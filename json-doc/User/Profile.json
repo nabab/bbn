@@ -52,7 +52,7 @@
     "shortName": "Profile",
     "contentConstructor": {
         "file": "bbn\\User\\Profile",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -75,7 +75,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -127,7 +127,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -151,7 +151,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         }

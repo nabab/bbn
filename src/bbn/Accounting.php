@@ -3,12 +3,15 @@ namespace bbn;
 
 use bbn\X;
 use bbn\Str;
-
-class Accounting extends bbn\Models\Cls\Basic
+use bbn\Models\Cls\Basic;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Tts\Optional;
+use bbn\Appui\Option;
+class Accounting extends Basic
 {
 
-  use bbn\Models\Tts\Cache;
-  use bbn\Models\Tts\Optional;
+  use Cache;
+  use Optional;
 
   /** @var int The ID of the option's for the root path / */
   private static $id_public_root;
@@ -29,7 +32,7 @@ class Accounting extends bbn\Models\Cls\Basic
 
   public function __construct()
   {
-    $this->options = bbn\Appui\Option::getInstance();
+    $this->options = Option::getInstance();
     $this->cacheInit();
     self::optionalInit();
   }

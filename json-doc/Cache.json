@@ -52,7 +52,7 @@
     "shortName": "Cache",
     "contentConstructor": {
         "file": "bbn\\Cache",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "makeHash": {
@@ -75,7 +75,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -110,7 +112,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -135,7 +138,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -169,7 +174,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -203,7 +210,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -237,7 +246,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -272,7 +281,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -317,7 +328,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -352,7 +365,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -387,7 +402,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -412,7 +429,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -449,7 +467,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -485,7 +504,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -530,7 +551,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -594,7 +617,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -639,7 +664,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -684,7 +709,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -739,7 +764,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -763,7 +788,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -787,7 +812,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -821,7 +846,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -855,7 +882,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -898,7 +925,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -941,7 +968,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {

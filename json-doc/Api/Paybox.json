@@ -72,7 +72,7 @@
     "shortName": "Paybox",
     "contentConstructor": {
         "file": "bbn\\Api\\Paybox",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -95,7 +95,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -165,7 +165,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {

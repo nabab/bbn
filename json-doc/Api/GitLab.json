@@ -1,0 +1,968 @@
+{
+    "doc": {
+        "description": "GitLab API class\n",
+        "tags": {
+            "category": "Api",
+            "package": "Api",
+            "author": "Mirko Argentino <mirko@bbn.solutions>",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License",
+            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/Api\/GitLab"
+        }
+    },
+    "name": "bbn\\Api\\GitLab",
+    "namespace": true,
+    "traits": [
+        "bbn\\Api\\GitLab\\User",
+        "bbn\\Api\\GitLab\\Project",
+        "bbn\\Api\\GitLab\\Branch",
+        "bbn\\Api\\GitLab\\Issue",
+        "bbn\\Api\\GitLab\\Note"
+    ],
+    "interfaces": [],
+    "fileName": "\/Api\/GitLab.php",
+    "startLine": 16,
+    "endLine": 145,
+    "numMethods": 24,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [
+        "bbn\\Api\\GitLab\\User",
+        "bbn\\Api\\GitLab\\Project",
+        "bbn\\Api\\GitLab\\Branch",
+        "bbn\\Api\\GitLab\\Issue",
+        "bbn\\Api\\GitLab\\Note"
+    ],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "token": null,
+        "host": null,
+        "lastError": "",
+        "lastRequest": "",
+        "userURL": "users\/",
+        "userID": null,
+        "projectURL": "projects\/",
+        "branchURL": "branches\/",
+        "issueURL": "issues\/",
+        "noteURL": "notes\/"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api",
+    "shortName": "GitLab",
+    "contentConstructor": {
+        "file": "bbn\\Api\\GitLab",
+        "returns": []
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "Constructor.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $accessToken, string $host = '')\n  {\n    if (empty($accessToken)) {\n      throw new \\Error(_('The access token is mandatory'));\n    }\n\n    $this->token = $accessToken;\n    $host        = !empty(\\trim($host)) ? \\trim($host) : 'localhost';\n    $this->host  = $host . (\\str_ends_with($host, '\/') ? '' : '\/') . 'api\/v4\/';\n  }",
+            "startLine": 42,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "accessToken",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "host",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getLastError": {
+            "name": "getLastError",
+            "summary": "Gets the last error",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->lastError;\n  }",
+            "startLine": 58,
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "hasError": {
+            "name": "hasError",
+            "summary": "Returns true if an error has occurred",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return !empty($this->lastError);\n  }",
+            "startLine": 68,
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getUsers": {
+            "name": "getUsers",
+            "summary": "Gets the users list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->userURL);\n  }",
+            "startLine": 18,
+            "endLine": 21,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getUser": {
+            "name": "getUser",
+            "summary": "Gets a user info.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id = NULL)\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
+            "startLine": 29,
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The user id"
+                }
+            ]
+        },
+        "getUserID": {
+            "name": "getUserID",
+            "summary": "Gets the current user ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (empty($this->userID)\n      && ($r = $this->request('user'))\n    ) {\n      $this->userID = $r['id'];\n    }\n    return $this->userID;\n  }",
+            "startLine": 39,
+            "endLine": 47,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getProjects": {
+            "name": "getProjects",
+            "summary": "Gets the list of projects to which you have access",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->projectURL);\n  }",
+            "startLine": 15,
+            "endLine": 18,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getProject": {
+            "name": "getProject",
+            "summary": "Gets a specific project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project);\n  }",
+            "startLine": 26,
+            "endLine": 29,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getProjectUsers": {
+            "name": "getProjectUsers",
+            "summary": "Gets the users list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/users');\n  }",
+            "startLine": 37,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getProjectGroups": {
+            "name": "getProjectGroups",
+            "summary": "Gets the groups list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/groups');\n  }",
+            "startLine": 48,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getCommits": {
+            "name": "getCommits",
+            "summary": "Gets the commits list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch = '', string $filePath = '', string $since = '', string $until = '')\n  {\n    $url = $this->projectURL . $project . '\/repository\/commits';\n    $params = [];\n    if (!empty($filePath)) {\n      $params[] = 'path=' . \\urldecode($filePath);\n    }\n    if (!empty($branch)) {\n      $params[] = 'branch=' . $branch;\n    }\n    if (!empty($since)) {\n      $params[] = 'since=' . \\date('c', \\strtotime($since));\n    }\n    if (!empty($until)) {\n      $params[] = 'until=' . \\date('c', \\strtotime($until));\n    }\n    foreach ($params as $i => $p) {\n      if ($i === 0) {\n        $url .= '?';\n      }\n      $url .= $p . (!empty($params[$i + 1]) ? '&' : '');\n    }\n    return $this->request($url);\n  }",
+            "startLine": 63,
+            "endLine": 86,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of a repository branch, tag or revision range"
+                },
+                {
+                    "name": "filePath",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ath The file path"
+                },
+                {
+                    "name": "since",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Only commits after or on this date are returned"
+                },
+                {
+                    "name": "until",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Only commits before or on this date are returned"
+                }
+            ]
+        },
+        "getCommit": {
+            "name": "getCommit",
+            "summary": "Gets a specific commit of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $id)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id);\n  }",
+            "startLine": 94,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The commit hash or name of a repository branch or tag"
+                }
+            ]
+        },
+        "getDiff": {
+            "name": "getDiff",
+            "summary": "Gets the diff of a commit of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $id, string $filePath = '')\n  {\n    $diff = $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id . '\/diff');\n    if (!empty($filePath)) {\n      if (!\\is_null($i = \\bbn\\X::find($diff, function($d) use($filePath){\n        return ($d->old_path === $filePath) || ($d->new_path === $filePath);\n      }))) {\n        return \\bbn\\X::toArray($diff[$i]);\n      }\n      return [];\n    }\n    return $diff;\n  }",
+            "startLine": 106,
+            "endLine": 118,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The commit hash or name of a repository branch or tag"
+                },
+                {
+                    "name": "filePath",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ath The file path"
+                }
+            ]
+        },
+        "getIssues": {
+            "name": "getIssues",
+            "summary": "Gets the issues list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . '?scoper=all');\n  }",
+            "startLine": 126,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getClosedIssues": {
+            "name": "getClosedIssues",
+            "summary": "Gets the closed issues list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . '?scoper=all&state=closed');\n  }",
+            "startLine": 137,
+            "endLine": 140,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getOpenedIssues": {
+            "name": "getOpenedIssues",
+            "summary": "Gets the opened issues list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . '?scoper=all&state=opened');\n  }",
+            "startLine": 148,
+            "endLine": 151,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getIssueNotes": {
+            "name": "getIssueNotes",
+            "summary": "Gets the notes list of a specific issue of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $issue, string $sort = 'asc')\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $issue . '\/' . $this->noteURL . '?sort=' . $sort);\n  }",
+            "startLine": 161,
+            "endLine": 164,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "issue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue ID"
+                },
+                {
+                    "name": "sort",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "asc",
+                    "default_name": "",
+                    "description": "The sorting direction 'asc' or 'desc'"
+                }
+            ]
+        },
+        "getBranches": {
+            "name": "getBranches",
+            "summary": "Gets the branches of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/' . $this->branchURL);\n  }",
+            "startLine": 16,
+            "endLine": 19,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getBranch": {
+            "name": "getBranch",
+            "summary": "Gets a specific branch of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/' . $this->branchURL . $branch);\n  }",
+            "startLine": 28,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the brach"
+                }
+            ]
+        },
+        "getAllIssues": {
+            "name": "getAllIssues",
+            "summary": "Get the issues list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->issueURL . '?scope=all');\n  }",
+            "startLine": 15,
+            "endLine": 18,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getAssigendIssues": {
+            "name": "getAssigendIssues",
+            "summary": "Gets the assigned issues list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->issueURL . '?scope=all&assignee_id=Any');\n  }",
+            "startLine": 25,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getMyIssues": {
+            "name": "getMyIssues",
+            "summary": "Gets the issues list of the current user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->issueURL . '?scope=all');\n  }",
+            "startLine": 35,
+            "endLine": 38,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getMyAssigendIssues": {
+            "name": "getMyAssigendIssues",
+            "summary": "Gets the assigned issues list of the current user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->issueURL . '?scope=all&assignee_id=' . $this->getUserID());\n  }",
+            "startLine": 45,
+            "endLine": 48,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getIssue": {
+            "name": "getIssue",
+            "summary": "Gets a specific issue",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id)\n  {\n    return $this->request($this->issueURL . $id);\n  }",
+            "startLine": 56,
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue ID"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "GitLab API class",
+    "description": "",
+    "description_parts": []
+}

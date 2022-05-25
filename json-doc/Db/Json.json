@@ -71,7 +71,7 @@
     "shortName": "Json",
     "contentConstructor": {
         "file": "bbn\\Db\\Json",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -94,7 +94,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {

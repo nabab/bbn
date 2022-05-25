@@ -56,7 +56,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -108,7 +110,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -162,7 +166,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -205,7 +211,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -239,7 +247,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {

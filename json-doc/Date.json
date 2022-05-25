@@ -61,7 +61,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -85,7 +85,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -128,7 +128,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -171,7 +171,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -205,7 +205,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -257,7 +257,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -300,7 +300,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -343,7 +343,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -395,7 +395,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {

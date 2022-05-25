@@ -95,7 +95,7 @@
     "shortName": "Image",
     "contentConstructor": {
         "file": "bbn\\File\\Image",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "jpg2pdf": {
@@ -123,7 +123,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -173,7 +173,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -228,7 +228,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -271,7 +271,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
@@ -287,8 +287,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function($file, bbn\\File\\System $fs = NULL)\n  {\n    $this->fs = $fs ?: new File\\System();\n    if ( \\is_array($file) )\n    {\n      if ( isset($file['name'],$file['tmp_name']) )\n      {\n        $this->path = '';\n        $this->name = $file['name'];\n        $this->size = $file['size'];\n        $file = $file['tmp_name'];\n      }\n    }\n    else if ( \\is_string($file) )\n    {\n      $file = trim($file);\n      if ( strrpos($file,'\/') !== false )\n      {\n        \/* The -2 in strrpos means that if there is a final \/, it will be kept in the file name *\/\n        $this->name = substr($file,strrpos($file,'\/',-2)+1);\n        $this->path = substr($file,0,-\\strlen($this->name));\n        if ( substr($this->path,0,2) == '\/\/' ){\n          $this->path = 'http:\/\/'.substr($this->path,2);\n        }\n      }\n      else\n      {\n        $this->name = $file;\n        $this->path = '.\/';\n      }\n    }\n\n    $this->getExtension();\n    if ( \\is_string($file) && is_file($file) ){\n      $this->file = $file;\n    }\n    else{\n      $this->make();\n    }\n  }",
-                "startLine": 76,
-                "endLine": 115,
+                "startLine": 78,
+                "endLine": 117,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -297,7 +297,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -361,7 +361,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -390,7 +392,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getExtension",
                 "summary": "Return the extension of the file.",
@@ -406,8 +408,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function()\n  {\n    if ( $this->name ){\n      if ( !isset($this->ext) ){\n        if ( strpos($this->name, '.') !== false ){\n          $p = Str::fileExt($this->name, 1);\n          $this->ext = $p[1];\n          $this->title = $p[0];\n        }\n        else{\n          $this->ext = '';\n          $this->title = substr($this->name,-1) === '\/' ? substr($this->name,0,-1) : $this->name;\n        }\n      }\n      return $this->ext;\n    }\n    return false;\n  }",
-                "startLine": 165,
-                "endLine": 182,
+                "startLine": 167,
+                "endLine": 184,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -416,7 +418,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -447,7 +449,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -468,7 +470,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -499,7 +501,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -528,7 +530,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "save",
                 "summary": "That feature saves the file as a parameter, and accepts a string that contains the path where to save.",
@@ -544,8 +546,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function($dest = '.\/')\n  {\n    $new_name = false;\n    if ( substr($dest,-1) === '\/' ){\n      if ( is_dir($dest) ){\n        $new_name = 0;\n      }\n    }\n    else if ( is_dir($dest) ){\n      $dest .= '\/';\n      $new_name = 0;\n    }\n    else if ( is_dir(substr($dest,0,strrpos($dest,'\/'))) ){\n      $new_name = 1;\n    }\n    if ( $new_name !== false ){\n      if ( $new_name === 0 ){\n        $dest .= $this->name;\n      }\n      if ( null !== $_FILES ){\n        move_uploaded_file($this->file,$dest);\n        $this->file = $dest;\n        $this->uploaded = 1;\n      }\n      else{\n        copy($this->file, $dest);\n      }\n    }\n    return $this;\n  }",
-                "startLine": 302,
-                "endLine": 331,
+                "startLine": 310,
+                "endLine": 339,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -554,7 +556,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -606,7 +608,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -635,7 +637,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -659,7 +661,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -734,7 +736,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -784,7 +786,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -854,7 +856,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -894,7 +896,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -934,7 +936,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -984,7 +986,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -1024,7 +1026,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -1064,7 +1066,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1093,7 +1095,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1122,7 +1124,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1151,7 +1153,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -1226,7 +1228,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1250,7 +1252,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -1297,8 +1299,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->file && $this->size === 0 ){\n      $this->size = filesize($this->file);\n    }\n    return $this->size;\n  }",
-            "startLine": 128,
-            "endLine": 134,
+            "startLine": 130,
+            "endLine": 136,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1307,7 +1309,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getSize",
                 "summary": "Return the filesize in byte.",
@@ -1323,8 +1325,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function()\n  {\n    if ( $this->file && $this->size === 0 ){\n      $this->size = filesize($this->file);\n    }\n    return $this->size;\n  }",
-                "startLine": 128,
-                "endLine": 134,
+                "startLine": 130,
+                "endLine": 136,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1333,7 +1335,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1349,8 +1351,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->file ){\n      $f = fopen($this->file, 'r');\n      try {\n        while ($line = fgets($f)) {\n          yield $line;\n        }\n      }\n      finally {\n        fclose($f);\n      }\n    }\n  }",
-            "startLine": 139,
-            "endLine": 152,
+            "startLine": 141,
+            "endLine": 154,
             "isDeprecated": false,
             "isGenerator": true,
             "isInternal": false,
@@ -1359,7 +1361,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "iterateLines",
                 "summary": "",
@@ -1370,8 +1372,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function()\n  {\n    if ( $this->file ){\n      $f = fopen($this->file, 'r');\n      try {\n        while ($line = fgets($f)) {\n          yield $line;\n        }\n      }\n      finally {\n        fclose($f);\n      }\n    }\n  }",
-                "startLine": 139,
-                "endLine": 152,
+                "startLine": 141,
+                "endLine": 154,
                 "isDeprecated": false,
                 "isGenerator": true,
                 "isInternal": false,
@@ -1380,7 +1382,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1400,9 +1402,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->getSize();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
-            "startLine": 228,
-            "endLine": 248,
+            "code": "function()\n  {\n    if ($this->file) {\n      if (!$this->size) {\n        $this->getSize();\n      }\n      \n      if (!$this->size) {\n        throw new Exception(X::_(\"Impossible to get the file %s\", $this->file));\n      }\n\n      while (@ob_end_flush());\n      header(\"Content-Encoding: none\");\n      ignore_user_abort(true);\n      ini_set('output_buffering', 'Off');\n      ini_set('zlib.output_compression', false);\n      header('Content-Description: File Transfer');\n      header('Content-Type: application\/octet-stream');\n      header('Content-Disposition: attachment; filename=\"' . Str::escapeDquotes(basename($this->name)) . '\"');\n      header('Expires: 0');\n      header('Cache-Control: must-revalidate');\n      header('Pragma: public');\n      header('Content-Length: ' . $this->size);\n      readfile($this->file);\n      exit;\n    }\n  }",
+            "startLine": 230,
+            "endLine": 256,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1411,7 +1413,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "void"
+            ],
             "parent": {
                 "name": "download",
                 "summary": "Downloads the file. At the end of the script the user will be invited to choose the file's destination. If the file doesn't exist return an object with parameter file = null.",
@@ -1426,9 +1430,9 @@
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ( $this->file ){\n      if ( !$this->size ){\n        $this->getSize();\n      }\n      \n      if ( $this->size && ($handle = fopen($this->file, 'r')) ){\n        header('Content-type: application\/octet-stream');\n        header('Content-Disposition: attachment; filename=\"'.$this->name.'\"');\n        while ( !feof($handle) ){\n          echo fread($handle, 65536);\n        }\n        fclose($handle);\n      }\n      else{\n        die('Impossible to read the file '.$this->name);\n      }\n    }\n    return $this;\n  }",
-                "startLine": 228,
-                "endLine": 248,
+                "code": "function()\n  {\n    if ($this->file) {\n      if (!$this->size) {\n        $this->getSize();\n      }\n      \n      if (!$this->size) {\n        throw new Exception(X::_(\"Impossible to get the file %s\", $this->file));\n      }\n\n      while (@ob_end_flush());\n      header(\"Content-Encoding: none\");\n      ignore_user_abort(true);\n      ini_set('output_buffering', 'Off');\n      ini_set('zlib.output_compression', false);\n      header('Content-Description: File Transfer');\n      header('Content-Type: application\/octet-stream');\n      header('Content-Disposition: attachment; filename=\"' . Str::escapeDquotes(basename($this->name)) . '\"');\n      header('Expires: 0');\n      header('Cache-Control: must-revalidate');\n      header('Pragma: public');\n      header('Content-Length: ' . $this->size);\n      readfile($this->file);\n      exit;\n    }\n  }",
+                "startLine": 230,
+                "endLine": 256,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1437,7 +1441,9 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [
+                    "void"
+                ],
                 "parent": false,
                 "arguments": []
             },
@@ -1458,8 +1464,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->file ){\n      return md5_file($this->file);\n    }\n    return '';\n  }",
-            "startLine": 261,
-            "endLine": 267,
+            "startLine": 269,
+            "endLine": 275,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1468,7 +1474,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getHash",
                 "summary": "Return the hash of the file.",
@@ -1484,8 +1490,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function()\n  {\n    if ( $this->file ){\n      return md5_file($this->file);\n    }\n    return '';\n  }",
-                "startLine": 261,
-                "endLine": 267,
+                "startLine": 269,
+                "endLine": 275,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1494,7 +1500,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1515,8 +1521,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if ( $this->file ){\n      unlink($this->file);\n    }\n    $this->file = false;\n    return $this;\n  }",
-            "startLine": 283,
-            "endLine": 290,
+            "startLine": 291,
+            "endLine": 298,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1525,7 +1531,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "delete",
                 "summary": "Deletes the file.",
@@ -1541,8 +1547,8 @@
                 "visibility": "public",
                 "final": false,
                 "code": "function()\n  {\n    if ( $this->file ){\n      unlink($this->file);\n    }\n    $this->file = false;\n    return $this;\n  }",
-                "startLine": 283,
-                "endLine": 290,
+                "startLine": 291,
+                "endLine": 298,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -1551,7 +1557,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1577,7 +1583,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -1598,7 +1604,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1624,7 +1630,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getError",
                 "summary": "",
@@ -1645,7 +1651,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1671,7 +1677,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getErrors",
                 "summary": "",
@@ -1692,7 +1698,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1718,7 +1724,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "log",
                 "summary": "",
@@ -1739,7 +1745,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1765,7 +1771,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__call",
                 "summary": "",
@@ -1786,7 +1792,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1850,7 +1856,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "isDebug",
                 "summary": "",
@@ -1871,7 +1877,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1897,7 +1903,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "setDebug",
                 "summary": "",
@@ -1918,7 +1924,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {

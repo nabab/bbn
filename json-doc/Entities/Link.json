@@ -31,7 +31,7 @@
     "shortName": "Link",
     "contentConstructor": {
         "file": "bbn\\Entities\\Link",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -54,7 +54,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {

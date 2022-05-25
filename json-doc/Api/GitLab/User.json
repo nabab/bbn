@@ -1,0 +1,133 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\GitLab\\User",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Api\/GitLab\/User.php",
+    "startLine": 4,
+    "endLine": 50,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "userURL": "users\/",
+        "userID": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\GitLab",
+    "shortName": "User",
+    "contentConstructor": null,
+    "methods": {
+        "getUsers": {
+            "name": "getUsers",
+            "summary": "Gets the users list",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\User",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->userURL);\n  }",
+            "startLine": 18,
+            "endLine": 21,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getUser": {
+            "name": "getUser",
+            "summary": "Gets a user info.",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\User",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $id = NULL)\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
+            "startLine": 29,
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The user id"
+                }
+            ]
+        },
+        "getUserID": {
+            "name": "getUserID",
+            "summary": "Gets the current user ID",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\User",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (empty($this->userID)\n      && ($r = $this->request('user'))\n    ) {\n      $this->userID = $r['id'];\n    }\n    return $this->userID;\n  }",
+            "startLine": 39,
+            "endLine": 47,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": []
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

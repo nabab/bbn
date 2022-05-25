@@ -46,7 +46,7 @@
     "shortName": "Environment",
     "contentConstructor": {
         "file": "bbn\\Mvc\\Environment",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "detectLanguage": {
@@ -69,7 +69,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -93,7 +95,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -117,7 +119,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -151,7 +153,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -180,7 +182,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -214,7 +216,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -238,7 +240,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -272,7 +274,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -296,7 +298,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -320,7 +322,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -372,7 +374,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -396,7 +398,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -420,7 +422,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -444,7 +446,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -468,7 +470,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -492,7 +494,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -517,7 +519,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -526,7 +529,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"I6Y88QXGn0xYAkKoJX1tgfFF7\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"o5lPGiAl3gYxnIrG91l0\"}"
     },
     "constants": null,
     "summary": "",

@@ -11,7 +11,7 @@ use bbn\X;
 use bbn\Str;
 use Exception;
 
-class Dashboard
+class Bookmark
 {
 
   use bbn\Models\Tts\Optional;

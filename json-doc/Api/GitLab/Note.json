@@ -1,0 +1,42 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\GitLab\\Note",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Api\/GitLab\/Note.php",
+    "startLine": 4,
+    "endLine": 12,
+    "numMethods": 0,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "noteURL": "notes\/"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\GitLab",
+    "shortName": "Note",
+    "contentConstructor": null,
+    "methods": null,
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

@@ -51,7 +51,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         }

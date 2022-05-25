@@ -303,7 +303,7 @@
     "shortName": "Doc",
     "contentConstructor": {
         "file": "bbn\\Parsers\\Doc",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -326,7 +326,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -371,7 +371,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -406,7 +406,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -441,7 +441,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -466,7 +466,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -502,7 +503,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -526,7 +527,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {

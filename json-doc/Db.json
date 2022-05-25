@@ -28,8 +28,8 @@
     },
     "fileName": "\/Db.php",
     "startLine": 20,
-    "endLine": 3294,
-    "numMethods": 154,
+    "endLine": 3368,
+    "numMethods": 157,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 3,
@@ -68,7 +68,7 @@
     "shortName": "Db",
     "contentConstructor": {
         "file": "bbn\\Db",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -96,7 +96,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -131,7 +131,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "void"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -160,7 +162,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -200,7 +204,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -241,7 +246,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -271,7 +278,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -302,7 +310,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -333,7 +342,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -364,7 +374,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -394,7 +405,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -434,7 +447,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -463,7 +478,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -493,7 +508,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -524,7 +540,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -565,7 +582,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -589,7 +608,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -641,7 +662,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -685,7 +706,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -721,7 +743,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -770,7 +793,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -799,7 +824,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -838,7 +865,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -878,7 +907,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -907,7 +938,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -957,7 +990,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -986,7 +1021,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1015,7 +1052,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1044,7 +1083,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1073,7 +1114,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1102,7 +1145,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1131,7 +1176,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1155,7 +1202,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1224,7 +1273,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1248,7 +1299,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1287,7 +1340,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1351,7 +1406,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1392,7 +1449,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1444,7 +1502,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1488,7 +1547,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1532,7 +1593,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1581,7 +1643,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1622,7 +1686,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1663,7 +1728,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1703,7 +1770,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1747,7 +1816,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1788,7 +1859,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -1818,7 +1890,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1847,7 +1919,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1876,7 +1950,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -1921,7 +1995,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1975,7 +2050,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": [
@@ -2028,7 +2104,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -2076,7 +2152,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -2105,7 +2183,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -2138,7 +2216,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -2172,7 +2250,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -2202,7 +2281,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -2232,7 +2313,8 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": [
@@ -2314,7 +2396,8 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -2406,7 +2489,8 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -2488,7 +2572,8 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -2580,7 +2665,8 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -2662,7 +2748,8 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -2753,7 +2840,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -2829,7 +2916,8 @@
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -2906,7 +2994,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -2962,7 +3051,8 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -3054,7 +3144,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -3126,7 +3217,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -3198,7 +3290,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -3270,7 +3363,8 @@
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -3359,7 +3453,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -3430,7 +3526,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3492,7 +3589,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3544,7 +3642,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3616,7 +3715,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3677,7 +3777,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3739,7 +3840,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3791,7 +3893,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3838,7 +3941,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -3878,7 +3982,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -3917,7 +4021,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -3951,7 +4055,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -3999,7 +4103,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -4033,7 +4137,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -4077,7 +4181,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4133,7 +4238,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4189,7 +4295,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4255,7 +4362,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4306,7 +4414,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -4335,7 +4443,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -4375,7 +4485,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -4416,7 +4528,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4467,7 +4580,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -4507,7 +4622,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -4547,7 +4664,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4599,7 +4717,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4661,7 +4780,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -4712,7 +4832,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -4741,7 +4863,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -4771,7 +4895,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -4802,7 +4927,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -4848,7 +4974,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -4890,7 +5017,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -4926,7 +5054,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -4993,7 +5123,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5033,7 +5165,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5073,7 +5207,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5113,7 +5249,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5148,7 +5286,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5187,7 +5327,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5221,7 +5363,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5255,7 +5399,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5294,7 +5440,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5333,7 +5481,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5372,7 +5522,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5416,7 +5568,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5459,7 +5613,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5502,7 +5658,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5545,7 +5703,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5606,7 +5766,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5651,7 +5813,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5694,7 +5858,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5737,7 +5903,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5780,7 +5948,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5823,7 +5993,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5884,7 +6056,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5936,7 +6110,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -5971,7 +6147,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -6017,7 +6194,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6062,7 +6241,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6097,7 +6278,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6140,7 +6323,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6183,7 +6368,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -6227,7 +6412,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -6258,7 +6444,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6284,7 +6471,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6315,7 +6503,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6346,7 +6535,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6377,7 +6567,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6408,7 +6599,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": []
@@ -6443,7 +6635,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": []
@@ -6474,7 +6667,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6499,7 +6693,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6513,6 +6709,52 @@
                 }
             ]
         },
+        "tableExists": {
+            "name": "tableExists",
+            "summary": "Returns true if the given table exists",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $table, string $database = '')\n  {\n    return $this->language->tableExists($table, $database);\n  }",
+            "startLine": 3195,
+            "endLine": 3198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "or currently selected if none"
+                }
+            ]
+        },
         "dropDatabase": {
             "name": "dropDatabase",
             "summary": "Drops the given database",
@@ -6523,8 +6765,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $database)\n  {\n    return $this->language->dropDatabase($database);\n  }",
-            "startLine": 3194,
-            "endLine": 3197,
+            "startLine": 3207,
+            "endLine": 3210,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6533,7 +6775,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6542,6 +6786,51 @@
                     "type": "string",
                     "required": true,
                     "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dropTable": {
+            "name": "dropTable",
+            "summary": "Drops the given table, in the current database if none given",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $table, string $database = '')\n  {\n    return $this->language->dropTable($table, $database);\n  }",
+            "startLine": 3219,
+            "endLine": 3222,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -6557,8 +6846,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (method_exists($this->language, __FUNCTION__)) {\n      $this->language->enableLast();\n    }\n  }",
-            "startLine": 3203,
-            "endLine": 3208,
+            "startLine": 3228,
+            "endLine": 3233,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6567,7 +6856,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -6581,8 +6870,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    if (method_exists($this->language, __FUNCTION__)) {\n      $this->language->disableLast();\n    }\n  }",
-            "startLine": 3214,
-            "endLine": 3219,
+            "startLine": 3239,
+            "endLine": 3244,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6591,7 +6880,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -6605,8 +6894,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getRealLastParams();\n  }",
-            "startLine": 3225,
-            "endLine": 3230,
+            "startLine": 3250,
+            "endLine": 3255,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6616,7 +6905,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6631,8 +6921,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->realLast();\n  }",
-            "startLine": 3237,
-            "endLine": 3242,
+            "startLine": 3262,
+            "endLine": 3267,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6642,7 +6932,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -6657,8 +6948,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getLastParams();\n  }",
-            "startLine": 3249,
-            "endLine": 3254,
+            "startLine": 3274,
+            "endLine": 3279,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6668,7 +6959,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6683,8 +6975,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getLastValues();\n  }",
-            "startLine": 3261,
-            "endLine": 3266,
+            "startLine": 3286,
+            "endLine": 3291,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6694,7 +6986,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -6709,8 +7002,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(array $cfg)\n  {\n    $this->ensureLanguageMethodExists(__FUNCTION__);\n\n    return $this->language->getQueryValues($cfg);\n  }",
-            "startLine": 3274,
-            "endLine": 3279,
+            "startLine": 3299,
+            "endLine": 3304,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -6719,7 +7012,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -6728,6 +7023,52 @@
                     "type": "array",
                     "required": true,
                     "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "export4Option": {
+            "name": "export4Option",
+            "summary": "Creates a simplified array for options from a table model",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Db",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($table_name, $database = '')\n  {\n    if ($database) {\n      $table_name = $database . '.' . $table_name; \n    }\n\n    $structure = $this->modelize($table_name);\n    foreach ($structure['keys'] as $k => &$m) {\n      unset($m['ref_db'], $m['constraint']);\n      if (empty($m['ref_table'])) {\n        unset($m['ref_table'], $m['ref_column'], $m['delete'], $m['update']);\n      }\n    }\n    foreach ($structure['fields'] as $k => &$f) {\n      unset($f['position']);\n      if (!in_array($f['type'], ['decimal', 'float', 'double'])) {\n        unset($f['decimals']);\n      }\n      if (!in_array($f['type'], $this->language->getNumericTypes())) {\n        unset($f['signed']);\n      }\n      if (empty($f['defaultExpression']) && is_null($f['default'])) {\n        unset($f['default'], $f['defaultExpression']);\n      }\n      if (empty($f['extra'])) {\n        unset($f['extra']);\n      }\n      if (empty($f['key'])) {\n        unset($f['key']);\n      }\n      if (empty($f['virtual'])) {\n        unset($f['virtual']);\n      }\n      if (empty($f['generation'])) {\n        unset($f['generation']);\n      }\n    }\n\n    return $structure;\n  }",
+            "startLine": 3314,
+            "endLine": 3353,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "table_name",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "name"
+                },
+                {
+                    "name": "database",
+                    "position": 1,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -6754,7 +7095,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "self"
             ],
             "parent": false,
             "arguments": []
@@ -6779,7 +7121,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         }

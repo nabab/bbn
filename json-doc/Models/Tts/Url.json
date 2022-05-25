@@ -59,7 +59,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -105,7 +106,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -150,7 +153,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -185,7 +190,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -221,7 +227,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -258,7 +265,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -294,7 +302,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -330,7 +339,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -383,7 +394,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -445,7 +458,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -480,7 +495,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -515,7 +530,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {

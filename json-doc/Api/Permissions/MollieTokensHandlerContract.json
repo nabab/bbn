@@ -51,7 +51,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -112,7 +112,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {

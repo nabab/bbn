@@ -33,7 +33,7 @@
     "shortName": "FCM",
     "contentConstructor": {
         "file": "bbn\\Api\\FCM",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -56,7 +56,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -91,7 +91,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [

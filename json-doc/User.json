@@ -215,7 +215,7 @@
     "shortName": "User",
     "contentConstructor": {
         "file": "bbn\\User",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -227,7 +227,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $params = [], array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    $f =& $this->class_cfg['fields'];\n    self::retrieverInit($this);\n\n    if ($this->isToken() && !empty($params[$f['token']])) {\n\n      if ($this->isPhoneNumberCodeSendingRequest($params)) {\n        \/\/ Verify that the received token is associated with the device uid\n        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ Check if the phone number is already registered\n        if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))\n          && ($exUser[$f['id']] !== $user_id)\n          && $this->updateApiTokenUserByTokenDevice(\n            $params[$f['token']],\n            $params[$f['device_uid']],\n            $exUser[$f['id']],\n            !empty($params[$f['device_lang']]) ? str_replace('\"', '', $params[$f['device_lang']]) : ''\n          )\n        ) {\n          if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [\n            $this->class_cfg['arch']['users']['id'] => $user_id\n          ])) {\n            $this->db->delete($this->class_cfg['table'], [\n              $this->class_cfg['arch']['users']['id'] => $user_id\n            ]);\n          }\n          $user_id = $exUser[$f['id']];\n        }\n\n        $this->id = $user_id;\n        \/\/ Generate a code\n        $code = random_int(1001, 9999);\n\n        \/\/ Save it\n        if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {\n          \/\/ Send the sms with code here\n\n          return $this->api_request_output = [\n            'success' => true,\n            'phone_verification_code' => $code\n          ];\n        }\n        else {\n          throw new \\Exception(X::_('Impossible to update the user'));\n        }\n\n\n      }\n      elseif ($this->isVerifyPhoneNumberRequest($params)) {\n        \/\/ Verify that the received token is associated to the device uid\n        if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ find the user using phone_number in db\n        $user = $this->findByPhoneNumber($params[$f['phone_number']]);\n\n        if (!$user) {\n          throw new \\Exception(X::_('Unknown phone number'));\n        }\n\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n        $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n\n        if (!$this->hasSkipVerification()) {\n          \/\/ Verify that the code is correct\n          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);\n\n          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n\n          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n        }\n\n        \/\/ Update verification code to null\n        $this->updatePhoneVerificationCode($params[$f['phone_number']], null);\n\n        \/\/ Generate a new token\n        $new_token = Str::genpwd(32, 16);\n\n        \/\/ Update user id and the new token in the row with the old token and device uid.\n        $this->db->update(\n            $this->class_cfg['tables']['api_tokens'], [\n            $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],\n            $this->class_cfg['arch']['api_tokens']['token']    => $new_token,\n          ], [\n            $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n            $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']],\n          ]\n        );\n\n        \/\/ Send the new token here\n        return $this->api_request_output =  [\n          'token'   => $new_token,\n          'success' => true\n        ];\n\n      }\n      elseif ($this->isTokenLoginRequest($params)) {\n        \/\/ Find the token associated to the device uid in db then get it's associated user.\n        if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {\n          throw new \\Exception(X::_('Invalid token').' '.$params[$f['token']].' \/ '.$params[$f['device_uid']]);\n        }\n\n        \/\/ Update device_lang and last\n        $toUdp = [\n          $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')\n        ];\n        if (isset($params[$f['device_lang']])) {\n          $toUdp[$this->class_cfg['arch']['api_tokens']['device_lang']] = $params[$f['device_lang']];\n        }\n        $this->db->update($this->class_cfg['tables']['api_tokens'], $toUdp, [\n          $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n          $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]\n        ]);\n\n        \/\/ Now the user is authenticated\n        $this->auth = true;\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n        $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n\n        return $this->api_request_output = [\n          'token'   => $params[$f['token']],\n          'success' => true\n        ];\n\n      }\n    }\n    else {\n      \/\/ The client environment variables\n      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';\n      $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';\n      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n      if (empty($this->user_agent)) {\n        X::log([X::isCli(), $_SERVER], 'user_sess');\n      }\n\n      \/\/ Creating the session's variables if they don't exist yet\n      $this->_init_session();\n\n      \/*\n      if (x::isCli() && isset($params['id'])) {\n        $this->id = $params['id'];\n        $this->auth = true;\n      }\n      *\/\n      \/\/ The user logs in\n      if ($this->isLoginRequest($params)) {\n        \/** @todo separate credentials and salt checking *\/\n        if (!empty($this->sess_cfg['fingerprint'])\n          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']\n        ) {\n          \/** @todo separate credentials and salt checking *\/\n          $this->_check_credentials($params);\n        }\n        else{\n          $this->setError(19);\n          $this->session->destroy();\n        }\n      }\n\n      \/** @todo revise the process: dying is not the solution! *\/\n      \/\/ The user is not known yet\n      elseif ($this->isResetPasswordRequest($params)) {\n        if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {\n          $this->password_reset = true;\n          if (($params[$f['pass1']] === $params[$f['pass2']])) {\n            $this->expireHotlink($params[$f['id']]);\n            $this->id = $id;\n            $this->forcePassword($params[$f['pass2']]);\n            $this->session->set([]);\n          }\n          else{\n            $this->setError(7);\n          }\n        }\n        else{\n          $this->setError(18);\n        }\n      }\n      else {\n        $this->checkSession();\n      }\n    }\n  }",
+            "code": "function(bbn\\Db $db, array $params = [], array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n    $f =& $this->class_cfg['fields'];\n    self::retrieverInit($this);\n\n    if ($this->isToken() && !empty($params[$f['token']])) {\n\n      if ($this->isPhoneNumberCodeSendingRequest($params)) {\n        \/\/ Verify that the received token is associated with the device uid\n        if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ Check if the phone number is already registered\n        if (($exUser = $this->findByPhoneNumber($params[$f['phone_number']]))\n          && ($exUser[$f['id']] !== $user_id)\n          && $this->updateApiTokenUserByTokenDevice(\n            $params[$f['token']],\n            $params[$f['device_uid']],\n            $exUser[$f['id']],\n            !empty($params[$f['device_lang']]) ? str_replace('\"', '', $params[$f['device_lang']]) : ''\n          )\n        ) {\n          if (!$this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['login'], [\n            $this->class_cfg['arch']['users']['id'] => $user_id\n          ])) {\n            $this->db->delete($this->class_cfg['table'], [\n              $this->class_cfg['arch']['users']['id'] => $user_id\n            ]);\n          }\n          $user_id = $exUser[$f['id']];\n        }\n\n        $this->id = $user_id;\n        \/\/ Generate a code\n        $code = random_int(1001, 9999);\n\n        \/\/ Save it\n        if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {\n          \/\/ Send the sms with code here\n\n          return $this->api_request_output = [\n            'success' => true,\n            'phone_verification_code' => $code\n          ];\n        }\n        else {\n          throw new \\Exception(X::_('Impossible to update the user'));\n        }\n\n\n      }\n      elseif ($this->isVerifyPhoneNumberRequest($params)) {\n        \/\/ Verify that the received token is associated to the device uid\n        if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {\n          throw new \\Exception(X::_('Invalid token'));\n        }\n\n        \/\/ find the user using phone_number in db\n        $user = $this->findByPhoneNumber($params[$f['phone_number']]);\n\n        if (!$user) {\n          throw new \\Exception(X::_('Unknown phone number'));\n        }\n\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n        $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n\n        if (!$this->hasSkipVerification()) {\n          \/\/ Verify that the code is correct\n          $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);\n\n          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n\n          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {\n            throw new \\Exception(X::_('Invalid code'));\n          }\n        }\n\n        \/\/ Update verification code to null\n        $this->updatePhoneVerificationCode($params[$f['phone_number']], null);\n\n        \/\/ Generate a new token\n        $new_token = Str::genpwd(32, 16);\n\n        \/\/ Update user id and the new token in the row with the old token and device uid.\n        $this->db->update(\n            $this->class_cfg['tables']['api_tokens'], [\n            $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],\n            $this->class_cfg['arch']['api_tokens']['token']    => $new_token,\n          ], [\n            $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n            $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']],\n          ]\n        );\n\n        \/\/ Send the new token here\n        return $this->api_request_output =  [\n          'token'   => $new_token,\n          'success' => true\n        ];\n\n      }\n      elseif ($this->isTokenLoginRequest($params)) {\n        \/\/ Find the token associated to the device uid in db then get it's associated user.\n        if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {\n          throw new \\Exception(X::_('Invalid token').' '.$params[$f['token']].' \/ '.$params[$f['device_uid']]);\n        }\n\n        \/\/ Update device_lang and last\n        $toUdp = [\n          $this->class_cfg['arch']['api_tokens']['last'] => date('Y-m-d H:i:S')\n        ];\n        if (isset($params[$f['device_lang']])) {\n          $toUdp[$this->class_cfg['arch']['api_tokens']['device_lang']] = $params[$f['device_lang']];\n        }\n        $this->db->update($this->class_cfg['tables']['api_tokens'], $toUdp, [\n          $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],\n          $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']]\n        ]);\n\n        \/\/ Now the user is authenticated\n        $this->auth = true;\n        $this->id = $user[$this->class_cfg['arch']['users']['id']];\n        $this->id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n\n        return $this->api_request_output = [\n          'token'   => $params[$f['token']],\n          'success' => true\n        ];\n\n      }\n    }\n    else {\n      \/\/ The client environment variables\n      $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';\n      $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';\n      $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';\n      if (empty($this->user_agent)) {\n        X::log([X::isCli(), $_SERVER], 'user_sess');\n      }\n\n      \/\/ Creating the session's variables if they don't exist yet\n      $this->_init_session();\n\n      \/\/ CLI user\n      if (x::isCli() && isset($params['id'])) {\n        $this->id = $params['id'];\n        $this->auth = true;\n      }\n\n      \/\/ The user logs in\n      if ($this->isLoginRequest($params)) {\n        \/** @todo separate credentials and salt checking *\/\n        if (!empty($this->sess_cfg['fingerprint'])\n          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']\n        ) {\n          \/** @todo separate credentials and salt checking *\/\n          $this->_check_credentials($params);\n        }\n        else{\n          $this->setError(19);\n          $this->session->destroy();\n        }\n      }\n\n      \/** @todo revise the process: dying is not the solution! *\/\n      \/\/ The user is not known yet\n      elseif ($this->isResetPasswordRequest($params)) {\n        if ($id = $this->getIdFromMagicString($params[$f['id']], $params[$f['key']])) {\n          $this->password_reset = true;\n          if (($params[$f['pass1']] === $params[$f['pass2']])) {\n            $this->expireHotlink($params[$f['id']]);\n            $this->id = $id;\n            $this->forcePassword($params[$f['pass2']]);\n            $this->session->set([]);\n          }\n          else{\n            $this->setError(7);\n          }\n        }\n        else{\n          $this->setError(18);\n        }\n      }\n      else {\n        $this->checkSession();\n      }\n    }\n  }",
             "startLine": 273,
             "endLine": 470,
             "isDeprecated": false,
@@ -238,7 +238,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -290,7 +290,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -315,7 +315,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -340,7 +341,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -374,7 +377,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -408,7 +411,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -453,7 +458,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -487,7 +492,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -512,7 +519,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -538,7 +546,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -564,7 +573,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -590,7 +600,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -625,7 +636,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -660,7 +671,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -694,7 +707,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -718,7 +731,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -752,7 +767,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -776,7 +793,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -811,7 +828,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -846,7 +863,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -870,7 +887,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -904,7 +923,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -928,7 +949,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -962,7 +985,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -997,7 +1022,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1026,7 +1053,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1055,7 +1084,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1089,7 +1120,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1123,7 +1156,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "self"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1147,7 +1182,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1171,7 +1206,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1196,7 +1231,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -1222,7 +1258,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -1247,7 +1284,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1282,7 +1321,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1326,7 +1366,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1350,7 +1392,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1374,7 +1418,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1398,7 +1442,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -1419,7 +1463,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1445,7 +1489,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1469,7 +1513,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -1493,7 +1537,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1538,7 +1584,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1573,7 +1621,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1609,7 +1658,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -1635,7 +1685,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1671,7 +1722,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1725,7 +1777,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1761,7 +1814,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1797,7 +1851,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "self"
             ],
             "parent": false,
             "arguments": []
@@ -1822,7 +1877,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1846,7 +1903,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -1870,7 +1929,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1916,7 +1977,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": {
                 "name": "getError",
@@ -1938,7 +2000,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1964,7 +2026,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -2029,7 +2093,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -2063,7 +2127,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -2098,7 +2162,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -2159,7 +2223,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -2184,7 +2248,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -2220,7 +2285,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -2255,7 +2321,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -2289,7 +2357,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bbn\\Db"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -2313,7 +2383,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -2334,7 +2404,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2360,7 +2430,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getErrors",
                 "summary": "",
@@ -2381,7 +2451,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2407,7 +2477,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "log",
                 "summary": "",
@@ -2428,7 +2498,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2454,7 +2524,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__call",
                 "summary": "",
@@ -2475,7 +2545,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2539,7 +2609,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "isDebug",
                 "summary": "",
@@ -2560,7 +2630,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2586,7 +2656,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "setDebug",
                 "summary": "",
@@ -2607,7 +2677,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2654,7 +2724,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "self"
             ],
             "parent": false,
             "arguments": []
@@ -2679,7 +2750,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -2703,7 +2776,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -2738,7 +2813,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -2773,7 +2849,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -2807,7 +2885,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -2859,7 +2939,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -2912,7 +2992,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": [
@@ -2957,7 +3038,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -3001,7 +3083,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -3035,7 +3119,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -3096,7 +3182,9 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {

@@ -1,0 +1,127 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\GitLab\\Branch",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Api\/GitLab\/Branch.php",
+    "startLine": 4,
+    "endLine": 34,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "branchURL": "branches\/"
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\GitLab",
+    "shortName": "Branch",
+    "contentConstructor": null,
+    "methods": {
+        "getBranches": {
+            "name": "getBranches",
+            "summary": "Gets the branches of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Branch",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/' . $this->branchURL);\n  }",
+            "startLine": 16,
+            "endLine": 19,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getBranch": {
+            "name": "getBranch",
+            "summary": "Gets a specific branch of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Branch",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/' . $this->branchURL . $branch);\n  }",
+            "startLine": 28,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the brach"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

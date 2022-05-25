@@ -59,7 +59,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -85,7 +86,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -111,7 +113,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -137,7 +140,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -163,7 +167,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -189,7 +194,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": []
@@ -215,7 +221,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "stdClass"
             ],
             "parent": false,
             "arguments": []
@@ -241,7 +248,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []

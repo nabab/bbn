@@ -11,7 +11,7 @@
     "interfaces": [],
     "fileName": "\/Appui\/Database.php",
     "startLine": 15,
-    "endLine": 1742,
+    "endLine": 1745,
     "numMethods": 69,
     "numProperties": 0,
     "numConstants": 0,
@@ -54,7 +54,7 @@
     "shortName": "Database",
     "contentConstructor": {
         "file": "bbn\\Appui\\Database",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -77,7 +77,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__construct",
                 "summary": "",
@@ -98,7 +98,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -134,9 +134,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $host = NULL, string $engine = 'mysql', string $db = '')\n  {\n    if (bbn\\Str::isUid($host)) {\n      $id_host = $host;\n    }\n    elseif (!($id_host = $this->hostId($host, $engine))) {\n      throw new \\Exception(X::_(\"Impossible to find the host\").' '.\"$host ($engine)\");\n    }\n\n    if (!($cfg = $this->o->option($id_host))) {\n      throw new \\Exception(X::_(\"Impossible to find the option corresponding to host\").' '.\"$host ($engine)\");\n    }\n\n    if ($id_host && ($parent = $this->o->parent($this->o->getIdParent($id_host)))) {\n      if (!isset($this->connections[$parent['code']])) {\n        throw new \\Exception(X::_(\"Unknown engine\").\" \".$parent['code']);\n      }\n\n      if (!isset($this->connections[$parent['code']][$cfg['code'] . $db])) {\n        switch ($parent['code']) {\n          case 'mysql':\n            if (strpos($cfg['code'], '@')) {\n              $bits = bbn\\X::split($cfg['code'], '@');\n              if ((count($bits) === 2) && ($password = $this->getPassword($id_host))) {\n                $db_cfg = [\n                  'engine' => 'mysql',\n                  'user' => $bits[0],\n                  'host' => $bits[1],\n                  'db' => $db,\n                  'pass' => $password\n                ];\n              }\n              else {\n                $db_cfg = [\n                  'engine' => 'mysql',\n                  'host' => $cfg['code'],\n                  'db' => $db\n                ];\n              }\n\n              try {\n                $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\\Db($db_cfg);\n              }\n              catch (\\Exception $e) {\n                throw new \\Exception($e->getMessage());\n              }\n            }\n            break;\n\n          case 'postgre':\n            if (empty($db) || empty($cfg['path'])) {\n              throw new \\Exception(X::_('db or path empty'));\n            }\n            break;\n\n          case 'sqlite':\n            if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'\/'.$db)) {\n              throw new \\Exception(X::_('db or path empty'));\n            }\n            \n            $db_cfg = [\n              'engine' => 'sqlite',\n              'db' => $cfg['path'].'\/'.$db\n            ];\n            try {\n              $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\\Db($db_cfg);\n            }\n            catch (\\Exception $e) {\n              throw new \\Exception($e->getMessage());\n            }\n            break;\n\n          default:\n            throw new \\Exception(X::_('Impossible to find the engine').' '.$cfg['engine']);\n        }\n      }\n\n      if (isset($this->connections[$parent['code']][$cfg['code'] . $db])) {\n        return $this->connections[$parent['code']][$cfg['code'] . $db];\n      }\n    }\n\n    throw new \\Exception(X::_(\"Impossible to get a connection for\").' '.$cfg['code']);\n  }",
+            "code": "function(string $host = NULL, string $engine = 'mysql', string $db = '')\n  {\n    if (bbn\\Str::isUid($host)) {\n      $id_host = $host;\n    }\n    elseif (!($id_host = $this->hostId($host, $engine))) {\n      throw new \\Exception(X::_(\"Impossible to find the host\").' '.\"$host ($engine)\");\n    }\n\n    if (!($cfg = $this->o->option($id_host))) {\n      throw new \\Exception(X::_(\"Impossible to find the option corresponding to host\").' '.\"$host ($engine)\");\n    }\n\n    if ($id_host && ($parent = $this->o->parent($this->o->getIdParent($id_host)))) {\n      if (!isset($this->connections[$parent['code']])) {\n        throw new \\Exception(X::_(\"Unknown engine\").\" \".$parent['code']);\n      }\n\n      if (!isset($this->connections[$parent['code']][$cfg['code'] . $db])) {\n        switch ($parent['code']) {\n          case 'mysql':\n            if (strpos($cfg['code'], '@')) {\n              $bits = bbn\\X::split($cfg['code'], '@');\n              if (count($bits) === 2) {\n                if (!($password = $this->getPassword($id_host))) {\n                  throw new \\Exception(X::_(\"No password for %s\", $cfg['code']));\n                }\n                $db_cfg = [\n                  'engine' => 'mysql',\n                  'user' => $bits[0],\n                  'host' => $bits[1],\n                  'db' => $db,\n                  'pass' => $password\n                ];\n              }\n              else {\n                $db_cfg = [\n                  'engine' => 'mysql',\n                  'host' => $cfg['code'],\n                  'db' => $db\n                ];\n              }\n\n              try {\n                $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\\Db($db_cfg);\n              }\n              catch (\\Exception $e) {\n                throw new \\Exception($e->getMessage());\n              }\n            }\n            break;\n\n          case 'postgre':\n            if (empty($db) || empty($cfg['path'])) {\n              throw new \\Exception(X::_('db or path empty'));\n            }\n            break;\n\n          case 'sqlite':\n            if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'\/'.$db)) {\n              throw new \\Exception(X::_('db or path empty'));\n            }\n            \n            $db_cfg = [\n              'engine' => 'sqlite',\n              'db' => $cfg['path'].'\/'.$db\n            ];\n            try {\n              $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\\Db($db_cfg);\n            }\n            catch (\\Exception $e) {\n              throw new \\Exception($e->getMessage());\n            }\n            break;\n\n          default:\n            throw new \\Exception(X::_('Impossible to find the engine').' '.$cfg['engine']);\n        }\n      }\n\n      if (isset($this->connections[$parent['code']][$cfg['code'] . $db])) {\n        return $this->connections[$parent['code']][$cfg['code'] . $db];\n      }\n    }\n\n    throw new \\Exception(X::_(\"Impossible to get a connection for\").' '.$cfg['code']);\n  }",
             "startLine": 83,
-            "endLine": 166,
+            "endLine": 169,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -145,7 +145,9 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bbn\\Db"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -189,8 +191,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $host = NULL, string $engine = 'mysql')\n  {\n    if (empty($host)) {\n      $host = $this->db->getConnectionCode();\n    }\n\n    $r = self::getOptionId($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine);\n    return $r ?: null;\n  }",
-            "startLine": 175,
-            "endLine": 183,
+            "startLine": 178,
+            "endLine": 186,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -200,7 +202,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -235,8 +238,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $engine = 'mysql')\n  {\n    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine))\n        && ($num = $this->o->count($id_parent))\n    ) {\n      return $num;\n    }\n\n    return 0;\n  }",
-            "startLine": 191,
-            "endLine": 200,
+            "startLine": 194,
+            "endLine": 203,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -246,7 +249,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -271,8 +275,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $engine = 'mysql')\n  {\n    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine))\n        && ($co = array_values($this->o->codeOptions($id_parent)))\n    ) {\n      return $co;\n    }\n\n    return [];\n  }",
-            "startLine": 208,
-            "endLine": 217,
+            "startLine": 211,
+            "endLine": 220,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -281,7 +285,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -305,8 +311,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $engine = 'mysql')\n  {\n    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine))\n        && ($opt = $this->o->fullOptions($id_parent))\n    ) {\n      return $opt;\n    }\n\n    return null;\n  }",
-            "startLine": 225,
-            "endLine": 234,
+            "startLine": 228,
+            "endLine": 237,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -316,7 +322,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -341,8 +348,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db = '', string $host = '', string $engine = 'mysql')\n  {\n    if (!\\bbn\\Str::isUid($host)) {\n      $host = $this->hostId($host, $engine);\n    }\n    if (($id_parent = self::getOptionId('dbs', $engine))\n        && ($res = $this->o->fromCode($db ?: $this->db->getCurrent(), $id_parent))\n    ) {\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 243,
-            "endLine": 255,
+            "startLine": 246,
+            "endLine": 258,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -352,7 +359,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -396,8 +404,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $host = '', string $engine = 'mysql')\n  {\n    if (!$host) {\n      $num = $this->o->count(self::getOptionId('dbs', $engine));\n      return $num;\n    }\n    elseif (!bbn\\Str::isUid($host)) {\n      $host = $this->hostId($host, $engine);\n    }\n\n    $all = $this->o->getAliases($host);\n    $num = $all ? count($all) : 0;\n    return $num;\n  }",
-            "startLine": 264,
-            "endLine": 277,
+            "startLine": 267,
+            "endLine": 280,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -406,7 +414,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -440,8 +450,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $host = '', string $engine = 'mysql')\n  {\n    if (!$host) {\n      $arr = $this->o->fullOptions(self::getOptionId('dbs', $engine));\n    }\n    elseif (!bbn\\Str::isUid($host)) {\n      $host = $this->hostId($host, $engine);\n    }\n\n    if ($host) {\n      $o   = &$this->o;\n      $arr = array_map(\n        function ($a) use ($o) {\n          return $o->parent($a['id_parent']);\n        },\n        $this->o->getAliases($host)\n      );\n    }\n\n    if (!empty($arr)) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $arr\n      );\n      return $res;\n    }\n\n    return [];\n  }",
-            "startLine": 286,
-            "endLine": 320,
+            "startLine": 289,
+            "endLine": 323,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -450,7 +460,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -484,8 +496,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $host = '', string $engine = 'mysql')\n  {\n    $o =& $this->o;\n    if ($dbs = $this->dbs($host, $engine)) {\n      $res = array_map(\n        function ($a) use ($o, $engine) {\n          $r = [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['name'],\n            'num_tables' => 0,\n            'num_connections' => 0,\n            'num_procedures' => 0,\n            'num_functions' => 0\n          ];\n          \/\/die(var_dump( $o->fromCode('tables', $a['id'])));\n          if ($id_tables = $o->fromCode('tables', $a['id'])) {\n            $r['num_tables'] = $o->count($id_tables);\n          }\n\n          if ($id_connections = $o->fromCode($engine === 'sqlite' ? 'paths' : 'connections', $a['id'])) {\n            $r['num_connection'] = $o->count($id_connections);\n          }\n\n          if ($id_procedures = $o->fromCode('procedures', $a['id'])) {\n            $r['num_procedures'] = $o->count($id_procedures);\n          }\n\n          if ($id_functions = $o->fromCode('functions', $a['id'])) {\n            $r['num_functions'] = $o->count($id_functions);\n          }\n\n          return $r;\n        },\n        $dbs\n      );\n      return $res ?: [];\n    }\n\n    return [];\n  }",
-            "startLine": 329,
-            "endLine": 369,
+            "startLine": 332,
+            "endLine": 372,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -494,7 +506,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -528,8 +542,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '', string $host = '', string $engine = 'mysql')\n  {\n    if (!bbn\\Str::isUid($db)) {\n      if (Str::isUid($host)) {\n        if (!($parent = $this->o->parent($this->o->getIdParent($host)))) {\n          throw new \\Exception(X::_(\"Impossible to find the host engine\"));\n        }\n\n        $engine = $parent['code'];\n        $db     = $this->dbId($db, $host, $engine);\n      }\n      else {\n        $db = $this->dbId($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\Str::isUid($db)\n        && ($id_parent = $this->o->fromCode('tables', $db))\n        && ($id = $this->o->fromCode($table, $id_parent))\n    ) {\n      return $id;\n    }\n\n    return null;\n  }",
-            "startLine": 380,
-            "endLine": 404,
+            "startLine": 383,
+            "endLine": 407,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -539,7 +553,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -594,8 +609,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db, string $host = '', string $engine = 'mysql')\n  {\n    if (!bbn\\Str::isUid($db)) {\n      if (Str::isUid($host)) {\n        $db = $this->dbId($db, $host);\n      }\n      else {\n        $db = $this->dbId($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\Str::isUid($db) && ($id_parent = $this->o->fromCode('tables', $db))) {\n      $num = $this->o->count($id_parent);\n      return $num ?: 0;\n    }\n\n    return null;\n  }",
-            "startLine": 414,
-            "endLine": 431,
+            "startLine": 417,
+            "endLine": 434,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -605,7 +620,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "int"
             ],
             "parent": false,
             "arguments": [
@@ -650,8 +666,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db = '', string $host = '', string $engine = 'mysql')\n  {\n    if (!bbn\\Str::isUid($db)) {\n      if (Str::isUid($host)) {\n        $db = $this->dbId($db, $host);\n      }\n      else {\n        $db = $this->dbId($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\Str::isUid($db)\n        && ($id_parent = $this->o->fromCode('tables', $db))\n        && ($fo = array_values($this->o->codeOptions($id_parent)))\n    ) {\n      $res = array_map(\n        function ($a) {\n          return [\n            'id' => $a['id'],\n            'text' => $a['text'],\n            'name' => $a['code']\n          ];\n        },\n        $fo\n      );\n      return $res ?: [];\n    }\n\n    return null;\n  }",
-            "startLine": 441,
-            "endLine": 470,
+            "startLine": 444,
+            "endLine": 473,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -661,7 +677,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -706,8 +723,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db = '', string $host = '', string $engine = 'mysql')\n  {\n    if (!bbn\\Str::isUid($db)) {\n      if (Str::isUid($host)) {\n        $db = $this->dbId($db, $host);\n      }\n      else {\n        $db = $this->dbId($db, $host, $engine);\n      }\n    }\n\n    if (bbn\\Str::isUid($db) && ($id_parent = $this->o->fromCode('tables', $db))) {\n      $o =& $this->o;\n      if ($fo = $this->o->fullOptions($id_parent)) {\n        $res = array_map(\n          function ($a) use ($o) {\n            $r = array_merge(\n              $a,\n              [\n                'name' => $a['code'],\n                'num_columns' => 0,\n                'num_keys' => 0\n              ]\n            );\n            if ($id_columns = $o->fromCode('columns', $a['id'])) {\n              $r['num_columns'] = $o->count($id_columns);\n            }\n\n            if ($id_keys = $o->fromCode('keys', $a['id'])) {\n              $r['num_keys'] = $o->count($id_keys);\n            }\n\n            return $r;\n          },\n          $fo\n        );\n        return $res ?: [];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 480,
-            "endLine": 521,
+            "startLine": 483,
+            "endLine": 524,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -717,7 +734,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -762,8 +780,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_keycol)\n  {\n    if (($table = $this->tableIdFromItem($id_keycol))\n        && ($r = $this->o->code($table))\n    ) {\n      return $r;\n    }\n\n    return null;\n  }",
-            "startLine": 530,
-            "endLine": 539,
+            "startLine": 533,
+            "endLine": 542,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -773,7 +791,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -799,8 +818,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_keycol)\n  {\n    if (bbn\\Str::isUid($id_keycol)\n        && ($id_cols = $this->o->getIdParent($id_keycol))\n        && ($id_table = $this->o->getIdParent($id_cols))\n    ) {\n      return $id_table;\n    }\n\n    return null;\n  }",
-            "startLine": 548,
-            "endLine": 558,
+            "startLine": 551,
+            "endLine": 561,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -810,7 +829,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -836,8 +856,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_table)\n  {\n    if (($id_db = $this->dbIdFromTable($id_table))\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n\n    return null;\n  }",
-            "startLine": 567,
-            "endLine": 576,
+            "startLine": 570,
+            "endLine": 579,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -847,7 +867,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -873,8 +894,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_table)\n  {\n    if (bbn\\Str::isUid($id_table)\n        && ($id_tables = $this->o->getIdParent($id_table))\n        && ($id_db = $this->o->getIdParent($id_tables))\n    ) {\n      return $id_db;\n    }\n\n    return null;\n  }",
-            "startLine": 585,
-            "endLine": 595,
+            "startLine": 588,
+            "endLine": 598,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -884,7 +905,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -910,8 +932,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_keycol)\n  {\n    if ($id_db = $this->dbIdFromItem($id_keycol)\n        && ($r = $this->o->code($id_db))\n    ) {\n      return $r;\n    }\n\n    return null;\n  }",
-            "startLine": 604,
-            "endLine": 613,
+            "startLine": 607,
+            "endLine": 616,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -921,7 +943,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -947,8 +970,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_keycol)\n  {\n    if (($id_table = $this->tableIdFromItem($id_keycol))\n        && ($id_db = $this->dbIdFromTable($id_table))\n    ) {\n      return $id_db;\n    }\n\n    return null;\n  }",
-            "startLine": 622,
-            "endLine": 631,
+            "startLine": 625,
+            "endLine": 634,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -958,7 +981,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -984,8 +1008,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $column, string $table, string $db = '')\n  {\n    $res = null;\n    if (Str::isUid($table)) {\n      $res = $this->o->fromCode($this->db->csn($column), 'columns', $table);\n      return $res;\n    }\n\n    $c = $this->db->csn($column);\n    $t = $this->db->tsn($table);\n    if (!Str::isUid($db)) {\n      $db = $this->dbId($db);\n    }\n\n    if (Str::isUid($db) && ($tmp = $this->o->fromCode($c, 'columns', $t, 'tables', $db))) {\n      $res = $tmp;\n    }\n\n    return $res;\n  }",
-            "startLine": 642,
-            "endLine": 661,
+            "startLine": 645,
+            "endLine": 664,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -995,7 +1019,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1041,8 +1066,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    $num = 0;\n    if (!Str::isUid($table) && Str::isUid($db)) {\n      $table = $this->tableId($table, $db);\n    }\n\n    if (Str::isUid($table)\n        && ($id_parent = $this->o->fromCode('columns', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n\n    return $num;\n  }",
-            "startLine": 671,
-            "endLine": 685,
+            "startLine": 674,
+            "endLine": 688,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1051,7 +1076,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1086,8 +1113,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    if (!bbn\\Str::isUid($table) && Str::isUid($db)) {\n      $table = $this->tableId($this->db->tsn($table), $db);\n    }\n\n    if (bbn\\Str::isUid($table)\n        && ($id_parent = $this->o->fromCode('columns', $table))\n        && ($res = $this->o->options($id_parent))\n    ) {\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 695,
-            "endLine": 709,
+            "startLine": 698,
+            "endLine": 712,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1097,7 +1124,8 @@
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1133,8 +1161,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    if (!bbn\\Str::isUid($table) && Str::isUid($db)) {\n      $table = $this->tableId($table, $db);\n    }\n\n    if (bbn\\Str::isUid($table)\n        && ($id_parent = $this->o->fromCode('columns', $table))\n        && ($res = $this->o->fullOptions($id_parent))\n    ) {\n      return $res;\n    }\n\n    return [];\n  }",
-            "startLine": 719,
-            "endLine": 733,
+            "startLine": 722,
+            "endLine": 736,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1143,7 +1171,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1178,8 +1208,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $key, string $table, string $db = '')\n  {\n    $res = null;\n    if (bbn\\Str::isUid($key)) {\n      $res = $this->o->fromCode($key, $table);\n    }\n    elseif (Str::isUid($table) && ($tmp = $this->o->fromCode($key, 'keys', $table))) {\n      $res = $tmp;\n    }\n    elseif (Str::isUid($db) && ($tmp = $this->o->fromCode($key, 'keys', $table, 'tables', $db))) {\n      $res = $tmp;\n    }\n\n    return $res;\n  }",
-            "startLine": 744,
-            "endLine": 758,
+            "startLine": 747,
+            "endLine": 761,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1189,7 +1219,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1235,8 +1266,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    $num = 0;\n    if (!bbn\\Str::isUid($table) && Str::isUid($db)) {\n      $table = $this->tableId($table, $db);\n    }\n\n    if (bbn\\Str::isUid($table)\n        && ($id_parent = $this->o->fromCode('keys', $table))\n    ) {\n      $num = $this->o->count($id_parent);\n    }\n\n    return $num;\n  }",
-            "startLine": 768,
-            "endLine": 782,
+            "startLine": 771,
+            "endLine": 785,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1245,7 +1276,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1280,8 +1313,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    $res = [];\n    if (!bbn\\Str::isUid($table) && bbn\\Str::isUid($db)) {\n      $table = $this->tableId($table, $db);\n    }\n\n    if (bbn\\Str::isUid($table)\n        && ($id_parent = $this->o->fromCode('keys', $table))\n        && ($tree = $this->o->fullTree($id_parent))\n        && $tree['items']\n    ) {\n      $t   =& $this;\n      $res = array_map(\n        function ($a) use ($t) {\n          $key = [\n            'name' => $a['code'],\n            'unique' => $a['unique'],\n            'columns' => [],\n            'ref_column' => $a['id_alias'] ? $a['alias']['code'] : null,\n            'ref_table' => $a['id_alias'] &&\n                          ($id_table = $t->o->getIdParent($a['alias']['id_parent'])) ? $t->o->code($id_table) : null,\n            'ref_db' => !empty($id_table) &&\n                        ($id_db = $t->o->getIdParent($t->o->getIdParent($id_table))) ? $t->o->code($id_db) : null\n          ];\n          foreach ($a['items'] as $col){\n            $key['columns'][] = $col['code'];\n          }\n\n          return $key;\n        },\n        $tree['items']\n      );\n    }\n\n    return $res;\n  }",
-            "startLine": 792,
-            "endLine": 828,
+            "startLine": 795,
+            "endLine": 831,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1290,7 +1323,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1325,8 +1360,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    return $this->keys($table, $db);\n  }",
-            "startLine": 838,
-            "endLine": 841,
+            "startLine": 841,
+            "endLine": 844,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1335,7 +1370,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1370,8 +1407,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '')\n  {\n    $id = $this->tableId($table, $db);\n    return $this->o->removeFull($id);\n  }",
-            "startLine": 851,
-            "endLine": 855,
+            "startLine": 854,
+            "endLine": 858,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1380,7 +1417,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1415,8 +1454,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db = '')\n  {\n    $id = $this->dbId($db);\n    return $this->o->removeFull($id);\n  }",
-            "startLine": 864,
-            "endLine": 868,
+            "startLine": 867,
+            "endLine": 871,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1425,7 +1464,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1450,8 +1491,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $connection)\n  {\n    $id = $this->hostId($connection);\n    return $this->o->removeFull($id);\n  }",
-            "startLine": 877,
-            "endLine": 881,
+            "startLine": 880,
+            "endLine": 884,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1460,7 +1501,9 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "int"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1485,8 +1528,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table = '', string $db = '', string $host = '', string $engine = 'mysql')\n  {\n    $model = null;\n    if (!$host) {\n      $conn = $this->db;\n      $host = $this->db->getConnectionCode();\n      $old_db = $conn->getCurrent();\n      if (Str::isUid($db)) {\n        $db = $this->o->getCode($db);\n      }\n\n      if ($db && ($old_db !== $db)) {\n        try {\n          $conn->change($db);\n        }\n        catch (\\Exception $e) {\n          throw new \\Exception(X::_(\"Impossible to use the database\").\" $db\");\n        }\n      }\n      elseif (!$db) {\n        $db = $this->db->getCurrent();\n      }\n    }\n    elseif ($db) {\n      try {\n        $conn = $this->connection($host, $engine, $db);\n      }\n      catch (\\Exception $e) {\n        throw new \\Exception($e->getMessage());\n      }\n    }\n\n    if (!$conn || !$conn->check()) {\n      throw new \\Exception(X::_(\"Impossible to connect\"));\n    }\n\n    $table_id = null;\n    $table    = $conn->tsn($table);\n    $ftable   = $conn->tfn($db.'.'.$table);\n    $keys     = function (&$a) use (&$table_id, $table, &$conn) {\n      if (\\is_array($a['keys'])) {\n        array_walk(\n          $a['keys'],\n          function (&$w, $k) use ($table_id, $table) {\n            $w['id_option'] = $this->keyId($k, $table_id);\n          }\n        );\n      }\n    };\n    $fields   = function (&$a) use (&$table_id, $table, &$conn) {\n      if (\\is_array($a['fields'])) {\n        array_walk(\n          $a['fields'],\n          function (&$w, $k) use ($table_id, $table) {\n            if (!$table_id) {\n              throw new \\Exception(X::_(\"Table undefined\").\" $table\");\n            }\n\n            $w['id_option'] = $this->columnId($k, $table_id);\n            $w['option']    = $w['id_option'] ? $this->o->option($w['id_option']) : [];\n          }\n        );\n      }\n    };\n\n    if ($model = $conn->modelize($ftable)) {\n      if ($table\n          && ($table_id = $this->tableId($table, $db, $host, $engine))\n      ) {\n        $keys($model);\n        $fields($model);\n        $model['id_option'] = $table_id;\n        $model['option']    = $this->o->option($table_id);\n}\n      elseif (empty($table)) {\n        array_walk(\n          $model,\n          function (&$w, $k) use (&$table_id, &$keys, &$fields, $host, $engine, $db) {\n            $table = $this->db->tsn($k);\n            if ($table_id = $this->tableId($table, $db, $host, $engine)) {\n              $w['id_option'] = $table_id;\n              $w['option']    = $this->o->option($w['id_option']);\n              $keys($w);\n              $fields($w);\n            }\n          }\n        );\n      }\n    }\n\n    if (!empty($old_db) && ($old_db !== $db)) {\n      $conn->change($old_db);\n    }\n\n    return $model;\n  }",
-            "startLine": 891,
-            "endLine": 986,
+            "startLine": 894,
+            "endLine": 989,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1496,7 +1539,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1550,8 +1594,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $host, string $engine, array $cfg, bool $full = false)\n  {\n    if (($id_parent = self::getOptionId('connections', $engine))\n        && !($id_host = $this->o->fromCode($host, $id_parent))\n    ) {\n      $id_host = $this->o->add(\n        [\n          'id_parent' => $id_parent,\n          'text' => $cfg['name'] ?? $host,\n          'code' => $host\n        ]\n      );\n    }\n\n    if ($id_host) {\n      if (!empty($cfg['password'])) {\n        if (!$this->pw) {\n          $this->pw = new Passwords($this->db);\n        }\n\n        $this->pw->store($cfg['password'], $id_host);\n      }\n      \/** @todo but might be heavy *\/\n      \/* if ($full) {\n\n      }*\/\n    }\n\n    return $id_host ?: null;\n  }",
-            "startLine": 998,
-            "endLine": 1027,
+            "startLine": 1001,
+            "endLine": 1030,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1561,7 +1605,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1617,8 +1662,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db, string $host = '', $full = false)\n  {\n    $id_db = null;\n    if (Str::isUid($host)\n        && ($engine = $this->o->parent($this->o->getIdParent($host)))\n        && ($id_dbs = $this->o->fromCode('dbs', $engine['id']))\n    ) {\n      if (!($id_db = $this->o->fromCode($db, $id_dbs))) {\n        if ($id_db = $this->o->add(\n          [\n            'id_parent' => $id_dbs,\n            'text' => $db,\n            'code' => $db,\n          ]\n        )\n        ) {\n          $this->o->setCfg($id_db, ['allow_children' => 1, 'show_code' => 1]);\n        }\n      }\n\n      if ($id_db) {\n        if (!($id_procedures = $this->o->fromCode('procedures', $id_db))\n            && ($id_procedures = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => X::_('Procedures'),\n                'code' => 'procedures',\n              ]\n            ))\n        ) {\n          $this->o->setCfg(\n            $id_procedures,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n\n        if (!($id_connections = $this->o->fromCode('connections', $id_db))\n            && ($id_connections = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => X::_('Connections'),\n                'code' => 'connections',\n              ]\n            ))\n        ) {\n          $this->o->setCfg(\n            $id_connections,\n            [\n              'show_alias' => 1,\n              'notext' => 1,\n              'id_root_alias' => self::getOptionId('connections'),\n              'root_alias' => 'Connections'\n            ]\n          );\n        }\n\n        if (!($id_functions = $this->o->fromCode('functions', $id_db))\n            && ($id_functions = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => X::_('Function'),\n                'code' => 'functions',\n              ]\n            ))\n        ) {\n          $this->o->setCfg(\n            $id_functions,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n\n        if (!($id_tables = $this->o->fromCode('tables', $id_db))\n            && ($id_tables = $this->o->add(\n              [\n                'id_parent' => $id_db,\n                'text' => X::_('Tables'),\n                'code' => 'tables',\n              ]\n            ))\n        ) {\n          $this->o->setCfg(\n            $id_tables,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n\n        if ($id_connections && $id_functions && $id_procedures && $id_tables) {\n          if (!$this->db->count(\n            'bbn_options', [\n              'id_parent' => $id_connections,\n              'id_alias' => $host\n            ]\n          )) {\n            $this->o->add([\n              'id_parent' => $id_connections,\n              'id_alias' => $host\n            ]);\n          }\n          if ($full) {\n            if (!empty($host)) {\n              try {\n                $conn = $this->connection($host, $engine['code'], $db);\n              }\n              catch (\\Exception $e) {\n                throw new \\Exception(X::_(\"Impossible to connect\"));\n              }\n              $tables = $conn->getTables($db);\n              if (!empty($tables)) {\n                foreach ($tables as $t) {\n                  $this->importTable($t, $id_db, $host);\n                }\n              }\n            }\n          }\n        }\n        else{\n          throw new \\Exception(X::_(\"Impossible to find an host ID for DB\").\" \".$this->o->code($id_db));\n        }\n      }\n    }\n\n    return $id_db;\n  }",
-            "startLine": 1038,
-            "endLine": 1172,
+            "startLine": 1041,
+            "endLine": 1175,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1628,7 +1673,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1674,8 +1720,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id_db)\n  {\n    if ($this->check()\n        && defined('BBN_DB_USER')\n        && defined('BBN_DB_HOST')\n        && ($connections = $this->o->fullOptions('connections', $id_db))\n    ) {\n      foreach ($connections as $c) {\n        if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {\n          return $c['alias']['id'];\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1181,
-            "endLine": 1196,
+            "startLine": 1184,
+            "endLine": 1199,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1685,7 +1731,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": [
@@ -1711,8 +1758,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $id_db, string $host = '')\n  {\n    if (empty($host)) {\n      $host_id = $this->retrieveHost($id_db);\n    }\n    else{\n      $host_id = bbn\\Str::isUid($host) ? $host : $this->hostId($host);\n    }\n\n    if ($host_id && ($id_tables = $this->o->fromCode('tables', $id_db))) {\n      $engine = $this->o->parent($this->o->getIdParent($host_id));\n      if (!($id_table = $this->o->fromCode($table, $id_tables))\n          && ($id_table = $this->o->add(\n            [\n              'id_parent' => $id_tables,\n              'text' => $table,\n              'code' => $table,\n            ]\n          ))\n      ) {\n        $this->o->setCfg($id_table, ['allow_children' => 1]);\n        if ($id_columns = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => X::_(\"Columns\"),\n            'code' => 'columns'\n          ]\n        )\n        ) {\n          $this->o->setCfg(\n            $id_columns,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'sortable' => 1\n            ]\n          );\n        }\n\n        if ($id_keys = $this->o->add(\n          [\n            'id_parent' => $id_table,\n            'text' => X::_(\"Keys\"),\n            'code' => 'keys',\n          ]\n        )\n        ) {\n          $this->o->setCfg(\n            $id_keys,\n            [\n              'show_code' => 1,\n              'show_value' => 1,\n              'show_alias' => 1,\n              'allow_children' => 1\n            ]\n          );\n        }\n      }\n      else{\n        $id_columns = $this->o->fromCode('columns', $id_table);\n        $id_keys    = $this->o->fromCode('keys', $id_table);\n      }\n\n      $db = $this->o->code($id_db);\n      if ($id_table\n          && $id_columns\n          && $id_keys\n          && $db\n          && ($conn = $this->connection($host_id, $engine['code'], $db))\n          && ($m = $conn->modelize($db.'.'.$table))\n          && !empty($m['fields'])\n      ) {\n        $num_cols     = 0;\n        $num_cols_rem = 0;\n        $fields       = [];\n        $ocols        = array_flip($this->o->options($id_columns));\n        foreach ($m['fields'] as $col => $cfg) {\n          if ($opt_col = $this->o->option($col, $id_columns)) {\n            $num_cols += (int)$this->o->set($opt_col['id'], bbn\\X::mergeArrays($opt_col, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\X::mergeArrays(\n              $cfg,\n              [\n                'id_parent' => $id_columns,\n                'text' => $col,\n                'code' => $col,\n                'num' => $cfg['position']\n              ]\n            )\n          )\n          ) {\n            $num_cols++;\n            $opt_col       = $cfg;\n            $opt_col['id'] = $id;\n          }\n\n          if ($opt_col) {\n            $fields[$col] = $opt_col['id'];\n          }\n\n          if (isset($ocols[$col])) {\n            unset($ocols[$col]);\n          }\n        }\n\n        if (!empty($ocols)) {\n          foreach ($ocols as $col => $id) {\n            if (bbn\\Str::isUid($id)) {\n              $num_cols_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n\n        $num_keys     = 0;\n        $num_keys_rem = 0;\n        $okeys        = array_flip($this->o->options($id_keys));\n        foreach ($m['keys'] as $key => $cfg) {\n          $cols = $cfg['columns'] ?? [];\n          unset($cfg['columns']);\n          if (isset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column'])\n              && ($id_alias = $this->columnId($cfg['ref_column'], $cfg['ref_table'], $cfg['ref_db']))\n          ) {\n            $cfg['id_alias'] = $id_alias;\n            unset($cfg['ref_db'], $cfg['ref_table'], $cfg['ref_column']);\n          }\n\n          if ($opt_key = $this->o->option($key, $id_keys)) {\n            $num_keys += (int)$this->o->set($opt_key['id'], bbn\\X::mergeArrays($opt_key, $cfg));\n          }\n          elseif ($id = $this->o->add(\n            bbn\\X::mergeArrays(\n              $cfg, [\n              'id_parent' => $id_keys,\n              'text' => $key,\n              'code' => $key\n              ]\n            )\n          )\n          ) {\n            $this->o->setCfg(\n              $id, [\n              'show_code' => 1,\n              'show_alias' => 1\n              ]\n            );\n            $num_keys++;\n            $opt_key       = $cfg;\n            $opt_key['id'] = $id;\n          }\n\n          if (isset($okeys[$key])) {\n            unset($okeys[$key]);\n          }\n\n          if ($opt_key && $cols) {\n            foreach ($cols as $col){\n              if (isset($fields[$col])) {\n                if ($opt = $this->o->option($col, $opt_key['id'])) {\n                  $this->o->set(\n                    $opt['id'], bbn\\X::mergeArrays(\n                      $opt, [\n                      'id_alias' => $fields[$col]\n                      ]\n                    )\n                  );\n                }\n                else{\n                  $tmp = [\n                    'id_parent' => $opt_key['id'],\n                    'id_alias' => $fields[$col],\n                    'code' => $col,\n                    'text' => $col\n                  ];\n                  if ($this->o->add($tmp)) {\n                    $opt = $tmp;\n                  }\n                }\n              }\n            }\n          }\n        }\n\n        if (!empty($okeys)) {\n          foreach (array_values($okeys) as $id) {\n            if (bbn\\Str::isUid($id)) {\n              $children = $this->o->items($id);\n              foreach ($children as $cid) {\n                $num_keys_rem += (int)$this->o->removeFull($cid);\n              }\n\n              $num_keys_rem += (int)$this->o->remove($id);\n            }\n          }\n        }\n\n        return [\n          'columns' => $num_cols,\n          'keys' => $num_keys,\n          'columns_removed' => $num_cols_rem,\n          'keys_removed' => $num_keys_rem\n        ];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 1207,
-            "endLine": 1413,
+            "startLine": 1210,
+            "endLine": 1416,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1722,7 +1769,8 @@
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1768,8 +1816,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table)\n  {\n    $res = null;\n    if ($m = $this->db->modelize($table)) {\n      $tf    = explode('.', $this->db->tfn($table));\n      $db    = $tf[0];\n      $table = $tf[1];\n\n      if (($id_host = $this->importHost($this->db->host))\n          && ($id_db = $this->importDb($db, $id_host))\n      ) {\n        $res = $this->importTable($table, $id_db);\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 1422,
-            "endLine": 1438,
+            "startLine": 1425,
+            "endLine": 1441,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1779,7 +1827,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1805,8 +1854,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $db = '')\n  {\n    $res = null;\n    if ($tables = $this->db->getTables($db)) {\n      $res = [\n        'tables' => 0,\n        'columns' => 0,\n        'keys' => 0\n      ];\n      foreach ($tables as $t){\n        if ($tmp = $this->import(($db ?: $this->db->getCurrent()).'.'.$t)) {\n          $res['tables']++;\n          $res['columns'] += $tmp['columns'];\n          $res['keys']    += $tmp['keys'];\n        }\n      }\n    }\n\n    return $res;\n  }",
-            "startLine": 1447,
-            "endLine": 1466,
+            "startLine": 1450,
+            "endLine": 1469,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1816,7 +1865,8 @@
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1842,8 +1892,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $table, string $db = '', string $host = '', string $engine = 'mysql')\n  {\n    if ($model = $this->modelize($table, $db, $host, $engine)) {\n      \/** @var array The empty config, js for bbn-table, php for bbn\\appui\\grid *\/\n      $res = [\n        'js' => [\n          'columns' => []\n        ],\n        'php' => [\n          'tables' => [$table],\n          'fields' => [],\n          'join' => [],\n          'order' => []\n        ]\n      ];\n      if (!$db) {\n        $db = $this->db->getCurrent();\n      }\n\n      \/** @var string An alias which will be use as prefix for all aliases *\/\n      $alias = Str::genpwd(5);\n      \/** @var int An incremental index for the tables alias *\/\n      $tIdx  = 0;\n      \/** @var int An incremental index for the columns alias *\/\n      $cIdx  = 0;\n      foreach ($model['fields'] as $col => $f) {\n        \/** @var array The javascript column configuration *\/\n        $js = [\n          'text' => $col,\n          'field' => $col\n        ];\n        $field = $table.'.'.$col;\n        \/\/ Text should be defined before the option is changed in case of a single foreign key\n        if (!empty($f['option'])) {\n          \/\/ Taking the text from the option (which will be the col name if not defined)\n          $js['text'] = $f['option']['text'];\n        }\n\n        \/** @var bool|string The simple name of the unique column to display for the key  *\/\n        $displayColumn = false;\n        \/\/ Case where the column is part of a key\n        if (!empty($model['cols'][$col])) {\n          foreach ($model['cols'][$col] as $c) {\n            if ($c === 'PRIMARY') {\n              if (empty($f['option'])) {\n                $f['editable'] = false;\n              }\n              else {\n                $f['option']['editable'] = false;\n              }\n              $js['component'] = 'appui-database-data-binary';\n              $js['cls'] = 'bbn-c';\n              $js['width'] = 'bbn-c';\n            }\n            \/\/ Case where it is a foreign key\n            elseif (!empty($model['keys'][$c]['ref_table'])) {\n              \/\/ Incrementing the alias indexes as we'll use them\n              $tIdx++;\n              \/\/ Getting the model from the foreign table\n              $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);\n              \/\/ Looking for displayed columns configured\n              if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {\n                $dcols = [];\n                foreach ($tmodel['option']['dcolumns'] as $dcol) {\n                  $dcols[] = $this->db->cfn($dcol, $alias.'_t'.$tIdx, true);\n                  if (!$displayColumn) {\n                    $displayColumn = $dcol;\n                  }\n                }\n\n                \/\/ Adding a single display column to the query\n                if (count($dcols) === 1) {\n                  $field = $displayColumn;\n                }\n                \/\/ Adding more display column as concat in the query\n                else {\n                  $field = \"CONCAT(\".X::join($dcols, ', ').\")\";\n                }\n              }\n              else {\n                \/\/ Otherwise looking for the first varchar\n                foreach ($tmodel['fields'] as $tcol => $tf) {\n                  if ($tf['type'] === 'varchar') {\n                    $cIdx++;\n                    \/\/ Adding the column to the query\n                    $field = $alias.'_t'.$tIdx.'.'.$tcol;\n                    $displayColumn = $tcol;\n                    break;\n                  }\n                }\n              }\n\n              if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {\n                if (!isset($f['option']['editor'])) {\n                  $f['option']['editor'] = 'appui-database-table-browser';\n                  $f['option']['options'] = [\n                    'table' => $model['keys'][$c]['ref_table'],\n                    'column' => $model['keys'][$c]['ref_column']\n                  ];\n                }\n              }\n\n              \/\/ Adding the JOIN part to the query\n              $res['php']['join'][] = [\n                'type' => $f['null'] ? 'left' : '',\n                'table' => $model['keys'][$c]['ref_db'].'.'.$model['keys'][$c]['ref_table'],\n                'alias' => $alias.'_t'.$tIdx,\n                'on' => [\n                  [\n                    'field' => $alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],\n                    'exp' => $table.'.'.$col\n                  ]\n                ]\n              ];\n              break;\n            }\n          }\n        }\n\n        $res['php']['fields'][$col] = $field;\n        if (!empty($f['option'])) {\n          $f = $f['option'];\n        }\n\n        \/\/ Taking all possible properties defined\n        \/\/ Width\n        if (empty($f['width'])) {\n          if ($f['type'] === 'date') {\n            $js['width'] = 100;\n          }\n          elseif ($f['type'] === 'datetime') {\n            $js['width'] = 140;\n          }\n          elseif ($f['type'] === 'binary') {\n            $js['width'] = 60;\n          }\n          elseif (!empty($f['maxlength']) && ($f['maxlength'] < 40)) {\n            $js['width'] = $this->length2Width($f['maxlength']);\n          }\n          else {\n            $js['minWidth'] = '40em';\n          }\n        }\n        else {\n          $js['width'] = $f['width'];\n        }\n\n        \/\/ For the cell view\n        if (!empty($f['component'])) {\n          $js['component'] = $f['component'];\n        }\n\n        \/\/ The editor\/filter component\n        if (!empty($f['editor'])) {\n          $js['editor'] = $f['editor'];\n        }\n        elseif (empty($js['editor']) && (!isset($f['editable']) || $f['editable'])) {\n          switch ($f['type']) {\n            case 'int':\n            case 'smallint':\n            case 'tinyint':\n            case 'bigint':\n            case 'mediumint':\n            case 'real':\n            case 'double':\n            case 'decimal':\n            case 'float':\n              $js['editor'] = 'bbn-numeric';\n              $max = pow(10, $f['maxlength']) - 1;\n              $js['options'] = [\n                'max' => $max,\n                'min' => $f['signed'] ? -$max : 0\n              ];\n              break;\n            case 'date':\n              $js['editor'] = 'bbn-datepicker';\n              break;\n            case 'datetime':\n              $js['editor'] = 'bbn-datetimepicker';\n              break;\n            case 'json':\n              $js['editor'] = 'bbn-json-editor';\n              break;\n            case 'enum':\n            case 'set':\n              $js['editor'] = 'bbn-dropdown';\n              $src = [];\n              if (!empty($f['extra'])) {\n                $src = X::split(substr($f['extra'], 1, -1), \"','\");\n              }\n\n              \/\/ Calculating the length based on the longest enum value\n              if (empty($js['width'])) {\n                $maxlength = 1;\n                foreach ($src as $s) {\n                  $len = strlen($s);\n                  if ($len > $maxlength) {\n                    $maxlength = $len;\n                  }\n                }\n              }\n\n              $js['options'] = [\n                'source' => $src\n              ];\n              break;\n            case 'binary':\n            case 'varbinary':\n              $js['component'] = 'appui-database-data-binary';\n              $js['cls'] = 'bbn-c';\n              $js['editor'] = 'bbn-upload';\n              break;\n            case 'text':\n            case 'bigtext':\n            case 'smalltext':\n            case 'tinytext':\n            case 'mediumtext':\n              $js['editor'] = 'bbn-textarea';\n              break;\n          }\n        }\n\n\n        $res['js']['columns'][] = $js;\n        \n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
-            "startLine": 1479,
-            "endLine": 1710,
+            "startLine": 1482,
+            "endLine": 1713,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1853,7 +1903,8 @@
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1905,8 +1956,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(int $length, $max = '30em')\n  {\n    if ($length > 32) {\n      return $max;\n    }\n    elseif ($length > 25) {\n      return '25em';\n    }\n    elseif ($length > 20) {\n      return '20em';\n    }\n    elseif ($length > 15) {\n      return '17em';\n    }\n    elseif ($length > 10) {\n      return '13em';\n    }\n    elseif ($length > 5) {\n      return '9em';\n    }\n    elseif ($length > 3) {\n      return '5em';\n    }\n\n    return '3em';\n\n  }",
-            "startLine": 1713,
-            "endLine": 1739,
+            "startLine": 1716,
+            "endLine": 1742,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1915,7 +1966,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [
+                "string"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -1958,7 +2011,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cacheDeleteAll",
                 "summary": "",
@@ -1979,7 +2032,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2005,7 +2058,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cacheDelete",
                 "summary": "",
@@ -2026,7 +2079,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2072,7 +2125,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cacheGet",
                 "summary": "",
@@ -2093,7 +2146,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2175,7 +2228,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cacheSet",
                 "summary": "",
@@ -2196,7 +2249,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 4,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2296,7 +2349,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cacheGetSet",
                 "summary": "",
@@ -2317,7 +2370,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 4,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2417,7 +2470,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cacheHas",
                 "summary": "",
@@ -2438,7 +2491,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2520,7 +2573,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -2541,7 +2594,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2567,7 +2620,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
@@ -2588,7 +2641,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2614,7 +2667,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getError",
                 "summary": "",
@@ -2635,7 +2688,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2661,7 +2714,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getErrors",
                 "summary": "",
@@ -2682,7 +2735,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2708,7 +2761,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "log",
                 "summary": "",
@@ -2729,7 +2782,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2755,7 +2808,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__call",
                 "summary": "",
@@ -2776,7 +2829,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2840,7 +2893,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "isDebug",
                 "summary": "",
@@ -2861,7 +2914,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2887,7 +2940,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "setDebug",
                 "summary": "",
@@ -2908,7 +2961,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2954,7 +3007,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -2978,7 +3031,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3002,7 +3055,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "bbn\\Appui\\Option"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -3026,7 +3081,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3050,7 +3105,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3074,7 +3129,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3098,7 +3153,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3122,7 +3177,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3146,7 +3201,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -3171,7 +3226,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -3196,7 +3252,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -3220,7 +3278,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -3245,7 +3305,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -3271,7 +3332,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "array"
             ],
             "parent": false,
             "arguments": []
@@ -3296,7 +3358,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         }

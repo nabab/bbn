@@ -85,7 +85,7 @@
     "shortName": "Button",
     "contentConstructor": {
         "file": "bbn\\Html\\Button",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "__construct": {
@@ -113,7 +113,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__construct",
                 "summary": "",
@@ -134,7 +134,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -181,7 +181,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "checkConfig",
                 "summary": "Confront the JSON schema object with the current configuration",
@@ -202,7 +202,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -250,7 +250,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getError",
                 "summary": "Returns the current error(s)",
@@ -271,7 +271,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -297,7 +297,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cssToString",
                 "summary": "Generates style string for a HTML tag",
@@ -318,7 +318,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -366,7 +366,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "css",
                 "summary": "",
@@ -387,7 +387,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -433,7 +433,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "addClass",
                 "summary": "",
@@ -454,7 +454,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -500,7 +500,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "append",
                 "summary": "Add an element to the content, or a string if it's one",
@@ -521,7 +521,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -567,7 +567,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getConfig",
                 "summary": "Returns the current configuration.",
@@ -588,7 +588,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -614,7 +614,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getParam",
                 "summary": "Returns the current configuration  HOW???",
@@ -635,7 +635,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -661,7 +661,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "showConfig",
                 "summary": "Returns the current configuration for PHP",
@@ -682,7 +682,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -708,7 +708,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "script",
                 "summary": "Returns the javascript coming with the object",
@@ -729,7 +729,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -775,7 +775,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "attr",
                 "summary": "",
@@ -796,7 +796,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -842,7 +842,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "text",
                 "summary": "",
@@ -863,7 +863,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -909,7 +909,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "content",
                 "summary": "",
@@ -930,7 +930,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -976,7 +976,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "html",
                 "summary": "Returns the corresponding HTML string",
@@ -997,7 +997,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1045,7 +1045,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "eleAndScript",
                 "summary": "",
@@ -1066,7 +1066,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1092,7 +1092,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "makeEmpty",
                 "summary": "",
@@ -1113,7 +1113,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },

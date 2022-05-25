@@ -40,7 +40,7 @@
     "shortName": "Git",
     "contentConstructor": {
         "file": "Cz\\Git\\GitRepository",
-        "returns": null
+        "returns": []
     },
     "methods": {
         "listRemote": {
@@ -63,7 +63,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -88,7 +88,8 @@
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
             "returns": [
-                null
+                null,
+                "string"
             ],
             "parent": false,
             "arguments": []
@@ -113,7 +114,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -165,7 +166,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -189,7 +190,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -250,7 +251,7 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -311,7 +312,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -345,7 +346,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -415,7 +416,7 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": [
                 {
@@ -485,7 +486,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": false,
             "arguments": []
         },
@@ -509,7 +510,9 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -552,7 +555,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "__construct",
                 "summary": "",
@@ -573,7 +576,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -621,7 +624,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getRepositoryPath",
                 "summary": "",
@@ -642,7 +645,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -673,7 +676,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "createTag",
                 "summary": "Creates a tag.",
@@ -699,7 +702,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -772,7 +775,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "removeTag",
                 "summary": "Removes tag.",
@@ -798,7 +801,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -851,7 +854,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "renameTag",
                 "summary": "Renames tag.",
@@ -877,7 +880,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -945,7 +948,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getTags",
                 "summary": "Returns list of tags in repo.",
@@ -966,7 +969,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -997,7 +1000,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "merge",
                 "summary": "Merges branches.",
@@ -1023,7 +1026,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1096,7 +1099,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "createBranch",
                 "summary": "Creates new branch.",
@@ -1122,7 +1125,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1195,7 +1198,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "removeBranch",
                 "summary": "Removes branch.",
@@ -1221,7 +1224,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1274,7 +1277,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getCurrentBranchName",
                 "summary": "Gets name of current branch",
@@ -1300,7 +1303,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1326,7 +1329,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getBranches",
                 "summary": "Returns list of all (local & remote) branches in repo.",
@@ -1347,7 +1350,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1373,7 +1376,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getRemoteBranches",
                 "summary": "Returns list of remote branches in repo.",
@@ -1394,7 +1397,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1420,7 +1423,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getLocalBranches",
                 "summary": "Returns list of local branches in repo.",
@@ -1441,7 +1444,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1472,7 +1475,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "checkout",
                 "summary": "Checkout branch.",
@@ -1498,7 +1501,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1551,7 +1554,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "removeFile",
                 "summary": "Removes file(s).",
@@ -1577,7 +1580,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1630,7 +1633,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "addFile",
                 "summary": "Adds file(s).",
@@ -1656,7 +1659,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1709,7 +1712,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "addAllChanges",
                 "summary": "Adds all created, modified & removed files.",
@@ -1735,7 +1738,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -1766,7 +1769,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "renameFile",
                 "summary": "Renames file(s).",
@@ -1792,7 +1795,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1865,7 +1868,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "commit",
                 "summary": "Commits changes",
@@ -1891,7 +1894,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -1964,7 +1967,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getLastCommitId",
                 "summary": "Returns last commit ID on current branch",
@@ -1990,7 +1993,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2021,7 +2024,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "hasChanges",
                 "summary": "Exists changes?",
@@ -2047,7 +2050,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2073,7 +2076,7 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "isChanges",
                 "summary": "",
@@ -2094,7 +2097,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": []
             },
@@ -2120,7 +2123,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "pull",
                 "summary": "Pull changes from a remote",
@@ -2141,7 +2144,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2209,7 +2212,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "push",
                 "summary": "Push changes to a remote",
@@ -2230,7 +2233,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2298,7 +2301,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "fetch",
                 "summary": "Run fetch command to get latest branches",
@@ -2319,7 +2322,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2387,7 +2390,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "addRemote",
                 "summary": "Adds new remote repository",
@@ -2408,7 +2411,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2496,7 +2499,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "renameRemote",
                 "summary": "Renames remote repository",
@@ -2517,7 +2520,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2585,7 +2588,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "removeRemote",
                 "summary": "Removes remote repository",
@@ -2606,7 +2609,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2654,7 +2657,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "setRemoteUrl",
                 "summary": "Changes remote repository URL",
@@ -2675,7 +2678,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 2,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2763,7 +2766,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "execute",
                 "summary": "",
@@ -2784,7 +2787,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2832,7 +2835,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "init",
                 "summary": "Init repo in directory",
@@ -2853,7 +2856,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -2921,7 +2924,7 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "cloneRepository",
                 "summary": "Clones GIT repository from $url into $directory",
@@ -2942,7 +2945,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3030,7 +3033,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "isRemoteUrlReadable",
                 "summary": "",
@@ -3051,7 +3054,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3119,7 +3122,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "extractRepositoryNameFromUrl",
                 "summary": "",
@@ -3140,7 +3143,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3193,7 +3196,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "isAbsolute",
                 "summary": "Is path absolute?",
@@ -3219,7 +3222,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3270,7 +3273,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getCommitMessage",
                 "summary": "Returns commit message from specific commit",
@@ -3296,7 +3299,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3369,7 +3372,7 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getCommitDate",
                 "summary": "Returns commit date from specific commit",
@@ -3395,7 +3398,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3468,7 +3471,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getCommitAuthor",
                 "summary": "Returns commit author from specific commit",
@@ -3494,7 +3497,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {
@@ -3547,7 +3550,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": null,
+            "returns": [],
             "parent": {
                 "name": "getCommitData",
                 "summary": "Returns array of commit metadata from specific commit",
@@ -3573,7 +3576,7 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
-                "returns": null,
+                "returns": [],
                 "parent": false,
                 "arguments": [
                     {

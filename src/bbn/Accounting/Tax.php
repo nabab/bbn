@@ -9,7 +9,7 @@ use bbn\Models\Tts\Dbconfig;
 use bbn\Db;
 
 
-class Item extends DbCls
+class Tax extends DbCls
 {
   use Dbconfig;
   use Common;
