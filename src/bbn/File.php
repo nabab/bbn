@@ -3,6 +3,8 @@
  * @package file
  */
 namespace bbn;
+
+use Exception;
 /**
  * Perform a single file objectification and manage its manipulation.
  *
@@ -225,26 +227,32 @@ class File extends Models\Cls\Basic
    *
    * @return file
    */
-  public function download()
+  public function download(): void
   {
-    if ( $this->file ){
-      if ( !$this->size ){
+    if ($this->file) {
+      if (!$this->size) {
         $this->getSize();
       }
       
-      if ( $this->size && ($handle = fopen($this->file, 'r')) ){
-        header('Content-type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="'.$this->name.'"');
-        while ( !feof($handle) ){
-          echo fread($handle, 65536);
-        }
-        fclose($handle);
+      if (!$this->size) {
+        throw new Exception(X::_("Impossible to get the file %s", $this->file));
       }
-      else{
-        die('Impossible to read the file '.$this->name);
-      }
+
+      while (@ob_end_flush());
+      header("Content-Encoding: none");
+      ignore_user_abort(true);
+      ini_set('output_buffering', 'Off');
+      ini_set('zlib.output_compression', false);
+      header('Content-Description: File Transfer');
+      header('Content-Type: application/octet-stream');
+      header('Content-Disposition: attachment; filename="' . Str::escapeDquotes(basename($this->name)) . '"');
+      header('Expires: 0');
+      header('Cache-Control: must-revalidate');
+      header('Pragma: public');
+      header('Content-Length: ' . $this->size);
+      readfile($this->file);
+      exit;
     }
-    return $this;
   }
 
   /**

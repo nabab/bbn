@@ -336,7 +336,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['tables']['versions'],
           [
             $cf['arch']['versions']['id_note'] => $id_note,
-            $cf['arch']['versions']['version'] => $next,
+            $cf['arch']['versions']['version'] => $next ?? 1,
             $cf['arch']['versions']['latest'] => 1,
             $cf['arch']['versions']['title'] => $title,
             $cf['arch']['versions']['content'] => $content,

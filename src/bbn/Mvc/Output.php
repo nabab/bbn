@@ -7,10 +7,17 @@
  */
 
 namespace bbn\Mvc;
-use bbn;
 
-
-class Output extends bbn\Models\Cls\Basic {
+use bbn\X;
+use bbn\Models\Cls\Basic;
+use JShrink\Minifier;
+use stdClass;
+use RuntimeException;
+use Exception;
+use bbn\File;
+use bbn\File\Image;
+use Parsedown;
+class Output extends Basic {
 
   /**
    * Returns an array with the status and the code for the given code, and sends the corresponding header if not disabled
@@ -65,7 +72,7 @@ class Output extends bbn\Models\Cls\Basic {
     ];
 
     if (!isset($http[$code])) {
-      throw new \Exception("The given status doesn't exist");
+      throw new Exception("The given status doesn't exist");
     }
 
     if ($send) {
@@ -82,7 +89,7 @@ class Output extends bbn\Models\Cls\Basic {
   }
 
 
-  public function __construct(\stdClass $obj, $mode){
+  public function __construct(stdClass $obj, $mode){
     $this->obj = $obj;
     $this->mode = $mode;
   }
@@ -95,12 +102,12 @@ class Output extends bbn\Models\Cls\Basic {
    */
   public function run()
   {
-    if ( \count((array)$this->obj) === 0 ){
+    if (\count((array)$this->obj) === 0) {
       self::statusHeader(404);
     }
 
-    if ( $this->mode === 'cli' ){
-      if ( !headers_sent() && !$this->obj->content ){
+    if ($this->mode === 'cli') {
+      if (!headers_sent() && !$this->obj->content) {
         exit('No output...');
       }
       if ( $this->obj->content ){
@@ -115,10 +122,10 @@ class Output extends bbn\Models\Cls\Basic {
       }
       else if ( !BBN_IS_DEV ){
         try{
-          $tmp = \JShrink\Minifier::minify($this->obj->prescript, ['flaggedComments' => false]);
+          $tmp = Minifier::minify($this->obj->prescript, ['flaggedComments' => false]);
         }
-        catch ( \RuntimeException $e ){
-          \bbn\X::log($this->obj->prescript, 'js_shrink');
+        catch ( RuntimeException $e ){
+          X::log($this->obj->prescript, 'js_shrink');
         }
         if ( $tmp ){
           $this->obj->prescript = $tmp;
@@ -131,10 +138,10 @@ class Output extends bbn\Models\Cls\Basic {
       }
       else if ( !BBN_IS_DEV ){
         try{
-          $tmp = \JShrink\Minifier::minify($this->obj->script, ['flaggedComments' => false]);
+          $tmp = Minifier::minify($this->obj->script, ['flaggedComments' => false]);
         }
-        catch ( \RuntimeException $e ){
-          \bbn\X::log($this->obj->script, 'js_shrink');
+        catch ( RuntimeException $e ){
+          X::log($this->obj->script, 'js_shrink');
         }
         if ( $tmp ){
           $this->obj->script = $tmp;
@@ -147,20 +154,20 @@ class Output extends bbn\Models\Cls\Basic {
       }
       else if ( !BBN_IS_DEV ){
         try{
-          $tmp = \JShrink\Minifier::minify($this->obj->postscript, ['flaggedComments' => false]);
+          $tmp = Minifier::minify($this->obj->postscript, ['flaggedComments' => false]);
         }
-        catch ( \RuntimeException $e ){
-          \bbn\X::log($this->obj->postscript, 'js_shrink');
+        catch ( RuntimeException $e ){
+          X::log($this->obj->postscript, 'js_shrink');
         }
         if ( $tmp ){
           $this->obj->postscript = $tmp;
         }
       }
     }
-    if ( empty($this->obj->content) || ( ($this->mode === 'file') || ($this->mode === 'image') ) ){
+    if ((empty($this->obj->content) && (X::countProperties($this->obj) === 1)) || in_array($this->mode, ['file', 'image'])) {
       if (!empty($this->obj->file)){
         if (\is_string($this->obj->file) && is_file($this->obj->file)){
-          $this->obj->file = new bbn\File($this->obj->file);
+          $this->obj->file = new File($this->obj->file);
         }
         if (\is_object($this->obj->file) &&
           method_exists($this->obj->file, 'download') &&
@@ -172,7 +179,7 @@ class Output extends bbn\Models\Cls\Basic {
       }
       else if (!empty($this->obj->img)){
         if (\is_string($this->obj->img) && is_file($this->obj->img)){
-          $this->obj->img = new bbn\File\Image($this->obj->img);
+          $this->obj->img = new Image($this->obj->img);
         }
         if (\is_object($this->obj->img) &&
           method_exists($this->obj->img, 'display') &&
@@ -206,7 +213,7 @@ class Output extends bbn\Models\Cls\Basic {
       $this->mode = '';
     }
     else if ( !empty($this->obj->content) && !empty($this->obj->help) ){
-      $mdParser = new \Parsedown();
+      $mdParser = new Parsedown();
       $this->obj->help = $mdParser->text($this->obj->help);
     }
     switch ( $this->mode ){
@@ -264,7 +271,6 @@ class Output extends bbn\Models\Cls\Basic {
       default:
         header('Content-type: text/html; charset=utf-8');
         echo isset($this->obj->content) ? $this->obj->content : '';
-
     }
   }
 }
