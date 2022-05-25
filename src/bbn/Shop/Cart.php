@@ -7,6 +7,8 @@ use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\Dbconfig;
 use bbn\Db;
+use bbn\Entities\Address;
+use bbn\Appui\Option;
 
 /**
  * Cart class
@@ -73,7 +75,7 @@ class Cart extends DbCls
     // Setting up the class configuration
     $this->_init_class_cfg($cfg);
     if ($user = \bbn\User::getInstance()) {
-      $this->idSession = $user->getIdSession();
+      $this->idSession = $user->getOsession('id_session');
     }
     $this->productCls = new Product($this->db);
     $this->productClsCfg = $this->productCls->getClassCfg();
@@ -89,7 +91,7 @@ class Cart extends DbCls
     if (empty($this->idSession)) {
       throw new \Exception(_("No user's session found"));
     }
-    $sales = new \bbn\Shop\Sales($this->db);
+    $sales = new Sales($this->db);
     $salesCfg = $sales->getClassCfg();
     $salesFields = $salesCfg['arch']['transactions'];
     if ($idCart = $this->selectOne($this->fields['id'], [
@@ -116,6 +118,9 @@ class Cart extends DbCls
    */
   public function addProduct(string $idProduct, int $quantity = 1, string $idCart = ''): bool
   {
+    if (!$this->productCls->isActive($idProduct)) {
+      throw new \Exception(sprintf(_('The product with the id %s is not available'), $idProduct));
+    }
     if (empty($idCart)
       && !($idCart = $this->getCurrentCartID())
     ) {
@@ -228,14 +233,158 @@ class Cart extends DbCls
   }
 
 
-  public function total()
+  /**
+   * Gets the total of the current (or given) cart for the given address
+   * @param string $idAddress The address ID
+   * @param string $idCart The cart ID
+   * @return float
+   */
+  public function total(string $idAddress, string $idCart = ''): float
   {
-
+    if (empty($idCart)) {
+      $idCart = $this->getCurrentCartID();
+    }
+    if (!Str::isUid($idCart)) {
+      throw new \Exception(_('The cart ID is an invalid UID'));
+    }
+    $total = 0;
+    if ($products = $this->getProducts($idCart)) {
+      $pFields = $this->class_cfg['arch']['cart_products'];
+      foreach ($products as $product) {
+        $total += $product[$pFields['amount']];
+      }
+    }
+    $total += $this->shippingCost($idAddress, $idCart);
+    return \round($total, 2);
   }
 
 
-  public function shippingCost(){
+  /**
+   * Gets the total of the current (or given) cart in detail for the given address
+   * @param string $idAddress The address ID
+   * @param string $idCart The cart ID
+   * @return array
+   */
+  public function totalDetail(string $idAddress, string $idCart = ''): array
+  {
+    if (empty($idCart)) {
+      $idCart = $this->getCurrentCartID();
+    }
+    if (!Str::isUid($idCart)) {
+      throw new \Exception(_('The cart ID is an invalid UID'));
+    }
+    $res = [
+      'products' => 0,
+      'shipping' => 0,
+      'total' => 0
+    ];
+    if ($products = $this->getProducts($idCart)) {
+      $pFields = $this->class_cfg['arch']['cart_products'];
+      foreach ($products as $product) {
+        $res['products'] += $product[$pFields['amount']];
+        $res['total'] += $product[$pFields['amount']];
+      }
+    }
+    $res['shipping'] = $this->shippingCost($idAddress, $idCart);
+    $res['total'] += $res['shipping'];
+    foreach ($res as $i => $v) {
+      $res[$i] = \round($v, 2);
+    }
+    return $res;
+  }
 
+
+  /**
+   * Gets the shipping cost for the given address
+   * @param string $idAddress The address ID
+   * @param string $idCart The cart ID
+   * @return float
+   */
+  public function shippingCost(string $idAddress, string $idCart = ''): float
+  {
+    if (empty($idCart)) {
+      $idCart = $this->getCurrentCartID();
+    }
+    if (!Str::isUid($idCart)) {
+      throw new \Exception(_('The cart ID is an invalid UID'));
+    }
+    $addressCls = new Address($this->db);
+    $addressClsCfg = $addressCls->getClassCfg();
+    $aFields = $addressClsCfg['arch']['addresses'];
+    if (!($idCountry = $addressCls->selectOne($aFields['country'], [$aFields['id'] => $idAddress]))) {
+      throw new \Exception(sprintf(_('Contry not found for the address %s'), $idAddress));
+    }
+    $opt = Option::getInstance();
+    if (!($continentCode = $opt->getProp($idCountry, 'continent'))) {
+      throw new \Exception(sprintf(_('Continent code not found for the country %s'), $idCountry));
+    }
+    if (!($continent = $opt->fromCode($continentCode, 'territories'))) {
+      throw new \Exception(sprintf(_('Continent not found with the code %s'), $continentCode));
+    }
+    $pFields = $this->class_cfg['arch']['cart_products'];
+    $cost = 0;
+    if ($products = $this->getProducts($idCart)) {
+      $providerCls = new Provider($this->db);
+      $providersCosts = [];
+      $providersWeight = [];
+      foreach ($products as $product) {
+        if (!($provider = $this->productCls->getProvider($product[$pFields['id_product']]))) {
+          throw new \Exception(sprintf(_('No provider found for the product %s'), $product[$pFields['id_product']]));
+        }
+        if ($weight = $this->productCls->getWeight($product[$pFields['id_product']])) {
+          if (!isset($providersWeight[$provider])) {
+            $providersWeight[$provider] = $weight;
+          }
+          else {
+            $providersWeight[$provider] += $weight;
+          }
+          if (!isset($providersCosts[$provider])) {
+            $pc = $providerCls->getShippingCosts($provider, $continent);
+            $providersCosts[$provider] = [
+              'prices' => [],
+              'surcharge' => []
+            ];
+            $prices = [];
+            if (\is_array($pc)) {
+              foreach ($pc as $i => $v) {
+                if ($i !== 'territory') {
+                  if (\substr($i, 0, 2) === 'gm') {
+                    $providersCosts[$provider]['surcharge'][\substr($i, 2)] = $v;
+                  }
+                  else {
+                    $prices[\substr($i, 1)] = $v;
+                  }
+                }
+              }
+            }
+            ksort($prices, SORT_NUMERIC);
+            $providersCosts[$provider]['prices'] = $prices;
+          }
+        }
+      }
+      foreach ($providersWeight as $p => $pw) {
+        $weights = \array_keys($providersCosts[$p]['prices']);
+        $tmpw = $weights[0];
+        foreach ($weights as $i => $w) {
+          if ($w <= $pw) {
+            $tmpw = $w;
+          }
+          if (isset($weights[$i + 1]) && ($pw > $w)) {
+            $tmpw = $weights[$i + 1];
+          }
+        }
+        $cost += $providersCosts[$p]['prices'][$tmpw];
+        $diff = $pw - $tmpw;
+        if (($diff > 0) && count($providersCosts[$p]['surcharge'])) {
+          $gr = \array_keys($providersCosts[$p]['surcharge'])[0];
+          $m = \array_values($providersCosts[$p]['surcharge'])[0];
+          $num = $diff / $gr;
+          $num = \round($num, 0) + ($num - round($num, 0) > 0 ? 1 : 0);
+          $cost += $m * $num;
+        }
+      }
+    }
+    return \round($cost, 2);
   }
 
 
@@ -253,12 +402,12 @@ class Cart extends DbCls
       throw new \Exception(_('The cart ID is an invalid UID'));
     }
     $weight = 0;
+    $pFields = $this->class_cfg['arch']['cart_products'];
     if ($products = $this->getProducts($idCart)) {
-      $weightField = $this->productClsCfg['arch']['products']['weight'];
       foreach ($products as $product) {
-        $info = $this->getProduct($product[$this->fields['id_product']]);
-        if (\is_int($info[$weightField])) {
-          $weight += $info[$weightField];
+        $prodWeight = $this->productCls->getWeight($product[$pFields['id_product']]);
+        if (\is_int($prodWeight)) {
+          $weight += $prodWeight * $product[$pFields['quantity']];
         }
       }
     }
@@ -293,7 +442,7 @@ class Cart extends DbCls
   {
     $pTable = $this->class_cfg['tables']['cart_products'];
     $pFields = $this->class_cfg['arch']['cart_products'];
-    return $this->db->select($pTable, [], [
+    return $this->db->rselect($pTable, [], [
       $pFields['id_cart'] => $idCart,
       $pFields['id_product'] => $idProduct
     ]);
@@ -319,12 +468,12 @@ class Cart extends DbCls
    */
   protected function getProductAmount(string $idProduct, int $quantity): float
   {
-    if ($prod = $this->getProduct($idProduct)) {
-      $priceField = $this->productClsCfg['arch']['products']['price'];
-      if (\is_null($prod[$priceField])) {
+    if ($this->productCls->isActive($idProduct)) {
+      $price = $this->productCls->getPrice($idProduct);
+      if (\is_null($price)) {
         return (float)0;
       }
-      return round((float)$prod[$priceField] * $quantity, 2);
+      return round((float)$price * $quantity, 2);
     }
     throw new \Exception(sprintf(_('No product found with the ID %s'), $idProduct));
   }

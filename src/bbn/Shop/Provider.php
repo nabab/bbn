@@ -121,4 +121,21 @@ class Provider extends DbCls
     return null;
   }
 
+
+  /**
+   * Gets the shipping costs list of the given provider and territory
+   * @param string $id The provider ID
+   * @param string $territory The territory ID
+   * @return array
+   */
+  public function getShippingCosts(string $id, string $territory): ?array
+  {
+    if (($cfg = $this->selectOne($this->fields['cfg'], [$this->fields['id'] => $id]))
+      && ($cfg = json_decode($cfg, true))
+    ) {
+      return X::getRow($cfg, ['territory' => $territory]);
+    }
+    return null;
+  }
+
 }
