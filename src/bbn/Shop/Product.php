@@ -252,6 +252,50 @@ class Product extends DbCls
   }
 
 
+  /**
+   * Gets the price of the given product
+   * @param string $id The product ID
+   * @return float|null
+   */
+  public function getPrice(string $id): ?float
+  {
+    return $this->db->selectOne($this->class_table, $this->fields['price'], [$this->fields['id'] => $id]);
+  }
+
+
+  /**
+   * Gets the provider of the given product
+   * @param string $id The product ID
+   * @return string|null
+   */
+  public function getProvider(string $id): ?string
+  {
+    return $this->db->selectOne($this->class_table, $this->fields['id_provider'], [$this->fields['id'] => $id]);
+  }
+
+
+  /**
+   * Gets the weight of the given product
+   * @param string $id The product ID
+   * @return int|null
+   */
+  public function getWeight(string $id): ?int
+  {
+    return $this->db->selectOne($this->class_table, $this->fields['weight'], [$this->fields['id'] => $id]);
+  }
+
+
+  /**
+   * Checks if the given product is active
+   * @param string $id The product ID
+   * @return bool
+   */
+  public function isActive(string $id): bool
+  {
+    return (bool)$this->db->selectOne($this->class_table, $this->fields['active'], [$this->fields['id'] => $id]);
+  }
+
+
   public function getVariants(string $id): array
   {
     $cfg  = $this->getClassCfg();
@@ -260,7 +304,6 @@ class Product extends DbCls
       $a['id_main'] => $id
     ]);
   }
-
 
 
   private function getVariantsList(array $product): array
