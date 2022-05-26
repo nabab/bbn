@@ -16,7 +16,7 @@
     "php": ">=8.0",
     "ext-mbstring": "*",
     "ext-json": "*",
-    "composer/composer": "2.1.14",
+    "composer/composer": "2.3.5",
     "zordius/lightncandy": "1.2.*",
     "greenlion/php-sql-parser": "4.5.*",
     "mpdf/mpdf": "8.0.*",
