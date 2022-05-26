@@ -54,7 +54,7 @@
     "phploc/phploc": "7.0.*",
     "sebastian/phpcpd": "6.0.*",
     "friendsofphp/php-cs-fixer": "3.3.*",
-    "phpunitgen/core": "2.0.*",
+    "phpunitgen/core": "3.0.*",
     "mockery/mockery": "1.4.*"
   },
   "autoload": {
