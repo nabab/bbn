@@ -429,7 +429,7 @@ JAVASCRIPT;
     css.onerror = function(){
       bbn_reject();
     };
-    document.getElementsByTagName("head")[0].appendChild(css);
+    document.getElementsByTagName("body")[0].appendChild(css);
   })
 })
 JAVASCRIPT;
@@ -506,7 +506,7 @@ JAVASCRIPT;
       css.onerror = function(){
         bbn_reject();
       };
-      document.getElementsByTagName("head")[0].appendChild(css);
+      document.getElementsByTagName("body")[0].appendChild(css);
     })
   })
 JAVASCRIPT;

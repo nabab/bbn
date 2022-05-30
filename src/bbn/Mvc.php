@@ -580,6 +580,12 @@ class Mvc implements Mvc\Api
   }
 
 
+  public function fetchSubpluginDir(string $path, string $mode, string $plugin_from, string $plugin_for)
+  {
+    return $this->router->fetchSubpluginDir($path, $mode, $plugin_from, $plugin_for);
+  }
+
+
   public static function includePhpView($bbn_inc_file, $bbn_inc_content, array $bbn_inc_data = [])
   {
     $randoms = [];
@@ -1286,6 +1292,21 @@ class Mvc implements Mvc\Api
     ) {
       foreach ($items as $it) {
         $res[$it] = $this->customPluginModel($it, $data, $ctrl, $plugin);
+      }
+    }
+
+    return $res;
+  }
+
+
+  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data, Controller $ctrl): array
+  {
+    $res = [];
+    if (($path = Router::parse($path))
+      && ($items = $this->fetchSubpluginDir($path, 'model', $plugin_from, $plugin_for))
+    ) {
+      foreach ($items as $it) {
+        $res[$it] = $this->getSubpluginModel($it, $data, $ctrl, $plugin_from, $plugin_for);
       }
     }
 

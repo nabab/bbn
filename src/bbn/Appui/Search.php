@@ -2,6 +2,7 @@
 
 namespace bbn\Appui;
 
+use Exception;
 use bbn\Db;
 use bbn\X;
 use bbn\User;
@@ -101,17 +102,30 @@ class Search extends Basic
     $this->user   = User::getInstance();
 
     if (!$this->db) {
-      throw new \Exception('Db instance cannot be found!');
+      throw new Exception('Db instance cannot be found!');
     }
 
     if (!$this->user) {
-      throw new \Exception(X::_('User is not logged in!'));
+      throw new Exception(X::_('User is not logged in!'));
     }
 
     $this->_init_class_cfg($cfg);
     $this->cacheInit();
     $this->timer      = new Timer();
-    $model->getCustomModelGroup('', 'appui-search');
+    try {
+      $model->getCustomModelGroup('', 'appui-search');
+    }
+    catch (Exception $e) {
+
+    }
+    foreach ($model->getPlugins() as $pi) {
+      try {
+        $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
+      }
+      catch (Exception $e) {
+
+      }
+    }
   }
 
   /**
@@ -122,7 +136,7 @@ class Search extends Basic
    * ```
    *
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   protected function getSearchCfg(): array
   {
@@ -234,7 +248,7 @@ class Search extends Basic
    * @param string $search_value
    * @param int $step
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function get(string $search_value, int $step = 0, $start = 0, $limit = 100): array
   {
@@ -548,7 +562,7 @@ class Search extends Basic
       ]);
     }
 
-    throw new \Exception(X::_("Impossible to find the requested search ID"));
+    throw new Exception(X::_("Impossible to find the requested search ID"));
   }
 
   /**
@@ -597,7 +611,7 @@ class Search extends Basic
     try {
       $parameters = (new \ReflectionFunction($function))->getParameters();
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $parameters = ['search'];
     }
 

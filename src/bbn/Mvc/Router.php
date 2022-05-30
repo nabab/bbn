@@ -519,10 +519,56 @@ class Router
     if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
       $dir = $dir1;
     }
-    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)
-        && is_dir($dir2)
+
+    if (!$dir) {
+      throw new \Exception(X::_("Impossible to find the directory for %s", $path));
+    }
+
+
+    $res     = [];
+    $files   = bbn\File\Dir::getFiles($dir);
+    $prepath = $path && ($path !== '.') ? $path.'/' : '';
+    if (!is_array($files)) {
+      throw new \Exception(X::_("The directory %s doesn't exist", $dir));
+    }
+
+    foreach ($files as $f) {
+      if (\in_array(bbn\Str::fileExt($f), self::$_filetypes[$mode], true)) {
+        $res[] = $prepath.bbn\Str::fileExt($f, true)[0];
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * @param $path
+   * @param $mode
+   * @return array|null
+   */
+  public function fetchSubpluginDir(string $path, string $mode, string $plugin_from, string $plugin_for): array
+  {
+    // Only for views and models
+    if (!self::isMode($mode) && !\in_array($mode, self::$_controllers)) {
+      throw new \Exception(X::_("The mode %s is invalid", $mode));
+    }
+
+    // If there is a prepath defined we prepend it to the path
+    if ($this->_prepath
+        && (strpos($path, '/') !== 0)
+        && (strpos($path, $this->_prepath) !== 0)
     ) {
-      $dir = $dir2;
+      $path = $this->_prepath . $path;
+    }
+
+    /** @var string $root Where the files will be searched for by default */
+    $root   = $this->_get_subplugin_root($mode, $plugin_from, $plugin_for);
+
+    $dir = false;
+    $dir1 = self::parse($root . $path);
+    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {
+      $dir = $dir1;
     }
 
     if (!$dir) {

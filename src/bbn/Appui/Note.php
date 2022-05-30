@@ -228,14 +228,15 @@ class Note extends bbn\Models\Cls\Db
     $title,
     string $content = '',
     string $id_type = null,
-    bool $private = false,
-    bool $locked = false,
+    bool   $private = false,
+    bool   $locked = false,
     string $id_parent = null,
     string $id_alias = null,
     string $mime = '',
     string $lang = '',
     string $id_option = null,
-    string $excerpt = ''
+    string $excerpt = '',
+    bool   $pinned = false
   ) {
     $props = [
       'title',
@@ -248,7 +249,8 @@ class Note extends bbn\Models\Cls\Db
       'mime',
       'lang',
       'id_option',
-      'excerpt'
+      'excerpt',
+      'pinned'
     ];
     if (is_array($title)) {
       $cfg = $title;
@@ -294,7 +296,8 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['locked'] => !empty($cfg['locked']) ? 1 : 0,
           $cf['arch']['notes']['creator'] => $usr->getId(),
           $cf['arch']['notes']['mime'] => $cfg['mime'],
-          $cf['arch']['notes']['lang'] => $cfg['lang']
+          $cf['arch']['notes']['lang'] => $cfg['lang'],
+          $cf['arch']['notes']['pinned'] => !empty($cfg['pinned']) ? 1 : 0
         ]
       )
       && ($id_note = $this->db->lastId())
@@ -373,44 +376,63 @@ class Note extends bbn\Models\Cls\Db
    * @param bool|null $locked
    * @return int|null
    */
-  public function update(string $id, string $title, string $content, bool $private = null, bool $locked = null): ?int
+  public function update(
+     string $id,
+     $title,
+     string $content = '',
+     bool   $private = false,
+     bool   $locked = false,
+     string $excerpt = '',
+     bool   $pinned = false
+  ): ?int
   {
+    $props = [
+      'title',
+      'content',
+      'private',
+      'locked',
+      'excerpt',
+      'pinned'
+    ];
+    if (is_array($title)) {
+      $cfg = $title;
+    }
+    else {
+      $cfg = [];
+    }
+
+    foreach ($props as $prop) {
+      if (!array_key_exists($prop, $cfg)) {
+        $cfg[$prop] = $$prop;
+      }
+    }
+
+    if (empty($cfg['content']) && empty($cfg['title'])) {
+      return null;
+    }
+
     $ok = null;
-    if ($old = $this->db->rselect('bbn_notes', [], ['id' => $id])) {
+    if ($old = $this->get($id)) {
       $ok  = 0;
-      $new = [];
-      if (!\is_null($private) && ($private != $old['private'])) {
-        $new['private'] = $private;
+      $new_note = [];
+      $new_version = [];
+      foreach ($props as $p) {
+        if ($cfg[$p] != $old[$p]) {
+          if (in_array($p, ['content', 'title', 'excerpt'])) {
+            $new_version[$p] = $cfg[$p];
+          }
+          else {
+            $new_note[$p] = $cfg[$p];
+          }
+        }
       }
 
-      if (!\is_null($locked) && ($locked != $old['locked'])) {
-        $new['locked'] = $locked;
+      if (!empty($new_note)) {
+        $ok = $this->db->update('bbn_notes', $new_note, ['id' => $id]);
       }
 
-      if (!empty($new)) {
-        $ok = $this->db->update('bbn_notes', $new, ['id' => $id]);
-      }
-
-      if ($old_v = $this->get($id)) {
-        $changed = false;
-        $new_v   = [
-          'title' => $old_v['title'],
-          'content' => $old_v['content'],
-        ];
-
-        if ($title !== $old_v['title']) {
-          $changed        = true;
-          $new_v['title'] = $title;
-        }
-
-        if ($content !== $old_v['content']) {
-          $changed          = true;
-          $new_v['content'] = $content;
-        }
-
-        if (!empty($changed)) {
-          $ok = $this->insertVersion($id, $new_v['title'], $new_v['content']);
-        }
+      if (!empty($new_version)) {
+        $ok = $this->insertVersion($id, $cfg['title'], $cfg['content'], $cfg['excerpt']);
       }
     }
 
@@ -1044,7 +1066,7 @@ class Note extends bbn\Models\Cls\Db
    * @return array|null
    * @throws \Exception
    */
-  public function browse(array $cfg, bool $with_content = false): ?array
+  public function browse(array $cfg, bool $with_content = false, $private = false, string $id_type = null): ?array
   {
     if (isset($cfg['limit']) && ($user = bbn\User::getInstance())) {
       /** @var bbn\Db $db */
@@ -1118,15 +1140,32 @@ class Note extends bbn\Models\Cls\Db
         ]],
         'filters' => [[
           'field' => $db->cfn($cf['arch']['notes']['active'], $cf['table']),
-          'operator' => '=',
           'value' => 1,
-        ], [
-          'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
-          'operator' => '=',
-          'value' => 0,
         ]],
         'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
       ];
+      if ($private) {
+        $grid_cfg['filters'][] = [
+          'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
+          'value' => 1
+        ];
+        $grid_cfg['filters'][] = [
+          'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
+          'value' => $user->getId()
+        ];
+      }
+      else {
+        $grid_cfg['filters'][] = [
+          'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
+          'value' => 0
+        ];
+      }
+      if ($id_type) {
+        $grid_cfg['filters'][] = [
+          'field' => $db->cfn($cf['arch']['notes']['id_type'], $cf['table']),
+          'value' => $id_type
+        ];
+      }
       if (!empty($cfg['fields'])) {
         $grid_cfg['fields'] = bbn\X::mergeArrays($grid_cfg['fields'], $cfg['fields']);
         unset($cfg['fields']);
@@ -1138,7 +1177,7 @@ class Note extends bbn\Models\Cls\Db
       }
 
       if ($with_content) {
-        $grid_cfg['fields']['content'] = 'last_version.'.$cf['arch']['versions']['content'];
+        $grid_cfg['fields']['content'] = $db->cfn($cf['arch']['versions']['content'], $cf['tables']['versions']);
       }
 
       $grid = new Grid($this->db, $cfg, $grid_cfg);
@@ -1398,6 +1437,76 @@ class Note extends bbn\Models\Cls\Db
     return $this->_remove_note_event($id_note, $id_event);
   }
 
+
+  public function savePostIt(array $cfg): ?array
+  {
+    if (empty($cfg['text'])) {
+      throw new Exception(X::_("Impossible to create an empty post-it"));
+    }
+
+    if (!X::hasProps($cfg, ['bcolor', 'fcolor'], true)) {
+      throw new Exception(X::_("Impossible to create a post-it without setting a color"));
+    }
+
+    $id_postIt = self::getOptionId('postit', 'types');
+    if (!$id_postIt) {
+      throw new Exception(X::_("Impossible to find the post-it option"));
+    }
+
+    if (empty($cfg['id'])) {
+      if ($id_note = $this->insert([
+        'title' => $cfg['title'] ?? '',
+        'content' => json_encode([
+          'text' => Str::sanitizeHtml($cfg['text']),
+          'bcolor' => $cfg['bcolor'],
+          'fcolor' => $cfg['fcolor']
+        ]),
+        'id_type' => $id_postIt,
+        'pinned'  => $cfg['pinned'] ?? 0,
+        'private' => 1,
+        'excerpt' => Str::html2text($cfg['content']),
+        'mime' => 'json/bbn-postit'
+      ])) {
+        return $this->getPostIt($id_note);
+      }
+    }
+    elseif (
+      ($postit = $this->getPostIt($cfg['id'])) && 
+      $this->update(
+        $cfg['id'],
+        $cfg['title'] ?? '',
+        json_encode([
+          'text' => Str::sanitizeHtml($cfg['text']),
+          'bcolor' => $cfg['bcolor'],
+          'fcolor' => $cfg['fcolor'],
+        ]),
+        1,
+        $postit['locked'],
+        Str::html2text($cfg['content']),
+        $cfg['pinned']
+      )
+    ) {
+      return $this->getpostIt($cfg['id']);
+    }
+
+    return null;
+  }
+
+  public function getPostIt(string $id): ?array
+  {
+    if ($note = $this->get($id)) {
+      if (!Str::isJson($note['content'])) {
+        throw new Exception(X::_("The content of the post-it should be of type JSON"));
+      }
+
+      $cfg =json_decode($note['content'], true);
+      $note = array_merge($note, $cfg);
+      unset($note['content']);
+      return $note;
+    }
+
+    return null;
+  }
 
   /**
    * If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row.

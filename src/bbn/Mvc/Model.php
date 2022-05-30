@@ -264,6 +264,12 @@ class Model extends DbClass
   }
 
 
+  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data = null)
+  {
+    return $this->_ctrl->getSubpluginModelGroup(...\func_get_args());
+  }
+
+
   public function getDataError($propNames, ?string $errorMsg = null, bool $checkEmpty = true): ?array
   {
     if (!$errorMsg) {

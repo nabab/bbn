@@ -4,6 +4,7 @@ namespace bbn\Mvc;
 
 use bbn;
 use bbn\X;
+use Exception;
 
 class Controller implements Api
 {
@@ -1489,7 +1490,7 @@ class Controller implements Api
     }
   }
 
-  public function getCustomModelGroup(string $path, string $plugin, array $data = null)
+  public function getCustomModelGroup(string $path, string $plugin, array $data = null): array
   {
     if (strpos($path, './') === 0) {
       $path = $this->getCurrentDir() . substr($path, 1);
@@ -1500,6 +1501,21 @@ class Controller implements Api
     }
 
     $res = $this->_mvc->getCustomModelGroup($path, $plugin, $data, $this);
+    if (\is_object($res)) {
+      $res = X::toArray($res);
+    }
+
+    return $res;
+  }
+
+  
+  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data = null): array
+  {
+    if (!isset($data)) {
+      $data = $this->data;
+    }
+
+    $res = $this->_mvc->getSubpluginModelGroup($path, $plugin_from, $plugin_for, $data, $this);
     if (\is_object($res)) {
       $res = X::toArray($res);
     }
