@@ -92,6 +92,9 @@ class Appui
   private $_menuFilesContent;
 
   /** @var array */
+  private $_dashboardFilesContent;
+
+  /** @var array */
   private $_current = [];
 
   /** @var Db */
@@ -1135,6 +1138,65 @@ class Appui
 
 
   /**
+   * Returns an array of dashboards with their structures from the dashboards.json files in all plugins.
+   *
+   * @return array
+   */
+  public function getDashboardFilesContent(): array
+  {
+    if (!$this->_dashboardFilesContent) {
+      $routes     = $this->getRoutes();
+      $dashboards = [];
+      foreach ($routes['root'] as $url => $plugin) {
+        $fn = $plugin['root'] . 'Path';
+        if (method_exists($this, $fn)) {
+          $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
+          if ($this->_currentFs->exists($path . 'dashboards.json')) {
+            if ($list = $this->_currentFs->decodeContents($path.'dashboards.json', 'json', true)) {
+              foreach ($list as $i => $item) {
+                if (empty($item['items'])
+                  || empty($item['code'])
+                ) {
+                  continue;
+                }
+                foreach ($item['items'] as $k => $it) {
+                  if (\is_array($it['id_option'])) {
+                    $list[$i]['items'][$k]['id_option'] = $this->getOption()->fromCode(...$it['id_option']);
+                  }
+                  if (!Str::isUid($list[$i]['items'][$k]['id_option'])) {
+                    unset($list[$i]['items'][$k]);
+                  }
+                }
+                if (!isset($dashboards[$item['code']])) {
+                  $dashboards[$item['code']] = [
+                    'text' => $item['text'],
+                    'code' => $item['code'],
+                    'id_option' => $list[$i]['id_option'],
+                    'items' => []
+                  ];
+                }
+                $dashboards[$item['code']]['items'] = X::mergeArrays($dashboards[$item['code']]['items'], $list[$i]['items']);
+              }
+
+            }
+            else {
+              throw new Exception(X::_("The dashboards file in %s is corrupted", $plugin['name']));
+            }
+          }
+        }
+        else {
+          throw new Exception(X::_("Impossible to recognize the root in plugin %s", $plugin['name']));
+        }
+      }
+
+      $this->_dashboardFilesContent = $dashboards;
+    }
+
+    return $this->_dashboardFilesContent;
+  }
+
+
+  /**
    * Returns an array of tables with their whole structure, keys included
    *
    * @return array
@@ -1808,13 +1870,30 @@ class Appui
               }
               else {
                 $idOption = $perm_class->fromPath($mit['link']);
-                if (($mit['icon'] !== $item['icon'])
-                  || ($mit['num'] !== $item['num'])
-                  || ($idOption !== $item['id_option'])
+                if (\array_key_exists('icon', $mit)
+                  && \array_key_exists('icon', $item)
+                  && ($mit['icon'] !== $item['icon'])
                 ) {
                   if (!$menu_class->set($idItem, [
-                    'icon' => $mit['icon'],
-                    'num' => $mit['num'],
+                    'icon' => $mit['icon']
+                  ])) {
+                    throw new Exception(X::_("Impossible to update the menu element %s!", $idItem));
+                  }
+                  $numChanges++;
+                }
+                if (\array_key_exists('num', $mit)
+                  && \array_key_exists('num', $item)
+                  && ($mit['num'] !== $item['num'])
+                ) {
+                  if (!$menu_class->set($idItem, [
+                    'num' => $mit['num']
+                  ])) {
+                    throw new Exception(X::_("Impossible to update the menu element %s!", $idItem));
+                  }
+                  $numChanges++;
+                }
+                if ($idOption !== $item['id_option']) {
+                  if (!$menu_class->set($idItem, [
                     'id_option' => $idOption
                   ])) {
                     throw new Exception(X::_("Impossible to update the menu element %s!", $idItem));
@@ -1882,91 +1961,133 @@ class Appui
    */
   public function updateDashboard(): int
   {
-    $num_widgets = 0;
     $db          = $this->getDb();
-    $opt_class   = $this->getOption();
-    $pref_class  = $this->getPreferences();
-    $admin_group = $this->getUserGroup('admin', 'Administrators');
-    $dev_group   = $this->getUserGroup('dev', 'Developers');
-    $idDashboard = $opt_class->fromCode('dashboard', 'appui');
-    $routes      = $this->getRoutes();
-    if (!($idList = $opt_class->fromCode('list', $idDashboard))) {
-      throw new Exception(X::_("Id list not found"));
+    $optClass   = $this->getOption();
+    $prefClass  = $this->getPreferences();
+    $prefCfg = $prefClass->getClassCfg();
+    $dashClass   = new Dashboard();
+    $adminGroup = $this->getUserGroup('admin', 'Administrators');
+    $devGroup   = $this->getUserGroup('dev', 'Developers');
+    $numChanges = 0;
+    $defaultCreated = false;
+    if (!($idDashboard = $optClass->fromCode('dashboard', 'appui'))) {
+      throw new Exception(X::_('Dashboard option not found'));
+    }
+    if (!($idList = $optClass->fromCode('list', $idDashboard))) {
+      throw new Exception(X::_('Dashboard list option not found'));
+    }
+    if (!($defDash = $optClass->fromCode('default', $idDashboard))) {
+      throw new Exception(X::_('Default dashboard option not found'));
     }
 
-    if (!($idPluginsDashboard = $pref_class->addToGroup(
-      $idList, [
-      'text' => 'Plugins dashboard',
-      'code' => 'plugins',
-      ]
-    ))
+    if (!($idDefaultDashboard = $dashClass->getId('default'))
+      && ($idDefaultDashboard = $dashClass->insert([
+        $prefCfg['arch']['user_options']['text'] => 'Default dashboard',
+        'code' => 'default',
+        $prefCfg['arch']['user_options']['public'] => 1
+      ]))
     ) {
-      throw new Exception(X::_("Plugins dashboard not found"));
-    }
-    else {
-      $pref_class->makePublic($idPluginsDashboard);
-      $defDash = $opt_class->fromCode('default', 'dashboard', 'appui');
-      $prefCfg = $pref_class->getClassCfg();
-      $db->insert(
-        $prefCfg['table'], [
-        $prefCfg['arch']['user_options']['id_option'] => $defDash,
-        $prefCfg['arch']['user_options']['id_group'] => $admin_group,
-        $prefCfg['arch']['user_options']['id_alias'] => $idPluginsDashboard,
-        ]
-      );
-      $db->insert(
-        $prefCfg['table'], [
-        $prefCfg['arch']['user_options']['id_option'] => $defDash,
-        $prefCfg['arch']['user_options']['id_group'] => $dev_group,
-        $prefCfg['arch']['user_options']['id_alias'] => $idPluginsDashboard,
-        ]
-      );
+      $defaultCreated = true;
+      $numChanges++;
     }
 
-    if (!($idDefaultDashboard = $pref_class->addToGroup(
-      $idList, [
-      'text' => 'Default dashboard',
-      'code' => 'default',
-      ]
-    ))
+    if (empty($idDefaultDashboard)) {
+      throw new Exception(X::_('Default dashboard not found'));
+    }
+
+    if (!($idPluginsDashboard = $dashClass->getId('plugins'))
+      && ($idPluginsDashboard = $dashClass->insert([
+        $prefCfg['arch']['user_options']['text'] => 'Plugins dashboard',
+        'code' => 'plugins',
+        $prefCfg['arch']['user_options']['public'] => 1
+      ]))
     ) {
-      throw new Exception(X::_("Default dashboard not found"));
-    }
-    else {
-      $pref_class->makePublic($idDefaultDashboard);
-    }
-
-    $dashboard = new Dashboard($idPluginsDashboard);
-    $plugins   = array_map(
-      function ($r) {
-        return $r['name'];
-      },
-      array_values($routes['root'])
-    );
-    foreach ($plugins as $p) {
-      $name = substr($p, strlen('appui-'));
-      if ('dashboard' === $name) {
-        continue;
+      $numChanges++;
+      if (!$db->selectOne($prefCfg['table'], $prefCfg['arch']['user_options']['id_alias'], [
+        $prefCfg['arch']['user_options']['id_option'] => $defDash,
+        $prefCfg['arch']['user_options']['id_group'] => $adminGroup,
+      ])) {
+        $db->insert(
+          $prefCfg['table'], [
+          $prefCfg['arch']['user_options']['id_option'] => $defDash,
+          $prefCfg['arch']['user_options']['id_group'] => $adminGroup,
+          $prefCfg['arch']['user_options']['id_alias'] => $idPluginsDashboard,
+          ]
+        );
       }
+      if (!$db->selectOne($prefCfg['table'], $prefCfg['arch']['user_options']['id_alias'], [
+        $prefCfg['arch']['user_options']['id_option'] => $defDash,
+        $prefCfg['arch']['user_options']['id_group'] => $devGroup,
+      ])) {
+        $db->insert(
+          $prefCfg['table'], [
+          $prefCfg['arch']['user_options']['id_option'] => $defDash,
+          $prefCfg['arch']['user_options']['id_group'] => $devGroup,
+          $prefCfg['arch']['user_options']['id_alias'] => $idPluginsDashboard,
+          ]
+        );
+      }
+    }
 
-      $idWidgets = $opt_class->fromCode('widgets', 'appui-dashboard', 'plugins', $name, 'appui');
-      if ($idWidgets && ($widgets = $opt_class->fullOptions($idWidgets))) {
-        $num_widgets = 0;
-        foreach ($widgets as $w) {
-          $dashboard->setCurrent($idDefaultDashboard);
-          if (!empty($w['public']) && $dashboard->addWidget($w['id'])) {
-            ++$num_widgets;
+    if (empty($idPluginsDashboard)) {
+      throw new Exception(X::_('Plugins dashboard not found'));
+    }
+
+    if ($dashboards = $this->getDashboardFilesContent()) {
+      foreach ($dashboards as $dash) {
+        if (empty($dash['code'])) {
+          throw new Exception(X::_('Dashboard code not found %s', \json_encode($dash)));
+        }
+        if (!($idDash = $dashClass->getId($dash['code']))) {
+          if (!($idDash = $dashClass->insert([
+            $prefCfg['arch']['user_options']['text'] => $dash['text'],
+            'code' => $dash['code'],
+            $prefCfg['arch']['user_options']['public'] => 1
+          ]))) {
+            throw new Exception(X::_('Dashboard not created %s', \json_encode($dash)));
           }
-
-          $dashboard->setCurrent($idPluginsDashboard);
-          if ($dashboard->addWidget($w['id'])) {
-            ++$num_widgets;
+          $dashClass->setCurrent($idDash);
+          $numChanges++;
+        }
+        else {
+          $dashClass->setCurrent($idDash);
+          if (($d = $dashClass->get($idDash))
+            && ($dash['text'] !== $d[$prefCfg['arch']['user_options']['text']])
+          ) {
+            $d[$prefCfg['arch']['user_options']['text']] = $dash['text'];
+            if (!$dashClass->update($d)) {
+              throw new Exception(X::_('Dashboard %s not updated', $idDash));
+            }
+            $numChanges++;
+          }
+        }
+        if (empty($idDash)) {
+          throw new Exception(X::_('Dashboard %s not found', $dash['code']));
+        }
+        if (!empty($dash['items'])) {
+          $dashWidgets = $dashClass->getWidgets();
+          foreach ($dash['items'] as $item) {
+            $dashClass->setCurrent($idDash);
+            $widgetOpt = $optClass->option($item['id_option']);
+            if (\is_null(X::find($dashWidgets, [
+              $prefCfg['arch']['user_options_bits']['id_option'] => $item['id_option']
+            ]))) {
+              $dashClass->addWidget($item['id_option']);
+              $numChanges++;
+              if (($dash['code'] === 'plugins')
+                && $defaultCreated
+                && !empty($widgetOpt['public'])
+              ) {
+                $dashClass->setCurrent($idDefaultDashboard);
+                $dashClass->addWidget($item['id_option']);
+                $numChanges++;
+              }
+            }
           }
         }
       }
     }
-
-    return $num_widgets;
+    return $numChanges;
   }
 
 
