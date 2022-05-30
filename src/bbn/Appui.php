@@ -1727,15 +1727,16 @@ class Appui
   /**
    * Update the menus in the database
    *
-   * @return string The ID of the menu it created
+   * @return int The number of changes made
    */
-  public function updateMenus(): string
+  public function updateMenus(): int
   {
     $db         = $this->getDb();
     $opt_class  = $this->getOption();
     $menu_class = $this->getMenu();
     $pref_class = $this->getPreferences();
     $perm_class = $this->getPermissions();
+    $numChanges = 0;
     if (!($id_main_menu = $menu_class->getByCode('main'))
       && ($id_main_menu = $menu_class->add(
         [
@@ -1745,6 +1746,7 @@ class Appui
         ]
       ))
     ) {
+      $numChanges++;
       $pref_class->makePublic($id_main_menu);
       // Set default menu
       if ($pref_class->add(
@@ -1753,9 +1755,9 @@ class Appui
           'text' => 'Default menu',
           'id_alias' => $id_main_menu,
         ]
-      )
-      ) {
+      )) {
         $pref_class->makePublic($id_main_menu);
+        $numChanges++;
       }
     }
 
@@ -1771,6 +1773,7 @@ class Appui
           if (!$idMenu = $menu_class->add($idPluginMenu, $m)) {
             throw new Exception(X::_("Impossible to add the menu element %s!", $m['text']));
           }
+          $numChanges++;
         }
         else if (($m['icon'] !== $menu['icon'])
           || ($m['num'] !== $menu['num'])
@@ -1781,6 +1784,7 @@ class Appui
           ])) {
             throw new Exception(X::_("Impossible to update the menu element %s!", $idMenu));
           }
+          $numChanges++;
         }
         if (!empty($idMenu)) {
           if (!empty($m['items'])) {
@@ -1800,6 +1804,7 @@ class Appui
                 if (!$menu_class->add($idPluginMenu, $mit)) {
                   throw new Exception(X::_("Impossible to add the menu element %s!", $mit['text']));
                 }
+                $numChanges++;
               }
               else {
                 $idOption = $perm_class->fromPath($mit['link']);
@@ -1814,6 +1819,7 @@ class Appui
                   ])) {
                     throw new Exception(X::_("Impossible to update the menu element %s!", $idItem));
                   }
+                  $numChanges++;
                 }
               }
             }
@@ -1829,6 +1835,7 @@ class Appui
         'num' => 2,
       ]
     )) {
+      $numChanges++;
       $pref_class->makePublic($id_plugin_menu);
       foreach ($menus as $m) {
         if ($id_parent_menu = $menu_class->add($id_plugin_menu, $m)) {
@@ -1842,6 +1849,7 @@ class Appui
             );
             unset($mit['link']);
             $menu_class->add($id_plugin_menu, $mit);
+            $numChanges++;
           }
         }
         else {
@@ -1862,7 +1870,7 @@ class Appui
       );
     }
 
-    return $id_main_menu;
+    return $numChanges;
 
   }
 
