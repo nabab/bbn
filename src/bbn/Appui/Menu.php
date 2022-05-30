@@ -669,6 +669,50 @@ class Menu extends bbn\Models\Cls\Basic
 
 
   /**
+   * Gets the ID of a menu by its code and relative user's access
+   * @param string $code The code of the menu
+   * @param bool $pub The value of the 'public' field
+   * @param string|null $idUser The value of the 'id_user' field
+   * @param string|null $idGroup The value of the 'id_group' field
+   * @return string|null
+   */
+  public function getByCode(string $code, bool $pub = true, $idUser = null, $idGroup = null): ?string
+  {
+    $prefCfg = $this->pref->getClassCfg();
+    $pFields = $prefCfg['arch']['user_options'];
+    $where = [
+      'conditions' => [[
+        'field' => $pFields['id_option'],
+        'value' => $this->fromPath('menus')
+      ], [
+        'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $pFields['cfg'] . ', "$.code"))',
+        'value' => $code
+      ], [
+        'field' => $pFields['public'],
+        'value' => (int)$pub
+      ]]
+    ];
+    if (!empty($idUser)) {
+      $where['conditions'][] = [
+        'field' => $pFields['id_user'],
+        'value' => $idUser
+      ];
+    }
+    if (!empty($idGroup)) {
+      $where['conditions'][] = [
+        'field' => $pFields['id_group'],
+        'value' => $idGroup
+      ];
+    }
+    return $this->pref->getDb()->selectOne([
+      'table' => $prefCfg['table'],
+      'fields' => [$pFields['id']],
+      'where' => $where
+    ]);
+  }
+
+
+  /**
    * @param $root
    */
   private static function _set_public_root($root)

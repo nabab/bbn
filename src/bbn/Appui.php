@@ -1736,13 +1736,14 @@ class Appui
     $menu_class = $this->getMenu();
     $pref_class = $this->getPreferences();
     $perm_class = $this->getPermissions();
-    if ($id_main_menu = $menu_class->add(
-      [
-        'text' => 'Main menu',
-        'code' => 'main',
-        'num' => 1,
-      ]
-    )
+    if (!($id_main_menu = $menu_class->getByCode('main'))
+      && ($id_main_menu = $menu_class->add(
+        [
+          'text' => 'Main menu',
+          'code' => 'main',
+          'num' => 1,
+        ]
+      ))
     ) {
       $pref_class->makePublic($id_main_menu);
       // Set default menu
@@ -1758,17 +1759,77 @@ class Appui
       }
     }
 
+    $menus = $this->getMenuFilesContent();
+
+    // Check if Plugins menu exists
+    if ($idPluginMenu = $menu_class->getByCode('plugins')) {
+      $items = $menu_class->get($idPluginMenu);
+      foreach ($menus as $m) {
+        $menu = X::getRow($items, ['text' => $m['text']]);
+        $idMenu = !empty($menu['id']) ? $menu['id'] :null;
+        if (empty($menu)) {
+          if (!$idMenu = $menu_class->add($idPluginMenu, $m)) {
+            throw new Exception(X::_("Impossible to add the menu element %s!", $m['text']));
+          }
+        }
+        else if (($m['icon'] !== $menu['icon'])
+          || ($m['num'] !== $menu['num'])
+        ) {
+          if (!$menu_class->set($idMenu, [
+            'icon' => $m['icon'],
+            'num' => $m['num']
+          ])) {
+            throw new Exception(X::_("Impossible to update the menu element %s!", $idMenu));
+          }
+        }
+        if (!empty($idMenu)) {
+          if (!empty($m['items'])) {
+            $subItems = $menu_class->get($idPluginMenu, $idMenu);
+            foreach ($m['items'] as $mit) {
+              $item = X::getRow($subItems, ['text' => $mit['text']]);
+              $idItem = !empty($item['id']) ? $item['id'] : null;
+              if (empty($item)) {
+                $mit = array_merge(
+                  $mit,
+                  [
+                    'id_parent' => $idMenu,
+                    'id_option' => $perm_class->fromPath($mit['link']),
+                  ]
+                );
+                unset($mit['link']);
+                if (!$menu_class->add($idPluginMenu, $mit)) {
+                  throw new Exception(X::_("Impossible to add the menu element %s!", $mit['text']));
+                }
+              }
+              else {
+                $idOption = $perm_class->fromPath($mit['link']);
+                if (($mit['icon'] !== $item['icon'])
+                  || ($mit['num'] !== $item['num'])
+                  || ($idOption !== $item['id_option'])
+                ) {
+                  if (!$menu_class->set($idItem, [
+                    'icon' => $mit['icon'],
+                    'num' => $mit['num'],
+                    'id_option' => $idOption
+                  ])) {
+                    throw new Exception(X::_("Impossible to update the menu element %s!", $idItem));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
     // Add Plugins menu
-    if ($id_plugin_menu = $menu_class->add(
+    elseif ($id_plugin_menu = $menu_class->add(
       [
         'text' => 'Plugins',
         'code' => 'plugins',
         'num' => 2,
       ]
-    )
-    ) {
+    )) {
       $pref_class->makePublic($id_plugin_menu);
-      $menus = $this->getMenuFilesContent();
       foreach ($menus as $m) {
         if ($id_parent_menu = $menu_class->add($id_plugin_menu, $m)) {
           foreach ($m['items'] as $mit) {

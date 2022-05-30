@@ -2445,6 +2445,16 @@ class Preferences extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns the bbn\Db instance
+   * @return bbn\DB
+   */
+  public function getDb(): bbn\Db
+  {
+    return $this->db;
+  }
+
+
+  /**
    * Sets the user variables using a user object
    *
    * @param bbn\User $user
