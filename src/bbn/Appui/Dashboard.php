@@ -59,6 +59,7 @@ class Dashboard
   protected $nativeWidgetFields = [
     'component',
     'itemComponent',
+    'icon',
     'closable',
     'observe',
     'limit',
