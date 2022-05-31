@@ -6731,7 +6731,7 @@
                 "value": "Note",
                 "text": "Note",
                 "url": "bbn-php\/doc\/class\/Appui\/Note",
-                "lastmod": 1653444614,
+                "lastmod": 1653913591,
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
@@ -6739,7 +6739,7 @@
                         "class": "Appui\/Note",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/__construct",
                         "desc": "Note constructor."
                     },
@@ -6748,7 +6748,7 @@
                         "class": "Appui\/Note",
                         "text": "addMedia",
                         "value": "addMedia",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/addMedia",
                         "desc": ""
                     },
@@ -6757,7 +6757,7 @@
                         "class": "Appui\/Note",
                         "text": "addMediaToNote",
                         "value": "addMediaToNote",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/addMediaToNote",
                         "desc": ""
                     },
@@ -6766,7 +6766,7 @@
                         "class": "Appui\/Note",
                         "text": "browse",
                         "value": "browse",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/browse",
                         "desc": ""
                     },
@@ -6775,7 +6775,7 @@
                         "class": "Appui\/Note",
                         "text": "copy",
                         "value": "copy",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/copy",
                         "desc": ""
                     },
@@ -6784,7 +6784,7 @@
                         "class": "Appui\/Note",
                         "text": "count",
                         "value": "count",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/count",
                         "desc": ""
                     },
@@ -6793,7 +6793,7 @@
                         "class": "Appui\/Note",
                         "text": "countByType",
                         "value": "countByType",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/countByType",
                         "desc": ""
                     },
@@ -6802,7 +6802,7 @@
                         "class": "Appui\/Note",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/get",
                         "desc": ""
                     },
@@ -6811,7 +6811,7 @@
                         "class": "Appui\/Note",
                         "text": "getAliases",
                         "value": "getAliases",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getAliases",
                         "desc": "Returns an array of IDs of the notes which are aliases of the given ID."
                     },
@@ -6820,7 +6820,7 @@
                         "class": "Appui\/Note",
                         "text": "getByType",
                         "value": "getByType",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getByType",
                         "desc": ""
                     },
@@ -6829,7 +6829,7 @@
                         "class": "Appui\/Note",
                         "text": "getChildren",
                         "value": "getChildren",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getChildren",
                         "desc": "Returns an array of IDs of the notes which are children of the given ID."
                     },
@@ -6838,7 +6838,7 @@
                         "class": "Appui\/Note",
                         "text": "getEventIdFromNote",
                         "value": "getEventIdFromNote",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getEventIdFromNote",
                         "desc": "Returns event id for the given note."
                     },
@@ -6847,7 +6847,7 @@
                         "class": "Appui\/Note",
                         "text": "getExcerpt",
                         "value": "getExcerpt",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getExcerpt",
                         "desc": ""
                     },
@@ -6856,7 +6856,7 @@
                         "class": "Appui\/Note",
                         "text": "getFull",
                         "value": "getFull",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getFull",
                         "desc": ""
                     },
@@ -6865,7 +6865,7 @@
                         "class": "Appui\/Note",
                         "text": "getLang",
                         "value": "getLang",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getLang",
                         "desc": ""
                     },
@@ -6874,7 +6874,7 @@
                         "class": "Appui\/Note",
                         "text": "getLastVersionCfg",
                         "value": "getLastVersionCfg",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getLastVersionCfg",
                         "desc": "Returns the configuration to have the last version for each note"
                     },
@@ -6883,7 +6883,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediaInstance",
                         "value": "getMediaInstance",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaInstance",
                         "desc": ""
                     },
@@ -6892,7 +6892,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediaNotes",
                         "value": "getMediaNotes",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaNotes",
                         "desc": "returns all the notes linked to the media."
                     },
@@ -6901,7 +6901,7 @@
                         "class": "Appui\/Note",
                         "text": "getMedias",
                         "value": "getMedias",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMedias",
                         "desc": ""
                     },
@@ -6910,7 +6910,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediasNotes",
                         "value": "getMediasNotes",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediasNotes",
                         "desc": "Selects from db all medias that have the property content not null and a correspondent existing file."
                     },
@@ -6919,7 +6919,7 @@
                         "class": "Appui\/Note",
                         "text": "getNoteIdFromEvent",
                         "value": "getNoteIdFromEvent",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getNoteIdFromEvent",
                         "desc": "Returns note id for the given event."
                     },
@@ -6928,7 +6928,7 @@
                         "class": "Appui\/Note",
                         "text": "getTitle",
                         "value": "getTitle",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getTitle",
                         "desc": ""
                     },
@@ -6937,7 +6937,7 @@
                         "class": "Appui\/Note",
                         "text": "getVersions",
                         "value": "getVersions",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getVersions",
                         "desc": ""
                     },
@@ -6946,7 +6946,7 @@
                         "class": "Appui\/Note",
                         "text": "hasMedias",
                         "value": "hasMedias",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/hasMedias",
                         "desc": ""
                     },
@@ -6955,7 +6955,7 @@
                         "class": "Appui\/Note",
                         "text": "insert",
                         "value": "insert",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insert",
                         "desc": "Creates a new note in the database"
                     },
@@ -6964,7 +6964,7 @@
                         "class": "Appui\/Note",
                         "text": "insertNoteEvent",
                         "value": "insertNoteEvent",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertNoteEvent",
                         "desc": "If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row."
                     },
@@ -6973,7 +6973,7 @@
                         "class": "Appui\/Note",
                         "text": "insertOrUpdateUrl",
                         "value": "insertOrUpdateUrl",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertOrUpdateUrl",
                         "desc": "Insert the given url to the note if has no url and update it otherwise."
                     },
@@ -6982,7 +6982,7 @@
                         "class": "Appui\/Note",
                         "text": "insertVersion",
                         "value": "insertVersion",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertVersion",
                         "desc": "Adds a new version to the given note if it's different from the last, and returns the latest version."
                     },
@@ -6991,7 +6991,7 @@
                         "class": "Appui\/Note",
                         "text": "latest",
                         "value": "latest",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/latest",
                         "desc": ""
                     },
@@ -7000,7 +7000,7 @@
                         "class": "Appui\/Note",
                         "text": "remove",
                         "value": "remove",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/remove",
                         "desc": ""
                     },
@@ -7009,7 +7009,7 @@
                         "class": "Appui\/Note",
                         "text": "removeAllMedias",
                         "value": "removeAllMedias",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeAllMedias",
                         "desc": "Removes all the rows associating medias with a given note."
                     },
@@ -7018,7 +7018,7 @@
                         "class": "Appui\/Note",
                         "text": "removeMedia",
                         "value": "removeMedia",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeMedia",
                         "desc": "Removes a row associating a given media and a given note."
                     },
@@ -7027,7 +7027,7 @@
                         "class": "Appui\/Note",
                         "text": "removeNoteEvent",
                         "value": "removeNoteEvent",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeNoteEvent",
                         "desc": "Removes the row corresponding to the given arguments from bbn_notes_events."
                     },
@@ -7036,7 +7036,7 @@
                         "class": "Appui\/Note",
                         "text": "setLang",
                         "value": "setLang",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setLang",
                         "desc": ""
                     },
@@ -7045,7 +7045,7 @@
                         "class": "Appui\/Note",
                         "text": "setOption",
                         "value": "setOption",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setOption",
                         "desc": "Changes the id_option of the note"
                     },
@@ -7054,7 +7054,7 @@
                         "class": "Appui\/Note",
                         "text": "setType",
                         "value": "setType",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setType",
                         "desc": "Changes the type of the note"
                     },
@@ -7063,7 +7063,7 @@
                         "class": "Appui\/Note",
                         "text": "update",
                         "value": "update",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/update",
                         "desc": ""
                     },
@@ -7072,7 +7072,7 @@
                         "class": "Appui\/Note",
                         "text": "urlToNote",
                         "value": "urlToNote",
-                        "lastmod": 1653444614,
+                        "lastmod": 1653913591,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/urlToNote",
                         "desc": ""
                     }
@@ -8837,7 +8837,7 @@
                 "value": "Search",
                 "text": "Search",
                 "url": "bbn-php\/doc\/class\/Appui\/Search",
-                "lastmod": 1649990259,
+                "lastmod": 1653708258,
                 "desc": "",
                 "items": [
                     {
@@ -8845,7 +8845,7 @@
                         "class": "Appui\/Search",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/__construct",
                         "desc": ""
                     },
@@ -8854,7 +8854,7 @@
                         "class": "Appui\/Search",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/get",
                         "desc": "Launch the search and return the results."
                     },
@@ -8863,7 +8863,7 @@
                         "class": "Appui\/Search",
                         "text": "getSearchId",
                         "value": "getSearchId",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/getSearchId",
                         "desc": ""
                     },
@@ -8872,7 +8872,7 @@
                         "class": "Appui\/Search",
                         "text": "getSearchRow",
                         "value": "getSearchRow",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/getSearchRow",
                         "desc": ""
                     },
@@ -8881,7 +8881,7 @@
                         "class": "Appui\/Search",
                         "text": "getSimilarSearches",
                         "value": "getSimilarSearches",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/getSimilarSearches",
                         "desc": "Retrieves the search IDs"
                     },
@@ -8890,7 +8890,7 @@
                         "class": "Appui\/Search",
                         "text": "register",
                         "value": "register",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/register",
                         "desc": ""
                     },
@@ -8899,7 +8899,7 @@
                         "class": "Appui\/Search",
                         "text": "saveSearch",
                         "value": "saveSearch",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/saveSearch",
                         "desc": ""
                     },
@@ -8908,7 +8908,7 @@
                         "class": "Appui\/Search",
                         "text": "setResult",
                         "value": "setResult",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/setResult",
                         "desc": "Adds a result in the table when a result is selected."
                     },
@@ -8917,7 +8917,7 @@
                         "class": "Appui\/Search",
                         "text": "updateSearch",
                         "value": "updateSearch",
-                        "lastmod": 1649990259,
+                        "lastmod": 1653708258,
                         "url": "bbn-php\/doc\/method\/Appui\/Search\/updateSearch",
                         "desc": ""
                     }
@@ -10092,7 +10092,7 @@
                 "value": "Compiler",
                 "text": "Compiler",
                 "url": "bbn-php\/doc\/class\/Cdn\/Compiler",
-                "lastmod": 1648014990,
+                "lastmod": 1653832104,
                 "desc": "PHP version 7",
                 "items": [
                     {
@@ -10100,7 +10100,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/__construct",
                         "desc": "Constructor."
                     },
@@ -10109,7 +10109,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "compile",
                         "value": "compile",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/compile",
                         "desc": "Returns an array of compiled codes based on a list of files."
                     },
@@ -10118,7 +10118,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "cssContent",
                         "value": "cssContent",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/cssContent",
                         "desc": "Returns a string with javascript including the given CSS content in the head of the document."
                     },
@@ -10127,7 +10127,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "cssLinks",
                         "value": "cssLinks",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/cssLinks",
                         "desc": "Returns a javascript string including css files."
                     },
@@ -10136,7 +10136,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "getContent",
                         "value": "getContent",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/getContent",
                         "desc": "Returns the content of a file or a group of files,"
                     },
@@ -10145,7 +10145,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "groupCompile",
                         "value": "groupCompile",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/groupCompile",
                         "desc": "Compiles together a group of files and returns the result as an array."
                     },
@@ -10154,7 +10154,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "hasLinks",
                         "value": "hasLinks",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/hasLinks",
                         "desc": "Returns true if the given css code contains url parameters."
                     },
@@ -10163,7 +10163,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "jsLinks",
                         "value": "jsLinks",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/jsLinks",
                         "desc": "Returns a javascript string invoking other javascript files."
                     },
@@ -10172,7 +10172,7 @@
                         "class": "Cdn\/Compiler",
                         "text": "minify",
                         "value": "minify",
-                        "lastmod": 1648014990,
+                        "lastmod": 1653832104,
                         "url": "bbn-php\/doc\/method\/Cdn\/Compiler\/minify",
                         "desc": "Minify the given string in the given lang (js or css)."
                     }
@@ -19048,7 +19048,7 @@
                 "value": "Controller",
                 "text": "Controller",
                 "url": "bbn-php\/doc\/class\/Mvc\/Controller",
-                "lastmod": 1647745609,
+                "lastmod": 1653707442,
                 "desc": "The MVC class from which the controller is called",
                 "items": [
                     {
@@ -19056,7 +19056,7 @@
                         "class": "Mvc\/Controller",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/__construct",
                         "desc": "This will call the initial build a new instance."
                     },
@@ -19065,7 +19065,7 @@
                         "class": "Mvc\/Controller",
                         "text": "action",
                         "value": "action",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/action",
                         "desc": "Merges post data and result array witt the current data"
                     },
@@ -19074,7 +19074,7 @@
                         "class": "Mvc\/Controller",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/add",
                         "desc": "Returns a new Controller instance with the given arguments."
                     },
@@ -19083,7 +19083,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addAuthorizedRoute",
                         "value": "addAuthorizedRoute",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addAuthorizedRoute",
                         "desc": "Add a route to authorized routes list if not already exists."
                     },
@@ -19092,7 +19092,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addCss",
                         "value": "addCss",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addCss",
                         "desc": "This will get a CSS view encapsulated in a scoped style tag and add it to the output object."
                     },
@@ -19101,7 +19101,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addData",
                         "value": "addData",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addData",
                         "desc": "Merges the existing data if there is with this one. Chainable."
                     },
@@ -19110,7 +19110,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addInc",
                         "value": "addInc",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addInc",
                         "desc": "Adds a property to the MVC object inc if it has not been declared."
                     },
@@ -19119,7 +19119,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addJs",
                         "value": "addJs",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addJs",
                         "desc": "This will add a javascript view from a file path to $this->obj->script"
                     },
@@ -19128,7 +19128,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addJsGroup",
                         "value": "addJsGroup",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addJsGroup",
                         "desc": "This will add a javascript view from a directory path or an array of files to $this->obj->script"
                     },
@@ -19137,7 +19137,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addLess",
                         "value": "addLess",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addLess",
                         "desc": "This will get and compile a LESS view encapsulated in a scoped style tag and add it to the output object."
                     },
@@ -19146,7 +19146,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addScript",
                         "value": "addScript",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addScript",
                         "desc": "This will add the given string to the script property, and create it if needed. Chainable"
                     },
@@ -19155,7 +19155,7 @@
                         "class": "Mvc\/Controller",
                         "text": "addToObj",
                         "value": "addToObj",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/addToObj",
                         "desc": "Creates a new Controller instance and merges it's object with the existing one."
                     },
@@ -19164,7 +19164,7 @@
                         "class": "Mvc\/Controller",
                         "text": "cachedAction",
                         "value": "cachedAction",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/cachedAction",
                         "desc": "Merges post data and result array witt the current data"
                     },
@@ -19173,7 +19173,7 @@
                         "class": "Mvc\/Controller",
                         "text": "combo",
                         "value": "combo",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/combo",
                         "desc": "Compile and echoes all the views with the given data"
                     },
@@ -19182,7 +19182,7 @@
                         "class": "Mvc\/Controller",
                         "text": "customPluginModel",
                         "value": "customPluginModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/customPluginModel",
                         "desc": "Retrieves a view of a custom plugin."
                     },
@@ -19191,7 +19191,7 @@
                         "class": "Mvc\/Controller",
                         "text": "customPluginView",
                         "value": "customPluginView",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/customPluginView",
                         "desc": "Retrieves a view of a custom plugin."
                     },
@@ -19200,7 +19200,7 @@
                         "class": "Mvc\/Controller",
                         "text": "deleteCachedModel",
                         "value": "deleteCachedModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/deleteCachedModel",
                         "desc": "This will delete the cached model. There is no order for the arguments."
                     },
@@ -19209,7 +19209,7 @@
                         "class": "Mvc\/Controller",
                         "text": "exists",
                         "value": "exists",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/exists",
                         "desc": "Checks if the internal path to the controller exists."
                     },
@@ -19218,7 +19218,7 @@
                         "class": "Mvc\/Controller",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/get",
                         "desc": "Returns the output object."
                     },
@@ -19227,7 +19227,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getAll",
                         "value": "getAll",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getAll",
                         "desc": ""
                     },
@@ -19236,7 +19236,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getCachedModel",
                         "value": "getCachedModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getCachedModel",
                         "desc": "This will get the cached model. There is no order for the arguments."
                     },
@@ -19245,7 +19245,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getComponent",
                         "value": "getComponent",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getComponent",
                         "desc": "Returns a component with it's content from the given name if exists and null otherwise."
                     },
@@ -19254,7 +19254,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getContent",
                         "value": "getContent",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getContent",
                         "desc": "This will get a the content of a file located within the data path"
                     },
@@ -19263,7 +19263,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getController",
                         "value": "getController",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getController",
                         "desc": "Returns the current controller's file's name."
                     },
@@ -19272,7 +19272,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getCss",
                         "value": "getCss",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getCss",
                         "desc": "This will get a CSS view encapsulated in a scoped style tag."
                     },
@@ -19281,7 +19281,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getCurrentDir",
                         "value": "getCurrentDir",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getCurrentDir",
                         "desc": "Returns the current controller's directory name."
                     },
@@ -19290,7 +19290,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getCustomModelGroup",
                         "value": "getCustomModelGroup",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getCustomModelGroup",
                         "desc": ""
                     },
@@ -19299,7 +19299,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getDir",
                         "value": "getDir",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getDir",
                         "desc": "This will return the path to the directory of the current controller"
                     },
@@ -19308,7 +19308,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getExternalView",
                         "value": "getExternalView",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getExternalView",
                         "desc": "This will get a view from a different root."
                     },
@@ -19317,7 +19317,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getJs",
                         "value": "getJs",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getJs",
                         "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML"
                     },
@@ -19326,7 +19326,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getJsGroup",
                         "value": "getJsGroup",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getJsGroup",
                         "desc": "This will get a javascript view encapsulated in an anonymous function for embedding in HTML"
                     },
@@ -19335,7 +19335,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getLess",
                         "value": "getLess",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getLess",
                         "desc": "This will get and compile a LESS view encapsulated in a scoped style tag."
                     },
@@ -19344,7 +19344,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getLocalPath",
                         "value": "getLocalPath",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getLocalPath",
                         "desc": "Returns the current controller's path."
                     },
@@ -19353,7 +19353,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getLocalRoute",
                         "value": "getLocalRoute",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getLocalRoute",
                         "desc": "Returns the current controller's route."
                     },
@@ -19362,7 +19362,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getMode",
                         "value": "getMode",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getMode",
                         "desc": ""
                     },
@@ -19371,7 +19371,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getModel",
                         "value": "getModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getModel",
                         "desc": "This will get the model. There is no order for the arguments."
                     },
@@ -19380,7 +19380,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getModelGroup",
                         "value": "getModelGroup",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getModelGroup",
                         "desc": ""
                     },
@@ -19389,7 +19389,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getObjectModel",
                         "value": "getObjectModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getObjectModel",
                         "desc": ""
                     },
@@ -19398,7 +19398,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPath",
                         "value": "getPath",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPath",
                         "desc": "Returns the internal path to the controller."
                     },
@@ -19407,7 +19407,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPlugin",
                         "value": "getPlugin",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPlugin",
                         "desc": "If the controller is inside a plugin it will its name and null otherwise."
                     },
@@ -19416,7 +19416,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPluginFromComponent",
                         "value": "getPluginFromComponent",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginFromComponent",
                         "desc": "Retrieves the plugin's name from the component's name if any"
                     },
@@ -19425,7 +19425,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPluginModel",
                         "value": "getPluginModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginModel",
                         "desc": "Retrieves a model of a the plugin."
                     },
@@ -19434,7 +19434,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPluginView",
                         "value": "getPluginView",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginView",
                         "desc": "This will get a view."
                     },
@@ -19443,7 +19443,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPluginViews",
                         "value": "getPluginViews",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPluginViews",
                         "desc": "Gets views for html, css and js."
                     },
@@ -19452,7 +19452,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getPrepath",
                         "value": "getPrepath",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getPrepath",
                         "desc": ""
                     },
@@ -19461,7 +19461,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getRendered",
                         "value": "getRendered",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getRendered",
                         "desc": "Returns the rendered result from the current mvc if successfully processed"
                     },
@@ -19470,7 +19470,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getRequest",
                         "value": "getRequest",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getRequest",
                         "desc": "Returns the current controller's route, i.e as demanded by the client."
                     },
@@ -19479,7 +19479,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getResult",
                         "value": "getResult",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getResult",
                         "desc": ""
                     },
@@ -19488,7 +19488,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getRoot",
                         "value": "getRoot",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getRoot",
                         "desc": "Returns the root of the application in the URL (base href)."
                     },
@@ -19497,7 +19497,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getScript",
                         "value": "getScript",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getScript",
                         "desc": "Returns the rendered script result from the current mvc if successfully processed"
                     },
@@ -19506,7 +19506,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getSubpluginModel",
                         "value": "getSubpluginModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getSubpluginModel",
                         "desc": "Get a sub plugin model (a plugin inside the plugin directory of another plugin)."
                     },
@@ -19515,7 +19515,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getUrl",
                         "value": "getUrl",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getUrl",
                         "desc": "Get the request url."
                     },
@@ -19524,7 +19524,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getView",
                         "value": "getView",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getView",
                         "desc": "This will get a view."
                     },
@@ -19533,7 +19533,7 @@
                         "class": "Mvc\/Controller",
                         "text": "getViewGroup",
                         "value": "getViewGroup",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/getViewGroup",
                         "desc": "This will get a view for embedding in HTML."
                     },
@@ -19542,7 +19542,7 @@
                         "class": "Mvc\/Controller",
                         "text": "hasArguments",
                         "value": "hasArguments",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasArguments",
                         "desc": ""
                     },
@@ -19551,7 +19551,7 @@
                         "class": "Mvc\/Controller",
                         "text": "hasBeenRerouted",
                         "value": "hasBeenRerouted",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasBeenRerouted",
                         "desc": "Checks if the controller has been rerouted"
                     },
@@ -19560,7 +19560,7 @@
                         "class": "Mvc\/Controller",
                         "text": "hasContent",
                         "value": "hasContent",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasContent",
                         "desc": "Checks if there is any HTML content in the object"
                     },
@@ -19569,7 +19569,7 @@
                         "class": "Mvc\/Controller",
                         "text": "hasData",
                         "value": "hasData",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasData",
                         "desc": "Checks if data exists or if a specific index exists in the data"
                     },
@@ -19578,7 +19578,7 @@
                         "class": "Mvc\/Controller",
                         "text": "hasSubpluginModel",
                         "value": "hasSubpluginModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/hasSubpluginModel",
                         "desc": "Returns true if the subplugin model exists."
                     },
@@ -19587,7 +19587,7 @@
                         "class": "Mvc\/Controller",
                         "text": "incl",
                         "value": "incl",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/incl",
                         "desc": "This will include a file from within the controller's path. Chainable"
                     },
@@ -19596,7 +19596,7 @@
                         "class": "Mvc\/Controller",
                         "text": "includeController",
                         "value": "includeController",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/includeController",
                         "desc": ""
                     },
@@ -19605,7 +19605,7 @@
                         "class": "Mvc\/Controller",
                         "text": "isAuthorizedRoute",
                         "value": "isAuthorizedRoute",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/isAuthorizedRoute",
                         "desc": "Checks if a route is authorized."
                     },
@@ -19614,7 +19614,7 @@
                         "class": "Mvc\/Controller",
                         "text": "isCli",
                         "value": "isCli",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/isCli",
                         "desc": "Returns true if called from CLI\/Cron, false otherwise"
                     },
@@ -19623,7 +19623,7 @@
                         "class": "Mvc\/Controller",
                         "text": "jsData",
                         "value": "jsData",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/jsData",
                         "desc": "Sets or add to the output object data property from an array."
                     },
@@ -19632,7 +19632,7 @@
                         "class": "Mvc\/Controller",
                         "text": "modelExists",
                         "value": "modelExists",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/modelExists",
                         "desc": "Checks whether the given model exists or not."
                     },
@@ -19641,7 +19641,7 @@
                         "class": "Mvc\/Controller",
                         "text": "process",
                         "value": "process",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/process",
                         "desc": "This will launch the controller in a new function."
                     },
@@ -19650,7 +19650,7 @@
                         "class": "Mvc\/Controller",
                         "text": "registerPluginClasses",
                         "value": "registerPluginClasses",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/registerPluginClasses",
                         "desc": "Register a plugin class using spl_autoload."
                     },
@@ -19659,7 +19659,7 @@
                         "class": "Mvc\/Controller",
                         "text": "render",
                         "value": "render",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/render",
                         "desc": "This directly renders content with arbitrary values using the existing Mustache engine."
                     },
@@ -19668,7 +19668,7 @@
                         "class": "Mvc\/Controller",
                         "text": "reroute",
                         "value": "reroute",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/reroute",
                         "desc": "This will reroute a controller to another one seamlessly."
                     },
@@ -19677,7 +19677,7 @@
                         "class": "Mvc\/Controller",
                         "text": "reset",
                         "value": "reset",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/reset",
                         "desc": ""
                     },
@@ -19686,7 +19686,7 @@
                         "class": "Mvc\/Controller",
                         "text": "routeComponent",
                         "value": "routeComponent",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/routeComponent",
                         "desc": "Returns a component from the given name if exists and null otherwise."
                     },
@@ -19695,7 +19695,7 @@
                         "class": "Mvc\/Controller",
                         "text": "sayRoot",
                         "value": "sayRoot",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/sayRoot",
                         "desc": "Returns the current controller's root directory."
                     },
@@ -19704,7 +19704,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setCachedModel",
                         "value": "setCachedModel",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setCachedModel",
                         "desc": "This will set the cached model. There is no order for the arguments."
                     },
@@ -19713,7 +19713,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setColor",
                         "value": "setColor",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setColor",
                         "desc": "Sets background and font colors on the output object."
                     },
@@ -19722,7 +19722,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setData",
                         "value": "setData",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setData",
                         "desc": "Sets the data. Chainable. Should be useless as $this->data is public. Chainable."
                     },
@@ -19731,7 +19731,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setIcon",
                         "value": "setIcon",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setIcon",
                         "desc": "Sets the icon on the output object."
                     },
@@ -19740,7 +19740,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setMode",
                         "value": "setMode",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setMode",
                         "desc": ""
                     },
@@ -19749,7 +19749,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setObj",
                         "value": "setObj",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setObj",
                         "desc": "Adds to the output object from an array."
                     },
@@ -19758,7 +19758,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setPrepath",
                         "value": "setPrepath",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setPrepath",
                         "desc": ""
                     },
@@ -19767,7 +19767,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setRoot",
                         "value": "setRoot",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setRoot",
                         "desc": "Sets the root of the application in the URL (base href)."
                     },
@@ -19776,7 +19776,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setTitle",
                         "value": "setTitle",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setTitle",
                         "desc": "Sets the title on the output object."
                     },
@@ -19785,7 +19785,7 @@
                         "class": "Mvc\/Controller",
                         "text": "setUrl",
                         "value": "setUrl",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/setUrl",
                         "desc": "Sets the url on the output object."
                     },
@@ -19794,7 +19794,7 @@
                         "class": "Mvc\/Controller",
                         "text": "transform",
                         "value": "transform",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/transform",
                         "desc": "Transform the output object using a callback"
                     },
@@ -19803,7 +19803,7 @@
                         "class": "Mvc\/Controller",
                         "text": "viewExists",
                         "value": "viewExists",
-                        "lastmod": 1647745609,
+                        "lastmod": 1653707442,
                         "url": "bbn-php\/doc\/method\/Mvc\/Controller\/viewExists",
                         "desc": "Checks whether the given view exists or not."
                     }
@@ -19977,7 +19977,7 @@
                 "value": "Model",
                 "text": "Model",
                 "url": "bbn-php\/doc\/class\/Mvc\/Model",
-                "lastmod": 1641998169,
+                "lastmod": 1653707201,
                 "desc": "Model View Controller Class",
                 "items": [
                     {
@@ -19985,7 +19985,7 @@
                         "class": "Mvc\/Model",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/__construct",
                         "desc": "Models are always recreated and reincluded, even if they have from the same path"
                     },
@@ -19994,7 +19994,7 @@
                         "class": "Mvc\/Model",
                         "text": "addData",
                         "value": "addData",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/addData",
                         "desc": "Merges the existing data if there is with this one. Chainable."
                     },
@@ -20003,7 +20003,7 @@
                         "class": "Mvc\/Model",
                         "text": "addInc",
                         "value": "addInc",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/addInc",
                         "desc": "Adds a property to the MVC object inc if it has not been declared."
                     },
@@ -20012,7 +20012,7 @@
                         "class": "Mvc\/Model",
                         "text": "applyLocale",
                         "value": "applyLocale",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/applyLocale",
                         "desc": ""
                     },
@@ -20021,7 +20021,7 @@
                         "class": "Mvc\/Model",
                         "text": "checkAction",
                         "value": "checkAction",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/checkAction",
                         "desc": ""
                     },
@@ -20030,7 +20030,7 @@
                         "class": "Mvc\/Model",
                         "text": "deleteCache",
                         "value": "deleteCache",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/deleteCache",
                         "desc": "Deletes a cache with the given data."
                     },
@@ -20039,7 +20039,7 @@
                         "class": "Mvc\/Model",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/get",
                         "desc": ""
                     },
@@ -20048,7 +20048,7 @@
                         "class": "Mvc\/Model",
                         "text": "getCachedModel",
                         "value": "getCachedModel",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getCachedModel",
                         "desc": "This will get the cached model. There is no order for the arguments."
                     },
@@ -20057,7 +20057,7 @@
                         "class": "Mvc\/Model",
                         "text": "getContent",
                         "value": "getContent",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getContent",
                         "desc": "This will get a the content of a file located within the controller data path."
                     },
@@ -20066,7 +20066,7 @@
                         "class": "Mvc\/Model",
                         "text": "getControllerPath",
                         "value": "getControllerPath",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getControllerPath",
                         "desc": ""
                     },
@@ -20075,7 +20075,7 @@
                         "class": "Mvc\/Model",
                         "text": "getCustomModelGroup",
                         "value": "getCustomModelGroup",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getCustomModelGroup",
                         "desc": ""
                     },
@@ -20084,7 +20084,7 @@
                         "class": "Mvc\/Model",
                         "text": "getDataError",
                         "value": "getDataError",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getDataError",
                         "desc": ""
                     },
@@ -20093,7 +20093,7 @@
                         "class": "Mvc\/Model",
                         "text": "getFromCache",
                         "value": "getFromCache",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getFromCache",
                         "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the closure."
                     },
@@ -20102,7 +20102,7 @@
                         "class": "Mvc\/Model",
                         "text": "getModel",
                         "value": "getModel",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getModel",
                         "desc": "This will get the model. There is no order for the arguments."
                     },
@@ -20111,7 +20111,7 @@
                         "class": "Mvc\/Model",
                         "text": "getPluginModel",
                         "value": "getPluginModel",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getPluginModel",
                         "desc": "Retrieves a model of a the plugin."
                     },
@@ -20120,7 +20120,7 @@
                         "class": "Mvc\/Model",
                         "text": "getSetFromCache",
                         "value": "getSetFromCache",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getSetFromCache",
                         "desc": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function."
                     },
@@ -20129,7 +20129,7 @@
                         "class": "Mvc\/Model",
                         "text": "getSubpluginModel",
                         "value": "getSubpluginModel",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/getSubpluginModel",
                         "desc": "Get a sub plugin model (a plugin inside the plugin directory of another plugin)."
                     },
@@ -20138,7 +20138,7 @@
                         "class": "Mvc\/Model",
                         "text": "hasData",
                         "value": "hasData",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasData",
                         "desc": "Checks if data exists or if a specific index exists in the data"
                     },
@@ -20147,7 +20147,7 @@
                         "class": "Mvc\/Model",
                         "text": "hasPlugin",
                         "value": "hasPlugin",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasPlugin",
                         "desc": "Returns true if plugin exists and false otherwise."
                     },
@@ -20156,7 +20156,7 @@
                         "class": "Mvc\/Model",
                         "text": "hasSubpluginModel",
                         "value": "hasSubpluginModel",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasSubpluginModel",
                         "desc": "Returns true if the subplugin model exists."
                     },
@@ -20165,7 +20165,7 @@
                         "class": "Mvc\/Model",
                         "text": "hasVar",
                         "value": "hasVar",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasVar",
                         "desc": ""
                     },
@@ -20174,7 +20174,7 @@
                         "class": "Mvc\/Model",
                         "text": "hasVars",
                         "value": "hasVars",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/hasVars",
                         "desc": ""
                     },
@@ -20183,7 +20183,7 @@
                         "class": "Mvc\/Model",
                         "text": "isControlledBy",
                         "value": "isControlledBy",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/isControlledBy",
                         "desc": ""
                     },
@@ -20192,7 +20192,7 @@
                         "class": "Mvc\/Model",
                         "text": "isPlugin",
                         "value": "isPlugin",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/isPlugin",
                         "desc": "Returns true if plugin exists and false otherwise."
                     },
@@ -20201,7 +20201,7 @@
                         "class": "Mvc\/Model",
                         "text": "pluginPath",
                         "value": "pluginPath",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/pluginPath",
                         "desc": "Returns the path of the given plugin."
                     },
@@ -20210,7 +20210,7 @@
                         "class": "Mvc\/Model",
                         "text": "pluginUrl",
                         "value": "pluginUrl",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/pluginUrl",
                         "desc": "Returns the URL part of the given plugin."
                     },
@@ -20219,7 +20219,7 @@
                         "class": "Mvc\/Model",
                         "text": "registerPluginClasses",
                         "value": "registerPluginClasses",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/registerPluginClasses",
                         "desc": ""
                     },
@@ -20228,7 +20228,7 @@
                         "class": "Mvc\/Model",
                         "text": "setCache",
                         "value": "setCache",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/setCache",
                         "desc": "Sets a cache from the given data."
                     },
@@ -20237,7 +20237,7 @@
                         "class": "Mvc\/Model",
                         "text": "setData",
                         "value": "setData",
-                        "lastmod": 1641998169,
+                        "lastmod": 1653707201,
                         "url": "bbn-php\/doc\/method\/Mvc\/Model\/setData",
                         "desc": "Sets the data. Chainable. Should be useless as $this->data is public. Chainable."
                     }
@@ -20285,7 +20285,7 @@
                 "value": "Router",
                 "text": "Router",
                 "url": "bbn-php\/doc\/class\/Mvc\/Router",
-                "lastmod": 1639452564,
+                "lastmod": 1653708359,
                 "desc": "Manages the translations berween the URLs requested and the app filesystem.",
                 "items": [
                     {
@@ -20293,7 +20293,7 @@
                         "class": "Mvc\/Router",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/__construct",
                         "desc": "Router constructor."
                     },
@@ -20302,7 +20302,7 @@
                         "class": "Mvc\/Router",
                         "text": "fetchCustomDir",
                         "value": "fetchCustomDir",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/fetchCustomDir",
                         "desc": ""
                     },
@@ -20311,7 +20311,7 @@
                         "class": "Mvc\/Router",
                         "text": "fetchDir",
                         "value": "fetchDir",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/fetchDir",
                         "desc": ""
                     },
@@ -20320,7 +20320,7 @@
                         "class": "Mvc\/Router",
                         "text": "getCheckerFile",
                         "value": "getCheckerFile",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/getCheckerFile",
                         "desc": "Gets the name that the checker file should have for the given known route."
                     },
@@ -20329,7 +20329,7 @@
                         "class": "Mvc\/Router",
                         "text": "getLocaleDomain",
                         "value": "getLocaleDomain",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/getLocaleDomain",
                         "desc": ""
                     },
@@ -20338,7 +20338,7 @@
                         "class": "Mvc\/Router",
                         "text": "getPluginFromComponent",
                         "value": "getPluginFromComponent",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/getPluginFromComponent",
                         "desc": "Retrieves the plugin's name from the component's name if any."
                     },
@@ -20347,7 +20347,7 @@
                         "class": "Mvc\/Router",
                         "text": "getPrepath",
                         "value": "getPrepath",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/getPrepath",
                         "desc": ""
                     },
@@ -20356,7 +20356,7 @@
                         "class": "Mvc\/Router",
                         "text": "getRoutes",
                         "value": "getRoutes",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/getRoutes",
                         "desc": ""
                     },
@@ -20365,7 +20365,7 @@
                         "class": "Mvc\/Router",
                         "text": "isMode",
                         "value": "isMode",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/isMode",
                         "desc": "Checks whether The given string is a valid mode."
                     },
@@ -20374,7 +20374,7 @@
                         "class": "Mvc\/Router",
                         "text": "parse",
                         "value": "parse",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/parse",
                         "desc": "Removes trailing slashes."
                     },
@@ -20383,7 +20383,7 @@
                         "class": "Mvc\/Router",
                         "text": "reset",
                         "value": "reset",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/reset",
                         "desc": "Resets the full path in the mvc\/mode of an external app (plugin)."
                     },
@@ -20392,7 +20392,7 @@
                         "class": "Mvc\/Router",
                         "text": "route",
                         "value": "route",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/route",
                         "desc": ""
                     },
@@ -20401,7 +20401,7 @@
                         "class": "Mvc\/Router",
                         "text": "routeComponent",
                         "value": "routeComponent",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/routeComponent",
                         "desc": ""
                     },
@@ -20410,7 +20410,7 @@
                         "class": "Mvc\/Router",
                         "text": "routeCustomPlugin",
                         "value": "routeCustomPlugin",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/routeCustomPlugin",
                         "desc": ""
                     },
@@ -20419,7 +20419,7 @@
                         "class": "Mvc\/Router",
                         "text": "routeSubplugin",
                         "value": "routeSubplugin",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/routeSubplugin",
                         "desc": ""
                     },
@@ -20428,7 +20428,7 @@
                         "class": "Mvc\/Router",
                         "text": "setPrepath",
                         "value": "setPrepath",
-                        "lastmod": 1639452564,
+                        "lastmod": 1653708359,
                         "url": "bbn-php\/doc\/method\/Mvc\/Router\/setPrepath",
                         "desc": ""
                     }
@@ -21045,17 +21045,17 @@
                 "value": "Cart",
                 "text": "Cart",
                 "url": "bbn-php\/doc\/class\/Shop\/Cart",
-                "lastmod": 1645619591,
-                "desc": "",
+                "lastmod": 1653581907,
+                "desc": "Cart class",
                 "items": [
                     {
                         "type": "method",
                         "class": "Shop\/Cart",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1645619591,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Cart\/__construct",
-                        "desc": ""
+                        "desc": "Constructor"
                     }
                 ]
             },
@@ -21083,7 +21083,7 @@
                 "value": "Product",
                 "text": "Product",
                 "url": "bbn-php\/doc\/class\/Shop\/Product",
-                "lastmod": 1652064125,
+                "lastmod": 1653581907,
                 "desc": "",
                 "items": [
                     {
@@ -21091,7 +21091,7 @@
                         "class": "Shop\/Product",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/__construct",
                         "desc": ""
                     },
@@ -21100,7 +21100,7 @@
                         "class": "Shop\/Product",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/add",
                         "desc": ""
                     },
@@ -21109,7 +21109,7 @@
                         "class": "Shop\/Product",
                         "text": "edit",
                         "value": "edit",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/edit",
                         "desc": ""
                     },
@@ -21118,7 +21118,7 @@
                         "class": "Shop\/Product",
                         "text": "exists",
                         "value": "exists",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/exists",
                         "desc": ""
                     },
@@ -21127,7 +21127,7 @@
                         "class": "Shop\/Product",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/get",
                         "desc": ""
                     },
@@ -21136,7 +21136,7 @@
                         "class": "Shop\/Product",
                         "text": "getByUrl",
                         "value": "getByUrl",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/getByUrl",
                         "desc": ""
                     },
@@ -21145,7 +21145,7 @@
                         "class": "Shop\/Product",
                         "text": "getEditions",
                         "value": "getEditions",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/getEditions",
                         "desc": ""
                     },
@@ -21154,7 +21154,7 @@
                         "class": "Shop\/Product",
                         "text": "getTypeNote",
                         "value": "getTypeNote",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/getTypeNote",
                         "desc": ""
                     },
@@ -21163,7 +21163,7 @@
                         "class": "Shop\/Product",
                         "text": "getTypes",
                         "value": "getTypes",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/getTypes",
                         "desc": ""
                     },
@@ -21172,7 +21172,7 @@
                         "class": "Shop\/Product",
                         "text": "getVariants",
                         "value": "getVariants",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/getVariants",
                         "desc": ""
                     },
@@ -21181,7 +21181,7 @@
                         "class": "Shop\/Product",
                         "text": "remove",
                         "value": "remove",
-                        "lastmod": 1652064125,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Product\/remove",
                         "desc": ""
                     }
@@ -21192,7 +21192,7 @@
                 "value": "Provider",
                 "text": "Provider",
                 "url": "bbn-php\/doc\/class\/Shop\/Provider",
-                "lastmod": 1650149211,
+                "lastmod": 1653581907,
                 "desc": "",
                 "items": [
                     {
@@ -21200,7 +21200,7 @@
                         "class": "Shop\/Provider",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1650149211,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Provider\/__construct",
                         "desc": ""
                     },
@@ -21209,7 +21209,7 @@
                         "class": "Shop\/Provider",
                         "text": "add",
                         "value": "add",
-                        "lastmod": 1650149211,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Provider\/add",
                         "desc": ""
                     },
@@ -21218,7 +21218,7 @@
                         "class": "Shop\/Provider",
                         "text": "edit",
                         "value": "edit",
-                        "lastmod": 1650149211,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Provider\/edit",
                         "desc": ""
                     },
@@ -21227,7 +21227,7 @@
                         "class": "Shop\/Provider",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1650149211,
+                        "lastmod": 1653581907,
                         "url": "bbn-php\/doc\/method\/Shop\/Provider\/get",
                         "desc": ""
                     }
@@ -25775,7 +25775,7 @@
         "value": "Mvc",
         "text": "Mvc",
         "url": "bbn-php\/doc\/class\/Mvc",
-        "lastmod": 1639504392,
+        "lastmod": 1653707646,
         "desc": "Model View Controller Class.",
         "items": [
             {
@@ -25783,7 +25783,7 @@
                 "class": "Mvc",
                 "text": "__construct",
                 "value": "__construct",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/__construct",
                 "desc": "This should be called only once from within the app"
             },
@@ -25792,7 +25792,7 @@
                 "class": "Mvc",
                 "text": "addAuthorizedRoute",
                 "value": "addAuthorizedRoute",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/addAuthorizedRoute",
                 "desc": "Add a route to authorized routes list if not already exists."
             },
@@ -25801,7 +25801,7 @@
                 "class": "Mvc",
                 "text": "addForbiddenRoute",
                 "value": "addForbiddenRoute",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/addForbiddenRoute",
                 "desc": ""
             },
@@ -25810,7 +25810,7 @@
                 "class": "Mvc",
                 "text": "addInc",
                 "value": "addInc",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/addInc",
                 "desc": "Adds a property to the MVC object inc if it has not been declared."
             },
@@ -25819,7 +25819,7 @@
                 "class": "Mvc",
                 "text": "addToViews",
                 "value": "addToViews",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/addToViews",
                 "desc": ""
             },
@@ -25828,7 +25828,7 @@
                 "class": "Mvc",
                 "text": "check",
                 "value": "check",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/check",
                 "desc": "Checks whether a corresponding file has been found or not."
             },
@@ -25837,7 +25837,7 @@
                 "class": "Mvc",
                 "text": "customPluginModel",
                 "value": "customPluginModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/customPluginModel",
                 "desc": "Retrieves a model of a custom plugin."
             },
@@ -25846,7 +25846,7 @@
                 "class": "Mvc",
                 "text": "customPluginView",
                 "value": "customPluginView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/customPluginView",
                 "desc": "Retrieves a view of a custom plugin."
             },
@@ -25855,7 +25855,7 @@
                 "class": "Mvc",
                 "text": "debug",
                 "value": "debug",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/debug",
                 "desc": ""
             },
@@ -25864,7 +25864,7 @@
                 "class": "Mvc",
                 "text": "deleteCachedModel",
                 "value": "deleteCachedModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/deleteCachedModel",
                 "desc": "This will unset the model in cache"
             },
@@ -25873,7 +25873,7 @@
                 "class": "Mvc",
                 "text": "fetchCustomDir",
                 "value": "fetchCustomDir",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/fetchCustomDir",
                 "desc": ""
             },
@@ -25882,7 +25882,7 @@
                 "class": "Mvc",
                 "text": "fetchDir",
                 "value": "fetchDir",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/fetchDir",
                 "desc": ""
             },
@@ -25891,7 +25891,7 @@
                 "class": "Mvc",
                 "text": "getAppName",
                 "value": "getAppName",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getAppName",
                 "desc": "Returns the current app's name."
             },
@@ -25900,7 +25900,7 @@
                 "class": "Mvc",
                 "text": "getAppPath",
                 "value": "getAppPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getAppPath",
                 "desc": "Returns the current app's full path (with src\/ at the end if raw if false)."
             },
@@ -25909,7 +25909,7 @@
                 "class": "Mvc",
                 "text": "getAppPrefix",
                 "value": "getAppPrefix",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getAppPrefix",
                 "desc": "Returns the current app's prefix if any."
             },
@@ -25918,7 +25918,7 @@
                 "class": "Mvc",
                 "text": "getCachedModel",
                 "value": "getCachedModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getCachedModel",
                 "desc": "This will get the model as it is in cache if any and otherwise will save it in cache then return it"
             },
@@ -25927,7 +25927,7 @@
                 "class": "Mvc",
                 "text": "getCachePath",
                 "value": "getCachePath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getCachePath",
                 "desc": "Returns ths full path of the cache"
             },
@@ -25936,7 +25936,7 @@
                 "class": "Mvc",
                 "text": "getContentPath",
                 "value": "getContentPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getContentPath",
                 "desc": "Returns the full path of the content data; if plugin is provided gives the path for the plugin's content data."
             },
@@ -25945,7 +25945,7 @@
                 "class": "Mvc",
                 "text": "getCookie",
                 "value": "getCookie",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getCookie",
                 "desc": ""
             },
@@ -25954,7 +25954,7 @@
                 "class": "Mvc",
                 "text": "getCurPath",
                 "value": "getCurPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getCurPath",
                 "desc": "Returns the web public path of the app."
             },
@@ -25963,7 +25963,7 @@
                 "class": "Mvc",
                 "text": "getCustomModelGroup",
                 "value": "getCustomModelGroup",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getCustomModelGroup",
                 "desc": ""
             },
@@ -25972,7 +25972,7 @@
                 "class": "Mvc",
                 "text": "getDataPath",
                 "value": "getDataPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getDataPath",
                 "desc": "Returns the full path of the data; if plugin is provided gives the path for the plugin's data."
             },
@@ -25981,7 +25981,7 @@
                 "class": "Mvc",
                 "text": "getDb",
                 "value": "getDb",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getDb",
                 "desc": ""
             },
@@ -25990,7 +25990,7 @@
                 "class": "Mvc",
                 "text": "getDebug",
                 "value": "getDebug",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getDebug",
                 "desc": ""
             },
@@ -25999,7 +25999,7 @@
                 "class": "Mvc",
                 "text": "getExternalView",
                 "value": "getExternalView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getExternalView",
                 "desc": "This will get a view from a different root."
             },
@@ -26008,7 +26008,7 @@
                 "class": "Mvc",
                 "text": "getFile",
                 "value": "getFile",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getFile",
                 "desc": ""
             },
@@ -26017,7 +26017,7 @@
                 "class": "Mvc",
                 "text": "getFiles",
                 "value": "getFiles",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getFiles",
                 "desc": ""
             },
@@ -26026,7 +26026,7 @@
                 "class": "Mvc",
                 "text": "getGet",
                 "value": "getGet",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getGet",
                 "desc": ""
             },
@@ -26035,7 +26035,7 @@
                 "class": "Mvc",
                 "text": "getLibPath",
                 "value": "getLibPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getLibPath",
                 "desc": "Returns the full path of the libraries (vendor folder)."
             },
@@ -26044,7 +26044,7 @@
                 "class": "Mvc",
                 "text": "getLocale",
                 "value": "getLocale",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getLocale",
                 "desc": ""
             },
@@ -26053,7 +26053,7 @@
                 "class": "Mvc",
                 "text": "getLogPath",
                 "value": "getLogPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getLogPath",
                 "desc": "Returns the full path of the logs."
             },
@@ -26062,7 +26062,7 @@
                 "class": "Mvc",
                 "text": "getMode",
                 "value": "getMode",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getMode",
                 "desc": ""
             },
@@ -26071,7 +26071,7 @@
                 "class": "Mvc",
                 "text": "getModel",
                 "value": "getModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getModel",
                 "desc": "This will get the model; there is no order for the arguments."
             },
@@ -26080,7 +26080,7 @@
                 "class": "Mvc",
                 "text": "getModelGroup",
                 "value": "getModelGroup",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getModelGroup",
                 "desc": ""
             },
@@ -26089,7 +26089,7 @@
                 "class": "Mvc",
                 "text": "getParams",
                 "value": "getParams",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getParams",
                 "desc": ""
             },
@@ -26098,7 +26098,7 @@
                 "class": "Mvc",
                 "text": "getPluginFromComponent",
                 "value": "getPluginFromComponent",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginFromComponent",
                 "desc": "Retrieves the plugin's name from the component's name if any."
             },
@@ -26107,7 +26107,7 @@
                 "class": "Mvc",
                 "text": "getPluginModel",
                 "value": "getPluginModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginModel",
                 "desc": "An alias for customPluginModel()"
             },
@@ -26116,7 +26116,7 @@
                 "class": "Mvc",
                 "text": "getPluginPath",
                 "value": "getPluginPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginPath",
                 "desc": "Returns the path of the given plugin."
             },
@@ -26125,7 +26125,7 @@
                 "class": "Mvc",
                 "text": "getPlugins",
                 "value": "getPlugins",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPlugins",
                 "desc": ""
             },
@@ -26134,7 +26134,7 @@
                 "class": "Mvc",
                 "text": "getPluginUrl",
                 "value": "getPluginUrl",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginUrl",
                 "desc": "Returns the URL part of the given plugin."
             },
@@ -26143,7 +26143,7 @@
                 "class": "Mvc",
                 "text": "getPluginView",
                 "value": "getPluginView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPluginView",
                 "desc": "This will get a view."
             },
@@ -26152,7 +26152,7 @@
                 "class": "Mvc",
                 "text": "getPost",
                 "value": "getPost",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPost",
                 "desc": ""
             },
@@ -26161,7 +26161,7 @@
                 "class": "Mvc",
                 "text": "getPrepath",
                 "value": "getPrepath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getPrepath",
                 "desc": ""
             },
@@ -26170,7 +26170,7 @@
                 "class": "Mvc",
                 "text": "getRequest",
                 "value": "getRequest",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getRequest",
                 "desc": ""
             },
@@ -26179,7 +26179,7 @@
                 "class": "Mvc",
                 "text": "getRoot",
                 "value": "getRoot",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getRoot",
                 "desc": "Returns the root of the application in the URL (base href)."
             },
@@ -26188,7 +26188,7 @@
                 "class": "Mvc",
                 "text": "getRoute",
                 "value": "getRoute",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getRoute",
                 "desc": ""
             },
@@ -26197,7 +26197,7 @@
                 "class": "Mvc",
                 "text": "getRoutes",
                 "value": "getRoutes",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getRoutes",
                 "desc": ""
             },
@@ -26206,7 +26206,7 @@
                 "class": "Mvc",
                 "text": "getSubpluginModel",
                 "value": "getSubpluginModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getSubpluginModel",
                 "desc": "An alias for subpluginModel()"
             },
@@ -26215,7 +26215,7 @@
                 "class": "Mvc",
                 "text": "getTmpPath",
                 "value": "getTmpPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getTmpPath",
                 "desc": "Returns the full path of the temp data; if plugin is provided gives the path for the plugin's temp data."
             },
@@ -26224,7 +26224,7 @@
                 "class": "Mvc",
                 "text": "getUrl",
                 "value": "getUrl",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getUrl",
                 "desc": "Get the request url."
             },
@@ -26233,7 +26233,7 @@
                 "class": "Mvc",
                 "text": "getUserDataPath",
                 "value": "getUserDataPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getUserDataPath",
                 "desc": "Returns path for the user's dir"
             },
@@ -26242,7 +26242,7 @@
                 "class": "Mvc",
                 "text": "getUserTmpPath",
                 "value": "getUserTmpPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getUserTmpPath",
                 "desc": "Returns path for the user's temp dir"
             },
@@ -26251,7 +26251,7 @@
                 "class": "Mvc",
                 "text": "getView",
                 "value": "getView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/getView",
                 "desc": "This will get a view."
             },
@@ -26260,7 +26260,7 @@
                 "class": "Mvc",
                 "text": "hasContent",
                 "value": "hasContent",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/hasContent",
                 "desc": "Checks if the controller has content."
             },
@@ -26269,7 +26269,7 @@
                 "class": "Mvc",
                 "text": "hasCustomPLuginModel",
                 "value": "hasCustomPLuginModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/hasCustomPLuginModel",
                 "desc": "Checks if the given plugin model exists"
             },
@@ -26278,7 +26278,7 @@
                 "class": "Mvc",
                 "text": "hasPlugin",
                 "value": "hasPlugin",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/hasPlugin",
                 "desc": ""
             },
@@ -26287,7 +26287,7 @@
                 "class": "Mvc",
                 "text": "hasPluginView",
                 "value": "hasPluginView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/hasPluginView",
                 "desc": ""
             },
@@ -26296,7 +26296,7 @@
                 "class": "Mvc",
                 "text": "hasSubpluginModel",
                 "value": "hasSubpluginModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/hasSubpluginModel",
                 "desc": "Returns true if the subplugin model exists."
             },
@@ -26305,7 +26305,7 @@
                 "class": "Mvc",
                 "text": "hasView",
                 "value": "hasView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/hasView",
                 "desc": ""
             },
@@ -26314,7 +26314,7 @@
                 "class": "Mvc",
                 "text": "includeModel",
                 "value": "includeModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/includeModel",
                 "desc": ""
             },
@@ -26323,7 +26323,7 @@
                 "class": "Mvc",
                 "text": "includePhpView",
                 "value": "includePhpView",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/includePhpView",
                 "desc": ""
             },
@@ -26332,7 +26332,7 @@
                 "class": "Mvc",
                 "text": "initPath",
                 "value": "initPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/initPath",
                 "desc": "Sets all the different paths' properties."
             },
@@ -26341,7 +26341,7 @@
                 "class": "Mvc",
                 "text": "isAuthorizedRoute",
                 "value": "isAuthorizedRoute",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/isAuthorizedRoute",
                 "desc": "Checks if a route is authorized."
             },
@@ -26350,7 +26350,7 @@
                 "class": "Mvc",
                 "text": "isCli",
                 "value": "isCli",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/isCli",
                 "desc": ""
             },
@@ -26359,7 +26359,7 @@
                 "class": "Mvc",
                 "text": "isPlugin",
                 "value": "isPlugin",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/isPlugin",
                 "desc": ""
             },
@@ -26368,7 +26368,7 @@
                 "class": "Mvc",
                 "text": "modelExists",
                 "value": "modelExists",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/modelExists",
                 "desc": "Checks whether the given model exists or not."
             },
@@ -26377,7 +26377,7 @@
                 "class": "Mvc",
                 "text": "output",
                 "value": "output",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/output",
                 "desc": ""
             },
@@ -26386,7 +26386,7 @@
                 "class": "Mvc",
                 "text": "pluginName",
                 "value": "pluginName",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/pluginName",
                 "desc": ""
             },
@@ -26395,7 +26395,7 @@
                 "class": "Mvc",
                 "text": "pluginPath",
                 "value": "pluginPath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/pluginPath",
                 "desc": ""
             },
@@ -26404,7 +26404,7 @@
                 "class": "Mvc",
                 "text": "pluginUrl",
                 "value": "pluginUrl",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/pluginUrl",
                 "desc": ""
             },
@@ -26413,7 +26413,7 @@
                 "class": "Mvc",
                 "text": "process",
                 "value": "process",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/process",
                 "desc": "Returns the rendered result from the current mvc if successfully processed"
             },
@@ -26422,7 +26422,7 @@
                 "class": "Mvc",
                 "text": "reroute",
                 "value": "reroute",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/reroute",
                 "desc": "This will reroute a controller to another one seemlessly. Chainable"
             },
@@ -26431,7 +26431,7 @@
                 "class": "Mvc",
                 "text": "routeComponent",
                 "value": "routeComponent",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/routeComponent",
                 "desc": "Retrieves component's data from the given plugin name if exists."
             },
@@ -26440,7 +26440,7 @@
                 "class": "Mvc",
                 "text": "setCachedModel",
                 "value": "setCachedModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/setCachedModel",
                 "desc": "This will set the model in cache"
             },
@@ -26449,7 +26449,7 @@
                 "class": "Mvc",
                 "text": "setDbInController",
                 "value": "setDbInController",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/setDbInController",
                 "desc": ""
             },
@@ -26458,7 +26458,7 @@
                 "class": "Mvc",
                 "text": "setLocale",
                 "value": "setLocale",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/setLocale",
                 "desc": ""
             },
@@ -26467,7 +26467,7 @@
                 "class": "Mvc",
                 "text": "setMode",
                 "value": "setMode",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/setMode",
                 "desc": ""
             },
@@ -26476,7 +26476,7 @@
                 "class": "Mvc",
                 "text": "setPrepath",
                 "value": "setPrepath",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/setPrepath",
                 "desc": ""
             },
@@ -26485,7 +26485,7 @@
                 "class": "Mvc",
                 "text": "setRoot",
                 "value": "setRoot",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/setRoot",
                 "desc": "Sets the root of the application in the URL (base href)."
             },
@@ -26494,7 +26494,7 @@
                 "class": "Mvc",
                 "text": "subpluginModel",
                 "value": "subpluginModel",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/subpluginModel",
                 "desc": "Get a subplugin model (a plugin inside the plugin directory of another plugin)."
             },
@@ -26503,7 +26503,7 @@
                 "class": "Mvc",
                 "text": "transform",
                 "value": "transform",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/transform",
                 "desc": "Transform the output object on Controller instance given a callback"
             },
@@ -26512,7 +26512,7 @@
                 "class": "Mvc",
                 "text": "viewExists",
                 "value": "viewExists",
-                "lastmod": 1639504392,
+                "lastmod": 1653707646,
                 "url": "bbn-php\/doc\/method\/Mvc\/viewExists",
                 "desc": "Checks whether the given view exists or not."
             }
@@ -26587,7 +26587,7 @@
         "value": "Str",
         "text": "Str",
         "url": "bbn-php\/doc\/class\/Str",
-        "lastmod": 1648910401,
+        "lastmod": 1653876464,
         "desc": "Class text",
         "items": [
             {
@@ -26595,7 +26595,7 @@
                 "class": "Str",
                 "text": "asVar",
                 "value": "asVar",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/asVar",
                 "desc": "Places quotes around a string"
             },
@@ -26604,7 +26604,7 @@
                 "class": "Str",
                 "text": "cast",
                 "value": "cast",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/cast",
                 "desc": "Converts any type of variable to a string."
             },
@@ -26613,7 +26613,7 @@
                 "class": "Str",
                 "text": "changeCase",
                 "value": "changeCase",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/changeCase",
                 "desc": "Converts the case of a string."
             },
@@ -26622,7 +26622,7 @@
                 "class": "Str",
                 "text": "checkFilename",
                 "value": "checkFilename",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/checkFilename",
                 "desc": "Checks if a string doesn't contain a filesystem path."
             },
@@ -26631,7 +26631,7 @@
                 "class": "Str",
                 "text": "checkJson",
                 "value": "checkJson",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/checkJson",
                 "desc": "Checks whether a JSON string is valid or not. If $return_error is set to true, the error will be returned."
             },
@@ -26640,7 +26640,7 @@
                 "class": "Str",
                 "text": "checkName",
                 "value": "checkName",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/checkName",
                 "desc": "Checks if a string complies with SQL naming convention."
             },
@@ -26649,7 +26649,7 @@
                 "class": "Str",
                 "text": "checkPath",
                 "value": "checkPath",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/checkPath",
                 "desc": "Checks if every bit of a string doesn't contain a filesystem path."
             },
@@ -26658,7 +26658,7 @@
                 "class": "Str",
                 "text": "cleanSpaces",
                 "value": "cleanSpaces",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/cleanSpaces",
                 "desc": "Trims, and removes extra spaces (all more than one)"
             },
@@ -26667,7 +26667,7 @@
                 "class": "Str",
                 "text": "convertSize",
                 "value": "convertSize",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/convertSize",
                 "desc": "Converts size from one unit to another."
             },
@@ -26676,7 +26676,7 @@
                 "class": "Str",
                 "text": "correctTypes",
                 "value": "correctTypes",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/correctTypes",
                 "desc": "If it looks like an int or float type, the string variable is converted into the correct type."
             },
@@ -26685,7 +26685,7 @@
                 "class": "Str",
                 "text": "cut",
                 "value": "cut",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/cut",
                 "desc": "Cuts a string (HTML and PHP tags stripped) to maximum length inserted."
             },
@@ -26694,7 +26694,7 @@
                 "class": "Str",
                 "text": "encodeDbname",
                 "value": "encodeDbname",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/encodeDbname",
                 "desc": "Returns a corrected string for database naming."
             },
@@ -26703,7 +26703,7 @@
                 "class": "Str",
                 "text": "encodeFilename",
                 "value": "encodeFilename",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/encodeFilename",
                 "desc": "Returns a cross-platform filename for the file."
             },
@@ -26712,7 +26712,7 @@
                 "class": "Str",
                 "text": "escape",
                 "value": "escape",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escape",
                 "desc": "Synonym of \"escape_squotes\"."
             },
@@ -26721,7 +26721,7 @@
                 "class": "Str",
                 "text": "escapeAllQuotes",
                 "value": "escapeAllQuotes",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeAllQuotes",
                 "desc": "Escapes all quotes (single and double) from a given string."
             },
@@ -26730,7 +26730,7 @@
                 "class": "Str",
                 "text": "escapeApo",
                 "value": "escapeApo",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeApo",
                 "desc": "Synonym of \"escape_squotes\"."
             },
@@ -26739,7 +26739,7 @@
                 "class": "Str",
                 "text": "escapeDquote",
                 "value": "escapeDquote",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeDquote",
                 "desc": "Synonym of \"escape_dquotes\"."
             },
@@ -26748,7 +26748,7 @@
                 "class": "Str",
                 "text": "escapeDquotes",
                 "value": "escapeDquotes",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeDquotes",
                 "desc": "Escapes the string in double quotes."
             },
@@ -26757,7 +26757,7 @@
                 "class": "Str",
                 "text": "escapeQuote",
                 "value": "escapeQuote",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeQuote",
                 "desc": "Synonym of \"escape_dquotes\"."
             },
@@ -26766,7 +26766,7 @@
                 "class": "Str",
                 "text": "escapeQuotes",
                 "value": "escapeQuotes",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeQuotes",
                 "desc": "Synonym of \"escape_dquotes\"."
             },
@@ -26775,7 +26775,7 @@
                 "class": "Str",
                 "text": "escapeSquote",
                 "value": "escapeSquote",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeSquote",
                 "desc": "Synonym of \"escape_squotes\"."
             },
@@ -26784,7 +26784,7 @@
                 "class": "Str",
                 "text": "escapeSquotes",
                 "value": "escapeSquotes",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/escapeSquotes",
                 "desc": "Escapes the string in quotes."
             },
@@ -26793,7 +26793,7 @@
                 "class": "Str",
                 "text": "export",
                 "value": "export",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/export",
                 "desc": "Returns a variable in a mode that is directly usable by PHP."
             },
@@ -26802,7 +26802,7 @@
                 "class": "Str",
                 "text": "fileExt",
                 "value": "fileExt",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/fileExt",
                 "desc": "Returns the file extension."
             },
@@ -26811,7 +26811,7 @@
                 "class": "Str",
                 "text": "genpwd",
                 "value": "genpwd",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/genpwd",
                 "desc": "Returns a random password."
             },
@@ -26820,7 +26820,7 @@
                 "class": "Str",
                 "text": "getNameFromIndex",
                 "value": "getNameFromIndex",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/getNameFromIndex",
                 "desc": ""
             },
@@ -26829,7 +26829,7 @@
                 "class": "Str",
                 "text": "getNumbers",
                 "value": "getNumbers",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/getNumbers",
                 "desc": "Extracts all digits from a string."
             },
@@ -26838,7 +26838,7 @@
                 "class": "Str",
                 "text": "hasSlash",
                 "value": "hasSlash",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/hasSlash",
                 "desc": "Returns \"true\" if slash or backslash are present."
             },
@@ -26847,7 +26847,7 @@
                 "class": "Str",
                 "text": "html2text",
                 "value": "html2text",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/html2text",
                 "desc": "Converts HTML to text replacing paragraphs and brs with new lines."
             },
@@ -26856,7 +26856,7 @@
                 "class": "Str",
                 "text": "isBuid",
                 "value": "isBuid",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isBuid",
                 "desc": "Checks if the string is a valid binary UID string."
             },
@@ -26865,7 +26865,7 @@
                 "class": "Str",
                 "text": "isCleanPath",
                 "value": "isCleanPath",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isCleanPath",
                 "desc": "Checks if \".. \\\\\" or \"..\/\" is contained in the parameter and it will return false if true."
             },
@@ -26874,7 +26874,7 @@
                 "class": "Str",
                 "text": "isDateSql",
                 "value": "isDateSql",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isDateSql",
                 "desc": "Checks if the argument is in a valid SQL date format."
             },
@@ -26883,7 +26883,7 @@
                 "class": "Str",
                 "text": "isDecimal",
                 "value": "isDecimal",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isDecimal",
                 "desc": "Checks if the item is a decimal."
             },
@@ -26892,7 +26892,7 @@
                 "class": "Str",
                 "text": "isDomain",
                 "value": "isDomain",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isDomain",
                 "desc": "Checks if the argument is a valid domain name."
             },
@@ -26901,7 +26901,7 @@
                 "class": "Str",
                 "text": "isEmail",
                 "value": "isEmail",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isEmail",
                 "desc": "Checks if the string is the correct type of e-mail address."
             },
@@ -26910,7 +26910,7 @@
                 "class": "Str",
                 "text": "isHTML",
                 "value": "isHTML",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isHTML",
                 "desc": ""
             },
@@ -26919,7 +26919,7 @@
                 "class": "Str",
                 "text": "isInteger",
                 "value": "isInteger",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isInteger",
                 "desc": "Checks if the item is a integer."
             },
@@ -26928,7 +26928,7 @@
                 "class": "Str",
                 "text": "isIp",
                 "value": "isIp",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isIp",
                 "desc": "Checks if the argument is a valid ip address."
             },
@@ -26937,7 +26937,7 @@
                 "class": "Str",
                 "text": "isJson",
                 "value": "isJson",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isJson",
                 "desc": "Checks if the string is a json string."
             },
@@ -26946,7 +26946,7 @@
                 "class": "Str",
                 "text": "isNumber",
                 "value": "isNumber",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isNumber",
                 "desc": "Checks if the item is a number."
             },
@@ -26955,7 +26955,7 @@
                 "class": "Str",
                 "text": "isUid",
                 "value": "isUid",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isUid",
                 "desc": "Checks if the string is a valid UID string."
             },
@@ -26964,7 +26964,7 @@
                 "class": "Str",
                 "text": "isUrl",
                 "value": "isUrl",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/isUrl",
                 "desc": "Checks if the argument is a valid URL string."
             },
@@ -26973,7 +26973,7 @@
                 "class": "Str",
                 "text": "makeReadable",
                 "value": "makeReadable",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/makeReadable",
                 "desc": "Returns the argumented value, replacing not standard objects (not stdClass) by their class name."
             },
@@ -26982,7 +26982,7 @@
                 "class": "Str",
                 "text": "markdown2html",
                 "value": "markdown2html",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/markdown2html",
                 "desc": "Transforms a markdown string into HTML."
             },
@@ -26991,7 +26991,7 @@
                 "class": "Str",
                 "text": "parsePath",
                 "value": "parsePath",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/parsePath",
                 "desc": "Replaces backslash with slash in a path string. Forbids the use of ..\/"
             },
@@ -27000,7 +27000,7 @@
                 "class": "Str",
                 "text": "parseUrl",
                 "value": "parseUrl",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/parseUrl",
                 "desc": "Returns an array containing any of the various components of the URL that are present."
             },
@@ -27009,7 +27009,7 @@
                 "class": "Str",
                 "text": "removeAccents",
                 "value": "removeAccents",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/removeAccents",
                 "desc": "Replaces accented characters with their character without the accent."
             },
@@ -27018,7 +27018,7 @@
                 "class": "Str",
                 "text": "removeComments",
                 "value": "removeComments",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/removeComments",
                 "desc": "Removes the comments."
             },
@@ -27027,7 +27027,7 @@
                 "class": "Str",
                 "text": "replaceOnce",
                 "value": "replaceOnce",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/replaceOnce",
                 "desc": "Replaces part of a string. If the part is not found, the method returns the string without change."
             },
@@ -27036,7 +27036,7 @@
                 "class": "Str",
                 "text": "sanitize",
                 "value": "sanitize",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/sanitize",
                 "desc": "Strip special characters except the below:"
             },
@@ -27045,7 +27045,7 @@
                 "class": "Str",
                 "text": "sanitizeHtml",
                 "value": "sanitizeHtml",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/sanitizeHtml",
                 "desc": "Remove malicious code and makes HTML standard compliant."
             },
@@ -27054,7 +27054,7 @@
                 "class": "Str",
                 "text": "saySize",
                 "value": "saySize",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/saySize",
                 "desc": "Converts the bytes to another unit form."
             },
@@ -27063,7 +27063,7 @@
                 "class": "Str",
                 "text": "text2html",
                 "value": "text2html",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/text2html",
                 "desc": "Converts text to HTML replacing new lines with brs."
             },
@@ -27072,7 +27072,7 @@
                 "class": "Str",
                 "text": "toCamel",
                 "value": "toCamel",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/toCamel",
                 "desc": "Converts the given string to camel case."
             },
@@ -27081,7 +27081,7 @@
                 "class": "Str",
                 "text": "unescapeSquote",
                 "value": "unescapeSquote",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/unescapeSquote",
                 "desc": "Unescapes the string in quotes."
             },
@@ -27090,7 +27090,7 @@
                 "class": "Str",
                 "text": "unescapeSquotes",
                 "value": "unescapeSquotes",
-                "lastmod": 1648910401,
+                "lastmod": 1653876464,
                 "url": "bbn-php\/doc\/method\/Str\/unescapeSquotes",
                 "desc": "Unescapes the string in quotes."
             }

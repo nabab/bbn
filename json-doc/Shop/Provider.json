@@ -11,8 +11,8 @@
     "interfaces": [],
     "fileName": "\/Shop\/Provider.php",
     "startLine": 17,
-    "endLine": 124,
-    "numMethods": 24,
+    "endLine": 141,
+    "numMethods": 25,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 1,
@@ -272,6 +272,54 @@
                     "has_default": false,
                     "default": "",
                     "default_name": ""
+                }
+            ]
+        },
+        "getShippingCosts": {
+            "name": "getShippingCosts",
+            "summary": "Gets the shipping costs list of the given provider and territory",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Provider",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id, string $territory)\n  {\n    if (($cfg = $this->selectOne($this->fields['cfg'], [$this->fields['id'] => $id]))\n      && ($cfg = json_decode($cfg, true))\n    ) {\n      return X::getRow($cfg, ['territory' => $territory]);\n    }\n    return null;\n  }",
+            "startLine": 131,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The provider ID"
+                },
+                {
+                    "name": "territory",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The territory ID"
                 }
             ]
         },

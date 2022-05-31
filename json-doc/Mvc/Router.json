@@ -18,8 +18,8 @@
     "interfaces": [],
     "fileName": "\/Mvc\/Router.php",
     "startLine": 28,
-    "endLine": 1163,
-    "numMethods": 40,
+    "endLine": 1209,
+    "numMethods": 41,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 6,
@@ -687,9 +687,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $mode, string $plugin)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_custom_root($mode, $plugin);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)\n        && is_dir($dir2)\n    ) {\n      $dir = $dir2;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "code": "function(string $path, string $mode, string $plugin)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_custom_root($mode, $plugin);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
             "startLine": 499,
-            "endLine": 547,
+            "endLine": 542,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -732,6 +732,69 @@
                 }
             ]
         },
+        "fetchSubpluginDir": {
+            "name": "fetchSubpluginDir",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Mvc\\Router",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $path, string $mode, string $plugin_from, string $plugin_for)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_subplugin_root($mode, $plugin_from, $plugin_for);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "startLine": 550,
+            "endLine": 593,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin_from",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin_for",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "getRoutes": {
             "name": "getRoutes",
             "summary": "",
@@ -742,8 +805,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->_routes;\n  }",
-            "startLine": 553,
-            "endLine": 556,
+            "startLine": 599,
+            "endLine": 602,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

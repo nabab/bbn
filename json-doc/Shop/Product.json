@@ -11,8 +11,8 @@
     "interfaces": [],
     "fileName": "\/Shop\/Product.php",
     "startLine": 17,
-    "endLine": 321,
-    "numMethods": 30,
+    "endLine": 364,
+    "numMethods": 34,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 1,
@@ -413,6 +413,157 @@
                 }
             ]
         },
+        "getPrice": {
+            "name": "getPrice",
+            "summary": "Gets the price of the given product",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Product",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return $this->db->selectOne($this->class_table, $this->fields['price'], [$this->fields['id'] => $id]);\n  }",
+            "startLine": 260,
+            "endLine": 263,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "float"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The product ID"
+                }
+            ]
+        },
+        "getProvider": {
+            "name": "getProvider",
+            "summary": "Gets the provider of the given product",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Product",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return $this->db->selectOne($this->class_table, $this->fields['id_provider'], [$this->fields['id'] => $id]);\n  }",
+            "startLine": 271,
+            "endLine": 274,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The product ID"
+                }
+            ]
+        },
+        "getWeight": {
+            "name": "getWeight",
+            "summary": "Gets the weight of the given product",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Product",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return $this->db->selectOne($this->class_table, $this->fields['weight'], [$this->fields['id'] => $id]);\n  }",
+            "startLine": 282,
+            "endLine": 285,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The product ID"
+                }
+            ]
+        },
+        "isActive": {
+            "name": "isActive",
+            "summary": "Checks if the given product is active",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Product",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return (bool)$this->db->selectOne($this->class_table, $this->fields['active'], [$this->fields['id'] => $id]);\n  }",
+            "startLine": 293,
+            "endLine": 296,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The product ID"
+                }
+            ]
+        },
         "getVariants": {
             "name": "getVariants",
             "summary": "",
@@ -423,8 +574,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    $cfg  = $this->getClassCfg();\n    $a = $cfg['arch']['products'];\n    return $this->db->getColumnValues($cfg['table'], $a['id'], [\n      $a['id_main'] => $id\n    ]);\n  }",
-            "startLine": 255,
-            "endLine": 262,
+            "startLine": 299,
+            "endLine": 306,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -459,8 +610,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id)\n  {\n    $sales = new Sales($this->db);\n    $total = $sales->getByProduct($id);\n    if ($total['num']) {\n      throw new Exception(_(\"Impossible to delete a product which has already been sold\"));\n    }\n\n    $cfg  = $this->getClassCfg();\n    $a = $cfg['arch']['products'];\n    if ($id_note = $this->db->selectOne($cfg['table'], $a['id_note'], [$a['id'] => $id])) {\n      foreach ($this->getVariants($id) as $v) {\n        $this->remove($id);\n      }\n\n      return $this->db->delete('bbn_shop_products', ['id' => $id]) && $this->cms->delete($id_note);\n    }\n\n    return 0;\n  }",
-            "startLine": 300,
-            "endLine": 319,
+            "startLine": 343,
+            "endLine": 362,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

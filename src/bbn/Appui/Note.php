@@ -237,7 +237,8 @@ class Note extends bbn\Models\Cls\Db
     string $id_option = null,
     string $excerpt = '',
     bool   $pinned = false
-  ) {
+  ): ?string
+  {
     $props = [
       'title',
       'content',
@@ -282,7 +283,7 @@ class Note extends bbn\Models\Cls\Db
       $cfg['excerpt'] = $this->getExcerpt($cfg['title'], $cfg['content']);
     }
 
-    $id_note = false;
+    $id_note = null;
 
     if (($usr = bbn\User::getInstance())
       && $this->db->insert(
@@ -1066,7 +1067,7 @@ class Note extends bbn\Models\Cls\Db
    * @return array|null
    * @throws \Exception
    */
-  public function browse(array $cfg, bool $with_content = false, $private = false, string $id_type = null): ?array
+  public function browse(array $cfg, bool $with_content = false, bool $private = false, string $id_type = null, bool $pinned = null): ?array
   {
     if (isset($cfg['limit']) && ($user = bbn\User::getInstance())) {
       /** @var bbn\Db $db */
@@ -1164,6 +1165,12 @@ class Note extends bbn\Models\Cls\Db
         $grid_cfg['filters'][] = [
           'field' => $db->cfn($cf['arch']['notes']['id_type'], $cf['table']),
           'value' => $id_type
+        ];
+      }
+      if (!is_null($pinned)) {
+        $grid_cfg['filters'][] = [
+          'field' => $db->cfn($cf['arch']['notes']['pinned'], $cf['table']),
+          'value' => $pinned
         ];
       }
       if (!empty($cfg['fields'])) {
@@ -1464,7 +1471,7 @@ class Note extends bbn\Models\Cls\Db
         'id_type' => $id_postIt,
         'pinned'  => $cfg['pinned'] ?? 0,
         'private' => 1,
-        'excerpt' => Str::html2text($cfg['content']),
+        'excerpt' => Str::html2text($cfg['text']),
         'mime' => 'json/bbn-postit'
       ])) {
         return $this->getPostIt($id_note);
@@ -1482,7 +1489,7 @@ class Note extends bbn\Models\Cls\Db
         ]),
         1,
         $postit['locked'],
-        Str::html2text($cfg['content']),
+        Str::html2text($cfg['text']),
         $cfg['pinned']
       )
     ) {
@@ -1503,6 +1510,25 @@ class Note extends bbn\Models\Cls\Db
       $note = array_merge($note, $cfg);
       unset($note['content']);
       return $note;
+    }
+
+    return null;
+  }
+
+
+  public function getPostIts(int $limit = 25, int $start = 0, $only_pinned = false): ?array
+  {
+    $id_postIt = self::getOptionId('postit', 'types');
+    $res = $this->browse(['limit' => $limit, 'start' => $start], true, true, $id_postIt, $only_pinned ?: null);
+    if ( $res ){
+      return array_map(function($a) {
+        if (Str::isJson($a['content'])) {
+          return array_merge($a, json_decode($a['content'], true));
+        }
+
+        unset($a['content']);
+        return $a;
+      }, $res['data']);
     }
 
     return null;

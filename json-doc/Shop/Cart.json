@@ -1,7 +1,13 @@
 {
     "doc": {
-        "description": "",
-        "tags": []
+        "description": "Cart class\n",
+        "tags": {
+            "category": "Shop",
+            "package": "Shop",
+            "author": "BBN Solutions <info@bbn.solutions>",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License",
+            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/Shop\/Cart"
+        }
     },
     "name": "bbn\\Shop\\Cart",
     "namespace": true,
@@ -10,9 +16,9 @@
     ],
     "interfaces": [],
     "fileName": "\/Shop\/Cart.php",
-    "startLine": 12,
-    "endLine": 55,
-    "numMethods": 21,
+    "startLine": 21,
+    "endLine": 481,
+    "numMethods": 31,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 1,
@@ -53,7 +59,9 @@
                 }
             }
         },
-        "type_note": null,
+        "idSession": null,
+        "productCls": null,
+        "productClsCfg": null,
         "db": null,
         "errors": [],
         "error": false,
@@ -76,16 +84,16 @@
     "methods": {
         "__construct": {
             "name": "__construct",
-            "summary": "",
+            "summary": "Constructor",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Shop\\Cart",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $cfg = NULL)\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n  }",
-            "startLine": 47,
-            "endLine": 53,
+            "code": "function(bbn\\Db $db, array $cfg = NULL)\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n    if ($user = \\bbn\\User::getInstance()) {\n      $this->idSession = $user->getOsession('id_session');\n    }\n    $this->productCls = new Product($this->db);\n    $this->productClsCfg = $this->productCls->getClassCfg();\n  }",
+            "startLine": 71,
+            "endLine": 82,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -148,6 +156,467 @@
                     "has_default": true,
                     "default": null,
                     "default_name": ""
+                }
+            ]
+        },
+        "getCurrentCartID": {
+            "name": "getCurrentCartID",
+            "summary": "Gets the ID of the current cart",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if (empty($this->idSession)) {\n      throw new \\Exception(_(\"No user's session found\"));\n    }\n    $sales = new Sales($this->db);\n    $salesCfg = $sales->getClassCfg();\n    $salesFields = $salesCfg['arch']['transactions'];\n    if ($idCart = $this->selectOne($this->fields['id'], [\n      $this->fields['id_session'] => $this->idSession\n    ], [\n      $this->fields['creation'] => 'DESC'\n    ])) {\n      if ($this->db->selectOne($salesCfg['table'], $salesFields['id'], [$salesFields['id_cart'] => $idCart])) {\n        return null;\n      }\n      return $idCart;\n    }\n    return null;\n  }",
+            "startLine": 89,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "addProduct": {
+            "name": "addProduct",
+            "summary": "Adds a product to the current (or given) cart",
+            "description": "It can also be used to add only quantities of product.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>It can also be used to add only quantities of product.<\/p>"
+                }
+            ],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProduct, int $quantity = 1, string $idCart = '')\n  {\n    if (!$this->productCls->isActive($idProduct)) {\n      throw new \\Exception(sprintf(_('The product with the id %s is not available'), $idProduct));\n    }\n    if (empty($idCart)\n      && !($idCart = $this->getCurrentCartID())\n    ) {\n      $idCart = $this->createCart();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $pTable = $this->class_cfg['tables']['cart_products'];\n    $pFields = $this->class_cfg['arch']['cart_products'];\n    if ($p = $this->productExists($idCart, $idProduct)) {\n      return $this->setProductQuantity($idCart, $idProduct, $p[$pFields['quantity']] + $quantity);\n    }\n    else {\n      return (bool)$this->db->insert($pTable, [\n        $pFields['id_cart'] => $idCart,\n        $pFields['id_product'] => $idProduct,\n        $pFields['quantity'] => $quantity,\n        $pFields['amount'] => $this->getProductAmount($idProduct, $quantity),\n        $pFields['date_added'] => date('Y-m-d H:i:s')\n      ]);\n    }\n  }",
+            "startLine": 119,
+            "endLine": 146,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProduct",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "roduct The product ID"
+                },
+                {
+                    "name": "quantity",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": "",
+                    "description": "The quantity"
+                },
+                {
+                    "name": "idCart",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID (optional)"
+                }
+            ]
+        },
+        "removeProduct": {
+            "name": "removeProduct",
+            "summary": "Removes a product form the current (or given) cart.",
+            "description": "It can also be used to remove only quantities of product.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "<p>It can also be used to remove only quantities of product.<\/p>"
+                }
+            ],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProduct, int $quantity = 0, string $idCart = '')\n  {\n    if (empty($idCart)) {\n      $idCart = $this->getCurrentCartID();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $pTable = $this->class_cfg['tables']['cart_products'];\n    $pFields = $this->class_cfg['arch']['cart_products'];\n    if ($p = $this->productExists($idCart, $idProduct)) {\n      if (!$quantity || ($quantity >= $p[$pFields['quantity']])) {\n        return (bool)$this->db->delete($pTable, [$pFields['id'] => $p[$pFields['id']]]);\n      }\n      else {\n        return $this->setProductQuantity($idCart, $idProduct, $p[$pFields['quantity']] - $quantity);\n      }\n    }\n    return false;\n  }",
+            "startLine": 156,
+            "endLine": 175,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProduct",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "roduct The product ID"
+                },
+                {
+                    "name": "quantity",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The quantity to remove"
+                },
+                {
+                    "name": "idCart",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
+                }
+            ]
+        },
+        "setProductQuantity": {
+            "name": "setProductQuantity",
+            "summary": "Sets the quantity (and the relative amount) of a product on the cart",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idCart, string $idProduct, int $quantity)\n  {\n    $pTable = $this->class_cfg['tables']['cart_products'];\n    $pFields = $this->class_cfg['arch']['cart_products'];\n    return (bool)$this->db->update($pTable, [\n      $pFields['quantity'] => $quantity,\n      $pFields['amount'] => $this->getProductAmount($idProduct, $quantity),\n      $pFields['date_added'] => date('Y-m-d H:i:s')\n    ], [\n      $pFields['id_cart'] => $idCart,\n      $pFields['id_product'] => $idProduct\n    ]);\n  }",
+            "startLine": 185,
+            "endLine": 197,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idCart",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
+                },
+                {
+                    "name": "idProduct",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "roduct The product ID"
+                },
+                {
+                    "name": "quantity",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The quantity to set"
+                }
+            ]
+        },
+        "getProducts": {
+            "name": "getProducts",
+            "summary": "Gets the products of the current (or given) cart",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idCart = '')\n  {\n    if (empty($idCart)) {\n      $idCart = $this->getCurrentCartID();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $pTable = $this->class_cfg['tables']['cart_products'];\n    $pFields = $this->class_cfg['arch']['cart_products'];\n    return $this->db->rselectAll($pTable, [], [$pFields['id_cart'] => $idCart]);\n  }",
+            "startLine": 205,
+            "endLine": 216,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idCart",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
+                }
+            ]
+        },
+        "setClient": {
+            "name": "setClient",
+            "summary": "Sets the client ID to the current cart",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idClient)\n  {\n    if (!Str::isUid($idClient)) {\n      throw new \\Exception(_('The client ID is an invalid UID'));\n    }\n    if ($idCart = $this->getCurrentCartID()) {\n      return $this->update($idCart, [$this->fields['id_client'] => $idClient]);\n    }\n    return false;\n  }",
+            "startLine": 224,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idClient",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "lient The client ID"
+                }
+            ]
+        },
+        "total": {
+            "name": "total",
+            "summary": "Gets the total of the current (or given) cart for the given address",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idAddress, string $idCart = '')\n  {\n    if (empty($idCart)) {\n      $idCart = $this->getCurrentCartID();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $total = 0;\n    if ($products = $this->getProducts($idCart)) {\n      $pFields = $this->class_cfg['arch']['cart_products'];\n      foreach ($products as $product) {\n        $total += $product[$pFields['amount']];\n      }\n    }\n    $total += $this->shippingCost($idAddress, $idCart);\n    return \\round($total, 2);\n  }",
+            "startLine": 242,
+            "endLine": 259,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "float"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idAddress",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ddress The address ID"
+                },
+                {
+                    "name": "idCart",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
+                }
+            ]
+        },
+        "totalDetail": {
+            "name": "totalDetail",
+            "summary": "Gets the total of the current (or given) cart in detail for the given address",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idAddress, string $idCart = '')\n  {\n    if (empty($idCart)) {\n      $idCart = $this->getCurrentCartID();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $res = [\n      'products' => 0,\n      'shipping' => 0,\n      'total' => 0\n    ];\n    if ($products = $this->getProducts($idCart)) {\n      $pFields = $this->class_cfg['arch']['cart_products'];\n      foreach ($products as $product) {\n        $res['products'] += $product[$pFields['amount']];\n        $res['total'] += $product[$pFields['amount']];\n      }\n    }\n    $res['shipping'] = $this->shippingCost($idAddress, $idCart);\n    $res['total'] += $res['shipping'];\n    foreach ($res as $i => $v) {\n      $res[$i] = \\round($v, 2);\n    }\n    return $res;\n  }",
+            "startLine": 268,
+            "endLine": 294,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idAddress",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ddress The address ID"
+                },
+                {
+                    "name": "idCart",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
+                }
+            ]
+        },
+        "shippingCost": {
+            "name": "shippingCost",
+            "summary": "Gets the shipping cost for the given address",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idAddress, string $idCart = '')\n  {\n    if (empty($idCart)) {\n      $idCart = $this->getCurrentCartID();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $addressCls = new Address($this->db);\n    $addressClsCfg = $addressCls->getClassCfg();\n    $aFields = $addressClsCfg['arch']['addresses'];\n    if (!($idCountry = $addressCls->selectOne($aFields['country'], [$aFields['id'] => $idAddress]))) {\n      throw new \\Exception(sprintf(_('Contry not found for the address %s'), $idAddress));\n    }\n    $opt = Option::getInstance();\n    if (!($continentCode = $opt->getProp($idCountry, 'continent'))) {\n      throw new \\Exception(sprintf(_('Continent code not found for the country %s'), $idCountry));\n    }\n    if (!($continent = $opt->fromCode($continentCode, 'territories'))) {\n      throw new \\Exception(sprintf(_('Continent not found with the code %s'), $continentCode));\n    }\n    $pFields = $this->class_cfg['arch']['cart_products'];\n    $cost = 0;\n    if ($products = $this->getProducts($idCart)) {\n      $providerCls = new Provider($this->db);\n      $providersCosts = [];\n      $providersWeight = [];\n      foreach ($products as $product) {\n        if (!($provider = $this->productCls->getProvider($product[$pFields['id_product']]))) {\n          throw new \\Exception(sprintf(_('No provider found for the product %s'), $product[$pFields['id_product']]));\n        }\n        if ($weight = $this->productCls->getWeight($product[$pFields['id_product']])) {\n          if (!isset($providersWeight[$provider])) {\n            $providersWeight[$provider] = $weight;\n          }\n          else {\n            $providersWeight[$provider] += $weight;\n          }\n          if (!isset($providersCosts[$provider])) {\n            $pc = $providerCls->getShippingCosts($provider, $continent);\n            $providersCosts[$provider] = [\n              'prices' => [],\n              'surcharge' => []\n            ];\n            $prices = [];\n            if (\\is_array($pc)) {\n              foreach ($pc as $i => $v) {\n                if ($i !== 'territory') {\n                  if (\\substr($i, 0, 2) === 'gm') {\n                    $providersCosts[$provider]['surcharge'][\\substr($i, 2)] = $v;\n                  }\n                  else {\n                    $prices[\\substr($i, 1)] = $v;\n                  }\n                }\n              }\n            }\n            ksort($prices, SORT_NUMERIC);\n            $providersCosts[$provider]['prices'] = $prices;\n          }\n        }\n      }\n      foreach ($providersWeight as $p => $pw) {\n        $weights = \\array_keys($providersCosts[$p]['prices']);\n        $tmpw = $weights[0];\n        foreach ($weights as $i => $w) {\n          if ($w <= $pw) {\n            $tmpw = $w;\n          }\n          if (isset($weights[$i + 1]) && ($pw > $w)) {\n            $tmpw = $weights[$i + 1];\n          }\n        }\n        $cost += $providersCosts[$p]['prices'][$tmpw];\n        $diff = $pw - $tmpw;\n        if (($diff > 0) && count($providersCosts[$p]['surcharge'])) {\n          $gr = \\array_keys($providersCosts[$p]['surcharge'])[0];\n          $m = \\array_values($providersCosts[$p]['surcharge'])[0];\n          $num = $diff \/ $gr;\n          $num = \\round($num, 0) + ($num - round($num, 0) > 0 ? 1 : 0);\n          $cost += $m * $num;\n        }\n      }\n    }\n    return \\round($cost, 2);\n  }",
+            "startLine": 303,
+            "endLine": 388,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "float"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idAddress",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ddress The address ID"
+                },
+                {
+                    "name": "idCart",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
+                }
+            ]
+        },
+        "totalShippingWeight": {
+            "name": "totalShippingWeight",
+            "summary": "Gets the total weight of the shipping",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Shop\\Cart",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idCart = '')\n  {\n    if (empty($idCart)) {\n      $idCart = $this->getCurrentCartID();\n    }\n    if (!Str::isUid($idCart)) {\n      throw new \\Exception(_('The cart ID is an invalid UID'));\n    }\n    $weight = 0;\n    $pFields = $this->class_cfg['arch']['cart_products'];\n    if ($products = $this->getProducts($idCart)) {\n      foreach ($products as $product) {\n        $prodWeight = $this->productCls->getWeight($product[$pFields['id_product']]);\n        if (\\is_int($prodWeight)) {\n          $weight += $prodWeight * $product[$pFields['quantity']];\n        }\n      }\n    }\n    return $weight;\n  }",
+            "startLine": 396,
+            "endLine": 415,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idCart",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "art The cart ID"
                 }
             ]
         },
@@ -1131,7 +1600,7 @@
         }
     },
     "constants": null,
-    "summary": "",
+    "summary": "Cart class",
     "description": "",
     "description_parts": []
 }
