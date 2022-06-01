@@ -7265,7 +7265,7 @@
                 "value": "Note",
                 "text": "Note",
                 "url": "bbn-php\/doc\/class\/Appui\/Note",
-                "lastmod": 1653913591,
+                "lastmod": 1654045964,
                 "desc": "Created by PhpStorm.",
                 "items": [
                     {
@@ -7273,7 +7273,7 @@
                         "class": "Appui\/Note",
                         "text": "__construct",
                         "value": "__construct",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/__construct",
                         "desc": "Note constructor."
                     },
@@ -7282,7 +7282,7 @@
                         "class": "Appui\/Note",
                         "text": "addMedia",
                         "value": "addMedia",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/addMedia",
                         "desc": ""
                     },
@@ -7291,7 +7291,7 @@
                         "class": "Appui\/Note",
                         "text": "addMediaToNote",
                         "value": "addMediaToNote",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/addMediaToNote",
                         "desc": ""
                     },
@@ -7300,7 +7300,7 @@
                         "class": "Appui\/Note",
                         "text": "browse",
                         "value": "browse",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/browse",
                         "desc": ""
                     },
@@ -7309,7 +7309,7 @@
                         "class": "Appui\/Note",
                         "text": "copy",
                         "value": "copy",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/copy",
                         "desc": ""
                     },
@@ -7318,7 +7318,7 @@
                         "class": "Appui\/Note",
                         "text": "count",
                         "value": "count",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/count",
                         "desc": ""
                     },
@@ -7327,7 +7327,7 @@
                         "class": "Appui\/Note",
                         "text": "countByType",
                         "value": "countByType",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/countByType",
                         "desc": ""
                     },
@@ -7336,7 +7336,7 @@
                         "class": "Appui\/Note",
                         "text": "get",
                         "value": "get",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/get",
                         "desc": ""
                     },
@@ -7345,7 +7345,7 @@
                         "class": "Appui\/Note",
                         "text": "getAliases",
                         "value": "getAliases",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getAliases",
                         "desc": "Returns an array of IDs of the notes which are aliases of the given ID."
                     },
@@ -7354,7 +7354,7 @@
                         "class": "Appui\/Note",
                         "text": "getByType",
                         "value": "getByType",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getByType",
                         "desc": ""
                     },
@@ -7363,7 +7363,7 @@
                         "class": "Appui\/Note",
                         "text": "getChildren",
                         "value": "getChildren",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getChildren",
                         "desc": "Returns an array of IDs of the notes which are children of the given ID."
                     },
@@ -7372,7 +7372,7 @@
                         "class": "Appui\/Note",
                         "text": "getEventIdFromNote",
                         "value": "getEventIdFromNote",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getEventIdFromNote",
                         "desc": "Returns event id for the given note."
                     },
@@ -7381,7 +7381,7 @@
                         "class": "Appui\/Note",
                         "text": "getExcerpt",
                         "value": "getExcerpt",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getExcerpt",
                         "desc": ""
                     },
@@ -7390,7 +7390,7 @@
                         "class": "Appui\/Note",
                         "text": "getFull",
                         "value": "getFull",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getFull",
                         "desc": ""
                     },
@@ -7399,7 +7399,7 @@
                         "class": "Appui\/Note",
                         "text": "getLang",
                         "value": "getLang",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getLang",
                         "desc": ""
                     },
@@ -7408,7 +7408,7 @@
                         "class": "Appui\/Note",
                         "text": "getLastVersionCfg",
                         "value": "getLastVersionCfg",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getLastVersionCfg",
                         "desc": "Returns the configuration to have the last version for each note"
                     },
@@ -7417,7 +7417,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediaInstance",
                         "value": "getMediaInstance",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaInstance",
                         "desc": ""
                     },
@@ -7426,7 +7426,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediaNotes",
                         "value": "getMediaNotes",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediaNotes",
                         "desc": "returns all the notes linked to the media."
                     },
@@ -7435,7 +7435,7 @@
                         "class": "Appui\/Note",
                         "text": "getMedias",
                         "value": "getMedias",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMedias",
                         "desc": ""
                     },
@@ -7444,7 +7444,7 @@
                         "class": "Appui\/Note",
                         "text": "getMediasNotes",
                         "value": "getMediasNotes",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getMediasNotes",
                         "desc": "Selects from db all medias that have the property content not null and a correspondent existing file."
                     },
@@ -7453,7 +7453,7 @@
                         "class": "Appui\/Note",
                         "text": "getNoteIdFromEvent",
                         "value": "getNoteIdFromEvent",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getNoteIdFromEvent",
                         "desc": "Returns note id for the given event."
                     },
@@ -7462,7 +7462,7 @@
                         "class": "Appui\/Note",
                         "text": "getPostIt",
                         "value": "getPostIt",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getPostIt",
                         "desc": ""
                     },
@@ -7471,7 +7471,7 @@
                         "class": "Appui\/Note",
                         "text": "getPostIts",
                         "value": "getPostIts",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getPostIts",
                         "desc": ""
                     },
@@ -7480,7 +7480,7 @@
                         "class": "Appui\/Note",
                         "text": "getTitle",
                         "value": "getTitle",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getTitle",
                         "desc": ""
                     },
@@ -7489,7 +7489,7 @@
                         "class": "Appui\/Note",
                         "text": "getVersions",
                         "value": "getVersions",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/getVersions",
                         "desc": ""
                     },
@@ -7498,7 +7498,7 @@
                         "class": "Appui\/Note",
                         "text": "hasMedias",
                         "value": "hasMedias",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/hasMedias",
                         "desc": ""
                     },
@@ -7507,7 +7507,7 @@
                         "class": "Appui\/Note",
                         "text": "insert",
                         "value": "insert",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insert",
                         "desc": "Creates a new note in the database"
                     },
@@ -7516,7 +7516,7 @@
                         "class": "Appui\/Note",
                         "text": "insertNoteEvent",
                         "value": "insertNoteEvent",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertNoteEvent",
                         "desc": "If the row corresponding to the given arguments is not in the table bbn_notes_events it inserts the row."
                     },
@@ -7525,7 +7525,7 @@
                         "class": "Appui\/Note",
                         "text": "insertOrUpdateUrl",
                         "value": "insertOrUpdateUrl",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertOrUpdateUrl",
                         "desc": "Insert the given url to the note if has no url and update it otherwise."
                     },
@@ -7534,7 +7534,7 @@
                         "class": "Appui\/Note",
                         "text": "insertVersion",
                         "value": "insertVersion",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/insertVersion",
                         "desc": "Adds a new version to the given note if it's different from the last, and returns the latest version."
                     },
@@ -7543,7 +7543,7 @@
                         "class": "Appui\/Note",
                         "text": "latest",
                         "value": "latest",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/latest",
                         "desc": ""
                     },
@@ -7552,7 +7552,7 @@
                         "class": "Appui\/Note",
                         "text": "remove",
                         "value": "remove",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/remove",
                         "desc": ""
                     },
@@ -7561,7 +7561,7 @@
                         "class": "Appui\/Note",
                         "text": "removeAllMedias",
                         "value": "removeAllMedias",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeAllMedias",
                         "desc": "Removes all the rows associating medias with a given note."
                     },
@@ -7570,7 +7570,7 @@
                         "class": "Appui\/Note",
                         "text": "removeMedia",
                         "value": "removeMedia",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeMedia",
                         "desc": "Removes a row associating a given media and a given note."
                     },
@@ -7579,7 +7579,7 @@
                         "class": "Appui\/Note",
                         "text": "removeNoteEvent",
                         "value": "removeNoteEvent",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/removeNoteEvent",
                         "desc": "Removes the row corresponding to the given arguments from bbn_notes_events."
                     },
@@ -7588,7 +7588,7 @@
                         "class": "Appui\/Note",
                         "text": "savePostIt",
                         "value": "savePostIt",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/savePostIt",
                         "desc": ""
                     },
@@ -7597,7 +7597,7 @@
                         "class": "Appui\/Note",
                         "text": "setLang",
                         "value": "setLang",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setLang",
                         "desc": ""
                     },
@@ -7606,7 +7606,7 @@
                         "class": "Appui\/Note",
                         "text": "setOption",
                         "value": "setOption",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setOption",
                         "desc": "Changes the id_option of the note"
                     },
@@ -7615,7 +7615,7 @@
                         "class": "Appui\/Note",
                         "text": "setType",
                         "value": "setType",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/setType",
                         "desc": "Changes the type of the note"
                     },
@@ -7624,7 +7624,7 @@
                         "class": "Appui\/Note",
                         "text": "update",
                         "value": "update",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/update",
                         "desc": ""
                     },
@@ -7633,7 +7633,7 @@
                         "class": "Appui\/Note",
                         "text": "urlToNote",
                         "value": "urlToNote",
-                        "lastmod": 1653913591,
+                        "lastmod": 1654045964,
                         "url": "bbn-php\/doc\/method\/Appui\/Note\/urlToNote",
                         "desc": ""
                     }

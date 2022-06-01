@@ -1230,7 +1230,7 @@ class Note extends bbn\Models\Cls\Db
     }
 
     $cf = &$this->class_cfg;
-    return $this->getColumnValues($cf['table'], $cf['arch']['notes']['id'], [
+    return $this->db->getColumnValues($cf['table'], $cf['arch']['notes']['id'], [
       $cf['arch']['notes']['id_alias'] => $id_note
     ]);
   }
@@ -1249,7 +1249,7 @@ class Note extends bbn\Models\Cls\Db
     }
 
     $cf = &$this->class_cfg;
-    return $this->getColumnValues($cf['table'], $cf['arch']['notes']['id'], [
+    return $this->db->getColumnValues($cf['table'], $cf['arch']['notes']['id'], [
       $cf['arch']['notes']['id_parent'] => $id_note
     ]);
   }
