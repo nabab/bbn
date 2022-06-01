@@ -1232,4 +1232,37 @@ class Task extends bbn\Models\Cls\Db
     return false;
   }
 
+  public function getCfg(string $id): array
+  {
+    if ($cfg = $this->db->selectOne('bbn_tasks', 'cfg', ['id' => $id])) {
+      return \json_decode($cfg, true);
+    }
+    return [];
+  }
+
+  public function setCfg(string $id, array $cfg): bool
+  {
+    return (bool)$this->db->update('bbn_tasks', ['cfg' => \json_encode($cfg)], ['id' => $id]);
+  }
+
+  public function addWidget(string $id, string $code): bool
+  {
+    return $this->toggleWidget($id, $code);
+  }
+
+  public function removeWidget(string $id, string $code): bool
+  {
+    return $this->toggleWidget($id, $code, false);
+  }
+
+  private function toggleWidget(string $id, string $code, bool $state = true): bool
+  {
+    $cfg = $this->getCfg($id);
+    if (!isset($cfg['widgets'])) {
+      $cfg['widgets'] = [];
+    }
+    $cfg['widgets'][$code] = empty($state) ? 0 : 1;
+    return $this->setCfg($id, $cfg);
+  }
+
 }
