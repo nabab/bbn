@@ -12,8 +12,8 @@
     "interfaces": [],
     "fileName": "\/Appui\/Menu.php",
     "startLine": 8,
-    "endLine": 808,
-    "numMethods": 48,
+    "endLine": 852,
+    "numMethods": 49,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 5,
@@ -1094,6 +1094,74 @@
             "returns": [],
             "parent": false,
             "arguments": []
+        },
+        "getByCode": {
+            "name": "getByCode",
+            "summary": "Gets the ID of a menu by its code and relative user's access",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Menu",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $code, bool $pub = true, $idUser = NULL, $idGroup = NULL)\n  {\n    $prefCfg = $this->pref->getClassCfg();\n    $pFields = $prefCfg['arch']['user_options'];\n    $where = [\n      'conditions' => [[\n        'field' => $pFields['id_option'],\n        'value' => $this->fromPath('menus')\n      ], [\n        'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $pFields['cfg'] . ', \"$.code\"))',\n        'value' => $code\n      ], [\n        'field' => $pFields['public'],\n        'value' => (int)$pub\n      ]]\n    ];\n    if (!empty($idUser)) {\n      $where['conditions'][] = [\n        'field' => $pFields['id_user'],\n        'value' => $idUser\n      ];\n    }\n    if (!empty($idGroup)) {\n      $where['conditions'][] = [\n        'field' => $pFields['id_group'],\n        'value' => $idGroup\n      ];\n    }\n    return $this->pref->getDb()->selectOne([\n      'table' => $prefCfg['table'],\n      'fields' => [$pFields['id']],\n      'where' => $where\n    ]);\n  }",
+            "startLine": 679,
+            "endLine": 712,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The code of the menu"
+                },
+                {
+                    "name": "pub",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": "",
+                    "description": "The value of the 'public' field"
+                },
+                {
+                    "name": "idUser",
+                    "position": 2,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "ser The value of the 'id_user' field"
+                },
+                {
+                    "name": "idGroup",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "roup The value of the 'id_group' field"
+                }
+            ]
         },
         "test": {
             "name": "test",

@@ -22,8 +22,8 @@
     "interfaces": [],
     "fileName": "\/User\/Preferences.php",
     "startLine": 35,
-    "endLine": 2634,
-    "numMethods": 100,
+    "endLine": 2644,
+    "numMethods": 101,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 7,
@@ -3078,6 +3078,32 @@
                     "description": "group"
                 }
             ]
+        },
+        "getDb": {
+            "name": "getDb",
+            "summary": "Returns the bbn\\Db instance",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\User\\Preferences",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->db;\n  }",
+            "startLine": 2451,
+            "endLine": 2454,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "bbn\\Db"
+            ],
+            "parent": false,
+            "arguments": []
         },
         "test": {
             "name": "test",
