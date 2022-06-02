@@ -298,7 +298,7 @@ class Compiler extends Basic
       script.onerror = function(){
         bbn_reject();
       };
-      document.head.appendChild(script);
+      document.getElementsByTagName("head")[0].appendChild(script);
     })
   })
 JAVASCRIPT;
@@ -429,12 +429,7 @@ JAVASCRIPT;
     css.onerror = function(){
       bbn_reject();
     };
-    if (document.body) {
-      document.body.appendChild(css)
-    }
-    else {
-      document.head.appendChild(css);
-    }
+    document.getElementsByTagName("head")[0].appendChild(css);
   })
 })
 JAVASCRIPT;
@@ -511,12 +506,7 @@ JAVASCRIPT;
       css.onerror = function(){
         bbn_reject();
       };
-      if (document.body) {
-        document.body.appendChild(css)
-      }
-      else {
-        document.head.appendChild(css);
-      }
+      document.getElementsByTagName("head")[0].appendChild(css);
     })
   })
 JAVASCRIPT;
