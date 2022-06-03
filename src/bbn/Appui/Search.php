@@ -585,9 +585,9 @@ class Search extends Basic
         $filter[$col] = $o;
         if ($tmp = $this->db->rselectAll($this->class_cfg['tables']['search_results'], [], $filter)) {
           foreach ($tmp as $t) {
-            /* if (!X::getRow($res, ['hash' => $t['hash']])) {
+            //if (!X::getRow($res, ['hash' => $t['hash']])) {
               $res[] = $t;
-            } */
+            //}
           }
         }
       }
