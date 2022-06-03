@@ -954,7 +954,8 @@ class Task extends bbn\Models\Cls\Db
         'deadline' => $cfg['deadline'] ?? NULL,
         'id_user' => $this->id_user ?: NULL,
         'state' => $cfg['state'] ?? $this->idState('opened'),
-        'creation_date' => $this->date ?: date('Y-m-d H:i:s')
+        'creation_date' => $this->date ?: date('Y-m-d H:i:s'),
+        'cfg' => \json_encode(['widgets' => []])
       ]) ){
         $id = $this->db->lastId();
         $this->addLog($id, 'insert');
