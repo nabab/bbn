@@ -77,7 +77,7 @@ class Client extends DbCls
     $this->media->setImageRoot('/image/');
   }
 	
-	public function add(String $email, Bool $newsletter){
+	public function add(string $email, bool $newsletter){
 		$id_client = false;
 		if(!$this->db->selectOne('bbn_shop_clients','id', ['email' => $email])){
 			$this->db->insert('bbn_shop_clients', [
