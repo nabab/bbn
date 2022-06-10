@@ -314,7 +314,7 @@ class Cart extends DbCls
     if (!($idCountry = $addressCls->selectOne($aFields['country'], [$aFields['id'] => $idAddress]))) {
       throw new \Exception(sprintf(_('Contry not found for the address %s'), $idAddress));
     }
-		$opt = Option::getInstance();
+    $opt = Option::getInstance();
     if (!($continentCode = $opt->getProp($idCountry, 'continent'))) {
       throw new \Exception(sprintf(_('Continent code not found for the country %s'), $idCountry));
     }

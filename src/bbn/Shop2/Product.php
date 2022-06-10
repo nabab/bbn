@@ -360,4 +360,5 @@ class Product extends DbCls
 
     return 0;
   }
+
 }

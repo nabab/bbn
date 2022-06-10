@@ -76,5 +76,56 @@ class Client extends DbCls
     $this->media = new Medias($this->db);
     $this->media->setImageRoot('/image/');
   }
+	
+	public function add(String $email, Bool $newsletter){
+		$id_client = false;
+		if(!$this->db->selectOne('bbn_shop_clients','id', ['email' => $email])){
+			$this->db->insert('bbn_shop_clients', [
+			'email' => $email,
+			'newsletter' => $newsletter
+			]);
+		}
+		return $this->db->selectOne('bbn_shop_clients','id', ['email' => $email]);
+	}
 
+	public function addAddress($id_client, $address): ?array{
+		if(!empty($id_client)){
+			$opt = Option::getInstance();
+		  $entity = new \bbn\Entities\Address($this->db);
+			
+			$address['email'] = $this->getEmail($id_client);
+			$address['address'] = $address['address1'].' '.$address['address2'];
+			$country = $opt->option($address['country']);
+			
+			if($id_address = $entity->insert($address)){
+				if($this->db->insert('bbn_shop_clients_addresses', [
+					'id_client' => $id_client,
+					'id_address' => $id_address,
+					'def' => 1,
+					'last' =>  date('Y-m-d H:i:s')
+				])){
+					$newAddress = $this->getAddress($id_address);
+					$newAddress['continent'] = $country['continent'];
+					return $newAddress;
+				}
+			}
+		}
+	}
+	
+	protected function getEmail($id_client): ?string
+	{
+		if($email = $this->db->selectOne('bbn_shop_clients','email', ['id' => $id_client])){
+			return $email;
+		}
+		return null;
+	}
+	
+	protected function getAddress($id_address)
+	{
+		
+		return $this->db->rselect('bbn_addresses',[], [
+			'id' => $id_address
+		]);
+	}
+	
 }

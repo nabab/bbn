@@ -130,10 +130,10 @@ class Provider extends DbCls
    */
   public function getShippingCosts(string $id, string $territory): ?array
   {
-		if (($cfg = $this->selectOne($this->fields['cfg'], [$this->fields['id'] => $id]))
+    if (($cfg = $this->selectOne($this->fields['cfg'], [$this->fields['id'] => $id]))
       && ($cfg = json_decode($cfg, true))
     ) {
-			return X::getRow($cfg, ['territory' => $territory]);
+      return X::getRow($cfg, ['territory' => $territory]);
     }
     return null;
   }
