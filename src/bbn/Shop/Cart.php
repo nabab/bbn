@@ -302,34 +302,42 @@ class Cart extends DbCls
    */
   public function shippingCost(string $idAddress, string $idCart = ''): float
   {
+    return $this->shippingCostDetail($idAddress, $idCart)['total'];
+  }
+
+
+  /**
+   * Gets the shipping cost for the given address indexed by providers
+   * @param string $idAddress The address ID
+   * @param string $idCart The cart ID
+   * @return array
+   */
+  public function shippingCostDetail(string $idAddress, string $idCart = ''): array
+  {
     if (empty($idCart)) {
       $idCart = $this->getCurrentCartID();
     }
     if (!Str::isUid($idCart)) {
       throw new \Exception(_('The cart ID is an invalid UID'));
     }
-    $addressCls = new Address($this->db);
-    $addressClsCfg = $addressCls->getClassCfg();
-    $aFields = $addressClsCfg['arch']['addresses'];
-    if (!($idCountry = $addressCls->selectOne($aFields['country'], [$aFields['id'] => $idAddress]))) {
-      throw new \Exception(sprintf(_('Contry not found for the address %s'), $idAddress));
-    }
-    $opt = Option::getInstance();
-    if (!($continentCode = $opt->getProp($idCountry, 'continent'))) {
-      throw new \Exception(sprintf(_('Continent code not found for the country %s'), $idCountry));
-    }
-    if (!($continent = $opt->fromCode($continentCode, 'territories'))) {
-      throw new \Exception(sprintf(_('Continent not found with the code %s'), $continentCode));
-    }
-    $pFields = $this->class_cfg['arch']['cart_products'];
-    $cost = 0;
+    $costs = [
+      'total' => 0
+    ];
     if ($products = $this->getProducts($idCart)) {
-      $providerCls = new Provider($this->db);
       $providersCosts = [];
       $providersWeight = [];
+      $providersDefaults = [];
+      $pFields = $this->class_cfg['arch']['cart_products'];
+      $continent = $this->getContinentFromAddress($idAddress);
       foreach ($products as $product) {
         if (!($provider = $this->productCls->getProvider($product[$pFields['id_product']]))) {
           throw new \Exception(sprintf(_('No provider found for the product %s'), $product[$pFields['id_product']]));
+        }
+        if (!isset($providersCosts[$provider])) {
+          $providersCosts[$provider] = $this->getProviderShippingCosts($provider, $continent);
+        }
+        if (!isset($costs[$provider])) {
+          $costs[$provider] = 0;
         }
         if ($weight = $this->productCls->getWeight($product[$pFields['id_product']])) {
           if (!isset($providersWeight[$provider])) {
@@ -338,28 +346,13 @@ class Cart extends DbCls
           else {
             $providersWeight[$provider] += $weight;
           }
-          if (!isset($providersCosts[$provider])) {
-            $pc = $providerCls->getShippingCosts($provider, $continent);
-            $providersCosts[$provider] = [
-              'prices' => [],
-              'surcharge' => []
-            ];
-            $prices = [];
-            if (\is_array($pc)) {
-              foreach ($pc as $i => $v) {
-                if ($i !== 'territory') {
-                  if (\substr($i, 0, 2) === 'gm') {
-                    $providersCosts[$provider]['surcharge'][\substr($i, 2)] = $v;
-                  }
-                  else {
-                    $prices[\substr($i, 1)] = $v;
-                  }
-                }
-              }
-            }
-            ksort($prices, SORT_NUMERIC);
-            $providersCosts[$provider]['prices'] = $prices;
-          }
+        }
+        else if (!isset($providersDefaults[$provider])
+          && !empty($providersCosts[$provider]['default'])
+        ) {
+          $providersDefaults[$provider] = $providersCosts[$provider]['default'];
+          $costs[$provider] = \round($costs[$provider] + $providersCosts[$provider]['default'], 2);
+          $costs['total'] = \round($costs['total'] + $providersCosts[$provider]['default'], 2);
         }
       }
       foreach ($providersWeight as $p => $pw) {
@@ -373,18 +366,19 @@ class Cart extends DbCls
             $tmpw = $weights[$i + 1];
           }
         }
-        $cost += $providersCosts[$p]['prices'][$tmpw];
+        $costs[$p] = \round($costs[$p] + $providersCosts[$p]['prices'][$tmpw], 2);
         $diff = $pw - $tmpw;
         if (($diff > 0) && count($providersCosts[$p]['surcharge'])) {
           $gr = \array_keys($providersCosts[$p]['surcharge'])[0];
           $m = \array_values($providersCosts[$p]['surcharge'])[0];
           $num = $diff / $gr;
           $num = \round($num, 0) + ($num - round($num, 0) > 0 ? 1 : 0);
-          $cost += $m * $num;
+          $costs[$p] = \round($costs[$p] + ($m * $num), 2);
         }
+        $costs['total'] = \round($costs['total'] + $costs[$p], 2);
       }
     }
-    return \round($cost, 2);
+    return $costs;
   }
 
 
@@ -476,6 +470,56 @@ class Cart extends DbCls
       return round((float)$price * $quantity, 2);
     }
     throw new \Exception(sprintf(_('No product found with the ID %s'), $idProduct));
+  }
+
+
+  protected function getContinentFromAddress(string $idAddress): string
+  {
+    $addressCls = new Address($this->db);
+    $addressClsCfg = $addressCls->getClassCfg();
+    $aFields = $addressClsCfg['arch']['addresses'];
+    if (!($idCountry = $addressCls->selectOne($aFields['country'], [$aFields['id'] => $idAddress]))) {
+      throw new \Exception(sprintf(_('Contry not found for the address %s'), $idAddress));
+    }
+    $opt = Option::getInstance();
+    if (!($continentCode = $opt->getProp($idCountry, 'continent'))) {
+      throw new \Exception(sprintf(_('Continent code not found for the country %s'), $idCountry));
+    }
+    if (!($continent = $opt->fromCode($continentCode, 'territories'))) {
+      throw new \Exception(sprintf(_('Continent not found with the code %s'), $continentCode));
+    }
+    return $continent;
+  }
+
+
+  protected function getProviderShippingCosts(string $provider, string $continent): array
+  {
+    $providerCls = new Provider($this->db);
+    $res = [
+      'prices' => [],
+      'surcharge' => [],
+      'default' => 0
+    ];
+    $prices = [];
+    $pc = $providerCls->getShippingCosts($provider, $continent);
+    if (\is_array($pc)) {
+      foreach ($pc as $i => $v) {
+        if ($i !== 'territory') {
+          if (\substr($i, 0, 2) === 'gm') {
+            $res['surcharge'][\substr($i, 2)] = $v;
+          }
+          else {
+            if ($i === 'g3000') {
+              $res['default'] = $v;
+            }
+            $prices[\substr($i, 1)] = $v;
+          }
+        }
+      }
+    }
+    ksort($prices, SORT_NUMERIC);
+    $res['prices'] = $prices;
+    return $res;
   }
 
 }
