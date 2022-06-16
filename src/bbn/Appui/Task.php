@@ -1191,7 +1191,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTracks($id_task){
     return $this->db->getRows("
-      SELECT id_user, SUM(length) AS total_time
+      SELECT id_user, SUM(length) AS total_time, COUNT(id_note) as num_notes
       FROM bbn_tasks_sessions
       WHERE id_task = ?
       GROUP BY id_user",
