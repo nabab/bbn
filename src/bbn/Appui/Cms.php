@@ -501,7 +501,7 @@ class Cms extends DbCls
                     'fields' => [],
                     'where' => [
                         'conditions' => [[
-                            'field' => $this->fields['id'],
+                            'field' => $this->class_cfg['arch']['events']['id'],
                             'value' => $id_event
                         ]]],
                     ])
