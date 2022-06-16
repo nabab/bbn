@@ -100,13 +100,24 @@ class Client extends DbCls
 		}
 		return $idClient;
 	}
-
+	public function addClientName(string $idClient, string $name, string $lastname){
+		if($this->db->rselect($this->class_table, [], [$this->fields['id'] => $idClient])){
+			if($this->db->update($this->class_table, [$this->fields['name'] => $name.' '.$lastname],[$this->fields['id'] => $idClient])){
+				return $name.' '.$lastname;
+			}
+		}
+	}
+	
 	public function addAddress(string $idClient, array $address): ?array
   {
     $opt = Option::getInstance();
     $entity = new \bbn\Entities\Address($this->db);
     $cfg = $entity->getClassCfg();
     $address[$cfg['arch']['addresses']['email']] = $this->getEmail($idClient);
+		if(($name = $address['name']) && ($lastname = $address['lastname'])){
+			$fullName = $this->addClientName($idClient, $name, $lastname);
+			unset($address['name'], $address['lastname']);
+		}
     $address[$cfg['arch']['addresses']['address']] = $address['address1'] . ' ' . $address['address2'];
     $country = $opt->option($address['country']);
     if ($idAddress = $entity->insert($address)) {
@@ -118,6 +129,7 @@ class Client extends DbCls
       ])) {
         $newAddress = $this->getAddress($idAddress);
         $newAddress['continent'] = $country['continent'];
+				$newAddress['fullName'] = $fullName;
         return $newAddress;
       }
     }
