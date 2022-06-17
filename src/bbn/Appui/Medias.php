@@ -386,7 +386,7 @@ class Medias extends bbn\Models\Cls\Db
       'field' => $this->db->cfn('position', $t),
       'dir' => 'ASC'
     ];
-    return $this->browse($cfg, $limit, $start);
+		return $this->browse($cfg, $limit, $start);
   }
 
 
@@ -742,11 +742,16 @@ class Medias extends bbn\Models\Cls\Db
     //the old media
     $old  = $this->getMedia($id_media, true);
     $root = Mvc::getDataPath('appui-note').'media/';
-    if ($old
+	  if ($old
         && (($old['name'] !== $name) || ($old['title'] !== $title))
     ) {
-        $content = json_decode($old['content'], true);
-        $path    = $root.$content['path'].'/';
+			if(gettype($old['content']) === 'string'){
+				$content = json_decode($old['content'], true);
+			}
+			else{
+				$content = $old['content'];
+			}
+			$path    = $root.$content['path'].'/';	
 
       if ($this->fs->exists($path.$id_media.'/'.$old['name'])) {
         if ($old['name'] !== $name) {
@@ -995,6 +1000,9 @@ class Medias extends bbn\Models\Cls\Db
       $data['full_path'] = $this->getThumbPath($full_path);
       $data['path']      = $this->getImageUrl($data['id']);
       $data['is_image']  = $this->isImage($full_path);
+			//here need to have the url where the media has to go! ex: google.it!
+			$data['linkUrl'] = '';
+			
       if ($data['is_image']) {
         $data['thumbs']     = $this->getThumbsSizes($data);
         $img                = new \bbn\File\Image($full_path);
@@ -1018,4 +1026,9 @@ class Medias extends bbn\Models\Cls\Db
       }
     }
   }
+	
+	public function setUrl(string $id_media, string $url)
+	{
+		if($this->db->selectOne()){}
+	}
 }
