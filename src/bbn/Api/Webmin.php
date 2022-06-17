@@ -58,8 +58,8 @@ class Webmin
    */
   public function callCommand(string $command, array $args = [])
   {
-    return xmlrpc_decode(
-      file_get_contents(
+    return \xmlrpc_decode(
+      \file_get_contents(
         $this->getUrl(),
         false,
         $this->getContext($command, $args)
