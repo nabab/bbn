@@ -501,7 +501,7 @@ class Cms extends DbCls
                     'fields' => [],
                     'where' => [
                         'conditions' => [[
-                            'field' => $this->fields['id'],
+                            'field' => $this->class_cfg['arch']['events']['id'],
                             'value' => $id_event
                         ]]],
                     ])
@@ -853,6 +853,10 @@ class Cms extends DbCls
 
     if (!is_string($url) || empty($url)) {
       throw new Exception(X::_("The CMS article MUST have a URL"));
+    }
+
+    if ($note = $this->getByUrl($url)){
+      $id_note = $note['id'];
     }
 
     if (!empty($id_note)) {
