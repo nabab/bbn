@@ -2630,12 +2630,12 @@ class Preferences extends bbn\Models\Cls\Db
         'conditions' => $cond
       ];
       return $this->db->rselectAll(
-          [
+        [
           'tables' => [$this->class_cfg['table']],
           'fields' => [$this->fields['id'], $this->fields['id_option']],
           'where' => $where,
           'order' => [$this->fields['text']]
-          ]
+        ]
       );
     }
 

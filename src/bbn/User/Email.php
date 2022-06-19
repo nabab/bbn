@@ -1,16 +1,21 @@
 <?php
 namespace bbn\User;
 
-use bbn;
 use bbn\X;
+use bbn\Db;
 use bbn\Str;
 use bbn\User;
+use bbn\User\Preferences;
 use bbn\Appui\Mailbox;
+use bbn\Appui\Passwords;
+use bbn\Models\Cls\Basic;
+use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\Optional;
 
-class Email extends bbn\Models\Cls\Basic
+class Email extends Basic
 {
-  use bbn\Models\Tts\Dbconfig;
-  use bbn\Models\Tts\Optional;
+  use Dbconfig;
+  use Optional;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -107,13 +112,13 @@ class Email extends bbn\Models\Cls\Basic
   }
 
 
-  public function __construct(bbn\Db $db, User $user = null, Preferences $preferences = null)
+  public function __construct(Db $db, User $user = null, Preferences $preferences = null)
   {
     self::optionalInit();
     $this->_init_class_cfg();
     $this->db   = $db;
-    $this->user = $user ?: bbn\User::getInstance();
-    $this->pref = $preferences ?: bbn\User\Preferences::getInstance();
+    $this->user = $user ?: User::getInstance();
+    $this->pref = $preferences ?: Preferences::getInstance();
   }
 
 
@@ -335,8 +340,9 @@ class Email extends bbn\Models\Cls\Basic
       if ($mb->update($folder['uid'])
           && ($folders = $mb->getFolders())
           && ($res = $folders[$folder['uid']])
+          && ($info = $mb->getInfoFolder($folder['uid']))
       ) {
-        if ($folder['last_uid'] !== $res['last_uid']) {
+        if (($folder['last_uid'] !== $res['db_uid']) || ($res['num_msg'] !== $info->Nmsgs)) {
           $id_account = $folder['id_account'];
           unset($folder['id_account']);
           $res = array_merge($folder, $res);
@@ -391,6 +397,7 @@ class Email extends bbn\Models\Cls\Basic
                 $cfg['id_user'] => $this->user->getId()
               ]
             ),
+            'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $a['id']]),
             'last_uid' => $a['last_uid'] ?? null,
             'last_check' => $a['last_check'] ?? null
           ];
@@ -431,6 +438,7 @@ class Email extends bbn\Models\Cls\Basic
             $cfg['id_user'] => $this->user->getId()
           ]
         ),
+        'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $a['id']]),
         'last_uid' => $a['last_uid'] ?? null,
         'last_check' => $a['last_check'] ?? null
       ];
@@ -444,76 +452,94 @@ class Email extends bbn\Models\Cls\Basic
   {
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
       $res = 0;
-      if ($folder['last_uid'] && ($folder['last_uid'] !== $folder['db_uid'])) {
-        $mb = $this->getMailbox($folder['id_account']);
-        if ($mb->selectFolder($folder['uid'])) {
-          if (!empty($folder['db_uid'])) {
-            try {
-              $start = $mb->getMsgNo($folder['db_uid']);
-            }
-            catch (\Exception $e) {
-              $start = 1;
-            }
+      $mb = $this->getMailbox($folder['id_account']);
+      $mb->selectFolder($folder['uid']);
+      if ($folder['last_uid'] && (($folder['last_uid'] !== $folder['db_uid']))) {
+        if (!empty($folder['db_uid'])) {
+          try {
+            $start = $mb->getMsgNo($folder['db_uid']);
           }
-
-          if (empty($start)) {
+          catch (\Exception $e) {
             $start = 1;
           }
-          $real_end = 1;
-          if (!empty($folder['last_uid'])) {
-            try {
-              $real_end = $mb->getMsgNo($folder['last_uid']);
-            }
-            catch (\Exception $e) {
-              $real_end = 1;
-            }
-          }
+        }
 
-          /** @todo temporary solution to avoid errors */
-          if ($start === $real_end) {
-            return 0;
+        if (empty($start)) {
+          $start = 1;
+        }
+        $real_end = 1;
+        if (!empty($folder['last_uid'])) {
+          try {
+            $real_end = $mb->getMsgNo($folder['last_uid']);
           }
-
-          if ($limit) {
-            $real_end = min($real_end, $start + $limit);
+          catch (\Exception $e) {
+            $real_end = 1;
           }
+        }
 
-          $end      = $start;
-          $num      = $real_end - $start;
-          //var_dump($folder, $num, $real_end);
-          while ($end <= $real_end) {
-            $end = min($real_end, $start + 999);
-            if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {
-              $start += 1000;
-              //var_dump($start, $end);
-              foreach ($all as $a) {
-                X::log($a, 'mail');
-                if ($this->insertEmail($folder, $a)) {
-                  $res++;
-                }
-                else {
-                  //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
-                  $this->log(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
-                }
+        /** @todo temporary solution to avoid errors */
+        if ($start === $real_end) {
+          return 0;
+        }
+
+        if ($limit) {
+          $real_end = min($real_end, $start + $limit);
+        }
+
+        $end      = $start;
+        $num      = $real_end - $start;
+        //var_dump($folder, $num, $real_end);
+        while ($end <= $real_end) {
+          $end = min($real_end, $start + 999);
+          if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {
+            $start += 1000;
+            //var_dump($start, $end);
+            foreach ($all as $a) {
+              X::log($a, 'mail');
+              if ($this->insertEmail($folder, $a)) {
+                $res++;
               }
-
-              if ($end === $real_end) {
-                $this->pref->updateBit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
-                break;
+              else {
+                //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
+                $this->log(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
               }
             }
-            else {
-              throw new \Exception(
-                X::_("Impossible to get the emails for folder")
-                .' '.$folder['uid']
-                .' '.X::_("from").' '.$start
-                .' '.X::_("to").' '.$end
-                .' ('.$real_end.')'
-              );
+
+            if ($end === $real_end) {
+              $this->pref->updateBit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
+              break;
             }
+          }
+          else {
+            throw new \Exception(
+              X::_("Impossible to get the emails for folder")
+              .' '.$folder['uid']
+              .' '.X::_("from").' '.$start
+              .' '.X::_("to").' '.$end
+              .' ('.$real_end.')'
+            );
           }
         }
       }
+
+      $info = $mb->getInfoFolder($folder['uid']);
+      if ($info->Nmsgs > ($res + $folder['num_msg'])) {
+        $cfg   = $this->class_cfg['arch']['users_emails'];
+        $table = $this->class_cfg['tables']['users_emails'];
+        $num = $res + $folder['num_msg'];
+        $s2 = 0;
+        while ($info->Nmsgs < $num) {
+          $msg = $this->db->rselect($table, [$cfg['id'], $cfg['msg_uid']], [$cfg['id_folder'] => $folder['id']], [$cfg['msg_uid'] => 'DESC'], $s2);
+          if (!$mb->getMsgNo($msg['msg_uid'])) {
+            if ($this->db->delete($table, [$cfg['id'] => $msg['id']])) {
+              $num--;
+              $s2--;
+            }
+          }
+          $s2++;
+        }
+      }
+
       return $res;
     }
 
@@ -591,13 +617,19 @@ class Email extends bbn\Models\Cls\Basic
       if ($folder
           && ($mb = $this->getMailbox($folder['id_account']))
           && $mb->selectFolder($folder['uid'])
-          && ($number = $mb->getMsgNo($em['msg_uid']))
+          && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
       ) {
+        if ($number === 0) {
+          $this->db->delete($table, [$cfg['id'] => $id]);
+          return null;
+        }
+
         $arr = $mb->getMsg($number);
         $arr['id_account'] = $folder['id_account'];
         return $arr;
       }
     }
+
     return null;
   }
 
@@ -682,15 +714,11 @@ class Email extends bbn\Models\Cls\Basic
         ];
         $id = false;
         if ($existing) {
-          //die(var_dump($ar));
-          //$this->db->update($table, $ar, [$cfg['id'] => $existing]);
+          $this->db->update($table, $ar, [$cfg['id'] => $existing]);
           $id = $existing;
         }
         elseif ($this->db->insert($table, $ar)) {
           $id = $this->db->lastId();
-        }
-
-        if ($id) {
           foreach (Mailbox::getDestFields() as $df) {
             if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {
               foreach ($email[$df] as $dest) {
@@ -700,7 +728,9 @@ class Email extends bbn\Models\Cls\Basic
               }
             }
           }
+        }
 
+        if ($id) {
           return $id;
         }
       }
@@ -1066,9 +1096,9 @@ class Email extends bbn\Models\Cls\Basic
       $inbox = X::getRow($types, ['code' => 'inbox']);
       $sent = X::getRow($types, ['code' => 'sent']);
       $ids = [];
-      $accounts = $em->getAccounts();
+      $accounts = $this->getAccounts();
       foreach ($accounts as $a) {
-        foreach ($em->getFolders($a['id']) as $f) {
+        foreach ($this->getFolders($a['id']) as $f) {
           if (($f['id_option'] === $inbox['id']) || ($f['id_option'] === $sent['id'])) {
             $ids[] = $f['id'];
           }
@@ -1084,10 +1114,10 @@ class Email extends bbn\Models\Cls\Basic
   }
 
 
-  private function _get_password(): bbn\Appui\Passwords
+  private function _get_password(): Passwords
   {
     if (!$this->pw) {
-      $this->pw = new bbn\Appui\Passwords($this->db);
+      $this->pw = new Passwords($this->db);
     }
 
     return $this->pw;

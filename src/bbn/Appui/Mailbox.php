@@ -2,14 +2,16 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
 use bbn\Mail;
 use bbn\X;
 use bbn\Str;
 use HTMLPurifier_Config;
 use HTMLPurifier;
+use IMAP\Connection;
+use bbn\Models\Cls\Basic;
 
-class Mailbox extends bbn\Models\Cls\Basic
+class Mailbox extends Basic
 {
 
   /**
@@ -93,7 +95,7 @@ class Mailbox extends bbn\Models\Cls\Basic
   protected $num_msg;
 
   /**
-   * @var resource The stream object
+   * @var Connection The stream object
    */
   protected $stream;
 
@@ -1321,6 +1323,8 @@ class Mailbox extends bbn\Models\Cls\Basic
       }
     }
   }
+  
+
 
 
 }
