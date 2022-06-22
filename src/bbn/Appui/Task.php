@@ -481,7 +481,36 @@ class Task extends bbn\Models\Cls\Db
 
   public function getChildren(string $id): array
   {
-    if ($children = $this->db->rselectAll('bbn_tasks', [], ['id_parent' => $id, 'active' => 1], ['creation_date' => 'DESC'])) {
+    if ($children = $this->db->rselectAll([
+      'table' => 'bbn_tasks',
+      'fields' => [],
+      'where' => [
+        'conditions' => [[
+          'field' => 'id_parent',
+          'value' => $id
+        ], [
+          'field' => 'active',
+          'value' => 1
+        ], [
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => 'private',
+            'value' => 0
+          ], [
+            'conditions' => [[
+              'field' => 'private',
+              'value' => 1
+            ], [
+              'field' => 'id_user',
+              'value' => $this->id_user
+            ]]
+          ]]
+        ]]
+      ],
+      'order' => [
+        'creation_date' => 'DESC'
+      ]
+    ])) {
       foreach ($children as $i => $c) {
         $children[$i]['num_children'] = $this->db->count('bbn_tasks', ['id_parent' => $c['id'], 'active' => 1]);
         $children[$i]['roles'] = $this->infoRoles($c['id']);
@@ -955,6 +984,7 @@ class Task extends bbn\Models\Cls\Db
         'id_user' => $this->id_user ?: NULL,
         'state' => $cfg['state'] ?? $this->idState('opened'),
         'creation_date' => $this->date ?: date('Y-m-d H:i:s'),
+        'private' => $cfg['private'] ?? 0,
         'cfg' => \json_encode(['widgets' => []])
       ]) ){
         $id = $this->db->lastId();
