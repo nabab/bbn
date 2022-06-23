@@ -601,7 +601,7 @@ class Notification extends bbn\Models\Cls\Db
           if (bbn\File\Dir::createPath($path) && !\is_file($path . "$mtime.json")) {
             $notification[$this->fields['web']]    = $mtime;
             $notification[$this->fields['dt_web']] = date('Y-m-d H:i:s', $mtime);
-            file_put_contents($path . "$mtime.json", Json_encode($notification));
+            file_put_contents($path . "$mtime.json", \json_encode($notification));
           }
         }
       }
@@ -616,7 +616,7 @@ class Notification extends bbn\Models\Cls\Db
           if (bbn\File\Dir::createPath($path) && !\is_file($path . "$mtime.json")) {
             $notification[$this->fields['browser']]    = $mtime;
             $notification[$this->fields['dt_browser']] = date('Y-m-d H:i:s', $mtime);
-            file_put_contents($path . "$mtime.json", Json_encode($notification));
+            file_put_contents($path . "$mtime.json", \json_encode($notification));
           }
         }
       }
