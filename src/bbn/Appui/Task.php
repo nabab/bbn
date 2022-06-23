@@ -235,7 +235,8 @@ class Task extends bbn\Models\Cls\Db
     return $res;
   }
 
-  public function getApprovedLog($id){
+  public function getApprovedLog($id): array
+  {
     if (
       $this->exists($id) &&
       ($action = $this->idAction('price_approved'))
@@ -243,12 +244,13 @@ class Task extends bbn\Models\Cls\Db
       return $this->db->rselect('bbn_tasks_logs', [], [
         'id_task' => $id,
         'action' => $action
-      ], ['chrono' => 'DESC']) ?: new \stdClass();
+      ], ['chrono' => 'DESC']) ?: [];
     }
-    return new \stdClass();
+    return [];
   }
 
-  public function getPriceLog($id){
+  public function getPriceLog($id): array
+  {
     if ($this->exists($id)
       && ($action_ins = $this->idAction('price_insert'))
       && ($action_upd = $this->idAction('price_update'))
@@ -278,7 +280,7 @@ class Task extends bbn\Models\Cls\Db
           'field' => 'chrono',
           'dir' => 'DESC'
         ]]
-      ]) ?: new \stdClass();
+      ]) ?: [];
     }
   }
 
