@@ -249,29 +249,28 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function getPriceLog($id){
-    if (
-      $this->exists($id) &&
-      ($action_ins = $this->idAction('price_insert')) &&
-      ($action_upd = $this->idAction('price_update'))
+    if ($this->exists($id)
+      && ($action_ins = $this->idAction('price_insert'))
+      && ($action_upd = $this->idAction('price_update'))
+      && ($action_del = $this->idAction('price_delete'))
     ){
       return $this->db->rselect([
         'table' => 'bbn_tasks_logs',
         'where' => [
-          'logic' => 'AND',
           'conditions' => [[
             'field' => 'id_task',
-            'operation' => '=',
             'value' => $id
           ], [
             'logic' => 'OR',
             'conditions' => [[
               'field' => 'action',
-              'operatort' => '=',
               'value' => $action_ins
             ], [
               'field' => 'action',
-              'operatort' => '=',
               'value' => $action_upd
+            ], [
+              'field' => 'action',
+              'value' => $action_del
             ]]
           ]]
         ],
