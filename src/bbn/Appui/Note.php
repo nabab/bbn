@@ -40,6 +40,7 @@ class Note extends bbn\Models\Cls\Db
     'tables' => [
       'notes' => 'bbn_notes',
       'versions' => 'bbn_notes_versions',
+      'features' => 'bbn_notes_features',
       'notes_medias' => 'bbn_notes_medias',
       'medias' => 'bbn_medias',
       'notes_tags' => 'bbn_notes_tags',
@@ -70,6 +71,14 @@ class Note extends bbn\Models\Cls\Db
         'excerpt' => 'excerpt',
         'id_user' => 'id_user',
         'creation' => 'creation',
+      ],
+      'features' => [
+        'id' => 'id',
+        'id_option' => 'id_option',
+        'id_note' => 'id_note',
+        'id_media' => 'id_media',
+        'num' => 'num',
+        'cfg' => 'cfg'
       ],
       'notes_medias' => [
         'id' => 'id',
@@ -1544,6 +1553,271 @@ class Note extends bbn\Models\Cls\Db
   public function insertNoteEvent(string $id_note, string $id_event): bool
   {
     return $this->_insert_note_event($id_note, $id_event);
+  }
+
+
+  /**
+   * Creates a new element for the given feature (= id_option)
+   *
+   * @param string $id_option
+   * @param string $id_note
+   * @param string|null $id_media
+   * @param integer|null $num
+   * @param array|null $cfg
+   * @return string|null
+   */
+  public function addFeature(string $id_option, string $id_note, string $id_media = null, int $num = null, array $cfg = null): ?string
+  {
+    $id_option = $this->getFeatureOption($id_option);
+    $dbCfg     = $this->getClassCfg();
+    $table     = $dbCfg['tables']['features'];
+    $cols      = $dbCfg['arch']['features'];
+    if ($num === 0) {
+      $num = ((int)$this->db->selectOne($table, 'MAX(num)', [$cols['id_option'] => $id_option])) + 1;
+    }
+
+    if ($this->db->insert($table, [
+      $cols['id_option'] => $id_option,
+      $cols['id_note'] => $id_note,
+      $cols['id_media'] => $id_media,
+      $cols['num'] => $num,
+      $cols['cfg'] => $cfg ? json_encode($cfg) : null
+    ])) {
+      return $this->db->lastId();
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Gets a full feature element
+   *
+   * @param string $id
+   * @return array|null
+   */
+  public function getFeature(string $id): ?array
+  {
+    $dbCfg  = $this->getClassCfg();
+    $table  = $dbCfg['tables']['features'];
+    $cols   = $dbCfg['arch']['features'];
+    if ($res = $this->db->rselect($table, $cols, [$cols['id'] => $id])) {
+      if (!empty($res['cfg'])) {
+        $res['cfg'] = json_decode($res['cfg'], true);
+      }
+
+      $res['title'] = $this->getTitle($res['id_note']);
+      $res['url']   = $this->getUrl($res['id_note']);
+      if ($res['id_media']) {
+        $media = $this->getMediaInstance();
+        $res['media'] = $media->getMedia($res['id_media']);
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Removes an element from a feature
+   *
+   * @param string $id
+   * @return integer
+   */
+  public function removeFeature(string $id): int
+  {
+    $dbCfg = $this->getClassCfg();
+    $table = $dbCfg['tables']['features'];
+    $cols  = $dbCfg['arch']['features'];
+    $res = 0;
+    if ($feat = $this->getFeature($id)) {
+      $res = $this->db->delete($table, [$cols['id'] => $id]);
+      $this->fixFeatureOrder($feat['id_option']);
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Changes the media for the given geature element
+   *
+   * @param string $id
+   * @param string|null $id_media
+   * @return integer
+   */
+  public function setFeatureMedia(string $id, string $id_media = null): int
+  {
+    $dbCfg = $this->getClassCfg();
+    $table = $dbCfg['tables']['features'];
+    $cols  = $dbCfg['arch']['features'];
+    return $this->db->update($table, [
+      $cols['id_media'] => $id_media
+    ], [
+      $cols['id'] => $id
+    ]);
+  }
+
+
+  /**
+   * Changes the order number (= num) for the given feature element
+   *
+   * @param string $id
+   * @param integer $num
+   * @return integer
+   */
+  public function setFeatureOrder(string $id, int $num): int
+  {
+    $dbCfg = $this->getClassCfg();
+    $table = $dbCfg['tables']['features'];
+    $cols  = $dbCfg['arch']['features'];
+    $res = 0;
+    if ($feat = $this->getFeature($id)) {
+      if ($feat['num'] > $num) {
+        $this->db->update($table, [
+          'num' => [null, 'num + 1']
+        ], [
+          'id_option' => $feat['id_option'],
+          ['id', '!=', $id],
+          ['num', '>=', $num],
+          ['num', '<', $feat['num']]
+        ]);
+      }
+      elseif ($feat['num'] < $num) {
+        $this->db->update($table, [
+          'num' => [null, 'num - 1']
+        ], [
+          'id_option' => $feat['id_option'],
+          ['id', '!=', $id],
+          ['num', '>', $feat['num']],
+          ['num', '<=', $num]
+        ]);
+      }
+      
+      $res = $this->db->update($table, [$cols['num'] => $num], [$cols['id'] => $id]);
+      if ($res) {
+        $this->fixFeatureOrder($feat['id_option']);
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Removes all the order numbers from the given feature elements
+   *
+   * @param string $id_option
+   * @return integer
+   */
+  public function unsetFeatureOrder(string $id_option): int
+  {
+    $id_option = $this->getFeatureOption($id_option);
+    $dbCfg     = $this->getClassCfg();
+    $table     = $dbCfg['tables']['features'];
+    $cols      = $dbCfg['arch']['features'];
+    return $this->db->update($table, [
+      $cols['num'] => null
+    ], [
+      $cols['id_option'] => $id_option
+    ]);
+  }
+
+
+  /**
+   * Fix the order for all the elements of the given feature
+   *
+   * @param string $id_option
+   * @return boolean
+   */
+  public function fixFeatureOrder(string $id_option): bool
+  {
+    $id_option = $this->getFeatureOption($id_option);
+    $dbCfg     = $this->getClassCfg();
+    $table     = $dbCfg['tables']['features'];
+    $cols      = $dbCfg['arch']['features'];
+    $res       = 0;
+    foreach ($this->getFeatureList($id_option) as $i => $d) {
+      if ($d['num'] !== ($i + 1)) {
+        $res += (int)$this->db->update($table, [$cols['num'] => $i + 1], [$cols['id'] => $d['id']]);
+      }
+    }
+
+    return (bool)$res;
+  }
+
+
+  /**
+   * Returns the given/requested id_option, from the code if it's not a UID
+   *
+   * @param string $id_option
+   * @return string
+   */
+  public function getFeatureOption(string $id_option): string
+  {
+    if (!Str::isUid($id_option)) {
+      $id_option = $this->getOptionId($id_option, 'features');
+      if (!$id_option) {
+        throw new Exception(X::_("Impossible to determine the feature %s", $id_option));
+      }
+    }
+
+    return $id_option;
+  }
+
+
+  /**
+   * Returns a list of the elements for the given feature, with only id and num
+   *
+   * @param string $id_option
+   * @return array
+   */
+  public function getFeatureList(string $id_option): array
+  {
+    $id_option = $this->getFeatureOption($id_option);
+    $dbCfg = $this->getClassCfg();
+    $table = $dbCfg['tables']['features'];
+    $cols  = $dbCfg['arch']['features'];
+    return $this->db->selectAll($table, [$cols['id'], $cols['num']], [$cols['id_option'] => $id_option]) ?: [];
+  }
+
+
+  /**
+   * Changes the config of a feature element
+   *
+   * @param string $id
+   * @param array|null $cfg
+   * @return integer
+   */
+  public function setFeatureCfg(string $id, array $cfg = null): int
+  {
+    $dbCfg = $this->getClassCfg();
+    $table = $dbCfg['tables']['features'];
+    $cols  = $dbCfg['arch']['features'];
+    return $this->db->update($table, [
+      $cols['cfg'] => $cfg ? json_encode($cfg) : null
+    ], [
+      $cols['id'] => $id
+    ]);
+  }
+
+
+  /**
+   * Gets all the elements, and their details, for the given feature
+   *
+   * @param string $id_option
+   * @return array
+   */
+  public function getFeatures(string $id_option): array
+  {
+    $res = [];
+    foreach ($this->getFeatureList($id_option) as $d) {
+      $res[] = $this->getFeature($d['id']);
+    }
+
+    return $res;
   }
 
 

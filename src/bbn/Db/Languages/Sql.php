@@ -596,6 +596,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     $res = [];
     if (!empty($cfg['values'])) {
       foreach ($cfg['values'] as $i => $v) {
+        if (isset($cfg['values_types']) && ($cfg['values_types'][$i] === 'exp')) {
+          continue;
+        }
         // Transforming the values if needed
         if (($cfg['values_desc'][$i]['type'] === 'binary')
           && ($cfg['values_desc'][$i]['maxlength'] === 16)
@@ -1318,21 +1321,16 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       'values' => [],
       'fields' => [],
     ];
-    foreach ($cfg['fields'] as $alias => $f) {
+    foreach ($cfg['fields'] as $i => $f) {
       if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
         $model  = $cfg['models'][$cfg['available_fields'][$f]];
         $csn    = $this->colSimpleName($f);
-        $is_uid = false;
         if (isset($model['fields'][$csn])) {
-          $column = $model['fields'][$csn];
-          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
-            $is_uid = true;
-          }
-
           $fields_to_put['fields'][] = $this->colSimpleName($f, true);
-          $fields_to_put['values'][] = '?';
+          $fields_to_put['values'][] = $cfg['fields_types'][$i] === 'exp' ? $cfg['values'] : '?';
         }
-      } else {
+      }
+      else {
         $this->error("Error(bool) The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
       }
     }
@@ -2877,7 +2875,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $this->getValuesDesc($r['on'], $res, $res['values_desc']);
         }
 
-        if (($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE')) {
+        if (in_array($res['kind'], ['INSERT', 'UPDATE'])) {
           foreach ($res['fields'] as $name){
             $desc = [];
             if (isset($res['models'], $res['available_fields'][$name])) {
@@ -3069,6 +3067,20 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         && \is_string(array_keys($res['fields'])[0])
       ) {
         $res['values'] = array_values($res['fields']);
+        $res['values_types'] = [];
+        foreach ($res['values'] as $i => $v) {
+          if (is_array($v)) {
+            if (count($v) !== 2) {
+              throw new Exception(X::_("Invalid value given as array with %u elements", count($v)));
+            }
+            $res['values_types'][] = $v[1] ? 'exp' : 'value';
+            $res['values'][$i] = $v[1] ?: $v[0];
+          }
+          else {
+            $res['values_types'][] = 'value';
+          }
+        }
+
         $res['fields'] = array_keys($res['fields']);
       }
     }
