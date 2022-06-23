@@ -1822,6 +1822,27 @@ class Note extends bbn\Models\Cls\Db
 
 
   /**
+   * Pins the given note
+   * @param string $id The note ID
+   * @return bool
+   */
+  public function pin(string $id): bool
+  {
+    return (bool)$this->db->update($this->class_table, [$this->fields['pinned'] => 1], [$this->fields['id'] => $id]);
+  }
+
+  /**
+   * Unpins the given note
+   * @param string $id The note ID
+   * @return bool
+   */
+  public function unpin(string $id): bool
+  {
+    return (bool)$this->db->update($this->class_table, [$this->fields['pinned'] => 0], [$this->fields['id'] => $id]);
+  }
+
+
+  /**
    * If a date is given for $end checks if it's after the start date.
    *
    * @param string|null $start
