@@ -4,10 +4,6 @@ namespace bbn\Api\GitLab;
 trait Branch
 {
 
-
-  /** @var string */
-  protected $branchURL = 'branches/';
-
   /**
    * Gets the branches of the given project
    * @param int|string $project ID or URL-encoded path of the project
