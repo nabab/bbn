@@ -222,6 +222,7 @@ class Shop extends Models\Cls\Db
     $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);
     $grid = new Grid($this->db, $params, $dbCfg);
     $data = $grid->getDatatable();
+   
     if ($data && $data['total']) {
       $editions = $this->product->getEditions();
       $types = $this->product->getTypes();
