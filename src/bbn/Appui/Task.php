@@ -1287,6 +1287,11 @@ class Task extends bbn\Models\Cls\Db
     return $this->toggleWidget($id, $code, false);
   }
 
+  public function setGit(string $id, int $idGit): bool
+  {
+    return (bool)$this->db->update('bbn_tasks', ['id_git' => $idGit], ['id' => $id]);
+  }
+
   private function toggleWidget(string $id, string $code, bool $state = true): bool
   {
     $cfg = $this->getCfg($id);

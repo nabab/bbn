@@ -4,10 +4,6 @@ namespace bbn\Api\GitLab;
 trait Project
 {
 
-
-  /** @var string */
-  protected $projectURL = 'projects/';
-
   /**
    * Gets the list of projects to which you have access
    * @return array
@@ -62,27 +58,20 @@ trait Project
    */
   public function getCommits($project, string $branch = '', string $filePath = '', string $since = '', string $until = ''): array
   {
-    $url = $this->projectURL . $project . '/repository/commits';
     $params = [];
     if (!empty($filePath)) {
-      $params[] = 'path=' . \urldecode($filePath);
+      $params['path'] = \urldecode($filePath);
     }
     if (!empty($branch)) {
-      $params[] = 'branch=' . $branch;
+      $params['branch'] = $branch;
     }
     if (!empty($since)) {
-      $params[] = 'since=' . \date('c', \strtotime($since));
+      $params['since'] = \date('c', \strtotime($since));
     }
     if (!empty($until)) {
-      $params[] = 'until=' . \date('c', \strtotime($until));
+      $params['until'] = \date('c', \strtotime($until));
     }
-    foreach ($params as $i => $p) {
-      if ($i === 0) {
-        $url .= '?';
-      }
-      $url .= $p . (!empty($params[$i + 1]) ? '&' : '');
-    }
-    return $this->request($url);
+    return $this->request($this->projectURL . $project . '/repository/commits', $params);
   }
 
 
@@ -115,52 +104,6 @@ trait Project
       return [];
     }
     return $diff;
-  }
-
-
-  /**
-   * Gets the issues list of the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @return array
-   */
-  public function getIssues($project): array
-  {
-    return $this->request($this->projectURL . $project . '/' . $this->issueURL . '?scoper=all');
-  }
-
-
-  /**
-   * Gets the closed issues list of the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @return array
-   */
-  public function getClosedIssues($project): array
-  {
-    return $this->request($this->projectURL . $project . '/' . $this->issueURL . '?scoper=all&state=closed');
-  }
-
-
-  /**
-   * Gets the opened issues list of the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @return array
-   */
-  public function getOpenedIssues($project): array
-  {
-    return $this->request($this->projectURL . $project . '/' . $this->issueURL . '?scoper=all&state=opened');
-  }
-
-
-  /**
-   * Gets the notes list of a specific issue of the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
-   * @param string $sort The sorting direction 'asc' or 'desc'
-   * @return array
-   */
-  public function getIssueNotes($project, int $issue, string $sort = 'asc'): array
-  {
-    return $this->request($this->projectURL . $project . '/' . $this->issueURL . $issue . '/' . $this->noteURL . '?sort=' . $sort);
   }
 
 

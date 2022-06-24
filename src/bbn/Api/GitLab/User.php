@@ -4,10 +4,6 @@ namespace bbn\Api\GitLab;
 trait User
 {
 
-
-  /** @var string */
-  protected $userURL = 'users/';
-
   /** @var string The current user ID */
   protected $userID;
 
