@@ -16,7 +16,6 @@ use bbn\Str;
 class GitLab
 {
 
-
   use GitLab\User;
   use GitLab\Project;
   use GitLab\Branch;
@@ -34,6 +33,21 @@ class GitLab
 
   /** @var string The last request made */
   protected $lastRequest = '';
+
+  /** @var string */
+  protected $userURL = 'users/';
+
+  /** @var string */
+  protected $projectURL = 'projects/';
+
+  /** @var string */
+  protected $branchURL = 'branches/';
+
+  /** @var string */
+  protected $issueURL = 'issues/';
+
+  /** @var string */
+  protected $noteURL = 'notes/';
 
   /**
    * Constructor.
@@ -74,15 +88,19 @@ class GitLab
   /**
    * Make a request to the GitLab instance
    * @param string $url The part of the url related to the action to be performed
+   * @param bool $isPost True if you want make a POST request
    * @return array
    */
-  private function request($url): array
+  private function request(string $url, array $params = [], bool $isPost = false): array
   {
     // Set the lastRequest property
-    $this->lastRequest = $this->host . $url . (str_contains($url, '?') ? '&' : '?') . 'private_token=' . $this->token;
+    $this->lastRequest = $this->host . $url . '?private_token=' . $this->token;
+    foreach ($params as $k => $v) {
+      $this->lastRequest .= '&' . $k . '=' . $v;
+    }
     //die(var_dump($this->lastRequest));
     // Make the curl request
-    $response = X::curl($this->lastRequest, null, []);
+    $response = X::curl($this->lastRequest, null, empty($isPost) ? [] : ['post' => 1]);
     // Check if the response is a JSON string and convert it
     if (Str::isJson(($response))) {
       $response = \json_decode($response);
@@ -90,6 +108,16 @@ class GitLab
     // Check if the request went in error
     $this->checkError($response);
     return $this->toArray($response);
+  }
+
+  /**
+   * Makes a POST request to the GitLab instance
+   * @param string $url The part of the url related to the action to be performed
+   * @return array
+   */
+  private function post(string $url, array $params = []): array
+  {
+    return $this->request($url, $params, true);
   }
 
   /**
@@ -102,7 +130,7 @@ class GitLab
     // Reset lastError property
     $this->setLastError('', false);
     // Check if an error is present
-    if (X::lastCurlCode() !== 200) {
+    if ((X::lastCurlCode() !== 200) && (X::lastCurlCode() !== 201)) {
       // Set the error to lastError property and throw exception
       $err = \is_object($data) ? (!empty($data->error) ? $data->error : (!empty($data->message) ? $data->message : $data)) : $data;
       $this->setLastError($err);

@@ -219,6 +219,7 @@ class Product extends DbCls
     $a = $cfg['arch']['products'];
     if ($this->db->selectOne($cfg['table'], $a['id_note'], [$a['id'] => $data['id']])) {
       $content = empty($data['items']) ? '[]' : json_encode($data['items']);
+      
       $res = $this->cms->set(
         $data['url'],
         $data['title'],
@@ -234,6 +235,8 @@ class Product extends DbCls
 
       //media upload end
       $res2 = $this->db->update('bbn_shop_products', [
+        
+        $a['front_img']      => $data['id_media'],
         $a['id_provider']    => $data['id_provider'],
         $a['price_purchase'] => $data['price_purchase'],
         $a['price']          => $data['price'],

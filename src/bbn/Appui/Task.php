@@ -235,7 +235,8 @@ class Task extends bbn\Models\Cls\Db
     return $res;
   }
 
-  public function getApprovedLog($id){
+  public function getApprovedLog($id): array
+  {
     if (
       $this->exists($id) &&
       ($action = $this->idAction('price_approved'))
@@ -243,35 +244,35 @@ class Task extends bbn\Models\Cls\Db
       return $this->db->rselect('bbn_tasks_logs', [], [
         'id_task' => $id,
         'action' => $action
-      ], ['chrono' => 'DESC']) ?: new \stdClass();
+      ], ['chrono' => 'DESC']) ?: [];
     }
-    return new \stdClass();
+    return [];
   }
 
-  public function getPriceLog($id){
-    if (
-      $this->exists($id) &&
-      ($action_ins = $this->idAction('price_insert')) &&
-      ($action_upd = $this->idAction('price_update'))
+  public function getPriceLog($id): array
+  {
+    if ($this->exists($id)
+      && ($action_ins = $this->idAction('price_insert'))
+      && ($action_upd = $this->idAction('price_update'))
+      && ($action_del = $this->idAction('price_delete'))
     ){
       return $this->db->rselect([
         'table' => 'bbn_tasks_logs',
         'where' => [
-          'logic' => 'AND',
           'conditions' => [[
             'field' => 'id_task',
-            'operation' => '=',
             'value' => $id
           ], [
             'logic' => 'OR',
             'conditions' => [[
               'field' => 'action',
-              'operatort' => '=',
               'value' => $action_ins
             ], [
               'field' => 'action',
-              'operatort' => '=',
               'value' => $action_upd
+            ], [
+              'field' => 'action',
+              'value' => $action_del
             ]]
           ]]
         ],
@@ -279,7 +280,7 @@ class Task extends bbn\Models\Cls\Db
           'field' => 'chrono',
           'dir' => 'DESC'
         ]]
-      ]) ?: new \stdClass();
+      ]) ?: [];
     }
   }
 
@@ -481,7 +482,36 @@ class Task extends bbn\Models\Cls\Db
 
   public function getChildren(string $id): array
   {
-    if ($children = $this->db->rselectAll('bbn_tasks', [], ['id_parent' => $id, 'active' => 1], ['creation_date' => 'DESC'])) {
+    if ($children = $this->db->rselectAll([
+      'table' => 'bbn_tasks',
+      'fields' => [],
+      'where' => [
+        'conditions' => [[
+          'field' => 'id_parent',
+          'value' => $id
+        ], [
+          'field' => 'active',
+          'value' => 1
+        ], [
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => 'private',
+            'value' => 0
+          ], [
+            'conditions' => [[
+              'field' => 'private',
+              'value' => 1
+            ], [
+              'field' => 'id_user',
+              'value' => $this->id_user
+            ]]
+          ]]
+        ]]
+      ],
+      'order' => [
+        'creation_date' => 'DESC'
+      ]
+    ])) {
       foreach ($children as $i => $c) {
         $children[$i]['num_children'] = $this->db->count('bbn_tasks', ['id_parent' => $c['id'], 'active' => 1]);
         $children[$i]['roles'] = $this->infoRoles($c['id']);
@@ -954,7 +984,9 @@ class Task extends bbn\Models\Cls\Db
         'deadline' => $cfg['deadline'] ?? NULL,
         'id_user' => $this->id_user ?: NULL,
         'state' => $cfg['state'] ?? $this->idState('opened'),
-        'creation_date' => $this->date ?: date('Y-m-d H:i:s')
+        'creation_date' => $this->date ?: date('Y-m-d H:i:s'),
+        'private' => $cfg['private'] ?? 0,
+        'cfg' => \json_encode(['widgets' => []])
       ]) ){
         $id = $this->db->lastId();
         $this->addLog($id, 'insert');
@@ -1190,7 +1222,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTracks($id_task){
     return $this->db->getRows("
-      SELECT id_user, SUM(length) AS total_time
+      SELECT id_user, SUM(length) AS total_time, COUNT(id_note) as num_notes
       FROM bbn_tasks_sessions
       WHERE id_task = ?
       GROUP BY id_user",
@@ -1253,6 +1285,11 @@ class Task extends bbn\Models\Cls\Db
   public function removeWidget(string $id, string $code): bool
   {
     return $this->toggleWidget($id, $code, false);
+  }
+
+  public function setGit(string $id, int $idGit): bool
+  {
+    return (bool)$this->db->update('bbn_tasks', ['id_git' => $idGit], ['id' => $id]);
   }
 
   private function toggleWidget(string $id, string $code, bool $state = true): bool
