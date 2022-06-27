@@ -1327,7 +1327,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $csn    = $this->colSimpleName($f);
         if (isset($model['fields'][$csn])) {
           $fields_to_put['fields'][] = $this->colSimpleName($f, true);
-          $fields_to_put['values'][] = $cfg['fields_types'][$i] === 'exp' ? $cfg['values'] : '?';
+          $fields_to_put['values'][] = !empty($cfg['fields_types']) && ($cfg['fields_types'][$i] === 'exp') ? $cfg['values'] : '?';
         }
       }
       else {
