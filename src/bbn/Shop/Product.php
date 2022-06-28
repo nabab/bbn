@@ -229,14 +229,14 @@ class Product extends DbCls
         $data['end'] ?? null,
         $data['tags'],
         $data['id_type'],
-        $data['id_media'],
+        $data['id_media'] ?: null,
         $data['id_option']
       );
 
       //media upload end
       $res2 = $this->db->update('bbn_shop_products', [
         
-        $a['front_img']      => $data['id_media'],
+        $a['front_img']      => $data['id_media'] ?: null,
         $a['id_provider']    => $data['id_provider'],
         $a['price_purchase'] => $data['price_purchase'],
         $a['price']          => $data['price'],

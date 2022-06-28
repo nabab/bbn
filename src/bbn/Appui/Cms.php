@@ -854,7 +854,7 @@ class Cms extends DbCls
       throw new Exception(X::_("The CMS article MUST have a URL"));
     }
 
-    if ($note = $this->getByUrl($url)){
+    if ($note = $this->getByUrl($url, true)){
       $id_note = $note['id'];
     }
 
