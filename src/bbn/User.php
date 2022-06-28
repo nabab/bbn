@@ -44,7 +44,12 @@ class User extends Models\Cls\Basic
       16 => 'impossible to add session in the database',
       17 => 'non matching salt',
       18 => 'incorrect magic string',
-      19 => 'wrong fingerprint'
+      19 => 'wrong fingerprint',
+      20 => 'invalid token',
+      21 => 'invalid phone number',
+      22 => 'impossible to update the phone number or the verification code',
+      23 => 'unknown phone number',
+      24 => 'invalid verification code'
     ],
     'table' => 'bbn_users',
     'tables' => [
@@ -286,7 +291,12 @@ class User extends Models\Cls\Basic
       if ($this->isPhoneNumberCodeSendingRequest($params)) {
         // Verify that the received token is associated with the device uid
         if (!($user_id = $this->getUserByTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']]))) {
-          throw new \Exception(X::_('Invalid token'));
+          $this->setError(20);
+          return $this->api_request_output =  [
+            'success' => false,
+            'error'   => X::_('Invalid token'),
+            'errorCode' => 20
+          ];
         }
 
         // Check if the phone number is already registered
@@ -313,17 +323,44 @@ class User extends Models\Cls\Basic
         // Generate a code
         $code = random_int(1001, 9999);
 
+        try {
+          $phone = \Brick\PhoneNumber\PhoneNumber::parse($params[$f['phone_number']]);
+        }
+        catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+          $this->setError(21);
+          return $this->api_request_output = [
+            'success' => false,
+            'error' => X::_('Invalid phone number'),
+            'errorCode' => 21
+          ];
+        }
+
+        if (!$this->hasSkipVerification()
+          && !$phone->isValidNumber()
+        ) {
+          $this->setError(21);
+          return $this->api_request_output = [
+            'success' => false,
+            'error' => X::_('Invalid phone number'),
+            'errorCode' => 21
+          ];
+        }
+
         // Save it
         if ($this->updatePhoneVerificationCode($params[$f['phone_number']], $code)) {
           // Send the sms with code here
-
           return $this->api_request_output = [
             'success' => true,
             'phone_verification_code' => $code
           ];
         }
         else {
-          throw new \Exception(X::_('Impossible to update the user'));
+          $this->setError(22);
+          return [
+            'success' => false,
+            'error' => X::_('Impossible to update the phone number or the verification code'),
+            'errorCode' => 22
+          ];
         }
 
 
@@ -331,14 +368,24 @@ class User extends Models\Cls\Basic
       elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
-          throw new \Exception(X::_('Invalid token'));
+          $this->setError(20);
+          return $this->api_request_output =  [
+            'success' => false,
+            'error'   => X::_('Invalid token'),
+            'errorCode' => 20
+          ];
         }
 
         // find the user using phone_number in db
         $user = $this->findByPhoneNumber($params[$f['phone_number']]);
 
         if (!$user) {
-          throw new \Exception(X::_('Unknown phone number'));
+          $this->setError(23);
+          return $this->api_request_output =  [
+            'success' => false,
+            'error'   => X::_('Unknown phone number'),
+            'errorCode' => 23
+          ];
         }
 
         $this->id = $user[$this->class_cfg['arch']['users']['id']];
@@ -348,13 +395,18 @@ class User extends Models\Cls\Basic
           // Verify that the code is correct
           $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
-          if (!$user_cgf || !isset($user_cgf['phone_verification_code'])) {
-            throw new \Exception(X::_('Invalid code'));
+          if (!$user_cgf
+            || !isset($user_cgf['phone_verification_code'])
+            || ((string)$user_cgf['phone_verification_code'] !== (string)$params[$f['phone_verification_code']])
+          ) {
+            $this->setError(24);
+            return $this->api_request_output =  [
+              'success' => false,
+              'error'   => X::_('Invalid verification code'),
+              'errorCode' => 24
+            ];
           }
 
-          if (((string)$user_cgf['phone_verification_code']) !== ((string)$params[$f['phone_verification_code']])) {
-            throw new \Exception(X::_('Invalid code'));
-          }
         }
 
         // Update verification code to null
@@ -384,7 +436,12 @@ class User extends Models\Cls\Basic
       elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
         if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
-          throw new \Exception(X::_('Invalid token').' '.$params[$f['token']].' / '.$params[$f['device_uid']]);
+          $this->setError(20);
+          return $this->api_request_output =  [
+            'success' => false,
+            'error'   => X::_('Invalid token'),
+            'errorCode' => 20
+          ];
         }
 
         // Update device_lang and last
