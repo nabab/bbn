@@ -1569,6 +1569,14 @@ class Note extends bbn\Models\Cls\Db
     if ($num === 0) {
       $num = ((int)$this->db->selectOne($table, 'MAX(num)', [$cols['id_option'] => $id_option])) + 1;
     }
+   	if ($id = $this->db->selectOne($table, $cols['id'], [
+      $cols['id_option'] => $id_option,
+      $cols['id_note'] => $id_note
+    ])) {
+      $this->db->delete($table, [
+        $cols['id'] => $id
+      ]);
+    }
 
     if ($this->db->insert($table, [
       $cols['id_option'] => $id_option,
@@ -1774,7 +1782,7 @@ class Note extends bbn\Models\Cls\Db
     $dbCfg = $this->getClassCfg();
     $table = $dbCfg['tables']['features'];
     $cols  = $dbCfg['arch']['features'];
-    return $this->db->selectAll($table, [$cols['id'], $cols['num']], [$cols['id_option'] => $id_option]) ?: [];
+    return $this->db->rselectAll($table, [$cols['id'], $cols['num']], [$cols['id_option'] => $id_option]) ?: [];
   }
 
 
