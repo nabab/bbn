@@ -595,8 +595,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     $res = [];
     if (!empty($cfg['values'])) {
+      // Only for the insert / update part (at the start of the query), before the where (but not before the join in insert / update beware!)
+      $num_types = in_array($cfg['kind'], ['INSERT', 'UPDATE']) && !empty($cfg['values_types']) ? count($cfg['values_types']) : 0;
       foreach ($cfg['values'] as $i => $v) {
-        if (isset($cfg['values_types']) && ($cfg['values_types'][$i] === 'exp')) {
+        if ($num_types && ($i < $num_types) && ($cfg['values_types'][$i] === 'exp')) {
           continue;
         }
         // Transforming the values if needed

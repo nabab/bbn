@@ -992,20 +992,14 @@ class Note extends bbn\Models\Cls\Db
   /**
    * Removes all the rows associating medias with a given note.
    * 
-   * @param string $id_media
    * @param string $id_note
-   * @param false $version
    * @return int|null
    * @throws \Exception
    */
   public function removeAllMedias(string $id_note): ?int
   {
     $cf = &$this->class_cfg;
-    if (
-      $this->db->selectOne($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media])
-      && $this->exists($id_note)
-    ) {
-
+    if ($this->exists($id_note)) {
       return $this->db->delete($cf['tables']['notes_medias'], [
         $cf['arch']['notes_medias']['id_note'] => $id_note
       ]);

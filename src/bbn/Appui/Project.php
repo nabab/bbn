@@ -11,6 +11,7 @@ namespace bbn\Appui;
 
 use bbn;
 use bbn\X;
+use Exception;
 
 use function yaml_parse;
 
@@ -313,7 +314,18 @@ class Project extends bbn\Models\Cls\Db
               $path .= '/src/';
             }
             break;
-          case 'cdn':
+          case 'home':
+            if (!defined('BBN_HOME_PATH')) {
+              throw new Exception(X::_("BBN_HOME_PATH is not defined"));
+            }
+
+            $path  = BBN_HOME_PATH;
+            $path .= $repository['path'];
+            if ($repository['alias_code'] === 'bbn-project') {
+              $path .= '/src/';
+            }
+            break;
+            case 'cdn':
             $path = $this->getCdnPath();
             $path .= $repository['path'];
             break;
