@@ -1560,7 +1560,7 @@ class Note extends bbn\Models\Cls\Db
    * @param array|null $cfg
    * @return string|null
    */
-  public function addFeature(string $id_option, string $id_note, string $id_media = null, int $num = null, array $cfg = null): ?string
+  public function addFeature(string $id_option, string $id_note, string $id_media = null, int $num = null, array $cfg = null): ?array
   {
     $id_option = $this->getFeatureOption($id_option);
     $dbCfg     = $this->getClassCfg();
@@ -1578,14 +1578,31 @@ class Note extends bbn\Models\Cls\Db
       ]);
     }
 
-    if ($this->db->insert($table, [
+    $media = null;
+    $data = [
       $cols['id_option'] => $id_option,
       $cols['id_note'] => $id_note,
       $cols['id_media'] => $id_media,
       $cols['num'] => $num,
       $cols['cfg'] => $cfg ? json_encode($cfg) : null
-    ])) {
-      return $this->db->lastId();
+    ];
+
+    if (empty($id_media)) {
+      if ($medias = $this->getMedias($id_note)) {
+        $media    = $medias[0];
+        $id_media = $media['id'];
+      }
+    }
+    else {
+      $media = $this->getMedia($id_media);
+    }
+
+    if ($this->db->insert($table, $data)) {
+      $data['id'] = $this->db->lastId();
+      return [
+        'data'  => $data,
+        'media' => $media
+      ];
     }
 
     return null;
@@ -1612,7 +1629,7 @@ class Note extends bbn\Models\Cls\Db
       $res['url']   = $this->getUrl($res['id_note']);
       if ($res['id_media']) {
         $media = $this->getMediaInstance();
-        $res['media'] = $media->getMedia($res['id_media']);
+        $res['media'] = $media->getMedia($res['id_media'], true);
       }
 
       return $res;

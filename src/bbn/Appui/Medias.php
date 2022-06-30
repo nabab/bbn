@@ -689,11 +689,16 @@ class Medias extends bbn\Models\Cls\Db
         && ($link_type !== $media[$cf['arch']['medias']['type']])
     ) {
       $this->transformMedia($media, $width);
-
-      return empty($details) ? $media['file'] : $media;
+      if (empty($details)) {
+        return $media['file'];
+      }
+      else {
+        $media['url'] = $this->getUrl($id);
+        return $media;
+      }
     }
 
-    return false;
+    return null;
   }
 
 
