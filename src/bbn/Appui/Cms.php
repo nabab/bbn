@@ -1003,4 +1003,10 @@ class Cms extends DbCls
       0
     );
   }
+
+  public function clearCache(string $idNote): bool
+  {
+    return !$this->cacheDelete($idNote)->cacheHas($idNote);
+  }
+
 }
