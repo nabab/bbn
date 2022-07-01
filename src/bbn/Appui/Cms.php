@@ -160,6 +160,10 @@ class Cms extends DbCls
    */
   public function get(string $id_note, bool $with_medias = false, bool $with_content = true): array
   {
+    $cacheName = md5(json_encode(func_get_args()));
+    if ($res = $this->cacheGet($id_note, $cacheName)) {
+      return $res;
+    }
     $res = [];
     if (!empty($id_note) && ($note = $this->note->get($id_note))) {
       $res             = $note;
@@ -179,10 +183,12 @@ class Cms extends DbCls
       }
     }
 
+    $this->cacheSet($id_note, $cacheName, $res);
+
     return $res;
   }
 
-  
+
   /**
    * Sets a media as the default for the given note
    *
@@ -206,7 +212,11 @@ class Cms extends DbCls
         ]);
       }
 
-      return (bool)$this->note->addMediaToNote($id_media, $id_note, 1);
+      if ($res = $this->note->addMediaToNote($id_media, $id_note, 1)) {
+        $this->cacheDelete($id_note);
+      }
+
+      return $res;
     }
 
     throw new \Exception(X::_("The note doesn't exist"));
@@ -223,11 +233,15 @@ class Cms extends DbCls
   {
     $cfg = $this->note->getClassCfg();
     if ($this->note->exists($id_note)) {
-      return (bool)$this->db->update($cfg['tables']['notes_medias'], [
+      if ($this->db->update($cfg['tables']['notes_medias'], [
         $cfg['arch']['notes_medias']['default_media'] => 0
       ], [
         $cfg['arch']['notes_medias']['id_note'] => $id_note
-      ]);
+      ])) {
+        $this->cacheDelete($id_note);
+        return true;
+      }
+      return false;
     }
 
     throw new \Exception(X::_("The note doesn't exist"));
@@ -629,17 +643,15 @@ class Cms extends DbCls
   public function unpublish(string $id_note): bool
   {
     if ($event = $this->getEvent($id_note)) {
-        $cfg = $this->class_cfg;
-      if (
-              $this->db->delete(
-                  $this->class_cfg['tables']['notes_events'],
-                  [$this->class_cfg['arch']['notes_events']['id_note'] => $id_note]
-              )
+      if ($this->db->delete($this->class_cfg['tables']['notes_events'], [
+          $this->class_cfg['arch']['notes_events']['id_note'] => $id_note
+        ])
+        && $this->db->delete($this->class_cfg['tables']['events'], [
+          $this->class_cfg['arch']['events']['id'] => $event['id']
+        ])
       ) {
-        return (bool)$this->db->delete(
-            $this->class_cfg['tables']['events'],
-            [$this->class_cfg['arch']['events']['id'] => $event['id']]
-        );
+        $this->cacheDelete($id_note);
+        return true;
       }
     }
 
@@ -669,7 +681,10 @@ class Cms extends DbCls
       throw new Exception(X::_('Impossible to find the given note'));
     }
 
-    return $this->note->insertOrUpdateUrl($id_note, $url);
+    if ($res = $this->note->insertOrUpdateUrl($id_note, $url)) {
+      $this->cacheDelete($id_note);
+    }
+    return $res;
   }
 
 
@@ -688,6 +703,7 @@ class Cms extends DbCls
     }
 
     if ($this->note->get($id_note) && $this->note->deleteUrl($id_note)) {
+      $this->cacheDelete($id_note);
       $success = true;
     }
 
@@ -723,14 +739,17 @@ class Cms extends DbCls
     if (empty($this->getEvent($id_note))) {
       $fields = $this->class_cfg['arch']['events'];
         //if a type is not given it inserts the event as page
-      if (
-        $id_event = $this->event->insert([
+      if ($id_event = $this->event->insert([
           $fields['name']    => $note['title'] ?? '',
           $fields['id_type'] => $cfg['id_type'] ?? self::$_id_event ?? null,
           $fields['start']   => $cfg['start'],
           $fields['end']     => $cfg['end'] ?? null
-        ])) {
-        return $this->note->insertNoteEvent($id_note, $id_event);
+        ])
+      ) {
+        if ($res = $this->note->insertNoteEvent($id_note, $id_event)) {
+          $this->cacheDelete($id_note);
+        }
+        return $res;
       }
       else {
         X::log([
@@ -742,8 +761,9 @@ class Cms extends DbCls
         throw new Exception(X::_("Impossible to insert the event"));
       }
     }
-    else {
-      return $this->updateEvent($id_note, $cfg);
+    else if ($this->updateEvent($id_note, $cfg)) {
+      $this->cacheDelete($id_note);
+      return true;
     }
 
     return null;
@@ -769,7 +789,10 @@ class Cms extends DbCls
             (strtotime($cfg['end']) !== strtotime($event['end']) )
         ) {
           $cfg['id_type'] = $cfg['id_type'] ?? self::$_id_event ?? null;
-          return $this->event->edit($event['id'], $cfg);
+          if ($res = $this->event->edit($event['id'], $cfg)) {
+            $this->cacheDelete($id_note);
+          }
+          return $res;
         } else {
           return true;
         }
@@ -790,7 +813,10 @@ class Cms extends DbCls
    */
   public function setContent(string $id_note, string $title, string $content, string $excerpt = ''): ?int
   {
-      return $this->note->insertVersion($id_note, $title, $content, $excerpt);
+      if ($res = $this->note->insertVersion($id_note, $title, $content, $excerpt)) {
+        $this->cacheDelete($id_note);
+      }
+      return $res;
   }
 
 
@@ -803,7 +829,10 @@ class Cms extends DbCls
    */
   public function setType(string $id_note, string $type): int
   {
-    return $this->note->setType($id_note, $type);
+    if ($res = $this->note->setType($id_note, $type)) {
+      $this->cacheDelete($id_note);
+    }
+    return $res;
   }
 
 
@@ -816,7 +845,10 @@ class Cms extends DbCls
    */
   public function setOption(string $id_note, string $id_option): int
   {
-    return $this->note->setOption($id_note, $id_option);
+    if ($res = $this->note->setOption($id_note, $id_option)) {
+      $this->cacheDelete($id_note);
+    }
+    return $res;
   }
 
 
@@ -902,6 +934,10 @@ class Cms extends DbCls
       }
     }
 
+    if ($change) {
+      $this->cacheDelete($cfg['id_note']);
+    }
+
     return $change ? true : false;
   }
 
@@ -933,6 +969,7 @@ class Cms extends DbCls
       }
 
       if (!empty($this->note->remove($id_note))) {
+        $this->cacheDelete($id_note);
         return true;
       }
     }
