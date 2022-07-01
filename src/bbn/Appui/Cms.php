@@ -158,7 +158,7 @@ class Cms extends DbCls
    * @param string $id_note
    * @return array
    */
-  public function get(string $id_note, bool $with_medias = false): array
+  public function get(string $id_note, bool $with_medias = false, bool $with_content = true): array
   {
     $res = [];
     if (!empty($id_note) && ($note = $this->note->get($id_note))) {
@@ -168,8 +168,12 @@ class Cms extends DbCls
       $res['end']      = $this->getEnd($id_note);
       $res['tags']     = $this->note->getTags($id_note);
       $res['items']    = $note['content'] ? json_decode($note['content'], true) : [];
-      $res['id_media'] = $this->getDefaultMedia($id_note);
-      unset($note['content']);
+      if (($res['id_media'] = $this->getDefaultMedia($id_note)) && !$with_medias) {
+        $res['media'] = $this->getMedia($res['id_media']);
+      }
+      if (!$with_content) {
+        unset($res['content']);
+      }
       if ($with_medias) {
         $res['medias'] = $this->note->getMedias($id_note);
       }
@@ -178,7 +182,7 @@ class Cms extends DbCls
     return $res;
   }
 
-
+  
   /**
    * Sets a media as the default for the given note
    *

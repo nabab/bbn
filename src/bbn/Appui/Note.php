@@ -1625,12 +1625,15 @@ class Note extends bbn\Models\Cls\Db
         $res['cfg'] = json_decode($res['cfg'], true);
       }
 
-      $res['title'] = $this->getTitle($res['id_note']);
+      /*$res['title'] = $this->getTitle($res['id_note']);
       $res['url']   = $this->getUrl($res['id_note']);
       if ($res['id_media']) {
         $media = $this->getMediaInstance();
         $res['media'] = $media->getMedia($res['id_media'], true);
-      }
+      }*/
+
+      $cms = new bbn\Appui\Cms($this->db);
+      $res = array_merge($cms->get($res['id_note'], false, false), $res);
 
       return $res;
     }
@@ -1754,13 +1757,22 @@ class Note extends bbn\Models\Cls\Db
   public function fixFeatureOrder(string $id_option): bool
   {
     $id_option = $this->getFeatureOption($id_option);
+    $option      = $this->getOption($id_option);
     $dbCfg     = $this->getClassCfg();
     $table     = $dbCfg['tables']['features'];
     $cols      = $dbCfg['arch']['features'];
     $res       = 0;
+    $is_null      = ($option['orderMode'] ?? '') !== 'manual';
     foreach ($this->getFeatureList($id_option) as $i => $d) {
-      if ($d['num'] !== ($i + 1)) {
-        $res += (int)$this->db->update($table, [$cols['num'] => $i + 1], [$cols['id'] => $d['id']]);
+      if ($is_null) {
+        if (!empty($d['num'])) {
+          $res += (int)$this->db->update($table, [$cols['num'] => null], [$cols['id'] => $d['id']]);
+        }
+      }
+      else {
+        if ($d['num'] !== ($i + 1)) {
+          $res += (int)$this->db->update($table, [$cols['num'] => $i + 1], [$cols['id'] => $d['id']]);
+        }
       }
     }
 
@@ -1835,10 +1847,24 @@ class Note extends bbn\Models\Cls\Db
     foreach ($this->getFeatureList($id_option) as $d) {
       $res[] = $this->getFeature($d['id']);
     }
-
+    $option = $this->getOption($id_option);
+    $mode = $option['orderMode'] ?? 'random';
+    switch ($mode) {
+      case "random":
+        shuffle($res);
+        break;
+      case "latest":
+        X::sortBy($res, 'start', 'desc');
+        break;
+      case "first":
+        X::sortBy($res, 'start', 'asc');
+        break;
+      case "manual":
+        X::sortBy($res, 'num', 'asc');
+        break;
+    }
     return $res;
   }
-
 
   /**
    * Pins the given note
