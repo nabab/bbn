@@ -1597,6 +1597,10 @@ class Note extends bbn\Models\Cls\Db
       $media = $this->getMedia($id_media);
     }
 
+    if ($media && !$data[$cols['id_media']]) {
+      $data[$cols['id_media']] = $media['id'];
+    }
+
     if ($this->db->insert($table, $data)) {
       $data['id'] = $this->db->lastId();
       return [
@@ -1633,7 +1637,7 @@ class Note extends bbn\Models\Cls\Db
       }*/
 
       $cms = new bbn\Appui\Cms($this->db);
-      $res = array_merge($cms->get($res['id_note'], false, false), $res);
+      $res = X::mergeArrays($cms->get($res['id_note'], false, false), $res);
 
       return $res;
     }
