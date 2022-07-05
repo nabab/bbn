@@ -1629,12 +1629,12 @@ class Note extends bbn\Models\Cls\Db
         $res['cfg'] = json_decode($res['cfg'], true);
       }
 
-      /*$res['title'] = $this->getTitle($res['id_note']);
+      $res['title'] = $this->getTitle($res['id_note']);
       $res['url']   = $this->getUrl($res['id_note']);
       if ($res['id_media']) {
         $media = $this->getMediaInstance();
         $res['media'] = $media->getMedia($res['id_media'], true);
-      }*/
+      }
 
       $cms = new bbn\Appui\Cms($this->db);
       $res = X::mergeArrays($cms->get($res['id_note'], false, false), $res);
