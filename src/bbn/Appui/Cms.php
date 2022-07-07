@@ -512,17 +512,14 @@ class Cms extends DbCls
   public function getEvent(string $id_note)
   {
     if ($id_event = $this->note->getEventIdFromNote($id_note)) {
+      $event = $this->event->get($id_event);
+      die(var_dump($id_event));
       if (
-              $event = $this->db->rselect([
-                    'table' => $this->class_cfg['table'],
-                    'fields' => [],
-                    'where' => [
-                        'conditions' => [[
-                            'field' => $this->class_cfg['arch']['events']['id'],
-                            'value' => $id_event
-                        ]]],
-                    ])
+            $event = $this->db->rselect($cfg['table'], [], [
+              $cfg['arch']['events']['id'] => $id_event
+            ])
       ) {
+        die(var_dump($event));
         //if the event is not in bbn_notes_events it inserts the row
         $this->note->insertNoteEvent($id_note, $id_event);
         $event['id_note'] = $id_note;
@@ -643,6 +640,7 @@ class Cms extends DbCls
   public function unpublish(string $id_note): bool
   {
     if ($event = $this->getEvent($id_note)) {
+      
       if ($this->db->delete($this->class_cfg['tables']['notes_events'], [
           $this->class_cfg['arch']['notes_events']['id_note'] => $id_note
         ])
