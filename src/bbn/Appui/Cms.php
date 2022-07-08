@@ -513,15 +513,12 @@ class Cms extends DbCls
   {
     if ($id_event = $this->note->getEventIdFromNote($id_note)) {
       $event = $this->event->get($id_event);
-      die(var_dump($id_event));
-      if (
-            $event = $this->db->rselect($cfg['table'], [], [
-              $cfg['arch']['events']['id'] => $id_event
-            ])
-      ) {
-        die(var_dump($event));
-        //if the event is not in bbn_notes_events it inserts the row
-        $this->note->insertNoteEvent($id_note, $id_event);
+      if (!$event) {
+        /** @todo temporary */
+        $this->db->update('bbn_history_uids', ['bbn_active' => 1, 'bbn_uid' => $id_event]);
+        $event = $this->event->get($id_event);
+      }
+      if ($event) {
         $event['id_note'] = $id_note;
         return $event;
       }
