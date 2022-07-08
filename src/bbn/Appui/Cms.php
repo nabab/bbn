@@ -515,7 +515,7 @@ class Cms extends DbCls
       $event = $this->event->get($id_event);
       if (!$event) {
         /** @todo temporary */
-        $this->db->update('bbn_history_uids', ['bbn_active' => 1, 'bbn_uid' => $id_event]);
+        $this->db->update('bbn_history_uids', ['bbn_active' => 1], ['bbn_uid' => $id_event]);
         $event = $this->event->get($id_event);
       }
       if ($event) {
