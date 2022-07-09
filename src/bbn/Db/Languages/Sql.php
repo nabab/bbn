@@ -209,10 +209,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   ];
 
   /** @var array The 'kinds' of writing statement */
-  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE'];
+  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'RENAME'];
 
   /** @var array The 'kinds' of structure alteration statement */
-  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE'];
+  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE', 'RENAME'];
 
   /**
    * @var array $last_cfg
