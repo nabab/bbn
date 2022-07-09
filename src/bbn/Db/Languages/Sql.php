@@ -598,7 +598,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       // Only for the insert / update part (at the start of the query), before the where (but not before the join in insert / update beware!)
       $num_types = in_array($cfg['kind'], ['INSERT', 'UPDATE']) && !empty($cfg['values_types']) ? count($cfg['values_types']) : 0;
       foreach ($cfg['values'] as $i => $v) {
-        if ($num_types && ($i < $num_types) && ($cfg['values_types'][$i] === 'exp')) {
+        if ($num_types && ($i < $num_types) && ($cfg['values_desc'][$i]['type'] === 'exp')) {
           continue;
         }
         // Transforming the values if needed
@@ -790,6 +790,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
   /**
+   * Returns a linear array 
    * @param array $where
    * @param array $cfg
    * @return array
@@ -1278,24 +1279,25 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       'fields' => [],
     ];
     $i             = 0;
-    foreach ($cfg['fields'] as $alias => $f) {
+    foreach ($cfg['fields'] as $i => $f) {
       if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
         $model  = $cfg['models'][$cfg['available_fields'][$f]];
         $csn    = $this->colSimpleName($f);
-        $is_uid = false;
-        //X::hdump('---------------', $idx, $f, $tables[$idx]['model']['fields'][$csn], $args['values'],
-        // $res['values'], '---------------');
         if (isset($model['fields'][$csn])) {
-          $column = $model['fields'][$csn];
-          if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
-            $is_uid = true;
-          }
 
           $fields_to_put['fields'][] = $this->colSimpleName($f, true);
-          $fields_to_put['values'][] = '?';
+          if ($cfg['values_desc'][$i] && ($cfg['values_desc'][$i]['type'] === 'exp')) {
+            $fields_to_put['values'][] = $cfg['values'][$i][1];
+          }
+          else {
+            $fields_to_put['values'][] = '?';
+          }
+        }
+        else {
+          $this->error(X::_("Error! Impossible to find the model for %s", implode(', ', $cfg['tables'])));
         }
       } else {
-        $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error(X::_("Error! The column '%s' doesn't exist in %s", $f, implode(', ', $cfg['tables'])));
       }
 
       $i++;
@@ -1329,11 +1331,19 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $csn    = $this->colSimpleName($f);
         if (isset($model['fields'][$csn])) {
           $fields_to_put['fields'][] = $this->colSimpleName($f, true);
-          $fields_to_put['values'][] = !empty($cfg['fields_types']) && ($cfg['fields_types'][$i] === 'exp') ? $cfg['values'] : '?';
+          if ($cfg['values_desc'][$i] && ($cfg['values_desc'][$i]['type'] === 'exp')) {
+            $fields_to_put['values'][] = $cfg['values'][$i][1];
+          }
+          else {
+            $fields_to_put['values'][] = '?';
+          }
+        }
+        else {
+          $this->error(X::_("Impossible to retrieve the column %s", $f));
         }
       }
       else {
-        $this->error("Error(bool) The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+        $this->error(X::_("The column '%s' doesn't exist in %s", $f, implode(', ', $cfg['tables'])));
       }
     }
 
@@ -2041,6 +2051,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $q =& $this->queries[$hash];
       /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
       if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
+        $this->error(X::_("Placeholders and values don't match"));
         $params['values'] = array_merge(
           $params['values'],
           array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
@@ -2610,8 +2621,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
 
       if (count($cfg['values']) !== count($cfg['values_desc'])) {
-        X::dump($cfg);
-        throw new \Exception('Database error in values count');
+        $this->error(X::_('Database error in values count'));
       }
 
       // Launching the trigger BEFORE execution
@@ -2811,23 +2821,55 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       unset($col);
       $res['models']      = $models;
       $res['tables_full'] = $tables_full;
-      switch ($res['kind']){
-        case 'SELECT':
-          if (empty($res['fields'])) {
-            foreach (array_keys($res['available_fields']) as $f){
-              if ($this->isColFullName($f)) {
-                $res['fields'][] = $f;
-              }
+
+      if (($res['kind'] === 'SELECT') && empty($res['fields'])) {
+        foreach (array_keys($res['available_fields']) as $f){
+          if ($this->isColFullName($f)) {
+            $res['fields'][] = $f;
+          }
+        }
+      }
+
+      if (in_array($res['kind'], ['INSERT', 'UPDATE'])) {
+        $res = $this->removeVirtual($res);
+        foreach ($res['fields'] as $i => $name) {
+          $desc = [];
+          if (isset($res['models'], $res['available_fields'][$name])) {
+            $t = $res['available_fields'][$name];
+            if (isset($tables_full[$t])
+              && ($model = $res['models'][$tables_full[$t]]['fields'])
+              && ($fname = $this->colSimpleName($name))
+              && !empty($model[$fname]['type'])
+            ) {
+              $desc['type']      = $model[$fname]['type'];
+              $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
             }
           }
+          if ($res['values'][$i] && is_array($res['values'][$i])) {
+            if ((count($res['values'][$i]) !== 2) || !$res['values'][$i][1]) {
+              throw new Exception(X::_("Using an array for insert/update value is allowed only for expressions with a 2 value array, the second value being the expression"));
+            }
 
-          //X::log($res, 'sql');
+            $desc['type'] = 'exp';
+          }
+
+          $res['values_desc'][] = $desc;
+        }
+      }
+
+      foreach ($res['join'] as $r){
+        $this->getValuesDesc($r['on'], $res, $res['values_desc']);
+      }
+      $this->getValuesDesc($res['filters'], $res, $res['values_desc']);
+      $this->getValuesDesc($res['having'], $res, $res['values_desc']);
+
+      switch ($res['kind']){
+        case 'SELECT':
           if ($res['select_st'] = $this->getSelect($res)) {
             $res['sql'] = $res['select_st'];
           }
           break;
         case 'INSERT':
-          $res = $this->removeVirtual($res);
           if ($res['insert_st'] = $this->getInsert($res)) {
             $res['sql'] = $res['insert_st'];
           }
@@ -2835,7 +2877,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           //var_dump($res);
           break;
         case 'UPDATE':
-          $res = $this->removeVirtual($res);
           if ($res['update_st'] = $this->getUpdate($res)) {
             $res['sql'] = $res['update_st'];
           }
@@ -2872,32 +2913,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
         $res['sql']           .= $res['having_st'].$res['order_st'].$res['limit_st'];
         $res['statement_hash'] = $this->makeHash($res['sql']);
-
-        foreach ($res['join'] as $r){
-          $this->getValuesDesc($r['on'], $res, $res['values_desc']);
-        }
-
-        if (in_array($res['kind'], ['INSERT', 'UPDATE'])) {
-          foreach ($res['fields'] as $name){
-            $desc = [];
-            if (isset($res['models'], $res['available_fields'][$name])) {
-              $t = $res['available_fields'][$name];
-              if (isset($tables_full[$t])
-                && ($model = $res['models'][$tables_full[$t]]['fields'])
-                && ($fname = $this->colSimpleName($name))
-                && !empty($model[$fname]['type'])
-              ) {
-                $desc['type']      = $model[$fname]['type'];
-                $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
-              }
-            }
-
-            $res['values_desc'][] = $desc;
-          }
-        }
-
-        $this->getValuesDesc($res['filters'], $res, $res['values_desc']);
-        $this->getValuesDesc($res['having'], $res, $res['values_desc']);
         $this->cfgs[$res['hash']] = $res;
       }
 
@@ -3069,20 +3084,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         && \is_string(array_keys($res['fields'])[0])
       ) {
         $res['values'] = array_values($res['fields']);
-        $res['values_types'] = [];
-        foreach ($res['values'] as $i => $v) {
-          if (is_array($v)) {
-            if (count($v) !== 2) {
-              throw new Exception(X::_("Invalid value given as array with %u elements", count($v)));
-            }
-            $res['values_types'][] = $v[1] ? 'exp' : 'value';
-            $res['values'][$i] = $v[1] ?: $v[0];
-          }
-          else {
-            $res['values_types'][] = 'value';
-          }
-        }
-
         $res['fields'] = array_keys($res['fields']);
       }
     }
