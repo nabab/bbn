@@ -47,7 +47,7 @@ abstract class AbstractLinkType
       'links' => [
         'id' => 'id',
         'id_entity' => 'id_entity',
-        'type_link' => 'type_link',
+        'link_type' => 'link_type',
         'id_people' => 'id_people',
         'id_address' => 'id_address',
         'id_option' => 'id_option',
@@ -250,7 +250,7 @@ abstract class AbstractLinkType
     return $this->db->count(
       $this->class_table, [
         $this->fields['id_entity'] => $this->entity->getId(),
-        $this->fields['type_link'] => $this->type
+        $this->fields['link_type'] => $this->type
       ]
     );
   }
@@ -277,7 +277,7 @@ abstract class AbstractLinkType
       }
 
       $cfg[$f['id_entity']] = $this->entity->getId();
-      $cfg[$f['type_link']]   = $this->type;
+      $cfg[$f['link_type']]   = $this->type;
 
       if (\array_key_exists($f['id'], $cfg)) {
         unset($cfg[$f['id']]);
@@ -399,7 +399,7 @@ abstract class AbstractLinkType
     return $this->db->getColumnValues(
       $this->class_table, $this->fields['id'], [
         $this->fields['id_entity'] => $this->entity->getId(),
-        $this->fields['type_link'] => $this->type
+        $this->fields['link_type'] => $this->type
       ]
     );
   }
@@ -414,7 +414,7 @@ abstract class AbstractLinkType
     $param = [
       $this->fields['id_entity'] => $this->entity->getId(),
       $this->fields['id'] => $id,
-      $this->fields['type_link'] => $this->type
+      $this->fields['link_type'] => $this->type
     ];
 
     if ($this->db->delete($this->class_table, $param)) {
@@ -494,7 +494,7 @@ abstract class AbstractLinkType
 
     return $this->db->$method($this->class_table, $fields, array_merge([
       $this->fields['id_entity'] => $this->entity->getId(),
-      $this->fields['type_link'] => $this->type
+      $this->fields['link_type'] => $this->type
     ], $where));
   }
 
