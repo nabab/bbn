@@ -35,9 +35,9 @@ abstract class AbstractLinkType
 
   /** @var array */
   protected static $default_class_cfg = [
-    'table' => 'bbn_links',
+    'table' => 'bbn_entities_links',
     'tables' => [
-      'links' => 'bbn_links',
+      'links' => 'bbn_entities_links',
       'people' => 'bbn_people',
       'addresses' => 'bbn_addresses',
       'options' => 'bbn_options',
