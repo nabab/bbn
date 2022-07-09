@@ -211,6 +211,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /** @var array The 'kinds' of writing statement */
   protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'RENAME'];
 
+  /** @var array The 'kinds' of reading statement */
+  protected static $read_kinds = ['SELECT', 'SHOW'];
+
   /** @var array The 'kinds' of structure alteration statement */
   protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE', 'RENAME'];
 
@@ -2016,7 +2019,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
           $params['kind']      = $sequences[0];
           $params['union']     = isset($sequences['UNION']);
-          $params['write']     = \in_array($params['kind'], self::$write_kinds, true);
+          $params['write']     = !\in_array($params['kind'], self::$read_kinds, true);
           $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
         }
         elseif (($this->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
