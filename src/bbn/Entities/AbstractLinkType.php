@@ -104,7 +104,7 @@ abstract class AbstractLinkType
    *  bbn\Entities\Link {
    *    stdClass Object 'link': {
    *     'id': '0ab0986031be11ecbb0c37346045384d',
-   *     'type_lien': '0a9ebf0a31be11ecbb0c37346045384d',
+   *     'link_type': '0a9ebf0a31be11ecbb0c37346045384d',
    *     'id_adherent': 99,
    *     'id_tiers': '0aa1830231be11ecbb0c37346045384d',
    *     'id_lieu': '0aa8204031be11ecbb0c37346045384d',

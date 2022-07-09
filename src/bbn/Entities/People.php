@@ -146,7 +146,7 @@ class People
                   [
                     'field' => 'bbn_options.id',
                     'operator' => 'eq',
-                    'exp' => 'apst_liens.type_lien'
+                    'exp' => 'apst_liens.link_type'
                   ]
                 ],
                 'logic' => 'AND'
@@ -610,7 +610,7 @@ class People
           foreach ($links as $link){
                         $link_update = ['id_tiers' => $id];
                         // Si les liens sont de type `Fonction` on les fusionne aussi de la même manière que les tiers
-            if (($link['type_lien'] === $fonction_lien)
+            if (($link['link_type'] === $fonction_lien)
                 && ($autre = $this->db->getRow(
                   "
 								SELECT apst_liens.id, apst_liens.id_adherent, apst_liens.cfg, h.tst AS creation
@@ -623,7 +623,7 @@ class People
 									  AND bbn_history_uids.bbn_active = 1
 								WHERE apst_liens.id_tiers = ?
                   AND apst_liens.id_adherent = ?
-                  AND apst_liens.type_lien = ?",
+                  AND apst_liens.link_type = ?",
                   hex2bin($a),
                   $link['id_adherent'],
                   hex2bin($fonction_lien)
