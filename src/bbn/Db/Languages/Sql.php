@@ -2848,7 +2848,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               $desc['maxlength'] = $model[$fname]['maxlength'] ?? null;
             }
           }
-          if ($res['values'][$i] && is_array($res['values'][$i])) {
+          if (isset($res['values'][$i]) && is_array($res['values'][$i])) {
             if ((count($res['values'][$i]) !== 2) || !$res['values'][$i][1]) {
               throw new Exception(X::_("Using an array for insert/update value is allowed only for expressions with a 2 value array, the second value being the expression"));
             }
