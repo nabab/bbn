@@ -48,6 +48,8 @@ class Client extends DbCls
    */
   protected $type_note;
 
+  protected $id_client;
+
   protected static $default_class_cfg = [
     'errors' => [
     ],
@@ -88,17 +90,20 @@ class Client extends DbCls
     $this->media->setImageRoot('/image/');
   }
 
+  public function getId(){
+    return $this->id_client;
+  }
   public function add(string $email, bool $newsletter = false): ?string
   {
-		if (!($idClient = $this->db->selectOne($this->class_table, $this->fields['id'], [$this->fields['email'] => $email]))
+		if (!($this->db->selectOne($this->class_table, $this->fields['id'], [$this->fields['email'] => $email]))
       && $this->db->insert($this->class_table, [
         $this->fields['email'] => $email,
         $this->fields['newsletter'] => empty($newsletter) ? 0 : 1
 			])
     ) {
-			$idClient = $this->db->lastId();
-		}
-		return $idClient;
+			$this->id_client = $this->db->lastId();
+    }
+		return $this->id_client;
 	}
 	public function addClientName(string $idClient, string $name, string $lastname){
 		if($this->db->rselect($this->class_table, [], [$this->fields['id'] => $idClient])){
@@ -127,7 +132,7 @@ class Client extends DbCls
         $this->class_cfg['arch']['clients_addresses']['def'] => 1,
         $this->class_cfg['arch']['clients_addresses']['last'] =>  date('Y-m-d H:i:s')
       ])) {
-        $newAddress = $this->getAddress($idAddress);
+        $newAddress = $this->getAddress($idAddress, $idClient);
         $newAddress['continent'] = $country['continent'];
 				$newAddress['fullName'] = $fullName;
         return $newAddress;
@@ -136,16 +141,25 @@ class Client extends DbCls
     return null;
 	}
 
-	protected function getEmail(STRING $idClient): ?string
+	protected function getEmail(string $idClient): ?string
 	{
 		return $this->db->selectOne($this->class_table, $this->fields['email'], [$this->fields['id'] => $idClient]);
 	}
 
-	protected function getAddress(string $idAddress): ?array
+	protected function getAddress(string $idAddress, string $idClient): ?array
 	{
     $entity = new \bbn\Entities\Address($this->db);
     $cfg = $entity->getClassCfg();
-		return $entity->rselect([$cfg['arch']['addresses']['id'] => $idAddress]);
+    $cfgShop = $this->getClassCfg();
+
+    $id = $this->db->selectOne($cfgShop['tables']['clients_addresses'], 'id', [
+      $cfgShop['arch']['clients_addresses']['id_client'] => $idClient,
+      $cfgShop['arch']['clients_addresses']['def'] => 1
+    ]);
+    $address = $entity->rselect([$cfg['arch']['addresses']['id'] => $idAddress]);
+    $address['id_shop_address'] = $id;
+   
+		return $address;
 	}
 
 }
