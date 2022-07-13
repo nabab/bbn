@@ -171,7 +171,39 @@ class Shop extends Models\Cls\Db
       return $res;
     }
   }
+  /**
+   * Returns the list of the providers in an array
+   *
+   * @param array $params
+   * @return array
+   */
+  public function getTransactionsList(array $params = []): array
+  {
+    $cfg  = $this->sales->getClassCfg();
+    $client = new \bbn\Shop\Client($this->db);
+    
+    $grid = new \bbn\Appui\Grid($this->db, $params, [
+      'tables' => $cfg['table'],
+      'fields' => $cfg['arch']['transactions'],
+      'limit' => 100
+    ]);
 
+    if ($grid->check()) {
+      $res = $grid->getDatatable();
+      foreach ($res['data'] as &$d) {
+        $d['client'] = $client->getClient($d['id_client']);
+        $d['address'] = $client->getAddress($d['id_address'],$d['id_client'], true);
+        $d['payment_type'] = $this->opt->text($d['payment_type']);
+        $d['country'] = $this->opt->text($d['address']['country']);
+        unset($d['id_client']);
+
+        $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];
+      }
+
+      unset($d);
+      return $res;
+    }
+  }
 
   /**
    * Returns a list of the products for the shop (public)
