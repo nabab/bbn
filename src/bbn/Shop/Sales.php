@@ -48,7 +48,11 @@ class Sales extends DbCls
     $this->_init_class_cfg($cfg);
   }
 
-
+  public function changeStatus(string $id_transaction, $status): ?bool
+  {
+    $cfg = $this->getClassCfg();
+    return $this->db->update($cfg['table'], [$cfg['arch']['transactions']['status'] => $status],[$cfg['arch']['transactions']['id'] => $id_transaction]);
+  }
   public function getByProduct(string $id_product, string $period = null, string $value = null): ?array
   {
     $cfg = $this->getClassCfg();
