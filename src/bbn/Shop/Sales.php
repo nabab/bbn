@@ -30,7 +30,6 @@ class Sales extends DbCls
         'id' => 'id',
         'id_cart' => 'id_cart',
         'id_client' => 'id_client',
-        'id_main' => 'id_main',
         'total' => 'total',
         'moment' => 'moment',
         'id_address' => 'id_address',
