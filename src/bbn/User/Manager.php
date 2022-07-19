@@ -135,6 +135,12 @@ You can click the following link to access directly your account:<br>
   }
 
 
+  public function getClassCfg(): array
+  {
+    return $this->class_cfg;
+  }
+
+
   public function isOnline(string $id_user, int $delay = 180): bool
   {
     $a =& $this->class_cfg['arch'];
