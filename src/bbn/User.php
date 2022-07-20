@@ -1049,7 +1049,7 @@ class User extends Basic implements Implementor
    *
    * @return User\Manager
    */
-  public function getManager(): Manager
+  public function getManager()
   {
     return new User\Manager($this);
   }

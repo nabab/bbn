@@ -52,7 +52,7 @@ interface Implementor
 
   public function isDev(): bool;
 
-  public function getManager(): Manager;
+  public function getManager();
 
   public function setPassword(string $old_pass, string $new_pass): bool;
 
