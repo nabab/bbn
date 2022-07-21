@@ -181,7 +181,10 @@ class Shop extends Models\Cls\Db
   {
     $cfg  = $this->sales->getClassCfg();
     $client = new \bbn\Shop\Client($this->db);
-    
+    $cart =  new \bbn\Shop\Cart($this->db);
+    $product =  new \bbn\Shop\Product($this->db);
+    $provider =  new \bbn\Shop\Provider($this->db);
+
     $grid = new \bbn\Appui\Grid($this->db, $params, [
       'tables' => $cfg['table'],
       'fields' => $cfg['arch']['transactions'],
@@ -191,8 +194,20 @@ class Shop extends Models\Cls\Db
     if ($grid->check()) {
       $res = $grid->getDatatable();
       foreach ($res['data'] as &$d) {
-        $d['client'] = $client->getClient($d['id_client']);
         $d['address'] = $client->getAddress($d['id_address'],$d['id_client'], true);
+        $d['cart'] = $cart->getProducts($d['id_cart']);
+        if(count($d['cart'])){
+          foreach($d['cart'] as $idxCart => $c){
+
+            $d['cart'][$idxCart]['shipping_cost'] = $cart->shippingCost($d['address']['id'], $c['id_cart']);
+            
+            $d['cart'][$idxCart]['product'] = $product->get($c['id_product']);
+            $provider_full = $provider->get($d['cart'][$idxCart]['product']['id_provider']);
+            $d['cart'][$idxCart]['product']['provider'] = $provider_full['name'];
+          }
+        }
+        $d['client'] = $client->getClient($d['id_client']);
+        
         $d['payment_type'] = $this->opt->text($d['payment_type']);
         $d['country'] = $this->opt->text($d['address']['country']);
         unset($d['id_client']);
