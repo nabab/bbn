@@ -402,10 +402,15 @@ TEMPLATE;
       }
       if ($r && !empty($this->imap_string)) {
         $mail_string = $this->mailer->getSentMIMEMessage();
-        if (!is_resource($this->imap)) {
+        if (!\is_resource($this->imap)
+          && !($this->imap instanceof \IMAP\Connection)
+        ) {
           $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
         }
-        if (!is_resource($this->imap) || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")) {
+        if ((!\is_resource($this->imap)
+            && !($this->imap instanceof \IMAP\Connection))
+          || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
+        ) {
           $this->log(\imap_errors());
         }
       }
