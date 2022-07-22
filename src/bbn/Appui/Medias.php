@@ -386,7 +386,19 @@ class Medias extends bbn\Models\Cls\Db
       'field' => $this->db->cfn('position', $t),
       'dir' => 'ASC'
     ];
-    return $this->browse($cfg, $limit, $start);
+    if ($res = $this->browse($cfg, $limit, $start)) {
+      foreach ($res['data'] as $i => $d) {
+        $res['data'][$i][$cf['arch']['medias_groups_medias']['position']] = $this->db->selectOne(
+          $t,
+          $cf['arch']['medias_groups_medias']['position'],
+          [
+            $cf['arch']['medias_groups_medias']['id_group'] => $idGroup,
+            $cf['arch']['medias_groups_medias']['id_media'] => $d[$cf['arch']['medias']['id']]
+          ]
+        );
+      }
+    }
+    return $res;
   }
 
 
