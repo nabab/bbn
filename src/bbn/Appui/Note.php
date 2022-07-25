@@ -1765,7 +1765,7 @@ class Note extends bbn\Models\Cls\Db
   public function fixFeatureOrder(string $id_option): bool
   {
     $id_option = $this->getFeatureOption($id_option);
-    $option    = $this->options->option($id_option);
+    $option    = $this->getOption($id_option);
     $dbCfg     = $this->getClassCfg();
     $table     = $dbCfg['tables']['features'];
     $cols      = $dbCfg['arch']['features'];
