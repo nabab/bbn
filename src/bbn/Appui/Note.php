@@ -1702,8 +1702,8 @@ class Note extends bbn\Models\Cls\Db
     $res = 0;
     if ($feat = $this->getFeature($id)) {
       if ($feat['num'] > $num) {
-        $this->db->update($table, [
-          'num' => [null, 'num + 1']
+        $res = $this->db->update($table, [
+          'num' => [null, '`num` + 1']
         ], [
           'id_option' => $feat['id_option'],
           ['id', '!=', $id],
@@ -1712,8 +1712,8 @@ class Note extends bbn\Models\Cls\Db
         ]);
       }
       elseif ($feat['num'] < $num) {
-        $this->db->update($table, [
-          'num' => [null, 'num - 1']
+        $res = $this->db->update($table, [
+          'num' => [null, '`num` - 1']
         ], [
           'id_option' => $feat['id_option'],
           ['id', '!=', $id],
@@ -1721,11 +1721,15 @@ class Note extends bbn\Models\Cls\Db
           ['num', '<=', $num]
         ]);
       }
+      $this->log($this->db->last(), $this->db->getLastValues());
+      $this->log($res);
       
       $res = $this->db->update($table, [$cols['num'] => $num], [$cols['id'] => $id]);
+      /*
       if ($res) {
         $this->fixFeatureOrder($feat['id_option']);
       }
+      */
     }
 
     return $res;
@@ -1761,12 +1765,12 @@ class Note extends bbn\Models\Cls\Db
   public function fixFeatureOrder(string $id_option): bool
   {
     $id_option = $this->getFeatureOption($id_option);
-    $option      = $this->getOption($id_option);
+    $option    = $this->options->option($id_option);
     $dbCfg     = $this->getClassCfg();
     $table     = $dbCfg['tables']['features'];
     $cols      = $dbCfg['arch']['features'];
     $res       = 0;
-    $is_null      = ($option['orderMode'] ?? '') !== 'manual';
+    $is_null   = ($option['orderMode'] ?? '') !== 'manual';
     foreach ($this->getFeatureList($id_option) as $i => $d) {
       if ($is_null) {
         if (!empty($d['num'])) {
