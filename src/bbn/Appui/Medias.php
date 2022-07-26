@@ -62,7 +62,8 @@ class Medias extends bbn\Models\Cls\Db
         'medias_groups_medias' => [
           'id_media' => 'id_media',
           'id_group' => 'id_group',
-          'position' => 'position'
+          'position' => 'position',
+          'link'=> 'link'
         ]
       ],
       'urlItemField' => 'id_media',
@@ -388,14 +389,16 @@ class Medias extends bbn\Models\Cls\Db
     ];
     if ($res = $this->browse($cfg, $limit, $start)) {
       foreach ($res['data'] as $i => $d) {
-        $res['data'][$i][$cf['arch']['medias_groups_medias']['position']] = $this->db->selectOne(
+        $media_groups_media = $this->db->rselect(
           $t,
-          $cf['arch']['medias_groups_medias']['position'],
+          [],
           [
             $cf['arch']['medias_groups_medias']['id_group'] => $idGroup,
             $cf['arch']['medias_groups_medias']['id_media'] => $d[$cf['arch']['medias']['id']]
           ]
         );
+        $res['data'][$i][$cf['arch']['medias_groups_medias']['position']] = $media_groups_media['position'];
+        $res['data'][$i][$cf['arch']['medias_groups_medias']['link']] = $media_groups_media['link'];
       }
     }
     return $res;
