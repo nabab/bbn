@@ -526,7 +526,7 @@ class Search extends Basic
       if ($result) {
         return $this->db->update($this->class_cfg['tables']['search_results'], [
           $f['num'] => $result['num'] + 1,
-          $f['last'] => time()
+          $f['last'] => date('Y-m-d H:i:s')
         ], [
           $f['id'] => $result['id']
         ]);
