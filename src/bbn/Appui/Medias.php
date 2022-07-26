@@ -339,9 +339,11 @@ class Medias extends bbn\Models\Cls\Db
     $cf = $this->getClassCfg();
     $t = $cf['tables']['medias_groups_medias'];
     $f = $cf['arch']['medias_groups_medias'];
+    $order = $this->db->selectOne($t, 'position', ['id_group' => $id_group], ['position' => 'DESC']) + 1;
     $res = $this->db->insertIgnore($t, [
       $f['id_group'] => $id_group,
-      $f['id_media'] => $id_media
+      $f['id_media'] => $id_media,
+      $f['position'] => $order ?: null
     ]);
     if ($res && $addTag) {
       $group = $this->getGroup($id_group);
