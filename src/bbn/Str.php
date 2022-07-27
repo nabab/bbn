@@ -1676,7 +1676,7 @@ class Str
   /**
    * Places quotes around a string
    *
-   *```php
+   * ```php
    *  var_dump(\bbn\Str::asVar('foo'));
    *  // (string) '"foo"'
    *

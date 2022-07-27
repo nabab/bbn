@@ -272,7 +272,7 @@ class X
   /**
    * Check if an array or an object has the given property
    *
-   *```php
+   * ```php
    *
    * $arr = [
    *  'a' => 1,
@@ -301,7 +301,7 @@ class X
    * X::hasProp('string', 'd');
    * // null
    *
-   *```
+   * ```
    *
    * @param array|object $obj
    * @param string       $prop
@@ -2596,7 +2596,7 @@ class X
    /**
    * Counts the properties of an object.
    *
-   *```php
+   * ```php
    * $obj = (object)[
    *      'a' => 1,
    *      'b' => false,
@@ -2791,7 +2791,7 @@ class X
   /**
   * Converts a hex UID to a binary UID. You can also give an array or an object to convert the array's items or the object's properties.
   *
-  *```php
+  * ```php
   *
   * X::convertUids('b39e594c261e4bba85f4994bc08657dc');
   * // (string) b"³žYL&\x1EKº…ô™KÀ†WÜ"
@@ -2802,7 +2802,7 @@ class X
   * X::convertUids((object)['uid' => 'b39e594c261e4bba85f4994bc08657dc, 'uid2' => 'b39e594c261e4bba85f4994bc08657dc]);
   * // (object) {'uid': b"³žYL&\x1EKº…ô™KÀ†WÜ", 'uid2': b"³žYL&\x1EKº…ô™KÀ†WÜ"}
   *
-  *```
+  * ```
   *
   * @param string|array|object $st
   * @return string
@@ -2825,7 +2825,7 @@ class X
   /**
   * Compares two float numbers with the given operator.
   *
-  *```php
+  * ```php
   * X::compareFloats(2.0, 4.0, '<');
   * // (bool) true
   *
@@ -2834,7 +2834,7 @@ class X
   *
   * X::compareFloats(2.5623, 2.5623, '<')
   * // (bool) false
-  *```
+  * ```
   *
   * @param float  $v1 Value 1
   * @param float  $v2 Value 2
@@ -3096,7 +3096,7 @@ class X
   /**
   * Creates an associative array based on the first array's value.
   *
-  *```php
+  * ```php
   * $arr = [
   *          [
   *            'a' => 'foo',
@@ -3110,7 +3110,7 @@ class X
   *
   * X::indexByFirstVal($arr);
   * // (array) ['foo' => 'bar', 'foo2' => 'bar2']
-  *```
+  * ```
   *
   * @param array $ar
   * @return array

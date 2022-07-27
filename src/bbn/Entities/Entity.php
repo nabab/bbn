@@ -4,7 +4,7 @@ namespace bbn\Entities;
 use bbn\Db;
 use bbn\Models\Tts\Dbconfig;
 
-class Address
+class Entity
 {
 
   use Dbconfig;
