@@ -162,7 +162,7 @@ class Client extends DbCls
     if (!$opt->option($address[$addressCfg['arch']['addresses']['country']])) {
       throw new \Exception(X::_('Country not found: %s', $address[$addressCfg['arch']['addresses']['country']]));
     }
-    $idAddress = $address[$this->class_cfg['arch']['clients_addresses']['id']] ?? null;
+    $idAddress = $address[$this->class_cfg['arch']['clients_addresses']['id_address']] ?? null;
     if (empty($idAddress)) {
       $toAddress = \array_filter($address, function($k) use($addressCfg){
         return \in_array($k, \array_values($addressCfg['arch']['addresses']), true);
