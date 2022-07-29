@@ -13,13 +13,24 @@ class MollieManager
   /**
    * MollieManager constructor.
    *
-   * @param string $access_token
+   * @param string $accessCode
+   * @param string $accessMode 'token' or 'key'
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function __construct(string $access_token)
+  public function __construct(string $accessCode, string $accessMode = 'token')
   {
     $this->mollie = new MollieApiClient();
-    $this->mollie->setAccessToken($access_token);
+    switch ($accessMode) {
+      case 'token':
+        $this->mollie->setAccessToken($accessCode);
+        break;
+      case 'key':
+        $this->mollie->setApiKey($accessCode);
+        break;
+      default:
+        $this->mollie->setAccessToken($accessCode);
+        break;
+    }
   }
 
 

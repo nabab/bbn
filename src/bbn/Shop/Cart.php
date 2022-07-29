@@ -28,6 +28,11 @@ class Cart extends DbCls
   protected $idSession;
 
   /**
+   * @var string
+   */
+  protected $idUser;
+
+  /**
    * @var \bbn\Shop\Product
    */
   protected $productCls;
@@ -76,6 +81,7 @@ class Cart extends DbCls
     $this->_init_class_cfg($cfg);
     if ($user = \bbn\User::getInstance()) {
       $this->idSession = $user->getOsession('id_session');
+      $this->idUser = $user->getId();
     }
     $this->productCls = new Product($this->db);
     $this->productClsCfg = $this->productCls->getClassCfg();
@@ -94,11 +100,23 @@ class Cart extends DbCls
     $sales = new Sales($this->db);
     $salesCfg = $sales->getClassCfg();
     $salesFields = $salesCfg['arch']['transactions'];
-    if ($idCart = $this->selectOne($this->fields['id'], [
-      $this->fields['id_session'] => $this->idSession
-    ], [
-      $this->fields['creation'] => 'DESC'
-    ])) {
+    $where = [
+      'logic' => 'OR',
+      'conditions' => [[
+        'field' => $this->fields['id_session'],
+        'value' => $this->idSession
+      ]]
+    ];
+    if (!empty($this->idUser)) {
+      $clientCls = new Client($this->db);
+      if ($idClient = $clientCls->getIdByUser($this->idUser)) {
+        \array_unshift($where['conditions'], [
+          'field' => $this->fields['id_client'],
+          'value' => $idClient
+        ]);
+      }
+    }
+    if ($idCart = $this->selectOne($this->fields['id'], $where, [$this->fields['creation'] => 'DESC'])) {
       if ($this->db->selectOne($salesCfg['table'], $salesFields['id'], [$salesFields['id_cart'] => $idCart])) {
         return null;
       }
