@@ -194,22 +194,26 @@ class Shop extends Models\Cls\Db
     if ($grid->check()) {
       $res = $grid->getDatatable();
       foreach ($res['data'] as &$d) {
-        $d['address'] = $client->getAddress($d['id_address'],$d['id_client'], true);
+        
+        $d['shipping_address'] = $client->getAddress($d['id_shipping_address'],$d['id_client'], true);
+        $d['billing_address'] = $d['shipping_address'];
+        if($d['id_billing_address'] !==  $d['id_shipping_address']){
+          $d['billing_address'] = $client->getShippingAddress($d['id_billing_address']);
+        }
         $d['cart'] = $cart->getProducts($d['id_cart']);
         if(count($d['cart'])){
           foreach($d['cart'] as $idxCart => $c){
 
-            $d['cart'][$idxCart]['shipping_cost'] = $cart->shippingCost($d['address']['id'], $c['id_cart']);
+            $d['cart'][$idxCart]['shipping_cost'] = $cart->shippingCost($d['shipping_address']['id_address'], $c['id_cart']);
             
             $d['cart'][$idxCart]['product'] = $product->get($c['id_product']);
             $provider_full = $provider->get($d['cart'][$idxCart]['product']['id_provider']);
             $d['cart'][$idxCart]['product']['provider'] = $provider_full['name'];
           }
         }
-        $d['client'] = $client->getClient($d['id_client']);
+        $d['client'] = $client->get($d['id_client']);
         
         $d['payment_type'] = $this->opt->text($d['payment_type']);
-        $d['country'] = $this->opt->text($d['address']['country']);
         unset($d['id_client']);
 
         $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];
