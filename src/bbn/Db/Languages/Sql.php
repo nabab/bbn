@@ -823,23 +823,20 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               && ($model = $cfg['models'][$cfg['tables_full'][$t]])
               && ($fname = $this->colSimpleName($f['field']))
             ) {
+              $desc['name'] = $fname;
               if (!empty($model['fields'][$fname]['type'])) {
-                $desc = [
-                  'type' => $model['fields'][$fname]['type'],
-                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
-                  'operator' => $f['operator'] ?? null
-                ];
+                $desc['type'] = $model['fields'][$fname]['type'];
+                $desc['maxlength'] = $model['fields'][$fname]['maxlength'] ?? null;
+                $desc['operator'] = $f['operator'] ?? null;
               }
               // Fixing filters using alias
               elseif (isset($cfg['fields'][$f['field']])
                 && ($fname = $this->colSimpleName($cfg['fields'][$f['field']]))
                 && !empty($model['fields'][$fname]['type'])
               ) {
-                $desc = [
-                  'type' => $model['fields'][$fname]['type'],
-                  'maxlength' => $model['fields'][$fname]['maxlength'] ?? null,
-                  'operator' => $f['operator'] ?? null
-                ];
+                $desc['type'] = $model['fields'][$fname]['type'];
+                $desc['maxlength'] = $model['fields'][$fname]['maxlength'] ?? null;
+                $desc['operator'] = $f['operator'] ?? null;
               }
 
               if (!empty($desc['type'])
