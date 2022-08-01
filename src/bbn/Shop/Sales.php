@@ -18,6 +18,11 @@ class Sales extends DbCls
    */
   protected $cart;
 
+  /**
+   * @var Client
+   */
+  protected $client;
+
   protected static $default_class_cfg = [
     'errors' => [
     ],
@@ -45,6 +50,7 @@ class Sales extends DbCls
     // The database connection
     $this->db = $db;
     $this->cart = new Cart($this->db);
+    $this->client = new Client($this->db);
     // Setting up the class configuration
     $this->_init_class_cfg($cfg);
   }
@@ -147,6 +153,82 @@ class Sales extends DbCls
     }
 
     return $this->db->rselect($req);
+  }
+
+  /**
+   * Gets a transaction
+   * @param string $idTransaction
+   * @return null|array
+   */
+  public function get(string $idTransaction): ?array
+  {
+    return $this->rselect([$this->fields['id'] => $idTransaction]);
+  }
+
+  /**
+   * Gets the client ID of a transaction
+   * @param string $idTransaction
+   * @return null|string
+   */
+  public function getIdClient(string $idTransaction): ?string
+  {
+    return $this->selectOne($this->fields['id_client'], [$this->fields['id'] => $idTransaction]);
+  }
+
+  /**
+   * Gets the cart ID of a transaction
+   * @param string $idTransaction
+   * @return null|string
+   */
+  public function getIdCart(string $idTransaction): ?string
+  {
+    return $this->selectOne($this->fields['id_cart'], [$this->fields['id'] => $idTransaction]);
+  }
+
+  /**
+   * Gets the shipping address ID of a transaction
+   * @param string $idTransaction
+   * @return null|string
+   */
+  public function getIdShippingAddress(string $idTransaction): ?string
+  {
+    return $this->selectOne($this->fields['id_shipping_address'], [$this->fields['id'] => $idTransaction]);
+  }
+
+  /**
+   * Gets the billing address ID of a transaction
+   * @param string $idTransaction
+   * @return null|string
+   */
+  public function getIdBillingAddress(string $idTransaction): ?string
+  {
+    return $this->selectOne($this->fields['id_billing_address'], [$this->fields['id'] => $idTransaction]);
+  }
+
+  /**
+   * Gets the shipping address of a transaction
+   * @param string $idTransaction
+   * @return null|string
+   */
+  public function getShippingAddress(string $idTransaction): ?array
+  {
+    if (!($idAddress = $this->getIdShippingAddress($idTransaction))) {
+      throw new \Exception(X::_('No shipping address found on transaction %s', $idTransaction));
+    }
+    return $this->client->getAddress($idAddress);
+  }
+
+  /**
+   * Gets the billing address of a transaction
+   * @param string $idTransaction
+   * @return null|string
+   */
+  public function getBillingAddress(string $idTransaction): ?array
+  {
+    if (!($idAddress = $this->getIdBillingAddress($idTransaction))) {
+      throw new \Exception(X::_('No billing address found on transaction %s', $idTransaction));
+    }
+    return $this->client->getAddress($idAddress);
   }
 
 }
