@@ -32,7 +32,8 @@ class Sales extends DbCls
         'id_client' => 'id_client',
         'total' => 'total',
         'moment' => 'moment',
-        'id_address' => 'id_address',
+        'id_shipping_address' => 'id_shipping_address',
+        'id_billing_address' => 'id_billing_address',
         'payment_type' => 'payment_type',
         'status' => 'status'
       ]
