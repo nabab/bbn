@@ -35,10 +35,11 @@ class Sales extends DbCls
         'id' => 'id',
         'id_cart' => 'id_cart',
         'id_client' => 'id_client',
-        'total' => 'total',
-        'moment' => 'moment',
         'id_shipping_address' => 'id_shipping_address',
         'id_billing_address' => 'id_billing_address',
+        'total' => 'total',
+        'moment' => 'moment',
+
         'payment_type' => 'payment_type',
         'status' => 'status'
       ]
@@ -153,6 +154,37 @@ class Sales extends DbCls
     }
 
     return $this->db->rselect($req);
+  }
+
+  /**
+   * Adds a trancation
+   * @param array $transacion
+   * @return null|string
+   */
+  public function add(array $transaction): ?string
+  {
+    if (empty($transaction[$this->fields['id_cart']])) {
+      throw new \Exception(X::_('No id_cart found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['id_client']])) {
+      throw new \Exception(X::_('No id_client found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['id_shipping_address']])) {
+      throw new \Exception(X::_('No id_shipping_address found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['id_billing_address']])) {
+      throw new \Exception(X::_('No id_billing_address found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['payment_type']])) {
+      throw new \Exception(X::_('No payment_type found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (!empty($transaction[$this->fields['moment']])) {
+      $transaction[$this->fields['moment']] = date('Y-m-d H:i:s');
+    }
+    if (!empty($transaction[$this->fields['total']])) {
+      $transaction[$this->fields['total']] = 0;
+    }
+    return $this->insert($transaction);
   }
 
   /**
