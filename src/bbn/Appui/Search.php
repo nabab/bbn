@@ -418,7 +418,12 @@ class Search extends Basic
 
           // There is certainly more
           if (count($search_results) === $item['cfg']['limit']) {
-            $config_array[$i]['cfg']['start'] += $item['cfg']['limit'];
+            if (!empty($config_array[$i]['cfg']['start'])) {
+              $config_array[$i]['cfg']['start'] += $item['cfg']['limit'];
+            }
+            else {
+              $config_array[$i]['cfg']['start'] = $item['cfg']['limit'];
+            }
             // So the loop doesn't go on
             $num_cfg = $i;
           }
