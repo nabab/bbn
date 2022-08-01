@@ -244,7 +244,9 @@ class Client extends DbCls
           'city' => $addr[$addressFields['city']],
           'country' => $addr[$addressFields['country']],
           'phone' => $addr[$addressFields['phone']],
-          'region' => !empty($addr['region']) ? $addr['region'] : ''
+          'region' => !empty($addr['region']) ? $addr['region'] : '',
+          'fulladdress'=> $addr[$addressFields['fulladdress']]
+
         ]);
       }
       else {
@@ -253,5 +255,30 @@ class Client extends DbCls
     }
     return $clientAddress;
 	}
+
+  //@todo da rifare al  momento non posso andare avanti con l'inserimento degli indirizzi
+
+  public function getBillingAddress($idBillingAddress){
+    die(var_dump($idBillingAddress));
+    $addressCls = new \bbn\Entities\Address($this->db);
+    $addressCfg = $addressCls->getClassCfg();
+    $addressFields = $addressCfg['arch']['addresses'];
+    if ($addr = $addressCls->rselect($idBillingAddress)) {
+      die(var_dump($addr));
+      $ad = explode("\n", $addr[$addressFields['address']]);
+      $clientAddress = X::mergeArrays($clientAddress, [
+        'address1' => $ad[0],
+        'address2' => $ad[1] ?? '',
+        'postcode' => $addr[$addressFields['postcode']],
+        'city' => $addr[$addressFields['city']],
+        'country' => $addr[$addressFields['country']],
+        'phone' => $addr[$addressFields['phone']],
+        'region' => !empty($addr['region']) ? $addr['region'] : ''
+      ]);
+    }
+    else {
+      throw new \Exception(X::_('Billing address not found: %s', $clientAddress[$this->class_cfg['arch']['clients_addresses']['id_address']]));
+    }
+  }
 
 }
