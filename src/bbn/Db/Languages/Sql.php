@@ -602,7 +602,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $num_types = in_array($cfg['kind'], ['INSERT', 'UPDATE']) && !empty($cfg['values_types']) ? count($cfg['values_types']) : 0;
       foreach ($cfg['values'] as $i => $v) {
         if (!isset($cfg['values_desc'][$i]['type'])) {
-          X::log($cfg['values_desc'], 'no_type_in_sql');
+          X::log([$i, $cfg['values_desc']], 'no_type_in_sql');
         }
         if ($num_types && ($i < $num_types) && ($cfg['values_desc'][$i]['type'] === 'exp')) {
           continue;
@@ -2858,6 +2858,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
           if (isset($res['values'][$i]) && is_array($res['values'][$i])) {
             if ((count($res['values'][$i]) !== 2) || !$res['values'][$i][1]) {
+              X::log($res['values'], 'arrays_in_db_write');
               throw new Exception(X::_("Using an array for insert/update value is allowed only for expressions with a 2 value array, the second value being the expression"));
             }
 
