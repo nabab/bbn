@@ -1006,6 +1006,85 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
+  /**
+   * Fixes the order of a medias group. If the group ID is not given, all groups will be fixed.
+   * @param string $idGroup
+   * @return int
+   */
+  public function fixOrder(string $idGroup = ''): int
+  {
+    $groups = !empty($idGroup) ? [$idGroup] : $this->db->getColumnValues($this->class_cfg['tables']['medias_groups'], $this->class_cfg['arch']['medias_groups']['id']);
+    $fixed = 0;
+    if (!empty($groups)) {
+      $mgTable = $this->class_cfg['tables']['medias_groups'];
+      $mgmTable = $this->class_cfg['tables']['medias_groups_medias'];
+      $mTable = $this->class_cfg['tables']['medias'];
+      $mFields = $this->class_cfg['arch']['medias'];
+      $mgFields = $this->class_cfg['arch']['medias_groups'];
+      $mgmFields = $this->class_cfg['arch']['medias_groups_medias'];
+      $positionMgm = $this->db->cfn($mgmFields['position'], $mgmTable);
+      $idMg = $this->db->cfn($mgFields['id'], $mgTable);
+      $idM = $this->db->cfn($mFields['id'], $mTable);
+      $idGroupMgm = $this->db->cfn($mgmFields['id_group'], $mgmTable);
+      $idMediaMgm = $this->db->cfn($mgmFields['id_media'], $mgmTable);
+      $createdM = $this->db->cfn($mFields['created'], $mTable);
+      foreach ($groups as $group) {
+        $medias = $this->db->rselectAll([
+          'table' => $mgmTable,
+          'fields' => [
+            $idMediaMgm,
+            $idGroupMgm,
+            $positionMgm,
+            $createdM
+          ],
+          'join' => [[
+            'table' => $mgTable,
+            'on' => [
+              'conditions' => [[
+                'field' => $idMg,
+                'exp' => $idGroupMgm
+              ]]
+            ]
+          ], [
+            'table' => $mTable,
+            'on' => [
+              'conditions' => [[
+                'field' => $idM,
+                'exp' => $idMediaMgm
+              ]]
+            ]
+          ]],
+          'where' => [
+            $idGroupMgm => $group
+          ],
+          'order' => [
+            $positionMgm => 'ASC',
+            $createdM => 'ASC'
+          ]
+        ]);
+        $this->db->update($mgmTable, [
+          $mgmFields['position'] => null
+        ], [
+          $mgmFields['id_group'] => $group
+        ]);
+        foreach ($medias as $i => $media) {
+          if ($this->db->update($mgmTable, [
+              $mgmFields['position'] => $i + 1
+            ], [
+              $mgmFields['id_group'] => $media[$mgmFields['id_group']],
+              $mgmFields['id_media'] => $media[$mgmFields['id_media']]
+            ])
+            && \is_null($media[$mgmFields['position']])
+          ) {
+            $fixed++;
+          }
+        }
+      }
+    }
+    return $fixed;
+  }
+
+
   protected function transformMedia(array &$data, int $width = null): void
   {
     $data['is_image'] = false;
