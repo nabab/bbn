@@ -356,10 +356,10 @@ abstract class AbstractLinkType
     foreach ($link as $k => $v) {
       switch ($k) {
         case $this->fields['id_people']:
-          $link[$k] = $this->entity->fnom((array)$r->people);
+          $link[$k] = $r->people ? $r->people->fullname : null;
           break;
         case $this->fields['id_address']:
-          $link[$k] = $this->entity->fadresse((array)$r->address);
+          $link[$k] = $r->address ? nl2br($r->address->fulladdress) : null;
           break;
         case $this->fields['id_entity']:
           $cfg = $this->class_cfg;
