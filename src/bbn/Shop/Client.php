@@ -163,6 +163,9 @@ class Client extends DbCls
       throw new \Exception(X::_('Country not found: %s', $address[$addressCfg['arch']['addresses']['country']]));
     }
     $idAddress = $address[$this->class_cfg['arch']['clients_addresses']['id_address']] ?? null;
+    if (isset($address['fulladdress'])) {
+      unset($address['fulladdress']);
+    }
     if (empty($idAddress)) {
       $toAddress = \array_filter($address, function($k) use($addressCfg){
         return \in_array($k, \array_values($addressCfg['arch']['addresses']), true);
@@ -256,29 +259,46 @@ class Client extends DbCls
     return $clientAddress;
 	}
 
-  //@todo da rifare al  momento non posso andare avanti con l'inserimento degli indirizzi
+  /**
+   * Gets the default shipping address of the give client ID
+   * @param string $id The client ID
+   * @return null|array
+   */
+  public function getDefaultShippingAddress(string $id): ?array
+  {
+    $table = $this->class_cfg['tables']['clients_addresses'];
+    $fields = $this->class_cfg['arch']['clients_addresses'];
+    if ($idClientAddress = $this->db->selectOne($table, $fields['id'], [
+      $fields['id_client'] => $id,
+      $fields['def'] => 1
+    ])) {
+      return $this->getAddress($idClientAddress);
+    }
+    if ($idClientAddress = $this->db->selectOne($table, $fields['id'], [
+      $fields['id_client'] => $id,
+      $fields['def'] => 2
+    ])) {
+      return $this->getAddress($idClientAddress);
+    }
+    return null;
+  }
 
-  public function getBillingAddress($idBillingAddress){
-    die(var_dump($idBillingAddress));
-    $addressCls = new \bbn\Entities\Address($this->db);
-    $addressCfg = $addressCls->getClassCfg();
-    $addressFields = $addressCfg['arch']['addresses'];
-    if ($addr = $addressCls->rselect($idBillingAddress)) {
-      die(var_dump($addr));
-      $ad = explode("\n", $addr[$addressFields['address']]);
-      $clientAddress = X::mergeArrays($clientAddress, [
-        'address1' => $ad[0],
-        'address2' => $ad[1] ?? '',
-        'postcode' => $addr[$addressFields['postcode']],
-        'city' => $addr[$addressFields['city']],
-        'country' => $addr[$addressFields['country']],
-        'phone' => $addr[$addressFields['phone']],
-        'region' => !empty($addr['region']) ? $addr['region'] : ''
-      ]);
+  /**
+   * Gets the default shipping address of the give client ID
+   * @param string $id The client ID
+   * @return null|array
+   */
+  public function getDefaultBillingAddress(string $id): ?array
+  {
+    $table = $this->class_cfg['tables']['clients_addresses'];
+    $fields = $this->class_cfg['arch']['clients_addresses'];
+    if ($idClientAddress = $this->db->selectOne($table, $fields['id'], [
+      $fields['id_client'] => $id,
+      $fields['def'] => 2
+    ])) {
+      return $this->getAddress($idClientAddress);
     }
-    else {
-      throw new \Exception(X::_('Billing address not found: %s', $clientAddress[$this->class_cfg['arch']['clients_addresses']['id_address']]));
-    }
+    return null;
   }
 
 }
