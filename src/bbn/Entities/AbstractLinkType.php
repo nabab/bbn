@@ -55,7 +55,7 @@ abstract class AbstractLinkType
       ],
       'entities' => [
         'id' => 'id',
-        'name' => 'nom'
+        'name' => 'name'
       ]
     ],
   ];

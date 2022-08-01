@@ -601,6 +601,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       // Only for the insert / update part (at the start of the query), before the where (but not before the join in insert / update beware!)
       $num_types = in_array($cfg['kind'], ['INSERT', 'UPDATE']) && !empty($cfg['values_types']) ? count($cfg['values_types']) : 0;
       foreach ($cfg['values'] as $i => $v) {
+        if (!isset($cfg['values_desc'][$i]['type'])) {
+          X::log($cfg['values_desc'], 'no_type_in_sql');
+        }
         if ($num_types && ($i < $num_types) && ($cfg['values_desc'][$i]['type'] === 'exp')) {
           continue;
         }
@@ -2147,6 +2150,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         // If it is an insert statement we (try to) set the last inserted ID
         if (($q['kind'] === 'INSERT') && $r) {
           $this->setLastInsertId();
+        }
+
+        if (!isset($r)) {
+          X::log($q, 'no_r_in_sql');
+          return false;
         }
 
         return $r ?: false;
