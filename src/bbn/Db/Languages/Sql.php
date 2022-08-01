@@ -2844,7 +2844,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       if (in_array($res['kind'], ['INSERT', 'UPDATE'])) {
         $res = $this->removeVirtual($res);
         foreach ($res['fields'] as $i => $name) {
-          $desc = [];
+          $desc = [
+            'name' => $name
+          ];
           if (isset($res['models'], $res['available_fields'][$name])) {
             $t = $res['available_fields'][$name];
             if (isset($tables_full[$t])
