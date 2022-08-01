@@ -2858,7 +2858,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
           if (isset($res['values'][$i]) && is_array($res['values'][$i])) {
             if ((count($res['values'][$i]) !== 2) || !$res['values'][$i][1]) {
-              X::log($res['values'], 'arrays_in_db_write');
+              X::log([$res['tables'], $res['values']], 'arrays_in_db_write');
               throw new Exception(X::_("Using an array for insert/update value is allowed only for expressions with a 2 value array, the second value being the expression"));
             }
 
