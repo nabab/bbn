@@ -184,6 +184,7 @@ class Shop extends Models\Cls\Db
     $cart =  new \bbn\Shop\Cart($this->db);
     $product =  new \bbn\Shop\Product($this->db);
     $provider =  new \bbn\Shop\Provider($this->db);
+    $sales =  new \bbn\Shop\Sales($this->db);
 
     $grid = new \bbn\Appui\Grid($this->db, $params, [
       'tables' => $cfg['table'],
@@ -194,11 +195,10 @@ class Shop extends Models\Cls\Db
     if ($grid->check()) {
       $res = $grid->getDatatable();
       foreach ($res['data'] as &$d) {
-        
-        $d['shipping_address'] = $client->getAddress($d['id_shipping_address'],$d['id_client'], true);
+        $d['shipping_address'] = $sales->getShippingAddress($d['id']);
         $d['billing_address'] = $d['shipping_address'];
         if($d['id_billing_address'] !==  $d['id_shipping_address']){
-          $d['billing_address'] = $client->getShippingAddress($d['id_billing_address']);
+          $d['billing_address'] = $sales->getBillingAddress($d['id']);
         }
         $d['cart'] = $cart->getProducts($d['id_cart']);
         if(count($d['cart'])){
