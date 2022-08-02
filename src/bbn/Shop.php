@@ -21,6 +21,10 @@ use bbn\Appui\Option;
 use bbn\Shop\Product;
 use bbn\Shop\Provider;
 use bbn\Shop\Sales;
+use bbn\Shop\Cart;
+use bbn\Shop\Client;
+
+
 
 /**
  * Shopping system main class.
@@ -130,6 +134,9 @@ class Shop extends Models\Cls\Db
     $this->medias    = new Medias($this->db);
     $this->product   = new Product($this->db, $cfg);
     $this->sales     = new Sales($this->db);
+    $this->cart     = new Cart($this->db);
+    $this->client     = new Client($this->db);
+
     $this->providers = new Provider($this->db, $cfg['providers'] ?? []);
     //$this->medias->setImageRoot('/image/');
   }
@@ -180,12 +187,6 @@ class Shop extends Models\Cls\Db
   public function getTransactionsList(array $params = []): array
   {
     $cfg  = $this->sales->getClassCfg();
-    $client = new \bbn\Shop\Client($this->db);
-    $cart =  new \bbn\Shop\Cart($this->db);
-    $product =  new \bbn\Shop\Product($this->db);
-    $provider =  new \bbn\Shop\Provider($this->db);
-    $sales =  new \bbn\Shop\Sales($this->db);
-
     $grid = new \bbn\Appui\Grid($this->db, $params, [
       'tables' => $cfg['table'],
       'fields' => $cfg['arch']['transactions'],
@@ -195,23 +196,23 @@ class Shop extends Models\Cls\Db
     if ($grid->check()) {
       $res = $grid->getDatatable();
       foreach ($res['data'] as &$d) {
-        $d['shipping_address'] = $sales->getShippingAddress($d['id']);
+        $d['shipping_address'] = $this->sales->getShippingAddress($d['id']);
         $d['billing_address'] = $d['shipping_address'];
         if($d['id_billing_address'] !==  $d['id_shipping_address']){
-          $d['billing_address'] = $sales->getBillingAddress($d['id']);
+          $d['billing_address'] = $this->sales->getBillingAddress($d['id']);
         }
-        $d['cart'] = $cart->getProducts($d['id_cart']);
+        $d['cart'] = $this->cart->getProducts($d['id_cart']);
         if(count($d['cart'])){
           foreach($d['cart'] as $idxCart => $c){
 
-            $d['cart'][$idxCart]['shipping_cost'] = $cart->shippingCost($d['shipping_address']['id_address'], $c['id_cart']);
+            $d['cart'][$idxCart]['shipping_cost'] = $this->cart->shippingCost($d['shipping_address']['id_address'], $c['id_cart']);
             
-            $d['cart'][$idxCart]['product'] = $product->get($c['id_product']);
-            $provider_full = $provider->get($d['cart'][$idxCart]['product']['id_provider']);
+            $d['cart'][$idxCart]['product'] = $this->product->get($c['id_product']);
+            $provider_full = $this->providers->get($d['cart'][$idxCart]['product']['id_provider']);
             $d['cart'][$idxCart]['product']['provider'] = $provider_full['name'];
           }
         }
-        $d['client'] = $client->get($d['id_client']);
+        $d['client'] = $this->client->get($d['id_client']);
         
         $d['payment_type'] = $this->opt->text($d['payment_type']);
         unset($d['id_client']);
