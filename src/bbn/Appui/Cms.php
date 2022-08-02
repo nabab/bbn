@@ -417,9 +417,9 @@ class Cms extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string $type = null): array
+  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string $type = null, bool $published = false): array
   {
-    $cfg       = $this->getLastVersionCfg($with_content, false, $filter);
+    $cfg       = $this->getLastVersionCfg($with_content, $published, $filter);
     $type_cond = [];
     foreach ($this->getTypes() as $t) {
       if (!$type || ($type === $t['value'])) {
