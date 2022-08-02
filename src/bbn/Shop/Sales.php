@@ -37,10 +37,13 @@ class Sales extends DbCls
         'id_client' => 'id_client',
         'id_shipping_address' => 'id_shipping_address',
         'id_billing_address' => 'id_billing_address',
+        'number' => 'number',
         'total' => 'total',
         'moment' => 'moment',
-
         'payment_type' => 'payment_type',
+        'reference' => 'reference',
+        'url' => 'url',
+        'error' => 'error',
         'status' => 'status'
       ]
     ],
@@ -56,11 +59,27 @@ class Sales extends DbCls
     $this->_init_class_cfg($cfg);
   }
 
-  public function changeStatus(string $id_transaction, $status): ?bool
+  public function changeStatus(string $idTransaction, string $status, $errorMessage = null): ?bool
   {
-    $cfg = $this->getClassCfg();
-    return $this->db->update($cfg['table'], [$cfg['arch']['transactions']['status'] => $status],[$cfg['arch']['transactions']['id'] => $id_transaction]);
+    $data = [
+      $this->fields['status'] => $status
+    ];
+    if (!empty($errorMessage)) {
+      $data[$this->fields['error']] = $errorMessage;
+    }
+    return (bool)$this->update($idTransaction, $data);
   }
+
+  public function setStatusPaid(string $idTransaction, $errorMessage = null): bool
+  {
+    return $this->changeStatus($idTransaction, 'paid', $errorMessage);
+  }
+
+  public function setStatusFailed(string $idTransaction, $errorMessage = null): bool
+  {
+    return $this->changeStatus($idTransaction, 'failed', $errorMessage);
+  }
+
   public function getByProduct(string $id_product, string $period = null, string $value = null): ?array
   {
     $cfg = $this->getClassCfg();
@@ -178,11 +197,15 @@ class Sales extends DbCls
     if (empty($transaction[$this->fields['payment_type']])) {
       throw new \Exception(X::_('No payment_type found on the given transaction: %s', \json_encode($transaction)));
     }
-    if (!empty($transaction[$this->fields['moment']])) {
+    if (empty($transaction[$this->fields['moment']])) {
       $transaction[$this->fields['moment']] = date('Y-m-d H:i:s');
     }
-    if (!empty($transaction[$this->fields['total']])) {
+    if (empty($transaction[$this->fields['total']])) {
       $transaction[$this->fields['total']] = 0;
+    }
+    $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
+    while ($this->select([$this->fields['number'] => $transaction[$this->fields['number']]])) {
+      $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
     }
     return $this->insert($transaction);
   }
