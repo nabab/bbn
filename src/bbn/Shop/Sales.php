@@ -43,8 +43,10 @@ class Sales extends DbCls
         'payment_type' => 'payment_type',
         'reference' => 'reference',
         'url' => 'url',
-        'error' => 'error',
-        'status' => 'status'
+        'error_message' => 'error_message',
+        'error_code' => 'error_code',
+        'status' => 'status',
+        'test' => 'test'
       ]
     ],
   ];
@@ -59,25 +61,28 @@ class Sales extends DbCls
     $this->_init_class_cfg($cfg);
   }
 
-  public function changeStatus(string $idTransaction, string $status, $errorMessage = null): ?bool
+  public function changeStatus(string $idTransaction, string $status, $errorMessage = null, $errorCode = null): ?bool
   {
     $data = [
       $this->fields['status'] => $status
     ];
     if (!empty($errorMessage)) {
-      $data[$this->fields['error']] = $errorMessage;
+      $data[$this->fields['error_message']] = $errorMessage;
+    }
+    if (!empty($errorCode)) {
+      $data[$this->fields['error_code']] = $errorCode;
     }
     return (bool)$this->update($idTransaction, $data);
   }
 
-  public function setStatusPaid(string $idTransaction, $errorMessage = null): bool
+  public function setStatusPaid(string $idTransaction, $errorMessage = null, $errorCode = null): bool
   {
-    return $this->changeStatus($idTransaction, 'paid', $errorMessage);
+    return $this->changeStatus($idTransaction, 'paid', $errorMessage,  $errorCode);
   }
 
-  public function setStatusFailed(string $idTransaction, $errorMessage = null): bool
+  public function setStatusFailed(string $idTransaction, $errorMessage = null, $errorCode = null): bool
   {
-    return $this->changeStatus($idTransaction, 'failed', $errorMessage);
+    return $this->changeStatus($idTransaction, 'failed', $errorMessage, $errorCode);
   }
 
   public function getByProduct(string $id_product, string $period = null, string $value = null): ?array
@@ -207,6 +212,7 @@ class Sales extends DbCls
     while ($this->select([$this->fields['number'] => $transaction[$this->fields['number']]])) {
       $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
     }
+    $transaction[$this->fields['test']] = !empty($transaction[$this->fields['test']]) ? 1 : 0;
     return $this->insert($transaction);
   }
 
