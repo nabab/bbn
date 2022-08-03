@@ -249,7 +249,6 @@ class Client extends DbCls
           'phone' => $addr[$addressFields['phone']],
           'region' => !empty($addr['region']) ? $addr['region'] : '',
           'fulladdress'=> $addr[$addressFields['fulladdress']]
-
         ]);
       }
       else {
