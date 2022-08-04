@@ -488,13 +488,13 @@ class Dashboard
         $this->archBits['num'] => $w[$this->archBits['num']]
       ]);
       // Parse JSON properties
-      if (Str::isJson($o['buttonsRight'])) {
+      if (!empty($o['buttonsRight']) && Str::isJson($o['buttonsRight'])) {
         $o['buttonsRight'] = \json_decode($o['buttonsRight'], true);
       }
-      if (Str::isJson($o['buttonsLeft'])) {
+      if (!empty($o['buttonsLeft']) && Str::isJson($o['buttonsLeft'])) {
         $o['buttonsLeft'] = \json_decode($o['buttonsLeft'], true);
       }
-      if (Str::isJson($o['options'])) {
+      if (!empty($o['options']) && Str::isJson($o['options'])) {
         $o['options'] = \json_decode($o['options'], true);
       }
       // "hidden" property
