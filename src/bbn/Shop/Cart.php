@@ -235,6 +235,23 @@ class Cart extends DbCls
 
 
   /**
+   * Gets the products of the current (or given) cart with the products details
+   * @param string $idCart The cart ID
+   * @return array|null
+   */
+  public function getProductsDetail(string $idCart = ''): ?array
+  {
+    if ($products = $this->getProducts($idCart)) {
+      $prodCls = new Product($this->db);
+      foreach ($products as $i => $p) {
+        $products[$i]['product'] = $prodCls->get($p[$this->class_cfg['arch']['cart_products']['id_product']]);
+      }
+    }
+    return $products;
+  }
+
+
+  /**
    * Gets the products amount of a cart
    * @param string $idCart
    * @return float
