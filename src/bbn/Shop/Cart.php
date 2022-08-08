@@ -298,14 +298,16 @@ class Cart extends DbCls
   /**
    * Sets the client ID to the current cart
    * @param string $idClient The client ID
+   * @param string $idCart The cart ID
    * @return bool
    */
-  public function setClient(string $idClient): bool
+  public function setClient(string $idClient, string $idCart = ''): bool
   {
     if (!Str::isUid($idClient)) {
       throw new \Exception(_('The client ID is an invalid UID'));
     }
-    if ($idCart = $this->getCurrentCartID()) {
+    $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
+    if (!empty($idCart)) {
       return $this->update($idCart, [$this->fields['id_client'] => $idClient]);
     }
     return false;
