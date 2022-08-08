@@ -296,6 +296,20 @@ class Cart extends DbCls
 
 
   /**
+   * Gets the client ID of the given cart
+   * @param string $idCart
+   * @return strin|null
+   */
+  public function getClient(string $idCart = ''): ?string
+  {
+    $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
+    if (!empty($idCart)) {
+      return $this->selectOne($this->fields['id_client'], $idCart);
+    }
+    return null;
+  }
+
+  /**
    * Sets the client ID to the current cart
    * @param string $idClient The client ID
    * @param string $idCart The cart ID
