@@ -292,4 +292,86 @@ class Sales extends DbCls
     return $this->client->getAddress($idAddress);
   }
 
+  /**
+   * Sends the order confirm email to the client
+   * @param string $idTransaction
+   * @return bool
+   */
+  public function sendConfirmEmailToClient(string $idTransaction): bool
+  {
+    if (($opt = \bbn\Appui\Option::getInstance())
+      && ($d = $this->getMailData($idTransaction))
+      && ($email = $this->client->getEmail($d[$this->fields['id_client']]))
+    ) {
+      $mailCls = new \bbn\Mail();
+      $masksCls = new \bbn\Appui\Masks($this->db);
+      $template = $masksCls->getDefault($opt->fromCode('costumer_order', 'masks', 'appui'));
+      $title = \bbn\Tpl::render($template['title'], $d);
+      $content = \bbn\Tpl::render($template['content'], $d);
+      return (bool)$mailCls->send([
+        'to' => $email,
+        'title' => $title,
+        'text' => $content
+      ]);
+    }
+    return false;
+  }
+
+  /**
+   * Sends an email to notify a new order
+   * @param string $idTransaction The transaction ID
+   * @param string $email The email address to send to
+   * @return bool
+   */
+  public function sendNewOrderEmail(string $idTransaction, string $email = ''): bool
+  {
+    if (($opt = \bbn\Appui\Option::getInstance())
+      && ($d = $this->getMailData($idTransaction))
+    ) {
+      $mailCls = new \bbn\Mail();
+      $masksCls = new \bbn\Appui\Masks($this->db);
+      if (!\bbn\Str::isEmail($email)
+        && defined('BBN_ADMIN_EMAIL')
+      ) {
+        $email = BBN_ADMIN_EMAIL;
+      }
+      $template = $masksCls->getDefault($opt->fromCode('order', 'masks', 'appui'));
+      $title = \bbn\Tpl::render($template['title'], $d);
+      $content = \bbn\Tpl::render($template['content'], $d);
+      return (bool)$mailCls->send([
+        'to' => $email,
+        'title' => $title,
+        'text' => $content
+      ]);
+    }
+    return false;
+  }
+
+  /**
+   * Gets the transaction info to use on an email
+   * @param string $idTransaction
+   * @return null|array
+   */
+  private function getMailData(string $idTransaction): ?array
+  {
+    if (($opt = \bbn\Appui\Option::getInstance())
+      && ($transaction = $this->get($idTransaction))
+    ) {
+      $transaction['products'] = $this->cart->getProductsDetail($transaction[$this->fields['id_cart']]);
+      foreach ($transaction['products'] as $i => $p) {
+        $transaction['products'][$i]['product']['price'] = '€ ' . (string)number_format(round((float)$p['product']['price'], 2), 2, ',', '');
+        $transaction['products'][$i]['amount'] = '€ ' . (string)number_format(round((float)$p['amount'], 2), 2, ',', '');
+      }
+      $transaction['total'] = '€ ' . (string)number_format(round((float)$transaction[$this->fields['total']], 2), 2, ',', '');
+      $transaction['shippingAddress'] = $this->getShippingAddress($idTransaction);
+      $transaction['billingAddress'] = $this->getBillingAddress($idTransaction);
+      $transaction['shippingAddress']['country'] = $opt->text($transaction['shippingAddress']['country']);
+      $transaction['billingAddress']['country'] = $opt->text($transaction['billingAddress']['country']);
+      $transaction[$this->fields['payment_type']] = $opt->text($transaction[$this->fields['payment_type']]);
+      $transaction['formattedMoment'] = date('d/m/Y', strtotime($transaction[$this->fields['moment']]));
+      return $transaction;
+    }
+    return null;
+  }
+
 }
