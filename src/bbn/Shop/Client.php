@@ -198,7 +198,7 @@ class Client extends DbCls
     return null;
 	}
 
-	protected function getEmail(string $idClient): ?string
+	public function getEmail(string $idClient): ?string
 	{
 		return $this->selectOne($this->fields['email'], [$this->fields['id'] => $idClient]);
 	}
