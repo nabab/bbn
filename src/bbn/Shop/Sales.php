@@ -38,6 +38,7 @@ class Sales extends DbCls
         'id_shipping_address' => 'id_shipping_address',
         'id_billing_address' => 'id_billing_address',
         'number' => 'number',
+        'shipping_cost' => 'shipping_cost',
         'total' => 'total',
         'moment' => 'moment',
         'payment_type' => 'payment_type',
@@ -80,8 +81,20 @@ class Sales extends DbCls
     return $this->changeStatus($idTransaction, 'paid', $errorMessage,  $errorCode);
   }
 
-  public function setStatusFailed(string $idTransaction, $errorMessage = null, $errorCode = null): bool
+  public function setStatusFailed(string $idTransaction, $errorMessage = null, $errorCode = null, bool $readdProducts = true): bool
   {
+    if ($readdProducts
+      && ($idCart = $this->getIdCart($idTransaction))
+      && ($products = $this->cart->getProducts($idCart))
+    ) {
+      $prodCls = new Product($this->db);
+      $prodClsCfg = $prodCls->getClassCfg();
+      $prodFields = $prodClsCfg['arch']['products'];
+      foreach ($products as $product) {
+        $currentStock = $prodCls->getStock($product[$prodFields['id_product']]);
+        $prodCls->setStock($product[$prodFields['id_product']], $currentStock + $product[$prodFields['quantity']]);
+      }
+    }
     return $this->changeStatus($idTransaction, 'failed', $errorMessage, $errorCode);
   }
 
@@ -208,11 +221,16 @@ class Sales extends DbCls
     if (empty($transaction[$this->fields['total']])) {
       $transaction[$this->fields['total']] = 0;
     }
+    if (empty($transaction[$this->fields['shipping_cost']])) {
+      $transaction[$this->fields['shipping_cost']] = 0;
+    }
     $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
     while ($this->select([$this->fields['number'] => $transaction[$this->fields['number']]])) {
       $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
     }
     $transaction[$this->fields['test']] = !empty($transaction[$this->fields['test']]) ? 1 : 0;
+    $this->client->setLastUsedAddress($transaction[$this->fields['id_shipping_address']], $transaction[$this->fields['moment']]);
+    $this->client->setLastUsedAddress($transaction[$this->fields['id_billing_address']], $transaction[$this->fields['moment']]);
     return $this->insert($transaction);
   }
 
@@ -359,7 +377,7 @@ class Sales extends DbCls
     ) {
       $transaction['products'] = $this->cart->getProductsDetail($transaction[$this->fields['id_cart']]);
       foreach ($transaction['products'] as $i => $p) {
-        $transaction['products'][$i]['product']['price'] = '€ ' . (string)number_format(round((float)$p['product']['price'], 2), 2, ',', '');
+        $transaction['products'][$i]['product']['price'] = '€ ' . (string)number_format(round((float)($p['amount'] / $p['quantity']), 2), 2, ',', '');
         $transaction['products'][$i]['amount'] = '€ ' . (string)number_format(round((float)$p['amount'], 2), 2, ',', '');
       }
       $transaction['total'] = '€ ' . (string)number_format(round((float)$transaction[$this->fields['total']], 2), 2, ',', '');

@@ -300,4 +300,17 @@ class Client extends DbCls
     return null;
   }
 
+  /**
+   * Sets the 'last' field for the given client address
+   * @param string $idClientAddress
+   * @return bool
+   */
+  public function setLastUsedAddress(string $idClientAddress, string $moment = '')
+  {
+    $table = $this->class_cfg['tables']['clients_addresses'];
+    $fields = $this->class_cfg['arch']['clients_addresses'];
+    $moment = date('Y-m-d H:i:s', !empty($moment) ? strtotime($moment) : time());
+    return (bool)$this->db->update($table, [$fields['last'] => $moment], [$fields['id'] => $idClientAddress]);
+  }
+
 }

@@ -296,6 +296,29 @@ class Cart extends DbCls
 
 
   /**
+   * Checks the availability of the products in the cart and return an array with "id => quantity"
+   * of the products that are no longer available or with less than the requested quantity available
+   * @param string $idCart
+   * @return null|array
+   */
+  public function checkProductsStock(string $idCart = ''): ?array
+  {
+    if ($products = $this->getProducts($idCart)) {
+      $pCfg = $this->class_cfg['arch']['cart_products'];
+      $res = [];
+      foreach ($products as $product) {
+        $stock = $this->productCls->getStock($product[$pCfg['id_product']]);
+        if (!$stock || ($stock < $product[$pCfg['quantity']])) {
+          $res[$product[$pCfg['id_product']]] = $stock;
+        }
+      }
+      return !empty($res) ? $res : null;
+    }
+    return null;
+  }
+
+
+  /**
    * Gets the client ID of the given cart
    * @param string $idCart
    * @return strin|null
