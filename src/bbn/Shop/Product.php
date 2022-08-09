@@ -309,6 +309,29 @@ class Product extends DbCls
   }
 
 
+  /**
+   * Gets the stock quantity of the given product
+   * @param string $id
+   * @return int
+   */
+  public function getStock(string $id): int
+  {
+    return $this->selectOne($this->fields['stock'], $id);
+  }
+
+
+  /**
+   * Sets the stock quantity of the given product
+   * @param string $id
+   * @param int $quantity
+   * @return bool
+   */
+  public function setStock(string $id, int $quantity): bool
+  {
+    return (bool)$this->update($id, [$this->fields['stock'] => $quantity]);
+  }
+
+
   private function getVariantsList(array $product): array
   {
     $cfg  = $this->getClassCfg();
