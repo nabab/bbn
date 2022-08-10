@@ -197,16 +197,18 @@ class Shop extends Models\Cls\Db
       foreach ($res['data'] as &$d) {
         $d['shipping_address'] = $this->sales->getShippingAddress($d[$transFields['id']]);
         $d['billing_address'] = $d['shipping_address'];
-        if($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]){
+        if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {
           $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);
         }
-        $d['cart'] = $this->cart->getProducts($d[$transFields['id_cart']]);
-        if (count($d['cart'])) {
-          foreach ($d['cart'] as $idxCart => $c) {
-            $d['cart'][$idxCart]['shipping_cost'] = $this->cart->shippingCost($d['shipping_address']['id_address'], $c['id_cart']);
-            $d['cart'][$idxCart]['product'] = $this->product->get($c['id_product']);
-            $provider_full = $this->providers->get($d['cart'][$idxCart]['product']['id_provider']);
-            $d['cart'][$idxCart]['product']['provider'] = $provider_full['name'];
+        if ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']])) {
+          foreach ($d['products'] as $i => $p) {
+            $prod = $this->product->get($p['id_product']);
+            $d['products'][$i]['product'] = $prod;
+            $d['products'][$i]['product']['provider'] = '';
+            if (!empty($prod)) {
+              $provider = $this->providers->get($prod['id_provider']);
+              $d['products'][$i]['product']['provider'] = !empty($provider) ? $provider['name'] : '';
+            }
           }
         }
         $d['client'] = $this->client->get($d[$transFields['id_client']]);
