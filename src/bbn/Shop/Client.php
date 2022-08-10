@@ -198,10 +198,28 @@ class Client extends DbCls
     return null;
 	}
 
+  /**
+   * Gets the client's email address
+   * @param string $idClient
+   * @return null|string
+   */
 	public function getEmail(string $idClient): ?string
 	{
 		return $this->selectOne($this->fields['email'], [$this->fields['id'] => $idClient]);
 	}
+
+  /**
+   * Gets the client's full name
+   * @param string $idClient
+   * @return null|string
+   */
+  public function getFullName(string $idClient): ?string
+  {
+    if ($client = $this->get($idClient)) {
+      return $client[$this->fields['first_name']] . (!empty($client[$this->fields['last_name']]) ? ' ' . $client[$this->fields['last_name']] : '');
+    }
+    return null;
+  }
 
   /**
    * Gets the addresses list of a client
