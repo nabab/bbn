@@ -327,7 +327,7 @@ class Sales extends DbCls
     ) {
       $mailCls = new Mail();
       $masksCls = new Masks($this->db);
-      if ($template = $masksCls->getDefault($opt->fromCode('costumer_order', 'masks', 'appui'))) {
+      if ($template = $masksCls->getDefault($opt->fromCode('client_order', 'masks', 'appui'))) {
         $title = Tpl::render($template['title'], $d);
         $content = Tpl::render($template['content'], $d);
         return (bool)$mailCls->send([
