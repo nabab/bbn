@@ -767,9 +767,11 @@ class Medias extends bbn\Models\Cls\Db
     if ($old
         && (($old['name'] !== $name) || ($old['title'] !== $title))
     ) {
-        $content = json_decode($old['content'], true);
-        $path    = $root.$content['path'].'/';
-
+      $content = $old['content'];
+      if (\bbn\Str::isJson($old['content'])) {
+        $content = \json_decode($old['content'], true);
+      }
+      $path = $root.$content['path'].'/';
       if ($this->fs->exists($path.$id_media.'/'.$old['name'])) {
         if ($old['name'] !== $name) {
           //if the media is an image has to update also the thumbs names
