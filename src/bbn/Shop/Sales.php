@@ -7,6 +7,10 @@ use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\Dbconfig;
 use bbn\Db;
+use bbn\Mail;
+use bbn\Appui\Masks;
+use bbn\Tpl;
+use bbn\Appui\Option;
 
 
 class Sales extends DbCls
@@ -317,20 +321,21 @@ class Sales extends DbCls
    */
   public function sendConfirmEmailToClient(string $idTransaction): bool
   {
-    if (($opt = \bbn\Appui\Option::getInstance())
+    if (($opt = Option::getInstance())
       && ($d = $this->getMailData($idTransaction))
       && ($email = $this->client->getEmail($d[$this->fields['id_client']]))
     ) {
-      $mailCls = new \bbn\Mail();
-      $masksCls = new \bbn\Appui\Masks($this->db);
-      $template = $masksCls->getDefault($opt->fromCode('costumer_order', 'masks', 'appui'));
-      $title = \bbn\Tpl::render($template['title'], $d);
-      $content = \bbn\Tpl::render($template['content'], $d);
-      return (bool)$mailCls->send([
-        'to' => $email,
-        'title' => $title,
-        'text' => $content
-      ]);
+      $mailCls = new Mail();
+      $masksCls = new Masks($this->db);
+      if ($template = $masksCls->getDefault($opt->fromCode('costumer_order', 'masks', 'appui'))) {
+        $title = Tpl::render($template['title'], $d);
+        $content = Tpl::render($template['content'], $d);
+        return (bool)$mailCls->send([
+          'to' => $email,
+          'title' => $title,
+          'text' => $content
+        ]);
+      }
     }
     return false;
   }
@@ -343,24 +348,27 @@ class Sales extends DbCls
    */
   public function sendNewOrderEmail(string $idTransaction, string $email = ''): bool
   {
-    if (($opt = \bbn\Appui\Option::getInstance())
+    if (($opt = Option::getInstance())
       && ($d = $this->getMailData($idTransaction))
     ) {
-      $mailCls = new \bbn\Mail();
-      $masksCls = new \bbn\Appui\Masks($this->db);
-      if (!\bbn\Str::isEmail($email)
+      $mailCls = new Mail();
+      $masksCls = new Masks($this->db);
+      if (!Str::isEmail($email)
         && defined('BBN_ADMIN_EMAIL')
       ) {
         $email = BBN_ADMIN_EMAIL;
       }
-      $template = $masksCls->getDefault($opt->fromCode('order', 'masks', 'appui'));
-      $title = \bbn\Tpl::render($template['title'], $d);
-      $content = \bbn\Tpl::render($template['content'], $d);
-      return (bool)$mailCls->send([
-        'to' => $email,
-        'title' => $title,
-        'text' => $content
-      ]);
+      if (!empty($email)
+        && ($template = $masksCls->getDefault($opt->fromCode('order', 'masks', 'appui')))
+      ) {
+        $title = Tpl::render($template['title'], $d);
+        $content = Tpl::render($template['content'], $d);
+        return (bool)$mailCls->send([
+          'to' => $email,
+          'title' => $title,
+          'text' => $content
+        ]);
+      }
     }
     return false;
   }
@@ -372,7 +380,7 @@ class Sales extends DbCls
    */
   private function getMailData(string $idTransaction): ?array
   {
-    if (($opt = \bbn\Appui\Option::getInstance())
+    if (($opt = Option::getInstance())
       && ($transaction = $this->get($idTransaction))
     ) {
       $transaction['products'] = $this->cart->getProductsDetail($transaction[$this->fields['id_cart']]);
