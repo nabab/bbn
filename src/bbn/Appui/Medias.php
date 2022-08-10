@@ -768,7 +768,7 @@ class Medias extends bbn\Models\Cls\Db
         && (($old['name'] !== $name) || ($old['title'] !== $title))
     ) {
       $content = $old['content'];
-      if(\bbn\Str::isJson($old['content'])){
+      if (\bbn\Str::isJson($old['content'])) {
         $content = \json_decode($old['content'], true);
       }
       $path = $root.$content['path'].'/';
