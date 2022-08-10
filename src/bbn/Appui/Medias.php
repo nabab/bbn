@@ -763,14 +763,13 @@ class Medias extends bbn\Models\Cls\Db
     $new = [];
     //the old media
     $old  = $this->getMedia($id_media, true);
-
     $root = Mvc::getDataPath('appui-note').'media/';
     if ($old
         && (($old['name'] !== $name) || ($old['title'] !== $title))
     ) {
       $content = $old['content'];
       if(\bbn\Str::isJson($old['content'])){
-        $content = json_decode($old['content'], true);
+        $content = \json_decode($old['content'], true);
       }
       $path = $root.$content['path'].'/';
       if ($this->fs->exists($path.$id_media.'/'.$old['name'])) {
