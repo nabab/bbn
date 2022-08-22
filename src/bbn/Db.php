@@ -1,6 +1,7 @@
 <?php
 namespace bbn;
 
+use Exception;
 use bbn\Db\Engines;
 
 /**
@@ -52,7 +53,7 @@ class Db implements Db\Actions
    *  // (void)
    * ```
    * @param null|array $cfg Mandatory db_user db_engine db_host db_pass
-   * @throws \Exception
+   * @throws Exception
    */
   public function __construct(array $cfg = [])
   {
@@ -69,7 +70,7 @@ class Db implements Db\Actions
         $cls    = '\\bbn\\Db\\Languages\\'.ucwords($engine);
 
         if (!class_exists($cls)) {
-          throw new \Exception(X::_("The database engine %s is not recognized", $engine));
+          throw new Exception(X::_("The database engine %s is not recognized", $engine));
         }
 
         $this->language = new $cls($cfg);
@@ -89,7 +90,7 @@ class Db implements Db\Actions
       $connection  = $cfg['engine'] ?? 'No engine';
       $connection .= '/'.($cfg['db'] ?? 'No DB');
       $this->log(X::_("Impossible to create the connection for").' '.$connection);
-      throw new \Exception(X::_("Impossible to create the connection for").' '.$connection);
+      throw new Exception(X::_("Impossible to create the connection for").' '.$connection);
     }
   }
 
@@ -637,7 +638,7 @@ class Db implements Db\Actions
   /**
    * @param $tables
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getFieldsList($tables): array
   {
@@ -780,6 +781,28 @@ class Db implements Db\Actions
   public function getPrimary(string $table): array
   {
     return $this->language->getPrimary($table);
+  }
+
+
+  /**
+   * Return primary keys of a table as a string if there is a single-column unique key.
+   *
+   * ```php
+   * X::dump($db-> getSinglePrimary('table_users'));
+   * // (string) "id"
+   * ```
+   *
+   * @param string $table The table's name
+   * @return array
+   */
+  public function getSinglePrimary(string $table): ?string
+  {
+    $primaries = $this->language->getPrimary($table);
+    if (count($primaries) === 1) {
+      return $primaries[0];
+    }
+
+    return null;
   }
 
 
@@ -1433,7 +1456,7 @@ class Db implements Db\Actions
             if (isset($cfg['available_fields'][$f])) {
               if ($cfg['available_fields'][$f] && ($t = $cfg['models'][$cfg['available_fields'][$f]])
               ) {
-                throw new \Exception("Impossible to create the where in union for the following request: ".PHP_EOL.$cfg['sql']);
+                throw new Exception("Impossible to create the where in union for the following request: ".PHP_EOL.$cfg['sql']);
                 //die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));
               }
             }
@@ -2443,7 +2466,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getSelect(array $cfg): string
   {
@@ -2470,7 +2493,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getInsert(array $cfg): string
   {
@@ -2498,7 +2521,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getUpdate(array $cfg): string
   {
@@ -2519,7 +2542,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getDelete(array $cfg): string
   {
@@ -2535,7 +2558,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getJoin(array $cfg): string
   {
@@ -2555,7 +2578,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getWhere(array $cfg): string
   {
@@ -2570,7 +2593,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getGroupBy(array $cfg): string
   {
@@ -2585,7 +2608,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getHaving(array $cfg): string
   {
@@ -2605,7 +2628,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getOrder(array $cfg): string
   {
@@ -2625,7 +2648,7 @@ class Db implements Db\Actions
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getLimit(array $cfg): string
   {
@@ -2654,7 +2677,7 @@ class Db implements Db\Actions
    * 
    * @param string $table The table's name
    * @return string | false
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreate(string $table, array $model = null): string
   {
@@ -2668,7 +2691,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateTable(string $table, array $model = null): string
   {
@@ -2682,7 +2705,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateKeys(string $table, array $model = null): string
   {
@@ -2696,7 +2719,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateConstraints(string $table, array $model = null): string
   {
@@ -2713,7 +2736,7 @@ class Db implements Db\Actions
    * @param bool $unique
    * @param null $length
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    * @todo return data
    *
    * ```php
@@ -2736,7 +2759,7 @@ class Db implements Db\Actions
    * @param string $table The table's name.
    * @param string $key The key's name.
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    * @todo far vedere a thomas perchè non funziona/return data
    *
    * ```php
@@ -2757,7 +2780,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterTable(string $table, array $cfg): string
   {
@@ -2771,7 +2794,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterColumn(string $table, array $cfg): string
   {
@@ -2785,7 +2808,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterKey(string $table, array $cfg): string
   {
@@ -2799,7 +2822,7 @@ class Db implements Db\Actions
    * @param string $table
    * @param array $cfg
    * @return int
-   * @throws \Exception
+   * @throws Exception
    */
   public function alter(string $table, array $cfg): int
   {
@@ -2849,7 +2872,7 @@ class Db implements Db\Actions
    * @param string|null $pass
    * @param string|null $db
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function createUser(string $user = null, string $pass = null, string $db = null): bool
   {
@@ -2871,7 +2894,7 @@ class Db implements Db\Actions
    *
    * @param string $user
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function deleteUser(string $user): bool
   {
@@ -2886,7 +2909,7 @@ class Db implements Db\Actions
    * @param string $user . The user's name, without params will return all privileges of all db_users
    * @param string $host . The host
    * @return array
-   * @throws \Exception
+   * @throws Exception
    * @todo far vedere  a th la descrizione
    *
    * ```php
@@ -3245,7 +3268,7 @@ class Db implements Db\Actions
 
   /**
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getRealLastParams(): ?array
   {
@@ -3257,7 +3280,7 @@ class Db implements Db\Actions
 
   /**
    * @return string|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function realLast(): ?string
   {
@@ -3269,7 +3292,7 @@ class Db implements Db\Actions
 
   /**
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getLastParams(): ?array
   {
@@ -3281,7 +3304,7 @@ class Db implements Db\Actions
 
   /**
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getLastValues(): ?array
   {
@@ -3291,10 +3314,22 @@ class Db implements Db\Actions
   }
 
 
+  public function getQuery(string $type, array $cfg): string
+  {
+    if (in_array(strtoupper($type), ['INSERT', 'UPDATE', 'DELETE', 'SELECT'])) {
+      $cfg['kind'] = $type;
+      $cfg = $this->processCfg($cfg);
+      return $cfg['sql'] ?: '';
+    }
+
+    throw new Exception(X::_("Impossible to make a query of type %s", $type));
+  }
+
+
   /**
    * @param array $cfg
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getQueryValues(array $cfg): array
   {
@@ -3357,12 +3392,12 @@ class Db implements Db\Actions
    * Throws ans exception if language class method does not exist.
    *
    * @param string $method
-   * @throws \Exception
+   * @throws Exception
    */
   private function ensureLanguageMethodExists(string $method)
   {
     if (!method_exists($this->language, $method)) {
-      throw new \Exception(X::_('Method %s not found on the language %s class!', $method, $this->engine));
+      throw new Exception(X::_('Method %s not found on the language %s class!', $method, $this->engine));
     }
   }
 }
