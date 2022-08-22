@@ -235,16 +235,116 @@ class Cart extends DbCls
 
 
   /**
+   * Gets the products of the current (or given) cart with the products details
+   * @param string $idCart The cart ID
+   * @return array|null
+   */
+  public function getProductsDetail(string $idCart = ''): ?array
+  {
+    if ($products = $this->getProducts($idCart)) {
+      $prodCls = new Product($this->db);
+      foreach ($products as $i => $p) {
+        $products[$i]['product'] = $prodCls->get($p[$this->class_cfg['arch']['cart_products']['id_product']]);
+      }
+    }
+    return $products;
+  }
+
+
+  /**
+   * Gets the products amount of a cart
+   * @param string $idCart
+   * @return float
+   */
+  public function getProductsAmount(string $idCart = ''): float
+  {
+    if (empty($idCart)) {
+      $idCart = $this->getCurrentCartID();
+    }
+    if (!Str::isUid($idCart)) {
+      throw new \Exception(_('The cart ID is an invalid UID'));
+    }
+    $total = 0;
+    if ($products = $this->getProducts($idCart)) {
+      $pFields = $this->class_cfg['arch']['cart_products'];
+      foreach ($products as $product) {
+        $total += $product[$pFields['amount']];
+      }
+    }
+    return \round($total, 2);
+  }
+
+
+  /**
+   * Gets the products number of a cart
+   * @param string $idCart
+   * @return int
+   */
+  public function getProductsQuantity(string $idCart = ''): int
+  {
+    if (empty($idCart)) {
+      $idCart = $this->getCurrentCartID();
+    }
+    if (!Str::isUid($idCart)) {
+      throw new \Exception(_('The cart ID is an invalid UID'));
+    }
+    if ($prods = $this->getProducts($idCart)) {
+      return \count($prods);
+    }
+    return 0;
+  }
+
+
+  /**
+   * Checks the availability of the products in the cart and return an array with "id => quantity"
+   * of the products that are no longer available or with less than the requested quantity available
+   * @param string $idCart
+   * @return null|array
+   */
+  public function checkProductsStock(string $idCart = ''): ?array
+  {
+    if ($products = $this->getProducts($idCart)) {
+      $pCfg = $this->class_cfg['arch']['cart_products'];
+      $res = [];
+      foreach ($products as $product) {
+        $stock = $this->productCls->getStock($product[$pCfg['id_product']]);
+        if (!$stock || ($stock < $product[$pCfg['quantity']])) {
+          $res[$product[$pCfg['id_product']]] = $stock;
+        }
+      }
+      return !empty($res) ? $res : null;
+    }
+    return null;
+  }
+
+
+  /**
+   * Gets the client ID of the given cart
+   * @param string $idCart
+   * @return strin|null
+   */
+  public function getClient(string $idCart = ''): ?string
+  {
+    $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
+    if (!empty($idCart)) {
+      return $this->selectOne($this->fields['id_client'], $idCart);
+    }
+    return null;
+  }
+
+  /**
    * Sets the client ID to the current cart
    * @param string $idClient The client ID
+   * @param string $idCart The cart ID
    * @return bool
    */
-  public function setClient(string $idClient): bool
+  public function setClient(string $idClient, string $idCart = ''): bool
   {
     if (!Str::isUid($idClient)) {
       throw new \Exception(_('The client ID is an invalid UID'));
     }
-    if ($idCart = $this->getCurrentCartID()) {
+    $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
+    if (!empty($idCart)) {
       return $this->update($idCart, [$this->fields['id_client'] => $idClient]);
     }
     return false;
@@ -265,14 +365,7 @@ class Cart extends DbCls
     if (!Str::isUid($idCart)) {
       throw new \Exception(_('The cart ID is an invalid UID'));
     }
-    $total = 0;
-    if ($products = $this->getProducts($idCart)) {
-      $pFields = $this->class_cfg['arch']['cart_products'];
-      foreach ($products as $product) {
-        $total += $product[$pFields['amount']];
-      }
-    }
-    $total += $this->shippingCost($idAddress, $idCart);
+    $total = $this->getProductsAmount($idCart) + $this->shippingCost($idAddress, $idCart);
     return \round($total, 2);
   }
 
@@ -291,18 +384,12 @@ class Cart extends DbCls
     if (!Str::isUid($idCart)) {
       throw new \Exception(_('The cart ID is an invalid UID'));
     }
+    $productsAmount = $this->getProductsAmount($idCart);
     $res = [
-      'products' => 0,
+      'products' => $productsAmount,
       'shipping' => 0,
-      'total' => 0
+      'total' => $productsAmount
     ];
-    if ($products = $this->getProducts($idCart)) {
-      $pFields = $this->class_cfg['arch']['cart_products'];
-      foreach ($products as $product) {
-        $res['products'] += $product[$pFields['amount']];
-        $res['total'] += $product[$pFields['amount']];
-      }
-    }
     $res['shipping'] = $this->shippingCost($idAddress, $idCart);
     $res['total'] += $res['shipping'];
     foreach ($res as $i => $v) {
@@ -359,10 +446,10 @@ class Cart extends DbCls
         }
         if ($weight = $this->productCls->getWeight($product[$pFields['id_product']])) {
           if (!isset($providersWeight[$provider])) {
-            $providersWeight[$provider] = $weight;
+            $providersWeight[$provider] = $weight * $product[$pFields['quantity']];
           }
           else {
-            $providersWeight[$provider] += $weight;
+            $providersWeight[$provider] += $weight * $product[$pFields['quantity']];
           }
         }
         else if (!isset($providersDefaults[$provider])

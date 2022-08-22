@@ -21,6 +21,10 @@ use bbn\Appui\Option;
 use bbn\Shop\Product;
 use bbn\Shop\Provider;
 use bbn\Shop\Sales;
+use bbn\Shop\Cart;
+use bbn\Shop\Client;
+
+
 
 /**
  * Shopping system main class.
@@ -130,6 +134,9 @@ class Shop extends Models\Cls\Db
     $this->medias    = new Medias($this->db);
     $this->product   = new Product($this->db, $cfg);
     $this->sales     = new Sales($this->db);
+    $this->cart     = new Cart($this->db);
+    $this->client     = new Client($this->db);
+
     $this->providers = new Provider($this->db, $cfg['providers'] ?? []);
     //$this->medias->setImageRoot('/image/');
   }
@@ -180,45 +187,32 @@ class Shop extends Models\Cls\Db
   public function getTransactionsList(array $params = []): array
   {
     $cfg  = $this->sales->getClassCfg();
-    $client = new \bbn\Shop\Client($this->db);
-    $cart =  new \bbn\Shop\Cart($this->db);
-    $product =  new \bbn\Shop\Product($this->db);
-    $provider =  new \bbn\Shop\Provider($this->db);
-
+    $transFields = $cfg['arch']['transactions'];
     $grid = new \bbn\Appui\Grid($this->db, $params, [
       'tables' => $cfg['table'],
-      'fields' => $cfg['arch']['transactions'],
-      'limit' => 100
+      'fields' => \array_values($transFields)
     ]);
-
     if ($grid->check()) {
       $res = $grid->getDatatable();
       foreach ($res['data'] as &$d) {
-        
-        $d['shipping_address'] = $client->getAddress($d['id_shipping_address'],$d['id_client'], true);
+        $d['shipping_address'] = $this->sales->getShippingAddress($d[$transFields['id']]);
         $d['billing_address'] = $d['shipping_address'];
-        if($d['id_billing_address'] !==  $d['id_shipping_address']){
-          $d['billing_address'] = $client->getShippingAddress($d['id_billing_address']);
+        if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {
+          $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);
         }
-        $d['cart'] = $cart->getProducts($d['id_cart']);
-        if(count($d['cart'])){
-          foreach($d['cart'] as $idxCart => $c){
-
-            $d['cart'][$idxCart]['shipping_cost'] = $cart->shippingCost($d['shipping_address']['id_address'], $c['id_cart']);
-            
-            $d['cart'][$idxCart]['product'] = $product->get($c['id_product']);
-            $provider_full = $provider->get($d['cart'][$idxCart]['product']['id_provider']);
-            $d['cart'][$idxCart]['product']['provider'] = $provider_full['name'];
+        if ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']])) {
+          foreach ($d['products'] as $i => $p) {
+            $prod = $this->product->get($p['id_product']);
+            $d['products'][$i]['product'] = $prod;
+            $d['products'][$i]['product']['provider'] = '';
+            if (!empty($prod)) {
+              $provider = $this->providers->get($prod['id_provider']);
+              $d['products'][$i]['product']['provider'] = !empty($provider) ? $provider['name'] : '';
+            }
           }
         }
-        $d['client'] = $client->get($d['id_client']);
-        
-        $d['payment_type'] = $this->opt->text($d['payment_type']);
-        unset($d['id_client']);
-
-        $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];
+        $d['client'] = $this->client->get($d[$transFields['id_client']]);
       }
-
       unset($d);
       return $res;
     }

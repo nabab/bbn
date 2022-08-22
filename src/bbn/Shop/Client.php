@@ -198,10 +198,28 @@ class Client extends DbCls
     return null;
 	}
 
-	protected function getEmail(string $idClient): ?string
+  /**
+   * Gets the client's email address
+   * @param string $idClient
+   * @return null|string
+   */
+	public function getEmail(string $idClient): ?string
 	{
 		return $this->selectOne($this->fields['email'], [$this->fields['id'] => $idClient]);
 	}
+
+  /**
+   * Gets the client's full name
+   * @param string $idClient
+   * @return null|string
+   */
+  public function getFullName(string $idClient): ?string
+  {
+    if ($client = $this->get($idClient)) {
+      return $client[$this->fields['first_name']] . (!empty($client[$this->fields['last_name']]) ? ' ' . $client[$this->fields['last_name']] : '');
+    }
+    return null;
+  }
 
   /**
    * Gets the addresses list of a client
@@ -249,7 +267,6 @@ class Client extends DbCls
           'phone' => $addr[$addressFields['phone']],
           'region' => !empty($addr['region']) ? $addr['region'] : '',
           'fulladdress'=> $addr[$addressFields['fulladdress']]
-
         ]);
       }
       else {
@@ -299,6 +316,19 @@ class Client extends DbCls
       return $this->getAddress($idClientAddress);
     }
     return null;
+  }
+
+  /**
+   * Sets the 'last' field for the given client address
+   * @param string $idClientAddress
+   * @return bool
+   */
+  public function setLastUsedAddress(string $idClientAddress, string $moment = '')
+  {
+    $table = $this->class_cfg['tables']['clients_addresses'];
+    $fields = $this->class_cfg['arch']['clients_addresses'];
+    $moment = date('Y-m-d H:i:s', !empty($moment) ? strtotime($moment) : time());
+    return (bool)$this->db->update($table, [$fields['last'] => $moment], [$fields['id'] => $idClientAddress]);
   }
 
 }

@@ -7,6 +7,10 @@ use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\Dbconfig;
 use bbn\Db;
+use bbn\Mail;
+use bbn\Appui\Masks;
+use bbn\Tpl;
+use bbn\Appui\Option;
 
 
 class Sales extends DbCls
@@ -35,12 +39,19 @@ class Sales extends DbCls
         'id' => 'id',
         'id_cart' => 'id_cart',
         'id_client' => 'id_client',
-        'total' => 'total',
-        'moment' => 'moment',
         'id_shipping_address' => 'id_shipping_address',
         'id_billing_address' => 'id_billing_address',
+        'number' => 'number',
+        'shipping_cost' => 'shipping_cost',
+        'total' => 'total',
+        'moment' => 'moment',
         'payment_type' => 'payment_type',
-        'status' => 'status'
+        'reference' => 'reference',
+        'url' => 'url',
+        'error_message' => 'error_message',
+        'error_code' => 'error_code',
+        'status' => 'status',
+        'test' => 'test'
       ]
     ],
   ];
@@ -55,11 +66,42 @@ class Sales extends DbCls
     $this->_init_class_cfg($cfg);
   }
 
-  public function changeStatus(string $id_transaction, $status): ?bool
+  public function changeStatus(string $idTransaction, string $status, $errorMessage = null, $errorCode = null): ?bool
   {
-    $cfg = $this->getClassCfg();
-    return $this->db->update($cfg['table'], [$cfg['arch']['transactions']['status'] => $status],[$cfg['arch']['transactions']['id'] => $id_transaction]);
+    $data = [
+      $this->fields['status'] => $status
+    ];
+    if (!empty($errorMessage)) {
+      $data[$this->fields['error_message']] = $errorMessage;
+    }
+    if (!empty($errorCode)) {
+      $data[$this->fields['error_code']] = $errorCode;
+    }
+    return (bool)$this->update($idTransaction, $data);
   }
+
+  public function setStatusPaid(string $idTransaction, $errorMessage = null, $errorCode = null): bool
+  {
+    return $this->changeStatus($idTransaction, 'paid', $errorMessage,  $errorCode);
+  }
+
+  public function setStatusFailed(string $idTransaction, $errorMessage = null, $errorCode = null, bool $readdProducts = true): bool
+  {
+    if ($readdProducts
+      && ($idCart = $this->getIdCart($idTransaction))
+      && ($products = $this->cart->getProducts($idCart))
+    ) {
+      $prodCls = new Product($this->db);
+      $prodClsCfg = $prodCls->getClassCfg();
+      $prodFields = $prodClsCfg['arch']['products'];
+      foreach ($products as $product) {
+        $currentStock = $prodCls->getStock($product[$prodFields['id_product']]);
+        $prodCls->setStock($product[$prodFields['id_product']], $currentStock + $product[$prodFields['quantity']]);
+      }
+    }
+    return $this->changeStatus($idTransaction, 'failed', $errorMessage, $errorCode);
+  }
+
   public function getByProduct(string $id_product, string $period = null, string $value = null): ?array
   {
     $cfg = $this->getClassCfg();
@@ -156,6 +198,47 @@ class Sales extends DbCls
   }
 
   /**
+   * Adds a trancation
+   * @param array $transacion
+   * @return null|string
+   */
+  public function add(array $transaction): ?string
+  {
+    if (empty($transaction[$this->fields['id_cart']])) {
+      throw new \Exception(X::_('No id_cart found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['id_client']])) {
+      throw new \Exception(X::_('No id_client found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['id_shipping_address']])) {
+      throw new \Exception(X::_('No id_shipping_address found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['id_billing_address']])) {
+      throw new \Exception(X::_('No id_billing_address found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['payment_type']])) {
+      throw new \Exception(X::_('No payment_type found on the given transaction: %s', \json_encode($transaction)));
+    }
+    if (empty($transaction[$this->fields['moment']])) {
+      $transaction[$this->fields['moment']] = date('Y-m-d H:i:s');
+    }
+    if (empty($transaction[$this->fields['total']])) {
+      $transaction[$this->fields['total']] = 0;
+    }
+    if (empty($transaction[$this->fields['shipping_cost']])) {
+      $transaction[$this->fields['shipping_cost']] = 0;
+    }
+    $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
+    while ($this->select([$this->fields['number'] => $transaction[$this->fields['number']]])) {
+      $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
+    }
+    $transaction[$this->fields['test']] = !empty($transaction[$this->fields['test']]) ? 1 : 0;
+    $this->client->setLastUsedAddress($transaction[$this->fields['id_shipping_address']], $transaction[$this->fields['moment']]);
+    $this->client->setLastUsedAddress($transaction[$this->fields['id_billing_address']], $transaction[$this->fields['moment']]);
+    return $this->insert($transaction);
+  }
+
+  /**
    * Gets a transaction
    * @param string $idTransaction
    * @return null|array
@@ -229,6 +312,92 @@ class Sales extends DbCls
       throw new \Exception(X::_('No billing address found on transaction %s', $idTransaction));
     }
     return $this->client->getAddress($idAddress);
+  }
+
+  /**
+   * Sends the order confirm email to the client
+   * @param string $idTransaction
+   * @return bool
+   */
+  public function sendConfirmEmailToClient(string $idTransaction): bool
+  {
+    if (($opt = Option::getInstance())
+      && ($d = $this->getMailData($idTransaction))
+      && ($email = $this->client->getEmail($d[$this->fields['id_client']]))
+    ) {
+      $mailCls = new Mail();
+      $masksCls = new Masks($this->db);
+      if ($template = $masksCls->getDefault($opt->fromCode('client_order', 'masks', 'appui'))) {
+        $title = Tpl::render($template['title'], $d);
+        $content = Tpl::render($template['content'], $d);
+        return (bool)$mailCls->send([
+          'to' => $email,
+          'title' => $title,
+          'text' => $content
+        ]);
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Sends an email to notify a new order
+   * @param string $idTransaction The transaction ID
+   * @param string $email The email address to send to
+   * @return bool
+   */
+  public function sendNewOrderEmail(string $idTransaction, string $email = ''): bool
+  {
+    if (($opt = Option::getInstance())
+      && ($d = $this->getMailData($idTransaction))
+    ) {
+      $mailCls = new Mail();
+      $masksCls = new Masks($this->db);
+      if (!Str::isEmail($email)
+        && defined('BBN_ADMIN_EMAIL')
+      ) {
+        $email = BBN_ADMIN_EMAIL;
+      }
+      if (!empty($email)
+        && ($template = $masksCls->getDefault($opt->fromCode('order', 'masks', 'appui')))
+      ) {
+        $title = Tpl::render($template['title'], $d);
+        $content = Tpl::render($template['content'], $d);
+        return (bool)$mailCls->send([
+          'to' => $email,
+          'title' => $title,
+          'text' => $content
+        ]);
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Gets the transaction info to use on an email
+   * @param string $idTransaction
+   * @return null|array
+   */
+  private function getMailData(string $idTransaction): ?array
+  {
+    if (($opt = Option::getInstance())
+      && ($transaction = $this->get($idTransaction))
+    ) {
+      $transaction['products'] = $this->cart->getProductsDetail($transaction[$this->fields['id_cart']]);
+      foreach ($transaction['products'] as $i => $p) {
+        $transaction['products'][$i]['product']['price'] = '€ ' . (string)number_format(round((float)($p['amount'] / $p['quantity']), 2), 2, ',', '');
+        $transaction['products'][$i]['amount'] = '€ ' . (string)number_format(round((float)$p['amount'], 2), 2, ',', '');
+      }
+      $transaction['total'] = '€ ' . (string)number_format(round((float)$transaction[$this->fields['total']], 2), 2, ',', '');
+      $transaction['shippingAddress'] = $this->getShippingAddress($idTransaction);
+      $transaction['billingAddress'] = $this->getBillingAddress($idTransaction);
+      $transaction['shippingAddress']['country'] = $opt->text($transaction['shippingAddress']['country']);
+      $transaction['billingAddress']['country'] = $opt->text($transaction['billingAddress']['country']);
+      $transaction[$this->fields['payment_type']] = $opt->text($transaction[$this->fields['payment_type']]);
+      $transaction['formattedMoment'] = date('d/m/Y', strtotime($transaction[$this->fields['moment']]));
+      return $transaction;
+    }
+    return null;
   }
 
 }
