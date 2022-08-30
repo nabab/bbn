@@ -389,6 +389,7 @@ class Sales extends DbCls
         $transaction['products'][$i]['amount'] = '€ ' . (string)number_format(round((float)$p['amount'], 2), 2, ',', '');
       }
       $transaction['total'] = '€ ' . (string)number_format(round((float)$transaction[$this->fields['total']], 2), 2, ',', '');
+      $transaction['shippingCost'] = '€ ' . (string)number_format(round((float)$transaction[$this->fields['shipping_cost']], 2), 2, ',', '');
       $transaction['shippingAddress'] = $this->getShippingAddress($idTransaction);
       $transaction['billingAddress'] = $this->getBillingAddress($idTransaction);
       $transaction['shippingAddress']['country'] = $opt->text($transaction['shippingAddress']['country']);
