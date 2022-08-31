@@ -636,7 +636,7 @@ JS;
               $lang = file_get_contents($this->fpath . X::dirname($js) . "/$name.$c[lang].lang");
               if ($lang) {
                 //$lang = json_decode($lang, true);
-                $codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }" . PHP_EOL . $codes[$i]['js'];
+                //$codes[$i]['js'] = "if ( window.bbn ){ bbn.fn.autoExtend('lng', $lang); }" . PHP_EOL . $codes[$i]['js'];
               }
             }
 
@@ -705,7 +705,7 @@ JS;
       if ($codes) {
         $str = '';
         foreach ($codes as $cd) {
-          $str .= "{name: '$cd[name]', script: function(){try{ $cd[js] } catch(e){throw new Error('Impossible to load component $cd[name] - ' + e.message);}}";
+          $str .= "{name: '$cd[name]', script: bbn => {let bbn_result; try { bbn_result = $cd[js] ;} catch(e){throw new Error('Impossible to load component $cd[name] - ' + e.message);}return bbn_result;}";
           if (!empty($cd['css'])) {
             $str .= ', css: ' . json_encode($cd['css']);
           }
