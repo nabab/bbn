@@ -85,15 +85,15 @@ class Sales extends DbCls
     return $this->changeStatus($idTransaction, 'paid', $errorMessage,  $errorCode);
   }
 
-  public function setStatusFailed(string $idTransaction, $errorMessage = null, $errorCode = null, bool $readdProducts = true): bool
+  public function setStatusFailed(string $idTransaction, $errorMessage = null, $errorCode = null, bool $fixProductsQuantity = true): bool
   {
-    if ($readdProducts
+    if ($fixProductsQuantity
       && ($idCart = $this->getIdCart($idTransaction))
       && ($products = $this->cart->getProducts($idCart))
     ) {
       $prodCls = new Product($this->db);
-      $prodClsCfg = $prodCls->getClassCfg();
-      $prodFields = $prodClsCfg['arch']['products'];
+      $cartClsCfg = $this->cart->getClassCfg();
+      $prodFields = $cartClsCfg['arch']['cart_products'];
       foreach ($products as $product) {
         $currentStock = $prodCls->getStock($product[$prodFields['id_product']]);
         $prodCls->setStock($product[$prodFields['id_product']], $currentStock + $product[$prodFields['quantity']]);
