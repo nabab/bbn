@@ -1479,10 +1479,9 @@ class System extends bbn\Models\Cls\Basic
             $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
           }
         } else {
-          try {
-            $res = unlink($path);
-          } catch (\Exception $e) {
-            $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
+          $res = @unlink($path);
+          if (!$res) {
+            $this->log(X::_('Error in _delete') . ': ' . $path);
           }
         }
       }
