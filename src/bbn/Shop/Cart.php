@@ -611,13 +611,13 @@ class Cart extends DbCls
       foreach ($pc as $i => $v) {
         if ($i !== 'territory') {
           if (\substr($i, 0, 2) === 'gm') {
-            $res['surcharge'][\substr($i, 2)] = $v;
+            $res['surcharge'][(int)\substr($i, 2)] = $v;
           }
           else {
             if ($i === 'g3000') {
-              $res['default'] = $v;
+              $res['default'] = (float)$v;
             }
-            $prices[\substr($i, 1)] = $v;
+            $prices[(int)\substr($i, 1)] = (float)$v;
           }
         }
       }
