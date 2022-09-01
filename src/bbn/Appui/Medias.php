@@ -366,10 +366,11 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
-  public function browseByGroup(string $idGroup, array $cfg, int $limit = 20, int $start = 0): ?array
+  public function browseByGroup(string $idGroup, array $cfg = [], int $limit = 20, int $start = 0): ?array
   {
     $cf = $this->getClassCfg();
     $t = $cf['tables']['medias_groups_medias'];
+
     $cfg['join'] = [[
       'table' => $t,
       'on' => [
@@ -382,13 +383,16 @@ class Medias extends bbn\Models\Cls\Db
         ]]
       ]
     ]];
+
     if (empty($cfg['order']) || !\is_array($cfg['order'])) {
       $cfg['order'] = [];
     }
+
     $cfg['order'][] = [
       'field' => $this->db->cfn('position', $t),
       'dir' => 'ASC'
     ];
+
     if ($res = $this->browse($cfg, $limit, $start)) {
       foreach ($res['data'] as $i => $d) {
         $media_groups_media = $this->db->rselect(
@@ -632,12 +636,21 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function getThumbsName(string $name,array $size = [60,60])
   {
-    $tmp = explode('.', $name);
-    if (isset($tmp[1]) && $ext = '.'.$tmp[1]) {
-      return $tmp[0].'_w'.$size[0].'h'.$size[1].$ext;
+    if (count($size) === 1) {
+      $size[] = $size[0];
     }
 
-    return null;
+    if ((count($size) !== 2) || !Str::isInteger($size[0], $size[1])) {
+      return null;
+    }
+
+    $ext = Str::fileExt($name, true);
+    $dir = dirname($name);
+    if (!empty($dir)) {
+      $dir .= '/';
+    }
+
+    return $dir . $ext[0] . '_w' . $size[0] . 'h' . $size[1] . (empty($ext[1]) ? '' : '.' . $ext[1]);
   }
 
 

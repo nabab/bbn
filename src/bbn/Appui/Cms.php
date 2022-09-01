@@ -12,6 +12,7 @@ namespace bbn\Appui;
 
 use Exception;
 use bbn\X;
+use bbn\Str;
 use bbn\Db;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Cls\Db as DbCls;
@@ -186,6 +187,108 @@ class Cms extends DbCls
     $this->cacheSet($id_note, $cacheName, $res);
 
     return $res;
+  }
+
+
+  public function getSEO(string $id_note): array
+  {
+    $seo = '';
+    if ($note = $this->get($id_note, true, true)) {
+      $seo = '<noscript>' . PHP_EOL . '<h1>' . $note['title'] . '</h1>' . PHP_EOL;
+      if (!empty($note['items'])) {
+        foreach($note['items'] as $it) {
+          if (!empty($it['type']) && ($it['type'] === 'container')) {
+            foreach ($it['items'] as $it2) {
+              $seo .= $this->getBlockString($it2, $note);
+            }
+          }
+          else {
+            $seo .= $this->getBlockString($it, $note);
+          }
+        }
+
+        $seo .= '</noscript>' . PHP_EOL;
+      }
+    }
+
+    return [
+      'title' => $note['title'],
+      'description' => $note['excerpt'],
+      'tags' => $note['tags'],
+      'seo' => $seo
+    ];
+  }
+
+
+  public function getBlockString(array $it, array $note): string
+  {
+    $seo = '';
+    if (!empty($it['type'])) {
+      $seo .= '<div>';
+      switch ($it['type']) {
+        case 'gallery':
+          if (!empty($it['source'])) {
+            if (is_string($it['source'])) {
+              $gallery = $this->media->browseByGroup($it['source'], [], 100);
+              if ($gallery && !empty($gallery['data'])) {
+                foreach ($gallery['data'] as $d) {
+                  $tags = $this->media->getTags($d['id']);
+                  $img = $d['path'];
+                  if (!empty($d['thumbs'])) {
+                    //$img = $this->media->getThumbsName($d['path'], [$d['thumbs'][0]]);
+                  }
+    
+                  $seo .= '<a href="/' . $d['path'] . '"><img src="/' . $img . '" alt="' .
+                      Str::escapeDquotes(
+                        $d['title'] . ' - ' . 
+                        (empty($tags) ? '' : X::join($tags, ' | ') . ' | ') .
+                        X::join($note['tags'], ' | ') . ' - ' . $note['title']
+                      ) . '"></a><br>' . PHP_EOL;
+                }
+              }
+            }
+          }
+
+          break;
+        case 'title':
+          $seo .= '<' . ($it['tag'] ?? 'h2') . '>' . $it['content'] . '</' . ($it['tag'] ?? 'h2') . '>' . PHP_EOL;
+          break;
+        case 'html':
+          $seo .= $it['content'] . PHP_EOL;
+          break;
+        case 'line':
+          $seo .= '<hr>' . PHP_EOL;
+          break;
+        case 'imagetext':
+          $seo .= '<a href="/' . $it['source'] . '"><img src="/' . $it['source'] . '" alt="' .
+              Str::escapeDquotes(
+                $it['caption'] . ' - ' . 
+                (empty($tags) ? '' : X::join($tags, ' | ') . ' | ') .
+                X::join($note['tags'], ' | ') . ' - ' . $note['title']
+              ) . '"></a><br>' . PHP_EOL .
+              (empty($it['details']) ? '' : '<p>' . $it['details'] . '</p>' . PHP_EOL);
+          if (!empty($it['details_title'])) {
+            $seo .= '<caption>' . $it['details_title'] . '</caption>' . PHP_EOL;
+          }
+          break;
+        case 'image':
+          $seo .= '<a href="/' . $it['source'] . '"><img src="/' . $it['source'] . '" alt="' .
+              Str::escapeDquotes(
+                $it['caption'] . ' - ' . 
+                (empty($tags) ? '' : X::join($tags, ' | ') . ' | ') .
+                X::join($note['tags'], ' | ') . ' - ' . $note['title']
+              ) . '"></a><br>' . PHP_EOL .
+              (empty($it['details']) ? '' : '<p>' . $it['details'] . '</p>' . PHP_EOL);
+          if (!empty($it['details_title'])) {
+            $seo .= '<caption>' . $it['details_title'] . '</caption>' . PHP_EOL;
+          }
+          break;
+      }
+
+      $seo .= '</div>';
+    }
+
+    return $seo;
   }
 
 
