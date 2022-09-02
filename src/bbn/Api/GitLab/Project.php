@@ -10,7 +10,47 @@ trait Project
    */
   public function getProjects(): array
   {
-    return $this->request($this->projectURL);
+    return $this->request($this->projectURL, [
+      'order_by' => 'name',
+      'sort' => 'asc'
+    ]);
+  }
+
+
+  /**
+   * Gets the list of projects to which you have access (simple mode)
+   * @return array
+   */
+  public function getProjectsSimple(): array
+  {
+    return $this->request($this->projectURL, [
+      'simple' => true,
+      'order_by' => 'name',
+      'sort' => 'asc'
+    ]);
+  }
+
+
+  /**
+   * Gets the list of projects to which you have access
+   * @param int $page
+   * @param int $perPage
+   * @return array
+   */
+  public function getProjectsList(int $page = 1, int $perPage = 25): array
+  {
+    $list = $this->request($this->projectURL, [
+      'order_by' => 'name',
+      'sort' => 'asc',
+      'page' => $page,
+      'per_page' => $perPage
+    ]);
+    $header = $this->getLastResponseHeader();
+    return [
+      'data' => $list,
+      'total' => (int)$header['x-total'],
+      'limit' => $perPage
+    ];
   }
 
 
