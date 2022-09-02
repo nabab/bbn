@@ -57,7 +57,7 @@ class Image extends bbn\File
      * @var array
      */
   protected static
-        $allowed_extensions = ['jpg','gif','jpeg','png','svg'],
+        $allowed_extensions = ['jpg','gif','jpeg','png','svg','webp'],
         $max_width          = 5000;
 
 
@@ -203,18 +203,17 @@ class Image extends bbn\File
     if (class_exists('\\Imagick')) {
       $img = new \Imagick();
       if (strpos($svg, '<svg') !== 0) {
-          $svg = @file_get_contents($svg);
+        $svg = @file_get_contents($svg);
       }
 
-            $img->setImageFormat("png24");
-            $res = $img->writeImage($filename);
-            $img->clear();
-            $img->destroy();
-            return $res;
+      $img->setImageFormat("png24");
+      $res = $img->writeImage($filename);
+      $img->clear();
+      $img->destroy();
+      return $res;
     }
 
-      return false;
-
+    return false;
   }
 
 
@@ -224,13 +223,13 @@ class Image extends bbn\File
      */
   public function __construct($file, System $fs = null)
   {
-      parent::__construct($file, $fs);
-    if (!\in_array($this->getExtension(),bbn\File\Image::$allowed_extensions)) {
-        $this->name  = false;
-        $this->path  = false;
-        $this->file  = false;
-        $this->size  = false;
-        $this->title = false;
+    parent::__construct($file, $fs);
+    if (!\in_array($this->ext, bbn\File\Image::$allowed_extensions)) {
+      $this->name  = false;
+      $this->path  = false;
+      $this->file  = false;
+      $this->size  = false;
+      $this->title = false;
     }
   }
 
@@ -262,11 +261,11 @@ class Image extends bbn\File
      */
   public function getExtension()
   {
-      parent::getExtension();
+    parent::getExtension();
     if (!$this->ext2 && $this->file) {
       if (function_exists('exif_imagetype')) {
-        if ($r = exif_imagetype($this->file)) {
-          if (!array_key_exists($r, bbn\File\Image::$allowed_extensions)) {
+        if (exif_imagetype($this->file)) {
+          if (!in_array($this->ext, bbn\File\Image::$allowed_extensions)) {
             $this->ext = false;
           }
         }
@@ -276,14 +275,14 @@ class Image extends bbn\File
       }
 
       if ($this->ext) {
-          $this->ext2 = $this->ext;
+        $this->ext2 = $this->ext;
         if ($this->ext2 === 'jpg') {
           $this->ext2 = 'jpeg';
         }
       }
     }
 
-      return $this->ext;
+    return $this->ext;
   }
 
 
@@ -308,10 +307,10 @@ class Image extends bbn\File
         return false;
       }
 
-        return true;
+      return true;
     }
 
-      return false;
+    return false;
   }
 
 
@@ -443,17 +442,28 @@ class Image extends bbn\File
         $dest = $this->file;
       }
 
-      if (class_exists('\\Imagick')) {
+      $ext = Str::fileExt($dest);
+      if (in_array($ext, self::$allowed_extensions)) {
+        if ($ext === 'jpg') {
+          $ext = 'jpeg';
+        }
+
+        if (class_exists('\\Imagick')) {
+          if ($ext !== $this->ext2) {
+            $this->img->setImageFormat($ext);
+          }
+
           $this->img->writeImage($dest);
-      }
-      elseif (function_exists('image'.$this->ext2)) {
-        if (!\call_user_func('image'.$this->ext2, $this->img, $dest)) {
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+        }
+        elseif (function_exists('image'.$ext)) {
+          if (!\call_user_func('image'.$ext, $this->img, $dest)) {
+            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          }
         }
       }
     }
 
-        return $this;
+    return $this;
   }
 
 

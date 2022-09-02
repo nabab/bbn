@@ -6,7 +6,7 @@
 
 namespace bbn\Models\Cls;
 
-use bbn;
+use bbn\Db as dbClass;
 
 /**
  * Basic object Class
@@ -24,7 +24,7 @@ use bbn;
 abstract class Db extends Basic
 {
   /**
-   * @var bbn\Db 
+   * @var dbClass
    */
   protected $db;
 
@@ -32,9 +32,9 @@ abstract class Db extends Basic
   /**
    * Constructor.
    *
-   * @param bbn\Db $db A database connection
+   * @param dbClass $db A database connection
    */
-  public function __construct(bbn\Db $db)
+  public function __construct(dbClass $db)
   {
     $this->db = $db;
   }

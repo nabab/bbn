@@ -227,6 +227,7 @@ class Cms extends DbCls
       $seo .= '<div>';
       switch ($it['type']) {
         case 'gallery':
+        case 'carousel':
           if (!empty($it['source'])) {
             if (is_string($it['source'])) {
               $gallery = $this->media->browseByGroup($it['source'], [], 100);
@@ -238,7 +239,9 @@ class Cms extends DbCls
                     //$img = $this->media->getThumbsName($d['path'], [$d['thumbs'][0]]);
                   }
     
-                  $seo .= '<a href="/' . $d['path'] . '"><img src="/' . $img . '" alt="' .
+                  $seo .= '<a href="/' . $d['path'] . '">' .
+                      '<img src="/' . $img . '" title="'. _("Enlarge") . ' ' . 
+                      basename($d['path']).'" alt="' .
                       Str::escapeDquotes(
                         $d['title'] . ' - ' . 
                         (empty($tags) ? '' : X::join($tags, ' | ') . ' | ') .
@@ -247,6 +250,23 @@ class Cms extends DbCls
                 }
               }
             }
+          }
+
+          break;
+        case 'slider':
+          if (!empty($it['id_feature'])) {
+            $features = $this->note->getFeatures($it['id_feature'], false);
+            $seo .= '<ul>';
+            foreach ($features as $feature) {
+              $seo .= '<li><a href="' . $feature['url'] . '">' . PHP_EOL;
+              if (!empty($feature['media'])) {
+                $seo .= '<img src="' . $feature['media']['path'] . '" alt="' . $feature['media']['title'] . '"><br>' . PHP_EOL;
+              }
+
+              $seo .= $feature['title'] . '<a></li>';
+            }
+
+            $seo .= '</ul>';
           }
 
           break;
@@ -283,6 +303,8 @@ class Cms extends DbCls
             $seo .= '<caption>' . $it['details_title'] . '</caption>' . PHP_EOL;
           }
           break;
+        default:
+          X::hddump($it);
       }
 
       $seo .= '</div>';

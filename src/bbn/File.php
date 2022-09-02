@@ -22,12 +22,11 @@ class File extends Models\Cls\Basic
   /**
    * @var int
    */
-  protected
-    $size=0,
+  protected $size = null;
   /**
    * @var mixed
    */
-    $ext;
+  protected $ext = null;
 
   /**
    * @var File\System $fs
@@ -91,7 +90,7 @@ class File extends Models\Cls\Basic
     else if ( \is_string($file) )
     {
       $file = trim($file);
-      if ( strrpos($file,'/') !== false )
+      if (strrpos($file,'/'))
       {
         /* The -2 in strrpos means that if there is a final /, it will be kept in the file name */
         $this->name = substr($file,strrpos($file,'/',-2)+1);
@@ -107,13 +106,15 @@ class File extends Models\Cls\Basic
       }
     }
 
-    $this->getExtension();
     if ( \is_string($file) && is_file($file) ){
       $this->file = $file;
+      $this->getExtension();
     }
     else{
+      $this->getExtension();
       $this->make();
     }
+
   }
 
   /**
@@ -129,9 +130,10 @@ class File extends Models\Cls\Basic
    */
   public function getSize()
   {
-    if ( $this->file && $this->size === 0 ){
-      $this->size = filesize($this->file);
+    if ($this->file && is_null($this->size)) {
+      $this->size = $this->fs->filesize($this->file);
     }
+
     return $this->size;
   }
 
@@ -166,21 +168,19 @@ class File extends Models\Cls\Basic
    */
   public function getExtension()
   {
-    if ( $this->name ){
-      if ( !isset($this->ext) ){
-        if ( strpos($this->name, '.') !== false ){
-          $p = Str::fileExt($this->name, 1);
-          $this->ext = $p[1];
-          $this->title = $p[0];
-        }
-        else{
-          $this->ext = '';
-          $this->title = substr($this->name,-1) === '/' ? substr($this->name,0,-1) : $this->name;
-        }
+    if ($this->name && is_null($this->ext)) {
+      if (strrpos($this->name, '.')) {
+        $p = Str::fileExt($this->name, 1);
+        $this->ext = $p[1];
+        $this->title = $p[0];
       }
-      return $this->ext;
+      else{
+        $this->ext = '';
+        $this->title = substr($this->name,-1) === '/' ? substr($this->name,0,-1) : $this->name;
+      }
     }
-    return false;
+
+    return $this->ext ?: '';
   }
 
   /**

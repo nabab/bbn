@@ -1617,9 +1617,10 @@ class Note extends bbn\Models\Cls\Db
    * Gets a full feature element
    *
    * @param string $id
+   * @param bool $full
    * @return array|null
    */
-  public function getFeature(string $id): ?array
+  public function getFeature(string $id, bool $full = true): ?array
   {
     $dbCfg  = $this->getClassCfg();
     $table  = $dbCfg['tables']['features'];
@@ -1636,8 +1637,10 @@ class Note extends bbn\Models\Cls\Db
         $res['media'] = $media->getMedia($res['id_media'], true);
       }
 
-      $cms = new bbn\Appui\Cms($this->db);
-      $res = X::mergeArrays($cms->get($res['id_note'], false, false), $res);
+      if ($full) {
+        $cms = new bbn\Appui\Cms($this->db);
+        $res = X::mergeArrays($cms->get($res['id_note'], false, false), $res);
+      }
 
       return $res;
     }
@@ -1847,14 +1850,16 @@ class Note extends bbn\Models\Cls\Db
    * Gets all the elements, and their details, for the given feature
    *
    * @param string $id_option
+   * @param bool $full
    * @return array
    */
-  public function getFeatures(string $id_option): array
+  public function getFeatures(string $id_option, bool $full = true): array
   {
     $res = [];
     foreach ($this->getFeatureList($id_option) as $d) {
-      $res[] = $this->getFeature($d['id']);
+      $res[] = $this->getFeature($d['id'], $full);
     }
+
     $option = $this->getOption($id_option);
     $mode = $option['orderMode'] ?? 'random';
     switch ($mode) {

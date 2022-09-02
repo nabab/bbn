@@ -77,7 +77,7 @@ class Medias extends bbn\Models\Cls\Db
   protected $path;
 
   public
-    $img_extensions = ['jpeg', 'jpg', 'png', 'gif'],
+    $img_extensions = ['jpeg', 'jpg', 'png', 'gif', 'webp'],
     $thumbs_sizes   = [
       [500, false],
       [250, false],
@@ -565,7 +565,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $path
    * @param array $size
    */
-  public function getThumbPath(string $path, array $size = [60, 60], $if_exists = true)
+  public function getThumbPath(string $path, array $size = [60, 60], bool $if_exists = true)
   {
     if (isset($size[0], $size[1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {
       $ext = '.'.Str::fileExt($path);
@@ -595,13 +595,13 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $path
    * @return array
    */
-  public function getThumbsPath(string $path)
+  public function getThumbsPath(string $path, bool $if_exists = true)
   {
     $res  = [];
 
     if (file_exists($path) && $this->isImage($path)) {
-      foreach($this->thumbs_sizes as $size){
-        if (($result = $this->getThumbPath($path, $size)) !== null) {
+      foreach($this->thumbs_sizes as $size) {
+        if (($result = $this->getThumbPath($path, $size, $if_exists)) !== null) {
           $res[] = $result;
         }
       }
@@ -771,24 +771,21 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $title
    * @return array|false|string
    */
-  public function update(string $id_media,string $name,string $title)
+  public function update(string $id_media, string $name, string $title)
   {
     $new = [];
     //the old media
     $old  = $this->getMedia($id_media, true);
-    $root = Mvc::getDataPath('appui-note').'media/';
-    if ($old
-        && (($old['name'] !== $name) || ($old['title'] !== $title))
-    ) {
+    if ($old && (($old['name'] !== $name) || ($old['title'] !== $title))) {
       $content = $old['content'];
-      if (\bbn\Str::isJson($old['content'])) {
-        $content = \json_decode($old['content'], true);
+      if (\bbn\Str::isJson($content)) {
+        $content = \json_decode($content, true);
       }
-      $path = $root.$content['path'].'/';
-      if ($this->fs->exists($path.$id_media.'/'.$old['name'])) {
+
+      if ($this->fs->exists($old['file'])) {
         if ($old['name'] !== $name) {
           //if the media is an image has to update also the thumbs names
-          if ($this->isImage($path.$id_media.'/'.$old['name'])) {
+          if ($this->isImage($old['file'])) {
             $thumbs_names = [
               [
                 'old' => $this->getThumbsName($old['name'], [60,60]),

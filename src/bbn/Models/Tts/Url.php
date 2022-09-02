@@ -3,6 +3,7 @@
 namespace bbn\Models\Tts;
 
 use Exception;
+use stdClass;
 use bbn\Appui\Url as urlCls;
 use bbn\X;
 
@@ -154,9 +155,9 @@ trait Url
    * Returns the whole content of the URL row based on its ID
    *
    * @param string $id_url
-   * @return array|null
+   * @return stdClass|null
    */
-  public function getFullUrl(string $id_url): ?array
+  public function getFullUrl(string $id_url): ?stdClass
   {
     $this->checkUrlCfg();
     return $this->url->select($id_url);
@@ -169,9 +170,9 @@ trait Url
    * @param string $id_item
    * @param string $url
    * @param string $type
-   * @return boolean
+   * @return null|string
    */
-  public function setUrl(string $id_item, string $url, string $type = null): bool
+  public function setUrl(string $id_item, string $url, string $type = null): ?string
   {
     $this->checkUrlCfg();
     if (!($url = $this->sanitizeUrl($url))) {
@@ -189,14 +190,14 @@ trait Url
         throw new Exception(X::_("The URL is already in use by another item"));
       }
     }
-    else {
-      return (bool)$this->db->insert($this->urlTable, [
-        $this->class_cfg['urlItemField'] => $id_item,
-        $this->urlFields['id_url'] => $id_url
-      ]);
+    elseif (!$this->db->insert($this->urlTable, [
+      $this->class_cfg['urlItemField'] => $id_item,
+      $this->urlFields['id_url'] => $id_url
+    ])) {
+      return null;
     }
 
-    return true;
+    return $id_url ?: null;
   }
 
 
@@ -207,9 +208,9 @@ trait Url
    * @param string $url
    * @param string $prefix
    * @param string $type
-   * @return boolean
+   * @return null|string
    */
-  public function addUrl(string $id_item, string $url, string $prefix = '', string $type = null): bool
+  public function addUrl(string $id_item, string $url, string $prefix = '', string $type = null): ?string
   {
     $this->checkUrlCfg();
     if (!$type && !$this->urlType) {
@@ -224,6 +225,33 @@ trait Url
         $this->class_cfg['urlItemField'] => $id_item,
         $this->urlFields['id_url'] => $id_url
       ]);
+    }
+
+    return $id_url ?: null;
+  }
+
+
+  /**
+   * Returns true if the item is linked to an url.
+   *
+   * @param string $id_source
+   * @param string $id_destination
+   * @return bool
+   *
+   */
+  public function redirectUrl(string $id_item, string $url_source, string $url_destination): bool
+  {
+    $this->checkUrlCfg();
+    if ($id_source = $this->getUrlId($url_source)) {
+      $url = $this->getFullUrl($id_source);
+      if ($url && ($id_destination = $this->setUrl($id_item, $url_destination, $url->type))) {
+        $cfg = $this->url->getClassCfg();
+        return (bool)$this->db->update(
+          $cfg['table'],
+          [$cfg['arch']['url']['redirect'] => $id_destination],
+          [$cfg['arch']['url']['id'] => $id_source]
+        );
+      }
     }
 
     return false;
