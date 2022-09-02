@@ -304,7 +304,7 @@ class Cms extends DbCls
           }
           break;
         default:
-          X::hddump($it);
+          X::log($it, 'unknown_types');
       }
 
       $seo .= '</div>';
