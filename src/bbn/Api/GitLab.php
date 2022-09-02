@@ -34,6 +34,9 @@ class GitLab
   /** @var string The last request made */
   protected $lastRequest = '';
 
+  /** @var array The last response header */
+  protected $lastResponseHeader = [];
+
   /** @var string */
   protected $userURL = 'users/';
 
@@ -86,6 +89,16 @@ class GitLab
 
 
   /**
+   * Returns the last request response header
+   * @return array
+   */
+  public function getLastResponseHeader(): array
+  {
+    return $this->lastResponseHeader;
+  }
+
+
+  /**
    * Make a request to the GitLab instance
    * @param string $url The part of the url related to the action to be performed
    * @param bool $isPost True if you want make a POST request
@@ -100,7 +113,19 @@ class GitLab
     }
     //die(var_dump($this->lastRequest));
     // Make the curl request
-    $response = X::curl($this->lastRequest, null, empty($isPost) ? [] : ['post' => 1]);
+    $response = X::curl($this->lastRequest, null, empty($isPost) ? ['header' => 1] : ['post' => 1]);
+    if (empty($isPost)) {
+      $headerSize = X::lastCurlInfo()['header_size'];
+      $header = explode("\r\n", substr($response, 0, $headerSize));
+      $this->lastResponseHeader = [];
+      foreach ($header as $v) {
+        $tmp = \explode(':', $v);
+        if (\count($tmp)) {
+          $this->lastResponseHeader[\trim($tmp[0])] = \trim($tmp[1]);
+        }
+      }
+      $response = substr($response, $headerSize);
+    }
     // Check if the response is a JSON string and convert it
     if (Str::isJson(($response))) {
       $response = \json_decode($response);

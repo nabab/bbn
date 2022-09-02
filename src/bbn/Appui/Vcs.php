@@ -95,8 +95,11 @@ class Vcs
     if (!($pref = \bbn\User\Preferences::getInstance())) {
       throw new \Exception(X::_('No User\Preferences class instance found'));
     }
-    if (!($idPref = $pref->getByOption($id))) {
+    if (!($userPref = $pref->getByOption($id))) {
       throw new \Exception(X::_('No user\'s preference found for the server %s', $id));
+    }
+    else {
+      $idPref = $userPref[$pref->getFields()['id']];
     }
     if (!($token = $this->pwd->userGet($idPref, $user))) {
       throw new \Exception(X::_('No user\'s access token found for the server %s', $id));
@@ -113,10 +116,11 @@ class Vcs
     if (!($idParent = $this->getOptionId('list'))) {
       throw new \Exception(X::_('"list" option not found'));
     }
+    $optFields = $this->opt->getFields();
     $o = [
-      'id_parent' => $idParent,
-      'text' => $name,
-      'code' => $url,
+      $optFields['id_parent'] => $idParent,
+      $optFields['text'] => $name,
+      $optFields['code'] => $url,
       'type' => $type
     ];
     if (!($idOpt = $this->opt->add($o))) {
@@ -134,9 +138,10 @@ class Vcs
     if (!Str::isUrl($url)) {
       throw new \Exception(X::_('No valid URL: %s', $url));
     }
+    $optFields = $this->opt->getFields();
     $o = [
-      'text' => $name,
-      'code' => $url,
+      $optFields['text'] => $name,
+      $optFields['code'] => $url,
       'type' => $type
     ];
     if (!$this->opt->set($id, $o)) {
@@ -164,35 +169,85 @@ class Vcs
   }
 
 
-  public function getProjectsList(string $id): array
+  public function getProjectsList(string $id, int $page = 1, int $perPage = 25): array
   {
+    $optFields = $this->opt->getFields();
+    $list = [];
     if (($accessToken = $this->getUserAccessToken($id))
       && ($server = $this->opt->option($id))
-      && !empty($server['code'])
+      && !empty($server[$optFields['code']])
+      && !empty($server['type'])
     ) {
-      $gitlab = new \bbn\Appui\Api\GitLab($accessToken, $server['code']);
-      return $gitlab->getProjects();
+      $t = $this;
+      switch ($server['type']) {
+        case 'git':
+          $gitlab = new GitLab($accessToken, $server[$optFields['code']]);
+          $list = $gitlab->getProjectsList($page, $perPage);
+          $list['data'] = \array_map(function($o) use($t) {
+            return $t->normalizeGitProject((array)$o);
+          }, $list['data']);
+          break;
+        case 'svn':
+          $list = \array_map($this->normalizeSvnProject, $list);
+          break;
+      }
     }
-    return [];
+    return $list;
   }
 
 
-  private function normalizeServer(array $obj): array
+  private function normalizeServer(array $server): array
   {
     try {
-      $ut = !!$this->getUserAccessToken($obj['id']);
+      $ut = $this->getUserAccessToken($server['id']);
     }
     catch(\Exception $e) {
       $ut = false;
     }
     return [
-      'id' => $obj['id'],
-      'name' => $obj['text'],
-      'url' => $obj['code'],
-      'type' => $obj['type'],
-      'hasAdminAccessToken' => $this->hasAdminAccessToken($obj['id']),
+      'id' => $server['id'],
+      'name' => $server['text'],
+      'url' => $server['code'],
+      'type' => $server['type'],
+      'hasAdminAccessToken' => $this->hasAdminAccessToken($server['id']),
       'hasUserAccessToken'=> $ut
     ];
+  }
+
+
+  private function normalizeGitProject(array $project): array
+  {
+    return [
+      'id' => $project['id'],
+      'name' => $project['name'],
+      'fullname' => $project['name_with_namespace'],
+      'description' => $project['description'],
+      'path' => $project['path'],
+      'fullpath' => $project['path_with_namespace'],
+      'url' => $project['web_url'],
+      'urlGit' => $project['http_url_to_repo'],
+      'urlSsh' => $project['ssh_url_to_repo'],
+      'namespace' => [
+        'id' => $project['namespace']->id,
+        'idParent' => $project['namespace']->parent_id,
+        'name' => $project['namespace']->name,
+        'path' => $project['namespace']->path,
+        'fullpath' => $project['namespace']->full_path,
+        'url' => $project['namespace']->web_url
+      ],
+      'created' => $project['created_at'],
+      'creator' => $project['creator_id'],
+      'private' => !empty($project['owner']),
+      'visibility' => $project['visibility'],
+      'defaultBranch' => $project['default_branch'],
+      'archived' => $project['archived']
+    ];
+  }
+
+
+  private function normalizeSvnProject(array $project): array
+  {
+    return $project;
   }
 
 
