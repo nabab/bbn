@@ -160,10 +160,46 @@ class Vcs
   }
 
 
+  public function getProjectTags(string $idServer, string $idProject): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectTags($idServer, $idProject);
+    }
+    return [];
+  }
+
+
   public function getProjectUsers(string $idServer, string $idProject): array
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
       return $serverCls->getProjectUsers($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function getProjectUsersEvents(string $idServer, string $idProject): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectUsersEvents($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function getProjectEvents(string $idServer, string $idProject): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectEvents($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function getProjectCommitsEvents(string $idServer, string $idProject): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectCommitsEvents($idServer, $idProject);
     }
     return [];
   }

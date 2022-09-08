@@ -19,6 +19,8 @@ class GitLab
   use GitLab\User;
   use GitLab\Project;
   use GitLab\Branch;
+  use GitLab\Tag;
+  use GitLab\Event;
   use GitLab\Issue;
   use GitLab\Note;
 
@@ -45,6 +47,12 @@ class GitLab
 
   /** @var string */
   protected $branchURL = 'branches/';
+
+  /** @var string */
+  protected $tagURL = 'tags/';
+
+  /** @var string */
+  protected $eventURL = 'events/';
 
   /** @var string */
   protected $issueURL = 'issues/';

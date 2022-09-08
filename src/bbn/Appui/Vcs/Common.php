@@ -20,7 +20,13 @@ trait Common {
 
   public function hasAdminAccessToken(string $id): bool
   {
-    return !!$this->pwd->get($id);
+    return !!$this->getAdminAccessToken($id);
+  }
+
+
+  public function getAdminAccessToken(string $id): ?string
+  {
+    return $this->pwd->get($id);
   }
 
 
