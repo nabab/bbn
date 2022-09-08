@@ -38,7 +38,7 @@ class Svn implements Server
   }
 
 
-  public function getConnection(string $id)
+  public function getConnection(string $id, bool $asAdmin = false): object
   {
     if ($server = $this->getServer($id)) {
       $this->checkServerHost($server->host);
@@ -65,9 +65,51 @@ class Svn implements Server
   }
 
 
+  public function getProjectTags(string $idServer, string $idProject): array
+  {
+    return [];
+  }
+
+
   public function getProjectUsers(string $idServer, string $idProject): array
   {
     return [];
+  }
+
+
+  public function getProjectUsersEvents(string $idServer, string $idProject): array
+  {
+    return [];
+  }
+
+
+  public function getProjectEvents(string $idServer, string $idProject): array
+  {
+    return [];
+  }
+
+
+  public function getProjectCommitsEvents(string $idServer, string $idProject): array
+  {
+    return [];
+  }
+
+
+  public function normalizeEvent(object $event): object
+  {
+    return $event;
+  }
+
+
+  public function normalizeUser(object $user): object
+  {
+    return (object)[
+      'id' => $user->id,
+      'name' => $user->name,
+      'username' => $user->username,
+      'avatar' => $user->avatar_url,
+      'url' => $user->web_url
+    ];
   }
 
 
@@ -75,6 +117,7 @@ class Svn implements Server
   {
     return (object)[
       'id' => $project->id,
+      'type' => 'svn',
       'name' => $project->name,
       'fullname' => $project->name_with_namespace,
       'description' => $project->description,
@@ -96,7 +139,16 @@ class Svn implements Server
       'private' => !empty($project->owner),
       'visibility' => $project->visibility,
       'defaultBranch' => $project->default_branch,
-      'archived' => $project->archived
+      'archived' => $project->archived,
+      'avatar' => $project->avatar_url,
+      'license' => [
+        'name' => $project->license->name,
+        'code' => $project->license->nickname
+      ],
+      'noCommits' => $project->statistics['commit_count'],
+      'size' => $project->statistics['repository_size'],
+      'noForks' => $project->forks_count,
+      'noStars' => $project->star_count
     ];
   }
 

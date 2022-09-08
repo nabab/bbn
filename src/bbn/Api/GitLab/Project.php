@@ -59,9 +59,13 @@ trait Project
    * @param int|string $project ID or URL-encoded path of the project
    * @return array
    */
-  public function getProject($project): array
+  public function getProject($project, bool $includeStats = false): array
   {
-    return $this->request($this->projectURL . $project);
+    $params = [];
+    if ($includeStats) {
+      $params['statistics'] = true;
+    }
+    return $this->request($this->projectURL . $project, $params);
   }
 
 
