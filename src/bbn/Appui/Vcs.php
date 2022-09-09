@@ -74,12 +74,23 @@ class Vcs
     if (!($pref = \bbn\User\Preferences::getInstance())) {
       throw new \Exception(X::_('No User\Preferences class instance found'));
     }
+    if ($exPref = $pref->getByOption($id)) {
+      $this->pwd->userDelete($exPref['id'], $user);
+      $pref->delete($exPref['id']);
+    }
     if (!($idPref = $pref->add($id, []))) {
       throw new \Exception(X::_('Error while adding the user preference: idUser %s - idOption %s', $user->getId(), $id));
     }
     if (!$this->pwd->userStore($token, $idPref, $user)) {
       throw new \Exception(X::_('Error while storing the user access token: ID: %s , Token: %s', $id, $token));
     }
+    if (!($serverCls = $this->getServerInstance($id))) {
+      throw new \Exception(X::_('Unable to connect with the following access token: ID: %s , Token: %s', $id, $token));
+    }
+    if (!($userInfo = $serverCls->getCurrentUser($id))) {
+      throw new \Exception(X::_('Unable to find user information: ID: %s , Token: %s', $id, $token));
+    }
+    $pref->set($idPref, ['user' => $userInfo]);
     return true;
   }
 
@@ -200,6 +211,33 @@ class Vcs
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
       return $serverCls->getProjectCommitsEvents($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function getAppuiUsers(string $idServer): array
+  {
+    if ($prefs = $this->db->rselectAll([
+      'table' => 'bbn_users_options',
+      'fields' => [
+        'id' => 'id_user',
+        'info' => 'JSON_EXTRACT(cfg, "$.user")'
+      ],
+      'where' => [
+        'conditions' => [[
+          'field' => 'id_option',
+          'value' => $idServer
+        ], [
+          'field' => 'JSON_EXTRACT(cfg, "$.user")',
+          'operator' => 'isnotnull'
+        ]]
+      ]
+    ])) {
+      return \array_map(function($p){
+        $p['info'] = \json_decode($p['info'], true);
+        return $p;
+      }, $prefs);
     }
     return [];
   }

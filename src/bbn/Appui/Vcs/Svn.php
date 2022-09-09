@@ -46,6 +46,11 @@ class Svn implements Server
     }
   }
 
+  public function getCurrentUser(string $id): object
+  {
+    return new \stdClass;
+  }
+
 
   public function getProjectsList(string $id, int $page = 1, int $perPage = 25): array
   {
