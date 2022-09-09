@@ -47,6 +47,12 @@ class Git implements Server
   }
 
 
+  public function getCurrentUser(string $id): object
+  {
+    return (object)$this->getConnection($id)->getUser();
+  }
+
+
   public function getProjectsList(string $id, int $page = 1, int $perPage = 25): array
   {
     $list = $this->getConnection($id)->getProjectsList($page, $perPage) ?: [];
@@ -106,13 +112,53 @@ class Git implements Server
       'id' => $event->id,
       'created' => $event->created_at,
       'author' => $this->normalizeUser($event->author),
-      'title' => ''
+      'type' => '',
+      'title' => '',
+      'text' => ''
     ];
-    if (isset($event->push_data)) {
-      $data = X::mergeArrays($data, [
-        'title' => $event->push_data->commit_title,
-        'branch' => $event->push_data->ref,
-      ]);
+    switch ($event->action_name) {
+      case 'pushed to':
+      case 'pushed new':
+        $data = X::mergeArrays($data, [
+          'type' => 'commit',
+          'text' => $event->push_data->commit_title,
+          'branch' => $event->push_data->ref
+        ]);
+        break;
+      case 'imported':
+        $data = X::mergeArrays($data, [
+          'type' => 'import',
+          'title' => X::_('Import project')
+        ]);
+        break;
+      case 'removed':
+      case 'deleted':
+        if (isset($event->push_data)) {
+          $data = X::mergeArrays($data, [
+            'type' => 'branch',
+            'title' => X::_('Removed branch'),
+            'branch' => $event->push_data->ref
+          ]);
+        }
+        break;
+      case 'accepted':
+        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {
+          $data = X::mergeArrays($data, [
+            'type' => 'merge',
+            'title' => X::_('Merge request accepted'),
+            'text' => $event->target_title ?: ''
+          ]);
+        }
+        break;
+      case 'opened':
+        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {
+          $data = X::mergeArrays($data, [
+            'type' => 'merge',
+            'title' => X::_('Merge request created'),
+            'text' => $event->target_title ?: ''
+          ]);
+        }
+        break;
     }
     return (object)$data;
   }

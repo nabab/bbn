@@ -21,6 +21,8 @@ interface Server {
 
   function getServer(string $id): object;
 
+  function getCurrentUser(string $id): object;
+
   function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;
 
   function getProject(string $idServer, string $idProject): ?object;
