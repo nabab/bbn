@@ -423,7 +423,7 @@ class Cms extends DbCls
       $cfg['where']['conditions'][] = [
         'field' => 'bbn_events.start',
         'operator' => '<=',
-        'value' => date('Y-m-d')
+        'value' => date('Y-m-d H:i:s')
       ];
       $cfg['where']['conditions'][] = [
         'logic' => 'OR',
@@ -431,7 +431,7 @@ class Cms extends DbCls
           [
             'field' => 'bbn_events.end',
             'operator' => '>=',
-            'value' => date('Y-m-d')
+            'value' => date('Y-m-d H:i:s')
           ], [
             'field' => 'bbn_events.end',
             'operator' => 'isnull',

@@ -317,15 +317,18 @@ class Sales extends DbCls
   /**
    * Sends the order confirm email to the client
    * @param string $idTransaction
+   * @param \bbn\Mail $mailCls
    * @return bool
    */
-  public function sendConfirmEmailToClient(string $idTransaction): bool
+  public function sendConfirmEmailToClient(string $idTransaction, \bbn\Mail $mailCls = null): bool
   {
     if (($opt = Option::getInstance())
       && ($d = $this->getMailData($idTransaction))
       && ($email = $this->client->getEmail($d[$this->fields['id_client']]))
     ) {
-      $mailCls = new Mail();
+      if (empty($mailCls)) {
+        $mailCls = new Mail();
+      }
       $masksCls = new Masks($this->db);
       if ($template = $masksCls->getDefault($opt->fromCode('client_order', 'masks', 'appui'))) {
         $title = Tpl::render($template['title'], $d);
@@ -344,14 +347,17 @@ class Sales extends DbCls
    * Sends an email to notify a new order
    * @param string $idTransaction The transaction ID
    * @param string $email The email address to send to
+   * @param \bbn\Mail $mailCls
    * @return bool
    */
-  public function sendNewOrderEmail(string $idTransaction, string $email = ''): bool
+  public function sendNewOrderEmail(string $idTransaction, string $email = '', \bbn\Mail $mailCls = null): bool
   {
     if (($opt = Option::getInstance())
       && ($d = $this->getMailData($idTransaction))
     ) {
-      $mailCls = new Mail();
+      if (empty($mailCls)) {
+        $mailCls = new Mail();
+      }
       $masksCls = new Masks($this->db);
       if (!Str::isEmail($email)
         && defined('BBN_ADMIN_EMAIL')
