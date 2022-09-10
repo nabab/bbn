@@ -1955,8 +1955,10 @@ class X
         $compare = self::compareConditions($data, $a);
       }
       else {
-        $compare = self::compare($data[$a['field']], $a['value'], $a['operator']);
+        $compare = array_key_exists($a['field'], $data) ?
+            self::compare($data[$a['field']], $a['value'], $a['operator']) : false;
       }
+
       if ($compare) {
         if ($filter['logic'] === 'OR') {
           $ok = true;
