@@ -1257,7 +1257,7 @@ MYSQL;
               if ( $primary_defined && !self::$db->count($table, [$s['primary'] => $primary_value]) ){
                 $primary_defined = false;
               }
-              if ( !$primary_defined && self::$db->insert(self::$table_uids, [
+              if ( !$primary_defined && self::$db->insertIgnore(self::$table_uids, [
                 'bbn_uid' => $primary_value,
                 'bbn_table' => $s['id']
               ]) ){

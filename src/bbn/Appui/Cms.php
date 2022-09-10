@@ -303,6 +303,8 @@ class Cms extends DbCls
             $seo .= '<caption>' . $it['details_title'] . '</caption>' . PHP_EOL;
           }
           break;
+        case 'video':
+          break;
         default:
           X::log($it, 'unknown_types');
       }

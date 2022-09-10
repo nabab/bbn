@@ -469,6 +469,11 @@ class Environment
 
 
   /**
+   * Returns the post information.
+   * If the _post private prop is not set, puts all the post information into it,
+   * except any index starting with _bbn_; in that case it will become a BBN constant
+   * if it has not been yet defined (e.g. _bbn_baseURL will become BBN_BASEURL)
+   * 
    * @return array
    */
   public function getPost()

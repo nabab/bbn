@@ -6,8 +6,8 @@ use DateTime;
 class Event extends bbn\Models\Cls\Db
 {
 
-  use
-    bbn\Models\Tts\Dbconfig;
+  use bbn\Models\Tts\Dbconfig;
+  use bbn\Models\Tts\Optional;
 
   protected static
     /** @var array */

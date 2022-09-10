@@ -1415,7 +1415,7 @@ class System extends bbn\Models\Cls\Basic
    */
   private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
   {
-    if (empty($this->_is_dir($dir))) {
+    if (!$this->_is_dir($dir)) {
       return mkdir($dir, $chmod, $recursive);
     }
 

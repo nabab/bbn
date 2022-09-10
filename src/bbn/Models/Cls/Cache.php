@@ -20,21 +20,17 @@ use bbn;
  */
 abstract class Cache extends bbn\Models\Cls\Basic
 {
-	protected
-    /**
-     * @var bbn\Db
-     */
-    $db,
-		/** @var string */
-		$_cache_prefix,
-		/** @var $cacher cache */
-		$cacher;
+  /** @var string */
+	protected string $_cache_prefix;
 
-  public function __construct(bbn\Db $db){
-    $this->db = $db;
-		$this->cacher = bbn\Cache::getEngine();
-		$this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
-	}
+  /** @var $cacher cache */
+  protected bbn\Cache $cacher;
+
+  public function __construct(protected bbn\Db $db)
+  {
+    $this->cacher = bbn\Cache::getEngine();
+    $this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
+  }
 
 	protected function _cache_name($uid, $method = ''){
     if ( is_array($uid) ){

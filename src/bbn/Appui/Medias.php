@@ -73,18 +73,19 @@ class Medias extends bbn\Models\Cls\Db
   private $opt;
   private $usr;
   private $opt_id;
+  /** @var array $thumbsSizes Keeping the thumbs sizes in memory by type */
+  private $thumbsSizes;
+  protected System $fs;
 
   protected $path;
-
-  public
-    $img_extensions = ['jpeg', 'jpg', 'png', 'gif', 'webp'],
-    $thumbs_sizes   = [
-      [500, false],
-      [250, false],
-      [125, false],
-      [96, false],
-      [48, false]
-    ];
+  protected $img_extensions = ['jpeg', 'jpg', 'png', 'gif', 'webp'];
+  protected $thumbs_sizes   = [
+    [500, false],
+    [250, false],
+    [125, false],
+    [96, false],
+    [48, false]
+  ];
 
   /** @var array $class_cfg */
   protected $class_cfg;
@@ -146,21 +147,23 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function getPath($media = null): string
   {
-    if ($media && !is_array($media)) {
+    if (is_string($media)) {
       $media = $this->getMedia($media, true);
+    }
+
+    if (!is_array($media)) {
+      throw new Exception("Impossible to find the media in the database");
     }
 
     if (!isset($this->path)) {
       $this->path = Mvc::getDataPath('appui-note').'media';
     }
 
-    $path = $this->path;
-    if ($media && $media['content'] && $media['content']['path']) {
-      $path .= '/'.$media['content']['path'].$media['id']
-              .'/'.$media['name'];
+    if (!isset($media['content'], $media['content']['path'])) {
+      throw new Exception("The media doesn't seem to have a path");
     }
 
-    return $path;
+    return $this->path . '/' . $media['content']['path'] . $media['id'] . '/' . $media['name'];
   }
 
 
@@ -458,6 +461,10 @@ class Medias extends bbn\Models\Cls\Db
         && ($id_type = $this->opt->fromCode($type, $this->opt_id))
         && ($ext = Str::fileExt($file))
     ) {
+      if (($type === 'file') && $this->isImage($file)) {
+        $id_type = $this->opt->fromCode('image', $this->opt_id);
+      }
+
       $content = null;
       if (!$this->fs->isFile($file)) {
         throw new Exception(X::_("Impossible to find the file %s", $file));
@@ -527,12 +534,32 @@ class Medias extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns an array of sizes rules, each corresponding to a thumbnail
+   * @param string $id_type
+   * @return array
+   */
+  public function getThumbsSizesByType(string $id_type): array
+  {
+    if (!isset($this->thumbsSizes[$id_type])) {
+      $o = $this->opt->option($id_type);
+      if (!$o) {
+        throw new Exception(X::_("The given type doesn't exist"));
+      }
+
+      $this->thumbsSizes[$id_type] = $o;
+    }
+
+    return $this->thumbsSizes[$id_type];
+  }
+
+
+  /**
    * @param string|array $media
    * @return array
    */
-  public function getThumbsSizes($media): array
+  public function getThumbsSizes($media, $exists = true): array
   {
-    if (!is_array($media)) {
+    if (is_string($media)) {
       $media = $this->getMedia($media);
     }
 
@@ -540,24 +567,24 @@ class Medias extends bbn\Models\Cls\Db
       throw new Exception("Impossible to find the media in the database");
     }
 
-    if (!($path = $this->getPath($media))) {
+    if (empty($media['file'])) {
       throw new Exception("Impossible to retrieve the path");
     }
-    
-    $list = $this->fs->getFiles(X::dirname($path));
-    if (count($list) > 1) {
-      $sizes = [];
-      foreach ($list as $l) {
-        preg_match('/.*\_w([0-9]*)\.[a-zA-Z]*$/', $l, $m);
-        if (!empty($m) && !empty($m[1])) {
-          $sizes[] = (int)$m[1];
-        }
+
+    $cfg = $this->getThumbsSizesByType($media['type']);
+    $res = [];
+    foreach ($cfg['thumbs'] as $thumb) {
+      $size = [
+        empty($thumb['width']) ? false : $thumb['width'],
+        empty($thumb['height']) ? false : $thumb['height'],
+        X::hasProps($thumb, ['width', 'height', 'crop'], true) ? true : false
+      ];
+      if (!$exists || file_exists($this->getThumbPath($media['file'], $size))) {
+        $res[] = $size;
       }
-      sort($sizes);
-      return $sizes;
     }
 
-    return [];
+    return $res;
   }
 
   /**
@@ -565,23 +592,45 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $path
    * @param array $size
    */
-  public function getThumbPath(string $path, array $size = [60, 60], bool $if_exists = true)
+  protected function getThumbPath(string $path, array $size, bool $if_exists = true, bool $create = false): ?string
   {
-    if (isset($size[0], $size[1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {
-      $ext = '.'.Str::fileExt($path);
-      $file = substr($path, 0, - strlen($ext));
-      if ($size[0] && Str::isInteger($size[0])) {
-        $file .= '_w'.$size[0];
+    if (X::hasProps($size, [0, 1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {
+      $ext = Str::fileExt($path, true);
+      $file = dirname($path) . '/' . $ext[0] . '.bbn';
+      // Width
+      if ($size[0]) {
+        $file .= '-w-' . $size[0];
+      }
+      // Height
+      if ($size[1]) {
+        $file .= '-h-' . $size[1];
+      }
+      // Cropped
+      if ($size[0] && $size[1] && !empty($size[2])) {
+        $file .= '-c';
       }
 
-      if ($size[1] && Str::isInteger($size[1])) {
-        $file .= '_h'.$size[1];
-      }
+      $file .= '.' . $ext[1];
 
-      $file .= $ext;
-
-      if (!$if_exists || file_exists($file)) {
+      if (!$if_exists) {
         return $file;
+      }
+
+      if (file_exists($file)) {
+        return $file;
+      }
+      elseif ($create && file_exists($path)) {
+        $img = new Image($path);
+        if ($size[0] && ($size[0] >= $img->getWidth())) {
+          symlink($path, $file);
+        }
+        elseif ($size[1] && ($size[1] >= $img->getHeight())) {
+          symlink($path, $file);
+        }
+        elseif ($img->resize($size[0] ?: null, $size[1] ?: null, $size[2] ?? false)) {
+          $img->save($file);
+          return $file;
+        }
       }
     }
 
@@ -592,16 +641,36 @@ class Medias extends bbn\Models\Cls\Db
   /**
    * If the thumbs files exists for this path it returns an array of the the thumbs filename
    *
-   * @param string $path
+   * @param $media
+   * @param bool $if_exists
+   * @param bool $create
    * @return array
    */
-  public function getThumbsPath(string $path, bool $if_exists = true)
+  public function getThumbsPath($media, bool $if_exists = true, bool $create = false, bool $delete = false)
   {
     $res  = [];
+    if (is_string($media)) {
+      $media = $this->getMedia($media, true);
+    }
 
-    if (file_exists($path) && $this->isImage($path)) {
-      foreach($this->thumbs_sizes as $size) {
-        if (($result = $this->getThumbPath($path, $size, $if_exists)) !== null) {
+    if (!is_array($media)) {
+      throw new Exception(X::_("The media doesn't exist"));
+    }
+
+    if (!empty($media['is_image']) && file_exists($media['file'])) {
+      if ($delete) {
+        $files = $this->fs->getFiles(dirname($media['file']));
+        if (count($files) > 1) {
+          foreach ($files as $f) {
+            if ($f !== $media['file']) {
+              $this->fs->delete($f);
+            }
+          }
+        }
+      }
+
+      foreach ($media['thumbs'] as $size) {
+        if (($result = $this->getThumbPath($media['file'], $size, $if_exists, $create)) !== null) {
           $res[] = $result;
         }
       }
@@ -617,9 +686,17 @@ class Medias extends bbn\Models\Cls\Db
    * @param string $path
    * @return void
    */
-  public function removeThumbs(string $path)
+  public function removeThumbs($media)
   {
-    if ($thumbs = $this->getThumbsPath($path)) {
+    if (is_string($media)) {
+      $media = $this->getMedia($media);
+    }
+
+    if (!is_array($media)) {
+      throw new Exception(X::_("The media doesn't exist"));
+    }
+
+    if ($thumbs = $this->getThumbsPath($media)) {
       foreach($thumbs as $th){
         if(file_exists($th)) {
           unlink($th);
@@ -710,7 +787,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param int|null $width
    * @return array|false|string
    */
-  public function getMedia(string $id, bool $details = false, int $width = null)
+  public function getMedia(string $id, bool $details = false, int $width = null, int $height = null, bool $crop = false)
   {
     $cf =& $this->class_cfg;
     if (Str::isUid($id)
@@ -718,7 +795,7 @@ class Medias extends bbn\Models\Cls\Db
         && ($media = $this->db->rselect($cf['table'], $cf['arch']['medias'], [$cf['arch']['medias']['id'] => $id]))
         && ($link_type !== $media[$cf['arch']['medias']['type']])
     ) {
-      $this->transformMedia($media, $width);
+      $this->transformMedia($media, $width, $height, $crop);
       if (empty($details)) {
         return $media['file'];
       }
@@ -870,10 +947,11 @@ class Medias extends bbn\Models\Cls\Db
       $file_content = file_get_contents($tmp_path);
 
       if (($media = $this->getMedia($id_media, true))) {
-        $old_path  = $this->getMediaPath($id_media, $oldName);
+        $old_path  = $media['file'];
         $full_path = $this->getMediaPath($id_media, $newName);
         if ($this->fs->putContents($full_path, $file_content)) {
           if ($this->isImage($full_path)) {
+            $thumbs_sizes = $this->getThumbsSizes($media);
             $image = new Image($full_path);
             $this->removeThumbs($old_path);
             $image->thumbs(X::dirname($full_path), $this->thumbs_sizes, '_%s', true);
@@ -1007,9 +1085,17 @@ class Medias extends bbn\Models\Cls\Db
    * @param string|null $name
    * @return string|null
    */
-  public function getMediaPath(string $id_media, string $name = null)
+  public function getMediaPath($media, string $name = null)
   {
-    if ($media = $this->getMedia($id_media, true) && !empty($media['content'])) {
+    if (is_string($media)) {
+      $media = $this->getMedia($media);
+    }
+
+    if (!is_array($media)) {
+      throw new Exception("Impossible to find the media in the database");
+    }
+
+    if (!empty($media['content'])) {
       $path    = bbn\Mvc::getDataPath('appui-note').'media/'.$media['content']['path'].$id_media.'/'.($name ? $name : $media['name']);
       return $path;
     }
@@ -1097,35 +1183,35 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
-  protected function transformMedia(array &$data, int $width = null): void
+  protected function transformMedia(array &$data, int $width = null, int $height = null, bool $crop = false): void
   {
-    $data['is_image'] = false;
-
     if (!empty($data['content'])) {
       $data['content'] = json_decode($data['content'], true);
-      $full_path = $this->getPath($data);
-      $data['file']      = $full_path;
-      $data['full_path'] = $this->getThumbPath($full_path);
+      $file = $this->getPath($data);
+      $data['file']      = $file;
+      $data['full_path'] = $file;
       $data['path']      = $this->getImageUrl($data['id']);
-      $data['is_image']  = $this->isImage($full_path);
-      if ($data['is_image']) {
-        $data['thumbs']     = $this->getThumbsSizes($data);
-        $img                = new \bbn\File\Image($full_path);
+      $data['is_image']  = $this->isImage($file);
+      if ($data['is_image'] && is_file($file)) {
+        $img                = new \bbn\File\Image($file);
+        $data['is_thumb']   = false;
+        $data['thumbs']     = $this->getThumbsSizes($data, false);
         $data['dimensions'] = [
           'w' => $img->getWidth(),
           'h' => $img->getHeight()
         ];
-        if ($width && ($width < $img->getWidth())) {
+        if ($width || $height) {
+          $goodSize = null;
           foreach ($data['thumbs'] as $size) {
-            if ($size >= $width) {
-              $dot     = strrpos($data['file'], '.');
-              $tmpFile = substr($data['file'], 0, $dot) . '_w' . $size .
-                strtolower(substr($data['file'], $dot));
-              if ($this->fs->isFile($tmpFile) && $this->isImage($tmpFile)) {
-                $data['file'] = $tmpFile;
-              }
+            if (($width == $size[0]) && ($height == $size[1]) && ($crop == ($size[2] ?? false))) {
+              $goodSize = $size;
               break;
             }
+          }
+
+          if ($goodSize && ($tmpFile = $this->getThumbPath($file, $goodSize, true, true))) {
+            $data['is_thumb'] = true;
+            $data['file'] = $tmpFile;
           }
         }
       }

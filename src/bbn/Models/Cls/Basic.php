@@ -25,23 +25,22 @@ use bbn\X;
 abstract class Basic
 {
 
-  protected
-    /**
-     * @var array
-     */
-    $errors = [],
-    /**
-     * @var false|string
-     */
-    $error = false,
-        /**
-         * @var boolean
-         */
-        $debug = false,
-        /**
-         * @var array
-         */
-        $log = [];
+  /**
+   * @var array
+   */
+  protected $errors = [];
+  /**
+   * @var false|string
+   */
+  protected $error = false;
+  /**
+   * @var boolean
+   */
+  protected $debug = false;
+  /**
+   * @var array
+   */
+  protected $log = [];
 
 
   /**
@@ -145,28 +144,29 @@ abstract class Basic
   }
 
 
-  /**
+  /*
    * @param string $name
    * @param array $arguments
    * @return void
   public static function __callStatic($name, $arguments)
   {
     $this->log(["Wrong static method used: $name with arguments:", $arguments]);
-      return false;
-    }
+    return false;
+  }
    */
 
-    /**
+    /*
      * get property from delegate link.
      *
      * @param string $name
      * @return void
     public function __get($name)
     {
-        return ($name === 'error') && isset($this->error) ? $this->error : false;
+      return ($name === 'error') && isset($this->error) ? $this->error : false;
     }
+    */
 
-    /**
+    /*
      * set property from delegate link.
      *
      * @param string $name
@@ -175,11 +175,10 @@ abstract class Basic
     public function __set($name, $value)
     {
         if ( $name === 'error' ){
-            $this->error = $value;
-    }
-        /*
-     * else if ( $name === 'log' )
-            array_push(X::log, $value);
+          $this->error = $value;
+        }
+        else if ( $name === 'log' )
+          array_push(X::log, $value);
     }
      */
 }

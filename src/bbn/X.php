@@ -14,6 +14,8 @@ namespace bbn;
  * @todo Look into the check function and divide it
  */
 
+use Exception;
+
 if (!defined('BBN_X_MAX_LOG_FILE')) {
   define('BBN_X_MAX_LOG_FILE', 1048576);
 }
@@ -587,7 +589,7 @@ class X
    * @param object $o1 The first object to merge.
    * @param object $o2 The second object to merge.
    * @return object The merged object.
-   * @throws \Exception
+   * @throws Exception
    */
   public static function mergeObjects(object $o1, object $o2): \stdClass
   {
@@ -596,7 +598,7 @@ class X
     if (\count($args) > 2) {
       for ($i = \count($args) - 1; $i > 1; $i--) {
         if (!is_object($args[$i])) {
-          throw new \Exception('The provided argument must be an object, ' . gettype($args[$i]) . ' given.');
+          throw new Exception('The provided argument must be an object, ' . gettype($args[$i]) . ' given.');
         }
         $args[$i - 1] = self::mergeObjects($args[$i - 1], $args[$i]);
       }
@@ -699,7 +701,7 @@ class X
    * @param array $a1 The first array to merge.
    * @param array $a2 The second array to merge.
    * @return array The merged array.
-   * @throws \Exception
+   * @throws Exception
    */
   public static function mergeArrays(array $a1, array $a2): array
   {
@@ -707,7 +709,7 @@ class X
     if (\count($args) > 2) {
       for ($i = \count($args) - 1; $i > 1; $i--) {
         if (!is_array($args[$i])) {
-          throw new \Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.' );
+          throw new Exception('The provided argument must be an array, ' . gettype($args[$i]) . ' given.' );
         }
         $args[$i - 1] = self::mergeArrays($args[$i - 1], $args[$i]);
       }
@@ -1703,6 +1705,276 @@ class X
 
 
   /**
+   * @param array $where
+   * @param bool  $full
+   * @return array|bool
+   */
+  public static function treatConditions(array $where)
+  {
+    if (!isset($where['conditions'])) {
+      $where['conditions'] = $where;
+    }
+
+    if (isset($where['conditions']) && \is_array($where['conditions'])) {
+      if (!isset($where['logic']) || (strtoupper($where['logic']) !== 'OR')) {
+        $where['logic'] = 'AND';
+      }
+
+      $res = [
+        'conditions' => [],
+        'logic' => $where['logic']
+      ];
+      foreach ($where['conditions'] as $key => $f) {
+        $is_array = \is_array($f);
+        if ($is_array
+          && array_key_exists('conditions', $f)
+          && \is_array($f['conditions'])
+        ) {
+          $res['conditions'][] = self::treatConditions($f);
+        }
+        else {
+          if (\is_string($key)) {
+            // 'id_user' => [1, 2] Will do OR
+            if (!$is_array) {
+              if (null === $f) {
+                $f = [
+                  'field' => $key,
+                  'operator' => 'isnull'
+                ];
+              }
+              else{
+                $f = [
+                  'field' => $key,
+                  'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                  'value' => $f
+                ];
+              }
+            }
+            elseif (isset($f[0])) {
+              $tmp = [
+                'conditions' => [],
+                'logic' => 'OR'
+              ];
+              foreach ($f as $v){
+                if (null === $v) {
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => 'isnull'
+                  ];
+                }
+                else{
+                  $tmp['conditions'][] = [
+                    'field' => $key,
+                    'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                    'value' => $v
+                  ];
+                }
+              }
+
+              $res['conditions'][] = $tmp;
+            }
+          }
+          elseif ($is_array && !X::isAssoc($f) && count($f) >= 2) {
+            $tmp = [
+              'field' => $f[0],
+              'operator' => $f[1]
+            ];
+            if (isset($f[3])) {
+              $tmp['exp'] = $f[3];
+            }
+            elseif (array_key_exists(2, $f)) {
+              if (is_array($f[2])) {
+                $tmp = [
+                  'conditions' => [],
+                  'logic' => 'AND'
+                ];
+                foreach ($f[2] as $v){
+                  if (null === $v) {
+                    $tmp['conditions'][] = [
+                      'field' => $f[0],
+                      'operator' => 'isnotnull'
+                    ];
+                  }
+                  else{
+                    $tmp['conditions'][] = [
+                      'field' => $f[0],
+                      'operator' => $f[1],
+                      'value' => $v
+                    ];
+                  }
+                }
+
+                $res['conditions'][] = $tmp;
+              }
+              elseif ($f[2] === null) {
+                $tmp['operator'] = $f[2] === '!=' ? 'isnotnull' : 'isnull';
+              }
+              else{
+                $tmp['value'] = $f[2];
+              }
+            }
+
+            $f = $tmp;
+          }
+
+          if (isset($f['field'])) {
+            if (!isset($f['operator'])) {
+              $f['operator'] = 'eq';
+            }
+
+            $res['conditions'][] = $f;
+          }
+        }
+      }
+
+      return $res;
+    }
+
+    return null;
+  }
+
+
+  public static function compare($v1, $v2, $operator){
+    switch ($operator) {
+      case "===":
+      case "=":
+      case "equal":
+      case "eq":
+      case "is":
+        return $v1 === $v2;
+      case "!==":
+      case "notequal":
+      case "neq":
+      case "isnot":
+        return $v1 !== $v2;
+      case "!=":
+      case "different":
+        return $v1 != $v2;
+      case "contains":
+      case "contain":
+      case "icontains":
+      case "icontain":
+        if (empty($v1) || empty($v2)) {
+          return false;
+        }
+
+        $v1 = (string)$v1;
+        $v2 = (string)$v2;
+        return strpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) !== false;
+      case "doesnotcontain":
+      case "donotcontain":
+        if (empty($v1) || empty($v2)) {
+          return false;
+        }
+
+        $v1 = (string)$v1;
+        $v2 = (string)$v2;
+        return strpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === false;
+      case "starts":
+      case "start":
+        if (empty($v1) || empty($v2)) {
+          return false;
+        }
+
+        $v1 = (string)$v1;
+        $v2 = (string)$v2;
+        return strpos($v1, $v2) === 0;
+      case "startswith":
+      case "startsi":
+      case "starti":
+      case "istarts":
+      case "istart":
+        if (empty($v1) || empty($v2)) {
+          return false;
+        }
+
+        $v1 = (string)$v1;
+        $v2 = (string)$v2;
+        return strpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === 0;
+      case "endswith":
+      case "endsi":
+      case "endi":
+      case "iends":
+      case "iend":
+        if (empty($v1) || empty($v2)) {
+          return false;
+        }
+
+        $v1 = (string)$v1;
+        $v2 = (string)$v2;
+        return strrpos(Str::changeCase(Str::removeAccents($v1), 'lower'), Str::changeCase(Str::removeAccents($v2), 'lower')) === strlen($v1) - strlen($v2);
+      case "like":
+        if (empty($v1) || empty($v2)) {
+          return false;
+        }
+
+        $v1 = (string)$v1;
+        $v2 = (string)$v2;
+        return Str::changeCase(Str::removeAccents($v1), 'lower') === Str::changeCase(Str::removeAccents($v2), 'lower');
+      case "gt":
+      case ">":
+        return $v1 > $v2;
+      case "gte":
+      case ">=":
+        return $v1 >= $v2;
+      case "lt":
+      case "<":
+        return $v1 < $v2;
+      case "lte":
+      case "<=":
+        return $v1 <= $v2;
+      case "isnull":
+        return $v1 === null;
+      case "isnotnull":
+        return $v1 !== null;
+      case "isempty":
+        return $v1 === '';
+      case "isnotempty":
+        return $v1 !== '';
+      case '==':
+        return $v1 == $v2;
+      default:
+        return $v1 == $v2;
+    }
+  }
+
+
+  public static function compareConditions($data, $filter){
+    if (!isset($filter['conditions']) || empty($filter['logic']) || !is_array($filter['conditions'])) {
+      throw new Exception(X::_("Error in compareConditions: the filter should an abject with conditions and logic properties and conditions should be an array of arrays"));
+    }
+
+    $ok = $filter['logic'] === 'AND' ? true : false;
+    foreach ($filter['conditions'] as $a) {
+      if (!is_array($a)) {
+        throw new Exception(X::_("Error in compareConditions: each condition should be an array"));
+      }
+
+      $compare = null;
+      if (isset($a['conditions']) && is_array($a['conditions'])) {
+        $compare = self::compareConditions($data, $a);
+      }
+      else {
+        $compare = self::compare($data[$a['field']], $a['value'], $a['operator']);
+      }
+      if ($compare) {
+        if ($filter['logic'] === 'OR') {
+          $ok = true;
+          break;
+        }
+      }
+      elseif ($filter['logic'] === 'AND') {
+        $ok = false;
+        break;
+      }
+    }
+
+    return $ok;
+  }
+
+
+
+  /**
    * Returns the array's first index, which satisfies the 'where' condition.
    *
    * ```php
@@ -1750,28 +2022,23 @@ class X
    */
   public static function find(array $ar, $where, int $from = 0)
   {
-    //die(var_dump($where));
     if (!empty($where)) {
+      if (is_array($where)) {
+        $where = self::treatConditions($where);
+      }
+
       foreach ($ar as $i => $v) {
         if (!$from || ($i >= $from)) {
           $ok = 1;
           if (is_callable($where)) {
             $ok = (bool)$where($v);
           }
-          elseif (is_array($where)) {
-            $v = (array)$v;
-            foreach ($where as $k => $w) {
-              if (!array_key_exists($k, $v)
-                || (Str::isNumber($v[$k], $w) && ($v[$k] != $w))
-                || (!Str::isNumber($v[$k], $w) && ($v[$k] !== $w))
-              ) {
-                $ok = false;
-                break;
-              }
-            }
+          elseif (!is_array($where)) {
+            $ok = $v === $where;
           }
           else {
-            $ok = $v === $where;
+            $v = (array)$v;
+            $ok = self::compareConditions($v, $where);
           }
 
           if ($ok) {
@@ -1863,9 +2130,26 @@ class X
    * @param array|callable $where
    * @return array
    */
-  public static function getRows(array $ar, $where): array
+  public static function getRows(array $ar, $where = null, array $order = null, int $limit = 0, int $start = 0): array
   {
-    return self::filter($ar, $where);
+    $res = $ar;
+    if ($where) {
+      $res = self::filter($res, $where);
+    }
+
+    if ($order) {
+      self::sortBy($res, $order);
+    }
+
+    if ($start) {
+      array_splice($res, 0, $start);
+    }
+
+    if ($limit) {
+      return array_splice($res, 0, $limit);
+    }
+
+    return $res;
   }
 
 
@@ -2093,9 +2377,23 @@ class X
    */
   public static function sortBy(array &$ar, $key, $dir = ''): array
   {
+    $blackOrder = [
+      false,
+      null,
+      0,
+      '',
+      []
+    ];
+
     $args = \func_get_args();
     array_shift($args);
-    if (\is_string($key)) {
+    if (is_array($key)) {
+      $args = $key;
+      if (X::isAssoc($args)) {
+        $args = [$args];
+      }
+    }
+    elseif (\is_string($key)) {
       $args = [[
         'key' => $key,
         'dir' => $dir
@@ -2104,18 +2402,69 @@ class X
 
     usort(
       $ar,
-      function ($a, $b) use ($args) {
+      function ($a, $b) use ($args, $blackOrder) {
         foreach ($args as $arg) {
-          $key = $arg['key'];
-          $dir = $arg['dir'] ?? 'asc';
+          if (!is_array($arg)) {
+            throw new Exception(X::_("the order must be made of arrays, not %s", (string)$arg));
+          }
+
+          $key = $arg['key'] ?? $arg['field'] ?? null;
+          if (!$key) {
+            throw new Exception(X::_("the order must have a field or key and a dir key"));
+          }
+
+          $dir = strtolower($arg['dir'] ?? 'asc');
           if (!\is_array($key)) {
             $key = [$key];
           }
 
           $v1 = self::pick($a, $key);
           $v2 = self::pick($b, $key);
-          $a1 = strtolower($dir) === 'desc' ? ($v2 ?? null) : ($v1 ?? null);
-          $a2 = strtolower($dir) === 'desc' ? ($v1 ?? null) : ($v2 ?? null);
+          if (!$v1) {
+            if ($v2) {
+              $v1 = -1;
+              $v2 = 1;
+            }
+            else {
+              $v1 = array_search($v1, $blackOrder);
+              $v2 = array_search($v2, $blackOrder);
+            }
+          }
+          elseif (!$v2) {
+            $v1 = 1;
+            $v2 = -1;
+          }
+          elseif (is_array($v1)) {
+            if (!is_array($v2)) {
+              $v1 = 1;
+              $v2 = -1;
+            }
+            else {
+              $v1 = json_encode($v1);
+              $v2 = json_encode($v2);
+            }
+          }
+          elseif (is_array($v2)) {
+            $v1 = -1;
+            $v2 = 1;
+          }
+          elseif (is_object($v1)) {
+            if (!is_object($v2)) {
+              $v1 = 1;
+              $v2 = -1;
+            }
+            else {
+              $v1 = json_encode($v1);
+              $v2 = json_encode($v2);
+            }
+          }
+          elseif (is_object($v2)) {
+            $v1 = -1;
+            $v2 = 1;
+          }
+
+          $a1 = $dir === 'desc' ? $v2 : $v1;
+          $a2 = $dir === 'desc' ? $v1 : $v2;
           if (!Str::isNumber($v1, $v2)) {
             $a1  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a1, 'lower')));
             $a2  = str_replace('.', '0', str_replace('_', '1', Str::changeCase($a2, 'lower')));
@@ -2502,12 +2851,12 @@ class X
    * @param string $file2
    * @param bool $strict
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public static function isSame(string $file1, string $file2, $strict = false): bool
   {
     if (!is_file($file1) || !is_file($file2)) {
-      throw new \Exception("Boo! One of the files given to the X::is_same function doesn't exist");
+      throw new Exception("Boo! One of the files given to the X::is_same function doesn't exist");
     }
 
     $same = filesize($file1) === filesize($file2);
@@ -2538,7 +2887,7 @@ class X
    * @param array $props
    * @param array $ar
    * @return array|mixed
-   * @throws \Exception
+   * @throws Exception
    */
   public static function retrieveArrayVar(array $props, array &$ar)
   {
@@ -2548,7 +2897,7 @@ class X
         $cur =& $cur[$p];
       }
       else{
-        throw new \Exception("Impossible to find the value in the array");
+        throw new Exception("Impossible to find the value in the array");
       }
     }
 
@@ -2575,7 +2924,7 @@ class X
    * @param array $props
    * @param object $obj
    * @return object
-   * @throws \Exception
+   * @throws Exception
    */
   public static function retrieveObjectVar(array $props, object $obj)
   {
@@ -2585,7 +2934,7 @@ class X
         $cur = $cur->{$p};
       }
       else{
-        throw new \Exception("Impossible to find the value in the object");
+        throw new Exception("Impossible to find the value in the object");
       }
     }
 
@@ -2625,13 +2974,13 @@ class X
    * @param bool $with_titles Set it to false if you don't want the columns titles. Default true
    * @param array $cfg
    * @return bool
-   * @throws \PhpOffice\PhpSpreadsheet\Exception
-   * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+   * @throws \PhpOffice\PhpSpreadsheetException
+   * @throws \PhpOffice\PhpSpreadsheet\WriterException
    */
   public static function toExcel(array $data, string $file, bool $with_titles = true, array $cfg = []): bool
   {
     if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
-      throw new \Exception(X::_("You need the PhpOffice library to use this function"));
+      throw new Exception(X::_("You need the PhpOffice library to use this function"));
     }
 
     $excel    = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -3401,7 +3750,7 @@ class X
     }
 
     if (!method_exists(self::class, $name)) {
-      throw new \Exception(self::_("Undefined Method $name"));
+      throw new Exception(self::_("Undefined Method $name"));
     }
   }
 
