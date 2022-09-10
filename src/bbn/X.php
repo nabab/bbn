@@ -1955,8 +1955,7 @@ class X
         $compare = self::compareConditions($data, $a);
       }
       else {
-        $compare = array_key_exists($a['field'], $data) ?
-            self::compare($data[$a['field']], $a['value'], $a['operator']) : false;
+        $compare = self::compare($data[$a['field']] ?? null, $a['value'], $a['operator']);
       }
 
       if ($compare) {
