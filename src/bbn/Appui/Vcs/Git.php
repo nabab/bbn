@@ -128,7 +128,7 @@ class Git implements Server
       case 'imported':
         $data = X::mergeArrays($data, [
           'type' => 'import',
-          'title' => X::_('Import project')
+          'title' => X::_('Project imported')
         ]);
         break;
       case 'removed':
@@ -136,7 +136,7 @@ class Git implements Server
         if (isset($event->push_data)) {
           $data = X::mergeArrays($data, [
             'type' => 'branch',
-            'title' => X::_('Removed branch'),
+            'title' => X::_('Branch removed'),
             'branch' => $event->push_data->ref
           ]);
         }
