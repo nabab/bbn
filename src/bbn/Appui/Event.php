@@ -2,90 +2,91 @@
 namespace bbn\Appui;
 use bbn;
 use DateTime;
-
 class Event extends bbn\Models\Cls\Db
 {
 
   use bbn\Models\Tts\Dbconfig;
   use bbn\Models\Tts\Optional;
 
-  protected static
-    /** @var array */
-    $default_class_cfg = [
-      'table' => 'bbn_events',
-      'tables' => [
-        'events' => 'bbn_events',
-        'recurring' => 'bbn_events_recurring',
-        'exceptions' => 'bbn_events_exceptions',
-        'options' => 'bbn_options',
-      ],
-      'arch' => [
-        'events' => [
-          'id' => 'id',
-          'id_parent' => 'id_parent',
-          'id_type' => 'id_type',
-					'start' => 'start',
-          'end' => 'end',
-          'name' => 'name',
-          'recurring' => 'recurring',
-					'cfg' => 'cfg'
-        ],
-        'recurring' => [
-          'id' => 'id',
-          'id_event' => 'id_event',
-          'type' => 'type',
-          'interval' => 'interval',
-          'occurrences' => 'occurrences',
-          'until' => 'until',
-          'wd' => 'wd',
-          'mw' => 'mw',
-          'md' => 'md',
-          'ym' => 'ym'  
-        ],
-        'exceptions' => [
-          'id' => 'id',
-          'id_event' => 'id_event',
-          'id_user' => 'id_user',
-          'creation' => 'creation',
-          'day' => 'day',
-          'start' => 'start',
-          'end' => 'end',
-          'rescheduled' => 'rescheduled',
-          'deleted' => 'deleted'
-        ],
-        'options' => [
-          'id' => 'id'
-        ]
-      ],
-      'extra' => [
-        'action' => 'action',
-        'recurrence' => 'recurrence',
-        'exception' =>'exception',
-        'old_start' => 'old_start',
-        'old_end' => 'old_end',
-        'exceptions' => 'exceptions'
-      ]
-    ];
-
-  private
-    $opt,
-    $usr,
-    $opt_id,
-    $recurrences = [
-      'daily,',
-      'weekly',
-      'monthly',
-      'yearly'
+  /** @var array $default_class_cfg */
+  protected static $default_class_cfg = [
+    'table' => 'bbn_events',
+    'tables' => [
+      'events' => 'bbn_events',
+      'recurring' => 'bbn_events_recurring',
+      'exceptions' => 'bbn_events_exceptions',
+      'options' => 'bbn_options',
     ],
-    $weekdays = [
-      1 => 'monday',
-      2 => 'tuesday',
-      3 => 'wednesday',
-      4 => 'thursday',
-      5 => 'friday',
-      6 => 'saturday',
-      7 => 'sunday'
-    ];
+    'arch' => [
+      'events' => [
+        'id' => 'id',
+        'id_parent' => 'id_parent',
+        'id_type' => 'id_type',
+        'start' => 'start',
+        'end' => 'end',
+        'name' => 'name',
+        'recurring' => 'recurring',
+        'cfg' => 'cfg'
+      ],
+      'recurring' => [
+        'id' => 'id',
+        'id_event' => 'id_event',
+        'type' => 'type',
+        'interval' => 'interval',
+        'occurrences' => 'occurrences',
+        'until' => 'until',
+        'wd' => 'wd',
+        'mw' => 'mw',
+        'md' => 'md',
+        'ym' => 'ym'  
+      ],
+      'exceptions' => [
+        'id' => 'id',
+        'id_event' => 'id_event',
+        'id_user' => 'id_user',
+        'creation' => 'creation',
+        'day' => 'day',
+        'start' => 'start',
+        'end' => 'end',
+        'rescheduled' => 'rescheduled',
+        'deleted' => 'deleted'
+      ],
+      'options' => [
+        'id' => 'id'
+      ]
+    ],
+    'extra' => [
+      'action' => 'action',
+      'recurrence' => 'recurrence',
+      'exception' =>'exception',
+      'old_start' => 'old_start',
+      'old_end' => 'old_end',
+      'exceptions' => 'exceptions'
+    ]
+  ];
+
+  /** @var bbn\Appui\Option $opt */
+  private $opt;
+  /** @var bbn\User $user */
+  private $usr;
+  /** @var string $id_opt */
+  private $opt_id;
+  /** @var array $recurrences */
+  private $recurrences = [
+    'daily,',
+    'weekly',
+    'monthly',
+    'yearly'
+  ];
+  private $weekdays = [
+    1 => 'monday',
+    2 => 'tuesday',
+    3 => 'wednesday',
+    4 => 'thursday',
+    5 => 'friday',
+    6 => 'saturday',
+    7 => 'sunday'
+  ];
 
   /** @var array $class_cfg */
   protected $class_cfg;
