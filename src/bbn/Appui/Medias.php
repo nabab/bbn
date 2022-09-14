@@ -579,7 +579,7 @@ class Medias extends bbn\Models\Cls\Db
         empty($thumb['height']) ? false : $thumb['height'],
         X::hasProps($thumb, ['width', 'height', 'crop'], true) ? true : false
       ];
-      if (!$exists || file_exists($this->getThumbPath($media['file'], $size))) {
+      if (!$exists || $this->fs->exists($this->getThumbPath($media['file'], $size))) {
         $res[] = $size;
       }
     }
@@ -594,7 +594,7 @@ class Medias extends bbn\Models\Cls\Db
    */
   protected function getThumbPath(string $path, array $size, bool $if_exists = true, bool $create = false): ?string
   {
-    if (X::hasProps($size, [0, 1]) && (Str::isInteger($size[0]) || Str::isInteger($size[1]))) {
+    if (count($size) && (Str::isInteger($size[0]) || Str::isInteger($size[1] ?? null))) {
       $ext = Str::fileExt($path, true);
       $file = dirname($path) . '/' . $ext[0] . '.bbn';
       // Width
@@ -615,11 +615,14 @@ class Medias extends bbn\Models\Cls\Db
       if (!$if_exists) {
         return $file;
       }
-
-      if (file_exists($file)) {
-        return $file;
+      
+      if (!$this->fs->exists($path)) {
+        return null;
       }
-      elseif ($create && file_exists($path)) {
+
+      $exists = $this->fs->exists($file);
+
+      if ($create && !$exists) {
         $img = new Image($path);
         if ($size[0] && ($size[0] >= $img->getWidth())) {
           symlink($path, $file);
@@ -629,8 +632,11 @@ class Medias extends bbn\Models\Cls\Db
         }
         elseif ($img->resize($size[0] ?: null, $size[1] ?: null, $size[2] ?? false)) {
           $img->save($file);
-          return $file;
         }
+      }
+
+      if ($exists || $this->fs->exists($file)) {
+        return $file;
       }
     }
 
@@ -657,7 +663,7 @@ class Medias extends bbn\Models\Cls\Db
       throw new Exception(X::_("The media doesn't exist"));
     }
 
-    if (!empty($media['is_image']) && file_exists($media['file'])) {
+    if (!empty($media['is_image']) && $this->fs->exists($media['file'])) {
       if ($delete) {
         $files = $this->fs->getFiles(dirname($media['file']));
         if (count($files) > 1) {
@@ -698,7 +704,7 @@ class Medias extends bbn\Models\Cls\Db
 
     if ($thumbs = $this->getThumbsPath($media)) {
       foreach($thumbs as $th){
-        if(file_exists($th)) {
+        if ($this->fs->exists($th)) {
           unlink($th);
         }
       }
@@ -768,7 +774,7 @@ class Medias extends bbn\Models\Cls\Db
    */
   public function isImage(string $path)
   {
-    if (is_string($path) && is_file($path)) {
+    if (is_string($path) && $this->fs->isFile($path)) {
       $content_type = mime_content_type($path);
       if (strpos($content_type, 'image/') === 0) {
         return true;
@@ -787,7 +793,7 @@ class Medias extends bbn\Models\Cls\Db
    * @param int|null $width
    * @return array|false|string
    */
-  public function getMedia(string $id, bool $details = false, int $width = null, int $height = null, bool $crop = false)
+  public function getMedia(string $id, bool $details = false, int $width = null, int $height = null, bool $crop = false, bool $force = false)
   {
     $cf =& $this->class_cfg;
     if (Str::isUid($id)
@@ -795,7 +801,7 @@ class Medias extends bbn\Models\Cls\Db
         && ($media = $this->db->rselect($cf['table'], $cf['arch']['medias'], [$cf['arch']['medias']['id'] => $id]))
         && ($link_type !== $media[$cf['arch']['medias']['type']])
     ) {
-      $this->transformMedia($media, $width, $height, $crop);
+      $this->transformMedia($media, $width, $height, $crop, $force);
       if (empty($details)) {
         return $media['file'];
       }
@@ -1183,7 +1189,7 @@ class Medias extends bbn\Models\Cls\Db
   }
 
 
-  protected function transformMedia(array &$data, int $width = null, int $height = null, bool $crop = false): void
+  protected function transformMedia(array &$data, int $width = null, int $height = null, bool $crop = false, bool $force = false): void
   {
     if (!empty($data['content'])) {
       $data['content'] = json_decode($data['content'], true);
@@ -1200,12 +1206,14 @@ class Medias extends bbn\Models\Cls\Db
           'w' => $img->getWidth(),
           'h' => $img->getHeight()
         ];
-        if ($width || $height) {
-          $goodSize = null;
-          foreach ($data['thumbs'] as $size) {
-            if (($width == $size[0]) && ($height == $size[1]) && ($crop == ($size[2] ?? false))) {
-              $goodSize = $size;
-              break;
+        if ($width || $height || ($crop && ($data['dimensions']['w'] !== $data['dimensions']['h']))) {
+          $goodSize = $force ? [$width, $height, $crop] : null;
+          if (!$goodSize) {
+            foreach ($data['thumbs'] as $size) {
+              if (($width == $size[0]) && ($height == $size[1]) && ($crop == ($size[2] ?? false))) {
+                $goodSize = $size;
+                break;
+              }
             }
           }
 
