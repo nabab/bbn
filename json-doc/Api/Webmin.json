@@ -93,7 +93,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $command, array $args = [])\n  {\n    return xmlrpc_decode(\n      file_get_contents(\n        $this->getUrl(),\n        false,\n        $this->getContext($command, $args)\n      )\n    );\n  }",
+            "code": "function(string $command, array $args = [])\n  {\n    return \\xmlrpc_decode(\n      \\file_get_contents(\n        $this->getUrl(),\n        false,\n        $this->getContext($command, $args)\n      )\n    );\n  }",
             "startLine": 59,
             "endLine": 68,
             "isDeprecated": false,

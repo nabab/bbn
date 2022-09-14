@@ -1,0 +1,152 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Api\\GitLab\\Event",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Api\/GitLab\/Event.php",
+    "startLine": 4,
+    "endLine": 40,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Api\\GitLab",
+    "shortName": "Event",
+    "contentConstructor": null,
+    "methods": {
+        "getEvents": {
+            "name": "getEvents",
+            "summary": "Gets the events of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Event",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL);\n  }",
+            "startLine": 12,
+            "endLine": 15,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getUsersEvents": {
+            "name": "getUsersEvents",
+            "summary": "Gets the users events of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Event",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL, ['action' => 'joined']);\n  }",
+            "startLine": 23,
+            "endLine": 26,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "getCommitsEvents": {
+            "name": "getCommitsEvents",
+            "summary": "Gets the commits events of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Event",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL, ['action' => 'pushed']);\n  }",
+            "startLine": 34,
+            "endLine": 37,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

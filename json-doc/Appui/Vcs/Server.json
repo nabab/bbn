@@ -1,0 +1,745 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Vcs\\Server",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Vcs\/Server.php",
+    "startLine": 12,
+    "endLine": 49,
+    "numMethods": 17,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": true,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": true,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Vcs",
+    "shortName": "Server",
+    "contentConstructor": null,
+    "methods": {
+        "hasAdminAccessToken": {
+            "name": "hasAdminAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n  function getAdminAccessToken(string $id): ?string;\n\n  function getUserAccessToken(string $id): string;\n\n  function getConnection(string $id, bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(string $id): object;\n\n  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 14,
+            "endLine": 14,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAdminAccessToken": {
+            "name": "getAdminAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n  function getUserAccessToken(string $id): string;\n\n  function getConnection(string $id, bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(string $id): object;\n\n  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 16,
+            "endLine": 16,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUserAccessToken": {
+            "name": "getUserAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n  function getConnection(string $id, bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(string $id): object;\n\n  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 18,
+            "endLine": 18,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getConnection": {
+            "name": "getConnection",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id, bool $asAdmin = false)\n  {\n  function getServer(string $id): object;\n\n  function getCurrentUser(string $id): object;\n\n  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 20,
+            "endLine": 20,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "asAdmin",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getServer": {
+            "name": "getServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n  function getCurrentUser(string $id): object;\n\n  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 22,
+            "endLine": 22,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getCurrentUser": {
+            "name": "getCurrentUser",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 24,
+            "endLine": 24,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectsList": {
+            "name": "getProjectsList",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id, int $page = 1, int $perPage = 25)\n  {\n  function getProject(string $idServer, string $idProject): ?object;\n\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 26,
+            "endLine": 26,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "page",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                },
+                {
+                    "name": "perPage",
+                    "position": 2,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 25,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProject": {
+            "name": "getProject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function getProjectBranches(string $idServer, string $idProject): array;\n\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 28,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectBranches": {
+            "name": "getProjectBranches",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function getProjectTags(string $idServer, string $idProject): array;\n\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 30,
+            "endLine": 30,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectTags": {
+            "name": "getProjectTags",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function getProjectUsers(string $idServer, string $idProject): array;\n\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 32,
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectUsers": {
+            "name": "getProjectUsers",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function getProjectUsersEvents(string $idServer, string $idProject): array;\n\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 34,
+            "endLine": 34,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectUsersEvents": {
+            "name": "getProjectUsersEvents",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function getProjectEvents(string $idServer, string $idProject): array;\n\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 36,
+            "endLine": 36,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectEvents": {
+            "name": "getProjectEvents",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function getProjectCommitsEvents(string $idServer, string $idProject): array;\n\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 38,
+            "endLine": 38,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectCommitsEvents": {
+            "name": "getProjectCommitsEvents",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer, string $idProject)\n  {\n  function normalizeEvent(object $event): object;\n\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 40,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "normalizeEvent": {
+            "name": "normalizeEvent",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(object $event)\n  {\n  function normalizeUser(object $user): object;\n\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 42,
+            "endLine": 42,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "event",
+                    "position": 0,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "normalizeUser": {
+            "name": "normalizeUser",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(object $user)\n  {\n  function normalizeProject(object $project): object;\n\n  }",
+            "startLine": 44,
+            "endLine": 44,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "user",
+                    "position": 0,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "normalizeProject": {
+            "name": "normalizeProject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Server",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(object $project)\n  {\n  }",
+            "startLine": 46,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

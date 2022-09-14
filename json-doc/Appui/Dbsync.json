@@ -589,7 +589,7 @@
             "apst_app.apst_demandes",
             "apst_app.apst_demandes_documents",
             "apst_app.apst_documents",
-            "apst_app.apst_liens",
+            "apst_app.bbn_entities_links",
             "apst_app.apst_marques",
             "apst_app.apst_passages",
             "apst_app.apst_prospects",

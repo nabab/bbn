@@ -9,8 +9,8 @@
     "interfaces": [],
     "fileName": "\/Api\/GitLab\/Note.php",
     "startLine": 4,
-    "endLine": 12,
-    "numMethods": 0,
+    "endLine": 25,
+    "numMethods": 1,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -24,15 +24,78 @@
     "modifiers": 0,
     "parentClass": null,
     "isSubclassOf": false,
-    "defaultProperties": {
-        "noteURL": "notes\/"
-    },
+    "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Api\\GitLab",
     "shortName": "Note",
     "contentConstructor": null,
-    "methods": null,
+    "methods": {
+        "createIssueNote": {
+            "name": "createIssueNote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $issue, string $content, string $date = '')\n  {\n    $params = [\n      'body' => \\urlencode($content)\n    ];\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    if (($iss = $this->getIssue($issue))\n      && !empty($iss['iid'])\n      && ($note = $this->post($this->projectURL . $project . '\/' . $this->issueURL . $iss['iid'], $params))\n    ) {\n      return $note['id'];\n    }\n    return null;\n  }",
+            "startLine": 7,
+            "endLine": 22,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                null,
+                "int"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "issue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
     "properties": null,
     "staticProperties": [],
     "constants": null,

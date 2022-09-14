@@ -2309,11 +2309,11 @@
         "asVar": {
             "name": "asVar",
             "summary": "Places quotes around a string",
-            "description": "``php\n var_dump(\\bbn\\Str::asVar('foo'));\n \/\/ (string) '\"foo\"'\n\n var_dump(\\bbn\\Str::asVar(\"foo\", \"'\"));\n \/\/ (string) \"'foo'\"\n\nvar_dump(\\bbn\\Str::asVar(\"foo'bar\"));\n \/\/ (string) '\"foo\\'bar\"'\n\nvar_dump(\\bbn\\Str::asVar(\"foo'bar\", \"'\"));\n \/\/ (string) \"'foo\\'bar'\"\n\n```",
+            "description": "```php\n var_dump(\\bbn\\Str::asVar('foo'));\n \/\/ (string) '\"foo\"'\n\n var_dump(\\bbn\\Str::asVar(\"foo\", \"'\"));\n \/\/ (string) \"'foo'\"\n\nvar_dump(\\bbn\\Str::asVar(\"foo'bar\"));\n \/\/ (string) '\"foo\\'bar\"'\n\nvar_dump(\\bbn\\Str::asVar(\"foo'bar\", \"'\"));\n \/\/ (string) \"'foo\\'bar'\"\n\n```",
             "description_parts": [
                 {
-                    "type": "text",
-                    "content": "<p>``php\nvar_dump(\\bbn\\Str::asVar('foo'));\n\/\/ (string) '&quot;foo&quot;'<\/p>\n<p>var_dump(\\bbn\\Str::asVar(&quot;foo&quot;, &quot;'&quot;));\n\/\/ (string) &quot;'foo'&quot;<\/p>\n<p>var_dump(\\bbn\\Str::asVar(&quot;foo'bar&quot;));\n\/\/ (string) '&quot;foo\\'bar&quot;'<\/p>\n<p>var_dump(\\bbn\\Str::asVar(&quot;foo'bar&quot;, &quot;'&quot;));\n\/\/ (string) &quot;'foo\\'bar'&quot;<\/p>\n<pre><code><\/code><\/pre>"
+                    "type": "code",
+                    "content": "var_dump(\\bbn\\Str::asVar('foo'));\n \/\/ (string) '\"foo\"'\n\n var_dump(\\bbn\\Str::asVar(\"foo\", \"'\"));\n \/\/ (string) \"'foo'\"\n\nvar_dump(\\bbn\\Str::asVar(\"foo'bar\"));\n \/\/ (string) '\"foo\\'bar\"'\n\nvar_dump(\\bbn\\Str::asVar(\"foo'bar\", \"'\"));\n \/\/ (string) \"'foo\\'bar'\""
                 }
             ],
             "file": "bbn\\Str",

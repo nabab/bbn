@@ -1,0 +1,190 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Vcs\\Common",
+    "namespace": true,
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Vcs\/Common.php",
+    "startLine": 9,
+    "endLine": 89,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitNames": [],
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "db": null,
+        "opt": null,
+        "pwd": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Vcs",
+    "shortName": "Common",
+    "contentConstructor": null,
+    "methods": {
+        "hasAdminAccessToken": {
+            "name": "hasAdminAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Common",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return !!$this->getAdminAccessToken($id);\n  }",
+            "startLine": 21,
+            "endLine": 24,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAdminAccessToken": {
+            "name": "getAdminAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Common",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    return $this->pwd->get($id);\n  }",
+            "startLine": 27,
+            "endLine": 30,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUserAccessToken": {
+            "name": "getUserAccessToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Common",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    if (!($user = \\bbn\\User::getInstance())) {\n      throw new \\Exception(X::_('No User class instance found'));\n    }\n    if (!($pref = \\bbn\\User\\Preferences::getInstance())) {\n      throw new \\Exception(X::_('No User\\Preferences class instance found'));\n    }\n    if (!($userPref = $pref->getByOption($id))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id));\n    }\n    return $token;\n  }",
+            "startLine": 33,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getServer": {
+            "name": "getServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\Common",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    if (!($server = $this->opt->option($id))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "startLine": 54,
+            "endLine": 60,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "object"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

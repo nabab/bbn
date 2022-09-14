@@ -30,9 +30,9 @@
     "isSubclassOf": false,
     "defaultProperties": {
         "default_class_cfg": {
-            "table": "bbn_links",
+            "table": "bbn_entities_links",
             "tables": {
-                "links": "bbn_links",
+                "links": "bbn_entities_links",
                 "people": "bbn_people",
                 "addresses": "bbn_addresses",
                 "options": "bbn_options",
@@ -50,7 +50,7 @@
                 },
                 "entities": {
                     "id": "id",
-                    "name": "nom"
+                    "name": "name"
                 }
             }
         },
@@ -393,7 +393,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ($id instanceof Link) {\n      $r    = $id;\n      $link = (array)$id->link;\n    }\n    elseif ($r = $this->get($id)) {\n      $link = (array)$r->link;\n    }\n    else {\n      return null;\n    }\n\n    foreach ($link as $k => $v) {\n      switch ($k) {\n        case $this->fields['id_people']:\n          $link[$k] = $this->entity->fnom((array)$r->people);\n          break;\n        case $this->fields['id_address']:\n          $link[$k] = $this->entity->fadresse((array)$r->address);\n          break;\n        case $this->fields['id_entity']:\n          $cfg = $this->class_cfg;\n          $f   = $cfg['arch']['entities'];\n          $link[$k] = $this->db->selectOne($cfg['tables']['entities'], $f['name'], [\n            $f['id'] => $v\n          ]);\n          break;\n      }\n    }\n\n    return $link;\n  }",
+            "code": "function($id)\n  {\n    if ($id instanceof Link) {\n      $r    = $id;\n      $link = (array)$id->link;\n    }\n    elseif ($r = $this->get($id)) {\n      $link = (array)$r->link;\n    }\n    else {\n      return null;\n    }\n\n    foreach ($link as $k => $v) {\n      switch ($k) {\n        case $this->fields['id_people']:\n          $link[$k] = $r->people ? $r->people->fullname : null;\n          break;\n        case $this->fields['id_address']:\n          $link[$k] = $r->address ? nl2br($r->address->fulladdress) : null;\n          break;\n        case $this->fields['id_entity']:\n          $cfg = $this->class_cfg;\n          $f   = $cfg['arch']['entities'];\n          $link[$k] = $this->db->selectOne($cfg['tables']['entities'], $f['name'], [\n            $f['id'] => $v\n          ]);\n          break;\n      }\n    }\n\n    return $link;\n  }",
             "startLine": 343,
             "endLine": 375,
             "isDeprecated": false,
@@ -931,9 +931,9 @@
     "properties": null,
     "staticProperties": {
         "default_class_cfg": {
-            "table": "bbn_links",
+            "table": "bbn_entities_links",
             "tables": {
-                "links": "bbn_links",
+                "links": "bbn_entities_links",
                 "people": "bbn_people",
                 "addresses": "bbn_addresses",
                 "options": "bbn_options",
@@ -951,7 +951,7 @@
                 },
                 "entities": {
                     "id": "id",
-                    "name": "nom"
+                    "name": "name"
                 }
             }
         }

@@ -9,8 +9,8 @@
     "interfaces": [],
     "fileName": "\/Api\/GitLab\/Project.php",
     "startLine": 4,
-    "endLine": 167,
-    "numMethods": 11,
+    "endLine": 154,
+    "numMethods": 9,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -24,9 +24,7 @@
     "modifiers": 0,
     "parentClass": null,
     "isSubclassOf": false,
-    "defaultProperties": {
-        "projectURL": "projects\/"
-    },
+    "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Api\\GitLab",
@@ -42,9 +40,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->request($this->projectURL);\n  }",
-            "startLine": 15,
-            "endLine": 18,
+            "code": "function()\n  {\n    return $this->request($this->projectURL, [\n      'order_by' => 'name',\n      'sort' => 'asc'\n    ]);\n  }",
+            "startLine": 11,
+            "endLine": 17,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -59,6 +57,78 @@
             "parent": false,
             "arguments": []
         },
+        "getProjectsSimple": {
+            "name": "getProjectsSimple",
+            "summary": "Gets the list of projects to which you have access (simple mode)",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Project",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->request($this->projectURL, [\n      'simple' => true,\n      'order_by' => 'name',\n      'sort' => 'asc'\n    ]);\n  }",
+            "startLine": 24,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getProjectsList": {
+            "name": "getProjectsList",
+            "summary": "Gets the list of projects to which you have access",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Project",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $page = 1, int $perPage = 25)\n  {\n    $list = $this->request($this->projectURL, [\n      'order_by' => 'name',\n      'sort' => 'asc',\n      'page' => $page,\n      'per_page' => $perPage\n    ]);\n    $header = $this->getLastResponseHeader();\n    return [\n      'data' => $list,\n      'total' => (int)$header['x-total'],\n      'limit' => $perPage\n    ];\n  }",
+            "startLine": 40,
+            "endLine": 54,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "page",
+                    "position": 0,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 1,
+                    "default_name": ""
+                },
+                {
+                    "name": "perPage",
+                    "position": 1,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 25,
+                    "default_name": "",
+                    "description": "age"
+                }
+            ]
+        },
         "getProject": {
             "name": "getProject",
             "summary": "Gets a specific project",
@@ -68,16 +138,16 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project);\n  }",
-            "startLine": 26,
-            "endLine": 29,
+            "code": "function($project, bool $includeStats = false)\n  {\n    $params = [];\n    if ($includeStats) {\n      $params['statistics'] = true;\n    }\n    return $this->request($this->projectURL . $project, $params);\n  }",
+            "startLine": 62,
+            "endLine": 69,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
             "returns": [
                 "array"
@@ -93,6 +163,15 @@
                     "default": "",
                     "default_name": "",
                     "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "includeStats",
+                    "position": 1,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
                 }
             ]
         },
@@ -106,8 +185,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/users');\n  }",
-            "startLine": 37,
-            "endLine": 40,
+            "startLine": 77,
+            "endLine": 80,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -143,8 +222,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/groups');\n  }",
-            "startLine": 48,
-            "endLine": 51,
+            "startLine": 88,
+            "endLine": 91,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -179,9 +258,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, string $branch = '', string $filePath = '', string $since = '', string $until = '')\n  {\n    $url = $this->projectURL . $project . '\/repository\/commits';\n    $params = [];\n    if (!empty($filePath)) {\n      $params[] = 'path=' . \\urldecode($filePath);\n    }\n    if (!empty($branch)) {\n      $params[] = 'branch=' . $branch;\n    }\n    if (!empty($since)) {\n      $params[] = 'since=' . \\date('c', \\strtotime($since));\n    }\n    if (!empty($until)) {\n      $params[] = 'until=' . \\date('c', \\strtotime($until));\n    }\n    foreach ($params as $i => $p) {\n      if ($i === 0) {\n        $url .= '?';\n      }\n      $url .= $p . (!empty($params[$i + 1]) ? '&' : '');\n    }\n    return $this->request($url);\n  }",
-            "startLine": 63,
-            "endLine": 86,
+            "code": "function($project, string $branch = '', string $filePath = '', string $since = '', string $until = '')\n  {\n    $params = [];\n    if (!empty($filePath)) {\n      $params['path'] = \\urldecode($filePath);\n    }\n    if (!empty($branch)) {\n      $params['branch'] = $branch;\n    }\n    if (!empty($since)) {\n      $params['since'] = \\date('c', \\strtotime($since));\n    }\n    if (!empty($until)) {\n      $params['until'] = \\date('c', \\strtotime($until));\n    }\n    return $this->request($this->projectURL . $project . '\/repository\/commits', $params);\n  }",
+            "startLine": 103,
+            "endLine": 119,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -257,8 +336,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project, string $id)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id);\n  }",
-            "startLine": 94,
-            "endLine": 97,
+            "startLine": 127,
+            "endLine": 130,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -304,8 +383,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project, string $id, string $filePath = '')\n  {\n    $diff = $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id . '\/diff');\n    if (!empty($filePath)) {\n      if (!\\is_null($i = \\bbn\\X::find($diff, function($d) use($filePath){\n        return ($d->old_path === $filePath) || ($d->new_path === $filePath);\n      }))) {\n        return \\bbn\\X::toArray($diff[$i]);\n      }\n      return [];\n    }\n    return $diff;\n  }",
-            "startLine": 106,
-            "endLine": 118,
+            "startLine": 139,
+            "endLine": 151,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -348,174 +427,6 @@
                     "default": "",
                     "default_name": "",
                     "description": "ath The file path"
-                }
-            ]
-        },
-        "getIssues": {
-            "name": "getIssues",
-            "summary": "Gets the issues list of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Project",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . '?scoper=all');\n  }",
-            "startLine": 126,
-            "endLine": 129,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "project",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "ID or URL-encoded path of the project"
-                }
-            ]
-        },
-        "getClosedIssues": {
-            "name": "getClosedIssues",
-            "summary": "Gets the closed issues list of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Project",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . '?scoper=all&state=closed');\n  }",
-            "startLine": 137,
-            "endLine": 140,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "project",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "ID or URL-encoded path of the project"
-                }
-            ]
-        },
-        "getOpenedIssues": {
-            "name": "getOpenedIssues",
-            "summary": "Gets the opened issues list of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Project",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . '?scoper=all&state=opened');\n  }",
-            "startLine": 148,
-            "endLine": 151,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "project",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "ID or URL-encoded path of the project"
-                }
-            ]
-        },
-        "getIssueNotes": {
-            "name": "getIssueNotes",
-            "summary": "Gets the notes list of a specific issue of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Project",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project, int $issue, string $sort = 'asc')\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $issue . '\/' . $this->noteURL . '?sort=' . $sort);\n  }",
-            "startLine": 161,
-            "endLine": 164,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "project",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "ID or URL-encoded path of the project"
-                },
-                {
-                    "name": "issue",
-                    "position": 1,
-                    "type": "int",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The issue ID"
-                },
-                {
-                    "name": "sort",
-                    "position": 2,
-                    "type": "string",
-                    "required": false,
-                    "has_default": true,
-                    "default": "asc",
-                    "default_name": "",
-                    "description": "The sorting direction 'asc' or 'desc'"
                 }
             ]
         }
