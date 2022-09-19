@@ -72,7 +72,7 @@ class Git implements Server
 
   public function getProjectBranches(string $idServer, string $idProject): array
   {
-    return $this->getConnection($idServer)->getBranches($idProject) ?: [];
+    return X::sortBy(\array_map([$this, 'normalizeBranch'], $this->getConnection($idServer)->getBranches($idProject) ?: []), 'created', 'desc');
   }
 
 
@@ -103,6 +103,25 @@ class Git implements Server
   public function getProjectCommitsEvents(string $idServer, string $idProject): array
   {
     return \array_map([$this, 'normalizeEvent'], $this->getConnection($idServer)->getCommitsEvents($idProject) ?: []);
+  }
+
+
+  public function normalizeBranch(object $branch): array
+  {
+    return [
+      'id' => $branch->commit->id,
+      'ref' => $branch->commit->short_id,
+      'name' => $branch->name,
+      'created' => $branch->commit->created_at,
+      'default' => $branch->default,
+      'author' => [
+        'id' => '',
+        'name' => $branch->commit->author_name,
+        'username' => '',
+        'email' => $branch->commit->author_email
+      ],
+      'url' => $branch->web_url
+    ];
   }
 
 
@@ -189,7 +208,7 @@ class Git implements Server
       'url' => $project->web_url,
       'urlGit' => $project->http_url_to_repo,
       'urlSsh' => $project->ssh_url_to_repo,
-      'namespace' => [
+      'namespace' => (object)[
         'id' => $project->namespace->id,
         'idParent' => $project->namespace->parent_id,
         'name' => $project->namespace->name,
@@ -204,7 +223,7 @@ class Git implements Server
       'defaultBranch' => $project->default_branch,
       'archived' => $project->archived,
       'avatar' => $project->avatar_url,
-      'license' => [
+      'license' => (object)[
         'name' => $project->license->name,
         'code' => $project->license->nickname
       ],
