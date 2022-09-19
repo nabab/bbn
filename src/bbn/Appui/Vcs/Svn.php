@@ -46,9 +46,9 @@ class Svn implements Server
     }
   }
 
-  public function getCurrentUser(string $id): object
+  public function getCurrentUser(string $id): array
   {
-    return new \stdClass;
+    return [];
   }
 
 
@@ -58,7 +58,7 @@ class Svn implements Server
   }
 
 
-  public function getProject(string $idServer, string $idProject): ?object
+  public function getProject(string $idServer, string $idProject): ?array
   {
     return null;
   }
@@ -100,15 +100,21 @@ class Svn implements Server
   }
 
 
-  public function normalizeEvent(object $event): object
+  public function normalizeBranch(object $branch): array
+  {
+    return [];
+  }
+
+
+  public function normalizeEvent(object $event): array
   {
     return $event;
   }
 
 
-  public function normalizeUser(object $user): object
+  public function normalizeUser(object $user): array
   {
-    return (object)[
+    return [
       'id' => $user->id,
       'name' => $user->name,
       'username' => $user->username,
@@ -118,9 +124,9 @@ class Svn implements Server
   }
 
 
-  public function normalizeProject(object $project): object
+  public function normalizeProject(object $project): array
   {
-    return (object)[
+    return [
       'id' => $project->id,
       'type' => 'svn',
       'name' => $project->name,
@@ -155,6 +161,12 @@ class Svn implements Server
       'noForks' => $project->forks_count,
       'noStars' => $project->star_count
     ];
+  }
+
+
+  public function deleteBranch(string $idServer, string $idProject, string $branch): bool
+  {
+    return false;
   }
 
 }
