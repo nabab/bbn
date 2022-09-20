@@ -7,6 +7,7 @@ namespace bbn\File;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use Exception;
 
 /**
  * Image Class
@@ -26,39 +27,32 @@ use bbn\Str;
  */
 class Image extends bbn\File
 {
+  /** @var string */
+  protected static $imageClassMode     = '';
 
-  protected static $defaultThumbSizes = [[false, 500], [false, 250], [false, 125], [false, 96], [false, 48]];
-    /**
-     * @var bool
-     */
-  protected static $exif = false;
+  /** @var array */
+  protected static $allowed_extensions = ['jpg','gif','jpeg','png','svg','webp'];
+  
+  /** @var array */
+  protected static $defaultThumbSizes  = [[false, 500], [false, 250], [false, 125], [false, 96], [false, 48]];
 
-    /**
-     * @var mixed
-     */
+  /** @var bool */
+  protected static $exif               = false;
+
+  /** @var int */
+  protected static $max_width          = 5000;
+
+  /** @var string */
   protected $ext2;
 
-    /**
-     * @var mixed
-     */
+  /** @var int */
   protected $w;
 
-    /**
-     * @var mixed
-     */
+  /** @var int */
   protected $h;
 
-    /**
-     * @var mixed
-     */
+  /** @var mixed */
   protected $img;
-
-    /**
-     * @var array
-     */
-  protected static
-        $allowed_extensions = ['jpg','gif','jpeg','png','svg','webp'],
-        $max_width          = 5000;
 
 
   /**
@@ -217,6 +211,37 @@ class Image extends bbn\File
   }
 
 
+  public static function setImageClassMode(string $mode) 
+  {
+    $mode = strtolower($mode);
+    if (strpos($mode, 'gd') === 0) {
+      if (!function_exists('\\imagecreate')) {
+        throw new Exception(X::_("The GD library is not installed"));
+      }
+
+      self::$imageClassMode = 'gd';
+    }
+    else {
+      if (!class_exists('\\Imagick')) {
+        throw new Exception(X::_("The Imagick library is not installed"));
+      }
+
+      self::$imageClassMode = 'imagick';
+    }
+  }
+
+
+  /**
+   * Returns true if the current library used is Imagick
+   *
+   * @return boolean
+   */
+  public static function isImagick(): bool
+  {
+    return self::$imageClassMode === 'imagick';
+  }
+
+
   /**
      * Construct
      * @return void
@@ -230,6 +255,9 @@ class Image extends bbn\File
       $this->file  = false;
       $this->size  = false;
       $this->title = false;
+    }
+    elseif (!self::$imageClassMode) {
+      self::setImageClassMode(class_exists('\\Imagick') ? 'imagick' : 'gd');
     }
   }
 
@@ -245,6 +273,15 @@ class Image extends bbn\File
     }
 
     return '';
+  }
+
+
+  public function getImageObject()
+  {
+    if ($this->test()) {
+      return $this->img;
+    }
+
   }
 
 
@@ -333,7 +370,7 @@ class Image extends bbn\File
     */
     if ($this->file) {
       if (!$this->img) {
-        if (class_exists('\\Imagick')) {
+        if (self::isImagick()) {
           try{
             $this->img = new \Imagick($this->file);
             switch ($this->getExtension()) {
@@ -359,11 +396,11 @@ class Image extends bbn\File
           }
           catch (\Exception $e){
             $this->img   = false;
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
           }
         }
         elseif (function_exists('imagecreatefrom'.$this->ext2)) {
-          if ($this->img = \call_user_func('imagecreatefrom'.$this->ext2,$this->file)) {
+          if ($this->img = \call_user_func('imagecreatefrom'.$this->ext2, $this->file)) {
             imageinterlace($this->img, true);
             $this->w = imagesx($this->img);
             $this->h = imagesy($this->img);
@@ -372,16 +409,16 @@ class Image extends bbn\File
             }
           }
           else{
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
           }
         }
         else{
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
     }
     else{
-      $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+      $this->error = X::_("There has been a problem");
     }
 
     return $this;
@@ -448,16 +485,17 @@ class Image extends bbn\File
           $ext = 'jpeg';
         }
 
-        if (class_exists('\\Imagick')) {
+        if (self::isImagick()) {
           if ($ext !== $this->ext2) {
             $this->img->setImageFormat($ext);
+            $this->img->setOption('webp:exact', 'true'); 
           }
 
           $this->img->writeImage($dest);
         }
         elseif (function_exists('image'.$ext)) {
           if (!\call_user_func('image'.$ext, $this->img, $dest)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("The function %s doesn't exist", 'image'.$ext);
           }
         }
       }
@@ -545,83 +583,50 @@ class Image extends bbn\File
    * @param boolean  $crop  If cropping the image. Default = false.
    * @param int|bool $max_w The maximum value for new width.
    * @param int|bool $max_h The maximum valure for new height.
-   * @return image
-     */
-  public function resize($w=false, $h=false, $crop=false, $max_w=false, $max_h=false)
+   * @return Image
+   */
+  public function resize($w = null, int $h = null, bool $crop = false, int $max_w = null, int $max_h = null): self
   {
-      $max_w = false;
-      $max_h = false;
-    if (\is_array($w)) {
-        $max_w = isset($w['max_w']) ? $w['max_w'] : false;
-        $max_h = isset($w['max_h']) ? $w['max_h'] : false;
-        $crop  = isset($w['crop']) ? $w['crop'] : false;
-        $h     = isset($w['h']) ? $w['h'] : false;
-        $w     = isset($w['w']) ? $w['w'] : false;
+    if (!$this->test()) {
+      throw new Exception(X::_("The image is not valid"));
     }
 
-    if (( $w || $h ) && $this->test()) {
+    if (\is_array($w)) {
+        $max_w = $w['max_w'] ?? null;
+        $max_h = $w['max_h'] ?? null;
+        $crop  = $w['crop'] ?? false;
+        $h     = $w['h'] ?? null;
+        $w     = $w['w'] ?? null;
+    }
+
+
+    if ($w || $h) {
       if ($w && $h) {
-        if ($crop && ( ( $this->w / $this->h ) != ( $w / $h ) )) {
-          if (( $this->w / $this->h ) < ( $w / $h )) {
-                $w2 = $w;
-                $h2 = floor(($w2 * $this->h) / $this->w);
-                $x  = 0;
-                $y  = floor(($h2 - $h) / 2);
+        $oratio = $this->w / $this->h;
+        $nratio = $w / $h;
+        if ($crop && ($oratio != $nratio)) {
+          if ($oratio < $nratio) {
+            $w2 = $w;
+            $h2 = floor(($w2 * $this->h) / $this->w);
+            $x  = 0;
+            $y  = floor(($h2 - $h) / 2);
           }
-          elseif (( $this->w / $this->h ) > ( $w / $h )) {
-                  $h2 = $h;
-                  $w2 = floor(($h2 * $this->w) / $this->h);
-                  $y  = 0;
-                  $x  = floor(($w2 - $w) / 2);
-          }
-
-          if (class_exists('\\Imagick')) {
-            $res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
-          }
-          else{
-            $image = imagecreatetruecolor($w2,$h2);
-            if ($this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg') {
-                    imagecolorallocatealpha($image, 0, 0, 0, 127);
-                    imagealphablending($image, false);
-                    imagesavealpha($image, true);
-            }
-
-                  $res       = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
-                  $this->img = $image;
-          }
-
-          if ($res === true) {
-            $this->w = $w2;
-            $this->h = $h2;
-            if ($this->crop($w,$h,$x,$y)) {
-                  $this->w = $w;
-                  $this->h = $h;
-            }
+          else {
+            $h2 = $h;
+            $w2 = floor(($h2 * $this->w) / $this->h);
+            $y  = 0;
+            $x  = floor(($w2 - $w) / 2);
           }
         }
         else{
-            $w2 = $w;
-            $h2 = $h;
-          if (class_exists('\\Imagick')) {
-            $res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
-          }
-          else{
-                  $image = imagecreatetruecolor($w2,$h2);
-            if ($this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg') {
-              imagecolorallocatealpha($image, 0, 0, 0, 127);
-              imagealphablending($image, false);
-              imagesavealpha($image, true);
-            }
-
-                    $res       = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
-                    $this->img = $image;
-          }
+          $w2 = $w;
+          $h2 = $h;
         }
       }
-      else{
+      else {
         if ($w > 0) {
-            $w2 = $w;
-            $h2 = floor(($w2 * $this->h) / $this->w);
+          $w2 = $w;
+          $h2 = floor(($w2 * $this->h) / $this->w);
         }
 
         if ($h > 0) {
@@ -632,70 +637,76 @@ class Image extends bbn\File
             }
           }
           else{
-              $h2 = $h;
-              $w2 = floor(($h2 * $this->w) / $this->h);
+            $h2 = $h;
+            $w2 = floor(($h2 * $this->w) / $this->h);
           }
         }
+      }
 
-        if (isset($w2,$h2)) {
-          if (class_exists('\\Imagick')) {
-              $res = $this->img->resizeImage($w2,$h2,\Imagick::FILTER_LANCZOS,1);
-          }
-          else{
-              $image = imagecreatetruecolor($w2,$h2);
-            if ($this->ext == 'png' || $this->ext == 'gif' || $this->ext == 'svg') {
-              imagecolorallocatealpha($image, 0, 0, 0, 127);
-              imagealphablending($image, false);
-              imagesavealpha($image, true);
-            }
-
-              $res       = imagecopyresampled($image,$this->img,0,0,0,0,$w2,$h2,$this->w,$this->h);
-              $this->img = $image;
+      if (isset($w2, $h2)) {
+        if (self::isImagick()) {
+          $res = $this->img->resizeImage($w2, $h2, \Imagick::FILTER_LANCZOS, 1);
+        }
+        else{
+          $image = imagecreatetruecolor($w2,$h2);
+          if (in_array($this->ext, ['png', 'gif', 'svg', 'webp'])) {
+            imagecolorallocatealpha($image, 0, 0, 0, 127);
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
           }
 
-          if ($res === true) {
-              $this->w = $w2;
-              $this->h = $h2;
+          $res       = imagecopyresampled($image, $this->img, 0, 0, 0, 0, $w2, $h2, $this->w, $this->h);
+          $this->img = $image;
+        }
+
+        if ($res === true) {
+          if ($crop && isset($x, $y) && $this->crop($w, $h, $x, $y)) {
+            $this->w = $w;
+            $this->h = $h;
           }
-          else{
-              $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          else {
+            $this->w = $w2;
+            $this->h = $h2;
           }
         }
         else{
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem while resizing");
         }
+      }
+      else{
+        $this->error = X::_("Width and/or height is null");
       }
     }
 
-      return $this;
+    return $this;
   }
 
 
-    /**
+  /**
    * Resize the image with constant values, if the width is not given it will be set to auto.
-     * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT ?
-     *
-     * ```php
-     * $img = new bbn\File\Image("/home/data/test/image.jpg");
-     * bbn\X::dump($img->getWidth(),$img->getHeight());
-     * // (int) 345  146
-     * $img->autoresize("", 100);
-     * bbn\X::dump($img->getWidth(),$img->getHeight());
-     * // (int) 236  100
-     * ```
-     *
-     * @param integer $w default  BBN_MAX_WIDTH
+   * @todo BBN_MAX_WIDTH and BBN_MAX_HEIGHT ?
+   *
+   * ```php
+   * $img = new bbn\File\Image("/home/data/test/image.jpg");
+   * bbn\X::dump($img->getWidth(),$img->getHeight());
+   * // (int) 345  146
+   * $img->autoresize("", 100);
+   * bbn\X::dump($img->getWidth(),$img->getHeight());
+   * // (int) 236  100
+   * ```
+   *
+   * @param integer $w default  BBN_MAX_WIDTH
    * @param integer $h default BBN_MAX_HEIGHT
    * @return image
-     */
+   */
   public function autoresize(int $w = null, int $h = null)
   {
     if (!$w) {
-        $w = \defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;
+      $w = \defined('BBN_MAX_WIDTH') ? BBN_MAX_WIDTH : self::$max_width;
     }
 
     if (!$h) {
-        $h = \defined('BBN_MAX_HEIGHT') ? BBN_MAX_HEIGHT : self::$max_height;
+      $h = \defined('BBN_MAX_HEIGHT') ? BBN_MAX_HEIGHT : self::$max_height;
     }
 
     if ($this->test() && is_numeric($w) && is_numeric($h)) {
@@ -708,7 +719,7 @@ class Image extends bbn\File
       }
     }
     else{
-        $this->error = \defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ? BBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';
+        $this->error = X::_("Arguments must be numeric");
     }
 
       return $this;
@@ -734,27 +745,27 @@ class Image extends bbn\File
    * @param integer $y Y coordinate
    * @return image|false
      */
-  public function crop($w, $h, $x, $y)
+  public function crop($w, $h, $x, $y): self
   {
     if ($this->test()) {
         $args = \func_get_args();
       foreach ($args as $arg){
         if (!is_numeric($arg)) {
-            $this->error = \defined('BBN_ARGUMENTS_MUST_BE_NUMERIC') ? BBN_ARGUMENTS_MUST_BE_NUMERIC : 'Arguments must be numeric';
+          $this->error = X::_("Arguments must be numeric");
         }
       }
 
       if ($w + $x > $this->w) {
-          return false;
+        return false;
       }
 
       if ($h + $y > $this->h) {
-          return false;
+        return false;
       }
 
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         if (!$this->img->cropImage($w,$h,$x,$y)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
       else
@@ -767,15 +778,15 @@ class Image extends bbn\File
         }
 
         if (imagecopyresampled($img,$this->img,0,0,$x,$y,$w,$h,$w,$h)) {
-            $this->img = $img;
+          $this->img = $img;
         }
         else{
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem during the resampling");
         }
       }
     }
 
-      return $this;
+    return $this;
   }
 
 
@@ -794,7 +805,7 @@ class Image extends bbn\File
   {
       $ok = false;
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         if ($this->img->rotateImage(new \ImagickPixel(),$angle)) {
             $ok = 1;
         }
@@ -819,7 +830,7 @@ class Image extends bbn\File
         }
       }
       else{
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
       }
     }
 
@@ -843,14 +854,14 @@ class Image extends bbn\File
   public function flip($mode='v')
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         if ($mode == 'v') {
           if (!$this->img->flipImage()) {
-                $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+                $this->error = X::_("There has been a problem");
           }
         }
         elseif (!$this->img->flopImage()) {
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
       else
@@ -888,7 +899,7 @@ class Image extends bbn\File
         && ((strtolower($this->getExtension()) === 'jpg')
         || (strtolower($this->getExtension()) === 'jpeg'))
     ) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         $this->img->setImageCompression($comp);
         $this->img->setImageCompressionQuality($q);
         $this->img->stripImage();
@@ -914,16 +925,16 @@ class Image extends bbn\File
   public function brightness($val='+')
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         $p = ( $val == '-' ) ? 90 : 110;
         if (!$this->img->modulateImage($p,100,100)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
         }
       }
       elseif (function_exists('imagefilter')) {
           $p = ( $val == '-' ) ? -20 : 20;
         if (!imagefilter($this->img,IMG_FILTER_BRIGHTNESS,-20)) {
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
     }
@@ -947,16 +958,16 @@ class Image extends bbn\File
   public function contrast($val='+')
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         $p = ( $val == '-' ) ? 0 : 1;
         if (!$this->img->contrastImage($p)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
         }
       }
       elseif (function_exists('imagefilter')) {
           $p = ( $val == '-' ) ? -20 : 20;
         if (!imagefilter($this->img,IMG_FILTER_CONTRAST,-20)) {
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
     }
@@ -978,14 +989,14 @@ class Image extends bbn\File
   public function grayscale()
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         if (!$this->img->modulateImage(100,0,100)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
         }
       }
       elseif (function_exists('imagefilter')) {
         if (!imagefilter($this->img,IMG_FILTER_GRAYSCALE)) {
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
     }
@@ -1007,14 +1018,14 @@ class Image extends bbn\File
   public function negate()
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         if (!$this->img->negateImage(false)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
         }
       }
       elseif (function_exists('imagefilter')) {
         if (!imagefilter($this->img,IMG_FILTER_NEGATE)) {
-          $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+          $this->error = X::_("There has been a problem");
         }
       }
     }
@@ -1037,9 +1048,9 @@ class Image extends bbn\File
   public function polaroid()
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         if (!$this->img->polaroidImage(new \ImagickDraw(), 0)) {
-            $this->error = \defined('BBN_THERE_HAS_BEEN_A_PROBLEM') ? BBN_THERE_HAS_BEEN_A_PROBLEM : 'There has been a problem';
+            $this->error = X::_("There has been a problem");
         }
       }
     }
@@ -1123,9 +1134,10 @@ class Image extends bbn\File
   public function toString()
   {
     if ($this->test()) {
-      if (class_exists('\\Imagick')) {
+      if (self::isImagick()) {
         $m = $this->img;
-      } else
+      }
+      else
         {
           ob_start();
           \call_user_func('image'.$this->ext2,$this->img);
@@ -1140,7 +1152,7 @@ class Image extends bbn\File
 
   public function replaceColor($originalColor, $newColor = null, $precision = 0)
   {
-    if (class_exists('\\Imagick')) {
+    if (self::isImagick()) {
       $this->img = new \Imagick($this->file);
 
       if ($newColor === null) {

@@ -499,7 +499,7 @@ class Str
    * @param bool   $ar   If "true" also returns the file path, default: "false".
    * @return string|array
    */
-  public static function fileExt(string $file, bool $ar = false)
+  public static function fileExt(string $file, bool $ar = false, bool $keepCase = false)
   {
     $file = self::cast($file);
     if (mb_strrpos($file, '/') !== false) {
@@ -508,9 +508,16 @@ class Str
 
     if (mb_strpos($file, '.') !== false) {
       $p   = mb_strrpos($file, '.');
-      $f   = mb_substr($file, 0, $p);
-      $ext = mb_convert_case(mb_substr($file, $p + 1), MB_CASE_LOWER);
-      return $ar ? [$f, $ext] : $ext;
+      $ext = mb_substr($file, $p + 1);
+      if (!$keepCase) {
+        $ext = mb_convert_case($ext, MB_CASE_LOWER);
+      }
+
+      if (!$ar) {
+        return $ext;
+      }
+ 
+      return [mb_substr($file, 0, $p), $ext];
     }
 
     return $ar ? [$file, ''] : '';

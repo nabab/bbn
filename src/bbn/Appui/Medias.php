@@ -960,7 +960,7 @@ class Medias extends bbn\Models\Cls\Db
             $thumbs_sizes = $this->getThumbsSizes($media);
             $image = new Image($full_path);
             $this->removeThumbs($old_path);
-            $image->thumbs(X::dirname($full_path), $this->thumbs_sizes, '_%s', true);
+            $image->thumbs(X::dirname($full_path), $thumbs_sizes, '_%s', true);
             $media['is_image'] = true;
           }
         }
