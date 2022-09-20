@@ -21,11 +21,11 @@ interface Server {
 
   function getServer(string $id): object;
 
-  function getCurrentUser(string $id): object;
+  function getCurrentUser(string $id): array;
 
   function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;
 
-  function getProject(string $idServer, string $idProject): ?object;
+  function getProject(string $idServer, string $idProject): ?array;
 
   function getProjectBranches(string $idServer, string $idProject): array;
 
@@ -39,11 +39,15 @@ interface Server {
 
   function getProjectCommitsEvents(string $idServer, string $idProject): array;
 
-  function normalizeEvent(object $event): object;
+  function normalizeBranch(object $branch): array;
 
-  function normalizeUser(object $user): object;
+  function normalizeEvent(object $event): array;
 
-  function normalizeProject(object $project): object;
+  function normalizeUser(object $user): array;
+
+  function normalizeProject(object $project): array;
+
+  function deleteBranch(string $idServer, string $idProject, string $branch): bool;
 
 
 }

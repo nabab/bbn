@@ -5,7 +5,6 @@ namespace bbn\Appui\Vcs;
 use bbn;
 use bbn\Appui\Passwords;
 use bbn\Appui\Option;
-use bbn\Api\GitLab;
 use bbn\X;
 
 /**
@@ -16,7 +15,7 @@ use bbn\X;
  * @license http://www.opensource.org/licenses/mit-license.html MIT License
  * @link https://bbn.io/bbn-php/doc/class/Appui/Vcs/Git
  */
-class Git implements Server
+class GitLab implements Server
 {
   use Common;
 
@@ -43,13 +42,13 @@ class Git implements Server
   {
     $server = $this->getServer($id);
     $this->checkServerHost($server->host);
-    return new GitLab($asAdmin ? $this->getAdminAccessToken($id) : $server->userAccessToken, $server->host);
+    return new bbn\Api\GitLab($asAdmin ? $this->getAdminAccessToken($id) : $server->userAccessToken, $server->host);
   }
 
 
-  public function getCurrentUser(string $id): object
+  public function getCurrentUser(string $id): array
   {
-    return (object)$this->getConnection($id)->getUser();
+    return $this->getConnection($id)->getUser();
   }
 
 
@@ -61,7 +60,7 @@ class Git implements Server
   }
 
 
-  public function getProject(string $idServer, string $idProject): ?object
+  public function getProject(string $idServer, string $idProject): ?array
   {
     if ($proj = $this->getConnection($idServer, true)->getProject($idProject, true)) {
       return $this->normalizeProject((object)$proj);
@@ -72,7 +71,14 @@ class Git implements Server
 
   public function getProjectBranches(string $idServer, string $idProject): array
   {
-    return $this->getConnection($idServer)->getBranches($idProject) ?: [];
+    return X::sortBy(
+      \array_map(
+        [$this, 'normalizeBranch'],
+        $this->getConnection($idServer)->getBranches($idProject) ?: []
+      ),
+      'created',
+      'desc'
+    );
   }
 
 
@@ -84,7 +90,7 @@ class Git implements Server
 
   public function getProjectUsers(string $idServer, string $idProject): array
   {
-    return \array_map([$this, 'normalizeUser'], $this->getConnection($idServer)->getProjectUsers($idProject) ?: []);
+    return \array_map([$this, 'normalizeMember'], $this->getConnection($idServer, true)->getProjectUsers($idProject) ?: []);
   }
 
 
@@ -106,7 +112,26 @@ class Git implements Server
   }
 
 
-  public function normalizeEvent(object $event): object
+  public function normalizeBranch(object $branch): array
+  {
+    return [
+      'id' => $branch->commit->id,
+      'ref' => $branch->commit->short_id,
+      'name' => $branch->name,
+      'created' => $branch->commit->created_at,
+      'default' => $branch->default,
+      'author' => [
+        'id' => '',
+        'name' => $branch->commit->author_name,
+        'username' => '',
+        'email' => $branch->commit->author_email
+      ],
+      'url' => $branch->web_url
+    ];
+  }
+
+
+  public function normalizeEvent(object $event): array
   {
     $data = [
       'id' => $event->id,
@@ -160,13 +185,13 @@ class Git implements Server
         }
         break;
     }
-    return (object)$data;
+    return $data;
   }
 
 
-  public function normalizeUser(object $user): object
+  public function normalizeUser(object $user): array
   {
-    return (object)[
+    return [
       'id' => $user->id,
       'name' => $user->name,
       'username' => $user->username,
@@ -176,9 +201,20 @@ class Git implements Server
   }
 
 
-  public function normalizeProject(object $project): object
+  public function normalizeMember(object $member): array
   {
-    return (object)[
+    return X::mergeArrays([
+      'created' => $member->created_at,
+      'author' => !empty($member->created_by) ? $this->normalizeUser($member->created_by) : [],
+      'expire' => $member->expires_at,
+      'role' => bbn\Api\GitLab::$accessLevels[$member->access_level]
+    ], $this->normalizeUser($member));
+  }
+
+
+  public function normalizeProject(object $project): array
+  {
+    return [
       'id' => $project->id,
       'type' => 'git',
       'name' => $project->name,
@@ -189,7 +225,7 @@ class Git implements Server
       'url' => $project->web_url,
       'urlGit' => $project->http_url_to_repo,
       'urlSsh' => $project->ssh_url_to_repo,
-      'namespace' => [
+      'namespace' => (object)[
         'id' => $project->namespace->id,
         'idParent' => $project->namespace->parent_id,
         'name' => $project->namespace->name,
@@ -204,7 +240,7 @@ class Git implements Server
       'defaultBranch' => $project->default_branch,
       'archived' => $project->archived,
       'avatar' => $project->avatar_url,
-      'license' => [
+      'license' => (object)[
         'name' => $project->license->name,
         'code' => $project->license->nickname
       ],
@@ -213,6 +249,12 @@ class Git implements Server
       'noForks' => $project->forks_count,
       'noStars' => $project->star_count
     ];
+  }
+
+
+  public function deleteBranch(string $idServer, string $idProject, string $branch): bool
+  {
+    return $this->getConnection($idServer)->deleteBranch($idProject, $branch);
   }
 
 }

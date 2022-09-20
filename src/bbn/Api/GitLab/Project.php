@@ -76,7 +76,7 @@ trait Project
    */
   public function getProjectUsers($project): array
   {
-    return $this->request($this->projectURL . $project . '/users');
+    return $this->request($this->projectURL . $project . '/members/all');
   }
 
 

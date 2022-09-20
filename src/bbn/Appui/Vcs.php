@@ -7,9 +7,7 @@ use bbn\Cache;
 use bbn\Appui\Passwords;
 use bbn\X;
 use bbn\Appui\Option;
-use bbn\Str;
-use bbn\Api\GitLab;
-use bbn\Appui\Vcs\Git;
+use bbn\Appui\Vcs\GitLab;
 use bbn\Appui\Vcs\Svn;
 
 
@@ -48,7 +46,7 @@ class Vcs
     $this->db = $db;
     $this->opt = Option::getInstance();
     $this->pwd = new Passwords($this->db);
-    $this->git = new Git($this->db);
+    $this->git = new GitLab($this->db);
     $this->svn = new Svn($this->db);
     $this->cacheInit();
     self::optionalInit();
@@ -153,7 +151,7 @@ class Vcs
   }
 
 
-  public function getProject(string $idServer, string $idProject): ?object
+  public function getProject(string $idServer, string $idProject): ?array
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
       return $serverCls->getProject($idServer, $idProject);
@@ -240,6 +238,15 @@ class Vcs
       }, $prefs);
     }
     return [];
+  }
+
+
+  public function deleteBranch(string $idServer, string $idProject, string $branch): bool
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->deleteBranch($idServer, $idProject, $branch);
+    }
+    return false;
   }
 
 
