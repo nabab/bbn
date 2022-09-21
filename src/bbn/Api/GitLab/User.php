@@ -43,4 +43,43 @@ trait User
   }
 
 
+  /**
+   * Gets the users list of the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @return array
+   */
+  public function getProjectUsers($project): array
+  {
+    return $this->request($this->projectURL . $project . '/members/all');
+  }
+
+
+  /**
+   * Inserts an user into the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int $user The user ID
+   * @param int $role The user role ID
+   * @return bool
+   */
+  public function insertProjectUser($project, int $user, int $role): array
+  {
+    return $this->post($this->projectURL . $project . '/members', [
+      'user_id' => $user,
+      'access_level' => $role
+    ]);
+  }
+
+
+  /**
+   * Removes an user from the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int The user ID
+   * @return bool
+   */
+  public function removeProjectUser($project, int $user): bool
+  {
+    return $this->delete($this->projectURL . $project . '/members/' . $user);
+  }
+
+
 }

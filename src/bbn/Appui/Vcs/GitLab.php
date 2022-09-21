@@ -38,6 +38,11 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param string $id
+   * @param bool $asAdmin
+   * @return object
+   */
   public function getConnection(string $id, bool $asAdmin = false): object
   {
     $server = $this->getServer($id);
@@ -46,12 +51,22 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param string $id
+   * @return array
+   */
   public function getCurrentUser(string $id): array
   {
     return $this->getConnection($id)->getUser();
   }
 
 
+  /**
+   * @param string $id
+   * @param int $page
+   * @param int $perPage
+   * @return array
+   */
   public function getProjectsList(string $id, int $page = 1, int $perPage = 25): array
   {
     $list = $this->getConnection($id)->getProjectsList($page, $perPage) ?: [];
@@ -60,6 +75,11 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return null|array
+   */
   public function getProject(string $idServer, string $idProject): ?array
   {
     if ($proj = $this->getConnection($idServer, true)->getProject($idProject, true)) {
@@ -69,6 +89,11 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
   public function getProjectBranches(string $idServer, string $idProject): array
   {
     return X::sortBy(
@@ -82,36 +107,108 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
   public function getProjectTags(string $idServer, string $idProject): array
   {
     return $this->getConnection($idServer)->getTags($idProject) ?: [];
   }
 
 
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
   public function getProjectUsers(string $idServer, string $idProject): array
   {
     return \array_map([$this, 'normalizeMember'], $this->getConnection($idServer, true)->getProjectUsers($idProject) ?: []);
   }
 
 
+  /**
+   * @return array
+   */
+  public function getProjectUsersRoles(): array
+  {
+    return bbn\Api\GitLab::$accessLevels;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
   public function getProjectUsersEvents(string $idServer, string $idProject): array
   {
     return \array_map([$this, 'normalizeEvent'], $this->getConnection($idServer)->getUsersEvents($idProject) ?: []);
   }
 
 
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
   public function getProjectEvents(string $idServer, string $idProject): array
   {
     return \array_map([$this, 'normalizeEvent'], $this->getConnection($idServer)->getEvents($idProject) ?: []);
   }
 
 
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
   public function getProjectCommitsEvents(string $idServer, string $idProject): array
   {
-    return \array_map([$this, 'normalizeEvent'], $this->getConnection($idServer)->getCommitsEvents($idProject) ?: []);
+    return \array_values(
+      \array_filter(
+        \array_map(
+          [$this, 'normalizeEvent'],
+          $this->getConnection($idServer)->getCommitsEvents($idProject) ?: []
+        ),
+        function($e){
+          return $e['type'] === 'commit';
+        }
+      )
+    );
   }
 
 
+   /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return array
+   */
+  public function getProjectLabels(string $idServer, string $idProject): array
+  {
+    return \array_map(
+      [$this, 'normalizeLabel'],
+      $this->getConnection($idServer)->getProjectLabels($idProject) ?: []
+    );
+  }
+
+
+  /**
+   * @param string $idServer
+   * @return array
+   */
+  public function getUsers(string $idServer): array
+  {
+    return \array_map([$this, 'normalizeUser'], $this->getConnection($idServer, true)->getUsers() ?: []);
+  }
+
+
+  /**
+   * @param object $branch
+   * @return array
+   */
   public function normalizeBranch(object $branch): array
   {
     return [
@@ -131,6 +228,10 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param object $event
+   * @return array
+   */
   public function normalizeEvent(object $event): array
   {
     $data = [
@@ -139,14 +240,21 @@ class GitLab implements Server
       'author' => $this->normalizeUser($event->author),
       'type' => '',
       'title' => '',
-      'text' => ''
+      'text' => '',
+      'original' => $event
     ];
     switch ($event->action_name) {
       case 'pushed to':
-      case 'pushed new':
         $data = X::mergeArrays($data, [
           'type' => 'commit',
           'text' => $event->push_data->commit_title,
+          'branch' => $event->push_data->ref
+        ]);
+        break;
+      case 'pushed new':
+        $data = X::mergeArrays($data, [
+          'type' => 'branch',
+          'text' => X::_('Branch created'),
           'branch' => $event->push_data->ref
         ]);
         break;
@@ -184,34 +292,77 @@ class GitLab implements Server
           ]);
         }
         break;
+      case 'joined':
+        $data = X::mergeArrays($data, [
+          'type' => 'user',
+          'title' => X::_('Has been included among the users of the project')
+        ]);
+        break;
+      case 'left':
+        $data = X::mergeArrays($data, [
+          'type' => 'user',
+          'title' => X::_('Has been removed from project users')
+        ]);
+        break;
     }
     return $data;
   }
 
 
+  /**
+   * @param object $user
+   * @return array
+   */
   public function normalizeUser(object $user): array
   {
     return [
       'id' => $user->id,
       'name' => $user->name,
       'username' => $user->username,
+      'email' => $user->email ?? '',
       'avatar' => $user->avatar_url,
       'url' => $user->web_url
     ];
   }
 
 
+  /**
+   * @param object $member
+   * @return array
+   */
   public function normalizeMember(object $member): array
   {
     return X::mergeArrays([
       'created' => $member->created_at,
       'author' => !empty($member->created_by) ? $this->normalizeUser($member->created_by) : [],
       'expire' => $member->expires_at,
-      'role' => bbn\Api\GitLab::$accessLevels[$member->access_level]
+      'role' => $this->getProjectUsersRoles()[$member->access_level]
     ], $this->normalizeUser($member));
   }
 
 
+  /**
+   * @param object $user
+   * @return array
+   */
+  public function normalizeLabel(object $label): array
+  {
+    return [
+      'id' => $label->id,
+      'name' => $label->name,
+      'description' => $label->description ?: '',
+      'backgroundColor' => $label->color,
+      'fontColor' => $label->text_color,
+      'openedIssues' => $label->open_issues_count,
+      'closedIssues' => $label->closed_issues_count
+    ];
+  }
+
+
+  /**
+   * @param object $project
+   * @return array
+   */
   public function normalizeProject(object $project): array
   {
     return [
@@ -252,9 +403,98 @@ class GitLab implements Server
   }
 
 
+  /**
+   * @param object $issue
+   * @return array
+   */
+  public function normalizeIssue(object $issue): array
+  {
+    return [
+      'id' => $issue->id,
+      'iid' => $issue->iid,
+      'title' => $issue->title,
+      'description' => $issue->description ?: '',
+      'url' => $issue->web_url,
+      'author' => $this->normalizeUser($issue->author),
+      'created' => $issue->created_at,
+      'updated' => $issue->updated_at,
+      'closed' => $issue->closed_at,
+      'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser($issue->closed_by) : [],
+      'assignee' => !empty($issue->closed_by) ? $this->normalizeUser($issue->assignee) : [],
+      'private' => $issue->confidential,
+      'labels' => $issue->labels,
+      'state' => $issue->state,
+      'notes' => $issue->user_notes_count,
+      'tasks' => [
+        'count' => $issue->task_completion_status->count,
+        'completed' => $issue->task_completion_status->completed_count,
+      ]
+    ];
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param string $branch
+   * @param string $fromBranch
+   * @return array
+   */
+  public function insertBranch(string $idServer, string $idProject, string $branch, string $fromBranch): array
+  {
+    return $this->getConnection($idServer)->insertBranch($idProject, $branch, $fromBranch);
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param string $branch
+   * @return bool
+   */
   public function deleteBranch(string $idServer, string $idProject, string $branch): bool
   {
     return $this->getConnection($idServer)->deleteBranch($idProject, $branch);
   }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idUser
+   * @param int $idRols
+   * @return array
+   */
+  public function insertProjectUser(string $idServer, string $idProject, int $idUser, int $idRole): array
+  {
+    return $this->getConnection($idServer)->insertProjectUser($idProject, $idUser, $idRole);
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idUser
+   * @return bool
+   */
+  public function removeProjectUser(string $idServer, string $idProject, int $idUser): bool
+  {
+    return $this->getConnection($idServer)->removeProjectUser($idProject, $idUser);
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @return bool
+   */
+  public function getProjectIssues(string $idServer, string $idProject): array
+  {
+    return \array_map(
+      [$this, 'normalizeIssue'],
+      $this->getConnection($idServer)->getIssues($idProject)
+    );
+  }
+
 
 }

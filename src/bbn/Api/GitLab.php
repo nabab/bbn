@@ -23,10 +23,11 @@ class GitLab
   use GitLab\Event;
   use GitLab\Issue;
   use GitLab\Note;
+  use GitLab\Label;
 
   /** @var array The access levels */
   public static $accessLevels = [
-    0 => 'No access',
+    //0 => 'No access',
     5 => 'Minimal access',
     10 => 'Guest',
     20 => 'Reporter',
@@ -70,6 +71,9 @@ class GitLab
 
   /** @var string */
   protected $noteURL = 'notes/';
+
+  /** @var string */
+  protected $labelURL = 'labels/';
 
 
   /**
