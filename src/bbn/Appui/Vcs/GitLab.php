@@ -241,7 +241,7 @@ class GitLab implements Server
       'type' => '',
       'title' => '',
       'text' => '',
-      'original' => $event
+      'originalEvent' => $event
     ];
     switch ($event->action_name) {
       case 'pushed to':
@@ -428,7 +428,8 @@ class GitLab implements Server
       'tasks' => [
         'count' => $issue->task_completion_status->count,
         'completed' => $issue->task_completion_status->completed_count,
-      ]
+      ],
+      'originalIssue' => $issue
     ];
   }
 
