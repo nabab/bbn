@@ -13,7 +13,7 @@ trait User
    */
   public function getUsers(): array
   {
-    return $this->request($this->userURL);
+    return $this->request($this->userURL, ['per_page' => 5000]);
   }
 
 

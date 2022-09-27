@@ -323,6 +323,33 @@ class Vcs
   }
 
 
+  public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->closeProjectIssue($idServer, $idProject, $idIssue);
+    }
+    return null;
+  }
+
+
+  public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->reopenProjectIssue($idServer, $idProject, $idIssue);
+    }
+    return null;
+  }
+
+
+  public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->assignProjectIssue($idServer, $idProject, $idIssue, $idUser);
+    }
+    return null;
+  }
+
+
   private function getServerInstance(string $id)
   {
     if ($server = $this->getServer($id)) {

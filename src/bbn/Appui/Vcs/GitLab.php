@@ -415,19 +415,19 @@ class GitLab implements Server
       'title' => $issue->title,
       'description' => $issue->description ?: '',
       'url' => $issue->web_url,
-      'author' => $this->normalizeUser($issue->author),
+      'author' => $this->normalizeUser((object)$issue->author),
       'created' => $issue->created_at,
       'updated' => $issue->updated_at ?: $issue->created_at,
       'closed' => $issue->closed_at,
-      'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser($issue->closed_by) : [],
-      'assigned' => !empty($issue->assignee) ? $this->normalizeUser($issue->assignee) : [],
+      'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser((object)$issue->closed_by) : [],
+      'assigned' => !empty($issue->assignee) ? $this->normalizeUser((object)$issue->assignee) : [],
       'private' => $issue->confidential,
       'labels' => $issue->labels,
       'state' => $issue->state,
       'notes' => $issue->user_notes_count,
       'tasks' => [
-        'count' => $issue->task_completion_status->count,
-        'completed' => $issue->task_completion_status->completed_count,
+        'count' => $issue->task_completion_status->count ?: 0,
+        'completed' => $issue->task_completion_status->completed_count ?: 0,
       ],
       'originalIssue' => $issue
     ];
@@ -495,6 +495,52 @@ class GitLab implements Server
       [$this, 'normalizeIssue'],
       $this->getConnection($idServer)->getIssues($idProject)
     );
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @return null|array
+   */
+  public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($issue = $this->getConnection($idServer)->closeIssue($idProject, $idIssue)) {
+      return $this->normalizeIssue((object)$issue);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @return null|array
+   */
+  public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($issue = $this->getConnection($idServer)->reopenIssue($idProject, $idIssue)) {
+      return $this->normalizeIssue((object)$issue);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param int $idUser
+   * @return null|array
+   */
+  public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
+  {
+    if ($issue = $this->getConnection($idServer)->assignIssue($idProject, $idIssue, $idUser)) {
+      return $this->normalizeIssue((object)$issue);
+    }
+    return null;
   }
 
 

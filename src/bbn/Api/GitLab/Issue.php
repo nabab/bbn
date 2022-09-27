@@ -133,4 +133,63 @@ trait Issue
     return null;
   }
 
+
+  /**
+   * Closes an issue of the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int The issue ID
+   * @return null|array
+   */
+  public function closeIssue($project, int $issue): ?array
+  {
+    if (($i = $this->getIssue($issue))
+      && !empty($i['iid'])
+    ) {
+      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
+        'state_event' => 'close'
+      ]);
+    }
+    return null;
+  }
+
+
+  /**
+   * Reopens an issue of the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int The issue ID
+   * @return null|array
+   */
+  public function reopenIssue($project, int $issue): ?array
+  {
+    if (($i = $this->getIssue($issue))
+      && !empty($i['iid'])
+    ) {
+      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
+        'state_event' => 'reopen'
+      ]);
+    }
+    return null;
+  }
+
+
+  /**
+   * Assigns an issue of the given project to an user
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int The issue ID
+   * @param int The user ID
+   * @return null|array
+   */
+  public function assignIssue($project, int $issue, int $user): ?array
+  {
+    if (($i = $this->getIssue($issue))
+      && !empty($i['iid'])
+    ) {
+      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
+        'assignee_ids' => $user
+      ]);
+    }
+    return null;
+  }
+
+
 }

@@ -65,6 +65,12 @@ interface Server {
 
   function getProjectIssues(string $idServer, string $idProject): array;
 
+  function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
+
+  function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
+
+  function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array;
+
   function getUsers(string $idServer): array;
 
 }

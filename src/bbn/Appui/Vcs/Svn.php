@@ -230,9 +230,29 @@ class Svn implements Server
     return [];
   }
 
+
   public function getProjectIssues(string $idServer, string $idProject): array
   {
     return [];
   }
+
+
+  public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    return null;
+  }
+
+
+  public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    return null;
+  }
+
+
+  public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
+  {
+    return null;
+  }
+
 
 }
