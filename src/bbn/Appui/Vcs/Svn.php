@@ -255,4 +255,9 @@ class Svn implements Server
   }
 
 
+  public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
+  {
+    return [];
+  }
+
 }
