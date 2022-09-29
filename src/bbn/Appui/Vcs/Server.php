@@ -33,11 +33,15 @@ interface Server {
 
   function getProjectUsers(string $idServer, string $idProject): array;
 
+  function getProjectUsersRoles(): array;
+
   function getProjectUsersEvents(string $idServer, string $idProject): array;
 
   function getProjectEvents(string $idServer, string $idProject): array;
 
   function getProjectCommitsEvents(string $idServer, string $idProject): array;
+
+  function getProjectLabels(string $idServer, string $idProject): array;
 
   function normalizeBranch(object $branch): array;
 
@@ -45,9 +49,28 @@ interface Server {
 
   function normalizeUser(object $user): array;
 
+  function normalizeMember(object $member): array;
+
+  function normalizeLabel(object $label): array;
+
   function normalizeProject(object $project): array;
+
+  function insertBranch(string $idServer, string $idProject, string $branch, string $fromBranch): array;
 
   function deleteBranch(string $idServer, string $idProject, string $branch): bool;
 
+  function insertProjectUser(string $idServer, string $idProject, int $idUser, int $idRole): array;
+
+  function removeProjectUser(string $idServer, string $idProject, int $idUser): bool;
+
+  function getProjectIssues(string $idServer, string $idProject): array;
+
+  function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
+
+  function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
+
+  function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array;
+
+  function getUsers(string $idServer): array;
 
 }

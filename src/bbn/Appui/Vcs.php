@@ -95,10 +95,15 @@ class Vcs
 
   public function addServer(string $name, string $host, string $type, string $adminAccessToken, string $userAccessToken = ''): string
   {
-    $this->checkServerHost($host);
     if (!($idParent = $this->getOptionId('list'))) {
       throw new \Exception(X::_('"list" option not found'));
     }
+    $reg = '/(http[s]?:\/\/)?(?\'code\'[[:alpha:]\.]+(?!\/$)?)/m';
+    preg_match_all($reg, $host, $matches);
+    if (!empty($matches['code'])) {
+      $host = $matches['code'][0];
+    }
+    $this->checkServerHost($host);
     $optFields = $this->opt->getFields();
     $o = [
       $optFields['id_parent'] => $idParent,
@@ -117,7 +122,12 @@ class Vcs
   }
 
 
-  public function editServer(string $id, string $name, string $host, string $type){
+  public function editServer(string $id, string $name, string $host, string $type): bool{
+    $reg = '/(http[s]?:\/\/)?(?\'code\'[[:alpha:]\.]+(?!\/$)?)/m';
+    preg_match_all($reg, $host, $matches);
+    if (!empty($matches['code'])) {
+      $host = $matches['code'][0];
+    }
     $this->checkServerHost($host);
     $optFields = $this->opt->getFields();
     $o = [
@@ -128,7 +138,7 @@ class Vcs
     if (!$this->opt->set($id, $o)) {
       throw new \Exception(X::_('Error while updating the option with ID %s: %s', $id, \json_encode($o)));
     }
-    return false;
+    return true;
   }
 
 
@@ -187,6 +197,15 @@ class Vcs
   }
 
 
+  public function getProjectUsersRoles(string $idServer): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectUsersRoles($idServer);
+    }
+    return [];
+  }
+
+
   public function getProjectUsersEvents(string $idServer, string $idProject): array
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
@@ -209,6 +228,24 @@ class Vcs
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
       return $serverCls->getProjectCommitsEvents($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function getProjectLabels(string $idServer, string $idProject): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectLabels($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function getUsers(string $idServer): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getUsers($idServer);
     }
     return [];
   }
@@ -241,12 +278,75 @@ class Vcs
   }
 
 
+  public function insertBranch(string $idServer, string $idProject, string $branch, string $fromBranch): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->insertBranch($idServer, $idProject, $branch, $fromBranch);
+    }
+    return null;
+  }
+
+
   public function deleteBranch(string $idServer, string $idProject, string $branch): bool
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
       return $serverCls->deleteBranch($idServer, $idProject, $branch);
     }
     return false;
+  }
+
+
+  public function insertProjectUser(string $idServer, string $idProject, int $idUser, string $idRole): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->insertProjectUser($idServer, $idProject, $idUser, $idRole);
+    }
+    return null;
+  }
+
+
+  public function removeProjectUser(string $idServer, string $idProject, int $idUser): bool
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->removeProjectUser($idServer, $idProject, $idUser);
+    }
+    return false;
+  }
+
+
+  public function getProjectIssues(string $idServer, string $idProject): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectIssues($idServer, $idProject);
+    }
+    return [];
+  }
+
+
+  public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->closeProjectIssue($idServer, $idProject, $idIssue);
+    }
+    return null;
+  }
+
+
+  public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->reopenProjectIssue($idServer, $idProject, $idIssue);
+    }
+    return null;
+  }
+
+
+  public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->assignProjectIssue($idServer, $idProject, $idIssue, $idUser);
+    }
+    return null;
   }
 
 

@@ -23,10 +23,11 @@ class GitLab
   use GitLab\Event;
   use GitLab\Issue;
   use GitLab\Note;
+  use GitLab\Label;
 
   /** @var array The access levels */
   public static $accessLevels = [
-    0 => 'No access',
+    //0 => 'No access',
     5 => 'Minimal access',
     10 => 'Guest',
     20 => 'Reporter',
@@ -70,6 +71,9 @@ class GitLab
 
   /** @var string */
   protected $noteURL = 'notes/';
+
+  /** @var string */
+  protected $labelURL = 'labels/';
 
 
   /**
@@ -124,7 +128,7 @@ class GitLab
    * @param bool $isPost True if you want make a POST request
    * @return array
    */
-  private function request(string $url, array $params = [], bool $isPost = false, bool $isDelete = false): array
+  private function request(string $url, array $params = [], $mode = 'get'): array
   {
     // Set the lastRequest property
     $this->lastRequest = $this->host . $url . '?private_token=' . $this->token;
@@ -133,18 +137,23 @@ class GitLab
     }
     //die(var_dump($this->lastRequest));
     $options = [];
-    if (!empty($isPost)) {
-      $options['post'] = 1;
-    }
-    else if (!empty($isDelete)) {
-      $options['delete'] = 1;
-    }
-    else {
-      $options['header'] = 1;
+    switch ($mode) {
+      case 'post':
+        $options['post'] = 1;
+        break;
+      case 'put':
+        $options['put'] = 1;
+        break;
+      case 'delete':
+        $options['delete'] = 1;
+        break;
+      case 'get':
+        $options['header'] = 1;
+        break;
     }
     // Make the curl request
     $response = X::curl($this->lastRequest, null, $options);
-    if (empty($isPost) && empty($isDelete)) {
+    if ($mode === 'get') {
       $headerSize = X::lastCurlInfo()['header_size'];
       $header = explode("\r\n", substr($response, 0, $headerSize));
       $this->lastResponseHeader = [];
@@ -174,7 +183,7 @@ class GitLab
    */
   private function post(string $url, array $params = []): array
   {
-    return $this->request($url, $params, true);
+    return $this->request($url, $params, 'post');
   }
 
 
@@ -182,11 +191,23 @@ class GitLab
    * Makes a DELETE request to the GitLab instance
    * @param string $url The part of the url related to the action to be performed
    * @param array $params The request params
-   * @return array
+   * @return bool
    */
   private function delete(string $url, array $params = []): bool
   {
-    return empty($this->request($url, $params, false, true));
+    return empty($this->request($url, $params, 'delete'));
+  }
+
+
+  /**
+   * Makes a PUT request to the GitLab instance
+   * @param string $url The part of the url related to the action to be performed
+   * @param array $params The request params
+   * @return array
+   */
+  private function put(string $url, array $params = []): array
+  {
+    return $this->request($url, $params, 'put');
   }
 
 

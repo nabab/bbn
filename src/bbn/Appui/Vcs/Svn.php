@@ -5,7 +5,7 @@ namespace bbn\Appui\Vcs;
 use bbn;
 use bbn\Appui\Passwords;
 use bbn\Appui\Option;
-use bbn\Api\GitLab;
+use bbn\X;
 
 /**
  * VCS\Svn class
@@ -82,6 +82,12 @@ class Svn implements Server
   }
 
 
+  public function getProjectUsersRoles(): array
+  {
+    return [];
+  }
+
+
   public function getProjectUsersEvents(string $idServer, string $idProject): array
   {
     return [];
@@ -95,6 +101,12 @@ class Svn implements Server
 
 
   public function getProjectCommitsEvents(string $idServer, string $idProject): array
+  {
+    return [];
+  }
+
+
+  public function getProjectLabels(string $idServer, string $idProject): array
   {
     return [];
   }
@@ -115,11 +127,36 @@ class Svn implements Server
   public function normalizeUser(object $user): array
   {
     return [
-      'id' => $user->id,
-      'name' => $user->name,
-      'username' => $user->username,
-      'avatar' => $user->avatar_url,
-      'url' => $user->web_url
+      'id' => '',
+      'name' => '',
+      'username' => '',
+      'avatar' => '',
+      'url' => ''
+    ];
+  }
+
+
+  public function normalizeMember(object $member): array
+  {
+    return X::mergeArrays([
+      'created' => '',
+      'author' => [],
+      'expire' => '',
+      'role' => ''
+    ], $this->normalizeUser($member));
+  }
+
+
+  public function normalizeLabel(object $label): array
+  {
+    return [
+      'id' => '',
+      'name' => '',
+      'description' => '',
+      'backgroundColor' => '',
+      'fontColor' => '',
+      'openedIssues' => '',
+      'closedIssues' => ''
     ];
   }
 
@@ -127,40 +164,46 @@ class Svn implements Server
   public function normalizeProject(object $project): array
   {
     return [
-      'id' => $project->id,
+      'id' => '',
       'type' => 'svn',
-      'name' => $project->name,
-      'fullname' => $project->name_with_namespace,
-      'description' => $project->description,
-      'path' => $project->path,
-      'fullpath' => $project->path_with_namespace,
-      'url' => $project->web_url,
-      'urlGit' => $project->http_url_to_repo,
-      'urlSsh' => $project->ssh_url_to_repo,
+      'name' => '',
+      'fullname' => '',
+      'description' => '',
+      'path' => '',
+      'fullpath' => '',
+      'url' => '',
+      'urlGit' => '',
+      'urlSsh' => '',
       'namespace' => [
-        'id' => $project->namespace->id,
-        'idParent' => $project->namespace->parent_id,
-        'name' => $project->namespace->name,
-        'path' => $project->namespace->path,
-        'fullpath' => $project->namespace->full_path,
-        'url' => $project->namespace->web_url
+        'id' => '',
+        'idParent' => '',
+        'name' => '',
+        'path' => '',
+        'fullpath' => '',
+        'url' => ''
       ],
-      'created' => $project->created_at,
-      'creator' => $project->creator_id,
-      'private' => !empty($project->owner),
-      'visibility' => $project->visibility,
-      'defaultBranch' => $project->default_branch,
-      'archived' => $project->archived,
-      'avatar' => $project->avatar_url,
+      'created' => '',
+      'creator' => '',
+      'private' => '',
+      'visibility' => '',
+      'defaultBranch' => '',
+      'archived' => '',
+      'avatar' => '',
       'license' => [
-        'name' => $project->license->name,
-        'code' => $project->license->nickname
+        'name' => '',
+        'code' => ''
       ],
-      'noCommits' => $project->statistics['commit_count'],
-      'size' => $project->statistics['repository_size'],
-      'noForks' => $project->forks_count,
-      'noStars' => $project->star_count
+      'noCommits' => '',
+      'size' => '',
+      'noForks' => '',
+      'noStars' => ''
     ];
+  }
+
+
+  public function insertBranch(string $idServer, string $idProject, string $branch, string $fromBranch): array
+  {
+    return [];
   }
 
 
@@ -168,5 +211,48 @@ class Svn implements Server
   {
     return false;
   }
+
+
+  public function insertProjectUser(string $idServer, string $idProject, int $idUser, int $idRole): array
+  {
+    return [];
+  }
+
+
+  public function removeProjectUser(string $idServer, string $idProject, int $idUser): bool
+  {
+    return false;
+  }
+
+
+  public function getUsers(string $idServer): array
+  {
+    return [];
+  }
+
+
+  public function getProjectIssues(string $idServer, string $idProject): array
+  {
+    return [];
+  }
+
+
+  public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    return null;
+  }
+
+
+  public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    return null;
+  }
+
+
+  public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
+  {
+    return null;
+  }
+
 
 }

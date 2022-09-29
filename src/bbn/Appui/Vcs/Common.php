@@ -66,12 +66,12 @@ trait Common {
       $ut = $this->getUserAccessToken($server['id']);
     }
     catch(\Exception $e) {
-      $ut = false;
+      $ut = '';
     }
     return (object)[
       'id' => $server['id'],
       'name' => $server['text'],
-      'host' => $server['code'],
+      'host' => 'https://' . $server['code'],
       'type' => $server['type'],
       'userAccessToken' => $ut,
       'hasAdminAccessToken' => $this->hasAdminAccessToken($server['id']),
@@ -82,6 +82,9 @@ trait Common {
 
   private function checkServerHost(string $host)
   {
+    if (!str_starts_with($host, 'http')) {
+      $host = 'https://' . $host;
+    }
     if (!Str::isUrl($host)) {
       throw new \Exception(X::_('No valid host URL: %s', $host));
     }
