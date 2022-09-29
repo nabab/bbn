@@ -455,7 +455,7 @@ class Email extends Basic
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       $mb->selectFolder($folder['uid']);
-      if ($folder['last_uid'] !== $folder['db_uid']) {
+      if (empty($folder['last_uid']) || ($folder['last_uid'] !== $folder['db_uid'])) {
         X::log("has last UID");
         if (!empty($folder['db_uid'])) {
           try {
