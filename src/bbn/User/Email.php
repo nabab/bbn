@@ -451,10 +451,12 @@ class Email extends Basic
   public function syncEmails(array $folder, int $limit = 0): ?int
   {
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
+      X::log("has props");
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       $mb->selectFolder($folder['uid']);
       if ($folder['last_uid'] && (($folder['last_uid'] !== $folder['db_uid']))) {
+        X::log("has last UID");
         if (!empty($folder['db_uid'])) {
           try {
             $start = $mb->getMsgNo($folder['db_uid']);
@@ -489,6 +491,7 @@ class Email extends Basic
         $end      = $start;
         $num      = $real_end - $start;
         //var_dump($folder, $num, $real_end);
+        X::log(["END", $end, $real_end]);
         while ($end <= $real_end) {
           $end = min($real_end, $start + 999);
           if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {
@@ -523,6 +526,7 @@ class Email extends Basic
       }
 
       $info = $mb->getInfoFolder($folder['uid']);
+      X::log(["Info", $info]);
       if ($info->Nmsgs > ($res + $folder['num_msg'])) {
         $cfg   = $this->class_cfg['arch']['users_emails'];
         $table = $this->class_cfg['tables']['users_emails'];
