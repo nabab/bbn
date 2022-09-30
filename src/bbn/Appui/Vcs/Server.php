@@ -71,6 +71,8 @@ interface Server {
 
   function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array;
 
+  function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array;
+
   function getUsers(string $idServer): array;
 
 }

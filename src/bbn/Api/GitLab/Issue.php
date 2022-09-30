@@ -68,7 +68,11 @@ trait Issue
    */
   public function getIssues($project): array
   {
-    return $this->request($this->projectURL . $project . '/' . $this->issueURL, ['scope' => 'all']);
+    return $this->request($this->projectURL . $project . '/' . $this->issueURL, [
+      'scope' => 'all',
+      'page' => 0,
+      'per_page' => 5000
+    ]);
   }
 
 
@@ -97,19 +101,6 @@ trait Issue
       'scope' => 'all',
       'state' => 'opened'
     ]);
-  }
-
-
-  /**
-   * Gets the notes list of a specific issue of the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
-   * @param string $sort The sorting direction 'asc' or 'desc'
-   * @return array
-   */
-  public function getIssueNotes($project, int $issue, string $sort = 'asc'): array
-  {
-    return $this->request($this->projectURL . $project . '/' . $this->issueURL . $issue . '/' . $this->noteURL, ['sort' => $sort]);
   }
 
 

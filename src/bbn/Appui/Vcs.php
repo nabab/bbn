@@ -350,6 +350,15 @@ class Vcs
   }
 
 
+  public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->getProjectIssueComments($idServer, $idProject, $idIssue);
+    }
+    return [];
+  }
+
+
   private function getServerInstance(string $id)
   {
     if ($server = $this->getServer($id)) {

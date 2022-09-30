@@ -420,7 +420,7 @@ class GitLab implements Server
       'updated' => $issue->updated_at ?: $issue->created_at,
       'closed' => $issue->closed_at,
       'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser((object)$issue->closed_by) : [],
-      'assigned' => !empty($issue->assignee) ? $this->normalizeUser((object)$issue->assignee) : [],
+      'assigned' => !empty($issue->assignees) ? $this->normalizeUser((object)$issue->assignees[0]) : [],
       'private' => $issue->confidential,
       'labels' => $issue->labels,
       'state' => $issue->state,
@@ -487,7 +487,7 @@ class GitLab implements Server
   /**
    * @param string $idServer
    * @param string $idProject
-   * @return bool
+   * @return array
    */
   public function getProjectIssues(string $idServer, string $idProject): array
   {
@@ -541,6 +541,18 @@ class GitLab implements Server
       return $this->normalizeIssue((object)$issue);
     }
     return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @return array
+   */
+  public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
+  {
+    return $this->getConnection($idServer)->getIssueNotes($idProject, $idIssue);
   }
 
 
