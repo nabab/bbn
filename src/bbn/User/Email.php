@@ -342,18 +342,12 @@ class Email extends Basic
           && ($res = $folders[$folder['uid']])
           && ($info = $mb->getInfoFolder($folder['uid']))
       ) {
-        if (!array_key_exists('db_uid', $res)) {
-          $res['db_uid'] = null;
-        }
-
-        X::log(["----------------", $folder, $info, $res]);
-        if (($res['num_msg'] && !$folder['last_uid']) || ($folder['last_uid'] !== $res['db_uid']) || ($res['num_msg'] !== $info->Nmsgs)) {
+        if (($folder['last_uid'] !== $res['db_uid']) || ($res['num_msg'] !== $info->Nmsgs)) {
           $id_account = $folder['id_account'];
           unset($folder['id_account']);
           $res = array_merge($folder, $res);
           $this->pref->updateBit($folder['id'], $res, true);
           $res['id_account'] = $id_account;
-          X::log(["----------------222", $res]);
           $this->getAccount($id_account, true);
           if ($sync) {
             $this->syncEmails($res);
@@ -457,13 +451,10 @@ class Email extends Basic
   public function syncEmails(array $folder, int $limit = 0): ?int
   {
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
-      X::log("has props");
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
-      X::log($folder);
       $mb->selectFolder($folder['uid']);
-      if (empty($folder['last_uid']) || ($folder['last_uid'] !== $folder['db_uid'])) {
-        X::log("has last UID");
+      if ($folder['last_uid'] && (($folder['last_uid'] !== $folder['db_uid']))) {
         if (!empty($folder['db_uid'])) {
           try {
             $start = $mb->getMsgNo($folder['db_uid']);
@@ -498,7 +489,6 @@ class Email extends Basic
         $end      = $start;
         $num      = $real_end - $start;
         //var_dump($folder, $num, $real_end);
-        X::log(["END", $end, $real_end]);
         while ($end <= $real_end) {
           $end = min($real_end, $start + 999);
           if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {
@@ -533,7 +523,6 @@ class Email extends Basic
       }
 
       $info = $mb->getInfoFolder($folder['uid']);
-      X::log(["Info", $info]);
       if ($info->Nmsgs > ($res + $folder['num_msg'])) {
         $cfg   = $this->class_cfg['arch']['users_emails'];
         $table = $this->class_cfg['tables']['users_emails'];
