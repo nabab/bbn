@@ -342,7 +342,11 @@ class Email extends Basic
           && ($res = $folders[$folder['uid']])
           && ($info = $mb->getInfoFolder($folder['uid']))
       ) {
-        if (($folder['last_uid'] !== $res['db_uid']) || ($res['num_msg'] !== $info->Nmsgs)) {
+        if (!array_key_exists('db_uid', $res)) {
+          $res['db_uid'] = null;
+        }
+
+        if (($res['num_msg'] && !$folder['last_uid']) || ($folder['last_uid'] !== $res['db_uid']) || ($res['num_msg'] !== $info->Nmsgs)) {
           $id_account = $folder['id_account'];
           unset($folder['id_account']);
           $res = array_merge($folder, $res);
@@ -454,6 +458,7 @@ class Email extends Basic
       X::log("has props");
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
+      X::log($folder);
       $mb->selectFolder($folder['uid']);
       if (empty($folder['last_uid']) || ($folder['last_uid'] !== $folder['db_uid'])) {
         X::log("has last UID");
