@@ -346,14 +346,12 @@ class Email extends Basic
           $res['db_uid'] = null;
         }
 
-        X::log(["----------------", $folder, $info, $res]);
         if (($res['num_msg'] && !$folder['last_uid']) || ($folder['last_uid'] !== $res['db_uid']) || ($res['num_msg'] !== $info->Nmsgs)) {
           $id_account = $folder['id_account'];
           unset($folder['id_account']);
           $res = array_merge($folder, $res);
           $this->pref->updateBit($folder['id'], $res, true);
           $res['id_account'] = $id_account;
-          X::log(["----------------222", $res]);
           $this->getAccount($id_account, true);
           if ($sync) {
             $this->syncEmails($res);
