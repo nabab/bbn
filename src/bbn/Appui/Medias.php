@@ -519,6 +519,7 @@ class Medias extends bbn\Models\Cls\Db
           $path.$id
         );
         $new_file = $path.$id.'/'.X::basename($file);
+        chmod($new_file, 0644);
         if (strpos($mime, 'image/') === 0) {
           $image = new Image($new_file, $this->fs);
           $image->thumbs($path.$id, $this->thumbs_sizes);

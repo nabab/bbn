@@ -552,7 +552,30 @@ class GitLab implements Server
    */
   public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
   {
-    return $this->getConnection($idServer)->getIssueNotes($idProject, $idIssue);
+    return \array_map(
+      [$this, 'normalizeIssueComment'],
+      $this->getConnection($idServer)->getIssueNotes($idProject, $idIssue)
+    );
+  }
+
+
+  /**
+   * @param object $issue
+   * @return array
+   */
+  public function normalizeIssueComment(object $comment): array
+  {
+    return [
+      'id' => $comment->id,
+      'author' => $this->normalizeUser((object)$comment->author),
+      'created' => $comment->created_at,
+      'updated' => $comment->updated_at ?: $comment->created_at,
+      'content' => $comment->body,
+      'auto' => $comment->system,
+      'private' => $comment->confidential,
+      'attachment' => $comment->attachment,
+      'originalComment' => $comment
+    ];
   }
 
 
