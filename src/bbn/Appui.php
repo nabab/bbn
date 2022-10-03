@@ -2329,15 +2329,6 @@ class Appui
         $installer->report('Impossible retrieving the app ID', false, true);
       }
 
-      // Contacting the server to give the id_project, id_client, id_user and the public key
-      // Using JWT and JWE
-      if ($this->register()) {
-        $installer->report("Registering the app with ID {$id_app}...");
-      }
-      else {
-        $installer->report('Impossible retrieving the app ID', false, true);
-      }
-
       // Add Main menu
       $installer->report('Creating menus...');
       $this->updateMenus();
@@ -2363,6 +2354,16 @@ class Appui
 
       $cache->deleteAll('');
       $installer->report('Default DB records created.', true);
+
+      // Contacting the server to give the id_project, id_client, id_user and the public key
+      // Using JWT and JWE
+      if ($this->register()) {
+        $installer->report("Registering the app with ID {$id_app}...");
+      }
+      else {
+        $installer->report('Impossible retrieving the app ID', false, true);
+      }
+
     }
 
     return true;
