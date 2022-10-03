@@ -1704,6 +1704,18 @@ class Controller implements Api
 
 
   /**
+   * Returns true if the given property's name exists in the inc property object and is an object itself.
+   *
+   * @param string $name
+   * @return boolean
+   */
+  public function hasInc(string $name): bool
+  {
+    return isset($this->inc->$name) && is_object($this->inc->$name);
+  }
+
+
+  /**
    * @param int $num
    * @return bool
    */

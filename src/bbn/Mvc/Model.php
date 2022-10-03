@@ -404,22 +404,34 @@ class Model extends DbClass
 
 
   /**
-     * Checks if data exists or if a specific index exists in the data
-     *
-     * @return bool
-     */
-    public function hasData($idx = null, $check_empty = false): bool
-    {
-      if (!\is_array($this->data)) {
-        return false;
-      }
+   * Returns true if the given property's name exists in the inc property object and is an object itself.
+   *
+   * @param string $name
+   * @return boolean
+   */
+  public function hasInc(string $name): bool
+  {
+    return isset($this->inc->$name) && is_object($this->inc->$name);
+  }
 
-      if (\is_null($idx)) {
-        return !empty($this->data);
-      }
 
-      return X::hasProps($this->data, (array)$idx, $check_empty);
+  /**
+   * Checks if data exists or if a specific index exists in the data
+   *
+   * @return bool
+   */
+  public function hasData($idx = null, $check_empty = false): bool
+  {
+    if (!\is_array($this->data)) {
+      return false;
     }
+
+    if (\is_null($idx)) {
+      return !empty($this->data);
+    }
+
+    return X::hasProps($this->data, (array)$idx, $check_empty);
+  }
 
 
   /**

@@ -28,6 +28,8 @@ class Appui
   protected static $vars = [
     "env",
     "is_ssl",
+    "lang",
+    "theme",
     "admin_email",
     "db_engine",
     "db_host",
@@ -42,6 +44,8 @@ class Appui
     "lib_path",
     "data_path",
     "log_path",
+    "shared_path",
+    "static_path",
     "user",
     "preferences",
     "permissions",
@@ -54,6 +58,7 @@ class Appui
     "site_title",
     "client_name"
   ];
+
 
   /** @var bool  */
   private $_checked = null;
@@ -124,6 +129,9 @@ class Appui
   /** @var array */
   private $_info;
 
+  /** @var int */
+  private $_version;
+
 
   /**
    * Constructor
@@ -191,7 +199,34 @@ class Appui
     $this->_permissionFilesContent = null;
     $this->_menuFilesContent       = null;
     $this->_info                   = null;
+    $this->_version                = null;
   }
+
+
+  /**
+   * Returns the version number of the app.
+   * It is based on the file data/version.txt, and it will initialize one if if does not exist
+   *
+   * @param boolean $force
+   * @return integer
+   */
+  public function getVersion(bool $force = false): int
+  {
+    if ($force || !$this->_version) {
+      $vfile = $this->dataPath() . 'version.txt';
+      if (!is_file($vfile)) {
+        file_put_contents($vfile, '1');
+        $this->_version = 1;
+      }
+      else {
+        $this->_version = intval(file_get_contents($vfile));
+      }
+    }
+
+    return $this->_version;
+  }
+
+
 
 
   /**
@@ -274,6 +309,17 @@ class Appui
   public function dataPath(): ?string
   {
     return $this->_current['data_path'] ?? null;
+  }
+
+
+  /**
+   * Returns the public adress + path to the CDN
+   *
+   * @return string|null
+   */
+  public function staticPath(): ?string
+  {
+    return $this->_current['static_path'] ?? null;
   }
 
 
@@ -376,7 +422,7 @@ class Appui
           return;
         }
 
-        throw new Exception("Impossible to fiond the admin user");
+        //throw new Exception("Impossible to fiond the admin user");
       }
 
 
@@ -1513,7 +1559,7 @@ class Appui
             'id_client' => $id_client,
             'db' => BBN_DATABASE,
             'name' => BBN_APP_NAME,
-            'lang' => 'en',
+            'lang' => defined('BBN_LANG') ? BBN_LANG : 'en'
           ]
         )
     ) {
@@ -2368,5 +2414,362 @@ class Appui
     return true;
   }
 
+
+  public function getPlugins(): array
+  {
+    $routes = $this->getRoutes();
+    $plugins = [];
+    foreach ($routes['root'] as $url => $r) {
+      $plugins[$r['name']] = $url;
+    }
+
+    return $plugins;
+  }
+
+
+  public function getPublicVars(): array
+  {
+    $r = [
+      'logo_big' => $this->_current['logo_big'] ?? 'https://ressources.app-ui.com/logo_big.png',
+      'logo' => $this->_current['logo'] ?? 'https://ressources.app-ui.com/logo.png',
+      'static_path' => $this->_current['static_path'] ?? 'https://ressources.app-ui.com/',
+      'noscript' => '',
+      'token' => '',
+      'is_dev' => 0,
+      'url' => $this->_current['url'],
+      'site_title' => $this->_current['site_title'] ?? 'App-UI',
+      'is_prod' => $this->_current['env'] !== 'dev' ? 1 : 0,
+      'theme' => $this->_current['theme'] ?? 'default',
+      'custom_css' => '',
+      'version' => $this->getVersion()
+    ];
+
+    $others = ['lang', 'url', 'static_path', 'shared_path', 'app_prefix', 'app_name'];
+    foreach ($others as $o) {
+      $r[$o] = $this->_current[$o];
+    }
+
+    return $r;
+  }
+
+  public function getJsLibs(array $libs = []): array
+  {
+    if (empty($this->_jsLibs)) {
+      $this->_jsLibs = array_values($libs);
+      $this->_jsLibs[] = 'bbn-css|latest|' . ($r['theme'] ?? 'default');
+      $this->_jsLibs[] = 'bbn-vue';
+    }
+
+    return $this->_jsLibs;
+  }
+
+
+  public function getJsScript(string $path, string $lang = 'en', int $test = 0, array $libs = [], string $cdn_dirs = '', int $version = null): string
+  {
+    return $path . '?' . http_build_query([
+      'lang' => $lang,
+      'lib' => X::join($this->getJsLibs($libs), ','),
+      'test' => $test,
+      'dirs' => $cdn_dirs,
+      'v' => $version ?: $this->getVersion()
+    ]);
+  }
+
+
+  /**
+   * Generates the whole HTML document
+   *
+   * @param array $cfg
+   * @return string
+   */
+  public function createUI(string $content = '', array $libs = []): string
+  {
+    $vars = $this->getPublicVars();
+    foreach ($vars as $key => $val) {
+      $$key = $val;
+    }
+
+    $user = $this->getUser();
+    $plugins = $this->getPlugins();
+    if ($user) {
+      $token = $user->addToken();
+      $is_dev = $user->isDev();
+      $t = $user->getSession('theme');
+      if ($t) {
+        $theme = $t;
+      }
+    }
+
+    $script_src = $this->getJsScript($shared_path, $lang, $is_dev, $libs, '', $version);
+    $all_rights_reserved = X::_("All rights reserved");
+    $the_application_has_been_updated = X::_("The application has been updated but you still use an old version.");
+    $you_need_to_refresh = X::_("You need to refresh the page to upgrade.");
+    $do_you_want_to_do_it_now = X::_("Do you want to do it now?");
+    $service_worker_registration_failed = X::_("Service worker registration failed, error");
+
+$template = <<<HTML
+<!DOCTYPE html>
+<html class="no-js" lang="$lang">
+<head>
+<base href="$url" target="_self">
+
+<meta charset="utf-8">
+<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="author" content="BBN Solutions">
+<meta name="Copyright" content="$all_rights_reserved">
+<!--meta http-equiv="expires" content="Fri, 22 Jul 2002 11:12:01 GMT"-->
+<!--meta http-equiv="Cache-control" content="private"-->
+<!--meta http-equiv="Cache-control" content="no-store"-->
+<link rel="apple-touch-icon" sizes="57x57" href="{$static_path}img/favicon/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="{$static_path}img/favicon/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="{$static_path}img/favicon/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="{$static_path}img/favicon/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="{$static_path}img/favicon/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="{$static_path}img/favicon/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="{$static_path}img/favicon/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="{$static_path}img/favicon/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{$static_path}img/favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="{$static_path}img/favicon/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="{$static_path}img/favicon/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="{$static_path}img/favicon/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="manifest.json">
+<link rel="mask-icon" href="{$static_path}img/favicon/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#9f00a7">
+<meta name="msapplication-TileImage" content="{$static_path}img/favicon/mstile-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, User-scalable=yes">
+<title>$site_title</title>
+<style>$custom_css</style>
+<script>
+(() => {
+  /** @var {String} errorMsg An error message to display */
+  let errorMsg;
+
+  /** @var {Boolean} isDev True if dev environment */
+  const isDev = $is_dev;
+
+  /** @var {Boolean} hasServiceWorker True if Service Worker available */
+  const hasServiceWorker = !!('serviceWorker' in navigator);
+
+  /** @var {String} scriptSrc The script source */
+  const scriptSrc = `$script_src`;
+
+  /** @var {Boolean} hasBeenAsked True if it already has been asked to reload because the version is new */
+  let hasBeenAsked = false;
+
+  /** @var {Boolean} loaded True after init */
+  let loaded = false;
+
+  /** @var {Boolean} DOMLoaded True after DOMContentLoad event */
+  let DOMLoaded = false;
+
+  /** @var {Boolean} isReloading True wgen is reloading */
+  let isReloading = false;
+
+  /** @var {Function} onDomLoaded Loading the libraries through service worker or Ajax */
+  let onDomLoaded = () => {
+    if (loaded) {
+      console.log("THE SCRIPT IS ALREADY LOADED!");
+      return;
+    }
+
+    if (!DOMLoaded) {
+      console.log("THE DOM IS NOT LOADED!");
+      return;
+    }
+
+    // Adding
+    let script = document.createElement("script");
+    script.type = "text/javascript";
+    script.id = "bbn_script";
+    script.src = scriptSrc;
+
+    // All will be initiated when the libraries are loaded
+    script.onload = function() {
+      loaded = true;
+      console.log("LIBRARIES LOADED");
+      // Check that bbn is defined
+      if ('bbn' in window) {
+        console.log("BBN OK");
+        // Init phase through service worker
+        if (hasServiceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.addEventListener('message', function(event) {
+            if (event.data && event.data.type) {
+              let d = event.data;
+              let data = d.data || null;
+              if ( d.type === 'init' ){
+                bbn.fn.post('{$plugins['appui-core']}/index', {get: 1, js: 1}, r => {
+                  if (r.success) {
+                    init(r);
+                  }
+                });
+              }
+              else if ('appui' in window) {
+                let v = window.localStorage.getItem('bbn-vue-version');
+                appui.receive(d);
+              }
+            }
+          });
+          // 
+          bbn.fn.post('{$plugins['appui-core']}/index', {get: 1}, d => {
+            navigator.serviceWorker.controller.postMessage({type: "init", token: "$token", data: d});
+          });
+        }
+        // Through Ajax
+        else {
+          bbn.fn.post('{$plugins['appui-core']}/index', {get: 1}, init);
+        }
+      }
+      // If bbn is not defined we reload the window
+      else {
+        console.log("SCRI{PT PAS OK");
+        let attempts = window.localStorage.getItem('bbn-load') || 0;
+        // and avoid to do it more than 3 times
+        if ( attempts < 3 ){
+          window.localStorage.setItem('bbn-load', ++attempts);
+          alert("RELOADING??");
+          location.reload();
+        }
+      }
+    };
+    script.onerror = function(){
+      console.log("Impossible to load the libraries script");
+    };
+    document.getElementsByTagName("head")[0].appendChild(script);
+  };
+
+  let init = (d) => {
+    bbn.fn.log("INIT", d);
+    //document.getElementById('nojs_bbn').remove();
+    //document.querySelectorAll('.appui')[0].style.display = 'block';
+    if ( d.data && d.data.version ){
+      console.log("DATA OK");
+      bbn.vue.version = d.data.version;
+      let userOnStorage = window.localStorage.getItem('bbn-user-id');
+      if (d.data.app
+        && d.data.app.user
+        && d.data.app.user.id
+        && (userOnStorage !== d.data.app.user.id)
+      ){
+        window.localStorage.clear();
+        window.localStorage.setItem('bbn-user-id', d.data.app.user.id);
+      }
+      window.localStorage.setItem('bbn-vue-version', bbn.vue.version);
+      bbn.version = d.data.version;
+    }
+
+    let res = {};
+    if (d.script) {
+      res = eval(d.script);
+    }
+    else if (d.data && d.data.script) {
+      res = eval(d.data.script);
+    }
+
+    if (bbn.fn.isFunction(res)) {
+      res(d.data || {});
+      bbn.env.token = "$token";
+    }
+  };
+
+  // Only if service worker is enabled and not already registered
+  if (hasServiceWorker) {
+    console.log("SERVICE WORKER OK");
+    document.addEventListener('DOMContentLoaded', () => {
+      DOMLoaded = true;
+      console.log("DOM LOADED");
+    });
+
+    // Registration of the service worker
+    navigator.serviceWorker.register('/sw', {scope: '/'})
+    .then((registration) => {
+      window.bbnSW = registration;
+      registration.onupdatefound = () => {
+        const installingWorker = registration.installing;
+        //console.log("SW: STATE CHANGING " + installingWorker.state);
+        installingWorker.onstatechange = () => {
+          if (!hasBeenAsked
+            && !isReloading
+            && ['activated', 'installed'].includes(installingWorker.state)
+          ) {
+            if (('appui' in window)) {
+              hasBeenAsked = true;
+              if (confirm(`$the_application_has_been_updated
+$you_need_to_refresh
+$do_you_want_to_do_it_now`
+              )) {
+                isReloading = true;
+                location.reload();
+              }
+            }
+            else if ((installingWorker.state === 'activated') && !loaded) {
+              if (!DOMLoaded) {
+                document.addEventListener('DOMContentLoaded', onDomLoaded)
+              }
+              else {
+                onDomLoaded();
+              }
+            }
+          }
+          else if ('appui' in window) {
+            let v = window.localStorage.getItem('bbn-vue-version');
+            console.log(`{_("POLLING FROM SERVICE WORKER VERSION") ` + v);
+            appui.poll();
+          }
+        };
+      };
+      if (navigator.serviceWorker.controller && !loaded && DOMLoaded) {
+        onDomLoaded();
+      }
+    })
+    .catch((error) => {
+      console.log(`$service_worker_registration_failed`, error);
+    });
+  }
+  else {
+    // Adding the function onDOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      DOMLoaded = true;
+      onDomLoaded();
+    });
+  }
+
+})();
+</script>
+</head>
+<body>
+<div id="nojs_bbn"
+     style="background: #fff url($logo_big) no-repeat center; position: absolute; width: 100%; height: 100%; top: 0; left: 0">
+  <div id="error_message"></dv>
+</div>
+<div class="appui">
+  <bbn-appui :options="options"
+             :menus="menus"
+             :current-menu="currentMenu"
+             :shortcuts="shortcuts"
+             :plugins="plugins"
+             def="home"
+             @setimessage="setImessage"
+             :source="list"
+             :splittable="true"
+             :search-bar="searchBar"
+             :header="true"
+             :nav="true"
+             :clipboard="true"
+             :status="true"
+             :search-bar="false"
+             :browser-notification="true">
+  </bbn-appui>
+</div>
+<noscript>
+  $noscript
+</noscript>
+</body>
+</html>
+HTML;
+
+    return $template;
+  }
 
 }
