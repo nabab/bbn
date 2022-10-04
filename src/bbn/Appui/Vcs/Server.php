@@ -73,6 +73,12 @@ interface Server {
 
   function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array;
 
+  function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;
+
+  function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;
+
+  function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool;
+
   function getUsers(string $idServer): array;
 
 }

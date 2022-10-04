@@ -260,4 +260,22 @@ class Svn implements Server
     return [];
   }
 
+
+  public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
+  {
+    return [];
+  }
+
+
+  public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
+  {
+    return [];
+  }
+
+
+  public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
+  {
+    return false;
+  }
+
 }

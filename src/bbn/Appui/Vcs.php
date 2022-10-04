@@ -359,6 +359,33 @@ class Vcs
   }
 
 
+  public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->insertProjectIssueComment($idServer, $idProject, $idIssue, $content, $pvt, $date);
+    }
+    return [];
+  }
+
+
+  public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->editProjectIssueComment($idServer, $idProject, $idIssue, $idComment, $content, $pvt);
+    }
+    return [];
+  }
+
+
+  public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->deleteProjectIssueComment($idServer, $idProject, $idIssue, $idComment);
+    }
+    return [];
+  }
+
+
   private function getServerInstance(string $id)
   {
     if ($server = $this->getServer($id)) {

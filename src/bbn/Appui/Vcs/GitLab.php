@@ -572,10 +572,59 @@ class GitLab implements Server
       'updated' => $comment->updated_at ?: $comment->created_at,
       'content' => $comment->body,
       'auto' => $comment->system,
-      'private' => $comment->confidential,
+      'private' => $comment->internal,
       'attachment' => $comment->attachment,
       'originalComment' => $comment
     ];
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param string $content
+   * @param bool $pvt
+   * @param string $date
+   * @return null|array
+   */
+  public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
+  {
+    if ($comment = $this->getConnection($idServer)->createIssueNote($idProject, $idIssue, $content, $pvt, $date)) {
+      return $this->normalizeIssueComment((object)$comment);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param int $idComment
+   * @param string $content
+   * @param bool $pvt
+   * @return null|array
+   */
+  public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
+  {
+    if ($comment = $this->getConnection($idServer)->editIssueNote($idProject, $idIssue, $idComment, $content, $pvt)) {
+      return $this->normalizeIssueComment((object)$comment);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param int $idComment
+   * @return bool
+   */
+  public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
+  {
+    return $this->getConnection($idServer)->deleteIssueNote($idProject, $idIssue, $idComment);
   }
 
 
