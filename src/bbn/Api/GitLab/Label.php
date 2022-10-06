@@ -12,7 +12,9 @@ trait Label
   public function getProjectLabels($project): array
   {
     return $this->request($this->projectURL . $project . '/' . $this->labelURL, [
-      'with_counts' => true
+      'with_counts' => true,
+      'page' => 0,
+      'per_page' => 5000
     ]);
   }
 

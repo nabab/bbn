@@ -63,7 +63,7 @@ trait Project
   {
     $params = [];
     if ($includeStats) {
-      $params['statistics'] = true;
+      $params['statistics'] = 'true';
     }
     return $this->request($this->projectURL . $project, $params);
   }

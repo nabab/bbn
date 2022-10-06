@@ -65,6 +65,28 @@ interface Server {
 
   function getProjectIssues(string $idServer, string $idProject): array;
 
+  function createProjectIssue(
+    string $idServer,
+    string $idProject,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false,
+    string $date = ''
+  ): ?array;
+
+  public function editProjectIssue(
+    string $idServer,
+    string $idProject,
+    int $idIssue,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false
+  ): ?array;
+
   function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
 
   function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
@@ -78,6 +100,10 @@ interface Server {
   function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;
 
   function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool;
+
+  function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
+
+  function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
 
   function getUsers(string $idServer): array;
 

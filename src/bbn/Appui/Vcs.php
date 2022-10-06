@@ -314,6 +314,41 @@ class Vcs
   }
 
 
+  public function createProjectIssue(
+    string $idServer,
+    string $idProject,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false,
+    string $date = ''
+  ): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->createProjectIssue($idServer, $idProject, $title, $description, $labels, $assigned, $private, $date);
+    }
+    return [];
+  }
+
+
+  public function editProjectIssue(
+    string $idServer,
+    string $idProject,
+    int $idIssue,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false
+  ): ?array
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->editProjectIssue($idServer, $idProject, $idIssue, $title, $description, $labels, $assigned, $private);
+    }
+    return [];
+  }
+
   public function getProjectIssues(string $idServer, string $idProject): array
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
@@ -381,6 +416,24 @@ class Vcs
   {
     if ($serverCls = $this->getServerInstance($idServer)) {
       return $serverCls->deleteProjectIssueComment($idServer, $idProject, $idIssue, $idComment);
+    }
+    return [];
+  }
+
+
+  public function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->addLabelToProjectIssue($idServer, $idProject, $idIssue, $label);
+    }
+    return [];
+  }
+
+
+  public function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  {
+    if ($serverCls = $this->getServerInstance($idServer)) {
+      return $serverCls->removeLabelFromProjectIssue($idServer, $idProject, $idIssue, $label);
     }
     return [];
   }

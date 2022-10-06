@@ -57,7 +57,7 @@ trait Note
   {
     $params = [
       'body' => \urlencode($content),
-      'internal' => $internal
+      'internal' => empty($internal) ? 'false' : 'true'
     ];
     if (!empty($date)) {
       $params['created_at'] = \date('c', \strtotime($date));
@@ -83,7 +83,7 @@ trait Note
   {
     $params = [
       'body' => \urlencode($content),
-      //'internal' => $internal
+      //'internal' => empty($internal) ? 'false' : 'true'
     ];
     if (($iss = $this->getIssue($issue))
       && !empty($iss['iid'])

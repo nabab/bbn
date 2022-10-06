@@ -136,6 +136,7 @@ class GitLab
       $this->lastRequest .= '&' . $k . '=' . $v;
     }
     //die(var_dump($this->lastRequest));
+    //X::log($this->lastRequest, 'mirkocurl');
     $options = [];
     switch ($mode) {
       case 'post':
