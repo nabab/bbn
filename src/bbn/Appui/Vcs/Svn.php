@@ -236,6 +236,11 @@ class Svn implements Server
     return [];
   }
 
+  public function getProjectIssue(string $idServer, string $idProject, int $idIssue): array
+  {
+    return [];
+  }
+
   public function createProjectIssue(
     string $idServer,
     string $idProject,
@@ -305,6 +310,12 @@ class Svn implements Server
   public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
   {
     return false;
+  }
+
+
+  public function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array
+  {
+    return null;
   }
 
 

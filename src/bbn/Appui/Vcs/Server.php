@@ -65,6 +65,8 @@ interface Server {
 
   function getProjectIssues(string $idServer, string $idProject): array;
 
+  function getProjectIssue(string $idServer, string $idProject, int $idIssue): array;
+
   function createProjectIssue(
     string $idServer,
     string $idProject,
@@ -100,6 +102,8 @@ interface Server {
   function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;
 
   function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool;
+
+  function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array;
 
   function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
 

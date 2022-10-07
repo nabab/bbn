@@ -501,6 +501,17 @@ class GitLab implements Server
   /**
    * @param string $idServer
    * @param string $idProject
+   * @return array
+   */
+  public function getProjectIssue(string $idServer, string $idProject, int $idIssue): array
+  {
+    return $this->normalizeIssue((object)$this->getConnection($idServer, true)->getIssue($idProject, $idIssue));
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
    * @param string $title
    * @param string $description
    * @param array $labels
@@ -688,6 +699,22 @@ class GitLab implements Server
   /**
    * @param string $idServer
    * @param string $idProject
+   * @param string $name
+   * @param string $color
+   * @return null|array
+  */
+  public function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array
+  {
+    if ($label = $this->getConnection($idServer)->createProjectLabel($idProject, $name, $color)) {
+      return $this->normalizeLabel((object)$label);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
    * @param int $idIssue
    * @param string $label
    * @return bool
@@ -703,6 +730,7 @@ class GitLab implements Server
    * @param string $idProject
    * @param int $idIssue
    * @param string $label
+   * @return bool
    */
   public function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
   {

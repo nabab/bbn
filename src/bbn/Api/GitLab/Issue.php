@@ -126,9 +126,9 @@ trait Issue
   ): ?array
   {
     $params = [
-      'title' => \urlencode($title),
-      'description' => \urlencode($description),
-      'labels' => \urlencode(\implode(',', $labels))
+      'title' => $title,
+      'description' => $description,
+      'labels' => \implode(',', $labels)
     ];
     if (!empty($private)) {
       $params['confidential'] = 'true';
@@ -168,13 +168,12 @@ trait Issue
   ): ?array
   {
     $params = [
-      'title' => \urlencode($title),
-      'description' => \urlencode($description),
-      'labels' => \urlencode(\implode(',', $labels)),
+      'title' => $title,
+      'description' => $description,
+      'labels' => \implode(',', $labels),
       'confidential' => empty($private) ? 'false' : 'true',
       'assignee_ids' => $assigned
     ];
-    \bbn\X::log($params, 'mirkocurl');
     if (($i = $this->getIssue($issue))
       && !empty($i['iid'])
     ) {
@@ -239,46 +238,6 @@ trait Issue
       ]);
     }
     return null;
-  }
-
-
-  /**
-   * Add an issue label to the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
-   * @param string $label The label name
-   * @return bool
-   */
-  public function addLabelToProjectIssue($project, int $issue, string $label): bool
-  {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return !!$this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'add_labels' => \urlencode($label)
-      ]);
-    }
-    return false;
-  }
-
-
-  /**
-   * Remove an issue label from the given project
-   * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
-   * @param string $label The label name
-   * @return bool
-   */
-  public function removeLabelFromProjectIssue($project, int $issue, string $label): bool
-  {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return !!$this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'remove_labels' => \urlencode($label)
-      ]);
-    }
-    return false;
   }
 
 

@@ -133,7 +133,7 @@ class GitLab
     // Set the lastRequest property
     $this->lastRequest = $this->host . $url . '?private_token=' . $this->token;
     foreach ($params as $k => $v) {
-      $this->lastRequest .= '&' . $k . '=' . $v;
+      $this->lastRequest .= '&' . $k . '=' . (\is_string($v) ? \urlencode($v) : $v);
     }
     //die(var_dump($this->lastRequest));
     //X::log($this->lastRequest, 'mirkocurl');

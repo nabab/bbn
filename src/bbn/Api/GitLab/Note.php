@@ -56,7 +56,7 @@ trait Note
   public function createIssueNote($project, int $issue, string $content, bool $internal = false, string $date = ''): ?array
   {
     $params = [
-      'body' => \urlencode($content),
+      'body' => $content,
       'internal' => empty($internal) ? 'false' : 'true'
     ];
     if (!empty($date)) {
@@ -82,7 +82,7 @@ trait Note
   public function editIssueNote($project, int $issue, int $note, string $content, bool $internal = false): ?array
   {
     $params = [
-      'body' => \urlencode($content),
+      'body' => $content,
       //'internal' => empty($internal) ? 'false' : 'true'
     ];
     if (($iss = $this->getIssue($issue))
