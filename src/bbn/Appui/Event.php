@@ -1,12 +1,22 @@
 <?php
 namespace bbn\Appui;
-use bbn;
+
+use Exception;
 use DateTime;
-class Event extends bbn\Models\Cls\Db
+use bbn\X;
+use bbn\Str;
+use bbn\Db;
+use bbn\User;
+use bbn\Date;
+use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Cls\Db as modelDb;
+use bbn\Appui\Option;
+class Event extends modelDb
 {
 
-  use bbn\Models\Tts\Dbconfig;
-  use bbn\Models\Tts\Optional;
+  use Dbconfig;
+  use Optional;
 
   /** @var array $default_class_cfg */
   protected static $default_class_cfg = [
@@ -65,9 +75,9 @@ class Event extends bbn\Models\Cls\Db
     ]
   ];
 
-  /** @var bbn\Appui\Option $opt */
+  /** @var Option $opt */
   private $opt;
-  /** @var bbn\User $user */
+  /** @var User $user */
   private $usr;
   /** @var string $id_opt */
   private $opt_id;
@@ -111,7 +121,7 @@ class Event extends bbn\Models\Cls\Db
       // Get the first day of the month
       $firstday = strtotime('first day of this month', $tstart);
       // Get the week number of the recurrence
-      $week = \bbn\Date::getMonthWeek(date('Y-m-d', $tstart));
+      $week = Date::getMonthWeek(date('Y-m-d', $tstart));
       //From the end
       if ( $monthweek < 0 ){
         // Get the day in the last week of the month
@@ -121,7 +131,7 @@ class Event extends bbn\Models\Cls\Db
           $lastwd = strtotime('-1 week', $lastwd);
         }
         // Get the corrected week number
-        $lwd = \bbn\Date::getMonthWeek(date('Y-m-d', strtotime('-' . abs($monthweek + 1) .' week', $lastwd)));
+        $lwd = Date::getMonthWeek(date('Y-m-d', strtotime('-' . abs($monthweek + 1) .' week', $lastwd)));
         return $lwd === $week;
       }
       // From the start
@@ -133,32 +143,32 @@ class Event extends bbn\Models\Cls\Db
           $firstwd = strtotime('+1 week', $firstwd);
         }
         // Get the corrected week number
-        $fwd = \bbn\Date::getMonthWeek(date('Y-m-d', strtotime('+' . ($monthweek - 1) .' week', $firstwd)));
+        $fwd = Date::getMonthWeek(date('Y-m-d', strtotime('+' . ($monthweek - 1) .' week', $firstwd)));
         return $fwd === $week;
       }
     });
   }
 
-  public function __construct(bbn\Db $db){
+  public function __construct(Db $db){
     parent::__construct($db);
     $this->_init_class_cfg();
-    $this->opt = bbn\Appui\Option::getInstance();
-    $this->usr = bbn\User::getInstance();
+    $this->opt = Option::getInstance();
+    $this->usr = User::getInstance();
     //$this->opt_id = $this->opt->fromRootCode('event', 'appui');
   }
 
   /**
    * @param array $event
    * @return string|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function insert(array $event): ?string
   {
     $f =& $this->fields;
-    if ( (bbn\X::hasProps($event, [$f['id_type']], true) ) && (array_key_exists($this->fields['start'], $event))){
+    if ( (X::hasProps($event, [$f['id_type']], true) ) && (array_key_exists($this->fields['start'], $event))){
       if ( 
         !empty($event[$f['cfg']]) &&
-        !\bbn\Str::isJson($event[$f['cfg']])
+        !Str::isJson($event[$f['cfg']])
       ){
         $event[$f['cfg']] = json_encode($event[$f['cfg']]);
       }
@@ -184,8 +194,8 @@ class Event extends bbn\Models\Cls\Db
           $f['id_parent'] => $event[$f['id_parent']] ?? null,
           $f['id_type'] => $event[$f['id_type']],
           $f['start'] => $event[$f['start']],
-          $f['end'] => $event[$f['end']] ?? null,
-          $f['name'] => $event[$f['name']] ?? null,
+          $f['end'] => empty($event[$f['end']]) ? null : $event[$f['end']],
+          $f['name'] => empty($event[$f['name']]) ? null : $event[$f['name']],
           $f['recurring'] => (int)$is_rec,
           $f['cfg'] => $event[$f['cfg']] ?? null
         ]) &&
@@ -198,10 +208,10 @@ class Event extends bbn\Models\Cls\Db
             $rf['interval'] => $event[$rf['interval']] ?? null,
             $rf['occurrences'] => $event[$rf['occurrences']] ?? null,
             $rf['until'] => $event[$rf['until']] ?? null,
-            $rf['wd'] => !empty($event[$rf['wd']]) ? (\bbn\Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : null,
-            $rf['mw'] => !empty($event[$rf['mw']]) ? (\bbn\Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : null,
-            $rf['md'] => !empty($event[$rf['md']]) ? (\bbn\Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : null,
-            $rf['ym'] => !empty($event[$rf['ym']]) ? (\bbn\Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : null
+            $rf['wd'] => !empty($event[$rf['wd']]) ? (Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : null,
+            $rf['mw'] => !empty($event[$rf['mw']]) ? (Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : null,
+            $rf['md'] => !empty($event[$rf['md']]) ? (Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : null,
+            $rf['ym'] => !empty($event[$rf['ym']]) ? (Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : null
           ]);
         }
         return $id; 
@@ -217,7 +227,7 @@ class Event extends bbn\Models\Cls\Db
    */
   public function edit(string $id, array $event): ?int
   {
-    if ( \bbn\Str::isUid($id) ){
+    if ( Str::isUid($id) ){
       $f =& $this->fields;
       $rf =& $this->class_cfg['arch']['recurring'];
       $ok = 0;
@@ -229,7 +239,7 @@ class Event extends bbn\Models\Cls\Db
       }
       if ( 
         !empty($event[$f['cfg']]) &&
-        !\bbn\Str::isJson($event[$f['cfg']])
+        !Str::isJson($event[$f['cfg']])
       ){
         $event[$f['cfg']] = json_encode($event[$f['cfg']]);
       }
@@ -251,10 +261,10 @@ class Event extends bbn\Models\Cls\Db
           $rf['interval'] => $event[$rf['interval']] ?? null,
           $rf['occurrences'] => $event[$rf['occurrences']] ?? null,
           $rf['until'] => $event[$rf['until']] ?? null,
-          $rf['wd'] => !empty($event[$rf['wd']]) ? (\bbn\Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : null,
-          $rf['mw'] => !empty($event[$rf['mw']]) ? (\bbn\Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : null,
-          $rf['md'] => !empty($event[$rf['md']]) ? (\bbn\Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : null,
-          $rf['ym'] => !empty($event[$rf['ym']]) ? (\bbn\Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : null
+          $rf['wd'] => !empty($event[$rf['wd']]) ? (Str::isJson($event[$rf['wd']]) ? $event[$rf['wd']] : json_encode($event[$rf['wd']])) : null,
+          $rf['mw'] => !empty($event[$rf['mw']]) ? (Str::isJson($event[$rf['mw']]) ? $event[$rf['mw']] : json_encode($event[$rf['mw']])) : null,
+          $rf['md'] => !empty($event[$rf['md']]) ? (Str::isJson($event[$rf['md']]) ? $event[$rf['md']] : json_encode($event[$rf['md']])) : null,
+          $rf['ym'] => !empty($event[$rf['ym']]) ? (Str::isJson($event[$rf['ym']]) ? $event[$rf['ym']] : json_encode($event[$rf['ym']])) : null
         ]);
       }
       else if ( !empty($old_is_rec) ){
@@ -273,7 +283,7 @@ class Event extends bbn\Models\Cls\Db
    */
   public function delete(string $id): bool
   {
-    if ( \bbn\Str::isUid($id) ){
+    if ( Str::isUid($id) ){
       return (bool)$this->db->delete($this->class_table, [$this->fields['id'] => $id]);
     }
 
@@ -286,7 +296,7 @@ class Event extends bbn\Models\Cls\Db
    */
   public function get(string $id): ?array
   {
-    if ( \bbn\Str::isUid($id) ){
+    if ( Str::isUid($id) ){
       $t =& $this;
 
       return $this->db->rselect([
@@ -311,7 +321,89 @@ class Event extends bbn\Models\Cls\Db
 
     return null;
   }
+
+
+  private function getIds(string $mode = 'next', array $filter = [], string $from = null, int $num = 1): array
+  {
+    $timeFilter = [
+      'logic' => 'AND',
+      'conditions' => [
+        [
+          'field' => $this->fields['start'],
+          'operator' => $mode === 'next' ? '>' : '<',
+          'value' => Str::isDateSQL($from) ?: date('Y-m-d H:i:s')
+        ]
+      ]
+    ];
+    if (!empty($filter)) {
+      $tmp = $filter;
+      if (!isset($tmp['conditions'])) {
+        $tmp = [
+          'logic' => 'AND',
+          'conditions' => $tmp
+        ];
+      }
+      $filter = $timeFilter;
+      $timeFilter['conditions'][] = $tmp;
+    }
+    else {
+      $filter = $timeFilter;
+    }
+
+    $args = [
+      $this->class_table,
+      $this->fields['id'],
+      $filter,
+      [$this->fields['start'] => 'DESC'],
+      $num
+    ];
+    return $this->db->getColumnValues(...$args);
+  }
+
+
+  private function getOnes(string $mode = 'next', array $filter = [], string $from = null, int $num = 1): ?array
+  {
+    $ids = $this->getIds($mode, $filter, $from, $num);
+    if ($num === 1) {
+      if (!$ids) {
+        return null;
+      }
+
+      return $this->get($ids[0]);
+    }
+
+    $res = [];
+    foreach ($ids as $id) {
+      $res[] = $this->get($id);
+    }
+
+    return $res;
+  }
   
+  public function getLastIds(array $filter = [], string $from = null, int $num = 1): array
+  {
+    return $this->getIds('last', $filter, $from, $num);
+  }
+
+
+  public function getNextIds(array $filter = [], string $from = null, int $num = 1): array
+  {
+    return $this->getIds('next', $filter, $from, $num);
+  }
+
+
+  public function getLast(array $filter = [], string $from = null, int $num = 1): ?array
+  {
+    return $this->getOnes('last', $filter, $from, $num);
+  }
+  
+
+  public function getNext(array $filter = [], string $from = null, int $num = 1): ?array
+  {
+    return $this->getOnes('next', $filter, $from, $num);
+  }
+  
+
   /**
    * Gets an event with the recurring details.
    * @param string $id
@@ -319,7 +411,7 @@ class Event extends bbn\Models\Cls\Db
    */
   public function getFull(string $id): ?array
   {
-    if ( \bbn\Str::isUid($id) ){
+    if ( Str::isUid($id) ){
       $rt =& $this->class_cfg['tables']['recurring'];
       $rf =& $this->class_cfg['arch']['recurring'];
       $ot =& $this->class_cfg['tables']['options'];
@@ -455,7 +547,7 @@ class Event extends bbn\Models\Cls\Db
    */
   public function deleteRecurrences(string $id): bool
   {
-    if ( \bbn\Str::isUid($id) ){
+    if ( Str::isUid($id) ){
       $todelete = $this->db->count($this->class_cfg['tables']['recurring'], [$this->class_cfg['arch']['recurring']['id_event'] => $id]);
       return $this->db->delete($this->class_cfg['tables']['recurring'], [$this->class_cfg['arch']['recurring']['id_event'] => $id]) === $todelete;
     }
@@ -512,7 +604,7 @@ class Event extends bbn\Models\Cls\Db
     if ( \is_null($event[$rf['wd']]) ){
       $event[$rf['wd']] = [];
     }
-    else if (\bbn\Str::isJson($event[$rf['wd']]) ){
+    else if (Str::isJson($event[$rf['wd']]) ){
       $event[$rf['wd']] = json_decode($event[$rf['wd']], true);
     }
     if ( !empty($event[$rf['wd']]) ){
@@ -526,7 +618,7 @@ class Event extends bbn\Models\Cls\Db
     if ( \is_null($event[$rf['md']]) ){
       $event[$rf['md']] = [];
     }
-    else if (\bbn\Str::isJson($event[$rf['md']]) ){
+    else if (Str::isJson($event[$rf['md']]) ){
       $event[$rf['md']] = json_decode($event[$rf['md']], true);
     }
     if ( !empty($event[$rf['md']]) ){
@@ -536,7 +628,7 @@ class Event extends bbn\Models\Cls\Db
     if ( \is_null($event[$rf['ym']]) ){
       $event[$rf['ym']] = [];
     }
-    else if (\bbn\Str::isJson($event[$rf['ym']]) ){
+    else if (Str::isJson($event[$rf['ym']]) ){
       $event[$rf['ym']] = json_decode($event[$rf['ym']], true);
     }
     if ( !empty($event[$rf['ym']]) ){
@@ -546,7 +638,7 @@ class Event extends bbn\Models\Cls\Db
     if ( \is_null($event[$rf['mw']]) ){
       $event[$rf['mw']] = [];
     }
-    else if (\bbn\Str::isJson($event[$rf['mw']]) ){
+    else if (Str::isJson($event[$rf['mw']]) ){
       $event[$rf['mw']] = json_decode($event[$rf['mw']], true);
     }
     return $when;
@@ -573,7 +665,7 @@ class Event extends bbn\Models\Cls\Db
       ($ex = $this->getExceptions($recurrences[0][$rf['id_event']])) 
     ){
       return array_filter($recurrences, function($r) use($ex, $ef, $exf){
-        return \bbn\X::find($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === null;
+        return X::find($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === null;
       });    
     }
     return $recurrences;
@@ -588,10 +680,10 @@ class Event extends bbn\Models\Cls\Db
   public function setUntil(string $id, string $until = null): bool
   {
     if ( 
-      \bbn\Str::isUid($id) &&
+      Str::isUid($id) &&
       (
         \is_null($until) ||
-        \bbn\Str::isDateSql($until)
+        Str::isDateSql($until)
       )
     ){
       return (bool)$this->db->update($this->class_cfg['tables']['recurring'], [
@@ -621,7 +713,7 @@ class Event extends bbn\Models\Cls\Db
   public function addException(string $id_event, array $exc): bool
   {
     if ( 
-      \bbn\Str::isUid($id_event) &&
+      Str::isUid($id_event) &&
       ($ext =& $this->class_cfg['tables']['exceptions']) &&
       ($exf =& $this->class_cfg['arch']['exceptions']) &&
       $this->get($id_event) && 
@@ -639,8 +731,8 @@ class Event extends bbn\Models\Cls\Db
       $exc[$exf['day']] = date('Y-m-d', strtotime($exc[$exf['day']]));
       $exc[$exf['start']] = date('H:i:s', strtotime($exc[$exf['start']]));
       $exc[$exf['end']] = date('H:i:s', strtotime($exc[$exf['end']]));
-      $exc[$exf['id_user']] = !empty($exc[$exf['id_user']]) ? $exc[$exf['id_user']] : \bbn\User::getInstance()->getId();
-      $exc[$exf['creation']] = \bbn\Str::isDateSql($exc[$exf['creation']]) ?
+      $exc[$exf['id_user']] = !empty($exc[$exf['id_user']]) ? $exc[$exf['id_user']] : User::getInstance()->getId();
+      $exc[$exf['creation']] = Str::isDateSql($exc[$exf['creation']]) ?
         $exc[$exf['creation']] : date('Y-m-d H:i:s');
       return (bool)$this->db->insert($ext, $exc);
     }
@@ -656,8 +748,8 @@ class Event extends bbn\Models\Cls\Db
   public function copyExceptions(string $from_event, string $to_event): bool
   {
     if (
-      \bbn\Str::isUid($from_event) &&
-      \bbn\Str::isUid($to_event) &&
+      Str::isUid($from_event) &&
+      Str::isUid($to_event) &&
       ($table =& $this->class_cfg['tables']['exceptions']) &&
       ($fields =& $this->class_cfg['arch']['exceptions'])
     ){
@@ -682,7 +774,7 @@ class Event extends bbn\Models\Cls\Db
    */
   public function getExceptions(string $id): ?array
   {
-    if ( \bbn\Str::isUid($id) ){
+    if ( Str::isUid($id) ){
       return $this->db->rselectAll($this->class_cfg['tables']['exceptions'], [], [
         $this->class_cfg['arch']['exceptions']['id_event'] => $id
       ]);

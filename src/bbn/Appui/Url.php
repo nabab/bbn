@@ -108,7 +108,7 @@ class Url extends bbn\Models\Cls\Db
   public function getRedirectById(string $id): ?string
   {
     if ($redirect = $this->selectOne($this->fields['redirect'], $id)) {
-      if ($this->selectOne($this->fields['redirect'], [$this->fields['id'] => $redirect])) {
+      if ($this->selectOne($this->fields['redirect'], $redirect)) {
         throw new Exception(X::_("You can't redirect a redirected URL (ID %s)", $id));
       }
 

@@ -55,6 +55,8 @@ class System extends bbn\Models\Cls\Basic
    */
   private $current;
 
+  private $previous;
+
   protected $host;
 
   protected $timeout = 10;
@@ -300,9 +302,25 @@ class System extends bbn\Models\Cls\Basic
       }
 
       if (($p = $this->getRealPath($path)) && \is_dir($p)) {
+        $this->previous = $this->current;
         $this->current = $this->cleanPath($path);
         return true;
       }
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Undocumented function
+   *
+   * @return boolean
+   */
+  public function back(): bool
+  {
+    if ($this->previous) {
+      return $this->cd($this->previous);
     }
 
     return false;

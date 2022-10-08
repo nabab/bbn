@@ -43,10 +43,12 @@ trait HasError
    * Set an error and acts appropriately based oon the error mode
    *
    * @param $e
+   * @param bool $show_last
+   * @param bool $show_backtrace
    * @return void
    * @throws \Exception
    */
-  public function error($e): void
+  public function error($e, bool $show_last = true, bool $show_backtrace = true): void
   {
     $this->_has_error = true;
     self::_set_has_error_all();
@@ -65,41 +67,64 @@ trait HasError
     }
 
     $this->last_error = end($msg);
-    $msg[]            = self::getLogLine('QUERY');
-    $msg[]            = $this->last();
 
-    if (($last_real_params = $this->getRealLastParams()) && !empty($last_real_params['values'])) {
-      $msg[] = self::getLogLine('VALUES');
-      foreach ($last_real_params['values'] as $v){
-        if ($v === null) {
-          $msg[] = 'NULL';
-        }
-        elseif (\is_bool($v)) {
-          $msg[] = $v ? 'TRUE' : 'FALSE';
-        }
-        elseif (\is_string($v)) {
-          $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);
-        }
-        else{
-          $msg[] = $v;
+    if ($show_last) {
+      $msg[]            = self::getLogLine('QUERY');
+      $msg[]            = $this->last();
+
+      if (($last_real_params = $this->getRealLastParams()) && !empty($last_real_params['values'])) {
+        $msg[] = self::getLogLine('VALUES');
+        foreach ($last_real_params['values'] as $v){
+          if ($v === null) {
+            $msg[] = 'NULL';
+          }
+          elseif (\is_bool($v)) {
+            $msg[] = $v ? 'TRUE' : 'FALSE';
+          }
+          elseif (\is_string($v)) {
+            $msg[] = Str::isBuid($v) ? bin2hex($v) : Str::cut($v, 30);
+          }
+          else{
+            $msg[] = $v;
+          }
         }
       }
     }
 
-
-    $msg[] = self::getLogLine('BACKTRACE');
-    $dbt   = array_reverse(debug_backtrace());
-    array_walk(
-      $dbt, function ($a, $i) use (&$msg) {
-        if (isset($a['file'])) {
-          $msg[] = str_repeat(' ', $i).
-            ($i ? '->' : '').
-            "{$a['function']}  (".
-            X::basename(X::dirname($a['file'])).'/'.
-            X::basename($a['file']).":{$a['line']})";
+    if ($show_backtrace) {
+      $msg[] = self::getLogLine('BACKTRACE');
+      $last = '';
+      $i = 0;
+      $btr = array_map(function($a) use (&$last, &$i) {
+        $r = [
+          'dfile' => X::basename(
+            X::dirname($a['file'])).'/'.
+            X::basename($a['file']
+          ),
+          'good' => false
+        ];
+        if (($last === 'bbn/Db.php') && ($r['dfile'] !== $last)) {
+          $r['good'] = true;
         }
+
+        $last = $r['dfile'];
+        $r['msg'] = "{$a['function']}  (".
+          $r['dfile'] . ":{$a['line']})";
+        $i++;
+        return $r;
+      }, debug_backtrace());
+      $dbt = array_reverse($btr);
+      array_walk(
+        $dbt,
+        function ($a, $i) use (&$msg) {
+          if (isset($a['dfile'])) {
+            $msg[] = str_repeat($a['good'] ? '!' : ' ', $i).
+            ($i ? '->' : '').$a['msg'];
+          }
+        }
+      );
     }
-    );
+
     $this->log(implode(PHP_EOL, $msg));
     if ($this->on_error === Errors::E_EXCEPTION) {
       throw new \Exception(X::join($msg, PHP_EOL));

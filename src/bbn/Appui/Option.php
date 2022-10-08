@@ -1040,6 +1040,54 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+
+
+  /**
+   * Returns an option's children array of id and text in a user-defined indexed array
+   *
+   * ```php
+   * X::dump($opt->textValueOptions(12, 'title'));
+   * /* value comes from the default argument
+   * array [
+   *   ['title' => "My option 21", 'value' =>  21],
+   *   ['title' => "My option 22", 'value' =>  22],
+   *   ['title' => "My option 25", 'value' =>  25],
+   *   ['title' => "My option 27", 'value' =>  27]
+   * ]
+   * ```
+   *
+   * @param int|string $id    The option's ID or its code if it is children of {@link default}
+   * @param string     $text  The text field name for text column
+   * @param string     $value The value field name for id column
+   * @return array Options' list in a text/value indexed array
+   */
+  public function textValueOptionsRef($id, string $text = 'text', string $value = 'value'): ?array
+  {
+    $res = [];
+    if ($opts = $this->fullOptionsRef($id)) {
+      $cfg = $this->getCfg($id) ?: [];
+      $i   = 0;
+      foreach ($opts as $k => $o) {
+        if (!isset($is_array)) {
+          $is_array = \is_array($o);
+        }
+
+        $res[$i] = [
+          $text => $is_array ? $o[$this->fields['text']] : $o,
+          $value => $is_array ? $o[$this->fields['id']] : $k
+        ];
+        if (!empty($cfg['show_code'])) {
+          $res[$i][$this->fields['code']] = $o[$this->fields['code']];
+        }
+
+        $i++;
+      }
+    }
+
+    return $res;
+  }
+
+
   /**
    * @return array|null
    * @throws \Exception

@@ -1024,10 +1024,10 @@ class Medias extends bbn\Models\Cls\Db
         [
           $cf['arch']['medias']['id'] => $id
         ]
-      )) {
+      ) && false) {
         throw new Exception(X::_("Impossible to update the media in the database"));
       }
-      $this->removeThumbs($oldFile);
+      $this->removeThumbs($media);
       $this->fs->delete($oldFile);
       if (strpos($mime, 'image/') === 0) {
         $image = new Image($file, $this->fs);

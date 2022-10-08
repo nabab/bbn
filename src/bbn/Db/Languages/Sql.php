@@ -666,7 +666,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     foreach ($tables as $t){
-      if (!($model = $this->getColumns($t))) {
+      $model = $this->getColumns($t);
+      if (!is_array($model)) {
         $this->error('Impossible to find the table '.$t);
         throw new \Exception(X::_('Impossible to find the table ').$t);
       }
@@ -1241,9 +1242,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
             $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $st;
           } elseif (isset($cfg['available_fields'][$f]) && ($cfg['available_fields'][$f] === false)) {
-            $this->error("Error! The column '$f' exists on several tables in '" . implode(', ', $cfg['tables']));
+            $this->error("Error! The column '$f' exists on several tables in '" . implode(', ', $cfg['tables']), false);
           } else {
-            $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']));
+            $this->error("Error! The column '$f' doesn't exist in '" . implode(', ', $cfg['tables']), false);
           }
         }
 
@@ -1297,10 +1298,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
         }
         else {
-          $this->error(X::_("Error! Impossible to find the model for %s", implode(', ', $cfg['tables'])));
+          $this->error(X::_("Error! Impossible to find the model for %s", implode(', ', $cfg['tables'])), false);
         }
       } else {
-        $this->error(X::_("Error! The column '%s' doesn't exist in %s", $f, implode(', ', $cfg['tables'])));
+        $this->error(X::_("Error! The column '%s' doesn't exist in %s", $f, implode(', ', $cfg['tables'])), false);
       }
 
       $i++;
@@ -1342,11 +1343,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
         }
         else {
-          $this->error(X::_("Impossible to retrieve the column %s", $f));
+          $this->error(X::_("Impossible to retrieve the column %s", $f), false);
         }
       }
       else {
-        $this->error(X::_("The column '%s' doesn't exist in %s", $f, implode(', ', $cfg['tables'])));
+        $this->error(X::_("The column '%s' doesn't exist in %s", $f, implode(', ', $cfg['tables'])), false);
       }
     }
 
@@ -1450,7 +1451,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         if (isset($cfg['available_fields'][$g])) {
           $group_to_put[] = $this->escape($g);
         } else {
-          $this->error("Error! The column '$g' doesn't exist for group by " . print_r($cfg, true));
+          $this->error("Error! The column '$g' doesn't exist for group by " . print_r($cfg, true), false);
         }
       }
 
@@ -2054,7 +2055,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $q =& $this->queries[$hash];
       /* If the number of values is inferior to the number of placeholders we fill the values with the last given value */
       if (!empty($params['values']) && ($num_values < $q['placeholders'])) {
-        $this->error(X::_("Placeholders and values don't match"));
+        $this->error(X::_("Placeholders and values don't match"), false);
         $params['values'] = array_merge(
           $params['values'],
           array_fill($num_values, $q['placeholders'] - $num_values, end($params['values']))
@@ -2065,10 +2066,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       /* The number of values must match the number of placeholders to bind */
       if ($num_values !== $q['placeholders']) {
         $this->error(
-          'Incorrect arguments count (your values: '.$num_values.', in the statement: '.$q['placeholders'].")\n\n"
-          .$statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
-          .print_r(\func_get_args(), true)
-          .print_r($q, true)
+          X::_('Incorrect arguments count (your values: %u, in the statement: %u)', $num_values, $q['placeholders'])."\n\n"
+            . $statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
+            . print_r(\func_get_args(), true)
+            . print_r($q, true),
+          false
         );
         exit;
       }
@@ -2731,7 +2733,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $idx = \is_string($key) ? $key : $tfn;
         // Error if they do
         if (isset($tables_full[$idx])) {
-          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']));
+          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']), false);
           return null;
         }
 
@@ -2772,7 +2774,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $tables_full[$idx] = $tfn;
         }
         else{
-          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join));
+          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join), false);
         }
       }
 
@@ -2812,8 +2814,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         if (\is_string($idx)) {
           if (!isset($res['available_fields'][$col])) {
             //$this->log($res);
-            $this->error("Impossible to find the column $col");
-            $this->error(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
+            //$this->log(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
+            $this->error("Impossible to find the column $col", false);
             return null;
           }
 
@@ -2930,7 +2932,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       return $res;
     }
 
-    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true));
+    $this->error('Impossible to process the config (no hash)'.PHP_EOL.print_r($args, true), false);
     return null;
   }
 

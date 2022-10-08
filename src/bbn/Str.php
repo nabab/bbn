@@ -55,8 +55,12 @@ class Str
    */
   public static function cast($st)
   {
-    if (\is_array($st) || \is_object($st)) {
+    if (is_array($st) || is_object($st)) {
       return '';
+    }
+
+    if (is_string($st)) {
+      return normalizer_normalize($st);
     }
 
     return (string)$st;
@@ -1018,6 +1022,8 @@ class Str
         elseif (self::isDecimal($st)) {
           return (float)$st;
         }
+
+        return normalizer_normalize($st);
       }
     }
     elseif (\is_array($st)) {

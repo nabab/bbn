@@ -184,11 +184,18 @@ trait Optional
   }
 
 
-  public static function getOptionsIds()
+  /**
+   * Undocumented function
+   *
+   * @todo Check it, it doesn't seem ok
+   * @return array
+   */
+  public static function getOptionsIds(): array
   {
     return array_flip(
       array_filter(
-        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())), function ($a) {
+        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),
+        function ($a) {
           return $a !== null;
         }
       )
@@ -202,9 +209,21 @@ trait Optional
   }
 
 
+  public static function getOptionsTreeRef()
+  {
+    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];
+  }
+
+
   public static function getOptions()
   {
     return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));
+  }
+
+
+  public static function getOptionsRef()
+  {
+    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));
   }
 
 
@@ -217,6 +236,12 @@ trait Optional
   public static function getOptionsTextValue()
   {
     return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];
+  }
+
+
+  public static function getOptionsTextValueRef()
+  {
+    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];
   }
 
 
