@@ -188,10 +188,10 @@ class GitLab implements Server
    */
   public function getProjectLabels(string $idServer, string $idProject): array
   {
-    return \array_map(
+    return X::sortBy(\array_map(
       [$this, 'normalizeLabel'],
       $this->getConnection($idServer)->getProjectLabels($idProject) ?: []
-    );
+    ), 'name', 'asc');
   }
 
 
@@ -501,6 +501,74 @@ class GitLab implements Server
   /**
    * @param string $idServer
    * @param string $idProject
+   * @return array
+   */
+  public function getProjectIssue(string $idServer, string $idProject, int $idIssue): array
+  {
+    return $this->normalizeIssue((object)$this->getConnection($idServer, true)->getIssue($idProject, $idIssue));
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param string $title
+   * @param string $description
+   * @param array $labels
+   * @param int $assigned
+   * @param bool $private
+   * @param string $date
+   * @return array|null
+   */
+  public function createProjectIssue(
+    string $idServer,
+    string $idProject,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false,
+    string $date = ''
+  ): ?array
+  {
+    if ($issue = $this->getConnection($idServer)->createIssue($idProject, $title, $description, $labels, $assigned, $private, $date)) {
+      return $this->normalizeIssue((object)$issue);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param string $title
+   * @param string $description
+   * @param array $labels
+   * @param int $assigned
+   * @param bool $private
+   * @return array|null
+   */
+  public function editProjectIssue(
+    string $idServer,
+    string $idProject,
+    int $idIssue,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false
+  ): ?array
+  {
+    if ($issue = $this->getConnection($idServer)->editIssue($idProject, $idIssue, $title, $description, $labels, $assigned, $private)) {
+      return $this->normalizeIssue((object)$issue);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
    * @param int $idIssue
    * @return null|array
    */
@@ -572,11 +640,101 @@ class GitLab implements Server
       'updated' => $comment->updated_at ?: $comment->created_at,
       'content' => $comment->body,
       'auto' => $comment->system,
-      'private' => $comment->confidential,
+      'private' => $comment->internal,
       'attachment' => $comment->attachment,
       'originalComment' => $comment
     ];
   }
 
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param string $content
+   * @param bool $pvt
+   * @param string $date
+   * @return null|array
+   */
+  public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
+  {
+    if ($comment = $this->getConnection($idServer)->createIssueNote($idProject, $idIssue, $content, $pvt, $date)) {
+      return $this->normalizeIssueComment((object)$comment);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param int $idComment
+   * @param string $content
+   * @param bool $pvt
+   * @return null|array
+   */
+  public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
+  {
+    if ($comment = $this->getConnection($idServer)->editIssueNote($idProject, $idIssue, $idComment, $content, $pvt)) {
+      return $this->normalizeIssueComment((object)$comment);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param int $idComment
+   * @return bool
+   */
+  public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
+  {
+    return $this->getConnection($idServer)->deleteIssueNote($idProject, $idIssue, $idComment);
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param string $name
+   * @param string $color
+   * @return null|array
+  */
+  public function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array
+  {
+    if ($label = $this->getConnection($idServer)->createProjectLabel($idProject, $name, $color)) {
+      return $this->normalizeLabel((object)$label);
+    }
+    return null;
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param string $label
+   * @return bool
+   */
+  public function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  {
+    return $this->getConnection($idServer)->addLabelToProjectIssue($idProject, $idIssue, $label);
+  }
+
+
+  /**
+   * @param string $idServer
+   * @param string $idProject
+   * @param int $idIssue
+   * @param string $label
+   * @return bool
+   */
+  public function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  {
+    return $this->getConnection($idServer)->removeLabelFromProjectIssue($idProject, $idIssue, $label);
+  }
 
 }

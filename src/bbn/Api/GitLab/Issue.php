@@ -108,18 +108,76 @@ trait Issue
    * Creates a new issue to the given project
    * @param int|string $project ID or URL-encoded path of the project
    * @param string $title The issue's title
+   * @param string $description The issue's description
+   * @param array $labels The labels
+   * @param int $assigned The ID of the user to whom the issue is assigned
+   * @param bool $private If the issue is confidential
    * @param string $date The issue's date
+   * @return array|null
    */
-  public function createIssue($project, string $title, string $date = ''): ?int
+  public function createIssue(
+    $project,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false,
+    string $date = ''
+  ): ?array
   {
     $params = [
-      'title' => \urlencode($title)
+      'title' => $title,
+      'description' => $description,
+      'labels' => \implode(',', $labels)
     ];
+    if (!empty($private)) {
+      $params['confidential'] = 'true';
+    }
+    if (!empty($assigned)) {
+      $params['assignee_ids'] = $assigned;
+    }
     if (!empty($date)) {
       $params['created_at'] = \date('c', \strtotime($date));
     }
     if ($issue = $this->post($this->projectURL . $project . '/' . $this->issueURL, $params)) {
-      return $issue['id'];
+      return $issue;
+    }
+    return null;
+  }
+
+
+  /**
+   * Edites an issue on the given project
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int $issue The issue ID
+   * @param string $title The issue's title
+   * @param string $description The issue's description
+   * @param array $labels The labels
+   * @param int $assigned The ID of the user to whom the issue is assigned
+   * @param bool $private If the issue is confidential
+   * @return array|null
+   */
+  public function editIssue(
+    $project,
+    int $issue,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = 0,
+    bool $private = false
+  ): ?array
+  {
+    $params = [
+      'title' => $title,
+      'description' => $description,
+      'labels' => \implode(',', $labels),
+      'confidential' => empty($private) ? 'false' : 'true',
+      'assignee_ids' => $assigned
+    ];
+    if (($i = $this->getIssue($issue))
+      && !empty($i['iid'])
+    ) {
+      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], $params);
     }
     return null;
   }

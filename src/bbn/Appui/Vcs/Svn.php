@@ -236,6 +236,40 @@ class Svn implements Server
     return [];
   }
 
+  public function getProjectIssue(string $idServer, string $idProject, int $idIssue): array
+  {
+    return [];
+  }
+
+  public function createProjectIssue(
+    string $idServer,
+    string $idProject,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false,
+    string $date = ''
+  ): ?array
+  {
+    return null;
+  }
+
+
+  public function editProjectIssue(
+    string $idServer,
+    string $idProject,
+    int $idIssue,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false
+  ): ?array
+  {
+    return null;
+  }
+
 
   public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
   {
@@ -258,6 +292,42 @@ class Svn implements Server
   public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
   {
     return [];
+  }
+
+
+  public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
+  {
+    return [];
+  }
+
+
+  public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
+  {
+    return [];
+  }
+
+
+  public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
+  {
+    return false;
+  }
+
+
+  public function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array
+  {
+    return null;
+  }
+
+
+  public function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  {
+    return false;
+  }
+
+
+  public function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  {
+    return false;
   }
 
 }

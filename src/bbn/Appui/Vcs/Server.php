@@ -65,6 +65,30 @@ interface Server {
 
   function getProjectIssues(string $idServer, string $idProject): array;
 
+  function getProjectIssue(string $idServer, string $idProject, int $idIssue): array;
+
+  function createProjectIssue(
+    string $idServer,
+    string $idProject,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false,
+    string $date = ''
+  ): ?array;
+
+  public function editProjectIssue(
+    string $idServer,
+    string $idProject,
+    int $idIssue,
+    string $title,
+    string $description = '',
+    array $labels = [],
+    int $assigned = null,
+    bool $private = false
+  ): ?array;
+
   function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
 
   function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
@@ -72,6 +96,18 @@ interface Server {
   function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array;
 
   function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array;
+
+  function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;
+
+  function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;
+
+  function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool;
+
+  function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array;
+
+  function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
+
+  function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
 
   function getUsers(string $idServer): array;
 
