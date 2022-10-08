@@ -344,7 +344,7 @@ class Event extends modelDb
         ];
       }
       $filter = $timeFilter;
-      $timeFilter['conditions'][] = $tmp;
+      $filter['conditions'][] = $tmp;
     }
     else {
       $filter = $timeFilter;
