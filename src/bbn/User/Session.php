@@ -63,7 +63,7 @@ class Session
     }
 
     if (!$id) {
-      return;
+      throw new \Exception("Impossible to retrieve the session's ID");
     }
 
     $this->id = $id;
