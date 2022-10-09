@@ -204,10 +204,4 @@ class Api extends Basic
   }
 
 
-  public static function getTmpKey(bool $out = false)
-  {
-    return self::_get_tmp_key($out);
-  }
-
-
 }
