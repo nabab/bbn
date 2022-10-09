@@ -194,6 +194,11 @@ class Appui
   }
 
 
+  public function getConfig()
+  {
+    return $this->_current;
+  }
+
   /**
    * Sets the whole current config.
    *
@@ -1106,12 +1111,16 @@ class Appui
           $path = $this->$fn() . $plugin['path'] . '/src/cfg/';
           if ($this->_currentFs->exists($path . 'menu.json')) {
             if ($list = $this->_currentFs->decodeContents($path.'menu.json', 'json', true)) {
-              foreach ($list['items'] as &$it) {
-                $it['link'] = $url.'/'.$it['link'];
+              if (!empty($list['items'])) {
+                foreach ($list['items'] as &$it) {
+                  $it['link'] = $url.'/'.$it['link'];
+                }
+                unset($it);
+                $menus[$plugin['name']] = $list;
               }
-
-              unset($it);
-              $menus[$plugin['name']] = $list;
+              else {
+                X::log("Problem in {$path} menu.json");
+              }
             }
             else {
               throw new Exception(X::_("The menu file in %s is corrupted", $plugin['name']));
@@ -1824,6 +1833,9 @@ class Appui
     }
 
     $menus = $this->getMenuFilesContent();
+    if (!$menus) {
+      X::log("No menu!");
+    }
 
     // Check if Plugins menu exists
     if ($idPluginMenu = $menu_class->getByCode('plugins')) {
