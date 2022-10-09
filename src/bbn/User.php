@@ -1432,7 +1432,7 @@ class User extends Basic implements Implementor
       $id_session = $this->session->getId();
 
       // Inserting the session in the database
-      if ($this->db->insert(
+      if ($id_session && $this->db->insert(
         $this->class_cfg['tables']['sessions'], [
         $p['sess_id'] => $id_session,
         $p['ip_address'] => $this->ip_address,
