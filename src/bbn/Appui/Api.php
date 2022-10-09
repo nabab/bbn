@@ -2,12 +2,15 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
+use bbn\Models\Cls\Basic;
 use bbn\Util\Jwt;
 use bbn\X;
+use bbn\User;
+use bbn\Db;
 
 
-class Api extends bbn\Models\Cls\Basic
+class Api extends Basic
 {
 
   /** @var string The certificate used to decrypt messages from appui server without own cert */
@@ -43,7 +46,7 @@ class Api extends bbn\Models\Cls\Basic
    * Constructor
    *
    */
-  public function __construct(bbn\User $user, bbn\Db $db, int $ttl = 300)
+  public function __construct(User $user, Db $db, int $ttl = 300)
   {
     if ($user->getId()) {
       $this->db = $db;
@@ -64,14 +67,24 @@ class Api extends bbn\Models\Cls\Basic
       )
       ) {
         $key_in = self::_get_tmp_key();
+        try {
+          $res = $this->jwt->setKey($key_in)->get($res);
+        }
+        catch (Exception $e) {
+          X::log(["JSON token", $e->getMessage()]);
+          throw new Exception(X::_("Impossible to get data with JSON token, check log").PHP_EOL.$e->getMessage());
+        }
+
         return $this->jwt->setKey($key_in)->get($res);
       }
       else {
-        throw new \Exception(X::_("Impossible to register"));
+        $err = X::lastCurlError();
+        throw new Exception(X::_("Impossible to register throu cURL")
+          . ($err ? PHP_EOL.$err : ''));
       }
     }
     else {
-      throw new \Exception(X::_("No JWT"));
+      throw new Exception(X::_("No JWT"));
     }
   }
 
@@ -88,7 +101,7 @@ class Api extends bbn\Models\Cls\Basic
       $key = self::_get_key(true);
       $jwt = $this->jwt->setKey($key)->set(['data' => $cfg]);
       if ($res = X::curl(
-        self::REMOTE.'/'.BBN_ID_APP,
+        self::REMOTE.'/' . constant('constant('BBN_ID_APP')'),
         ['action' => $action, 'data' => $jwt]
       )
       ) {
@@ -96,11 +109,11 @@ class Api extends bbn\Models\Cls\Basic
         return $this->jwt->setKey($key)->get($res);
       }
       else {
-        throw new \Exception(X::_("Impossible to send the request"));
+        throw new Exception(X::_("Impossible to send the request"));
       }
     }
     else {
-      throw new \Exception(X::_("No JWT"));
+      throw new Exception(X::_("No JWT"));
     }
   }
 
@@ -122,22 +135,22 @@ class Api extends bbn\Models\Cls\Basic
   {
     if ($out) {
       if (empty(self::$_rsa_out)) {
-        self::_set_key(file_get_contents(BBN_APP_PATH.self::RSA_OUT), true);
+        self::_set_key(file_get_contents(constant('BBN_APP_PATH').self::RSA_OUT), true);
       }
 
       return self::$_rsa_out;
     }
 
     if (empty(self::$_rsa_in)) {
-      $opt = bbn\Appui\Option::getInstance();
-      $id_envs = $opt->fromCode('env', BBN_APP_NAME, 'project', 'appui');
+      $opt = Option::getInstance();
+      $id_envs = $opt->fromCode('env', constant('BBN_APP_NAME'), 'project', 'appui');
       $id_app = $this->db->selectOne(
         'bbn_options',
         'id',
         [
           'id_parent' => $id_envs,
-          'text' => BBN_APP_PATH,
-          'code' => BBN_SERVER_NAME.(BBN_CUR_PATH === '/' ? '' : BBN_CUR_PATH)
+          'text' => constant('BBN_APP_PATH'),
+          'code' => constant('BBN_SERVER_NAME').(constant('BBN_CUR_PATH') === '/' ? '' : constant('BBN_CUR_PATH'))
         ]
       );
       $passwords = new Passwords($this->db);
@@ -180,12 +193,12 @@ class Api extends bbn\Models\Cls\Basic
   {
     if ($out) {
       if (empty(self::$_rsa_out_tmp)) {
-        self::$_rsa_out_tmp = file_get_contents(BBN_APP_PATH.self::RSA_OUT_TMP);
+        self::$_rsa_out_tmp = file_get_contents(constant('BBN_APP_PATH').self::RSA_OUT_TMP);
       }
       return self::$_rsa_out_tmp;
     }
     if (empty(self::$_rsa_in_tmp)) {
-      self::$_rsa_in_tmp = file_get_contents(BBN_APP_PATH.self::RSA_IN_TMP);
+      self::$_rsa_in_tmp = file_get_contents(constant('BBN_APP_PATH').self::RSA_IN_TMP);
     }
     return self::$_rsa_in_tmp;
   }

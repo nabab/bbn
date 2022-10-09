@@ -4,8 +4,10 @@
  */
 namespace bbn\User;
 
-use bbn;
-use Error;
+use Exception;
+use bbn\X;
+use bbn\Models\Tts\Singleton;
+
 
 /**
  * A session management object for asynchronous PHP tasks
@@ -27,7 +29,7 @@ if (!defined('BBN_APP_NAME')) {
 
 class Session
 {
-  use bbn\Models\Tts\Singleton;
+  use Singleton;
 
   /** @var string */
   protected static $name = BBN_APP_NAME;
@@ -44,7 +46,7 @@ class Session
   public function __construct(array $defaults = null)
   {
     if (self::singletonExists()) {
-      throw new \Exception("Impossible to create a new session, one already exists");
+      throw new Exception("Impossible to create a new session, one already exists");
     }
     /*
     if (defined('BBN_DATA_PATH') && !$this->isOpened()) {
@@ -63,7 +65,16 @@ class Session
     }
 
     if (!$id) {
-      throw new \Exception("Impossible to retrieve the session's ID");
+      $save_path = session_save_path();
+      if (!is_dir($save_path)) {
+        throw new Exception(X::_("The session path %s doesn't exist", $save_path));
+      }
+      elseif (!is_writable($save_path)) {
+        throw new Exception(X::_("The session path %s is not writable", $save_path));
+      }
+      else {
+        throw new Exception(X::_("Impossible to retrieve the session's ID"));
+      }
     }
 
     $this->id = $id;
