@@ -51,13 +51,25 @@ trait Issue
 
 
   /**
-   * Gets a specific issue
+   * Gets a specific issue (only administrator)
    * @param int $id The issue ID
    * @return array
    */
   public function getIssue(int $id): array
   {
     return $this->request($this->issueURL . $id);
+  }
+
+
+  /**
+   * Gets a specific project issue
+   * @param int|string $project ID or URL-encoded path of the project
+   * @param int $iid The issue internal ID
+   * @return array
+   */
+  public function getProjectIssue($project, int $iid): array
+  {
+    return $this->request($this->projectURL . $project . '/' . $this->issueURL . $iid);
   }
 
 
@@ -128,7 +140,8 @@ trait Issue
     $params = [
       'title' => $title,
       'description' => $description,
-      'labels' => \implode(',', $labels)
+      'labels' => \implode(',', $labels),
+      'issue_type' => 'issue'
     ];
     if (!empty($private)) {
       $params['confidential'] = 'true';
@@ -149,23 +162,23 @@ trait Issue
   /**
    * Edites an issue on the given project
    * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
+   * @param int $iid The issue internal ID
    * @param string $title The issue's title
    * @param string $description The issue's description
    * @param array $labels The labels
    * @param int $assigned The ID of the user to whom the issue is assigned
    * @param bool $private If the issue is confidential
-   * @return array|null
+   * @return array
    */
   public function editIssue(
     $project,
-    int $issue,
+    int $iid,
     string $title,
     string $description = '',
     array $labels = [],
     int $assigned = 0,
     bool $private = false
-  ): ?array
+  ): array
   {
     $params = [
       'title' => $title,
@@ -174,70 +187,50 @@ trait Issue
       'confidential' => empty($private) ? 'false' : 'true',
       'assignee_ids' => $assigned
     ];
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], $params);
-    }
-    return null;
+    return $this->put($this->projectURL . $project . '/' . $this->issueURL . $iid, $params);
   }
 
 
   /**
    * Closes an issue of the given project
    * @param int|string $project ID or URL-encoded path of the project
-   * @param int The issue ID
-   * @return null|array
+   * @param int $iid The issue interal ID
+   * @return array
    */
-  public function closeIssue($project, int $issue): ?array
+  public function closeIssue($project, int $iid): array
   {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'state_event' => 'close'
-      ]);
-    }
-    return null;
+    return $this->put($this->projectURL . $project . '/' . $this->issueURL . $iid, [
+      'state_event' => 'close'
+    ]);
   }
 
 
   /**
    * Reopens an issue of the given project
    * @param int|string $project ID or URL-encoded path of the project
-   * @param int The issue ID
-   * @return null|array
+   * @param int $iid The issue internal ID
+   * @return array
    */
-  public function reopenIssue($project, int $issue): ?array
+  public function reopenIssue($project, int $iid): array
   {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'state_event' => 'reopen'
-      ]);
-    }
-    return null;
+    return $this->put($this->projectURL . $project . '/' . $this->issueURL . $iid, [
+      'state_event' => 'reopen'
+    ]);
   }
 
 
   /**
    * Assigns an issue of the given project to an user
    * @param int|string $project ID or URL-encoded path of the project
-   * @param int The issue ID
-   * @param int The user ID
-   * @return null|array
+   * @param int $iid The issue internal ID
+   * @param int $user The user ID
+   * @return array
    */
-  public function assignIssue($project, int $issue, int $user): ?array
+  public function assignIssue($project, int $iid, int $user): array
   {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return $this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'assignee_ids' => $user
-      ]);
-    }
-    return null;
+    return $this->put($this->projectURL . $project . '/' . $this->issueURL . $iid, [
+      'assignee_ids' => $user
+    ]);
   }
 
 

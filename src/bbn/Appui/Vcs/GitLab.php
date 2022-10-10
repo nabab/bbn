@@ -559,7 +559,10 @@ class GitLab implements Server
     bool $private = false
   ): ?array
   {
-    if ($issue = $this->getConnection($idServer)->editIssue($idProject, $idIssue, $title, $description, $labels, $assigned, $private)) {
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($issue = $this->getConnection($idServer)->editIssue($idProject, $i['iid'], $title, $description, $labels, $assigned, $private))
+    ) {
       return $this->normalizeIssue((object)$issue);
     }
     return null;
@@ -574,7 +577,10 @@ class GitLab implements Server
    */
   public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
   {
-    if ($issue = $this->getConnection($idServer)->closeIssue($idProject, $idIssue)) {
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($issue = $this->getConnection($idServer)->closeIssue($idProject, $i['iid']))
+    ) {
       return $this->normalizeIssue((object)$issue);
     }
     return null;
@@ -589,7 +595,10 @@ class GitLab implements Server
    */
   public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
   {
-    if ($issue = $this->getConnection($idServer)->reopenIssue($idProject, $idIssue)) {
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($issue = $this->getConnection($idServer)->reopenIssue($idProject, $i['iid']))
+    ) {
       return $this->normalizeIssue((object)$issue);
     }
     return null;
@@ -605,7 +614,10 @@ class GitLab implements Server
    */
   public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
   {
-    if ($issue = $this->getConnection($idServer)->assignIssue($idProject, $idIssue, $idUser)) {
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($issue = $this->getConnection($idServer)->assignIssue($idProject, $i['iid'], $idUser))
+    ) {
       return $this->normalizeIssue((object)$issue);
     }
     return null;
@@ -620,10 +632,15 @@ class GitLab implements Server
    */
   public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
   {
-    return \array_map(
-      [$this, 'normalizeIssueComment'],
-      $this->getConnection($idServer)->getIssueNotes($idProject, $idIssue)
-    );
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+    ){
+      return \array_map(
+        [$this, 'normalizeIssueComment'],
+        $this->getConnection($idServer)->getIssueNotes($idProject, $i['iid'])
+      );
+    }
+    return [];
   }
 
 
@@ -658,7 +675,10 @@ class GitLab implements Server
    */
   public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
   {
-    if ($comment = $this->getConnection($idServer)->createIssueNote($idProject, $idIssue, $content, $pvt, $date)) {
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($comment = $this->getConnection($idServer)->createIssueNote($idProject, $i['iid'], $content, $pvt, $date))
+    ) {
       return $this->normalizeIssueComment((object)$comment);
     }
     return null;
@@ -676,7 +696,10 @@ class GitLab implements Server
    */
   public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
   {
-    if ($comment = $this->getConnection($idServer)->editIssueNote($idProject, $idIssue, $idComment, $content, $pvt)) {
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($comment = $this->getConnection($idServer)->editIssueNote($idProject, $i['iid'], $idComment, $content, $pvt))
+    ) {
       return $this->normalizeIssueComment((object)$comment);
     }
     return null;
@@ -692,7 +715,12 @@ class GitLab implements Server
    */
   public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
   {
-    return $this->getConnection($idServer)->deleteIssueNote($idProject, $idIssue, $idComment);
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+    ){
+      return $this->getConnection($idServer)->deleteIssueNote($idProject, $i['iid'], $idComment);
+    }
+    return false;
   }
 
 
@@ -721,7 +749,12 @@ class GitLab implements Server
    */
   public function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
   {
-    return $this->getConnection($idServer)->addLabelToProjectIssue($idProject, $idIssue, $label);
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+    ){
+      return $this->getConnection($idServer)->addLabelToProjectIssue($idProject, $i['iid'], $label);
+    }
+    return false;
   }
 
 
@@ -734,7 +767,12 @@ class GitLab implements Server
    */
   public function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
   {
-    return $this->getConnection($idServer)->removeLabelFromProjectIssue($idProject, $idIssue, $label);
+    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+      && !empty($i['iid'])
+    ){
+      return $this->getConnection($idServer)->removeLabelFromProjectIssue($idProject, $i['iid'], $label);
+    }
+    return false;
   }
 
 }

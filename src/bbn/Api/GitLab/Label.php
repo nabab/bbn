@@ -38,40 +38,30 @@ trait Label
   /**
    * Adds an issue label to the given project
    * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
+   * @param int $iid The issue internal ID
    * @param string $label The label name
    * @return bool
    */
-  public function addLabelToProjectIssue($project, int $issue, string $label): bool
+  public function addLabelToProjectIssue($project, int $iid, string $label): bool
   {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return !!$this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'add_labels' => $label
-      ]);
-    }
-    return false;
+    return !!$this->put($this->projectURL . $project . '/' . $this->issueURL . $iid, [
+      'add_labels' => $label
+    ]);
   }
 
 
   /**
    * Removes an issue label from the given project
    * @param int|string $project ID or URL-encoded path of the project
-   * @param int $issue The issue ID
+   * @param int $iid The issue internal ID
    * @param string $label The label name
    * @return bool
    */
-  public function removeLabelFromProjectIssue($project, int $issue, string $label): bool
+  public function removeLabelFromProjectIssue($project, int $iid, string $label): bool
   {
-    if (($i = $this->getIssue($issue))
-      && !empty($i['iid'])
-    ) {
-      return !!$this->put($this->projectURL . $project . '/' . $this->issueURL . $i['iid'], [
-        'remove_labels' => $label
-      ]);
-    }
-    return false;
+    return !!$this->put($this->projectURL . $project . '/' . $this->issueURL . $iid, [
+      'remove_labels' => $label
+    ]);
   }
 
 
