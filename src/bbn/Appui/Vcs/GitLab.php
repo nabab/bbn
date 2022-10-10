@@ -505,7 +505,7 @@ class GitLab implements Server
    */
   public function getProjectIssue(string $idServer, string $idProject, int $idIssue): array
   {
-    return $this->normalizeIssue((object)$this->getConnection($idServer, true)->getIssue($idProject, $idIssue));
+    return $this->normalizeIssue((object)$this->getConnection($idServer, true)->getIssue($idIssue));
   }
 
 
