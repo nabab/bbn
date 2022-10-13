@@ -91,10 +91,10 @@ class Email extends Basic
 
 
   /**
-   * Returns a list typical folder types as they are recorded in the options
-   *
-   * @return array
-   */
+       * Returns a list typical folder types as they are recorded in the options
+       *
+       * @return array
+       */
   public static function getFolderTypes(): array
   {
     return self::getOptions('folders');
@@ -102,10 +102,10 @@ class Email extends Basic
 
 
   /**
-   * Returns a list of typical email accounts types as they are recorded in the options
-   *
-   * @return array
-   */
+       * Returns a list of typical email accounts types as they are recorded in the options
+       *
+       * @return array
+       */
   public static function getAccountTypes(): array
   {
     return self::getOptions('types');
@@ -147,11 +147,11 @@ class Email extends Basic
 
 
   /**
-   * Returns the list of the accounts' IDs of the current user.
-   *
-   * @param bool $force 
-   * @return array|null
-   */
+       * Returns the list of the accounts' IDs of the current user.
+       *
+       * @param bool $force 
+       * @return array|null
+       */
   public function getAccountsIds(): ?array
   {
     if ($id_accounts = self::getOptionId('accounts')) {
@@ -163,11 +163,11 @@ class Email extends Basic
 
 
   /**
-   * Returns the list of the accounts of the current user.
-   *
-   * @param bool $force 
-   * @return array|null
-   */
+       * Returns the list of the accounts of the current user.
+       *
+       * @param bool $force 
+       * @return array|null
+       */
   public function getAccounts(bool $force = false): array
   {
     $res = [];
@@ -228,7 +228,7 @@ class Email extends Basic
             'last_check' => $cfg['last_check'] ?? null
           ]
         ))
-    ) {
+       ) {
       return true;
     }
 
@@ -264,7 +264,7 @@ class Email extends Basic
         'ssl' => $cfg['ssl'] ?? true
       ]
     ))
-    ) {
+       ) {
       throw new \Exception("Impossible to add the preference");
     }
 
@@ -285,7 +285,7 @@ class Email extends Basic
   {
     if (($account = $this->getAccount($id_account))
         && ($num = $this->pref->deleteBits($id_account))
-    ) {
+       ) {
       return true;
     }
 
@@ -295,14 +295,25 @@ class Email extends Basic
 
   public function createFolder(string $id_account, string $name, string $id_parent = null): bool
   {
-
-    $this->createFolderDb($id_account, $id_parent);
+    $mb = $this->getMailbox($id_account);
+    if ($mb && $mb->createMbox($name)) {
+      return $this->createFolderDb($id_account, $name, $id_parent);
+    }
+    return false;
   }
 
 
   public function createFolderDb(string $id_account, string $name, string $id_parent = null): bool
   {
-
+    $types = self::getFolderTypes();
+    $a = [
+      'id_option' => X::getField($types, ['code' => 'folders'], 'id'),
+      'text' => $name
+    ];
+    if ($id_parent) {
+      $a['id_parent'] = $id_parent;
+    }
+    return (bool) $this->pref->addBit($id_account, $a);
   }
 
 
@@ -336,12 +347,12 @@ class Email extends Basic
     if (X::hasProp($folder, 'uid')
         && ($mb = $this->getMailbox($folder['id_account']))
         && $mb->check()
-    ) {
+       ) {
       if ($mb->update($folder['uid'])
           && ($folders = $mb->getFolders())
           && ($res = $folders[$folder['uid']])
           && ($info = $mb->getInfoFolder($folder['uid']))
-      ) {
+         ) {
         if (!array_key_exists('db_uid', $res)) {
           $res['db_uid'] = null;
         }
@@ -392,6 +403,7 @@ class Email extends Basic
             'text' => $a['text'],
             'uid' => $a['uid'],
             'id_option' => $a['id_option'],
+            'id_parent' => $a['id_parent'] ?? null,
             'type' => X::getField($types, ['id' => $a['id_option']], 'code'),
             'db_uid' => $this->db->selectOne(
               $table,
@@ -557,15 +569,15 @@ class Email extends Basic
 
 
   /**
-   * Returns a list of emails based on their folder.
-   *
-   * @param string $id_folder
-   * @param array $filter
-   * @param int $limit
-   * @param int $start
-   *
-   * @return array|null
-   */
+       * Returns a list of emails based on their folder.
+       *
+       * @param string $id_folder
+       * @param array $filter
+       * @param int $limit
+       * @param int $start
+       *
+       * @return array|null
+       */
   public function getList(string $id_folder, array $post): ?array
   {
     if ($ids = $this->idsFromFolder($id_folder)) {
@@ -627,7 +639,7 @@ class Email extends Basic
           && ($mb = $this->getMailbox($folder['id_account']))
           && $mb->selectFolder($folder['uid'])
           && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
-      ) {
+         ) {
         if ($number === 0) {
           $this->db->delete($table, [$cfg['id'] => $id]);
           return null;
@@ -928,15 +940,23 @@ class Email extends Basic
 
   public function syncFolders(string $id_account, array $subscribed = [])
   {
+    // get Mailbox account
     if ($mb = $this->getMailbox($id_account)) {
+      // get the parameter (host and port)
       $mbParam = $mb->getParams();
+      // get the option 'folders'
       $types   = self::getFolderTypes();
 
       $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed) {
+        // set the first value of $a in $ele and remove it in the array
         $ele = array_shift($a);
+        // search if res contain an array with 'text' => $ele and return the index or null instead
         $idx = X::find($res, ['text' => $ele]);
+   			
         if (null === $idx) {
+          // count number of element in array (useless ?)
           $idx   = count($res);
+          // add $ele in the res array
           $res[] = [
             'text' => $ele,
             'uid' => $prefix.$ele,
@@ -944,17 +964,16 @@ class Email extends Basic
             'subscribed' => in_array($prefix.$ele, $subscribed)
           ];
         }
-
         if (count($a)) {
           $put_in_res($a, $res[$idx]['items'], $prefix.$ele.'.');
         }
       };
 
       $compare = function (
-          array $real,
-          array $db,
-          array &$res = null,
-          $id_parent = null
+        array $real,
+        array $db,
+        array &$res = null,
+        $id_parent = null
       ) use (&$compare): array {
         if (!$res) {
           $res = ['add' => [], 'delete' => []];
@@ -1044,19 +1063,19 @@ class Email extends Basic
       $num    = 0;
       $dest   = [];
       /*
-      foreach ($fields as $field) {
-        $dest[$field] = [];
-        if (!empty($cfg[$field])) {
-          foreach ($cfg[$field] as $d) {
-            if (Str::isEmail($d)) {
-              $dest[$field][] = $d;
-              $num++;
+          foreach ($fields as $field) {
+            $dest[$field] = [];
+            if (!empty($cfg[$field])) {
+              foreach ($cfg[$field] as $d) {
+                if (Str::isEmail($d)) {
+                  $dest[$field][] = $d;
+                  $num++;
+                }
+              }
             }
           }
-        }
-      }
-      */
-  
+          */
+
       if (!empty($cfg['title']) || !empty($cfg['text'])) {
         $mailer = $mb->getMailer();
         return $mailer->send($cfg);

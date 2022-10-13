@@ -336,7 +336,10 @@ class Mailbox extends Basic
   public function createMbox($mbox)
   {
     if ($this->_is_connected()) {
-      return imap_createmailbox($this->stream, $this->mbParam. $mbox);
+      if(imap_createmailbox($this->stream, $this->mbParam. $mbox)) {
+        return true;
+      }
+      X::log(imap_errors(), "imap");
     }
 
     return false;
