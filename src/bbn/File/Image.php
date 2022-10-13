@@ -1093,8 +1093,20 @@ class Image extends bbn\File
               || (!empty($s[1]) && ($h > $s[1]))
               || $bigger
           ) {
-            $smask = (empty($s[0]) ? '' : 'w'.$s[0]).(empty($s[1]) ? '' : 'h'.$s[1]);
-            $fn    = $file.sprintf($mask, $smask).'.'.$this->ext;
+            $smask = [];
+            if (!empty($s[0])) {
+              $smask[] = 'w-' . $s[0];
+              if (!empty($s[1])) {
+                $mask .= '-%s';
+              }
+            }
+            if (!empty($s[1])) {
+              $smask[] = 'h-' . $s[1];
+            }
+            if ($crop) {
+              $mask .= '-%s';
+              $smask[] = 'c-1';
+            }
             if ($s[0] && $s[1]) {
               if ($crop) {
                 $this->resize($s[0], $s[1], true);
@@ -1106,9 +1118,10 @@ class Image extends bbn\File
             else{
               $this->resize($s[0], $s[1], $crop);
             }
-
+            $sm = sprintf($mask, ...$smask);
+            $fn = $file.$sm.'.'.$this->ext;
             $this->save($fn);
-            $res[$smask] = $fn;
+            $res[$sm] = $fn;
           }
         }
 

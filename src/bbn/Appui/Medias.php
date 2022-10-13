@@ -522,7 +522,15 @@ class Medias extends bbn\Models\Cls\Db
         chmod($new_file, 0644);
         if (strpos($mime, 'image/') === 0) {
           $image = new Image($new_file, $this->fs);
-          $image->thumbs($path.$id, $this->thumbs_sizes);
+          $tst = $this->getThumbsSizesByType($id_type);
+          $ts =  !empty($tst) && !empty($tst['thumbs']) ? \array_map(function($t){
+            return [
+              empty($t['width']) ? false : $t['width'],
+              empty($t['height']) ? false : $t['height'],
+              X::hasProps($t, ['width', 'height', 'crop'], true) ? true : false
+            ];
+          }, $tst['thumbs']) : $this->thumbs_sizes;
+          $image->thumbs($path.$id, $ts, '.bbn-%s');
         }
       }
 
@@ -961,7 +969,7 @@ class Medias extends bbn\Models\Cls\Db
             $thumbs_sizes = $this->getThumbsSizes($media);
             $image = new Image($full_path);
             $this->removeThumbs($old_path);
-            $image->thumbs(X::dirname($full_path), $thumbs_sizes, '_%s', true);
+            $image->thumbs(X::dirname($full_path), $thumbs_sizes, '.bbn-%s', true);
             $media['is_image'] = true;
           }
         }
@@ -1030,8 +1038,16 @@ class Medias extends bbn\Models\Cls\Db
       $this->removeThumbs($media);
       $this->fs->delete($oldFile);
       if (strpos($mime, 'image/') === 0) {
+        $tst = $this->getThumbsSizesByType($media['type']);
+        $ts =  !empty($tst) && !empty($tst['thumbs']) ? \array_map(function($t){
+          return [
+            empty($t['width']) ? false : $t['width'],
+            empty($t['height']) ? false : $t['height'],
+            X::hasProps($t, ['width', 'height', 'crop'], true) ? true : false
+          ];
+        }, $tst['thumbs']) : $this->thumbs_sizes;
         $image = new Image($file, $this->fs);
-        $image->thumbs($root . $path . $id, $this->thumbs_sizes);
+        $image->thumbs($root . $path . $id, $ts, '.bbn-%s');
       }
       $this->fs->move(
         $file,
@@ -1209,17 +1225,36 @@ class Medias extends bbn\Models\Cls\Db
         ];
         if ($width || $height || ($crop && ($data['dimensions']['w'] !== $data['dimensions']['h']))) {
           $goodSize = $force ? [$width, $height, $crop] : null;
+          $redirect = false;
           if (!$goodSize) {
             foreach ($data['thumbs'] as $size) {
-              if (($width == $size[0]) && ($height == $size[1]) && ($crop == ($size[2] ?? false))) {
+              if (($width == $size[0])
+                && ($height == $size[1])
+                && ($crop == ($size[2] ?? false))
+              ) {
                 $goodSize = $size;
+                $redirect = false;
                 break;
+              }
+              if (((!empty($width) && ($width <= $size[0]))
+                  || (!empty($height) && ($width <= $size[0])))
+                && ($crop == ($size[2] ?? false))
+              ) {
+                $goodSize = $size;
+                $redirect = true;
               }
             }
           }
 
+          if (!$goodSize) {
+            $data['redirect'] = true;
+          }
+
           if ($goodSize && ($tmpFile = $this->getThumbPath($file, $goodSize, true, true))) {
             $data['is_thumb'] = true;
+            if ($redirect) {
+              $data['redirect'] = $redirect;
+            }
             $data['file'] = $tmpFile;
           }
         }
