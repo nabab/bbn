@@ -135,7 +135,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($s, $full = false)\n  {\n    if (\\bbn\\Str::isUid($s)) {\n      $s = $this->get_info($s);\n    }\n\n    if (is_array($s) && isset($s['nom'])) {\n      $st = '';\n      if (!empty($s['civilite']) && $s['civilite'] !== 'I') {\n        if ($full && isset(self::$civilites[$s['civilite']])) {\n          $st .= self::$civilites[$s['civilite']].' ';\n        }\n        else{\n          $st .= $s['civilite'].' ';\n        }\n      }\n\n            $st .= $s['nom'];\n      if (!empty($s['prenom'])) {\n        $st .= ' '.$s['prenom'];\n      }\n\n      return $st;\n    }\n\n    return null;\n  }",
+            "code": "function($s, $full = false)\n  {\n    if (\\bbn\\Str::isUid($s)) {\n      $s = $this->get_info($s);\n    }\n\n    if (is_array($s) && isset($s['nom'])) {\n      $st = '';\n      if (!empty($s['civilite']) && $s['civilite'] !== '') {\n        if ($full && isset(self::$civilites[$s['civilite']])) {\n          $st .= self::$civilites[$s['civilite']].' ';\n        }\n        else{\n          $st .= $s['civilite'].' ';\n        }\n      }\n\n            $st .= $s['nom'];\n      if (!empty($s['prenom'])) {\n        $st .= ' '.$s['prenom'];\n      }\n\n      return $st;\n    }\n\n    return null;\n  }",
             "startLine": 69,
             "endLine": 95,
             "isDeprecated": false,

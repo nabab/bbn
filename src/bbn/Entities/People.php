@@ -74,7 +74,7 @@ class People
 
     if (is_array($s) && isset($s['nom'])) {
       $st = '';
-      if (!empty($s['civilite']) && $s['civilite'] !== 'I') {
+      if (!empty($s['civilite'])) {
         if ($full && isset(self::$civilites[$s['civilite']])) {
           $st .= self::$civilites[$s['civilite']].' ';
         }

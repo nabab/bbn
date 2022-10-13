@@ -1,19 +1,24 @@
 <?php
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
+use bbn\X;
+use bbn\Appui\Database;
+use bbn\Str;
+use bbn\Db;
+use bbn\Models\Tts\Report;
 
 class History
 {
-  use bbn\Models\Tts\Report;
+  use Report;
 
-  /** @var \bbn\Db The DB connection */
+  /** @var Db The DB connection */
   private static $db;
   /** @var array A collection of DB connections  */
   private static $dbs = [];
   /** @var array A collection of DB connections  */
   private static $structures = [];
-  /** @var database The database class which collects the columns IDs */
+  /** @var Database The database class which collects the columns IDs */
   private static $database_obj;
   /** @var string Name of the database where the history table is */
   private static $admin_db = '';
@@ -44,9 +49,9 @@ class History
   /**
    * Returns the database connection object.
    *
-   * @return bbn\Db
+   * @return Db
    */
-  private static function _get_db(): ?bbn\Db
+  private static function _get_db(): ?Db
   {
     if ( self::$db && self::$db->check() ){
       return self::$db;
@@ -57,9 +62,9 @@ class History
   /**
    * Returns an instance of the Appui\Database class.
    *
-   * @return database
+   * @return Database
    */
-  private static function _get_database(): ?database
+  private static function _get_database(): ?Database
   {
     if ( self::check() ){
       if ( !self::$database_obj && ($db = self::_get_db()) ){
@@ -92,7 +97,7 @@ class History
         $cfg['val'] = null;
       }
       else if (
-        bbn\Str::isUid($cfg['old']) &&
+        Str::isUid($cfg['old']) &&
         self::$db->count(self::$table_uids, ['bbn_uid' => $cfg['old']])
       ){
         $cfg['ref'] = $cfg['old'];
@@ -130,7 +135,7 @@ class History
   private static function _get_table_where(string $table): ?string
   {
     if (
-      bbn\Str::checkName($table) &&
+      Str::checkName($table) &&
       ($db = self::_get_db()) &&
       ($database_obj = self::_get_database()) &&
       ($model = $database_obj->modelize($table))
@@ -170,18 +175,18 @@ class History
 
   /**
    * Initializes
-   * @param bbn\Db $db
+   * @param Db $db
    * @param array $cfg
    * @return void
    */
-  public static function init(bbn\Db $db, array $cfg = []): void
+  public static function init(Db $db, array $cfg = []): void
   {
     /** @var string $hash Unique hash for this DB connection (so we don't init twice a same connection) */
     $hash = $db->getHash();
     if ( !\in_array($hash, self::$dbs, true) && $db->check() ){
       // Adding the connection to the list of connections
       self::$dbs[] = $hash;
-      /** @var bbn\Db db */
+      /** @var Db db */
       self::$db = $db;
       $vars = get_class_vars(__CLASS__);
       foreach ( $cfg as $cf_name => $cf_value ){
@@ -233,16 +238,17 @@ class History
     return self::$ok && (self::$enabled === true);
   }
 
+
   /**
    * @param $d
    * @return null|float
    */
   public static function validDate($d): ?float
   {
-    if ( !bbn\Str::isNumber($d) ){
+    if ( !Str::isNumber($d) ){
       $d = strtotime($d);
     }
-    if ( ($d > 0) && bbn\Str::isNumber($d) ){
+    if ( ($d > 0) && Str::isNumber($d) ){
       return (float)$d;
     }
     return null;
@@ -263,10 +269,10 @@ class History
   /**
    * Returns true if the given DB connection is configured for history
    *
-   * @param bbn\Db $db
+   * @param Db $db
    * @return bool
    */
-  public static function hasHistory(bbn\Db $db): bool
+  public static function hasHistory(Db $db): bool
   {
     $hash = $db->getHash();
     return \in_array($hash, self::$dbs, true);
@@ -294,7 +300,7 @@ class History
    */
   public static function setColumn(string $column): void
   {
-    if ( bbn\Str::checkName($column) ){
+    if ( Str::checkName($column) ){
       self::$column = $column;
     }
   }
@@ -316,7 +322,7 @@ class History
   public static function setDate($date): void
   {
     // Sets the current date
-    if ( !bbn\Str::isNumber($date) && !($date = strtotime($date)) ){
+    if ( !Str::isNumber($date) && !($date = strtotime($date)) ){
       return;
     }
     $t = time();
@@ -351,7 +357,7 @@ class History
   public static function setAdminDb(string $db_name): void
   {
     // Sets the history table name
-    if ( bbn\Str::checkName($db_name) ){
+    if ( Str::checkName($db_name) ){
       self::$admin_db = $db_name;
       self::$table = self::$admin_db.'.'.self::$prefix.'history';
     }
@@ -365,7 +371,7 @@ class History
   public static function setUser($user): void
   {
     // Sets the history table name
-    if ( bbn\Str::isUid($user) ){
+    if ( Str::isUid($user) ){
       self::$user = $user;
     }
   }
@@ -399,7 +405,7 @@ class History
       $id_tab = $db->cfn('bbn_table', self::$table_uids, true);
       $uid2 = $db->cfn('uid', self::$table, true);
       $chrono = $db->cfn('tst', self::$table, true);
-      $order = $dir && (bbn\Str::changeCase($dir, 'lower') === 'asc') ? 'ASC' : 'DESC';
+      $order = $dir && (Str::changeCase($dir, 'lower') === 'asc') ? 'ASC' : 'DESC';
       $sql = <<< MYSQL
 SELECT DISTINCT($uid)
 FROM $tab_uids
@@ -461,7 +467,7 @@ MYSQL;
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
-      bbn\Str::checkName($table) &&
+      Str::checkName($table) &&
       ($date = self::validDate($from_when)) &&
       ($db = self::_get_db()) &&
       ($dbc = self::_get_database()) &&
@@ -482,7 +488,7 @@ MYSQL;
         [$chrono, '>', $date]
       ];
       if ( $column ){
-        $where[$id_col] = bbn\Str::isUid($column) ? $column : $dbc->columnId($column, $id_table);
+        $where[$id_col] = Str::isUid($column) ? $column : $dbc->columnId($column, $id_table);
       }
       else {
         $w = self::_get_table_where($table);
@@ -527,7 +533,7 @@ MYSQL;
   public static function getPrevUpdate(string $table, string $id, $from_when, $column = null): ?array
   {
     if (
-      bbn\Str::checkName($table) &&
+      Str::checkName($table) &&
       ($date = self::validDate($from_when)) &&
       ($dbc = self::_get_database()) &&
       ($db = self::_get_db())
@@ -539,7 +545,7 @@ MYSQL;
       if ( $column ){
         $where = $db->escape('col').
           ' = UNHEX("'.$db->escapeValue(
-            bbn\Str::isUid($column) ? $column : $dbc->columnId($column, $table)
+            Str::isUid($column) ? $column : $dbc->columnId($column, $table)
           ).'")';
       }
       else{
@@ -764,14 +770,14 @@ MYSQL;
         'uid' => $id
       ];
       if ( !empty($col) ){
-        if ( !\bbn\Str::isUid($col) ){
+        if ( !Str::isUid($col) ){
           $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? 'ref' : 'val';
           $col = self::$database_obj->columnId($col, $table);
         }
         else {
-          $idx = \bbn\X::find($modelize['fields'], ['id_option' => strtolower($col)]);
+          $idx = X::find($modelize['fields'], ['id_option' => strtolower($col)]);
           if (null === $idx) {
-            throw new \Error("Impossible to find the option $col");
+            throw new Exception("Impossible to find the option $col");
           }
           $fields[] = $modelize['fields'][$idx]['type'] === 'binary' ? 'ref' : 'val';
         }
@@ -835,8 +841,8 @@ MYSQL;
       ($primary = self::$db->getPrimary($table)) &&
       ($modelize = self::getTableCfg($table))
     ){
-      if ( \bbn\Str::isUid($column) ){
-        $column = \bbn\X::find($modelize['fields'], ['id_option' => strtolower($column)]);
+      if ( Str::isUid($column) ){
+        $column = X::find($modelize['fields'], ['id_option' => strtolower($column)]);
       }
       $current = self::$db->selectOne($table, $column, [
         $primary[0] => $id
@@ -962,6 +968,85 @@ MYSQL;
     return self::$links;
   }
 
+
+  public static function fusion(Db $db, $ids) 
+  {
+    if (!is_array($ids)) {
+      $ids = func_get_args();
+    }
+
+    $source = $db->getColumnValues(
+      self::$table_uids,
+      'bbn_table',
+      ['bbn_uid' => $ids]
+    );
+    $unique = array_unique($source);
+    if (count($unique) > 1) {
+      X::log($unique);
+      throw new Exception(X::_("The fusion you wanna do seems to go on different tables"));
+    }
+
+    if (count($source) !== count($ids)) {
+      throw new Exception(X::_("They are not all in the history table"));
+    }
+
+    $source = array_shift($ids);
+    $isActive = $db->selectOne(
+      self::$table_uids,
+      'bbn_active',
+      [
+        'uid' => $source
+      ]
+    );
+    if (!$isActive) {
+      throw new Exception(X::_("Main record is deleted"));
+    }
+
+    $creation = $db->selectOne(
+      self::$table,
+      'MIN(tst)',
+      [
+        'uid' => $ids,
+        'opr' => 'INSERT'
+      ]
+    );
+    if (!$creation) {
+      throw new Exception(X::_("No creation date"));
+    }
+    $db->delete([
+      self::$table,
+      [
+        'uid' => $ids,
+        'opr' => 'INSERT',
+        ['tst', '>', $creation]
+      ]
+    ]);
+    $db->update([
+      self::$table,
+      ['uid' => $ids[0]],
+      [
+        'uid' => $ids,
+        'opr' => 'INSERT'
+      ]
+    ]);
+    $db->update([
+      self::$table,
+      ['uid' => $ids[0]],
+      [
+        'uid' => $ids,
+        'opr' => 'UPDATE'
+      ]
+    ]);
+    $db->delete([
+      self::$table,
+      [
+        'uid' => $ids,
+        'opr' => ['DELETE', 'RESTORE']
+      ]
+    ]);
+  }
+
+
   /**
    * The function used by the db trigger
    * This will basically execute the history query if it's configured for.
@@ -1028,7 +1113,7 @@ MYSQL;
             }
             else{
               $join_alias = $t;
-              $alias = strtolower(bbn\Str::genpwd());
+              $alias = strtolower(Str::genpwd());
               $join_alias['alias'] = $alias;
               $join_alias['on']['conditions'] = $db->replaceTableInConditions($join_alias['on']['conditions'], !empty($t['alias']) ? $t['alias'] : $t['table'], $alias);
               $new_join[] = $join_alias;
@@ -1114,7 +1199,7 @@ MYSQL;
         $primary_where = false;
         $primary_defined = false;
         $primary_value = false;
-        $idx1 = \bbn\X::find($cfg['values_desc'], ['primary' => true]);
+        $idx1 = X::find($cfg['values_desc'], ['primary' => true]);
         if ( $idx1 !== null ){
           $primary_where = $cfg['values'][$idx1];
         }
