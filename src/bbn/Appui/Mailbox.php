@@ -187,6 +187,7 @@ class Mailbox extends Basic
     }
   }
 
+ 	
 
   /**
    *  Closes the imap stream.
@@ -200,6 +201,11 @@ class Mailbox extends Basic
   }
 
 
+  public function getError(): ?string
+  {
+    return imap_last_error() ?: null;
+  }
+  
   public function getMailer(): Mail
   {
     if (!$this->mailer) {
@@ -355,9 +361,9 @@ class Mailbox extends Basic
   public function deleteMbox($mbox)
   {
     if ($this->_is_connected()) {
+     X::ddump($this->mbParam . $mbox);
       return imap_deletemailbox($this->stream, $this->mbParam . $mbox);
     }
-
     return false;
   }
 

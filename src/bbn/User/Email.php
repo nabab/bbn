@@ -1,6 +1,7 @@
 <?php
 namespace bbn\User;
 
+use Exception;
 use bbn\X;
 use bbn\Db;
 use bbn\Str;
@@ -296,23 +297,38 @@ class Email extends Basic
   public function createFolder(string $id_account, string $name, string $id_parent = null): bool
   {
     $mb = $this->getMailbox($id_account);
-    if ($mb && $mb->createMbox($name)) {
-      return $this->createFolderDb($id_account, $name, $id_parent);
+    $uid_parent = "";
+    if ($id_parent) {
+      $uid_parent = $this->getFolder($id_parent)['uid'];
     }
-    return false;
+    $mboxName = $id_parent ? $uid_parent . '.' . $name : $name;
+    if ($mb && $mb->createMbox($mboxName)) {
+      if ($this->createFolderDb($id_account, $name, $id_parent)) {
+        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        return true;
+      }
+    }
+    throw new Exception($mb ? $mb->getError() : X::_("No connection"));
   }
 
 
   public function createFolderDb(string $id_account, string $name, string $id_parent = null): bool
   {
     $types = self::getFolderTypes();
+
     $a = [
       'id_option' => X::getField($types, ['code' => 'folders'], 'id'),
-      'text' => $name
+      'text' => $name,
+      'uid' => $name,
+      'subcribed' => true
     ];
+
     if ($id_parent) {
+      $uid_parent = $this->getFolder($id_parent)['uid'];
+      $a['uid'] = $uid_parent . '.' . $name;
       $a['id_parent'] = $id_parent;
     }
+    
     return (bool) $this->pref->addBit($id_account, $a);
   }
 
@@ -330,15 +346,22 @@ class Email extends Basic
   }
 
 
-  public function deleteFolder(string $id): bool
+  public function deleteFolder(string $id, string $id_account): bool
   {
-    $this->deleteFolderDb($id);
+    $mb = $this->getMailbox($id_account);
+    $folder = $this->getFolder($id);
+    if ($folder && $mb->deleteMbox($folder['uid'])) {
+    	return $this->deleteFolderDb($id);
+    } else {
+      throw new Exception($mb->getError());
+    }
+    return false;
   }
 
 
   public function deleteFolderDb(string $id): bool
   {
-
+		return $this->pref->deleteBits($id);
   }
 
 
@@ -1048,7 +1071,6 @@ class Email extends Basic
       $result = $compare($res, $db_tree);
 
       $import($result['add']);
-
       return ['real' => $res, 'db' => $db_tree, 'compare' => $result];
     }
 
