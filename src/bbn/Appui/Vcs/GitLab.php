@@ -25,64 +25,76 @@ class GitLab implements Server
   /** @var bbn\Appui\Passwords The bbn\Appui\Passwords class instance */
   private $pwd;
 
+  /** @var string The server ID */
+  private $idServer;
+
+  /** @var object The server info */
+  private $server;
+
+  /** @var bbn\Api\GitLab The GitLab class instance for normal user */
+  private $userConnection;
+
+  /** @var bbn\Api\GitLab The GitLab class instance for admin user */
+  private $adminConnection;
+
 
   /**
    * Constructor.
    * @param bbn\Db $db
+   * @param string $idServer
    */
-  public function __construct($db)
+  public function __construct(bbn\Db $db, string $idServer)
   {
     $this->db = $db;
     $this->opt = Option::getInstance();
     $this->pwd = new Passwords($this->db);
+    $this->idServer = $idServer;
+    $this->server = $this->getServer();
+    $this->checkServerHost($this->server->host);
+    $this->userConnection = new bbn\Api\GitLab($this->server->userAccessToken, $this->server->host);
+    $this->adminConnection = new bbn\Api\GitLab($this->getAdminAccessToken(), $this->server->host);
   }
 
 
   /**
-   * @param string $id
    * @param bool $asAdmin
    * @return object
    */
-  public function getConnection(string $id, bool $asAdmin = false): object
+  public function getConnection(bool $asAdmin = false): object
   {
-    $server = $this->getServer($id);
-    $this->checkServerHost($server->host);
-    return new bbn\Api\GitLab($asAdmin ? $this->getAdminAccessToken($id) : $server->userAccessToken, $server->host);
+    return $asAdmin ? $this->adminConnection : $this->userConnection;
   }
 
 
   /**
-   * @param string $id
    * @return array
    */
-  public function getCurrentUser(string $id): array
+  public function getCurrentUser(): array
   {
-    return $this->getConnection($id)->getUser();
+    return $this->getConnection()->getUser();
   }
 
 
   /**
-   * @param string $id
    * @param int $page
    * @param int $perPage
    * @return array
    */
-  public function getProjectsList(string $id, int $page = 1, int $perPage = 25): array
+  public function getProjectsList(int $page = 1, int $perPage = 25): array
   {
-    $list = $this->getConnection($id)->getProjectsList($page, $perPage) ?: [];
+    $list = $this->getConnection()->getProjectsList($page, $perPage) ?: [];
     $list['data'] = \array_map([$this, 'normalizeProject'], $list['data']);
     return $list;
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return null|array
    */
-  public function getProject(string $idServer, string $idProject): ?array
+  public function getProject(string $idProject): ?array
   {
-    if ($proj = $this->getConnection($idServer, true)->getProject($idProject, true)) {
+    if ($proj = $this->getConnection(true)->getProject($idProject, true)) {
       return $this->normalizeProject((object)$proj);
     }
     return null;
@@ -90,16 +102,15 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectBranches(string $idServer, string $idProject): array
+  public function getProjectBranches(string $idProject): array
   {
     return X::sortBy(
       \array_map(
         [$this, 'normalizeBranch'],
-        $this->getConnection($idServer)->getBranches($idProject) ?: []
+        $this->getConnection()->getBranches($idProject) ?: []
       ),
       'created',
       'desc'
@@ -108,24 +119,22 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectTags(string $idServer, string $idProject): array
+  public function getProjectTags(string $idProject): array
   {
-    return $this->getConnection($idServer)->getTags($idProject) ?: [];
+    return $this->getConnection()->getTags($idProject) ?: [];
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectUsers(string $idServer, string $idProject): array
+  public function getProjectUsers(string $idProject): array
   {
-    return \array_map([$this, 'normalizeMember'], $this->getConnection($idServer, true)->getProjectUsers($idProject) ?: []);
+    return \array_map([$this, 'normalizeMember'], $this->getConnection(true)->getProjectUsers($idProject) ?: []);
   }
 
 
@@ -139,39 +148,36 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectUsersEvents(string $idServer, string $idProject): array
+  public function getProjectUsersEvents(string $idProject): array
   {
-    return \array_map([$this, 'normalizeEvent'], $this->getConnection($idServer)->getUsersEvents($idProject) ?: []);
+    return \array_map([$this, 'normalizeEvent'], $this->getConnection()->getUsersEvents($idProject) ?: []);
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectEvents(string $idServer, string $idProject): array
+  public function getProjectEvents(string $idProject): array
   {
-    return \array_map([$this, 'normalizeEvent'], $this->getConnection($idServer)->getEvents($idProject) ?: []);
+    return \array_map([$this, 'normalizeEvent'], $this->getConnection()->getEvents($idProject) ?: []);
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectCommitsEvents(string $idServer, string $idProject): array
+  public function getProjectCommitsEvents(string $idProject): array
   {
     return \array_values(
       \array_filter(
         \array_map(
           [$this, 'normalizeEvent'],
-          $this->getConnection($idServer)->getCommitsEvents($idProject) ?: []
+          $this->getConnection()->getCommitsEvents($idProject) ?: []
         ),
         function($e){
           return $e['type'] === 'commit';
@@ -182,26 +188,24 @@ class GitLab implements Server
 
 
    /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectLabels(string $idServer, string $idProject): array
+  public function getProjectLabels(string $idProject): array
   {
     return X::sortBy(\array_map(
       [$this, 'normalizeLabel'],
-      $this->getConnection($idServer)->getProjectLabels($idProject) ?: []
+      $this->getConnection()->getProjectLabels($idProject) ?: []
     ), 'name', 'asc');
   }
 
 
   /**
-   * @param string $idServer
    * @return array
    */
-  public function getUsers(string $idServer): array
+  public function getUsers(): array
   {
-    return \array_map([$this, 'normalizeUser'], $this->getConnection($idServer, true)->getUsers() ?: []);
+    return \array_map([$this, 'normalizeUser'], $this->getConnection(true)->getUsers() ?: []);
   }
 
 
@@ -435,82 +439,75 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param string $branch
    * @param string $fromBranch
    * @return array
    */
-  public function insertBranch(string $idServer, string $idProject, string $branch, string $fromBranch): array
+  public function insertBranch(string $idProject, string $branch, string $fromBranch): array
   {
-    return $this->getConnection($idServer)->insertBranch($idProject, $branch, $fromBranch);
+    return $this->getConnection()->insertBranch($idProject, $branch, $fromBranch);
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param string $branch
    * @return bool
    */
-  public function deleteBranch(string $idServer, string $idProject, string $branch): bool
+  public function deleteBranch(string $idProject, string $branch): bool
   {
-    return $this->getConnection($idServer)->deleteBranch($idProject, $branch);
+    return $this->getConnection()->deleteBranch($idProject, $branch);
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idUser
    * @param int $idRols
    * @return array
    */
-  public function insertProjectUser(string $idServer, string $idProject, int $idUser, int $idRole): array
+  public function insertProjectUser(string $idProject, int $idUser, int $idRole): array
   {
-    return $this->getConnection($idServer)->insertProjectUser($idProject, $idUser, $idRole);
+    return $this->getConnection()->insertProjectUser($idProject, $idUser, $idRole);
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idUser
    * @return bool
    */
-  public function removeProjectUser(string $idServer, string $idProject, int $idUser): bool
+  public function removeProjectUser(string $idProject, int $idUser): bool
   {
-    return $this->getConnection($idServer)->removeProjectUser($idProject, $idUser);
+    return $this->getConnection()->removeProjectUser($idProject, $idUser);
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectIssues(string $idServer, string $idProject): array
+  public function getProjectIssues(string $idProject): array
   {
     return \array_map(
       [$this, 'normalizeIssue'],
-      $this->getConnection($idServer)->getIssues($idProject)
+      $this->getConnection()->getIssues($idProject)
     );
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @return array
    */
-  public function getProjectIssue(string $idServer, string $idProject, int $idIssue): array
+  public function getProjectIssue(string $idProject, int $idIssue): array
   {
-    return $this->normalizeIssue((object)$this->getConnection($idServer, true)->getIssue($idIssue));
+    return $this->normalizeIssue((object)$this->getConnection(true)->getIssue($idIssue));
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param string $title
    * @param string $description
@@ -521,7 +518,6 @@ class GitLab implements Server
    * @return array|null
    */
   public function createProjectIssue(
-    string $idServer,
     string $idProject,
     string $title,
     string $description = '',
@@ -531,7 +527,7 @@ class GitLab implements Server
     string $date = ''
   ): ?array
   {
-    if ($issue = $this->getConnection($idServer)->createIssue($idProject, $title, $description, $labels, $assigned, $private, $date)) {
+    if ($issue = $this->getConnection()->createIssue($idProject, $title, $description, $labels, $assigned, $private, $date)) {
       return $this->normalizeIssue((object)$issue);
     }
     return null;
@@ -539,7 +535,6 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param string $title
    * @param string $description
@@ -549,7 +544,6 @@ class GitLab implements Server
    * @return array|null
    */
   public function editProjectIssue(
-    string $idServer,
     string $idProject,
     int $idIssue,
     string $title,
@@ -559,9 +553,9 @@ class GitLab implements Server
     bool $private = false
   ): ?array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
-      && ($issue = $this->getConnection($idServer)->editIssue($idProject, $i['iid'], $title, $description, $labels, $assigned, $private))
+      && ($issue = $this->getConnection()->editIssue($idProject, $i['iid'], $title, $description, $labels, $assigned, $private))
     ) {
       return $this->normalizeIssue((object)$issue);
     }
@@ -570,16 +564,15 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @return null|array
    */
-  public function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  public function closeProjectIssue(string $idProject, int $idIssue): ?array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
-      && ($issue = $this->getConnection($idServer)->closeIssue($idProject, $i['iid']))
+      && ($issue = $this->getConnection()->closeIssue($idProject, $i['iid']))
     ) {
       return $this->normalizeIssue((object)$issue);
     }
@@ -588,16 +581,15 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @return null|array
    */
-  public function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array
+  public function reopenProjectIssue(string $idProject, int $idIssue): ?array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
-      && ($issue = $this->getConnection($idServer)->reopenIssue($idProject, $i['iid']))
+      && ($issue = $this->getConnection()->reopenIssue($idProject, $i['iid']))
     ) {
       return $this->normalizeIssue((object)$issue);
     }
@@ -606,17 +598,16 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @param int $idUser
    * @return null|array
    */
-  public function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array
+  public function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
-      && ($issue = $this->getConnection($idServer)->assignIssue($idProject, $i['iid'], $idUser))
+      && ($issue = $this->getConnection()->assignIssue($idProject, $i['iid'], $idUser))
     ) {
       return $this->normalizeIssue((object)$issue);
     }
@@ -625,19 +616,18 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @return array
    */
-  public function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array
+  public function getProjectIssueComments(string $idProject, int $idIssue): array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
     ){
       return \array_map(
         [$this, 'normalizeIssueComment'],
-        $this->getConnection($idServer)->getIssueNotes($idProject, $i['iid'])
+        $this->getConnection()->getIssueNotes($idProject, $i['iid'])
       );
     }
     return [];
@@ -665,7 +655,6 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @param string $content
@@ -673,11 +662,11 @@ class GitLab implements Server
    * @param string $date
    * @return null|array
    */
-  public function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
+  public function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
-      && ($comment = $this->getConnection($idServer)->createIssueNote($idProject, $i['iid'], $content, $pvt, $date))
+      && ($comment = $this->getConnection()->createIssueNote($idProject, $i['iid'], $content, $pvt, $date))
     ) {
       return $this->normalizeIssueComment((object)$comment);
     }
@@ -686,7 +675,6 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @param int $idComment
@@ -694,11 +682,11 @@ class GitLab implements Server
    * @param bool $pvt
    * @return null|array
    */
-  public function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
+  public function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
-      && ($comment = $this->getConnection($idServer)->editIssueNote($idProject, $i['iid'], $idComment, $content, $pvt))
+      && ($comment = $this->getConnection()->editIssueNote($idProject, $i['iid'], $idComment, $content, $pvt))
     ) {
       return $this->normalizeIssueComment((object)$comment);
     }
@@ -707,33 +695,31 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @param int $idComment
    * @return bool
    */
-  public function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool
+  public function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
     ){
-      return $this->getConnection($idServer)->deleteIssueNote($idProject, $i['iid'], $idComment);
+      return $this->getConnection()->deleteIssueNote($idProject, $i['iid'], $idComment);
     }
     return false;
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param string $name
    * @param string $color
    * @return null|array
   */
-  public function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array
+  public function createProjectLabel(string $idProject, string $name, string $color): ?array
   {
-    if ($label = $this->getConnection($idServer)->createProjectLabel($idProject, $name, $color)) {
+    if ($label = $this->getConnection()->createProjectLabel($idProject, $name, $color)) {
       return $this->normalizeLabel((object)$label);
     }
     return null;
@@ -741,38 +727,58 @@ class GitLab implements Server
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @param string $label
    * @return bool
    */
-  public function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  public function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
     ){
-      return $this->getConnection($idServer)->addLabelToProjectIssue($idProject, $i['iid'], $label);
+      return $this->getConnection()->addLabelToProjectIssue($idProject, $i['iid'], $label);
     }
     return false;
   }
 
 
   /**
-   * @param string $idServer
    * @param string $idProject
    * @param int $idIssue
    * @param string $label
    * @return bool
    */
-  public function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool
+  public function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool
   {
-    if (($i = $this->getConnection($idServer, true)->getIssue($idIssue))
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
       && !empty($i['iid'])
     ){
-      return $this->getConnection($idServer)->removeLabelFromProjectIssue($idProject, $i['iid'], $label);
+      return $this->getConnection()->removeLabelFromProjectIssue($idProject, $i['iid'], $label);
     }
     return false;
+  }
+
+
+  public function analyzeWebhook(array $data): array
+  {
+    $d = [
+      'idProject' => $data['project_id'] ?? null,
+      'idUser' => $data['user_id'] ?? (!empty($data['user']) ? $data['user']['id'] : null),
+    ];
+    switch ($data['event_type']) {
+      case 'note':
+        $d = X::mergeArrays($d, [
+          'type' => 'comment',
+          'idIssue' => $data['issue']['id'],
+          'idComment' => $data['object_attributes']['id'],
+          'text' => $data['object_attributes']['note'],
+          'created' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['created_at'])),
+          'updated' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['updated_at']))
+        ]);
+        break;
+    }
+    return $d;
   }
 
 }

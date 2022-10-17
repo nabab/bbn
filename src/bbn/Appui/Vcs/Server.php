@@ -11,37 +11,39 @@ namespace bbn\Appui\Vcs;
 
 interface Server {
 
+  function __construct(\bbn\Db $db, string $idServer);
+
   function hasAdminAccessToken(string $id): bool;
 
   function getAdminAccessToken(string $id): ?string;
 
   function getUserAccessToken(string $id): string;
 
-  function getConnection(string $id, bool $asAdmin = false): object;
+  function getConnection(bool $asAdmin = false): object;
 
   function getServer(string $id): object;
 
-  function getCurrentUser(string $id): array;
+  function getCurrentUser(): array;
 
-  function getProjectsList(string $id, int $page = 1, int $perPage = 25): array;
+  function getProjectsList(int $page = 1, int $perPage = 25): array;
 
-  function getProject(string $idServer, string $idProject): ?array;
+  function getProject(string $idProject): ?array;
 
-  function getProjectBranches(string $idServer, string $idProject): array;
+  function getProjectBranches(string $idProject): array;
 
-  function getProjectTags(string $idServer, string $idProject): array;
+  function getProjectTags(string $idProject): array;
 
-  function getProjectUsers(string $idServer, string $idProject): array;
+  function getProjectUsers(string $idProject): array;
 
   function getProjectUsersRoles(): array;
 
-  function getProjectUsersEvents(string $idServer, string $idProject): array;
+  function getProjectUsersEvents(string $idProject): array;
 
-  function getProjectEvents(string $idServer, string $idProject): array;
+  function getProjectEvents(string $idProject): array;
 
-  function getProjectCommitsEvents(string $idServer, string $idProject): array;
+  function getProjectCommitsEvents(string $idProject): array;
 
-  function getProjectLabels(string $idServer, string $idProject): array;
+  function getProjectLabels(string $idProject): array;
 
   function normalizeBranch(object $branch): array;
 
@@ -55,20 +57,19 @@ interface Server {
 
   function normalizeProject(object $project): array;
 
-  function insertBranch(string $idServer, string $idProject, string $branch, string $fromBranch): array;
+  function insertBranch(string $idProject, string $branch, string $fromBranch): array;
 
-  function deleteBranch(string $idServer, string $idProject, string $branch): bool;
+  function deleteBranch(string $idProject, string $branch): bool;
 
-  function insertProjectUser(string $idServer, string $idProject, int $idUser, int $idRole): array;
+  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;
 
-  function removeProjectUser(string $idServer, string $idProject, int $idUser): bool;
+  function removeProjectUser(string $idProject, int $idUser): bool;
 
-  function getProjectIssues(string $idServer, string $idProject): array;
+  function getProjectIssues(string $idProject): array;
 
-  function getProjectIssue(string $idServer, string $idProject, int $idIssue): array;
+  function getProjectIssue(string $idProject, int $idIssue): array;
 
   function createProjectIssue(
-    string $idServer,
     string $idProject,
     string $title,
     string $description = '',
@@ -79,7 +80,6 @@ interface Server {
   ): ?array;
 
   public function editProjectIssue(
-    string $idServer,
     string $idProject,
     int $idIssue,
     string $title,
@@ -89,26 +89,26 @@ interface Server {
     bool $private = false
   ): ?array;
 
-  function closeProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
+  function closeProjectIssue(string $idProject, int $idIssue): ?array;
 
-  function reopenProjectIssue(string $idServer, string $idProject, int $idIssue): ?array;
+  function reopenProjectIssue(string $idProject, int $idIssue): ?array;
 
-  function assignProjectIssue(string $idServer, string $idProject, int $idIssue, int $idUser): ?array;
+  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;
 
-  function getProjectIssueComments(string $idServer, string $idProject, int $idIssue): array;
+  function getProjectIssueComments(string $idProject, int $idIssue): array;
 
-  function insertProjectIssueComment(string $idServer, string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;
+  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;
 
-  function editProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;
+  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;
 
-  function deleteProjectIssueComment(string $idServer, string $idProject, int $idIssue, int $idComment): bool;
+  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;
 
-  function createProjectLabel(string $idServer, string $idProject, string $name, string $color): ?array;
+  function createProjectLabel(string $idProject, string $name, string $color): ?array;
 
-  function addLabelToProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
+  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;
 
-  function removeLabelFromProjectIssue(string $idServer, string $idProject, int $idIssue, string $label): bool;
+  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;
 
-  function getUsers(string $idServer): array;
+  function getUsers(): array;
 
 }

@@ -18,19 +18,19 @@ trait Common {
   private $pwd;
 
 
-  public function hasAdminAccessToken(string $id): bool
+  public function hasAdminAccessToken(string $id = ''): bool
   {
-    return !!$this->getAdminAccessToken($id);
+    return !!$this->getAdminAccessToken($id ?: $this->idServer);
   }
 
 
-  public function getAdminAccessToken(string $id): ?string
+  public function getAdminAccessToken(string $id = ''): ?string
   {
-    return $this->pwd->get($id);
+    return $this->pwd->get($id ?: $this->idServer);
   }
 
 
-  public function getUserAccessToken(string $id): string
+  public function getUserAccessToken(string $id = ''): string
   {
     if (!($user = \bbn\User::getInstance())) {
       throw new \Exception(X::_('No User class instance found'));
@@ -38,23 +38,23 @@ trait Common {
     if (!($pref = \bbn\User\Preferences::getInstance())) {
       throw new \Exception(X::_('No User\Preferences class instance found'));
     }
-    if (!($userPref = $pref->getByOption($id))) {
-      throw new \Exception(X::_('No user\'s preference found for the server %s', $id));
+    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {
+      throw new \Exception(X::_('No user\'s preference found for the server %s', $id ?: $this->idServer));
     }
     else {
       $idPref = $userPref[$pref->getFields()['id']];
     }
     if (!($token = $this->pwd->userGet($idPref, $user))) {
-      throw new \Exception(X::_('No user\'s access token found for the server %s', $id));
+      throw new \Exception(X::_('No user\'s access token found for the server %s', $id ?: $this->idServer));
     }
     return $token;
   }
 
 
-  public function getServer(string $id): object
+  public function getServer(string $id = ''): object
   {
-    if (!($server = $this->opt->option($id))) {
-      throw new \Exception(X::_('No server found with ID %s', $id));
+    if (!($server = $this->opt->option($id ?: $this->idServer))) {
+      throw new \Exception(X::_('No server found with ID %s', $id ?: $this->idServer));
     }
     return $this->normalizeServer($server);
   }
