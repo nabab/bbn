@@ -6,10 +6,12 @@ use bbn;
 use bbn\Cache;
 use bbn\Appui\Passwords;
 use bbn\X;
+use bbn\Str;
 use bbn\Appui\Option;
 use bbn\Appui\Task;
 use bbn\Appui\Note;
 use bbn\User;
+use bbn\User\Preferences;
 use bbn\Appui\Vcs\GitLab;
 use bbn\Appui\Vcs\Svn;
 use bbn\Db;
@@ -98,10 +100,10 @@ class Vcs
   public function setUserAccessToken(string $id, string $token): bool
   {
     $this->changeServer($id);
-    if (!($user = \bbn\User::getInstance())) {
+    if (!($user = User::getInstance())) {
       throw new \Exception(X::_('No User class instance found'));
     }
-    if (!($pref = \bbn\User\Preferences::getInstance())) {
+    if (!($pref = Preferences::getInstance())) {
       throw new \Exception(X::_('No User\Preferences class instance found'));
     }
     if ($exPref = $pref->getByOption($id)) {
@@ -405,10 +407,78 @@ class Vcs
               && !empty($d['idIssue'])
               && ($task = $this->getAppuiTask($this->idServer, $d['idProject'], $d['idIssue']))
             ) {
-
+              return $this->addToTasksQueue($d['idProject'], 'import', $d);
             }
             break;
         }
+      }
+    }
+  }
+
+
+  public function addToTasksQueue(int $idProject, $type, $task)
+  {
+    return self::getDb()->insert('queue', [
+      'id_server' => $this->idServer,
+      'id_project' => $idProject,
+      'type' => $type,
+      'task' => !Str::isJson($task) ? \json_encode($task) : $task
+    ]);
+  }
+
+
+  public function processTasksQueue()
+  {
+    $db = self::getDb();
+    if ($tasks = $db->selectAll([
+      'table' => 'queue',
+      'fields' => [],
+      'where' => [
+        'conditions' => [[
+          'field' => 'started',
+          'operator' => 'isnull'
+        ], [
+          'field' => 'failed',
+          'value' => 0
+        ], [
+          'field' => 'active',
+          'value' => 1
+        ]]
+      ],
+      'group_by' => ['id_server'],
+      'order' => [[
+        'field' => 'created',
+        'dir' => 'asc'
+      ]]
+    ])) {
+      foreach ($tasks as $task) {
+        $db->update('queue', ['started' => date('Y-m-d H:i:s')], ['id' => $task->id]);
+        if ($t = \json_decode($task->task)) {
+          if (!empty($t->type)) {
+            switch ($t->type) {
+              case 'comment':
+                if (!empty($task->idProject)
+                  && !empty($t->idIssue)
+                  && !empty($t->idComment)
+                  && ($idTask = $this->getAppuiTaskId($task->idServer, $task->idProject, $t->idIssue))
+                ) {
+                  if (!$this->getAppuiTaskNote($task->idServer, $task->idProject, $t->idIssue, $t->idComment)) {
+
+                  }
+                }
+                break;
+            }
+          }
+        }
+        else {
+          $db->update('queue', [
+            'ended' => date('Y-m-d H:i:s'),
+            'failed' => 1
+          ], [
+            'id' => $task->id
+          ]);
+        }
+
       }
     }
   }
@@ -502,6 +572,12 @@ class Vcs
       }
     }
     return $idTask;
+  }
+
+
+  public function getAppuiUser()
+  {
+    
   }
 
 
@@ -684,18 +760,25 @@ class Vcs
       ) {
         $db = new \SQLite3($path);
         $db->exec("CREATE TABLE queue (
-          id INTEGER PRIMARY KEY,
-          server VARCHAR (150) NOT NULL,
-          created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
-          user VARCHAR (32),
-          method VARCHAR (100) NOT NULL,
-          args TEXT,
-          hash TEXT NOT NULL,
-          start DATETIME,
-          [end] DATETIME,
-          failed INTEGER (1) DEFAULT (0),
-          error TEXT,
-          active INTEGER (1) DEFAULT (1)
+          id         INTEGER      NOT NULL,
+          id_server  VARCHAR (16) NOT NULL,
+          id_project INTEGER      NOT NULL,
+          type       TEXT         NOT NULL
+                                  CHECK (type IN ('import', 'export') ),
+          created    DATETIME     NOT NULL
+                                  DEFAULT (CURRENT_TIMESTAMP),
+          task       TEXT         NOT NULL,
+          started    DATETIME     DEFAULT NULL,
+          ended      DATETIME     DEFAULT NULL,
+          failed     INTEGER (1)  DEFAULT (0)
+                                  NOT NULL
+                                  CHECK (failed IN (0, 1) ),
+          active     INTEGER (1)  NOT NULL
+                                  DEFAULT (1)
+                                  CHECK (active IN (0, 1) ),
+          PRIMARY KEY (
+              id
+          )
         );");
       }
       return \is_file($path) ? $path : null;
