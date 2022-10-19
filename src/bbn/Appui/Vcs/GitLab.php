@@ -768,14 +768,16 @@ class GitLab implements Server
     ];
     switch ($data['event_type']) {
       case 'note':
-        $d = X::mergeArrays($d, [
-          'type' => 'comment',
-          'idIssue' => $data['issue']['id'],
-          'idComment' => $data['object_attributes']['id'],
-          'text' => $data['object_attributes']['note'],
-          'created' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['created_at'])),
-          'updated' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['updated_at']))
-        ]);
+        if (empty($data['object_attributes']['system'])) {
+          $d = X::mergeArrays($d, [
+            'type' => 'comment',
+            'idIssue' => $data['issue']['id'],
+            'idComment' => $data['object_attributes']['id'],
+            'text' => $data['object_attributes']['note'],
+            'created' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['created_at'])),
+            'updated' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['updated_at']))
+          ]);
+        }
         break;
     }
     return $d;

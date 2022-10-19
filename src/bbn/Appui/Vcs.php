@@ -12,6 +12,7 @@ use bbn\Appui\Note;
 use bbn\User;
 use bbn\Appui\Vcs\GitLab;
 use bbn\Appui\Vcs\Svn;
+use bbn\Db;
 
 
 /**
@@ -46,7 +47,7 @@ class Vcs
    * Constructor.
    * @param bbn\Db $db
    */
-  public function __construct(bbn\Db $db, string $idServer = '')
+  public function __construct(Db $db, string $idServer = '')
   {
     $this->db = $db;
     $this->opt = Option::getInstance();
@@ -315,7 +316,7 @@ class Vcs
     if ($issues = $this->server->getProjectIssues($idProject)) {
       $t = $this;
       $issues = \array_map(function($i) use ($t, $idProject){
-        $i['idAppuiTask'] = $t->getAppuiTask($this->idServer, $idProject, $i['id']);
+        $i['idAppuiTask'] = $t->getAppuiTaskId($this->idServer, $idProject, $i['id']);
         return $i;
       }, $issues);
       return $issues;
@@ -327,7 +328,7 @@ class Vcs
   public function getProjectIssue(string $idProject, int $idIssue): ?array
   {
     if ($issue = $this->server->getProjectIssue($idProject, $idIssue)) {
-      $issue['idAppuiTask'] = $this->getAppuiTask($this->idServer, $idProject, $issue['id']);
+      $issue['idAppuiTask'] = $this->getAppuiTaskId($this->idServer, $idProject, $issue['id']);
       return $issue;
     }
     return null;
@@ -400,6 +401,12 @@ class Vcs
       if (!empty($d['type'])) {
         switch ($d['type']) {
           case 'comment':
+            if (!empty($d['idProject'])
+              && !empty($d['idIssue'])
+              && ($task = $this->getAppuiTask($this->idServer, $d['idProject'], $d['idIssue']))
+            ) {
+
+            }
             break;
         }
       }
@@ -409,7 +416,7 @@ class Vcs
 
   public function importIssueToTask(string $idProject, int $idIssue): ?string
   {
-    if (!($idTask = $this->getAppuiTask($this->idServer, $idProject, $idIssue))) {
+    if (!($idTask = $this->getAppuiTaskId($this->idServer, $idProject, $idIssue))) {
       if ($issue = $this->getProjectIssue($idProject, $idIssue)) {
         $task = new Task($this->db);
         $notes = new Note($this->db);
@@ -450,7 +457,7 @@ class Vcs
             ) {
               foreach ($issueNotes as $note) {
                 // Check if the note already exists and if it's a real note
-                if (empty($note['auto']) && !$this->getAppuiTaskNote($this->idServer, $idProject, $note['id'])) {
+                if (empty($note['auto']) && !$this->getAppuiTaskNote($this->idServer, $idProject, $idIssue, $note['id'])) {
                   // Use the external user's ID
                   $idUser = BBN_EXTERNAL_USER_ID;
                   // Check if the git user is an appui user
@@ -526,7 +533,32 @@ class Vcs
   }
 
 
-  private function getAppuiTask(string $idServer, string $idProject, int $idIssue): ?string
+  /**
+   * Gets the data path of the appui-vcs plugin
+   * @return string
+   */
+  public static function getMainDataPath(): string
+  {
+    return bbn\Mvc::getDataPath('appui-vcs');
+  }
+
+  /**
+   * Returns an instance of bbn\Db of the tasks queue database
+   * @return bbn\Db|null
+   */
+  public static function getDb(): ?Db
+  {
+    if ($dbPath = self::makeDb()) {
+      return new Db([
+        'engine' => 'sqlite',
+        'db' => $dbPath
+      ]);
+    }
+    return null;
+  }
+
+
+  private function getAppuiTaskId(string $idServer, string $idProject, int $idIssue): ?string
   {
     if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
       return $this->db->selectOne(self::BBN_TASK_TABLE, 'id_task', [
@@ -540,17 +572,49 @@ class Vcs
     return null;
   }
 
-  private function getAppuiTaskNote(string $idServer, string $idProject, int $idComment): ?array
+
+  private function getAppuiTask(string $idServer, string $idProject, int $idIssue): ?array
   {
     if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
-      $this->db->getColumnValues([
+      return $this->db->rselect(self::BBN_TASK_TABLE, [], [
+        'id_server' => $idServer,
+        'id_project' => $idProject,
+        'id_issue' => $idIssue,
+        'id_comment' => null,
+        'id_parent' => null
+      ]);
+    }
+    return null;
+  }
+
+
+  private function getAppuiTaskNote(string $idServer, string $idProject, int $idIssue, int $idComment): ?array
+  {
+    if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
+      return $this->db->rselect([
         'table' => self::BBN_TASK_TABLE,
-        'fields' => ['id_note'],
+        'fields' => [],
+        'join' => [[
+          'table' => self::BBN_TASK_TABLE,
+          'alias' => 'parent',
+          'on' => [
+            'conditions' => [[
+              'field' => 'parent.id',
+              'exp' => 'id_parent'
+            ], [
+              'field' => 'id_server',
+              'value' => $idServer
+            ], [
+              'field' => 'id_project',
+              'value' => $idProject
+            ], [
+              'field' => 'id_issue',
+              'value' => $idIssue
+            ]]
+          ]
+        ]],
         'where' => [
           'conditions' => [[
-            'field' => 'id_parent',
-            'operator' => 'isnotnull'
-          ], [
             'field' => 'id_server',
             'value' => $idServer
           ], [
@@ -562,6 +626,79 @@ class Vcs
           ]]
         ]
       ]);
+    }
+    return null;
+  }
+
+
+  private function getAppuiTaskNotes(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
+      $this->db->getColumnValues([
+        'table' => self::BBN_TASK_TABLE,
+        'fields' => ['id_note'],
+        'join' => [[
+          'table' => self::BBN_TASK_TABLE,
+          'alias' => 'parent',
+          'on' => [
+            'conditions' => [[
+              'field' => 'parent.id',
+              'exp' => 'id_parent'
+            ], [
+              'field' => 'id_server',
+              'value' => $idServer
+            ], [
+              'field' => 'id_project',
+              'value' => $idProject
+            ], [
+              'field' => 'id_issue',
+              'value' => $idIssue
+            ]]
+          ]
+        ]],
+        'where' => [
+          'conditions' => [[
+            'field' => 'id_server',
+            'value' => $idServer
+          ], [
+            'field' => 'id_project',
+            'value' => $idProject
+          ]]
+        ]
+      ]);
+    }
+    return null;
+  }
+
+
+  /**
+   * Makes the SQLite database and returns its path
+   * @return null|string
+   */
+  private static function makeDb(): ?string
+  {
+    if ($mainDataPath = self::getMainDataPath()) {
+      $path = $mainDataPath . 'queue.sqlite';
+      if (!\is_file($path)
+        && bbn\File\Dir::createPath($mainDataPath)
+      ) {
+        $db = new \SQLite3($path);
+        $db->exec("CREATE TABLE queue (
+          id INTEGER PRIMARY KEY,
+          server VARCHAR (150) NOT NULL,
+          created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+          user VARCHAR (32),
+          method VARCHAR (100) NOT NULL,
+          args TEXT,
+          hash TEXT NOT NULL,
+          start DATETIME,
+          [end] DATETIME,
+          failed INTEGER (1) DEFAULT (0),
+          error TEXT,
+          active INTEGER (1) DEFAULT (1)
+        );");
+      }
+      return \is_file($path) ? $path : null;
     }
     return null;
   }
