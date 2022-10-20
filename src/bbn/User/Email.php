@@ -351,7 +351,10 @@ class Email extends Basic
     $mb = $this->getMailbox($id_account);
     $folder = $this->getFolder($id);
     if ($folder && $mb->deleteMbox($folder['uid'])) {
-    	return $this->deleteFolderDb($id);
+      if ($this->deleteFolderDb($id)) {
+      	$this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        return true;
+      }
     }
     return false;
   }
