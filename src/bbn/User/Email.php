@@ -308,7 +308,7 @@ class Email extends Basic
         return true;
       }
     }
-    throw new Exception($mb ? $mb->getError() : X::_("No connection"));
+    return false;
   }
 
 
@@ -352,8 +352,6 @@ class Email extends Basic
     $folder = $this->getFolder($id);
     if ($folder && $mb->deleteMbox($folder['uid'])) {
     	return $this->deleteFolderDb($id);
-    } else {
-      throw new Exception($mb->getError());
     }
     return false;
   }
@@ -361,7 +359,7 @@ class Email extends Basic
 
   public function deleteFolderDb(string $id): bool
   {
-		return $this->pref->deleteBits($id);
+		return (bool) $this->pref->deleteBit($id);
   }
 
 

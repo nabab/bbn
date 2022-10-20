@@ -361,8 +361,10 @@ class Mailbox extends Basic
   public function deleteMbox($mbox)
   {
     if ($this->_is_connected()) {
-     X::ddump($this->mbParam . $mbox);
-      return imap_deletemailbox($this->stream, $this->mbParam . $mbox);
+      if (imap_deletemailbox($this->stream, $this->mbParam . $mbox)) {
+        return true;
+      }
+      X::ddump($this->getError());
     }
     return false;
   }
