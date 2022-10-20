@@ -92,10 +92,10 @@ class Email extends Basic
 
 
   /**
-       * Returns a list typical folder types as they are recorded in the options
-       *
-       * @return array
-       */
+           * Returns a list typical folder types as they are recorded in the options
+           *
+           * @return array
+           */
   public static function getFolderTypes(): array
   {
     return self::getOptions('folders');
@@ -103,10 +103,10 @@ class Email extends Basic
 
 
   /**
-       * Returns a list of typical email accounts types as they are recorded in the options
-       *
-       * @return array
-       */
+           * Returns a list of typical email accounts types as they are recorded in the options
+           *
+           * @return array
+           */
   public static function getAccountTypes(): array
   {
     return self::getOptions('types');
@@ -148,11 +148,11 @@ class Email extends Basic
 
 
   /**
-       * Returns the list of the accounts' IDs of the current user.
-       *
-       * @param bool $force 
-       * @return array|null
-       */
+           * Returns the list of the accounts' IDs of the current user.
+           *
+           * @param bool $force 
+           * @return array|null
+           */
   public function getAccountsIds(): ?array
   {
     if ($id_accounts = self::getOptionId('accounts')) {
@@ -164,11 +164,11 @@ class Email extends Basic
 
 
   /**
-       * Returns the list of the accounts of the current user.
-       *
-       * @param bool $force 
-       * @return array|null
-       */
+           * Returns the list of the accounts of the current user.
+           *
+           * @param bool $force 
+           * @return array|null
+           */
   public function getAccounts(bool $force = false): array
   {
     $res = [];
@@ -328,21 +328,47 @@ class Email extends Basic
       $a['uid'] = $uid_parent . '.' . $name;
       $a['id_parent'] = $id_parent;
     }
-    
+
     return (bool) $this->pref->addBit($id_account, $a);
   }
 
 
-  public function renameFolder(string $id, string $name): bool
+  public function renameFolder(string $id, string $name, string $id_account, string $id_parent = null): bool
   {
-
-    $this->renameFolderDb($id, $name);
+    $mb = $this->getMailbox($id_account);
+    $uid_parent = "";
+    if ($id_parent) {
+      $uid_parent = $this->getFolder($id_parent)['uid'];
+    }
+    $mboxName = $id_parent ? $uid_parent . '.' . $name : $name;
+    if ($mb && $mb->renameMbox($this->getFolder($id)['uid'], $mboxName)) {
+      if (this->renameFolderDb($id, $mboxName, $id_parent)) {
+        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        return true;
+      }
+    }
+    return false;
   }
 
 
-  public function renameFolderDb(string $id, string $name): bool
+  public function renameFolderDb(string $id, string $name, string $id_parent): bool
   {
+    $types = self::getFolderTypes();
 
+    $a = [
+      'id_option' => X::getField($types, ['code' => 'folders'], 'id'),
+      'text' => $name,
+      'uid' => $name,
+      'subcribed' => true
+    ];
+
+    if ($id_parent) {
+      $uid_parent = $this->getFolder($id_parent)['uid'];
+      $a['uid'] = $uid_parent . '.' . $name;
+      $a['id_parent'] = $id_parent;
+    }
+
+    return (bool) $this->pref->setBit($id_account, $a);
   }
 
 
@@ -352,7 +378,7 @@ class Email extends Basic
     $folder = $this->getFolder($id);
     if ($folder && $mb->deleteMbox($folder['uid'])) {
       if ($this->deleteFolderDb($id)) {
-      	$this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
+        $this->mboxes[$id_account]['folders'] = $this->getFolders($this->mboxes[$id_account]);
         return true;
       }
     }
@@ -362,7 +388,7 @@ class Email extends Basic
 
   public function deleteFolderDb(string $id): bool
   {
-		return (bool) $this->pref->deleteBit($id);
+    return (bool) $this->pref->deleteBit($id);
   }
 
 
@@ -593,15 +619,15 @@ class Email extends Basic
 
 
   /**
-       * Returns a list of emails based on their folder.
-       *
-       * @param string $id_folder
-       * @param array $filter
-       * @param int $limit
-       * @param int $start
-       *
-       * @return array|null
-       */
+           * Returns a list of emails based on their folder.
+           *
+           * @param string $id_folder
+           * @param array $filter
+           * @param int $limit
+           * @param int $start
+           *
+           * @return array|null
+           */
   public function getList(string $id_folder, array $post): ?array
   {
     if ($ids = $this->idsFromFolder($id_folder)) {
@@ -976,7 +1002,7 @@ class Email extends Basic
         $ele = array_shift($a);
         // search if res contain an array with 'text' => $ele and return the index or null instead
         $idx = X::find($res, ['text' => $ele]);
-   			
+
         if (null === $idx) {
           // count number of element in array (useless ?)
           $idx   = count($res);
@@ -1086,18 +1112,18 @@ class Email extends Basic
       $num    = 0;
       $dest   = [];
       /*
-          foreach ($fields as $field) {
-            $dest[$field] = [];
-            if (!empty($cfg[$field])) {
-              foreach ($cfg[$field] as $d) {
-                if (Str::isEmail($d)) {
-                  $dest[$field][] = $d;
-                  $num++;
+              foreach ($fields as $field) {
+                $dest[$field] = [];
+                if (!empty($cfg[$field])) {
+                  foreach ($cfg[$field] as $d) {
+                    if (Str::isEmail($d)) {
+                      $dest[$field][] = $d;
+                      $num++;
+                    }
+                  }
                 }
               }
-            }
-          }
-          */
+              */
 
       if (!empty($cfg['title']) || !empty($cfg['text'])) {
         $mailer = $mb->getMailer();
