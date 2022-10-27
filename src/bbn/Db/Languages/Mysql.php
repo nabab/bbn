@@ -363,6 +363,58 @@ MYSQL
   }
 
   /**
+   * Changes the charset to the given database
+   * @param string $database The database's name
+   * @param string $charset The charset to set
+   * @param string $collation The collation to set
+   */
+  public function setDatabaseCharset(string $database, string $charset, string $collation): bool
+  {
+    if ($this->check() && Str::checkName($database, $charset, $collation)) {
+      return (bool)$this->rawQuery("ALTER DATABASE `$database` CHARACTER SET = $charset COLLATE = $collation;");
+    }
+    return false;
+  }
+
+  /**
+   * Changes the charset to the given table
+   * @param string $table The table's name
+   * @param string $charset The charset to set
+   * @param string $collation The collation to set
+   */
+  public function setTableCharset(string $table, string $charset, string $collation): bool
+  {
+    if ($this->check() && Str::checkName($table, $charset, $collation)) {
+      return (bool)$this->rawQuery("ALTER TABLE `$table` CONVERT TO CHARACTER SET $charset COLLATE $collation;");
+    }
+    return false;
+  }
+
+  /**
+   * Changes the charset to the given column
+   * @param string $table The table's name
+   * @param string $column The column's name
+   * @param string $charset The charset to set
+   * @param string $collation The collation to set
+   */
+  public function setColumnCharset(string $table, string $column, string $charset, string $collation): bool
+  {
+    if ($this->check()
+      && Str::checkName($table, $column, $charset, $collation)
+      && ($modelize = $this->modelize($table))
+      && !empty($modelize['fields'][$column])
+      && !empty($modelize['fields'][$column]['type'])
+      && ($type = \strtoupper($modelize['fields'][$column]['type']))
+    ) {
+      if (!empty($modelize['fields'][$column]['maxlength'])) {
+        $type .= '(' . $modelize['fields'][$column]['maxlength'] . ')';
+      }
+      return (bool)$this->rawQuery("ALTER TABLE `$table` MODIFY `$column` $type CHARSET $charset COLLATE $collation;");
+    }
+    return false;
+  }
+
+  /**
    * Returns the comment (or an empty string if none) for a given table.
    *
    * @param string $table The table's name

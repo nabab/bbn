@@ -848,6 +848,52 @@ class Db implements Db\Actions
   }
 
 
+  /**
+   * Changes the charset to the given database
+   * @param string $database The database's name
+   * @param string $charset The charset to set
+   * @param string $collation The collation to set
+   */
+  public function setDatabaseCharset(string $database, string $charset, string $collation): bool
+  {
+    if (method_exists($this->language, 'setDatabaseCharset')) {
+      return $this->language->setDatabaseCharset($database, $charset, $collation);
+    }
+    return false;
+  }
+
+
+  /**
+   * Changes the charset to the given table
+   * @param string $table The table's name
+   * @param string $charset The charset to set
+   * @param string $collation The collation to set
+   */
+  public function setTableCharset(string $table, string $charset, string $collation): bool
+  {
+    if (method_exists($this->language, 'setTableCharset')) {
+      return $this->language->setTableCharset($table, $charset, $collation);
+    }
+    return false;
+  }
+
+
+  /**
+   * Changes the charset to the given column
+   * @param string $table The table's name
+   * @param string $column The column's name
+   * @param string $charset The charset to set
+   * @param string $collation The collation to set
+   */
+  public function setColumnCharset(string $table, string $column, string $charset, string $collation): bool
+  {
+    if (method_exists($this->language, 'setColumnCharset')) {
+      return $this->language->setColumnCharset($table, $column, $charset, $collation);
+    }
+    return false;
+  }
+
+
   /****************************************************************
    *                                                              *
    *                                                              *
