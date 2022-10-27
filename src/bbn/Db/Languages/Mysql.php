@@ -127,6 +127,10 @@ class Mysql extends Sql
       $cfg['port'] = 3306;
     }
 
+    if (empty($cfg['charset'])) {
+      $cfg['charset'] = 'utf8mb4';
+    }
+
     $cfg['code_db'] = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'] . '@' . $cfg['host'];
     $cfg['args'] = [
@@ -136,7 +140,7 @@ class Mysql extends Sql
         . 'port=' . $cfg['port'],
       $cfg['user'],
       $cfg['pass'],
-      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4'],
+      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES ' . $cfg['charset']],
     ];
 
     return $cfg;
