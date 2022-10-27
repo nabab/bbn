@@ -380,7 +380,13 @@ class Mailbox extends Basic
   public function renameMbox($old, $new)
   {
     if ($this->_is_connected()) {
-      return imap_renamemailbox($this->stream, $this->mbParam. $old, $this->mbParam. $new);
+      if (imap_renamemailbox($this->stream, $this->mbParam. $old, $this->mbParam. $new)) {
+        return true;
+      } else {
+        X::ddump(imap_last_error());
+      }
+    } else {
+      X::ddump("Not connected");
     }
 
     return false;
