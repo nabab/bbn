@@ -199,7 +199,7 @@ class Mysql extends Sql
    * @param string $collation
    * @return bool
    */
-  private function createMysqlDatabase(string $database, string $enc = 'utf8mb4', string $collation = 'utf8mb4_unicode_ci'): bool
+  private function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
     if (bbn\Str::checkName($database, $enc, $collation)) {
       return (bool)$this->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
@@ -494,7 +494,7 @@ MYSQL
    * @param string $engine
    * @return string
    */
-  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8mb4', string $engine = 'InnoDB')
+  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
   {
     $lines = [];
     $sql = '';
@@ -928,7 +928,7 @@ MYSQL
       $st .= $this->getColumnDefinitionStatement($name, $col);
     }
 
-    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
+    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
 
     return $st;
   }
