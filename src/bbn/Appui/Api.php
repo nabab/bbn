@@ -61,21 +61,21 @@ class Api extends Basic
     if ($this->jwt) {
       $key_out = self::_get_tmp_key(true);
       $jwt = $this->jwt->setKey($key_out)->set(['data' => $cfg]);
-      if ($res = X::curl(
+      if ($curl = X::curl(
         self::REMOTE,
         ['action' => 'register_project', 'data' => $jwt]
       )
       ) {
         $key_in = self::_get_tmp_key();
         try {
-          $res = $this->jwt->setKey($key_in)->get($res);
+          $res = $this->jwt->setKey($key_in)->get($curl);
         }
         catch (Exception $e) {
           X::log(["JSON token", $e->getMessage()]);
           throw new Exception(X::_("Impossible to get data with JSON token, check log").PHP_EOL.$e->getMessage());
         }
 
-        return $this->jwt->setKey($key_in)->get($res);
+        return $res;
       }
       else {
         $err = X::lastCurlError();
@@ -101,7 +101,7 @@ class Api extends Basic
       $key = self::_get_key(true);
       $jwt = $this->jwt->setKey($key)->set(['data' => $cfg]);
       if ($res = X::curl(
-        self::REMOTE.'/' . constant('constant('BBN_ID_APP')'),
+        self::REMOTE.'/' . constant('BBN_ID_APP'),
         ['action' => $action, 'data' => $jwt]
       )
       ) {
