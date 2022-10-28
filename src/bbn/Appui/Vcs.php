@@ -33,8 +33,6 @@ class Vcs
 
   const CACHE_NAME = 'bbn/Appui/Vcs';
 
-  const BBN_TASK_TABLE = 'bbn_tasks_vcs';
-
   /** @var string The cache name prefix */
   private $cacheNamePrefix;
 
@@ -43,6 +41,9 @@ class Vcs
 
   /** @var object|null The server class instance */
   private $server = null;
+
+  /** @var string The DB table for tasks-vcs links */
+  private static $taskTable = 'bbn_tasks_vcs';
 
 
   /**
@@ -405,7 +406,7 @@ class Vcs
           case 'comment':
             if (!empty($d['idProject'])
               && !empty($d['idIssue'])
-              && ($task = $this->getAppuiTask($this->idServer, $d['idProject'], $d['idIssue']))
+              && ($task = $this->getAppuiTaskByIssue($this->idServer, $d['idProject'], $d['idIssue']))
             ) {
               return $this->addToTasksQueue($d['idProject'], 'import', $d);
             }
@@ -430,7 +431,7 @@ class Vcs
   public function processTasksQueue()
   {
     $db = self::getDb();
-    if ($tasks = $db->selectAll([
+    if ($queue = $db->selectAll([
       'table' => 'queue',
       'fields' => [],
       'where' => [
@@ -451,18 +452,28 @@ class Vcs
         'dir' => 'asc'
       ]]
     ])) {
-      foreach ($tasks as $task) {
-        $db->update('queue', ['started' => date('Y-m-d H:i:s')], ['id' => $task->id]);
-        if ($t = \json_decode($task->task)) {
+      $task = new Task($this->db);
+      foreach ($queue as $q) {
+        $success = false;
+        $db->update('queue', ['started' => date('Y-m-d H:i:s')], ['id' => $q->id]);
+        if ($t = \json_decode($q->task)) {
           if (!empty($t->type)) {
             switch ($t->type) {
               case 'comment':
-                if (!empty($task->idProject)
+                if (!empty($q->idProject)
                   && !empty($t->idIssue)
                   && !empty($t->idComment)
-                  && ($idTask = $this->getAppuiTaskId($task->idServer, $task->idProject, $t->idIssue))
+                  && ($idTask = $this->getAppuiTaskId($q->idServer, $q->idProject, $t->idIssue))
                 ) {
-                  if (!$this->getAppuiTaskNote($task->idServer, $task->idProject, $t->idIssue, $t->idComment)) {
+                  $idUser = BBN_EXTERNAL_USER_ID;
+                  if ($u = $this->getAppuiUser($q->idServer, $t->idUser)) {
+                    $idUser = $u['id'];
+                  }
+                  $task->setUser($idUser);
+                  if (!$this->getAppuiTaskNote($q->idServer, $q->idProject, $t->idIssue, $t->idComment)) {
+                    $success = !empty($this->addAppuiTaskNote($q->idProject, $idTask, $idUser, $t->text, $t->updated));
+                  }
+                  else {
 
                   }
                 }
@@ -470,15 +481,14 @@ class Vcs
             }
           }
         }
-        else {
+        if ($success) {
           $db->update('queue', [
             'ended' => date('Y-m-d H:i:s'),
-            'failed' => 1
+            'failed' => empty($success) ? 0 : 1
           ], [
-            'id' => $task->id
+            'id' => $q->id
           ]);
         }
-
       }
     }
   }
@@ -489,16 +499,11 @@ class Vcs
     if (!($idTask = $this->getAppuiTaskId($this->idServer, $idProject, $idIssue))) {
       if ($issue = $this->getProjectIssue($idProject, $idIssue)) {
         $task = new Task($this->db);
-        $notes = new Note($this->db);
-        $notesCfg = $notes->getClassCfg();
-        $notesFields = $notesCfg['arch']['notes'];
-        $notesVersionsFields = $notesCfg['arch']['versions'];
         $idCatSupportTask = $this->opt->fromCode('support', 'cats', 'task', 'appui');
-        $appuiUsers = $this->getAppuiUsers($this->idServer);
         // Use the external user's ID
         $idUser = BBN_EXTERNAL_USER_ID;
         // Check if the git user is an appui user
-        if ($appuiUser = X::getRow($appuiUsers, ['idVcs' => $issue['author']['id']])) {
+        if ($appuiUser = $this->getAppuiUser($this->idServer, $issue['author']['id'])){
           $idUser = $appuiUser['id'];
         }
         if (!empty($idUser)) {
@@ -513,56 +518,30 @@ class Vcs
               'state' => $this->opt->fromCode($issue['state'], 'states', 'task', 'appui'),
               'cfg' => \json_encode(['widgets' => ['notes' => 1]])
             ]))
-            && $this->db->insert(self::BBN_TASK_TABLE, [
+            && $this->db->insert(self::$taskTable, [
               'id_server' => $this->idServer,
               'id_project' => $idProject,
               'id_issue' => $idIssue,
               'id_task' => $idTask
             ])
           ) {
-            $idParent = $this->db->lastId();
             // Comments
             if (!empty($issue['notes'])
               && ($issueNotes = $this->getProjectIssueComments($idProject, $idIssue))
             ) {
               foreach ($issueNotes as $note) {
                 // Check if the note already exists and if it's a real note
-                if (empty($note['auto']) && !$this->getAppuiTaskNote($this->idServer, $idProject, $idIssue, $note['id'])) {
+                if (empty($note['auto']) &&
+                  !$this->getAppuiTaskNote($this->idServer, $idProject, $idIssue, $note['id'])
+                ) {
                   // Use the external user's ID
                   $idUser = BBN_EXTERNAL_USER_ID;
                   // Check if the git user is an appui user
-                  if ($appuiUser = X::getRow($appuiUsers, ['idVcs' => $note['author']['id']])) {
+                  if ($appuiUser = $this->getAppuiUser($this->idServer, $note['author']['id'])) {
                     $idUser = $appuiUser['id'];
                   }
                   if (!empty($idUser)) {
-                    // Set the task's user
-                    $task->setUser($idUser);
-                    // Set the task's date
-                    $task->setDate(date('Y-m-d H:i:s', strtotime($note['updated'])));
-                    // Add the note to the task
-                    if (($idNote = $task->comment($idTask, [
-                        'title' => '',
-                        'text' => $note['content']
-                      ]))
-                      && $this->db->insert(self::BBN_TASK_TABLE, [
-                        'id_parent' => $idParent,
-                        'id_task' => $idTask,
-                        'id_server' => $this->idServer,
-                        'id_project' => $idProject,
-                        'id_comment' => $idNote,
-                      ])
-                    ) {
-                      $this->db->update($notesCfg['table'], [
-                        $notesFields['creator'] => $idUser
-                      ], [
-                        $notesFields['id'] => $idNote
-                      ]);
-                      $this->db->update($notesCfg['tables']['versions'], [
-                        $notesVersionsFields['id_user'] => $idUser
-                      ], [
-                        $notesVersionsFields['id_note'] => $idNote
-                      ]);
-                    }
+                    $this->addAppuiTaskNote($idProject, $idTask, $idUser, $note['content'], $note['updated']);
                   }
                 }
               }
@@ -575,9 +554,78 @@ class Vcs
   }
 
 
-  public function getAppuiUser()
+  public function addAppuiTaskNote(int $idProject, string $idTask, string $idUser, string $content, string $date = ''): ?string
   {
-    
+    $notes = new Note($this->db);
+    $notesCfg = $notes->getClassCfg();
+    $notesFields = $notesCfg['arch']['notes'];
+    $notesVersionsFields = $notesCfg['arch']['versions'];
+    $task = new Task($this->db);
+    // Set the task's user
+    $task->setUser($idUser);
+    $date = !empty($date) ? date('Y-m-d H:i:s', strtotime($date)) : date('Y-m-d H:i:s');
+    // Set the task's date
+    $task->setDate($date);
+    // Add the note to the task
+    if (($vcs = $this->getAppuiTask($this->idServer, $idProject, $idTask))
+      ($idNote = $task->comment($idTask, [
+        'title' => '',
+        'text' => $content
+      ]))
+      // Add the taks-vcs link
+      && $this->db->insert(self::$taskTable, [
+        'id_parent' => $vcs['id'],
+        'id_task' => $idTask,
+        'id_server' => $this->idServer,
+        'id_project' => $idProject,
+        'id_comment' => $idNote,
+      ])
+    ) {
+      // Get the ID
+      $id = $this->db->lastId();
+      // Set the correct user ID
+      $this->db->update($notesCfg['table'], [
+        $notesFields['creator'] => $idUser
+      ], [
+        $notesFields['id'] => $idNote
+      ]);
+      $this->db->update($notesCfg['tables']['versions'], [
+        $notesVersionsFields['id_user'] => $idUser
+      ], [
+        $notesVersionsFields['id_note'] => $idNote
+      ]);
+      return $id;
+    }
+    return null;
+  }
+
+
+  public function getAppuiUser(string $idServer, int $idVcs): ?array
+  {
+    if ($pref = $this->db->rselect([
+      'table' => 'bbn_users_options',
+      'fields' => [
+        'id' => 'id_user',
+        'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
+        'info' => 'JSON_EXTRACT(cfg, "$.user")'
+      ],
+      'where' => [
+        'conditions' => [[
+          'field' => 'id_option',
+          'value' => $idServer
+        ], [
+          'field' => 'JSON_EXTRACT(cfg, "$.user")',
+          'operator' => 'isnotnull'
+        ], [
+          'field' => 'JSON_EXTRACT(cfg, "$.user.id")',
+          'value' => $idVcs
+        ]]
+      ]
+    ])) {
+      $pref['info'] = \json_decode($pref['info'], true);
+      return $pref;
+    }
+    return null;
   }
 
 
@@ -636,8 +684,8 @@ class Vcs
 
   private function getAppuiTaskId(string $idServer, string $idProject, int $idIssue): ?string
   {
-    if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
-      return $this->db->selectOne(self::BBN_TASK_TABLE, 'id_task', [
+    if ($this->db->tableExists(self::$taskTable)) {
+      return $this->db->selectOne(self::$taskTable, 'id_task', [
         'id_server' => $idServer,
         'id_project' => $idProject,
         'id_issue' => $idIssue,
@@ -649,10 +697,25 @@ class Vcs
   }
 
 
-  private function getAppuiTask(string $idServer, string $idProject, int $idIssue): ?array
+  private function getAppuiTask(string $idServer, string $idProject, string $idTask): ?array
   {
-    if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
-      return $this->db->rselect(self::BBN_TASK_TABLE, [], [
+    if ($this->db->tableExists(self::$taskTable)) {
+      return $this->db->rselect(self::$taskTable, [], [
+        'id_server' => $idServer,
+        'id_project' => $idProject,
+        'id_task' => $idTask,
+        'id_comment' => null,
+        'id_parent' => null
+      ]);
+    }
+    return null;
+  }
+
+
+  private function getAppuiTaskByIssue(string $idServer, string $idProject, int $idIssue): ?array
+  {
+    if ($this->db->tableExists(self::$taskTable)) {
+      return $this->db->rselect(self::$taskTable, [], [
         'id_server' => $idServer,
         'id_project' => $idProject,
         'id_issue' => $idIssue,
@@ -666,12 +729,12 @@ class Vcs
 
   private function getAppuiTaskNote(string $idServer, string $idProject, int $idIssue, int $idComment): ?array
   {
-    if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
+    if ($this->db->tableExists(self::$taskTable)) {
       return $this->db->rselect([
-        'table' => self::BBN_TASK_TABLE,
+        'table' => self::$taskTable,
         'fields' => [],
         'join' => [[
-          'table' => self::BBN_TASK_TABLE,
+          'table' => self::$taskTable,
           'alias' => 'parent',
           'on' => [
             'conditions' => [[
@@ -709,12 +772,12 @@ class Vcs
 
   private function getAppuiTaskNotes(string $idServer, string $idProject, int $idIssue): ?array
   {
-    if ($this->db->tableExists(self::BBN_TASK_TABLE)) {
+    if ($this->db->tableExists(self::$taskTable)) {
       $this->db->getColumnValues([
-        'table' => self::BBN_TASK_TABLE,
+        'table' => self::$taskTable,
         'fields' => ['id_note'],
         'join' => [[
-          'table' => self::BBN_TASK_TABLE,
+          'table' => self::$taskTable,
           'alias' => 'parent',
           'on' => [
             'conditions' => [[
@@ -760,25 +823,17 @@ class Vcs
       ) {
         $db = new \SQLite3($path);
         $db->exec("CREATE TABLE queue (
-          id         INTEGER      NOT NULL,
-          id_server  VARCHAR (16) NOT NULL,
-          id_project INTEGER      NOT NULL,
-          type       TEXT         NOT NULL
-                                  CHECK (type IN ('import', 'export') ),
-          created    DATETIME     NOT NULL
-                                  DEFAULT (CURRENT_TIMESTAMP),
-          task       TEXT         NOT NULL,
-          started    DATETIME     DEFAULT NULL,
-          ended      DATETIME     DEFAULT NULL,
-          failed     INTEGER (1)  DEFAULT (0)
-                                  NOT NULL
-                                  CHECK (failed IN (0, 1) ),
-          active     INTEGER (1)  NOT NULL
-                                  DEFAULT (1)
-                                  CHECK (active IN (0, 1) ),
-          PRIMARY KEY (
-              id
-          )
+          id INTEGER NOT NULL,
+          id_server VARCHAR (16) NOT NULL,
+          id_project INTEGER NOT NULL,
+          type TEXT NOT NULL CHECK (type IN ('import', 'export')),
+          created DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+          task TEXT NOT NULL,
+          started DATETIME DEFAULT NULL,
+          ended DATETIME DEFAULT NULL,
+          failed INTEGER (1) DEFAULT (0) NOT NULL CHECK (failed IN (0, 1)),
+          active INTEGER (1) NOT NULL DEFAULT (1) CHECK (active IN (0, 1)),
+          PRIMARY KEY (id)
         );");
       }
       return \is_file($path) ? $path : null;
