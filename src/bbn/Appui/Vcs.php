@@ -400,13 +400,14 @@ class Vcs
 
   public function analyzeWebhook(array $data)
   {
+    $d = $this->server->analyzeWebhook($data);
     if ($d = $this->server->analyzeWebhook($data)) {
       if (!empty($d['type'])) {
         switch ($d['type']) {
           case 'comment':
             if (!empty($d['idProject'])
               && !empty($d['idIssue'])
-              && ($task = $this->getAppuiTaskByIssue($this->idServer, $d['idProject'], $d['idIssue']))
+              && $this->getAppuiTaskByIssue($this->idServer, $d['idProject'], $d['idIssue'])
             ) {
               return $this->addToTasksQueue($d['idProject'], 'import', $d);
             }
@@ -428,9 +429,14 @@ class Vcs
   }
 
 
-  public function processTasksQueue()
+  public function processTasksQueue(): array
   {
     $db = self::getDb();
+    $res = [
+      'todo' => 0,
+      'processed' => 0,
+      'failed' => 0
+    ];
     if ($queue = $db->selectAll([
       'table' => 'queue',
       'fields' => [],
@@ -446,51 +452,41 @@ class Vcs
           'value' => 1
         ]]
       ],
-      'group_by' => ['id_server'],
+      //'group_by' => ['id_server'],
       'order' => [[
         'field' => 'created',
         'dir' => 'asc'
       ]]
     ])) {
-      $task = new Task($this->db);
+      $res['todo'] = count($queue);
       foreach ($queue as $q) {
         $success = false;
         $db->update('queue', ['started' => date('Y-m-d H:i:s')], ['id' => $q->id]);
-        if ($t = \json_decode($q->task)) {
+        if (!empty($q->id_server)
+          && ($t = \json_decode($q->task))
+        ) {
+          $this->changeServer($q->id_server);
           if (!empty($t->type)) {
             switch ($t->type) {
               case 'comment':
-                if (!empty($q->idProject)
-                  && !empty($t->idIssue)
-                  && !empty($t->idComment)
-                  && ($idTask = $this->getAppuiTaskId($q->idServer, $q->idProject, $t->idIssue))
-                ) {
-                  $idUser = BBN_EXTERNAL_USER_ID;
-                  if ($u = $this->getAppuiUser($q->idServer, $t->idUser)) {
-                    $idUser = $u['id'];
-                  }
-                  $task->setUser($idUser);
-                  if (!$this->getAppuiTaskNote($q->idServer, $q->idProject, $t->idIssue, $t->idComment)) {
-                    $success = !empty($this->addAppuiTaskNote($q->idProject, $idTask, $idUser, $t->text, $t->updated));
-                  }
-                  else {
-
-                  }
-                }
+                $success = $this->processComment($q->id_server, $q->id_project, $q->type, $t);
                 break;
             }
           }
         }
-        if ($success) {
-          $db->update('queue', [
-            'ended' => date('Y-m-d H:i:s'),
-            'failed' => empty($success) ? 0 : 1
-          ], [
-            'id' => $q->id
-          ]);
+        $db->update('queue', [
+          'ended' => date('Y-m-d H:i:s'),
+          'failed' => empty($success) ? 1 : 0
+        ], [
+          'id' => $q->id
+        ]);
+        $res['processed']++;
+        if (empty($success)) {
+          $res['failed']++;
         }
       }
     }
+    return $res;
   }
 
 
@@ -568,7 +564,7 @@ class Vcs
     $task->setDate($date);
     // Add the note to the task
     if (($vcs = $this->getAppuiTask($this->idServer, $idProject, $idTask))
-      ($idNote = $task->comment($idTask, [
+      && ($idNote = $task->comment($idTask, [
         'title' => '',
         'text' => $content
       ]))
@@ -600,6 +596,18 @@ class Vcs
   }
 
 
+  public function editAppuiTaskNote(int $idProject, string $idTask, int $idComment, string $idUser, string $content, string $date = ''): bool
+  {
+    return false;
+  }
+
+
+  public function removeAppuiTaskNote(int $idProject, string $idTask, int $idComment, string $idUser, string $date = ''): bool
+  {
+    return false;
+  }
+
+
   public function getAppuiUser(string $idServer, int $idVcs): ?array
   {
     if ($pref = $this->db->rselect([
@@ -617,7 +625,7 @@ class Vcs
           'field' => 'JSON_EXTRACT(cfg, "$.user")',
           'operator' => 'isnotnull'
         ], [
-          'field' => 'JSON_EXTRACT(cfg, "$.user.id")',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
           'value' => $idVcs
         ]]
       ]
@@ -739,28 +747,28 @@ class Vcs
           'on' => [
             'conditions' => [[
               'field' => 'parent.id',
-              'exp' => 'id_parent'
+              'exp' => $this->db->cfn('id_parent', self::$taskTable)
             ], [
-              'field' => 'id_server',
+              'field' => 'parent.id_server',
               'value' => $idServer
             ], [
-              'field' => 'id_project',
+              'field' => 'parent.id_project',
               'value' => $idProject
             ], [
-              'field' => 'id_issue',
+              'field' => 'parent.id_issue',
               'value' => $idIssue
             ]]
           ]
         ]],
         'where' => [
           'conditions' => [[
-            'field' => 'id_server',
+            'field' => $this->db->cfn('id_server', self::$taskTable),
             'value' => $idServer
           ], [
-            'field' => 'id_project',
+            'field' => $this->db->cfn('id_project', self::$taskTable),
             'value' => $idProject
           ], [
-            'field' => 'id_comment',
+            'field' => $this->db->cfn('id_comment', self::$taskTable),
             'value' => $idComment
           ]]
         ]
@@ -782,31 +790,70 @@ class Vcs
           'on' => [
             'conditions' => [[
               'field' => 'parent.id',
-              'exp' => 'id_parent'
+              'exp' => $this->db->cfn('id_parent', self::$taskTable)
             ], [
-              'field' => 'id_server',
+              'field' => 'parent.id_server',
               'value' => $idServer
             ], [
-              'field' => 'id_project',
+              'field' => 'parent.id_project',
               'value' => $idProject
             ], [
-              'field' => 'id_issue',
+              'field' => 'parent.id_issue',
               'value' => $idIssue
             ]]
           ]
         ]],
         'where' => [
           'conditions' => [[
-            'field' => 'id_server',
+            'field' => $this->db->cfn('id_server', self::$taskTable),
             'value' => $idServer
           ], [
-            'field' => 'id_project',
+            'field' => $this->db->cfn('id_project', self::$taskTable),
             'value' => $idProject
           ]]
         ]
       ]);
     }
     return null;
+  }
+
+
+  private function processComment(string $idServer, int $idProject, string $type, object $task): bool
+  {
+    $success = false;
+    if ($type === 'import') {
+      if (!empty($task->idIssue)
+        && !empty($task->idComment)
+        && ($idTask = $this->getAppuiTaskId($idServer, $idProject, $task->idIssue))
+      ) {
+        $idUser = BBN_EXTERNAL_USER_ID;
+        if ($u = $this->getAppuiUser($idServer, $task->idUser)) {
+          $idUser = $u['id'];
+        }
+        $currentNote = $this->getAppuiTaskNote($idServer, $idProject, $task->idIssue, $task->idComment);
+        switch ($task->action) {
+          case 'insert':
+            if (empty($currentNote)) {
+              $success = !empty($this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated));
+            }
+            break;
+          case 'update':
+            if (!empty($currentNote)) {
+              $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
+            }
+            break;
+          case 'delete':
+            if (!empty($currentNote)) {
+              $success = $this->removeAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->updated);
+            }
+            break;
+        }
+      }
+    }
+    else if ($type === 'export') {
+
+    }
+    return $success;
   }
 
 

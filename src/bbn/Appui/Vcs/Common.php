@@ -35,6 +35,11 @@ trait Common {
     if (!($user = \bbn\User::getInstance())) {
       throw new \Exception(X::_('No User class instance found'));
     }
+    if (defined('BBN_EXTERNAL_USER_ID')
+      && ($user->getId() === BBN_EXTERNAL_USER_ID)
+    ) {
+      return $this->getAdminAccessToken($id);
+    }
     if (!($pref = \bbn\User\Preferences::getInstance())) {
       throw new \Exception(X::_('No User\Preferences class instance found'));
     }

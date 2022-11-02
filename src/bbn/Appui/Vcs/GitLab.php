@@ -771,6 +771,7 @@ class GitLab implements Server
         if (empty($data['object_attributes']['system'])) {
           $d = X::mergeArrays($d, [
             'type' => 'comment',
+            'action' => 'insert',
             'idIssue' => $data['issue']['id'],
             'idComment' => $data['object_attributes']['id'],
             'text' => $data['object_attributes']['note'],
