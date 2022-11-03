@@ -17,6 +17,7 @@ trait Common {
   /** @var bbn\Appui\Passwords The bbn\Appui\Passwords class instance */
   private $pwd;
 
+  private $idUser;
 
   public function hasAdminAccessToken(string $id = ''): bool
   {
@@ -32,7 +33,10 @@ trait Common {
 
   public function getUserAccessToken(string $id = ''): string
   {
-    if (!($user = \bbn\User::getInstance())) {
+    if (!empty($this->idUser)) {
+
+    }
+    else if (!($user = \bbn\User::getInstance())) {
       throw new \Exception(X::_('No User class instance found'));
     }
     if (defined('BBN_EXTERNAL_USER_ID')

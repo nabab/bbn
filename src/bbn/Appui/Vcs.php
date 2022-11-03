@@ -50,7 +50,7 @@ class Vcs
    * Constructor.
    * @param bbn\Db $db
    */
-  public function __construct(Db $db, string $idServer = '')
+  public function __construct(Db $db, string $idServer = '', string $idUser = '')
   {
     $this->db = $db;
     $this->opt = Option::getInstance();
@@ -59,6 +59,9 @@ class Vcs
     self::optionalInit();
     if (!empty($idServer)) {
       $this->changeServer($idServer);
+      if (!empty($idUser)) {
+        $this->$idUser = $idUser;
+      }
     }
 
     $this->cacheNamePrefix = '';
