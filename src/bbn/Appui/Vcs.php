@@ -514,12 +514,7 @@ class Vcs
               'state' => $this->opt->fromCode($issue['state'], 'states', 'task', 'appui'),
               'cfg' => \json_encode(['widgets' => ['notes' => 1]])
             ]))
-            && $this->db->insert(self::$taskTable, [
-              'id_server' => $this->idServer,
-              'id_project' => $idProject,
-              'id_issue' => $idIssue,
-              'id_task' => $idTask
-            ])
+            && ($idTaskLink = $this->addAppuiTaskLink($idTask, $idProject, $idIssue))
           ) {
             // Comments
             if (!empty($issue['notes'])
@@ -536,8 +531,10 @@ class Vcs
                   if ($appuiUser = $this->getAppuiUser($this->idServer, $note['author']['id'])) {
                     $idUser = $appuiUser['id'];
                   }
-                  if (!empty($idUser)) {
-                    $this->addAppuiTaskNote($idProject, $idTask, $idUser, $note['content'], $note['updated']);
+                  if (!empty($idUser)
+                    && ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $note['content'], $note['updated']))
+                  ) {
+                    $this->addAppuiTaskNoteLink($idTaskLink, $idNote, $idProject, $note['id']);
                   }
                 }
               }
@@ -550,7 +547,52 @@ class Vcs
   }
 
 
-  public function addAppuiTaskNote(int $idProject, string $idTask, string $idUser, string $content, string $date = ''): ?string
+  public function addAppuiTaskLink(string $idTask, int $idProject, int $idIssue): ?string
+  {
+    if (!empty($this->idServer)
+      && $this->db->tableExists(self::$taskTable)
+      && $this->db->insert(self::$taskTable, [
+        'id_task' => $idTask,
+        'id_server' => $this->idServer,
+        'id_project' => $idProject,
+        'id_issue' => $idIssue,
+      ])
+    ) {
+      return $this->db->lastId();
+    }
+    return null;
+  }
+
+
+  public function addAppuiTaskNoteLink(string $idParent, string $idNote, int $idProject, int $idComment): string
+  {
+    if (!empty($this->idServer)
+      && $this->db->tableExists(self::$taskTable)
+      && $this->db->insert(self::$taskTable, [
+        'id_parent' => $idParent,
+        'id_note' => $idNote,
+        'id_server' => $this->idServer,
+        'id_project' => $idProject,
+        'id_comment' => $idComment,
+      ])
+    ) {
+      return $this->db->lastId();
+    }
+    return null;
+  }
+
+
+  public function removeAppuiTaskNoteLink(string $idParent, string $idNote): bool
+  {
+    return $this->db->tableExists(self::$taskTable)
+      && (bool)$this->db->delete(self::$taskTable, [
+        'id_parent' => $idParent,
+        'id_note' => $idNote
+      ]);
+  }
+
+
+  public function addAppuiTaskNote(int $idProject, string $idTask, string $idUser, string $content, string $date): ?string
   {
     $notes = new Note($this->db);
     $notesCfg = $notes->getClassCfg();
@@ -559,26 +601,15 @@ class Vcs
     $task = new Task($this->db);
     // Set the task's user
     $task->setUser($idUser);
-    $date = !empty($date) ? date('Y-m-d H:i:s', strtotime($date)) : date('Y-m-d H:i:s');
     // Set the task's date
-    $task->setDate($date);
+    $task->setDate(date('Y-m-d H:i:s', strtotime($date)));
     // Add the note to the task
-    if (($vcs = $this->getAppuiTask($this->idServer, $idProject, $idTask))
+    if ($this->getAppuiTask($this->idServer, $idProject, $idTask)
       && ($idNote = $task->comment($idTask, [
         'title' => '',
         'text' => $content
       ]))
-      // Add the taks-vcs link
-      && $this->db->insert(self::$taskTable, [
-        'id_parent' => $vcs['id'],
-        'id_task' => $idTask,
-        'id_server' => $this->idServer,
-        'id_project' => $idProject,
-        'id_comment' => $idNote,
-      ])
     ) {
-      // Get the ID
-      $id = $this->db->lastId();
       // Set the correct user ID
       $this->db->update($notesCfg['table'], [
         $notesFields['creator'] => $idUser
@@ -590,7 +621,7 @@ class Vcs
       ], [
         $notesVersionsFields['id_note'] => $idNote
       ]);
-      return $id;
+      return $idNote;
     }
     return null;
   }
@@ -605,6 +636,33 @@ class Vcs
   public function removeAppuiTaskNote(int $idProject, string $idTask, int $idComment, string $idUser, string $date = ''): bool
   {
     return false;
+  }
+
+
+  public function getAppuiTaskNoteByNote(string $idNote): ?array
+  {
+    if ($this->db->tableExists(self::$taskTable)) {
+      return $this->db->rselect(self::$taskTable, [], ['id_note' => $idNote]);
+    }
+    return null;
+  }
+
+
+  public function getAppuiTaskByTask(string $idTask): ?array
+  {
+    if ($this->db->tableExists(self::$taskTable)) {
+      return $this->db->rselect(self::$taskTable, [], ['id_task' => $idTask]);
+    }
+    return null;
+  }
+
+
+  public function getAppuiTaskById(string $id): ?array
+  {
+    if ($this->db->tableExists(self::$taskTable)) {
+      return $this->db->rselect(self::$taskTable, [], ['id' => $id]);
+    }
+    return null;
   }
 
 
@@ -698,7 +756,8 @@ class Vcs
         'id_project' => $idProject,
         'id_issue' => $idIssue,
         'id_comment' => null,
-        'id_parent' => null
+        'id_parent' => null,
+        'id_note' => null
       ]) ?: null;
     }
     return null;
@@ -713,7 +772,8 @@ class Vcs
         'id_project' => $idProject,
         'id_task' => $idTask,
         'id_comment' => null,
-        'id_parent' => null
+        'id_parent' => null,
+        'id_note' => null
       ]);
     }
     return null;
@@ -728,7 +788,8 @@ class Vcs
         'id_project' => $idProject,
         'id_issue' => $idIssue,
         'id_comment' => null,
-        'id_parent' => null
+        'id_parent' => null,
+        'id_note' => null
       ]);
     }
     return null;
@@ -824,8 +885,9 @@ class Vcs
     if ($type === 'import') {
       if (!empty($task->idIssue)
         && !empty($task->idComment)
-        && ($idTask = $this->getAppuiTaskId($idServer, $idProject, $task->idIssue))
+        && ($appuiTask = $this->getAppuiTaskByIssue($idServer, $idProject, $task->idIssue))
       ) {
+        $idTask = $appuiTask['id_task'];
         $idUser = BBN_EXTERNAL_USER_ID;
         if ($u = $this->getAppuiUser($idServer, $task->idUser)) {
           $idUser = $u['id'];
@@ -834,7 +896,8 @@ class Vcs
         switch ($task->action) {
           case 'insert':
             if (empty($currentNote)) {
-              $success = !empty($this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated));
+              $success = ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated))
+                && $this->addAppuiTaskNoteLink($appuiTask['id'], $idNote, $idProject, $task->idComment);
             }
             break;
           case 'update':
