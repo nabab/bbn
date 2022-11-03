@@ -882,41 +882,67 @@ class Vcs
   private function processComment(string $idServer, int $idProject, string $type, object $task): bool
   {
     $success = false;
-    if ($type === 'import') {
-      if (!empty($task->idIssue)
-        && !empty($task->idComment)
-        && ($appuiTask = $this->getAppuiTaskByIssue($idServer, $idProject, $task->idIssue))
-      ) {
-        $idTask = $appuiTask['id_task'];
-        $idUser = BBN_EXTERNAL_USER_ID;
-        if ($u = $this->getAppuiUser($idServer, $task->idUser)) {
-          $idUser = $u['id'];
+    if (!empty($task->idIssue)
+      && ($appuiTask = $this->getAppuiTaskByIssue($idServer, $idProject, $task->idIssue))
+    ) {
+      if ($type === 'import') {
+        if (!empty($task->idComment)) {
+          $idTask = $appuiTask['id_task'];
+          $idUser = BBN_EXTERNAL_USER_ID;
+          if ($u = $this->getAppuiUser($idServer, $task->idUser)) {
+            $idUser = $u['id'];
+          }
+          $currentNote = $this->getAppuiTaskNote($idServer, $idProject, $task->idIssue, $task->idComment);
+          switch ($task->action) {
+            case 'insert':
+              if (empty($currentNote)) {
+                $success = ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated))
+                  && $this->addAppuiTaskNoteLink($appuiTask['id'], $idNote, $idProject, $task->idComment);
+              }
+              break;
+            case 'update':
+              if (!empty($currentNote)) {
+                $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
+              }
+              break;
+            case 'delete':
+              if (!empty($currentNote)) {
+                $success = $this->removeAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->updated);
+              }
+              break;
+          }
         }
-        $currentNote = $this->getAppuiTaskNote($idServer, $idProject, $task->idIssue, $task->idComment);
+      }
+      else if ($type === 'export') {
         switch ($task->action) {
           case 'insert':
-            if (empty($currentNote)) {
-              $success = ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated))
-                && $this->addAppuiTaskNoteLink($appuiTask['id'], $idNote, $idProject, $task->idComment);
-            }
+            $success = ($n = $this->insertProjectIssueComment(
+                $idProject,
+                $task->idIssue,
+                $task->text,
+                !empty($task->locked),
+                $task->updated
+              ))
+              && $this->addAppuiTaskNoteLink($appuiTask['id'], $task->idNote, $idProject, $n['id']);
             break;
           case 'update':
-            if (!empty($currentNote)) {
-              $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
-            }
+            $success = $this->editProjectIssueComment(
+              $idProject,
+              $task->idIssue,
+              $task->idComment,
+              $task->text,
+              !empty($task->locked),
+              $task->updated
+            );
             break;
           case 'delete':
-            if (!empty($currentNote)) {
-              $success = $this->removeAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->updated);
-            }
+            $success = $this->deleteProjectIssueComment($idProject, $task->idIssue, $task->idComment)
+              && $this->removeAppuiTaskNoteLink($appuiTask['id'], $task->idNote);
             break;
         }
       }
     }
-    else if ($type === 'export') {
-
-    }
-    return $success;
+    return !empty($success);
   }
 
 
