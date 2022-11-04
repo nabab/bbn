@@ -33,6 +33,16 @@ class Vcs
 
   const CACHE_NAME = 'bbn/Appui/Vcs';
 
+  public static $engines = [
+    'git' => [
+      'gitlab' => [
+        'name' => 'GitLab',
+        'class' => '\bbn\Appui\Vcs\GitLab'
+      ]
+    ],
+    'svn' => []
+  ];
+
   /** @var string The cache name prefix */
   private $cacheNamePrefix;
 
@@ -70,19 +80,11 @@ class Vcs
 
   public function changeServer(string $id): bbn\Appui\Vcs
   {
-    if ($server = $this->getServer($id)) {
+    if (($server = $this->getServer($id))
+      && !empty(self::$engines[$server->type][$server->engine])
+    ) {
       $this->idServer = $id;
-      switch ($server->type) {
-        case 'git':
-          $this->server = new GitLab($this->db, $id);
-          break;
-        case 'svn':
-          $this->server = new Svn($this->db, $id);
-          break;
-        default:
-          $this->server = null;
-          break;
-      }
+      $this->server = new self::$engines[$server->type][$server->engine]['class']($this->db, $id);
     }
     else {
       $this->idServer = null;
@@ -131,7 +133,14 @@ class Vcs
   }
 
 
-  public function addServer(string $name, string $host, string $type, string $adminAccessToken, string $userAccessToken = ''): string
+  public function addServer(
+    string $name,
+    string $host,
+    string $type,
+    string $engine,
+    string $adminAccessToken,
+    string $userAccessToken = ''
+  ): string
   {
     if (!($idParent = $this->getOptionId('list'))) {
       throw new \Exception(X::_('"list" option not found'));
@@ -147,7 +156,8 @@ class Vcs
       $optFields['id_parent'] => $idParent,
       $optFields['text'] => $name,
       $optFields['code'] => $host,
-      'type' => $type
+      'type' => $type,
+      'engine' => $engine
     ];
     if (!($idOpt = $this->opt->add($o))) {
       throw new \Exception(X::_('Error while inserting the option: %s', \json_encode($o)));
@@ -160,7 +170,7 @@ class Vcs
   }
 
 
-  public function editServer(string $id, string $name, string $host, string $type): bool{
+  public function editServer(string $id, string $name, string $host, string $type, string $engine): bool{
     $reg = '/(http[s]?:\/\/)?(?\'code\'[[:alpha:]\.]+(?!\/$)?)/m';
     preg_match_all($reg, $host, $matches);
     if (!empty($matches['code'])) {
@@ -171,7 +181,8 @@ class Vcs
     $o = [
       $optFields['text'] => $name,
       $optFields['code'] => $host,
-      'type' => $type
+      'type' => $type,
+      'engine' => $engine
     ];
     if (!$this->opt->set($id, $o)) {
       throw new \Exception(X::_('Error while updating the option with ID %s: %s', $id, \json_encode($o)));
@@ -322,7 +333,7 @@ class Vcs
     if ($issues = $this->server->getProjectIssues($idProject)) {
       $t = $this;
       $issues = \array_map(function($i) use ($t, $idProject){
-        $i['idAppuiTask'] = $t->getAppuiTaskId($this->idServer, $idProject, $i['id']);
+        $i['idAppuiTask'] = $t->getAppuiTaskId($idProject, $i['id']);
         return $i;
       }, $issues);
       return $issues;
@@ -334,7 +345,7 @@ class Vcs
   public function getProjectIssue(string $idProject, int $idIssue): ?array
   {
     if ($issue = $this->server->getProjectIssue($idProject, $idIssue)) {
-      $issue['idAppuiTask'] = $this->getAppuiTaskId($this->idServer, $idProject, $issue['id']);
+      $issue['idAppuiTask'] = $this->getAppuiTaskId($idProject, $issue['id']);
       return $issue;
     }
     return null;
@@ -356,6 +367,12 @@ class Vcs
   public function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array
   {
     return $this->server->assignProjectIssue($idProject, $idIssue, $idUser);
+  }
+
+
+  public function getProjectIssueComment(string $idProject, int $idIssue, int $idComment): array
+  {
+    return $this->server->getProjectIssueComment($idProject, $idIssue, $idComment);
   }
 
 
@@ -410,7 +427,7 @@ class Vcs
           case 'comment':
             if (!empty($d['idProject'])
               && !empty($d['idIssue'])
-              && $this->getAppuiTaskByIssue($this->idServer, $d['idProject'], $d['idIssue'])
+              && $this->getAppuiTaskByIssue($d['idProject'], $d['idIssue'])
             ) {
               return $this->addToTasksQueue($d['idProject'], 'import', $d);
             }
@@ -421,10 +438,13 @@ class Vcs
   }
 
 
-  public function addToTasksQueue(int $idProject, $type, $task)
+  public function addToTasksQueue(int $idProject, string $type, $task, string $idServer = ''): bool
   {
-    return self::getDb()->insert('queue', [
-      'id_server' => $this->idServer,
+    if (!($idServer = empty($idServer) ? $this->idServer : $idServer)) {
+      return false;
+    }
+    return (bool)self::getDb()->insert('queue', [
+      'id_server' => $idServer,
       'id_project' => $idProject,
       'type' => $type,
       'task' => !Str::isJson($task) ? \json_encode($task) : $task
@@ -455,7 +475,6 @@ class Vcs
           'value' => 1
         ]]
       ],
-      //'group_by' => ['id_server'],
       'order' => [[
         'field' => 'created',
         'dir' => 'asc'
@@ -465,17 +484,23 @@ class Vcs
       foreach ($queue as $q) {
         $success = false;
         $db->update('queue', ['started' => date('Y-m-d H:i:s')], ['id' => $q->id]);
-        if (!empty($q->id_server)
-          && ($t = \json_decode($q->task))
-        ) {
-          $this->changeServer($q->id_server);
-          if (!empty($t->type)) {
-            switch ($t->type) {
-              case 'comment':
-                $success = $this->processComment($q->id_server, $q->id_project, $q->type, $t);
-                break;
+        try {
+          if (!empty($q->id_server)
+            && ($t = \json_decode($q->task))
+          ) {
+            $this->changeServer($q->id_server);
+            if (!empty($t->type)) {
+              switch ($t->type) {
+                case 'comment':
+                  $success = $this->processComment($q->id_project, $q->type, $t);
+                  break;
+              }
             }
           }
+        }
+        catch(\Exception $e){
+          $success = false;
+          \bbn\X::adump($e->getMessage());
         }
         $db->update('queue', [
           'ended' => date('Y-m-d H:i:s'),
@@ -495,14 +520,14 @@ class Vcs
 
   public function importIssueToTask(string $idProject, int $idIssue): ?string
   {
-    if (!($idTask = $this->getAppuiTaskId($this->idServer, $idProject, $idIssue))) {
+    if (!($idTask = $this->getAppuiTaskId($idProject, $idIssue))) {
       if ($issue = $this->getProjectIssue($idProject, $idIssue)) {
         $task = new Task($this->db);
         $idCatSupportTask = $this->opt->fromCode('support', 'cats', 'task', 'appui');
         // Use the external user's ID
         $idUser = BBN_EXTERNAL_USER_ID;
-        // Check if the git user is an appui user
-        if ($appuiUser = $this->getAppuiUser($this->idServer, $issue['author']['id'])){
+        // Check if the vcs user is an appui user
+        if ($appuiUser = $this->getAppuiUser($issue['author']['id'])){
           $idUser = $appuiUser['id'];
         }
         if (!empty($idUser)) {
@@ -526,12 +551,12 @@ class Vcs
               foreach ($issueNotes as $note) {
                 // Check if the note already exists and if it's a real note
                 if (empty($note['auto']) &&
-                  !$this->getAppuiTaskNote($this->idServer, $idProject, $idIssue, $note['id'])
+                  !$this->getAppuiTaskNote($idProject, $idIssue, $note['id'])
                 ) {
                   // Use the external user's ID
                   $idUser = BBN_EXTERNAL_USER_ID;
                   // Check if the git user is an appui user
-                  if ($appuiUser = $this->getAppuiUser($this->idServer, $note['author']['id'])) {
+                  if ($appuiUser = $this->getAppuiUser($note['author']['id'])) {
                     $idUser = $appuiUser['id'];
                   }
                   if (!empty($idUser)
@@ -607,7 +632,7 @@ class Vcs
     // Set the task's date
     $task->setDate(date('Y-m-d H:i:s', strtotime($date)));
     // Add the note to the task
-    if ($this->getAppuiTask($this->idServer, $idProject, $idTask)
+    if ($this->getAppuiTask($idProject, $idTask)
       && ($idNote = $task->comment($idTask, [
         'title' => '',
         'text' => $content
@@ -669,28 +694,31 @@ class Vcs
   }
 
 
-  public function getAppuiUser(string $idServer, int $idVcs): ?array
+  public function getAppuiUser(int $idVcs, string $idServer = ''): ?array
   {
-    if ($pref = $this->db->rselect([
-      'table' => 'bbn_users_options',
-      'fields' => [
-        'id' => 'id_user',
-        'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
-        'info' => 'JSON_EXTRACT(cfg, "$.user")'
-      ],
-      'where' => [
-        'conditions' => [[
-          'field' => 'id_option',
-          'value' => $idServer
-        ], [
-          'field' => 'JSON_EXTRACT(cfg, "$.user")',
-          'operator' => 'isnotnull'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
-          'value' => $idVcs
-        ]]
-      ]
-    ])) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if (!empty($idServer)
+      && $pref = $this->db->rselect([
+        'table' => 'bbn_users_options',
+        'fields' => [
+          'id' => 'id_user',
+          'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
+          'info' => 'JSON_EXTRACT(cfg, "$.user")'
+        ],
+        'where' => [
+          'conditions' => [[
+            'field' => 'id_option',
+            'value' => $idServer
+          ], [
+            'field' => 'JSON_EXTRACT(cfg, "$.user")',
+            'operator' => 'isnotnull'
+          ], [
+            'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
+            'value' => $idVcs
+          ]]
+        ]
+      ])
+    ) {
       $pref['info'] = \json_decode($pref['info'], true);
       return $pref;
     }
@@ -698,31 +726,59 @@ class Vcs
   }
 
 
-  public function getAppuiUsers(string $idServer): array
+  public function getAppuiUsers(string $idServer = ''): array
   {
-    if ($prefs = $this->db->rselectAll([
-      'table' => 'bbn_users_options',
-      'fields' => [
-        'id' => 'id_user',
-        'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
-        'info' => 'JSON_EXTRACT(cfg, "$.user")'
-      ],
-      'where' => [
-        'conditions' => [[
-          'field' => 'id_option',
-          'value' => $idServer
-        ], [
-          'field' => 'JSON_EXTRACT(cfg, "$.user")',
-          'operator' => 'isnotnull'
-        ]]
-      ]
-    ])) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if (!empty($idServer)
+      && $prefs = $this->db->rselectAll([
+        'table' => 'bbn_users_options',
+        'fields' => [
+          'id' => 'id_user',
+          'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))',
+          'info' => 'JSON_EXTRACT(cfg, "$.user")'
+        ],
+        'where' => [
+          'conditions' => [[
+            'field' => 'id_option',
+            'value' => $idServer
+          ], [
+            'field' => 'JSON_EXTRACT(cfg, "$.user")',
+            'operator' => 'isnotnull'
+          ]]
+        ]
+      ])
+    ) {
       return \array_map(function($p){
         $p['info'] = \json_decode($p['info'], true);
         return $p;
       }, $prefs);
     }
     return [];
+  }
+
+
+  public function getUserByAppuiUser(string $idAppuiUser, string $idServer = '')
+  {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if (!empty($idServer)) {
+      return $this->db->selectOne([
+        'table' => 'bbn_users_options',
+        'fields' => ['JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.user.id"))'],
+        'where' => [
+          'conditions' => [[
+            'field' => 'id_option',
+            'value' => $idServer
+          ], [
+            'field' => 'id_user',
+            'value' => $idAppuiUser
+          ], [
+            'field' => 'JSON_EXTRACT(cfg, "$.user")',
+            'operator' => 'isnotnull'
+          ]]
+        ]
+      ]);
+    }
+    return null;
   }
 
 
@@ -751,9 +807,12 @@ class Vcs
   }
 
 
-  private function getAppuiTaskId(string $idServer, string $idProject, int $idIssue): ?string
+  private function getAppuiTaskId(string $idProject, int $idIssue, string $idServer = ''): ?string
   {
-    if ($this->db->tableExists(self::$taskTable)) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if ($this->db->tableExists(self::$taskTable)
+      && !empty($idServer)
+    ) {
       return $this->db->selectOne(self::$taskTable, 'id_task', [
         'id_server' => $idServer,
         'id_project' => $idProject,
@@ -767,9 +826,12 @@ class Vcs
   }
 
 
-  private function getAppuiTask(string $idServer, string $idProject, string $idTask): ?array
+  private function getAppuiTask(string $idProject, string $idTask, string $idServer = ''): ?array
   {
-    if ($this->db->tableExists(self::$taskTable)) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if ($this->db->tableExists(self::$taskTable)
+      && !empty($idServer)
+    ) {
       return $this->db->rselect(self::$taskTable, [], [
         'id_server' => $idServer,
         'id_project' => $idProject,
@@ -783,9 +845,12 @@ class Vcs
   }
 
 
-  private function getAppuiTaskByIssue(string $idServer, string $idProject, int $idIssue): ?array
+  private function getAppuiTaskByIssue(string $idProject, int $idIssue, string $idServer = ''): ?array
   {
-    if ($this->db->tableExists(self::$taskTable)) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if ($this->db->tableExists(self::$taskTable)
+      && !empty($idServer)
+    ) {
       return $this->db->rselect(self::$taskTable, [], [
         'id_server' => $idServer,
         'id_project' => $idProject,
@@ -799,9 +864,12 @@ class Vcs
   }
 
 
-  private function getAppuiTaskNote(string $idServer, string $idProject, int $idIssue, int $idComment): ?array
+  private function getAppuiTaskNote(string $idProject, int $idIssue, int $idComment, string $idServer = ''): ?array
   {
-    if ($this->db->tableExists(self::$taskTable)) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if ($this->db->tableExists(self::$taskTable)
+      && !empty($idServer)
+    ) {
       return $this->db->rselect([
         'table' => self::$taskTable,
         'fields' => [],
@@ -842,9 +910,12 @@ class Vcs
   }
 
 
-  private function getAppuiTaskNotes(string $idServer, string $idProject, int $idIssue): ?array
+  private function getAppuiTaskNotes(string $idProject, int $idIssue, string $idServer = ''): ?array
   {
-    if ($this->db->tableExists(self::$taskTable)) {
+    $idServer = empty($idServer) ? $this->idServer : $idServer;
+    if ($this->db->tableExists(self::$taskTable)
+      && !empty($idServer)
+    ) {
       $this->db->getColumnValues([
         'table' => self::$taskTable,
         'fields' => ['id_note'],
@@ -882,65 +953,82 @@ class Vcs
   }
 
 
-  private function processComment(string $idServer, int $idProject, string $type, object $task): bool
+  private function processComment(int $idProject, string $type, object $task): bool
   {
     $success = false;
     if (!empty($task->idIssue)
-      && ($appuiTask = $this->getAppuiTaskByIssue($idServer, $idProject, $task->idIssue))
+      && ($appuiTask = $this->getAppuiTaskByIssue($idProject, $task->idIssue))
     ) {
       if ($type === 'import') {
         if (!empty($task->idComment)) {
           $idTask = $appuiTask['id_task'];
           $idUser = BBN_EXTERNAL_USER_ID;
-          if ($u = $this->getAppuiUser($idServer, $task->idUser)) {
+          if ($u = $this->getAppuiUser($task->idUser)) {
             $idUser = $u['id'];
           }
-          $currentNote = $this->getAppuiTaskNote($idServer, $idProject, $task->idIssue, $task->idComment);
-          switch ($task->action) {
-            case 'insert':
-              if (empty($currentNote)) {
+          if ($currentNote = $this->getAppuiTaskNote($idProject, $task->idIssue, $task->idComment)) {
+            switch ($task->action) {
+              case 'insert':
                 $success = ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated))
                   && $this->addAppuiTaskNoteLink($appuiTask['id'], $idNote, $idProject, $task->idComment);
-              }
-              break;
-            case 'update':
-              if (!empty($currentNote)) {
-                $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
-              }
-              break;
-            case 'delete':
-              if (!empty($currentNote)) {
+                break;
+              case 'update':
+                $notes = new Note($this->db);
+                if (($note = $notes->get($currentNote['id_note']))
+                  && ($task->updated > $note['creation'])
+                ) {
+                  $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
+                }
+                break;
+              case 'delete':
                 $success = $this->removeAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->updated);
-              }
-              break;
+                break;
+            }
           }
         }
       }
       else if ($type === 'export') {
+        $vcsCls = $this;
+        if (!empty($task->idUser)
+          && $idUser = $this->getUserByAppuiUser($task->idUser)
+        ) {
+          $vcsCls = new \bbn\Appui\Vcs($this->db, $this->idServer, $idUser);
+        }
         switch ($task->action) {
           case 'insert':
-            $success = ($n = $this->insertProjectIssueComment(
+            if (empty($idUser)) {
+              $task->text = User::getInstance()->getName($task->idUser) . ' ' . _('wrote:') . PHP_EOL . PHP_EOL . $task->text;
+            }
+            $success = ($n = $vcsCls->insertProjectIssueComment(
                 $idProject,
                 $task->idIssue,
                 $task->text,
                 !empty($task->locked),
                 $task->updated
               ))
-              && $this->addAppuiTaskNoteLink($appuiTask['id'], $task->idNote, $idProject, $n['id']);
+              && $vcsCls->addAppuiTaskNoteLink($appuiTask['id'], $task->idNote, $idProject, $n['id']);
             break;
           case 'update':
-            $success = $this->editProjectIssueComment(
-              $idProject,
-              $task->idIssue,
-              $task->idComment,
-              $task->text,
-              !empty($task->locked),
-              $task->updated
-            );
+            if ($comment = $this->getProjectIssueComment($idProject, $task->idIssue, $task->idComment)) {
+              if ($comment['updated'] > $task->updated) {
+                return false;
+              }
+              if (empty($idUser)) {
+                $task->text = User::getInstance()->getName($task->idUser) . ' ' . _('edited:') . PHP_EOL . PHP_EOL . $task->text;
+              }
+              $success = $vcsCls->editProjectIssueComment(
+                $idProject,
+                $task->idIssue,
+                $task->idComment,
+                $task->text,
+                !empty($task->locked),
+                $task->updated
+              );
+            }
             break;
           case 'delete':
-            $success = $this->deleteProjectIssueComment($idProject, $task->idIssue, $task->idComment)
-              && $this->removeAppuiTaskNoteLink($appuiTask['id'], $task->idNote);
+            $success = $vcsCls->deleteProjectIssueComment($idProject, $task->idIssue, $task->idComment)
+              && $vcsCls->removeAppuiTaskNoteLink($appuiTask['id'], $task->idNote);
             break;
         }
       }

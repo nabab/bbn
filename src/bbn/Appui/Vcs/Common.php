@@ -5,6 +5,8 @@ namespace bbn\Appui\Vcs;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\User;
+use bbn\User\Preferences;
 
 trait Common {
 
@@ -34,18 +36,23 @@ trait Common {
   public function getUserAccessToken(string $id = ''): string
   {
     if (!empty($this->idUser)) {
-
+      $user = new User($this->db, ['id' => $this->idUser]);
+      $pref = new Preferences($this->db);
+      $pref->setUser($user);
     }
-    else if (!($user = \bbn\User::getInstance())) {
-      throw new \Exception(X::_('No User class instance found'));
-    }
-    if (defined('BBN_EXTERNAL_USER_ID')
-      && ($user->getId() === BBN_EXTERNAL_USER_ID)
-    ) {
-      return $this->getAdminAccessToken($id);
-    }
-    if (!($pref = \bbn\User\Preferences::getInstance())) {
-      throw new \Exception(X::_('No User\Preferences class instance found'));
+    else {
+      if (!($user = User::getInstance())) {
+        throw new \Exception(X::_('No User class instance found'));
+      }
+      if (X::isCli()
+        && defined('BBN_EXTERNAL_USER_ID')
+        && ($user->getId() === BBN_EXTERNAL_USER_ID)
+      ) {
+        return $this->getAdminAccessToken($id);
+      }
+      if (!($pref = Preferences::getInstance())) {
+        throw new \Exception(X::_('No User\Preferences class instance found'));
+      }
     }
     if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {
       throw new \Exception(X::_('No user\'s preference found for the server %s', $id ?: $this->idServer));
@@ -82,6 +89,7 @@ trait Common {
       'name' => $server['text'],
       'host' => 'https://' . $server['code'],
       'type' => $server['type'],
+      'engine' => $server['engine'],
       'userAccessToken' => $ut,
       'hasAdminAccessToken' => $this->hasAdminAccessToken($server['id']),
       'hasUserAccessToken'=> !empty($ut)

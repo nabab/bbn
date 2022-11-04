@@ -6,6 +6,7 @@ use bbn;
 use bbn\Appui\Passwords;
 use bbn\Appui\Option;
 use bbn\X;
+use bbn\Date;
 
 /**
  * VCS\Git class
@@ -219,7 +220,7 @@ class GitLab implements Server
       'id' => $branch->commit->id,
       'ref' => $branch->commit->short_id,
       'name' => $branch->name,
-      'created' => $branch->commit->created_at,
+      'created' => Date::format($branch->commit->created_at, 'dbdate'),
       'default' => $branch->default,
       'author' => [
         'id' => '',
@@ -240,7 +241,7 @@ class GitLab implements Server
   {
     $data = [
       'id' => $event->id,
-      'created' => $event->created_at,
+      'created' => Date::format($event->created_at, 'dbdate'),
       'author' => $this->normalizeUser($event->author),
       'type' => '',
       'title' => '',
@@ -337,9 +338,9 @@ class GitLab implements Server
   public function normalizeMember(object $member): array
   {
     return X::mergeArrays([
-      'created' => $member->created_at,
+      'created' => Date::format($member->created_at, 'dbdate'),
       'author' => !empty($member->created_by) ? $this->normalizeUser($member->created_by) : [],
-      'expire' => $member->expires_at,
+      'expire' => !empty($member->expires_at) ? Date::format($member->expires_at, 'dbdate') : '',
       'role' => $this->getProjectUsersRoles()[$member->access_level]
     ], $this->normalizeUser($member));
   }
@@ -388,7 +389,7 @@ class GitLab implements Server
         'fullpath' => $project->namespace->full_path,
         'url' => $project->namespace->web_url
       ],
-      'created' => $project->created_at,
+      'created' => Date::format($project->created_at, 'dbdate'),
       'creator' => $project->creator_id,
       'private' => !empty($project->owner),
       'visibility' => $project->visibility,
@@ -420,9 +421,11 @@ class GitLab implements Server
       'description' => $issue->description ?: '',
       'url' => $issue->web_url,
       'author' => $this->normalizeUser((object)$issue->author),
-      'created' => $issue->created_at,
-      'updated' => $issue->updated_at ?: $issue->created_at,
-      'closed' => $issue->closed_at,
+      'created' => Date::format($issue->created_at, 'dbdate'),
+      'updated' => !empty($issue->updated_at) ?
+        Date::format($issue->updated_at, 'dbdate') :
+        Date::format($issue->created_at, 'dbdate'),
+      'closed' => !empty($issue->closed_at) ? Date::format($issue->closed_at, 'dbdate') : '',
       'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser((object)$issue->closed_by) : [],
       'assigned' => !empty($issue->assignees) ? $this->normalizeUser((object)$issue->assignees[0]) : [],
       'private' => $issue->confidential,
@@ -620,6 +623,23 @@ class GitLab implements Server
    * @param int $idIssue
    * @return array
    */
+  public function getProjectIssueComment(string $idProject, int $idIssue, int $idComment): array
+  {
+    if (($i = $this->getConnection(true)->getIssue($idIssue))
+      && !empty($i['iid'])
+      && ($comment = $this->getConnection()->getIssueNote($idProject, $i['iid'], $idComment))
+    ){
+      return $this->normalizeIssueComment((object)$comment);
+    }
+    return [];
+  }
+
+
+  /**
+   * @param string $idProject
+   * @param int $idIssue
+   * @return array
+   */
   public function getProjectIssueComments(string $idProject, int $idIssue): array
   {
     if (($i = $this->getConnection(true)->getIssue($idIssue))
@@ -643,8 +663,10 @@ class GitLab implements Server
     return [
       'id' => $comment->id,
       'author' => $this->normalizeUser((object)$comment->author),
-      'created' => $comment->created_at,
-      'updated' => $comment->updated_at ?: $comment->created_at,
+      'created' => Date::format($comment->created_at, 'dbdate'),
+      'updated' => !empty($comment->updated_at) ?
+        Date::format($comment->updated_at, 'dbdate') :
+        Date::format($comment->created_at, 'dbdate'),
       'content' => $comment->body,
       'auto' => $comment->system,
       'private' => $comment->internal,
@@ -775,8 +797,10 @@ class GitLab implements Server
             'idIssue' => $data['issue']['id'],
             'idComment' => $data['object_attributes']['id'],
             'text' => $data['object_attributes']['note'],
-            'created' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['created_at'])),
-            'updated' => \date('Y-m-d H:i:s', \strtotime($data['object_attributes']['updated_at']))
+            'created' => Date::format($data['object_attributes']['created_at'], 'dbdate'),
+            'updated' => !empty($data['object_attributes']['updated_at']) ?
+              Date::format($data['object_attributes']['updated_at'], 'dbdate') :
+              Date::format($data['object_attributes']['created_at'], 'dbdate')
           ]);
         }
         break;
