@@ -161,7 +161,7 @@ class GitLab
       foreach ($header as $v) {
         $tmp = \explode(':', $v);
         if (\count($tmp)) {
-          $this->lastResponseHeader[\trim($tmp[0])] = \trim($tmp[1]);
+          $this->lastResponseHeader[\trim(array_shift($tmp))] = \trim(\implode(' ', $tmp));
         }
       }
       $response = substr($response, $headerSize);
