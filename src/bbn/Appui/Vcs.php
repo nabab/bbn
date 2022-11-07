@@ -622,34 +622,35 @@ class Vcs
 
   public function addAppuiTaskNote(int $idProject, string $idTask, string $idUser, string $content, string $date): ?string
   {
-    $notes = new Note($this->db);
-    $notesCfg = $notes->getClassCfg();
-    $notesFields = $notesCfg['arch']['notes'];
-    $notesVersionsFields = $notesCfg['arch']['versions'];
-    $task = new Task($this->db);
-    // Set the task's user
-    $task->setUser($idUser);
-    // Set the task's date
-    $task->setDate(date('Y-m-d H:i:s', strtotime($date)));
-    // Add the note to the task
-    if ($this->getAppuiTask($idProject, $idTask)
-      && ($idNote = $task->comment($idTask, [
+    if ($this->getAppuiTask($idProject, $idTask)) {
+      $notes = new Note($this->db);
+      $notesCfg = $notes->getClassCfg();
+      $notesFields = $notesCfg['arch']['notes'];
+      $notesVersionsFields = $notesCfg['arch']['versions'];
+      $task = new Task($this->db);
+      // Set the task's user
+      $task->setUser($idUser);
+      // Set the task's date
+      $task->setDate(date('Y-m-d H:i:s', strtotime($date)));
+      // Add the note to the task
+      if ($idNote = $task->comment($idTask, [
         'title' => '',
         'text' => $content
-      ]))
-    ) {
-      // Set the correct user ID
-      $this->db->update($notesCfg['table'], [
-        $notesFields['creator'] => $idUser
-      ], [
-        $notesFields['id'] => $idNote
-      ]);
-      $this->db->update($notesCfg['tables']['versions'], [
-        $notesVersionsFields['id_user'] => $idUser
-      ], [
-        $notesVersionsFields['id_note'] => $idNote
-      ]);
-      return $idNote;
+      ])) {
+        // Set the correct user ID
+        $this->db->update($notesCfg['table'], [
+          $notesFields['creator'] => $idUser
+        ], [
+          $notesFields['id'] => $idNote
+        ]);
+        $this->db->update($notesCfg['tables']['versions'], [
+          $notesVersionsFields['id_user'] => $idUser
+        ], [
+          $notesVersionsFields['id_note'] => $idNote,
+          $notesVersionsFields['latest'] => 1
+        ]);
+        return $idNote;
+      }
     }
     return null;
   }
@@ -657,12 +658,38 @@ class Vcs
 
   public function editAppuiTaskNote(int $idProject, string $idTask, int $idComment, string $idUser, string $content, string $date = ''): bool
   {
+    if (($task = $this->getAppuiTask($idProject, $idTask))
+      && ($note = $this->getAppuiTaskNote($idProject, $task['id_issue'], $idComment))
+      && ($idNote = $note['id_note'])
+    ) {
+      $notes = new Note($this->db);
+      $notesCfg = $notes->getClassCfg();
+      $notesVersionsFields = $notesCfg['arch']['versions'];
+      if (($n = $notes->get($idNote))
+        && $notes->update($idNote, '', $content, $n['private'], $n['locked'])
+      ){
+        // Set the correct user ID and date
+        $this->db->update($notesCfg['tables']['versions'], [
+          $notesVersionsFields['id_user'] => $idUser,
+          $notesVersionsFields['creation'] => $date
+        ], [
+          $notesVersionsFields['id_note'] => $idNote,
+          $notesVersionsFields['latest'] => 1
+        ]);
+        return true;
+      }
+    }
     return false;
   }
 
 
-  public function removeAppuiTaskNote(int $idProject, string $idTask, int $idComment, string $idUser, string $date = ''): bool
+  public function removeAppuiTaskNote(int $idProject, string $idTask, int $idComment): bool
   {
+    if (($task = $this->getAppuiTask($idProject, $idTask))
+      && ($note = $this->getAppuiTaskNote($idProject, $task['id_issue'], $idComment))
+    ) {
+      return (bool)$this->db->delete(self::$taskTable, ['id' => $note['id']]);
+    }
     return false;
   }
 
@@ -966,24 +993,26 @@ class Vcs
           if ($u = $this->getAppuiUser($task->idUser)) {
             $idUser = $u['id'];
           }
-          if ($currentNote = $this->getAppuiTaskNote($idProject, $task->idIssue, $task->idComment)) {
-            switch ($task->action) {
-              case 'insert':
-                $success = ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated))
-                  && $this->addAppuiTaskNoteLink($appuiTask['id'], $idNote, $idProject, $task->idComment);
-                break;
-              case 'update':
-                $notes = new Note($this->db);
-                if (($note = $notes->get($currentNote['id_note']))
-                  && ($task->updated > $note['creation'])
-                ) {
-                  $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
-                }
-                break;
-              case 'delete':
-                $success = $this->removeAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->updated);
-                break;
-            }
+          $currentNote = $this->getAppuiTaskNote($idProject, $task->idIssue, $task->idComment);
+          switch ($task->action) {
+            case 'insert':
+              $success = empty($currentNote)
+                && ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $task->text, $task->updated))
+                && $this->addAppuiTaskNoteLink($appuiTask['id'], $idNote, $idProject, $task->idComment);
+              break;
+            case 'update':
+              $notes = new Note($this->db);
+              if (!empty($currentNote)
+                && ($note = $notes->get($currentNote['id_note']))
+                && ($task->updated > $note['creation'])
+              ) {
+                $success = $this->editAppuiTaskNote($idProject, $idTask, $task->idComment, $idUser, $task->text, $task->updated);
+              }
+              break;
+            case 'delete':
+              $success = !empty($currentNote)
+                && $this->removeAppuiTaskNote($idProject, $idTask, $task->idComment);
+              break;
           }
         }
       }
