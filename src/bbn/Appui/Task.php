@@ -576,8 +576,8 @@ class Task extends bbn\Models\Cls\Db
         'last_action' => 'last_action'
       ],
       'texts' => [
-        'title' => 'bbn_tasks.title',
-        'text' => 'bbn_notes_versions.content'
+        'title' => 'bbn_notes_versions.title',
+        'text' => 'notever.content'
       ],
       'users' => [
         'my_user' => '',
@@ -641,11 +641,11 @@ class Task extends bbn\Models\Cls\Db
       else if ( isset($fields['texts'][$w[0]]) ){
         if ( !empty($w[2]) ){
           if ( $w[0] === 'title' ){
-            $query .= " AND bbn_tasks.title LIKE ? ";
+            $query .= " AND bbn_notes_versions.title LIKE ? AND bbn_notes_versions.latest = 1 ";
             array_push($args1, "%$w[2]%");
           }
           else if ( $w[0] === 'text' ){
-            $query .= " AND (bbn_tasks.title LIKE ? OR bbn_notes_versions.content LIKE ?) ";
+            $query .= " AND ((bbn_notes_versions.title LIKE ? OR bbn_notes_versions.content LIKE ?) AND bbn_notes_versions.latest = 1 ";
             array_push($args1, "%$w[2]%", "%$w[2]%");
             $join .= "
         LEFT JOIN bbn_tasks_notes
@@ -697,13 +697,19 @@ class Task extends bbn\Models\Cls\Db
       hex2bin($this->id_user)
     ];
     $sql = "
-      SELECT my_role.role, bbn_tasks.*,
+      SELECT my_role.role,
+      bbn_tasks.*,
+      bbn_notes_versions.title,
+      bbn_notes_versions.content,
       FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
       COUNT(children.id) AS num_children,
       COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
       {$this->references_select}
       IF(bbn_tasks.`state` = ?, MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
       FROM bbn_tasks
+        JOIN bbn_notes_versions
+          ON bbn_notes_versions.id_note = bbn_tasks.id_note
+          AND bbn_notes_versions.latest = 1
         LEFT JOIN bbn_tasks_roles AS my_role
           ON my_role.id_task = bbn_tasks.id
           AND my_role.id_user = ?
