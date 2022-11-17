@@ -218,7 +218,7 @@ class Sync2 extends bbn\Models\Cls\Db
             `rows` text,
             `vals` longtext,
             `state` int(10) NOT NULL DEFAULT '0'
-          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
           ALTER TABLE `dbsync`
             ADD PRIMARY KEY (`id`),
             ADD KEY `db` (`db`),
