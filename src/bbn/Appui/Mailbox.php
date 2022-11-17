@@ -187,6 +187,7 @@ class Mailbox extends Basic
     }
   }
 
+ 	
 
   /**
    *  Closes the imap stream.
@@ -200,6 +201,11 @@ class Mailbox extends Basic
   }
 
 
+  public function getError(): ?string
+  {
+    return imap_last_error() ?: null;
+  }
+  
   public function getMailer(): Mail
   {
     if (!$this->mailer) {
@@ -336,7 +342,10 @@ class Mailbox extends Basic
   public function createMbox($mbox)
   {
     if ($this->_is_connected()) {
-      return imap_createmailbox($this->stream, $this->mbParam. $mbox);
+      if(imap_createmailbox($this->stream, $this->mbParam. $mbox)) {
+        return true;
+      }
+      X::log(imap_errors(), "imap");
     }
 
     return false;
@@ -352,9 +361,11 @@ class Mailbox extends Basic
   public function deleteMbox($mbox)
   {
     if ($this->_is_connected()) {
-      return imap_deletemailbox($this->stream, $this->mbParam . $mbox);
+      if (imap_deletemailbox($this->stream, $this->mbParam . $mbox)) {
+        return true;
+      }
+      X::ddump($this->getError());
     }
-
     return false;
   }
 
@@ -369,7 +380,13 @@ class Mailbox extends Basic
   public function renameMbox($old, $new)
   {
     if ($this->_is_connected()) {
-      return imap_renamemailbox($this->stream, $this->mbParam. $old, $this->mbParam. $new);
+      if (imap_renamemailbox($this->stream, $this->mbParam. $old, $this->mbParam. $new)) {
+        return true;
+      } else {
+        X::ddump(imap_last_error());
+      }
+    } else {
+      X::ddump("Not connected");
     }
 
     return false;
