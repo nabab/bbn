@@ -1950,6 +1950,10 @@ class X
         throw new Exception(X::_("Error in compareConditions: each condition should be an array"));
       }
 
+      if (!isset($a['field'])) {
+        throw new Exception(X::_("Field is mandatory in filter"));
+      }
+
       $compare = null;
       if (isset($a['conditions']) && is_array($a['conditions'])) {
         $compare = self::compareConditions($data, $a);
