@@ -414,8 +414,10 @@ class Task extends bbn\Models\Cls\Db
         ON bbn_tasks_logs.id_task = bbn_tasks_roles.id_task
       LEFT JOIN bbn_tasks_notes
         ON bbn_tasks_notes.id_task = bbn_tasks_roles.id_task
+        AND bbn_tasks_notes.active = 1
       LEFT JOIN bbn_tasks AS children
-        ON bbn_tasks_roles.id_task = children.id_parent
+        ON bbn_tasks.id = children.id_parent
+        AND bbn_tasks.active = 1
       {$this->references_join}
     WHERE bbn_tasks_roles.id_user = ?".
       (empty($where) ? '' : " AND ($where)")."
@@ -479,8 +481,10 @@ class Task extends bbn\Models\Cls\Db
         AND bbn_tasks_roles.id_user = {$this->id_user}
       LEFT JOIN bbn_notes_versions
         ON bbn_notes_versions.id_note = bbn_tasks_notes.id_note
+        AND bbn_tasks_notes.active =1
       LEFT JOIN bbn_tasks AS children
         ON children.id = bbn_tasks.id
+        AND children.active = 1
       {$this->references_join}
     WHERE (notevers.title LIKE ?
     OR notevers.content LIKE ?
@@ -853,8 +857,10 @@ class Task extends bbn\Models\Cls\Db
           ON bbn_tasks_logs.id_task = bbn_tasks_roles.id_task
         LEFT JOIN bbn_tasks_notes
           ON bbn_tasks_notes.id_task = bbn_tasks.id
+          AND bbn_tasks_notes.active = 1
         LEFT JOIN bbn_tasks AS children
-          ON bbn_tasks_roles.id_task = children.id_parent
+          ON bbn_tasks.id_task = children.id_parent
+          AND children.active = 1
         $join
         {$this->references_join}
       WHERE bbn_tasks.active = 1
