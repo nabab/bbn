@@ -1009,7 +1009,7 @@ class Medias extends bbn\Models\Cls\Db
       $cf      =& $this->class_cfg;
       $root    = Mvc::getDataPath('appui-note') . 'media/';
       $path    = $media[$cf['arch']['medias']['content']]['path'];
-      $oldFile = $root . $path . $media[$cf['arch']['medias']['name']];
+      $oldFile = $media['file'];
       $name    = X::basename($file);
       $title   = $media[$cf['arch']['medias']['title']];
       $mime    = mime_content_type($file) ?: null;
