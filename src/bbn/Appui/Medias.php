@@ -286,7 +286,7 @@ class Medias extends bbn\Models\Cls\Db
       }
       $grid = new Grid($this->db, $cfg, [
         'table' => $cf['table'],
-        'fields' => [],
+        'fields' => array_merge($ct, ['last_mod' => "IFNULL(edited, created)"]),
         'join' => $cfg['join'] ?? null,
         'limit' => $cfg['limit'] ?? $limit,
         'start' => $cfg['start'] ?? $start
@@ -1027,7 +1027,8 @@ class Medias extends bbn\Models\Cls\Db
           $cf['arch']['medias']['mimetype'] => $mime,
           $cf['arch']['medias']['title'] => $title,
           $cf['arch']['medias']['name'] => $name,
-          $cf['arch']['medias']['content'] => json_encode($content)
+          $cf['arch']['medias']['content'] => json_encode($content),
+          $cf['arch']['medias']['updated'] => date('Y-m-d H:i:s')
         ],
         [
           $cf['arch']['medias']['id'] => $id
