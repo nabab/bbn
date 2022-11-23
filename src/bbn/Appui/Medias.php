@@ -1028,7 +1028,7 @@ class Medias extends bbn\Models\Cls\Db
           $cf['arch']['medias']['title'] => $title,
           $cf['arch']['medias']['name'] => $name,
           $cf['arch']['medias']['content'] => json_encode($content),
-          $cf['arch']['medias']['updated'] => date('Y-m-d H:i:s')
+          $cf['arch']['medias']['edited'] => date('Y-m-d H:i:s')
         ],
         [
           $cf['arch']['medias']['id'] => $id
