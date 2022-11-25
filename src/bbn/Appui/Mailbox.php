@@ -541,13 +541,28 @@ class Mailbox extends Basic
   }
 
 
-  public function getEmailsList(string $folder, int $start, int $end)
+  public function getEmailsList(array $folder, int $start, int $end)
   {
-    if (isset($this->folders[$folder]) && ($end > $start)
-        && $this->selectFolder($folder)
+    $current = $this->folders[$folder['uid']];
+    X::log([
+      "current" => $current,
+      "start" => $start,
+      "end" => $end,
+      "folder" => $this->folders[$folder['uid']],
+      "folders" => $folder,
+      "lastNO" => $folder['last_uid'] != null ? $this->getMsgNo($folder['last_uid']) : null,
+      "currentNO" => $folder['db_uid'] != null ? $this->getMsgNo($folder['db_uid']) : null,
+      "selectedFolder" => $this->selectFolder($folder['uid'])
+    ], "quentin");
+    //$folder_last = $this->getMsgNo((int)$current['last_uid']);
+    $folder_num = $current['num_msg'];
+    X::log(["EMAIL LIST", $folder_num, $start, $end ], "quentin");
+    if (isset($this->folders[$folder['uid']]) && ($end <= $start)
+        && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
-      while ($start <= $end) {
+      while ($start >= $end) {
+        X::log(["BOUCLE", $start, $end ], "test");
         $tmp = (array)$this->getMsgHeaderinfo($start);
         $structure = $this->getMsgStructure($start);
         if (!$tmp || !$structure) {
@@ -605,7 +620,10 @@ class Mailbox extends Basic
           }
         }
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
-        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : '';
+        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $tmp['udate'].'/'.$tmp['Size'];
+        if (!$tmp['message_id']) {
+          X::log($tmp, "mail2");
+        }
         $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
         $tmp['attachments'] = [];
         $tmp['is_html']     = false;
@@ -637,7 +655,7 @@ class Mailbox extends Basic
         }
 
         $res[] = $tmp;
-        $start++;
+        $start--;
       }
 
       return $res;
