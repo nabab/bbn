@@ -859,7 +859,7 @@ class Task extends bbn\Models\Cls\Db
           ON bbn_tasks_notes.id_task = bbn_tasks.id
           AND bbn_tasks_notes.active = 1
         LEFT JOIN bbn_tasks AS children
-          ON bbn_tasks.id_task = children.id_parent
+          ON bbn_tasks.id = children.id_parent
           AND children.active = 1
         $join
         {$this->references_join}
