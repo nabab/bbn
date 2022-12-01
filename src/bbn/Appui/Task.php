@@ -1151,7 +1151,7 @@ class Task extends bbn\Models\Cls\Db
     return $this;
   }
 
-  public function insert(array $cfg){
+  public function insert(array $cfg, bool $addRole = true){
     if (($opt = bbn\Appui\Option::getInstance())
       && ($idType = $opt->fromCode('tasks', 'types', 'note', 'appui'))
       && isset($cfg['title'], $cfg['type'])
@@ -1160,19 +1160,20 @@ class Task extends bbn\Models\Cls\Db
       if ( $this->db->insert('bbn_tasks', [
         'id_note' => $idNote,
         'type' => $cfg['type'],
-        'priority' => $cfg['priority'] ?? 5,
-        'id_parent' => $cfg['id_parent'] ?? NULL,
-        'id_alias' => $cfg['id_alias'] ?? NULL,
-        'deadline' => $cfg['deadline'] ?? NULL,
-        'id_user' => $this->id_user ?: NULL,
-        'state' => $cfg['state'] ?? $this->idState('opened'),
+        'priority' => !empty($cfg['priority']) ? $cfg['priority'] : 5,
+        'id_parent' => !empty($cfg['id_parent']) ? $cfg['id_parent'] : null,
+        'id_alias' => !empty($cfg['id_alias']) ? $cfg['id_alias'] : null,
+        'deadline' => !empty($cfg['deadline']) ? $cfg['deadline'] : null,
+        'id_user' => $this->id_user ?: null,
+        'state' => !empty($cfg['state']) ? $cfg['state'] : $this->idState('opened'),
         'creation_date' => $this->date ?: date('Y-m-d H:i:s'),
-        'private' => $cfg['private'] ?? 0,
-        'cfg' => \json_encode(['widgets' => []])
+        'private' => !empty($cfg['private']) ? 1 : 0
       ]) ){
         $id = $this->db->lastId();
         $this->addLog($id, 'insert');
-        $this->addRole($id, 'managers');
+        if ($addRole) {
+          $this->addRole($id, 'managers');
+        }
         /*
         $subject = "Nouveau bug posté par {$this->user}";
         $text = "<p>{$this->user} a posté un nouveau bug</p>".
