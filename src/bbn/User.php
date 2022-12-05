@@ -197,7 +197,8 @@ class User extends Basic implements Implementor
      */
     'hotlinks' => false,
     'show' => 'name',
-    'mailer' => '\\bbn\\Mail'
+    'mailer' => '\\bbn\\Mail',
+    'ip_address' => true
   ];
 
   /** @var bool Will be true when the user has just logged in. */
@@ -459,7 +460,7 @@ class User extends Basic implements Implementor
     else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
-      $this->ip_address  = $_SERVER['REMOTE_ADDR'] ?? '';
+      $this->ip_address  = $this->class_cfg['ip_address'] && $_SERVER['REMOTE_ADDR'] ? $_SERVER['REMOTE_ADDR'] : '';
       $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
       if (empty($this->user_agent)) {
         X::log([X::isCli(), $_SERVER], 'user_sess');

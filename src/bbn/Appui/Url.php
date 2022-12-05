@@ -81,7 +81,8 @@ class Url extends bbn\Models\Cls\Db
     ) {
       return $this->insert([
         $this->fields['url'] => $url,
-        $this->fields['type_url'] => $cfg['type_url']
+        $this->fields['type_url'] => $cfg['type_url'],
+        $this->fields['redirect'] => $cfg['redirect'] ?: $id_url
       ]);
     }
 
