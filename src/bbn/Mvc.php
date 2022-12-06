@@ -149,6 +149,8 @@ class Mvc implements Mvc\Api
     'ctrls' => []
   ];
 
+  protected $static_routes = [];
+
   protected $authorized_routes = [];
 
   protected $forbidden_routes = [];
@@ -445,6 +447,69 @@ class Mvc implements Mvc\Api
 
 
   /**
+   * Adds a route to static routes list if not already exists.
+   *
+   * @return int
+   */
+  public function addStaticRoute(): int
+  {
+    $res = 0;
+    foreach (\func_get_args() as $a) {
+      if (!in_array($a, $this->static_routes, true)) {
+        $this->static_routes[] = $a;
+        $res++;
+      }
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Checks if a route is authorized.
+   *
+   * @param $url
+   * @return bool
+   */
+  public function isStaticRoute($url): bool
+  {
+    if (in_array($url, $this->static_routes, true)) {
+      return true;
+    }
+
+    $auth_applicable = '';
+    foreach ($this->static_routes as $ar) {
+      if ((substr($ar, -1) === '*')
+          && (strpos($url, substr($ar, 0, -1)) === 0)
+      ) {
+        if (strlen($ar) > strlen($auth_applicable)) {
+          $auth_applicable = substr($ar, 0, -1);
+        }
+      }
+    }
+
+    if ($auth_applicable) {
+      foreach ($this->forbidden_routes as $forbidden) {
+        if ((substr($forbidden, -1) === '*')
+            && (strpos($url, substr($forbidden, 0, -1)) === 0)
+            // Should be as or more precise
+            && (strlen($auth_applicable) < strlen($forbidden))
+        ) {
+          return false;
+        }
+        elseif ($url === $forbidden) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /**
    * Add a route to authorized routes list if not already exists.
    *
    * @return int
@@ -486,6 +551,10 @@ class Mvc implements Mvc\Api
   public function isAuthorizedRoute($url): bool
   {
     if (in_array($url, $this->authorized_routes, true)) {
+      return true;
+    }
+
+    if ($this->isStaticRoute($url)) {
       return true;
     }
 
