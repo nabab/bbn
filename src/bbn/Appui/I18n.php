@@ -291,20 +291,20 @@ class I18n extends bbn\Models\Cls\Cache
   /**
    * Gets primaries langs from option
    *
-   * @return void
+   * @return array
    */
-  public function getPrimariesLangs()
+  public function getPrimariesLangs(): array
   {
-    $uid_languages = $this->options->fromCode('languages', 'i18n', 'appui');
-    $languages     = $this->options->fullTree($uid_languages);
-    $primaries     = array_values(
-      array_filter(
-        $languages['items'], function ($v) {
-          return !empty($v['primary']);
-        }
-      )
-    );
-    return $primaries;
+    if ($languages = $this->options->fullOptions('languages', 'i18n', 'appui')) {
+      return array_values(
+        array_filter(
+          $languages, function ($v) {
+            return !empty($v['primary']);
+          }
+        )
+      );
+    }
+    return [];
   }
 
 
@@ -317,20 +317,15 @@ class I18n extends bbn\Models\Cls\Cache
   {
     /** @var  $paths takes all options with i18n property setted*/
     $paths = $this->options->findI18n();
-
     $data = [];
     /**
     * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language
     */
     $primaries = $this->getPrimariesLangs();
-    foreach ($primaries as $p){
-      $configured_langs[] = $p['code'];
-    }
-
     foreach ($paths as $p => $val){
       $parent = $this->options->getIdParent($paths[$p]['id']);
-
-      foreach ($configured_langs as $lang) {
+      foreach ($primaries as $p) {
+        $lang = $p['code'];
         $count = 0;
         $items = $paths[$p]['items'];
         /** push the text of the option into the array of strings */
@@ -340,38 +335,28 @@ class I18n extends bbn\Models\Cls\Cache
           'id_parent' => $parent
         ];
         foreach ($items as $idx => $item){
-          if ($id = $this->db->selectOne(
-            'bbn_i18n', 'id', [
-            'exp' => $item['text'],
-            'lang' => $paths[$p]['language']
-            ]
-          )
-          ) {
-            if ($this->db->selectOne(
-              'bbn_i18n_exp', 'id_exp', [
+          if (($id = $this->db->selectOne('bbn_i18n', 'id', [
+              'exp' => $this->normlizeText($item['text']),
+              'lang' => $paths[$p]['language']
+            ]))
+            && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
               'id_exp' => $id,
               'lang' => $lang
-              ]
-            )
-            ) {
-              $count ++;
-            }
+            ])
+          ) {
+            $count++;
           }
         }
-
         $paths[$p]['data_widget']['result'][$lang] = [
           'num' => count($items),
           'num_translations' => $count,
           'lang' => $lang
         ];
       }
-
       $paths[$p]['data_widget']['locale_dirs'] = [];
-
       unset($paths[$p]['items']);
       $data[] = $paths[$p];
     }
-
     return [
       'data' => $data
     ];
@@ -392,13 +377,10 @@ class I18n extends bbn\Models\Cls\Cache
     * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language
     */
     $primaries = $this->getPrimariesLangs();
-    foreach ($primaries as $p){
-      $configured_langs[] = $p['code'];
-    }
-
     foreach ($paths as $p => $val){
       $parent = $this->options->getIdParent($paths[$p]['id']);
-      foreach ($configured_langs as $lang) {
+      foreach ($primaries as $p) {
+        $lang = $p['code'];
         $count = 0;
         $items = $paths[$p]['items'];
         /** push the text of the option into the array of strings */
@@ -408,37 +390,28 @@ class I18n extends bbn\Models\Cls\Cache
           'id_parent' => $parent
         ];
         foreach ($items as $idx => $item){
-          if ($id = $this->db->selectOne(
-            'bbn_i18n', 'id', [
-            'exp' => $item['text'],
-            'lang' => $paths[$p]['language']
-            ]
-          )
-          ) {
-            if ($this->db->selectOne(
-              'bbn_i18n_exp', 'id_exp', [
+          if (($id = $this->db->selectOne('bbn_i18n', 'id', [
+              'exp' => $this->normlizeText($item['text']),
+              'lang' => $paths[$p]['language']
+            ]))
+            && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
               'id_exp' => $id,
               'lang' => $lang
-              ]
-            )
-            ) {
-              $count ++;
-            }
+            ])
+          ) {
+            $count ++;
           }
         }
-
         $paths[$p]['data_widget']['result'][$lang] = [
           'num' => count($items),
           'num_translations' => $count,
           'lang' => $lang
         ];
       }
-
       $paths[$p]['data_widget']['locale_dirs'] = [];
       unset($paths[$p]['items']);
       $data[] = $paths[$p];
     }
-
     return [
       'data' => $data
     ];
@@ -466,19 +439,24 @@ class I18n extends bbn\Models\Cls\Cache
       /** @todo AT THE MOMENT I'M NOT CONSIDERING LANGUAGES OF TRANSLATION */
       foreach ($paths[$p]['items'] as $i => $value){
         /* check if the opt text is in bbn_i18n and takes translations from db */
-        if ($exp = $this->db->rselect(
-          'bbn_i18n',['id', 'exp', 'lang'] , [
-            'exp' => $paths[$p]['items'][$i]['text'],
-            'lang' => $paths[$p]['language']
-          ]
-        )
-        ) {
-          $translated = $this->db->rselectAll('bbn_i18n_exp', ['id_exp', 'expression', 'lang'],  ['id_exp' => $exp['id'] ]);
-          if (!empty($translated)) {
+        if ($exp = $this->db->rselect('bbn_i18n', [
+          'id',
+          'exp',
+          'lang'
+        ], [
+          'exp' => $this->normlizeText($paths[$p]['items'][$i]['text']),
+          'lang' => $paths[$p]['language']
+        ])) {
+          if ($translated = $this->db->rselectAll('bbn_i18n_exp', [
+            'id_exp',
+            'expression',
+            'lang'
+          ], [
+            'id_exp' => $exp['id']
+          ])) {
             /** @var  $languages the array of languages found in db for the options*/
             $languages      = [];
             $translated_exp = '';
-
             foreach ($translated as $t => $trans){
               if (!in_array($translated[$t]['lang'], $translated)) {
                 $languages[] = $translated[$t]['lang'];
@@ -501,24 +479,18 @@ class I18n extends bbn\Models\Cls\Cache
           }
         }
         else {
-          if ($this->db->insert(
-            'bbn_i18n', [
-            'exp' => $paths[$p]['items'][$i]['text'],
+          if ($this->db->insert('bbn_i18n', [
+            'exp' => $this->normlizeText($paths[$p]['items'][$i]['text']),
             'lang' => $paths[$p]['language'],
             //'id_user'=> $this->user->getId(),
             //'last_modified' => date('H-m-d H:i:s')
-
-            ]
-          )
-          ) {
+          ])) {
             $id = $this->db->lastId();
-            $this->db->insertIgnore(
-              'bbn_i18n_exp', [
-                'id_exp' => $id,
-                'expression' => $paths[$p]['items'][$i]['text'],
-                'lang' => $paths[$p]['language']
-              ]
-            );
+            $this->db->insertIgnore('bbn_i18n_exp', [
+              'id_exp' => $id,
+              'expression' => $this->normlizeText($paths[$p]['items'][$i]['text']),
+              'lang' => $paths[$p]['language']
+            ]);
             $res[$p]['strings'][] = [
               $paths[$p]['language'] => [
                 'id_exp' => $id,
@@ -706,18 +678,18 @@ class I18n extends bbn\Models\Cls\Cache
         $source_language = $this->getLanguage($id_option);
 
         $count[$lang] = 0;
-        foreach($fromPo as $o){
-          if ($exp = $o->getMsgId()) {
-            $id = $this->db->selectOne('bbn_i18n', 'id', ['exp' => $exp, 'lang' => $source_language]);
-            if ($string = $this->db->selectOne(
-              'bbn_i18n_exp', 'expression', [
+        foreach ($fromPo as $o) {
+          if (($exp = $o->getMsgId())
+            && ($id = $this->db->selectOne('bbn_i18n', 'id', [
+              'exp' => $this->normlizeText($exp),
+              'lang' => $source_language
+            ]))
+            && $this->db->selectOne('bbn_i18n_exp', 'expression', [
               'id_exp' => $id,
               'lang' => $lang
-              ]
-            )
-            ) {
-              $count[$lang]++;
-            }
+            ])
+          ) {
+            $count[$lang]++;
           }
         }
       }
@@ -797,21 +769,17 @@ class I18n extends bbn\Models\Cls\Cache
         $res[$r] = ['path' => $val];
 
         // checks if the table bbn_i18n of db already contains the string $r for this $source_lang
-        if (!($id = $this->db->selectOne(
-          'bbn_i18n', 'id', [
-          'exp' => $r,
+        if (!($id = $this->db->selectOne('bbn_i18n', 'id', [
+          'exp' => $this->normlizeText($r),
           'lang' => $source_language
-          ]
-        ))
-        ) {
+        ]))) {
           // if the string $r is not in 'bbn_i18n' inserts the string
-          $this->db->insertIgnore(
-            'bbn_i18n', [
-            'exp' => stripslashes($r),
+          if ($this->db->insertIgnore('bbn_i18n', [
+            'exp' => $this->normlizeText(stripslashes($r)),
             'lang' => $source_language,
-            ]
-          );
-          $id = $this->db->lastId();
+          ])) {
+            $id = $this->db->lastId();
+          }
         }
 
         // create the property 'id_exp' for the string $r
@@ -821,13 +789,10 @@ class I18n extends bbn\Models\Cls\Cache
         $res[$r]['original_exp'] = $r;
 
         // checks in 'bbn_i18n_exp' if the string $r already exist for this $source_lang
-        if(!( $id_exp = $this->db->selectOne(
-          'bbn_i18n_exp', 'id_exp', [
+        if (!($id_exp = $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
           'id_exp' => $id,
           'lang' => $source_language
-          ]
-        ) )
-        ) {
+        ]))) {
           // if the string $r is not in 'bbn_i18n_exp' inserts the string
           //  $done will be the number of strings found in the folder $to_explore that haven't been found in the table
           // 'bbn_i18n_exp' of db, so $done is the number of new strings inserted in in 'bbn_i18n_exp'
@@ -835,7 +800,7 @@ class I18n extends bbn\Models\Cls\Cache
             'bbn_i18n_exp', [
             'id_exp' => $id,
             'lang' => $source_language,
-            'expression' => stripslashes($r)
+            'expression' => $this->normlizeText(stripslashes($r))
             ]
           );
           //creates an array of new strings found in the folder;
@@ -845,14 +810,10 @@ class I18n extends bbn\Models\Cls\Cache
         // $languages is the array of languages existing in locale dir
         foreach ($languages as $lng){
           //  create a property indexed to the code of $lng containing the string $r from 'bbn_i18n_exp' in this $lng
-          $res[$r][$lng] = (string)$this->db->selectOne(
-            'bbn_i18n_exp',
-            'expression',
-            [
-              'id_exp' => $id,
-              'lang' => $lng
-            ]
-          );
+          $res[$r][$lng] = (string)$this->db->selectOne('bbn_i18n_exp', 'expression', [
+            'id_exp' => $id,
+            'lang' => $lng
+          ]);
         }
       }
 
@@ -926,15 +887,10 @@ class I18n extends bbn\Models\Cls\Cache
                 $po_file[$i][$lng]['translations_po'] = $t->getMsgStr();
 
                 // @var  $id takes the id of the original expression in db
-                if ($id = $this->db->selectOne(
-                  'bbn_i18n',
-                  'id',
-                  [
-                    'exp' => $original,
-                    'lang' => $path_source_lang
-                  ]
-                )
-                ) {
+                if ($id = $this->db->selectOne('bbn_i18n', 'id', [
+                  'exp' => $this->normlizeText($original),
+                  'lang' => $path_source_lang
+                ])) {
                   $po_file[$i][$lng]['translations_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
 
                   // the id of the string
@@ -1032,24 +988,20 @@ class I18n extends bbn\Models\Cls\Cache
                   }
 
                   // @var  $id takes the id of the original expression in db
-                  if (!isset($id) && !($id = $this->db->selectOne(
-                    'bbn_i18n', 'id', [
-                      'exp' => $original,
+                  if (!isset($id)
+                    && !($id = $this->db->selectOne('bbn_i18n', 'id', [
+                      'exp' => $this->normlizeText($original),
                       'lang' => $path_source_lang
-                    ]
-                  ))
+                    ]))
                   ) {
-                    if (!$this->db->insertIgnore(
-                      'bbn_i18n', [
-                        'exp' => $original,
-                        'lang' => $path_source_lang
-                      ]
-                    )
-                    ) {
+                    if (!$this->db->insertIgnore('bbn_i18n', [
+                      'exp' => $this->normlizeText($original),
+                      'lang' => $path_source_lang
+                    ])) {
                       throw new \Exception(
                         sprintf(
                           _("Impossible to insert the original string %s in the original language %s"),
-                          $original,
+                          $this->normlizeText($original),
                           $path_source_lang
                         )
                       );
@@ -1061,25 +1013,20 @@ class I18n extends bbn\Models\Cls\Cache
 
                   if ($id) {
                     $row[$lng.'_po'] = stripslashes($t->getMsgStr());
-
                     $row[$lng.'_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
                     if ($row[$lng.'_po'] && !$row[$lng.'_db']) {
                       if ((($row[$lng.'_db'] === false)
-                          && $this->db->insert(
-                            'bbn_i18n_exp', [
-                            'expression' => $row[$lng.'_po'],
+                          && $this->db->insert('bbn_i18n_exp', [
+                            'expression' => $this->normlizeText($row[$lng.'_po']),
                             'id_exp' => $id,
                             'lang' => $lng
-                            ]
-                          ))
-                          || $this->db->update(
-                            'bbn_i18n_exp', [
-                            'expression' => $row[$lng.'_po']
-                            ], [
-                            'id_exp' => $id,
-                            'lang' => $lng
-                            ]
-                          )
+                          ]))
+                        || $this->db->update('bbn_i18n_exp', [
+                          'expression' => $this->normlizeText($row[$lng.'_po'])
+                        ], [
+                          'id_exp' => $id,
+                          'lang' => $lng
+                        ])
                       ) {
                         $row[$lng.'_db'] = $row[$lng.'_po'];
                       }
@@ -1195,6 +1142,17 @@ class I18n extends bbn\Models\Cls\Cache
   public function getIndexPath(string $id_option)
   {
     return $this->getLocaleDirPath($id_option).'/index.txt';
+  }
+
+
+  /**
+   * Returns a normalized version of the given text
+   * @param string $text
+   * @return string
+   */
+  private function normlizeText(string $text): string
+  {
+    return \trim(\normalizer_normalize($text));
   }
 
 
