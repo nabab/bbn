@@ -92,10 +92,10 @@ class Email extends Basic
 
 
   /**
-             * Returns a list typical folder types as they are recorded in the options
-             *
-             * @return array
-             */
+   * Returns a list typical folder types as they are recorded in the options
+   *
+   * @return array
+   */
   public static function getFolderTypes(): array
   {
     return self::getOptions('folders');
@@ -103,10 +103,10 @@ class Email extends Basic
 
 
   /**
-             * Returns a list of typical email accounts types as they are recorded in the options
-             *
-             * @return array
-             */
+   * Returns a list of typical email accounts types as they are recorded in the options
+   *
+   * @return array
+   */
   public static function getAccountTypes(): array
   {
     return self::getOptions('types');
@@ -148,11 +148,11 @@ class Email extends Basic
 
 
   /**
-             * Returns the list of the accounts' IDs of the current user.
-             *
-             * @param bool $force 
-             * @return array|null
-             */
+   * Returns the list of the accounts' IDs of the current user.
+   *
+   * @param bool $force
+   * @return array|null
+   */
   public function getAccountsIds(): ?array
   {
     if ($id_accounts = self::getOptionId('accounts')) {
@@ -164,11 +164,11 @@ class Email extends Basic
 
 
   /**
-             * Returns the list of the accounts of the current user.
-             *
-             * @param bool $force 
-             * @return array|null
-             */
+   * Returns the list of the accounts of the current user.
+   *
+   * @param bool $force
+   * @return array|null
+   */
   public function getAccounts(bool $force = false): array
   {
     $res = [];
@@ -216,20 +216,20 @@ class Email extends Basic
   public function updateAccount(string $id_account, array $cfg): bool
   {
     if (X::hasProps($cfg, ['login', 'pass', 'type'], true)
-        && ($acc = $this->getAccount($id_account))
-        && ($this->pref->setCfg(
-          $id_account,
-          [
-            'host' => $cfg['host'] ?? null,
-            'login' => $cfg['login'],
-            'type' => $cfg['type'],
-            'port' => $cfg['port'] ?? null,
-            'ssl' => $cfg['ssl'] ?? true,
-            'last_uid' => $cfg['last_uid'] ?? null,
-            'last_check' => $cfg['last_check'] ?? null
-          ]
-        ))
-       ) {
+      && ($acc = $this->getAccount($id_account))
+      && ($this->pref->setCfg(
+        $id_account,
+        [
+          'host' => $cfg['host'] ?? null,
+          'login' => $cfg['login'],
+          'type' => $cfg['type'],
+          'port' => $cfg['port'] ?? null,
+          'ssl' => $cfg['ssl'] ?? true,
+          'last_uid' => $cfg['last_uid'] ?? null,
+          'last_check' => $cfg['last_check'] ?? null
+        ]
+      ))
+    ) {
       return true;
     }
 
@@ -265,7 +265,7 @@ class Email extends Basic
         'ssl' => $cfg['ssl'] ?? true
       ]
     ))
-       ) {
+    ) {
       throw new \Exception("Impossible to add the preference");
     }
 
@@ -285,8 +285,8 @@ class Email extends Basic
   public function reset(string $id_account): bool
   {
     if (($account = $this->getAccount($id_account))
-        && ($num = $this->pref->deleteBits($id_account))
-       ) {
+      && ($num = $this->pref->deleteBits($id_account))
+    ) {
       return true;
     }
 
@@ -396,14 +396,14 @@ class Email extends Basic
   public function checkFolder(array $folder, $sync = false)
   {
     if (X::hasProp($folder, 'uid')
-        && ($mb = $this->getMailbox($folder['id_account']))
-        && $mb->check()
-       ) {
+      && ($mb = $this->getMailbox($folder['id_account']))
+      && $mb->check()
+    ) {
       if ($mb->update($folder['uid'])
-          && ($folders = $mb->getFolders())
-          && ($res = $folders[$folder['uid']])
-          && ($info = $mb->getInfoFolder($folder['uid']))
-         ) {
+        && ($folders = $mb->getFolders())
+        && ($res = $folders[$folder['uid']])
+        && ($info = $mb->getInfoFolder($folder['uid']))
+      ) {
         if (!array_key_exists('db_uid', $res)) {
           $res['db_uid'] = null;
         }
@@ -456,9 +456,17 @@ class Email extends Basic
             'id_option' => $a['id_option'],
             'id_parent' => $a['id_parent'] ?? null,
             'type' => X::getField($types, ['id' => $a['id_option']], 'code'),
-            'db_uid' => $this->db->selectOne(
+            'db_uid_max' => $this->db->selectOne(
               $table,
               'MAX('.$this->db->csn($cfg['msg_uid'], true).')',
+              [
+                $cfg['id_folder'] => $a['id'],
+                $cfg['id_user'] => $this->user->getId()
+              ]
+            ),
+            'db_uid_min' => $this->db->selectOne(
+              $table,
+              'MIN('.$this->db->csn($cfg['msg_uid'], true).')',
               [
                 $cfg['id_folder'] => $a['id'],
                 $cfg['id_user'] => $this->user->getId()
@@ -497,9 +505,17 @@ class Email extends Basic
         'uid' => $a['uid'],
         'id_option' => $a['id_option'],
         'type' => X::getField($types, ['id' => $a['id_option']], 'code'),
-        'db_uid' => $this->db->selectOne(
+        'db_uid_max' => $this->db->selectOne(
           $table,
           'MAX('.$this->db->csn($cfg['msg_uid'], true).')',
+          [
+            $cfg['id_folder'] => $a['id'],
+            $cfg['id_user'] => $this->user->getId()
+          ]
+        ),
+        'db_uid_min' => $this->db->selectOne(
+          $table,
+          'MIN('.$this->db->csn($cfg['msg_uid'], true).')',
           [
             $cfg['id_folder'] => $a['id'],
             $cfg['id_user'] => $this->user->getId()
@@ -522,34 +538,47 @@ class Email extends Basic
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       X::log($folder);
+      $info = $mb->getInfoFolder($folder['uid']);
       $mb->selectFolder($folder['uid']);
-      if (empty($folder['last_uid']) || ($folder['last_uid'] !== $folder['db_uid'])) {
+      if (!empty($folder['last_uid'])) {
         X::log("has last UID");
-        if (!empty($folder['db_uid'])) {
+
+        if (!empty($folder['db_uid_min'])) {
           try {
-            $start = $mb->getMsgNo($folder['db_uid']);
-          }
-          catch (\Exception $e) {
-            $start = 1;
+            $start = $mb->getMsgNo($folder['db_uid_min']);
+          } catch (\Exception $e) {
+
           }
         }
 
-        if (empty($start)) {
+        if (empty($start) and !empty($folder['db_uid_max'])) {
+          try {
+            $start = $mb->getMsgNo($folder['db_uid_max']);
+          }
+          catch (\Exception $e) {
+
+          }
+        }
+
+        if (empty($start) and !empty($folder['last_uid'])) {
+          try {
+            $start = $mb->getMsgNo($folder['last_uid']);
+          }
+          catch (\Exception $e) {
+
+          }
+        }
+
+        if (empty($start) && $info->Nmsgs) {
+          $start = $info->Nmsgs;
+        } else if (empty($start)) {
           $start = 1;
         }
-        $real_end = 1;
-        if (!empty($folder['last_uid'])) {
-          try {
-            $real_end = $mb->getMsgNo($folder['last_uid']);
-          }
-          catch (\Exception $e) {
-            $real_end = 1;
-          }
-        }
 
-        /** @todo temporary solution to avoid errors */
-        if ($start === $real_end) {
-          return 0;
+        $real_end = $start - $limit;
+
+        if ($real_end < 1) {
+          $real_end = 1;
         }
 
         if ($limit) {
@@ -559,14 +588,16 @@ class Email extends Basic
         $end      = $start;
         $num      = $real_end - $start;
         //var_dump($folder, $num, $real_end);
-        X::log(["END", $end, $real_end]);
-        while ($end <= $real_end) {
+        X::log(["END", $end, $real_end, $folder['uid']], 'mail2');
+        while ($end > $real_end) {
           $end = min($real_end, $start + 999);
-          if ($all = $mb->getEmailsList($folder['uid'], $start, $end)) {
+          if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
             $start += 1000;
             //var_dump($start, $end);
             foreach ($all as $a) {
-              X::log($a, 'mail');
+              if ($folder['uid'] === "Sent") {
+                X::log($a, 'mail2');
+              }
               if ($this->insertEmail($folder, $a)) {
                 $res++;
               }
@@ -593,7 +624,7 @@ class Email extends Basic
         }
       }
 
-      $info = $mb->getInfoFolder($folder['uid']);
+
       X::log(["Info", $info]);
       if ($info->Nmsgs > ($res + $folder['num_msg'])) {
         $cfg   = $this->class_cfg['arch']['users_emails'];
@@ -620,15 +651,15 @@ class Email extends Basic
 
 
   /**
-             * Returns a list of emails based on their folder.
-             *
-             * @param string $id_folder
-             * @param array $filter
-             * @param int $limit
-             * @param int $start
-             *
-             * @return array|null
-             */
+   * Returns a list of emails based on their folder.
+   *
+   * @param string $id_folder
+   * @param array $filter
+   * @param int $limit
+   * @param int $start
+   *
+   * @return array|null
+   */
   public function getList(string $id_folder, array $post): ?array
   {
     if ($ids = $this->idsFromFolder($id_folder)) {
@@ -672,7 +703,7 @@ class Email extends Basic
     if ($em) {
       $folder = $this->getFolder($em['id_folder']);
       if ($folder
-          && ($mb = $this->getAccount($folder['id_account']))) {
+        && ($mb = $this->getAccount($folder['id_account']))) {
         return $mb;
       }
     }
@@ -687,10 +718,10 @@ class Email extends Basic
     if ($em) {
       $folder = $this->getFolder($em['id_folder']);
       if ($folder
-          && ($mb = $this->getMailbox($folder['id_account']))
-          && $mb->selectFolder($folder['uid'])
-          && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
-         ) {
+        && ($mb = $this->getMailbox($folder['id_account']))
+        && $mb->selectFolder($folder['uid'])
+        && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
+      ) {
         if ($number === 0) {
           $this->db->delete($table, [$cfg['id'] => $id]);
           return null;
@@ -1024,7 +1055,7 @@ class Email extends Basic
         array $real,
         array $db,
         array &$res = null,
-        $id_parent = null
+              $id_parent = null
       ) use (&$compare): array {
         if (!$res) {
           $res = ['add' => [], 'delete' => []];
@@ -1203,3 +1234,4 @@ class Email extends Basic
 
 
 }
+
