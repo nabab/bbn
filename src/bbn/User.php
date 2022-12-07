@@ -1,7 +1,9 @@
 <?php
+
 /**
  * @package user
  */
+
 namespace bbn;
 
 use Exception;
@@ -272,7 +274,7 @@ class User extends Basic implements Implementor
     // Setting up the class configuration
     $this->_init_class_cfg($cfg);
 
-    $f =& $this->class_cfg['fields'];
+    $f = &$this->class_cfg['fields'];
     self::retrieverInit($this);
 
     if ($this->isToken() && !empty($params[$f['token']])) {
@@ -314,8 +316,7 @@ class User extends Basic implements Implementor
 
         try {
           $phone = \Brick\PhoneNumber\PhoneNumber::parse($params[$f['phone_number']]);
-        }
-        catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+        } catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
           $this->setError(21);
           return $this->api_request_output = [
             'success' => false,
@@ -324,7 +325,8 @@ class User extends Basic implements Implementor
           ];
         }
 
-        if (!$this->hasSkipVerification()
+        if (
+          !$this->hasSkipVerification()
           && !$phone->isValidNumber()
         ) {
           $this->setError(21);
@@ -342,8 +344,7 @@ class User extends Basic implements Implementor
             'success' => true,
             'phone_verification_code' => $code
           ];
-        }
-        else {
+        } else {
           $this->setError(22);
           return [
             'success' => false,
@@ -351,10 +352,7 @@ class User extends Basic implements Implementor
             'errorCode' => 22
           ];
         }
-
-
-      }
-      elseif ($this->isVerifyPhoneNumberRequest($params)) {
+      } elseif ($this->isVerifyPhoneNumberRequest($params)) {
         // Verify that the received token is associated to the device uid
         if (!$this->verifyTokenAndDeviceUid($params[$f['device_uid']], $params[$f['token']])) {
           $this->setError(20);
@@ -384,7 +382,8 @@ class User extends Basic implements Implementor
           // Verify that the code is correct
           $user_cgf = json_decode($user[$this->class_cfg['arch']['users']['cfg']], true);
 
-          if (!$user_cgf
+          if (
+            !$user_cgf
             || !isset($user_cgf['phone_verification_code'])
             || ((string)$user_cgf['phone_verification_code'] !== (string)$params[$f['phone_verification_code']])
           ) {
@@ -395,7 +394,6 @@ class User extends Basic implements Implementor
               'errorCode' => 24
             ];
           }
-
         }
 
         // Update verification code to null
@@ -406,10 +404,12 @@ class User extends Basic implements Implementor
 
         // Update user id and the new token in the row with the old token and device uid.
         $this->db->update(
-            $this->class_cfg['tables']['api_tokens'], [
+          $this->class_cfg['tables']['api_tokens'],
+          [
             $this->class_cfg['arch']['api_tokens']['id_user']  => $user[$this->class_cfg['arch']['users']['id']],
             $this->class_cfg['arch']['api_tokens']['token']    => $new_token,
-          ], [
+          ],
+          [
             $this->class_cfg['arch']['api_tokens']['token']      => $params[$f['token']],
             $this->class_cfg['arch']['api_tokens']['device_uid'] => $params[$f['device_uid']],
           ]
@@ -420,11 +420,9 @@ class User extends Basic implements Implementor
           'token'   => $new_token,
           'success' => true
         ];
-
-      }
-      elseif ($this->isTokenLoginRequest($params)) {
+      } elseif ($this->isTokenLoginRequest($params)) {
         // Find the token associated to the device uid in db then get it's associated user.
-        if (! $user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
+        if (!$user = $this->findUserByApiTokenAndDeviceUid($params[$f['token']], $params[$f['device_uid']])) {
           $this->setError(20);
           return $this->api_request_output =  [
             'success' => false,
@@ -454,13 +452,11 @@ class User extends Basic implements Implementor
           'token'   => $params[$f['token']],
           'success' => true
         ];
-
       }
-    }
-    else {
+    } else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
-      $this->ip_address  = $this->class_cfg['ip_address'] && $_SERVER['REMOTE_ADDR'] ? $_SERVER['REMOTE_ADDR'] : '';
+      $this->ip_address  = $this->class_cfg['ip_address'] && isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
       $this->accept_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
       if (empty($this->user_agent)) {
         X::log([X::isCli(), $_SERVER], 'user_sess');
@@ -478,13 +474,13 @@ class User extends Basic implements Implementor
       // The user logs in
       if ($this->isLoginRequest($params)) {
         /** @todo separate credentials and salt checking */
-        if (!empty($this->sess_cfg['fingerprint'])
+        if (
+          !empty($this->sess_cfg['fingerprint'])
           && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
         ) {
           /** @todo separate credentials and salt checking */
           $this->_check_credentials($params);
-        }
-        else{
+        } else {
           $this->setError(19);
           $this->session->destroy();
         }
@@ -500,16 +496,13 @@ class User extends Basic implements Implementor
             $this->id = $id;
             $this->forcePassword($params[$f['pass2']]);
             $this->session->set([]);
-          }
-          else{
+          } else {
             $this->setError(7);
           }
-        }
-        else{
+        } else {
           $this->setError(18);
         }
-      }
-      else {
+      } else {
         $this->checkSession();
       }
     }
@@ -622,16 +615,13 @@ class User extends Basic implements Implementor
         // Unsetting if null
         if (is_null($v) && array_key_exists($k, $this->data)) {
           unset($this->data[$k]);
-        }
-        else {
+        } else {
           $this->data[$k] = $v;
         }
       }
-    }
-    elseif (is_string($index)) {
+    } elseif (is_string($index)) {
       $this->data[$index] = $data;
-    }
-    else {
+    } else {
       throw new Exception(X::_("Invalid parameters for function setData in user class"));
     }
 
@@ -649,13 +639,13 @@ class User extends Basic implements Implementor
   {
     if ($this->checkSession()) {
       $update = [];
-      foreach ($d as $key => $val){
+      foreach ($d as $key => $val) {
         if (($key !== $this->fields['id'])
-            && ($key !== $this->fields['cfg'])
-            && ($key !== 'auth')
-            && ($key !== 'admin')
-            && ($key !== 'dev')
-            && ($key !== 'pass')
+          && ($key !== $this->fields['cfg'])
+          && ($key !== 'auth')
+          && ($key !== 'admin')
+          && ($key !== 'dev')
+          && ($key !== 'pass')
         ) {
           $update[$key] = $val;
         }
@@ -700,7 +690,7 @@ class User extends Basic implements Implementor
   }
 
 
-    /**
+  /**
    * Sets the given attribute(s) in the user's session.
    *
    * @return self
@@ -713,8 +703,8 @@ class User extends Basic implements Implementor
         $attr = [$args[0] => $args[1]];
       }
 
-      if(is_array($attr)) {
-        foreach ($attr as $key => $val){
+      if (is_array($attr)) {
+        foreach ($attr as $key => $val) {
           if (\is_string($key)) {
             $this->session->set($val, $this->userIndex, $key);
           }
@@ -743,12 +733,12 @@ class User extends Basic implements Implementor
   }
 
 
-    /**
+  /**
    * Returns session property from the session's user array (userIndex).
    *
    * @param null|string The property to get
-     * @return mixed
-     */
+   * @return mixed
+   */
   public function getSession($attr = null)
   {
     if ($this->session && $this->session->has($this->userIndex)) {
@@ -782,7 +772,7 @@ class User extends Basic implements Implementor
   }
 
 
-   /**
+  /**
    * Checks if the given attribute exists in the user's session.
    *
    * @return bool
@@ -801,16 +791,17 @@ class User extends Basic implements Implementor
   public function updateActivity(): self
   {
     if ($id_session = $this->getIdSession() && $this->check()) {
-      $p =& $this->class_cfg['arch']['sessions'];
+      $p = &$this->class_cfg['arch']['sessions'];
       $this->db->update(
-        $this->class_cfg['tables']['sessions'], [
-        $p['last_activity'] => date('Y-m-d H:i:s')
-        ], [
-        $p['id'] => $id_session
+        $this->class_cfg['tables']['sessions'],
+        [
+          $p['last_activity'] => date('Y-m-d H:i:s')
+        ],
+        [
+          $p['id'] => $id_session
         ]
       );
-    }
-    else{
+    } else {
       $this->setError(13);
     }
 
@@ -829,7 +820,7 @@ class User extends Basic implements Implementor
     $id_session = $this->getIdSession();
     if ($this->check()) {
       if ($id_session) {
-        $p =& $this->class_cfg['arch']['sessions'];
+        $p = &$this->class_cfg['arch']['sessions'];
         // It is normal this is sometimes not changing as different actions can happen in the same
         $time = time();
         if ($force || empty($this->sess_cfg['last_renew']) || ($time - $this->sess_cfg['last_renew'] >= 2)) {
@@ -848,8 +839,7 @@ class User extends Basic implements Implementor
             [$p['id'] => $id_session]
           );
         }
-      }
-      else{
+      } else {
         $this->setError(13);
       }
     }
@@ -868,23 +858,24 @@ class User extends Basic implements Implementor
   {
     if ($this->id) {
       if ($this->session) {
-        $p =& $this->class_cfg['arch']['sessions'];
+        $p = &$this->class_cfg['arch']['sessions'];
         $this->db->update(
-          $this->class_cfg['tables']['sessions'], [
+          $this->class_cfg['tables']['sessions'],
+          [
             $p['ip_address'] => $this->ip_address,
             $p['user_agent'] => $this->user_agent,
             $p['opened'] => 0,
             $p['last_activity'] => date('Y-m-d H:i:s'),
             $p['cfg'] => json_encode($this->sess_cfg)
-          ],[
+          ],
+          [
             $p['id_user'] => $this->id,
             $p['sess_id'] => $this->session->getId()
           ]
         );
         if ($with_session) {
           $this->session->set([]);
-        }
-        else{
+        } else {
           $this->session->set([], $this->userIndex);
         }
       }
@@ -948,7 +939,7 @@ class User extends Basic implements Implementor
       }
 
       if (is_array($attr)) {
-        foreach ($attr as $key => $val){
+        foreach ($attr as $key => $val) {
           if (\is_string($key)) {
             $this->cfg[$key] = $val;
           }
@@ -977,7 +968,7 @@ class User extends Basic implements Implementor
       }
 
       if (is_array($attr)) {
-        foreach ($attr as $key){
+        foreach ($attr as $key) {
           if (isset($key)) {
             unset($this->cfg[$key]);
           }
@@ -1069,10 +1060,13 @@ class User extends Basic implements Implementor
       $pwt         = $this->class_cfg['tables']['passwords'];
       $pwa         = $this->class_cfg['arch']['passwords'];
       $stored_pass = $this->db->selectOne(
-        $pwt, $pwa['pass'], [
-        $this->class_cfg['arch']['passwords']['id_user'] => $this->id
-        ], [
-        $this->class_cfg['arch']['passwords']['added'] => 'DESC'
+        $pwt,
+        $pwa['pass'],
+        [
+          $this->class_cfg['arch']['passwords']['id_user'] => $this->id
+        ],
+        [
+          $this->class_cfg['arch']['passwords']['added'] => 'DESC'
         ]
       );
       if ($this->_check_password($old_pass, $stored_pass)) {
@@ -1094,8 +1088,7 @@ class User extends Basic implements Implementor
     if ($this->auth) {
       if (\is_null($usr)) {
         $usr = $this->getSession();
-      }
-      elseif (str::isUid($usr)) {
+      } elseif (str::isUid($usr)) {
         $mgr = $this->getManager();
         $usr = $mgr->getUser($usr);
       }
@@ -1118,7 +1111,7 @@ class User extends Basic implements Implementor
   {
     if ($this->auth) {
       $token = Str::genpwd(32, 16);
-      $f     =& $this->class_cfg['arch']['tokens'];
+      $f     = &$this->class_cfg['arch']['tokens'];
       if ($this->db->insert(
         $this->class_cfg['tables']['tokens'],
         [
@@ -1127,8 +1120,7 @@ class User extends Basic implements Implementor
           $f['creation'] => X::microtime(),
           $f['last'] => X::microtime()
         ]
-      )
-      ) {
+      )) {
         return $token;
       }
     }
@@ -1147,8 +1139,7 @@ class User extends Basic implements Implementor
     if ($this->auth) {
       if (\is_null($usr)) {
         $usr = $this->getSession();
-      }
-      elseif (str::isUid($usr) && ($mgr = $this->getManager())) {
+      } elseif (str::isUid($usr) && ($mgr = $this->getManager())) {
         $usr = $mgr->getUser($usr);
       }
 
@@ -1265,8 +1256,7 @@ class User extends Basic implements Implementor
       if (!empty($this->getSession('cfg'))) {
         $this->cfg      = $this->getSession('cfg');
         $this->id_group = $this->getSession('id_group');
-      }
-      elseif ($d = $this->db->rselect(
+      } elseif ($d = $this->db->rselect(
         $this->class_cfg['tables']['users'],
         array_unique(array_values($this->fields)),
         X::mergeArrays(
@@ -1274,10 +1264,9 @@ class User extends Basic implements Implementor
           [$this->fields['active'] => 1],
           [$this->fields['id'] => $this->id]
         )
-      )
-      ) {
+      )) {
         $r = [];
-        foreach ($d as $key => $val){
+        foreach ($d as $key => $val) {
           $this->$key = $val;
           $r[$key]    = ($key === $this->fields['cfg']) && $val ? json_decode($val, true) : $val;
         }
@@ -1305,31 +1294,30 @@ class User extends Basic implements Implementor
   {
     if (!Str::isUid($id_session)) {
       $id_session = $this->getIdSession();
-    }
-    else{
+    } else {
       $cfg = $this->_get_session('cfg');
     }
 
-    if (empty($cfg)
-        && Str::isUid($id_session)
-        && ($id = $this->getSession('id'))
-        && ($d = $this->db->rselect(
-          $this->class_cfg['tables']['sessions'],
-          $this->class_cfg['arch']['sessions'],
-          [
+    if (
+      empty($cfg)
+      && Str::isUid($id_session)
+      && ($id = $this->getSession('id'))
+      && ($d = $this->db->rselect(
+        $this->class_cfg['tables']['sessions'],
+        $this->class_cfg['arch']['sessions'],
+        [
           $this->class_cfg['arch']['sessions']['id'] => $id_session,
           $this->class_cfg['arch']['sessions']['id_user'] => $id,
           $this->class_cfg['arch']['sessions']['opened'] => 1,
-          ]
-        ))
+        ]
+      ))
     ) {
       $cfg = json_decode($d['cfg'], true);
     }
 
     if (isset($cfg) && \is_array($cfg)) {
       $this->sess_cfg = $cfg;
-    }
-    else{
+    } else {
       if (isset($id_session, $id)) {
         $this->_init_session();
         $new_id_session = $this->getIdSession();
@@ -1345,25 +1333,25 @@ class User extends Basic implements Implementor
   }
 
 
-   /**
-    * Checks the conformity of a given string with a hash.
-    *
-    * @param string $pass_given  The password to check
-    * @param string $pass_stored The stored encrypted password to check against
-    * @return bool
-    */
+  /**
+   * Checks the conformity of a given string with a hash.
+   *
+   * @param string $pass_given  The password to check
+   * @param string $pass_stored The stored encrypted password to check against
+   * @return bool
+   */
   private function _check_password(string $pass_given, string $pass_stored): bool
   {
     return $this->_hash($pass_given) === $pass_stored;
   }
 
 
-   /**
-    * Retrieves all user info from its session and populates the object.
-    *
-    * @param bool $force
-    * @return self
-    */
+  /**
+   * Retrieves all user info from its session and populates the object.
+   *
+   * @param bool $force
+   * @return self
+   */
   private function _retrieve_session(bool $force = false): self
   {
     // $id mustn't be already defined
@@ -1373,16 +1361,15 @@ class User extends Basic implements Implementor
       $id         = $this->getSession('id');
       if ($id_session && $id) {
         $this->_sess_info($id_session);
-        if (isset($this->sess_cfg['fingerprint'])
-            && ($this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
+        if (
+          isset($this->sess_cfg['fingerprint'])
+          && ($this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint'])
         ) {
           $this->_authenticate($id)->_user_info()->_init_dir()->saveSession();
-        }
-        else {
+        } else {
           $this->setError(19);
         }
-      }
-      else {
+      } else {
         $this->setError(15);
       }
     }
@@ -1402,19 +1389,20 @@ class User extends Basic implements Implementor
     /** @var User\Session */
     $this->session = User\Session::getInstance();
     if (!$this->session) {
-      $session_cls   = defined('BBN_SESSION') 
-          && is_string(BBN_SESSION)
-          && class_exists(BBN_SESSION) ? BBN_SESSION : '\\bbn\\User\\Session';
+      $session_cls   = defined('BBN_SESSION')
+        && is_string(BBN_SESSION)
+        && class_exists(BBN_SESSION) ? BBN_SESSION : '\\bbn\\User\\Session';
       $this->session = new $session_cls($defaults);
     }
 
     /** @var int $id_session The ID of the session row in the DB */
-    if (!($id_session = $this->getIdSession())
-        || !($tmp = $this->db->selectOne(
-          $this->class_cfg['tables']['sessions'],
-          $this->class_cfg['arch']['sessions']['cfg'],
-          [$this->class_cfg['arch']['sessions']['id'] => $id_session]
-        ))
+    if (
+      !($id_session = $this->getIdSession())
+      || !($tmp = $this->db->selectOne(
+        $this->class_cfg['tables']['sessions'],
+        $this->class_cfg['arch']['sessions']['cfg'],
+        [$this->class_cfg['arch']['sessions']['id'] => $id_session]
+      ))
     ) {
       /** @var string $salt */
       $salt = self::makeFingerprint();
@@ -1423,7 +1411,7 @@ class User extends Basic implements Implementor
       $fingerprint = self::makeFingerprint();
 
       /** @var array $p The fields of the sessions table */
-      $p =& $this->class_cfg['arch']['sessions'];
+      $p = &$this->class_cfg['arch']['sessions'];
 
       $this->sess_cfg = [
         'fingerprint' => $this->getPrint($fingerprint),
@@ -1433,17 +1421,19 @@ class User extends Basic implements Implementor
       $id_session = $this->session->getId();
 
       // Inserting the session in the database
-      if ($id_session && $this->db->insert(
-        $this->class_cfg['tables']['sessions'], [
-        $p['sess_id'] => $id_session,
-        $p['ip_address'] => $this->ip_address,
-        $p['user_agent'] => $this->user_agent,
-        $p['opened'] => 1,
-        $p['last_activity'] => date('Y-m-d H:i:s'),
-        $p['creation'] => date('Y-m-d H:i:s'),
-        $p['cfg'] => json_encode($this->sess_cfg)
-         ]
-      )
+      if (
+        $id_session && $this->db->insert(
+          $this->class_cfg['tables']['sessions'],
+          [
+            $p['sess_id'] => $id_session,
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 1,
+            $p['last_activity'] => date('Y-m-d H:i:s'),
+            $p['creation'] => date('Y-m-d H:i:s'),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ]
+        )
       ) {
         // Setting the session with its ID
         $id = $this->db->lastId();
@@ -1453,20 +1443,19 @@ class User extends Basic implements Implementor
 
         $this->session->set(
           [
-          'fingerprint' => $fingerprint,
-          'tokens' => [],
-          'id_session' => $id,
-          'salt' => $salt
-           ], $this->sessIndex
+            'fingerprint' => $fingerprint,
+            'tokens' => [],
+            'id_session' => $id,
+            'salt' => $salt
+          ],
+          $this->sessIndex
         );
 
         $this->saveSession();
-      }
-      else{
+      } else {
         $this->setError(16);
       }
-    }
-    else {
+    } else {
       $this->sess_cfg = json_decode($tmp, true);
     }
 
@@ -1474,12 +1463,12 @@ class User extends Basic implements Implementor
   }
 
 
-   /**
-    * Sets an attribute the "session" part of the session (sessIndex).
-    *
-    * @param mixed $attr Attribute if value follows, or an array with attribute of value key pairs
-    * @return self
-    */
+  /**
+   * Sets an attribute the "session" part of the session (sessIndex).
+   *
+   * @param mixed $attr Attribute if value follows, or an array with attribute of value key pairs
+   * @return self
+   */
   private function _set_session($attr): self
   {
     if ($this->session->has($this->sessIndex)) {
@@ -1489,7 +1478,7 @@ class User extends Basic implements Implementor
       }
 
       if (is_array($attr)) {
-        foreach ($attr as $key => $val){
+        foreach ($attr as $key => $val) {
           if (\is_string($key)) {
             $this->session->set($val, $this->sessIndex, $key);
           }
@@ -1517,23 +1506,22 @@ class User extends Basic implements Implementor
   }
 
 
-   /**
-    * Checks the credentials of a user.
-    *
-    * @param array $params Credentials
-    * @return bool
-    */
+  /**
+   * Checks the credentials of a user.
+   *
+   * @param array $params Credentials
+   * @return bool
+   */
   private function _check_credentials($params): bool
   {
     if ($this->check()) {
 
       /** @var array $f The form fields sent to identify the users */
-      $f =& $this->class_cfg['fields'];
+      $f = &$this->class_cfg['fields'];
 
       if (!isset($params[$f['salt']])) {
         $this->setError(11);
-      }
-      else{
+      } else {
         if (!$this->checkSalt($params[$f['salt']])) {
           $this->setError(17);
           $this->session->destroy();
@@ -1543,7 +1531,7 @@ class User extends Basic implements Implementor
       if ($this->check()) {
         if (isset($params[$f['user']], $params[$f['pass']])) {
           // Table structure
-          $arch =& $this->class_cfg['arch'];
+          $arch = &$this->class_cfg['arch'];
 
           $this->_just_login = 1;
           if (!$this->check()) {
@@ -1561,8 +1549,7 @@ class User extends Basic implements Implementor
               [$arch['users']['active'] => 1],
               [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]]
             )
-          )
-          ) {
+          )) {
             $pass = $this->db->selectOne(
               $this->class_cfg['tables']['passwords'],
               $arch['passwords']['pass'],
@@ -1571,18 +1558,15 @@ class User extends Basic implements Implementor
             );
             if ($this->_check_password($params[$f['pass']], $pass)) {
               $this->_login($id);
-            }
-            else{
+            } else {
               $this->recordAttempt();
               // Canceling authentication if num_attempts > max_attempts
               $this->setError($this->checkAttempts() ? 6 : 4);
             }
-          }
-          else{
+          } else {
             $this->setError(6);
           }
-        }
-        else{
+        } else {
           $this->setError(12);
         }
       }
@@ -1592,27 +1576,28 @@ class User extends Basic implements Implementor
   }
 
 
-   /**
-    * Sets a user as authenticated ($this->auth = true).
-    *
-    * @param string $id
-    * @return self
-    */
+  /**
+   * Sets a user as authenticated ($this->auth = true).
+   *
+   * @param string $id
+   * @return self
+   */
   private function _authenticate(string $id): self
   {
     if ($this->check() && $id) {
       $this->id   = $id;
       $this->auth = true;
       $this->db->update(
-        $this->class_cfg['tables']['sessions'], [
-        $this->class_cfg['arch']['sessions']['id_user'] => $id
-         ], [
-         $this->class_cfg['arch']['sessions']['id'] => $this->getIdSession()
-         ]
+        $this->class_cfg['tables']['sessions'],
+        [
+          $this->class_cfg['arch']['sessions']['id_user'] => $id
+        ],
+        [
+          $this->class_cfg['arch']['sessions']['id'] => $this->getIdSession()
+        ]
       );
     }
 
     return $this;
   }
-
 }
