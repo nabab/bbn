@@ -480,7 +480,7 @@ class Mvc implements Mvc\Api
     $auth_applicable = '';
     foreach ($this->static_routes as $ar) {
       if ((substr($ar, -1) === '*')
-          && (strpos($url, substr($ar, 0, -1)) === 0)
+        && (strpos($url, substr($ar, 0, -1)) === 0)
       ) {
         if (strlen($ar) > strlen($auth_applicable)) {
           $auth_applicable = substr($ar, 0, -1);
@@ -491,13 +491,12 @@ class Mvc implements Mvc\Api
     if ($auth_applicable) {
       foreach ($this->forbidden_routes as $forbidden) {
         if ((substr($forbidden, -1) === '*')
-            && (strpos($url, substr($forbidden, 0, -1)) === 0)
-            // Should be as or more precise
-            && (strlen($auth_applicable) < strlen($forbidden))
+          && (strpos($url, substr($forbidden, 0, -1)) === 0)
+          // Should be as or more precise
+          && (strlen($auth_applicable) < strlen($forbidden))
         ) {
           return false;
-        }
-        elseif ($url === $forbidden) {
+        } elseif ($url === $forbidden) {
           return false;
         }
       }
@@ -567,7 +566,7 @@ class Mvc implements Mvc\Api
       }
 
       if ((substr($ar, -1) === '*')
-          && (strpos($url, substr($ar, 0, -1)) === 0)
+        && (strpos($url, substr($ar, 0, -1)) === 0)
       ) {
         if (strlen($ar) > strlen($auth_applicable)) {
           $auth_applicable = substr($ar, 0, -1);
@@ -578,13 +577,12 @@ class Mvc implements Mvc\Api
     if ($auth_applicable || $has_allow_all) {
       foreach ($this->forbidden_routes as $forbidden) {
         if ((substr($forbidden, -1) === '*')
-            && (strpos($url, substr($forbidden, 0, -1)) === 0)
-            // Should be as or more precise
-            && (strlen($auth_applicable) < strlen($forbidden))
+          && (strpos($url, substr($forbidden, 0, -1)) === 0)
+          // Should be as or more precise
+          && (strlen($auth_applicable) < strlen($forbidden))
         ) {
           return false;
-        }
-        elseif ($url === $forbidden) {
+        } elseif ($url === $forbidden) {
           return false;
         }
       }
