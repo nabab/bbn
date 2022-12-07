@@ -905,10 +905,6 @@ class Statistic extends bbn\Models\Cls\Db
   {
     $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];
     $cfg['where']['conditions'][] = [
-      'field' => 'bbn_history.col',
-      'value' => $this->hcfg['fields'][$this->hcfg['primary']]['id_option']
-    ];
-    $cfg['where']['conditions'][] = [
       'field' => 'bbn_history.opr',
       'operator' => 'LIKE',
       'value' => 'INSERT'
