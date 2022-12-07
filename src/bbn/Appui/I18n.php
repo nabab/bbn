@@ -481,9 +481,7 @@ class I18n extends bbn\Models\Cls\Cache
         else {
           if ($this->db->insert('bbn_i18n', [
             'exp' => $this->normlizeText($paths[$p]['items'][$i]['text']),
-            'lang' => $paths[$p]['language'],
-            //'id_user'=> $this->user->getId(),
-            //'last_modified' => date('H-m-d H:i:s')
+            'lang' => $paths[$p]['language']
           ])) {
             $id = $this->db->lastId();
             $this->db->insertIgnore('bbn_i18n_exp', [
@@ -568,11 +566,8 @@ class I18n extends bbn\Models\Cls\Cache
           $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.mo';
           // if a file po already exists takes its content
           if (is_file($po)) {
-            $fileHandler      = new \Sepia\PoParser\SourceHandler\FileSystem($po);
-            $poParser         = new \Sepia\PoParser\Parser($fileHandler);
-            $Catalog          = \Sepia\PoParser\Parser::parseFile($po);
             $num_translations = 0;
-            if ($translations = $Catalog->getEntries()) {
+            if ($translations = $this->parsePoFile($po)) {
               foreach($translations as $tr){
                 if ($tr->getMsgStr()) {
                   $num_translations ++;
@@ -625,7 +620,7 @@ class I18n extends bbn\Models\Cls\Cache
    * Returns an array containing the po files found for the id_option
    *
    * @param $id_option
-   * @return void
+   * @return array
    */
   public function getPoFiles($id_option)
   {
@@ -671,10 +666,7 @@ class I18n extends bbn\Models\Cls\Cache
     $po    = $this->getPoFiles($id_option);
     if (!empty($po)) {
       foreach ($po as $lang => $file) {
-        $fileHandler     = new \Sepia\PoParser\SourceHandler\FileSystem($file);
-        $poParser        = new \Sepia\PoParser\Parser($fileHandler);
-        $Catalog         = \Sepia\PoParser\Parser::parseFile($file);
-        $fromPo          = $Catalog->getEntries();
+        $fromPo          = $this->parsePoFile($file);
         $source_language = $this->getLanguage($id_option);
 
         $count[$lang] = 0;
@@ -871,46 +863,40 @@ class I18n extends bbn\Models\Cls\Cache
           $mo  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
 
           // if the file po exist takes its content
-          if (file_exists($po)) {
-            $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
-            $poParser    = new \Sepia\PoParser\Parser($fileHandler);
-            $Catalog     = \Sepia\PoParser\Parser::parseFile($po);
+          if ($translations = $this->parsePoFile($po)) {
+            foreach ($translations as $i => $t){
+              // @var  $original the original expression
+              $original = $t->getMsgId();
 
-            if (!empty($translations = $Catalog->getEntries())) {
-              foreach ($translations as $i => $t){
-                // @var  $original the original expression
-                $original = $t->getMsgId();
+              $po_file[$i][$lng]['original'] = $original;
 
-                $po_file[$i][$lng]['original'] = $original;
+              // the translation of the string found in the po file
+              $po_file[$i][$lng]['translations_po'] = $t->getMsgStr();
 
-                // the translation of the string found in the po file
-                $po_file[$i][$lng]['translations_po'] = $t->getMsgStr();
+              // @var  $id takes the id of the original expression in db
+              if ($id = $this->db->selectOne('bbn_i18n', 'id', [
+                'exp' => $this->normlizeText($original),
+                'lang' => $path_source_lang
+              ])) {
+                $po_file[$i][$lng]['translations_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
 
-                // @var  $id takes the id of the original expression in db
-                if ($id = $this->db->selectOne('bbn_i18n', 'id', [
-                  'exp' => $this->normlizeText($original),
-                  'lang' => $path_source_lang
-                ])) {
-                  $po_file[$i][$lng]['translations_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
+                // the id of the string
+                $po_file[$i][$lng]['id_exp'] = $id;
 
-                  // the id of the string
-                  $po_file[$i][$lng]['id_exp'] = $id;
+                // @var (array) takes $paths of files in which the string was found from the file po
+                $paths = $t->getReference();
 
-                  // @var (array) takes $paths of files in which the string was found from the file po
-                  $paths = $t->getReference();
+                // get the url to use it for the link to ide from the table
+                foreach ($paths as $p){
+                  $po_file[$i][$lng]['paths'][] = $project->real_to_url_i18n($p);
+                }
 
-                  // get the url to use it for the link to ide from the table
-                  foreach ($paths as $p){
-                    $po_file[$i][$lng]['paths'][] = $project->real_to_url_i18n($p);
-                  }
-
-                  // the number of times the strings is found in the files of the path
-                  $po_file[$i][$lng]['occurrence'] = !empty($po_file[$i][$path_source_lang]) ? count($po_file[$i][$path_source_lang]['paths']) : 0;
-                };
-              }
-
-              $success = true;
+                // the number of times the strings is found in the files of the path
+                $po_file[$i][$lng]['occurrence'] = !empty($po_file[$i][$path_source_lang]) ? count($po_file[$i][$path_source_lang]['paths']) : 0;
+              };
             }
+
+            $success = true;
           }
         }
       }
@@ -962,115 +948,109 @@ class I18n extends bbn\Models\Cls\Cache
           $po  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           $mo  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
           // if the file po exist takes its content
-          if (file_exists($po)) {
-            $fileHandler = new \Sepia\PoParser\SourceHandler\FileSystem($po);
-            $poParser    = new \Sepia\PoParser\Parser($fileHandler);
-            $Catalog     = \Sepia\PoParser\Parser::parseFile($po);
+          if ($translations = $this->parsePoFile($po)) {
+            foreach ($translations as $i => $t){
+              // @var  $original the original expression
+              $id = null;
+              if ($original = stripslashes($t->getMsgId())) {
+                $idx = \bbn\X::find($res, ['exp' => $original]);
+                if ($idx !== null) {
+                  $todo = false;
+                  $row  =& $res[$idx];
+                }
+                else{
+                  $todo = true;
+                  $row  = [];
+                }
 
-            if (!empty($translations = $Catalog->getEntries())) {
-              foreach ($translations as $i => $t){
-                // @var  $original the original expression
-                $id = null;
-                if ($original = stripslashes($t->getMsgId())) {
-                  $idx = \bbn\X::find($res, ['exp' => $original]);
-                  if ($idx !== null) {
-                    $todo = false;
-                    $row  =& $res[$idx];
-                  }
-                  else{
-                    $todo = true;
-                    $row  = [];
-                  }
+                // the translation of the string found in the po file
+                if (isset($row['id'])) {
+                  $id = $row['id'];
+                }
 
-                  // the translation of the string found in the po file
-                  if (isset($row['id'])) {
-                    $id = $row['id'];
+                // @var  $id takes the id of the original expression in db
+                if (!isset($id)
+                  && !($id = $this->db->selectOne('bbn_i18n', 'id', [
+                    'exp' => $this->normlizeText($original),
+                    'lang' => $path_source_lang
+                  ]))
+                ) {
+                  if (!$this->db->insertIgnore('bbn_i18n', [
+                    'exp' => $this->normlizeText($original),
+                    'lang' => $path_source_lang
+                  ])) {
+                    throw new \Exception(
+                      sprintf(
+                        _("Impossible to insert the original string %s in the original language %s"),
+                        $this->normlizeText($original),
+                        $path_source_lang
+                      )
+                    );
                   }
+                  else {
+                    $id = $this->db->lastId();
+                  }
+                }
 
-                  // @var  $id takes the id of the original expression in db
-                  if (!isset($id)
-                    && !($id = $this->db->selectOne('bbn_i18n', 'id', [
-                      'exp' => $this->normlizeText($original),
-                      'lang' => $path_source_lang
-                    ]))
-                  ) {
-                    if (!$this->db->insertIgnore('bbn_i18n', [
-                      'exp' => $this->normlizeText($original),
-                      'lang' => $path_source_lang
-                    ])) {
+                if ($id) {
+                  $row[$lng.'_po'] = stripslashes($t->getMsgStr());
+                  $row[$lng.'_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
+                  if ($row[$lng.'_po'] && !$row[$lng.'_db']) {
+                    if ((($row[$lng.'_db'] === false)
+                        && $this->db->insert('bbn_i18n_exp', [
+                          'expression' => $this->normlizeText($row[$lng.'_po']),
+                          'id_exp' => $id,
+                          'lang' => $lng
+                        ]))
+                      || $this->db->update('bbn_i18n_exp', [
+                        'expression' => $this->normlizeText($row[$lng.'_po'])
+                      ], [
+                        'id_exp' => $id,
+                        'lang' => $lng
+                      ])
+                    ) {
+                      $row[$lng.'_db'] = $row[$lng.'_po'];
+                    }
+                    else{
                       throw new \Exception(
                         sprintf(
-                          _("Impossible to insert the original string %s in the original language %s"),
-                          $this->normlizeText($original),
-                          $path_source_lang
+                          _("Impossible to insert or update the expression \"%s\" in %s"),
+                          $row[$lng.'_po'],
+                          $lng
                         )
                       );
                     }
-                    else {
-                      $id = $this->db->lastId();
-                    }
                   }
 
-                  if ($id) {
-                    $row[$lng.'_po'] = stripslashes($t->getMsgStr());
-                    $row[$lng.'_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
-                    if ($row[$lng.'_po'] && !$row[$lng.'_db']) {
-                      if ((($row[$lng.'_db'] === false)
-                          && $this->db->insert('bbn_i18n_exp', [
-                            'expression' => $this->normlizeText($row[$lng.'_po']),
-                            'id_exp' => $id,
-                            'lang' => $lng
-                          ]))
-                        || $this->db->update('bbn_i18n_exp', [
-                          'expression' => $this->normlizeText($row[$lng.'_po'])
-                        ], [
-                          'id_exp' => $id,
-                          'lang' => $lng
-                        ])
-                      ) {
-                        $row[$lng.'_db'] = $row[$lng.'_po'];
-                      }
-                      else{
-                        throw new \Exception(
-                          sprintf(
-                            _("Impossible to insert or update the expression \"%s\" in %s"),
-                            $row[$lng.'_po'],
-                            $lng
-                          )
-                        );
-                      }
-                    }
-
-                    if (empty($row[$lng.'_db'])) {
-                      $row[$lng.'_db'] = '';
-                      // die(var_dump($row[$lng.'_db']));
-                    }
-
-                    if ($todo) {
-                      $row['id_exp'] = $id;
-                      $row['paths']  = [];
-                      $row['exp']    = $original;
-                      // @var (array) takes $paths of files in which the string was found from the file po
-                      $paths = $t->getReference();
-
-                      // get the url to use it for the link to ide from the table
-                      foreach ($paths as $p) {
-                        $row['paths'][] = $project->realToUrl($p);
-                      }
-
-                      // the number of times the strings is found in the files of the path
-                      $row['occurrence'] = count($row['paths']);
-                      $res[]             = $row;
-                    }
+                  if (empty($row[$lng.'_db'])) {
+                    $row[$lng.'_db'] = '';
+                    // die(var_dump($row[$lng.'_db']));
                   }
-                  else{
-                    die("Error 2");
+
+                  if ($todo) {
+                    $row['id_exp'] = $id;
+                    $row['paths']  = [];
+                    $row['exp']    = $original;
+                    // @var (array) takes $paths of files in which the string was found from the file po
+                    $paths = $t->getReference();
+
+                    // get the url to use it for the link to ide from the table
+                    foreach ($paths as $p) {
+                      $row['paths'][] = $project->realToUrl($p);
+                    }
+
+                    // the number of times the strings is found in the files of the path
+                    $row['occurrence'] = count($row['paths']);
+                    $res[]             = $row;
                   }
                 }
+                else{
+                  die("Error 2");
+                }
               }
-
-              $success = true;
             }
+
+            $success = true;
           }
         }
       }
@@ -1155,5 +1135,10 @@ class I18n extends bbn\Models\Cls\Cache
     return \trim(\normalizer_normalize($text));
   }
 
+
+  private function parsePoFile(string $file): array
+  {
+    return \is_file($file) ? \Sepia\PoParser\Parser::parseFile($file)->getEntries() : [];
+  }
 
 }
