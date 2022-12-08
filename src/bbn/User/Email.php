@@ -474,7 +474,8 @@ class Email extends Basic
             ),
             'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $a['id']]),
             'last_uid' => $a['last_uid'] ?? null,
-            'last_check' => $a['last_check'] ?? null
+            'last_check' => $a['last_check'] ?? null,
+            'hash' => $a['hash'] ?? null
           ];
           if (!empty($a['items'])) {
             $res['items'] = $a['items'];
@@ -490,6 +491,40 @@ class Email extends Basic
     return null;
   }
 
+  public function flattenFolders($folders)  : array
+  {
+    $res = [];
+    foreach ($folders as $f) {
+      if (!empty($f['items']) && is_array($f['items']) && count($f['items'])) {
+        $res = array_merge($res, $this->flattenFolders($f['items']));
+      }
+      $res[] = $f;
+    }
+    return $res;
+  }
+
+  public function getHashes() : ?array
+  {
+    $res = [];
+    $account_hash = "";
+    foreach ($this->getAccounts() as $a) {
+      $res[$a['id']] = [
+        'hash' => "",
+        'folders' => []
+      ];
+      $folders = $this->flattenFolders($this->getFolders($a['id']));
+      foreach ($folders as $f) {
+        $res[$a['id']]['folders'][$f['id']] = $f['hash'];
+        if ($f['hash']) {
+          $account_hash .= $f['hash'];
+        } else {
+          $account_hash .= $f['id'];
+        }
+      }
+      $res[$a['id']]['hash'] = md5($account_hash);
+    }
+    return $res;
+  }
 
   public function getFolder(string $id, bool $force = false): ?array
   {
@@ -523,7 +558,8 @@ class Email extends Basic
         ),
         'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $a['id']]),
         'last_uid' => $a['last_uid'] ?? null,
-        'last_check' => $a['last_check'] ?? null
+        'last_check' => $a['last_check'] ?? null,
+        'hash' => $a['hash'] ?? null
       ];
     }
 
@@ -540,33 +576,21 @@ class Email extends Basic
       X::log($folder);
       $info = $mb->getInfoFolder($folder['uid']);
       $mb->selectFolder($folder['uid']);
+      X::log([$folder, !empty($folder['last_uid'])], "mail2");
       if (!empty($folder['last_uid'])) {
         X::log("has last UID");
 
         if (!empty($folder['db_uid_min'])) {
-          try {
-            $start = $mb->getMsgNo($folder['db_uid_min']);
-          } catch (\Exception $e) {
-
-          }
+          $start = $mb->getMsgNo($folder['db_uid_min']);
         }
 
         if (empty($start) and !empty($folder['db_uid_max'])) {
-          try {
-            $start = $mb->getMsgNo($folder['db_uid_max']);
-          }
-          catch (\Exception $e) {
-
-          }
+          $start = $mb->getMsgNo($folder['db_uid_max']);
         }
 
-        if (empty($start) and !empty($folder['last_uid'])) {
-          try {
-            $start = $mb->getMsgNo($folder['last_uid']);
-          }
-          catch (\Exception $e) {
-
-          }
+        if (empty($start)) {
+          $start = $mb->getMsgNo($folder['last_uid']);
+          X::log(["start from last UID", $folder, $start], "startFromUID");
         }
 
         if (empty($start) && $info->Nmsgs) {
@@ -577,27 +601,27 @@ class Email extends Basic
 
         $real_end = $start - $limit;
 
+
         if ($real_end < 1) {
           $real_end = 1;
         }
 
-        if ($limit) {
-          $real_end = min($real_end, $start + $limit);
+        if ($folder['db_uid_max'] != null && $folder['last_uid'] > $folder['db_uid_max']) {
+          $start = $mb->getMsgNo($folder['last_uid']);
+          $real_end = $mb->getMsgNo($folder['db_uid_max']);
         }
 
         $end      = $start;
         $num      = $real_end - $start;
         //var_dump($folder, $num, $real_end);
-        X::log(["END", $end, $real_end, $folder['uid']], 'mail2');
+        X::log(["END", $folder['text'], $start, $end, $real_end], 'mail2');
         while ($end > $real_end) {
           $end = min($real_end, $start + 999);
           if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
+            X::log(["got emails", $folder['text'], $start, $end, $real_end, count($all)], 'startFromUID');
             $start += 1000;
             //var_dump($start, $end);
             foreach ($all as $a) {
-              if ($folder['uid'] === "Sent") {
-                X::log($a, 'mail2');
-              }
               if ($this->insertEmail($folder, $a)) {
                 $res++;
               }
@@ -608,7 +632,11 @@ class Email extends Basic
             }
 
             if ($end === $real_end) {
-              $this->pref->updateBit($folder['id'], ['last_check' => date('Y-m-d H:i:s')], true);
+              $hash = md5(json_encode(['numMsg' => $folder['num_msg'], 'lastUid' => $folder['last_uid']]));
+              $this->pref->updateBit($folder['id'], [
+                'last_check' => date('Y-m-d H:i:s'),
+                'hash' => $hash
+              ], true);
               break;
             }
           }
