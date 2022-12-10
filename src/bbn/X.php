@@ -2227,7 +2227,7 @@ class X
    * @return bool|mixed
    *
    */
-  public static function getRow(array $r, $where): ?array
+  public static function getRow(array $r, $where)
   {
     if (($res = self::find($r, $where)) !== null) {
       return $r[$res];

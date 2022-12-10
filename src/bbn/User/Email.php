@@ -767,6 +767,7 @@ class Email extends Basic
 
   public function insertEmail(array $folder, array $email)
   {
+    X::log(["insertEmail", $folder, $email], 'insertedEmails');
     if (X::hasProps($email, ['from', 'uid'])) {
       $cfg      = $this->class_cfg['arch']['users_emails'];
       $table    = $this->class_cfg['tables']['users_emails'];

@@ -7,9 +7,23 @@ use bbn\Mail;
 use bbn\X;
 use bbn\Str;
 use HTMLPurifier_Config;
+use HTMLPurifier_URIScheme;
 use HTMLPurifier;
+use HTMLPurifier_HTML5Config;
 use IMAP\Connection;
 use bbn\Models\Cls\Basic;
+
+/*class HTMLPurifier_URIScheme_data extends HTMLPurifier_URIScheme {
+
+  public $default_port = null;
+  public $browsable = false;
+  public $hierarchical = true;
+
+  public function validate(&$uri, $config, $context) {
+    return true;
+  }
+
+}*/
 
 class Mailbox extends Basic
 {
@@ -632,12 +646,16 @@ class Mailbox extends Basic
           $tmp['is_html'] = $structure->subtype === 'HTML';
         }
         else {
+          X::log($structure, 'insertedEmails');
           foreach ($structure->parts as $part) {
+            X::log(['attachment', $part, $tmp], 'insertedEmails');
             if ($part->ifdisposition && (strtolower($part->disposition) === 'attachment') && $part->ifparameters) {
+              $name_row = X::getRow($part->parameters, ['attribute' => 'name']);
+              X::log(['name_row', $name_row], 'insertedEmails');
               $tmp['attachments'][] = [
-                'name' => $part->parameters[0]->value,
+                'name' => $name_row->value,
                 'size' => $part->bytes,
-                'type' => Str::fileExt($part->parameters[0]->value)
+                'type' => Str::fileExt($name_row->value)
               ];
             }
             elseif (!empty($part->parts)) {
@@ -695,14 +713,20 @@ class Mailbox extends Basic
     }
 
     if ($res['html'] = $this->_htmlmsg) {
-      $config      = HTMLPurifier_Config::createDefault();
+      $config = HTMLPurifier_HTML5Config::createDefault();
+
+
+
+      //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
       $purifier    = new HTMLPurifier($config);
+//        X::ddump($config, $this->_htmlmsg);
       $res['html'] =  $purifier->purify(quoted_printable_decode($res['html']));
     }
 
     $res['plain']      = $this->_plainmsg;
     $res['charset']    = $this->_charset;
     $res['attachment'] = $this->_attachments;
+    X::ddump($res);
     return $res;
   }
 
