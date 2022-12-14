@@ -166,14 +166,27 @@ class Client extends DbCls
     if (isset($address['fulladdress'])) {
       unset($address['fulladdress']);
     }
-    if (empty($idAddress)) {
-      $toAddress = \array_filter($address, function($k) use($addressCfg){
-        return \in_array($k, \array_values($addressCfg['arch']['addresses']), true);
-      }, ARRAY_FILTER_USE_KEY);
-      if (!empty($address['region'])) {
-        $toAddress['region'] = $address['region'];
-      }
+    $toAddress = \array_filter($address, function($k) use($addressCfg){
+      return \in_array($k, \array_values($addressCfg['arch']['addresses']), true);
+    }, ARRAY_FILTER_USE_KEY);
+    if (!empty($address['region'])) {
+      $toAddress['region'] = $address['region'];
+    }
+    if (empty($idAddress)
+      || (!($oldAddress = $addressCls->rselect($idAddress)))
+    ) {
       $idAddress = $addressCls->insert($toAddress);
+    }
+    if (!empty($oldAddress)) {
+      if ($oldCfg = \json_decode($oldAddress[$addressCfg['arch']['addresses']['cfg']])) {
+        $oldAddress = X::mergeArrays($oldAddress, $oldCfg);
+      }
+      $oldAddress = \array_filter($oldAddress, function($k) use($toAddress){
+        return \array_key_exists($k, $toAddress);
+      }, ARRAY_FILTER_USE_KEY);
+      if (\array_diff_assoc($toAddress, $oldAddress)) {
+        $idAddress = $addressCls->insert($toAddress);
+      }
     }
     if (!empty($idAddress)) {
       if (!empty($address[$this->class_cfg['arch']['clients_addresses']['def']])) {
