@@ -4227,11 +4227,11 @@ class Option extends bbn\Models\Cls\Db
             $this->fields['id_parent'],
             $this->fields['code'],
             $this->fields['text'],
-            'language' => 'JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n")'
+            'language' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
           ],
           'where' => [
             [
-              'field' => 'JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n")',
+              'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
               'operator' => 'isnotnull'
             ]
           ]
