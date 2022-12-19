@@ -617,6 +617,72 @@ class I18n extends bbn\Models\Cls\Cache
 
 
   /**
+   * Gets the widgets initial data for options
+   *
+   * @param string $id_project
+   * @param string $id_option
+   * @return void
+   */
+  public function getOptionsTranslationsWidget($lang)
+  {
+    $langs = [];
+    $result = [];
+    $primaries = $this->getPrimariesLangs();
+    if ($options = $this->options->findI18n(null, false)) {
+      foreach ($options as $opt) {
+        if (!isset($langs[$opt['language']])) {
+          $langs[$opt['language']] = [
+            'code' => $opt['language'],
+            'lang' => $opt['language'],
+            'title' => $this->options->text($opt['language'], 'languages', 'i18n', 'appui'),
+            'items' => []
+          ];
+        }
+        $langs[$opt['language']]['items'][] = $opt['text'];
+        if ($items = $this->options->fullOptions($opt['id'])) {
+          foreach ($items as $item) {
+            if (is_null(X::find($options, ['id' => $item['id']]))) {
+              $langs[$opt['language']]['items'][] = $item['text'];
+            }
+          }
+        }
+      }
+    }
+    if (!empty($langs[$lang])) {
+      foreach ($primaries as $p) {
+        $count = 0;
+        foreach ($langs[$lang]['items'] as $item) {
+          if (($id = $this->db->selectOne('bbn_i18n', 'id', [
+              'exp' => $this->normlizeText($item),
+              'lang' => $lang
+            ]))
+            && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
+              'id_exp' => $id,
+              'lang' => $p['code']
+            ])
+          ) {
+            $count++;
+          }
+        }
+        $result[$p['code']] = [
+          'lang' => $p['code'],
+          'num' => count($langs[$lang]['items']),
+          'num_translations' => $count,
+          'num_translations_db' => $count
+        ];
+      }
+    }
+
+    return [
+      'locale_dirs' => \array_map(function($p){
+        return $p['code'];
+      }, $primaries),
+      'result' => $result
+    ];
+  }
+
+
+  /**
    * Returns an array containing the po files found for the id_option
    *
    * @param $id_option

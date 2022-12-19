@@ -4302,6 +4302,70 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * Returns an array containing all languages set
+   *
+   * @return null|array
+   */
+  public function findI18nLangs(): ?array
+  {
+    if ($this->check()) {
+      return $this->db->getFieldValues([
+        'table' => $this->class_cfg['table'],
+        'fields' => [
+          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
+        ],
+        'where' => [[
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
+          'operator' => 'isnotnull'
+        ]]
+      ]);
+    }
+    return null;
+  }
+
+
+  /**
+   * Returns an array containing all options that have the property i18n set
+   *
+   * @param string $lang
+   * @param bool $items
+   * @return array
+   */
+  public function findI18nByLang(string $lang, $items = true)
+  {
+    if ($this->check()) {
+      $opts = $this->db->rselectAll([
+        'tables' => [$this->class_cfg['table']],
+        'fields' => [
+          $this->fields['id'],
+          $this->fields['id_parent'],
+          $this->fields['code'],
+          $this->fields['text'],
+          'language' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
+        ],
+        'where' => [
+          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))' => $lang
+        ]
+      ]) ?: [];
+      if (!empty($opts) && !empty($items)) {
+        foreach ($opts as $i => $opt){
+          $opts[$i]['items'] = array_values(
+            array_filter(
+              $opts,
+              function ($o) use ($opt) {
+                return $o[$this->fields['id_parent']] === $opt[$this->fields['id']];
+              }
+            )
+          );
+        }
+      }
+      return $opts;
+    }
+    return null;
+  }
+
+
+  /**
    * Gets the first row from a result
    *
    * @param array $where
