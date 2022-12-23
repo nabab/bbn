@@ -53,6 +53,8 @@ class Mailbox extends Basic
 
   private $_attachments = [];
 
+  private $_inline_files = [];
+
   /**
    * @var int The minimum delay between each ping for the current connection
    */
@@ -649,6 +651,7 @@ class Mailbox extends Basic
           X::log($structure, 'insertedEmails');
           foreach ($structure->parts as $part) {
             X::log(['attachment', $part, $tmp], 'insertedEmails');
+
             if ($part->ifdisposition && (strtolower($part->disposition) === 'attachment') && $part->ifparameters) {
               $name_row = X::getRow($part->parameters, ['attribute' => 'name']);
               X::log(['name_row', $name_row], 'insertedEmails');
@@ -686,7 +689,7 @@ class Mailbox extends Basic
    *
    * @param int $msgno
    */
-  public function getMsg($msgno)
+  public function getMsg($msgno, $id, $id_account)
   {
     // input $mbox = IMAP stream, $msgno = message id
     // output all the following:
@@ -694,9 +697,11 @@ class Mailbox extends Basic
     $this->_plainmsg    = '';
     $this->_charset     = '';
     $this->_attachments = [];
-    if (is_dir(BBN_USER_PATH . 'tmp_mail')) {
-      bbn\File\Dir::delete(BBN_USER_PATH . 'tmp_mail');
-    }
+
+
+
+    // check if "BBN_USER_PATH . 'tmp_mail'" directory exists
+
 
     // HEADER
     $res = (array)$this->getMsgHeaderinfo($msgno);
@@ -704,18 +709,74 @@ class Mailbox extends Basic
     // BODY STRUCTURE
     $structure = $this->getMsgStructure($msgno);
     if (!$structure->parts) {  // simple
-      $this->_get_msg_part($msgno, $structure, 0);
+      $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
     else {  // multipart: cycle through each part
       foreach ($structure->parts as $partno0 => $p){
-        $this->_get_msg_part($msgno, $p, $partno0 + 1);
+        $this->_get_msg_part($msgno, $p, $partno0 + 1, $id, $id_account);
+        // check if the part have fdisposition and if disposition its inline
+        if ($p->parts) {
+          foreach ($p->parts as $partno1 => $p2) {
+            if ($p2->ifdisposition && (strtolower($p2->disposition) === 'inline')) {
+              if ($p2->dparameters) {
+                // search in dparameters when attribute is filename
+                foreach ($p2->dparameters as $dparam) {
+                  if (strtolower($dparam->attribute) === 'filename') {
+                    $this->_inline_files[] = [
+                      'name' => $dparam->value,
+                      'id' => substr($p2->id, 1, -1)
+                    ];
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
-
     if ($res['html'] = $this->_htmlmsg) {
+
+      // replace cid links by name
+      $attachments_path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
+      $res['html'] = preg_replace_callback(
+        '/src="cid:(.*?)"/',
+        function ($m) use ($msgno, $attachments_path) {
+          $res = $m[0];
+          $cid = $m[1];
+          // get the name of the file with the cid in inline array
+          $att = null;
+          foreach ($this->_inline_files as $a) {
+            if ($a['id'] === $cid) {
+              $att = $a['name'];
+              break;
+            }
+          }
+          // encode this file BBN_USER_PATH . 'tmp_mail/' . $att in base64
+
+          $file = $attachments_path. $att;
+
+          // check if the file in an image and get the extension
+          $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+          if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+            $type = 'image/' . $ext;
+            if (file_exists($file)) {
+              $base64 = 'src="data:' . $type . ';base64,' . base64_encode(file_get_contents($file)) . '"';
+              if ($att) {
+                // set src to base64 decode for html
+                $res = $base64;
+              }
+            }
+          }
+
+          return $res;
+        },
+        $res['html']
+      );
+
+
       $config = HTMLPurifier_HTML5Config::createDefault();
 
-
+      $config->set('URI.AllowedSchemes', ['data' => true]);
 
       //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
       $purifier    = new HTMLPurifier($config);
@@ -726,7 +787,7 @@ class Mailbox extends Basic
     $res['plain']      = $this->_plainmsg;
     $res['charset']    = $this->_charset;
     $res['attachment'] = $this->_attachments;
-    X::ddump($res);
+    $res['inline']     = $this->_inline_files;
     return $res;
   }
 
@@ -1284,7 +1345,7 @@ class Mailbox extends Basic
    * @param $structure
    * @param string|false $partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
    */
-  private function _get_msg_part($msgno, $structure, $partno)
+  private function _get_msg_part($msgno, $structure, $partno, $id, $id_account)
   {
     // DECODE DATA
     $data = $this->getMsgBody($msgno, $partno);
@@ -1309,11 +1370,31 @@ class Mailbox extends Basic
     // Any part with a filename is an attachment,
     // so an attached text file (type 0) is not mistaken as the message.
     if ($params['filename'] || $params['name']) {
+
+      if (!is_dir(BBN_USER_PATH . 'tmp_mail')) {
+        mkdir(BBN_USER_PATH . 'tmp_mail');
+      }
+
+      if (!is_dir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account)) {
+        mkdir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account);
+      }
+
+      if (!is_dir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id)) {
+        mkdir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id);
+      }
+
+
+
+      $path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       // filename may be given as 'Filename' or 'Name' or both
       $filename = $params['filename'] ? $params['filename'] : $params['name'];
+
+      // check if the file already exist
+      $this->_attachments[] = $filename;
+      if (!file_exists($path . $filename)) {
+        file_put_contents($path . $filename, $data);
+      }
       // filename may be encoded, so see imap_mime_header_decode()
-      array_push($this->_attachments, $filename);
-      file_put_contents(BBN_USER_PATH . 'tmp_mail/' . $filename, $data);
       // this is a problem if two files have same name
     }
 
@@ -1378,7 +1459,7 @@ class Mailbox extends Basic
     // SUBPART RECURSION
     if ($structure->parts) {
       foreach ($structure->parts as $partno0 => $p2){
-        $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1));  // 1.2, 1.2.1, etc.
+        $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1), $id, $id_account);  // 1.2, 1.2.1, etc.
       }
     }
   }
