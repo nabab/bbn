@@ -763,6 +763,24 @@ class Email extends Basic
     return null;
   }
 
+  public function getEmailByUID($post): ?array
+  {
+    $cfg      = $this->class_cfg['arch']['users_emails'];
+    $table    = $this->class_cfg['tables']['users_emails'];
+
+    $grid = new \bbn\Appui\Grid($this->db, $post, [
+      'table' => $table,
+      'fields' => $cfg
+    ]);
+
+    if ($grid->check()) {
+      return $grid->getDatatable();
+    }
+
+    return null;
+
+  }
+
 
   public function insertEmail(array $folder, array $email)
   {
@@ -841,7 +859,7 @@ class Email extends Basic
           $cfg['is_read'] => $email['Unseen'] ? 0 : 1,
           $cfg['id_parent'] => $id_parent,
           $cfg['id_thread'] => $id_thread,
-          $cfg['external_uids'] => $external ? json_encode($external) : null
+          $cfg['external_uids'] => $external ? json_encode($external) : null,
         ];
         $id = false;
         if ($existing) {
