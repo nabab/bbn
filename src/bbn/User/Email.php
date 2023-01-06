@@ -570,55 +570,31 @@ class Email extends Basic
   public function syncEmails(array $folder, int $limit = 0): ?int
   {
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
-      X::log("has props");
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
-      X::log($folder);
       $info = $mb->getInfoFolder($folder['uid']);
       $mb->selectFolder($folder['uid']);
-      X::log([$folder, !empty($folder['last_uid'])], "mail2");
       if (!empty($folder['last_uid'])) {
-        X::log("has last UID");
-
-        if (!empty($folder['db_uid_min'])) {
-          $start = $mb->getMsgNo($folder['db_uid_min']);
-        }
 
         if (empty($start) and !empty($folder['db_uid_max'])) {
           $start = $mb->getMsgNo($folder['db_uid_max']);
-        }
-
-        if (empty($start)) {
-          $start = $mb->getMsgNo($folder['last_uid']);
-          X::log(["start from last UID", $folder, $start], "startFromUID");
-        }
-
-        if (empty($start) && $info->Nmsgs) {
-          $start = $info->Nmsgs;
-        } else if (empty($start)) {
+        } else {
           $start = 1;
         }
 
-        $real_end = $start - $limit;
+        $real_end = $start + $limit;
 
 
-        if ($real_end < 1) {
-          $real_end = 1;
+        if ($real_end > $folder['last_uid']) {
+          $real_end = $mb->getMsgNo($folder['last_uid']);
         }
 
-        if ($folder['db_uid_max'] != null && $folder['last_uid'] > $folder['db_uid_max']) {
-          $start = $mb->getMsgNo($folder['last_uid']);
-          $real_end = $mb->getMsgNo($folder['db_uid_max']);
-        }
 
         $end      = $start;
         $num      = $real_end - $start;
-        //var_dump($folder, $num, $real_end);
-        X::log(["END", $folder['text'], $start, $end, $real_end], 'mail2');
-        while ($end > $real_end) {
+        while ($end < $real_end) {
           $end = min($real_end, $start + 999);
           if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
-            X::log(["got emails", $folder['text'], $start, $end, $real_end, count($all)], 'startFromUID');
             $start += 1000;
             //var_dump($start, $end);
             foreach ($all as $a) {
@@ -818,10 +794,12 @@ class Email extends Basic
         }
       }
 
+
       if (!empty($id_sender)) {
         $id_parent = null;
         $id_thread = null;
         if (!empty($email['in_reply_to'])) {
+          // getting ID and ID thread where the unique ID correspond to in_reply_to
           $tmp = $this->db->rselect(
             $table,
             [$cfg['id'], $cfg['id_thread']],
@@ -833,6 +811,46 @@ class Email extends Basic
           if ($tmp) {
             $id_parent = $tmp[$cfg['id']];
             $id_thread = $tmp[$cfg['id_thread']] ?: $id_parent;
+          } else {
+            // if subject contains "testt thread" log the email
+            // remove all word like RE from response subject to find the original subject
+            $subject = preg_replace('/^RE: /i', '', $email['subject']);
+            $tmp = $this->db->rselectAll(
+              $table,
+              [$cfg['id'], $cfg['id_thread'], $cfg['subject'], $cfg['date']],
+              [
+                $cfg['id_user'] => $this->user->getId(),
+                $cfg['subject'] => '%' . $subject . '%'
+              ]
+            );
+
+            if (str_contains($email['subject'], 'testtt thread')) {
+              X::log([
+                "email" => $email,
+                "subject" => $subject,
+                "db" => $tmp
+              ], 'testThread');
+            }
+            if (count($tmp) > 1) {
+              // find the email with the closest date and not the same id as the current email
+              $closest = null;
+              foreach ($tmp as $t) {
+                if ($t[$cfg['id']] !== $email['id']) {
+                  if (!$closest) {
+                    $closest = $t;
+                  } else {
+                    $closest = abs(strtotime($t[$cfg['date']]) - strtotime($email['date'])) < abs(strtotime($closest[$cfg['date']]) - strtotime($email['date'])) ? $t : $closest;
+                  }
+                }
+              }
+              if ($closest) {
+                $id_parent = $closest[$cfg['id']];
+                $id_thread = $closest[$cfg['id_thread']] ?: $id_parent;
+              }
+            } else {
+              $id_parent = $tmp[0][$cfg['id']];
+              $id_thread = $tmp[0][$cfg['id_thread']] ?: $id_parent;
+            }
           }
         }
 

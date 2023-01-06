@@ -560,27 +560,18 @@ class Mailbox extends Basic
   public function getEmailsList(array $folder, int $start, int $end)
   {
     $current = $this->folders[$folder['uid']];
-    X::log([
-      "current" => $current,
-      "start" => $start,
-      "end" => $end,
-      "folder" => $this->folders[$folder['uid']],
-      "folders" => $folder,
-      "lastNO" => $folder['last_uid'] != null ? $this->getMsgNo($folder['last_uid']) : null,
-      "currentNO" => $folder['db_uid'] != null ? $this->getMsgNo($folder['db_uid']) : null,
-      "selectedFolder" => $this->selectFolder($folder['uid'])
-    ], "quentin");
+
     //$folder_last = $this->getMsgNo((int)$current['last_uid']);
     $folder_num = $current['num_msg'];
-    X::log(["EMAIL LIST", $folder_num, $start, $end ], "quentin");
-    if (isset($this->folders[$folder['uid']]) && ($end <= $start)
+
+    if (isset($this->folders[$folder['uid']]) && ($end >= $start)
         && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
-      while ($start >= $end) {
-        X::log(["BOUCLE", $start, $end ], "test");
+      while ($start <= $end) {
         $tmp = (array)$this->getMsgHeaderinfo($start);
         $structure = $this->getMsgStructure($start);
+        X::log($this->getMsgHeader($start), 'header');
         if (!$tmp || !$structure) {
           throw new \Exception("Wrong number? $start");
         }
@@ -635,6 +626,7 @@ class Mailbox extends Basic
             $tmp[$df] = $ads;
           }
         }
+        X::log($tmp, 'sync');
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
         $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $tmp['udate'].'/'.$tmp['Size'];
         if (!$tmp['message_id']) {
@@ -676,7 +668,7 @@ class Mailbox extends Basic
         }
 
         $res[] = $tmp;
-        $start--;
+        $start++;
       }
 
       return $res;
@@ -816,6 +808,14 @@ class Mailbox extends Basic
     return false;
   }
 
+  public function getThreads()
+  {
+    if ($this->_is_connected()) {
+      return imap_thread($this->stream);
+    }
+
+    return false;
+  }
 
   /**
    * Returns an array containing the full names of the all mailboxes.  (Test: ok)
