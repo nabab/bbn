@@ -41,10 +41,18 @@ class I18n extends bbn\Models\Cls\Cache
     $this->user    = \bbn\User::getInstance();
     $this->options = new \bbn\Appui\Option($db);
     if (empty($code)) {
-      $code = 'apst-app';
+      if (\defined('BBN_APP_NAME')) {
+        $code = BBN_APP_NAME;
+      }
+      else {
+        throw new \Exception(X::_("The project's ID/Code is mandatory"));
+      }
     }
 
     $this->id_project = \bbn\Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
+    if (empty($this->id_project)) {
+      throw new \Exception(X::_("Project's ID not found"));
+    }
   }
 
 
@@ -316,7 +324,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function getNumOptions()
   {
     /** @var  $paths takes all options with i18n property setted*/
-    $paths = $this->options->findI18n();
+    $paths = $this->options->findI18n(true);
     $data = [];
     /**
     * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language
@@ -426,7 +434,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function getOptions()
   {
     /** @var ( array) $paths get all options having i18n property setted and its items */
-    $paths = $this->options->findI18n();
+    $paths = $this->options->findI18n(true);
     $res   = [];
     foreach ($paths as $p => $val){
       $res[$p] = [
@@ -628,32 +636,12 @@ class I18n extends bbn\Models\Cls\Cache
     $langs = [];
     $result = [];
     $primaries = $this->getPrimariesLangs();
-    if ($options = $this->options->findI18n(null, false)) {
-      foreach ($options as $opt) {
-        if (!isset($langs[$opt['language']])) {
-          $langs[$opt['language']] = [
-            'code' => $opt['language'],
-            'lang' => $opt['language'],
-            'title' => $this->options->text($opt['language'], 'languages', 'i18n', 'appui'),
-            'items' => []
-          ];
-        }
-        $langs[$opt['language']]['items'][] = $opt['text'];
-        if ($items = $this->options->fullOptions($opt['id'])) {
-          foreach ($items as $item) {
-            if (is_null(X::find($options, ['id' => $item['id']]))) {
-              $langs[$opt['language']]['items'][] = $item['text'];
-            }
-          }
-        }
-      }
-    }
-    if (!empty($langs[$lang])) {
+    if ($options = $this->options->findI18nByLang($lang)) {
       foreach ($primaries as $p) {
         $count = 0;
-        foreach ($langs[$lang]['items'] as $item) {
+        foreach ($options as $item) {
           if (($id = $this->db->selectOne('bbn_i18n', 'id', [
-              'exp' => $this->normlizeText($item),
+              'exp' => $this->normlizeText($item['text']),
               'lang' => $lang
             ]))
             && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
@@ -666,7 +654,7 @@ class I18n extends bbn\Models\Cls\Cache
         }
         $result[$p['code']] = [
           'lang' => $p['code'],
-          'num' => count($langs[$lang]['items']),
+          'num' => count($options),
           'num_translations' => $count,
           'num_translations_db' => $count
         ];
@@ -833,7 +821,7 @@ class I18n extends bbn\Models\Cls\Cache
         ]))) {
           // if the string $r is not in 'bbn_i18n' inserts the string
           if ($this->db->insertIgnore('bbn_i18n', [
-            'exp' => $this->normlizeText(stripslashes($r)),
+            'exp' => $this->normlizeText($r),
             'lang' => $source_language,
           ])) {
             $id = $this->db->lastId();
@@ -858,7 +846,7 @@ class I18n extends bbn\Models\Cls\Cache
             'bbn_i18n_exp', [
             'id_exp' => $id,
             'lang' => $source_language,
-            'expression' => $this->normlizeText(stripslashes($r))
+            'expression' => $this->normlizeText($r)
             ]
           );
           //creates an array of new strings found in the folder;
@@ -1137,6 +1125,77 @@ class I18n extends bbn\Models\Cls\Cache
   }
 
 
+  public function getOptionsTranslationsTable(string $lang)
+  {
+    if (($options = $this->options->findI18nByLang($lang))
+      && ($languages = $this->getPrimariesLangs())
+    ) {
+      $res = [];
+      $langText = X::getField($languages, ['code' => $lang], 'text');
+      $languages = \array_map(fn($l) => $l['code'], $languages);
+      foreach ($options as $opt) {
+        $original = $this->normlizeText($opt['text']);
+        if (!($id = $this->db->selectOne('bbn_i18n', 'id', [
+          'exp' => $original,
+          'lang' => $lang
+        ]))) {
+          if ($this->db->insert('bbn_i18n', [
+            'exp' => $original,
+            'lang' => $lang
+          ])) {
+            $id = $this->db->lastId();
+          }
+          else {
+            throw new \Exception(X::_('Impossible to insert the original string %s in the original language %s', $original, $langText));
+          }
+        }
+        if (!empty($id)) {
+          if (!$this->db->selectOne('bbn_i18n_exp', 'id', [
+            'id_exp' => $id,
+            'lang' => $lang
+          ])) {
+            if (!$this->db->insert('bbn_i18n_exp', [
+              'id_exp' => $id,
+              'expression' => $original,
+              'lang' => $lang
+            ])) {
+              throw new \Exception(X::_('Impossible to insert the string %s in the language %s', $original, $langText));
+            }
+          }
+          $idx = X::find($res, ['id_exp' => $id]);
+          if (\is_null($idx)) {
+            $res[] = [
+              'id_exp' => $id,
+              'exp' => $original,
+              $lang . '_db' => $original,
+              $lang . '_po' => '',
+              'occurrence' => 0,
+              'paths' => []
+            ];
+            $idx = count($res) - 1;
+          }
+          $row =& $res[$idx];
+          $row['occurence']++;
+          foreach ($languages as $lng){
+            $row[$lng . '_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]) ?: '';
+            $row[$lng . '_po'] = '';
+          }
+        }
+      }
+
+      return [
+        'path_source_lang' => $lang,
+        'path' => X::_('Options - %s', $langText),
+        'languages' => $languages,
+        'total' => count($res),
+        'strings' => $res,
+        'id_option' => $lang
+      ];
+    }
+
+  }
+
+
   /**
    * Returns the path to explore relative to the given id_option
    * It only works if i18n class is constructed by giving the id_project
@@ -1192,13 +1251,57 @@ class I18n extends bbn\Models\Cls\Cache
 
 
   /**
+   * Inserts or updates an expression translation for the given language
+   * @param string $idExp The original expression's ID
+   * @param string $expression The translated expression
+   * @param string $lang The translation language
+   * @return bool
+   */
+  public function insertOrUpdateTranslation(string $idExp, string $expression, string $lang): bool
+  {
+    if ($id = $this->db->selectOne('bbn_i18n_exp', 'id', [
+      'id_exp' => $idExp,
+      'lang' => $lang
+    ])) {
+      if ($this->db->update('bbn_i18n_exp', ['expression' => $this->normlizeText($expression)], ['id' => $id])) {
+        return true;
+      }
+    }
+    /** INSERT in DB */
+    else if ($this->db->insert('bbn_i18n_exp', [
+      'expression' => $this->normlizeText($expression),
+      'id_exp' => $idExp,
+      'lang' => $lang
+    ])) {
+      return true;
+    }
+    return false;
+  }
+
+
+  /**
+   * Deletes an expression translation for the give language
+   * @param string $idExp The original expression's ID
+   * @param string $lang The translation language
+   * @return bool
+   */
+  public function deleteTranslation(string $idExp, string $lang): bool
+  {
+    return (bool)$this->db->delete('bbn_i18n_exp', [
+      'id_exp' => $idExp,
+      'lang' => $lang
+    ]);
+  }
+
+
+  /**
    * Returns a normalized version of the given text
    * @param string $text
    * @return string
    */
   private function normlizeText(string $text): string
   {
-    return \trim(\normalizer_normalize($text));
+    return \trim(\normalizer_normalize(stripslashes($text)));
   }
 
 

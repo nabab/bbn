@@ -1940,7 +1940,7 @@ class Option extends bbn\Models\Cls\Db
         $cfg[$m] = empty($cfg[$m]) ? 0 : 1;
       }
 
-      $mandatories = ['desc', 'inheritance', 'permissions'];
+      $mandatories = ['desc', 'inheritance', 'permissions', 'i18n', 'i18n_inheritance'];
       foreach ($mandatories as $m){
         $cfg[$m] = empty($cfg[$m]) ? '' : $cfg[$m];
       }
@@ -4211,50 +4211,53 @@ class Option extends bbn\Models\Cls\Db
   /**
    * Returns an array containing all options that have the property i18n set
    *
-   * @param null $id
    * @param bool $items
    * @return array
    */
-  public function findI18n($id = null, $items = true)
+  public function findI18n($items = false)
   {
     $res = [];
     if ($this->check()) {
-      $opts = $this->db->rselectAll(
-        [
-          'tables' => [$this->class_cfg['table']],
-          'fields' => [
-            $this->fields['id'],
-            $this->fields['id_parent'],
-            $this->fields['code'],
-            $this->fields['text'],
-            'language' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
-          ],
-          'where' => [
-            [
-              'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
-              'operator' => 'isnotnull'
-            ]
-          ]
-        ]
-      );
+      $opts = $this->db->rselectAll([
+        'table' => $this->class_cfg['table'],
+        'fields' => [
+          $this->fields['id'],
+          $this->fields['id_parent'],
+          $this->fields['code'],
+          $this->fields['text'],
+          'language' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))'
+        ],
+        'where' => [[
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))',
+          'operator' => 'isnotnull'
+        ], [
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))',
+          'operator' => '!=',
+          'value' => ''
+        ]]
+      ]);
 
       if ($opts) {
         foreach ($opts as $opt){
-          if (!empty($items)) {
-            $res[] = array_merge(
-              $opt, ['items' => array_values(
-                array_filter(
-                  $opts, function ($o) use ($opt) {
-                  return $o[$this->fields['id_parent']] === $opt[$this->fields['id']];
-                }
-                )
-              )]
-            );
-          }
-          else {
+          if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
+            $cfg = $this->getCfg($opt[$this->fields['id']]);
             $res[] = $opt;
+            if (!empty($cfg['i18n_inheritance'])) {
+              $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
+            }
           }
         }
+      }
+      if (!empty($res) && !empty($items)) {
+        $res2 = [];
+        foreach ($res as $r) {
+          $res2[] = \array_merge($r, [
+            'items' => array_values(array_filter($res, function($o) use($r) {
+              return $o[$this->fields['id_parent']] === $r[$this->fields['id']];
+            }))
+          ]);
+        }
+        return $res2;
       }
     }
 
@@ -4317,6 +4320,10 @@ class Option extends bbn\Models\Cls\Db
         'where' => [[
           'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
           'operator' => 'isnotnull'
+        ], [
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
+          'operator' => '!=',
+          'value' => ''
         ]]
       ]);
     }
@@ -4331,11 +4338,12 @@ class Option extends bbn\Models\Cls\Db
    * @param bool $items
    * @return array
    */
-  public function findI18nByLang(string $lang, $items = true)
+  public function findI18nByLang(string $lang, $items = false): array
   {
+    $res = [];
     if ($this->check()) {
       $opts = $this->db->rselectAll([
-        'tables' => [$this->class_cfg['table']],
+        'table' => $this->class_cfg['table'],
         'fields' => [
           $this->fields['id'],
           $this->fields['id_parent'],
@@ -4347,21 +4355,30 @@ class Option extends bbn\Models\Cls\Db
           'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))' => $lang
         ]
       ]) ?: [];
-      if (!empty($opts) && !empty($items)) {
-        foreach ($opts as $i => $opt){
-          $opts[$i]['items'] = array_values(
-            array_filter(
-              $opts,
-              function ($o) use ($opt) {
-                return $o[$this->fields['id_parent']] === $opt[$this->fields['id']];
-              }
-            )
-          );
+      if ($opts) {
+        foreach ($opts as $opt){
+          if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
+            $cfg = $this->getCfg($opt[$this->fields['id']]);
+            $res[] = $opt;
+            if (!empty($cfg['i18n_inheritance'])) {
+              $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
+            }
+          }
         }
       }
-      return $opts;
+      if (!empty($res) && !empty($items)) {
+        $res2 = [];
+        foreach ($res as $r) {
+          $res2[] = \array_merge($r, [
+            'items' => array_values(array_filter($res, function($o) use($r) {
+              return $o[$this->fields['id_parent']] === $r[$this->fields['id']];
+            }))
+          ]);
+        }
+        return $res2;
+      }
     }
-    return null;
+    return $res;
   }
 
 
@@ -4647,6 +4664,32 @@ class Option extends bbn\Models\Cls\Db
     }
 
     return $opt;
+  }
+
+
+  private function findI18nChildren(array $opt, bool $cascade = false, array &$res, string $lang = null){
+    $fid = $this->fields['id'];
+    if ($children = $this->fullOptions($opt[$fid])) {
+      foreach ($children as $child) {
+        if (\is_null(X::find($res, [$fid => $child[$fid]]))) {
+          $cfg = $this->getCfg($child[$fid]);
+          $child = [
+            $this->fields['id'] => $child[$this->fields['id']],
+            $this->fields['id_parent'] => $child[$this->fields['id_parent']],
+            $this->fields['code'] => $child[$this->fields['code']],
+            $this->fields['text'] => $child[$this->fields['text']],
+            'language' => !empty($cfg['i18n']) ? $cfg['i18n'] : $opt['language']
+          ];
+          if (empty($lang) || ($child['language'] === $lang)) {
+            $res[] = $child;
+          }
+          if (!empty($cfg['i18n_inheritance']) || (empty($cfg['i18n']) && $cascade)) {
+            $this->findI18nChildren($child, ($cfg['i18n_inheritance'] === 'cascade') || (empty($cfg['i18n']) && $cascade), $res);
+          }
+        }
+      }
+    }
+    return $res;
   }
 
 
