@@ -746,6 +746,38 @@ class I18n extends bbn\Models\Cls\Cache
 
 
   /**
+   * Get an expression translation for the given language
+   * @param string $expression The expression to be translated
+   * @param string $originalLang The original expression's language
+   * @param string $transLang the language of the translation
+   * @return string|null
+   */
+  public function getTranslation(string $expression, string $originalLang, string $transLang): ?string
+  {
+    return $this->db->selectOne([
+      'table' => 'bbn_i18n',
+      'fields' => ['bbn_i18n_exp.expression'],
+      'join' => [[
+        'table' => 'bbn_i18n_exp',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_i18n.id',
+            'exp' => 'bbn_i18n_exp.id_exp'
+          ], [
+            'field' => 'bbn_i18n_exp.lang',
+            'value' => $transLang
+          ]]
+        ]
+      ]],
+      'where' => [
+        'bbn_i18n.exp' => $this->normlizeText($expression),
+        'bbn_i18n.lang' => $originalLang
+      ]
+    ]);
+  }
+
+
+  /**
    * Returns the strings contained in the given path
    *
    * @param $id_option

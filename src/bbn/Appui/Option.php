@@ -557,7 +557,15 @@ class Option extends bbn\Models\Cls\Db
   public function nativeOption($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      if ($opt = $this->cacheGet($id, __FUNCTION__)) {
+      $originalLang = $this->findI18nById($id);
+      $lang = '';
+      if (\defined('BBN_LANG')
+        && !empty($originalLang)
+        && (BBN_LANG !== $originalLang)
+      ) {
+        $lang = BBN_LANG;
+      }
+      if ($opt = $this->cacheGet($id, __FUNCTION__ . (!empty($lang) ? "_$lang" : ''))) {
         return $opt;
       }
 
@@ -565,7 +573,14 @@ class Option extends bbn\Models\Cls\Db
       $cfn = $this->db->cfn($this->fields['id'], $tab);
       $opt = $this->getRow([$cfn => $id]);
       if ($opt) {
-        $this->cacheSet($id, __FUNCTION__, $opt);
+        if (!empty($lang)) {
+          $i18nCls = new \bbn\Appui\I18n($this->db);
+          $opt['_originalText'] = $opt[$this->fields['text']];
+          if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLang, $lang)) {
+            $opt[$this->fields['text']] = $trans;
+          }
+        }
+        $this->cacheSet($id, __FUNCTION__ . (!empty($lang) ? "_$lang" : ''), $opt);
         return $opt;
       }
     }
@@ -2094,8 +2109,13 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getIdParent($code = null): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args())) && ($o = $this->nativeOption($id))) {
-      return $o[$this->fields['id_parent']];
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      if ($opt = $this->cacheGet($id, 'nativeOption')) {
+        return $opt[$this->fields['id_parent']];
+      }
+      else {
+        return $this->db->selectOne($this->class_table, $this->fields['id_parent'], [$this->fields['id'] => $id]);
+      }
     }
 
     return null;
@@ -4379,6 +4399,36 @@ class Option extends bbn\Models\Cls\Db
       }
     }
     return $res;
+  }
+
+
+  public function findI18nById(string $id): ?string
+  {
+    if ($this->check()) {
+      if ($cfg = $this->getCfg($id)) {
+        if (!empty($cfg['i18n'])) {
+          return $cfg['i18n'];
+        }
+      }
+      if ($parents = $this->parents($id)) {
+        foreach ($parents as $i => $parent) {
+          $pcfg = $this->getCfg($parent);
+          if (empty($pcfg)
+            || empty($pcfg['i18n'])
+          ) {
+            continue;
+          }
+          if (!empty($pcfg['i18n_inheritance'])
+            && (($pcfg['i18n_inheritance'] === 'cascade')
+              || (($pcfg['i18n_inheritance'] === 'children')
+                && ($i === 0)))
+          ) {
+            return $pcfg['i18n'];
+          }
+        }
+      }
+    }
+    return null;
   }
 
 
