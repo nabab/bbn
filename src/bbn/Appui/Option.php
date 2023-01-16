@@ -2312,18 +2312,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function itext($code = null): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $val = $this->db->selectOne(
-        $this->class_cfg['table'], $this->fields['text'], [
-        $this->fields['id'] => $id
-        ]
-      );
-      if ($val) {
-        return X::_($val);
-      }
-    }
-
-    return null;
+    return $this->getTranslation($code);
   }
 
 
