@@ -897,11 +897,13 @@ class Task extends bbn\Models\Cls\Db
   public function notify(array $data){
     if ( isset($data['id_task'], $data['id_user'], $data['action']) && ($title = $this->getTitle($data['id_task'])) ){
       $text = $this->translateLog($data);
-      $users = array_filter($this->getUsers($data['id_task']), function($a) use($data){
+      $users = \array_values(\array_filter($this->getUsers($data['id_task']), function($a) use($data){
         return $a !== $data['id_user'];
-      });
-      $notif = new bbn\Appui\Notification($this->db);
-      return $notif->insert($title, $text, null, $users);
+      }));
+      if (!empty($users)) {
+        $notif = new bbn\Appui\Notification($this->db);
+        return $notif->insert($title, $text, null, $users, true);
+      }
     }
     return false;
   }
