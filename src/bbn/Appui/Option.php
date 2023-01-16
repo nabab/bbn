@@ -4432,6 +4432,27 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  public function getTranslation(string $code, string $lang = ''): ?string
+  {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+      && ($originalLang = $this->findI18nById($id))
+      && ($text = $this->text($id))
+    ) {
+      if (empty($lang)
+        && \defined('BBN_LANG')
+        && (BBN_LANG !== $originalLang)
+      ) {
+        $lang = BBN_LANG;
+      }
+      if (!empty($lang)) {
+        $i18nCls = new \bbn\Appui\I18n($this->db);
+        return  $i18nCls->getTranslation($text, $originalLang, $lang);
+      }
+    }
+    return null;
+  }
+
+
   /**
    * Gets the first row from a result
    *
