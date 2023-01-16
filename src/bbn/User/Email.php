@@ -754,8 +754,7 @@ class Email extends Basic
           $this->db->delete($table, [$cfg['id'] => $id]);
           return null;
         }
-
-        $arr = $mb->getMsg($number);
+        $arr = $mb->getMsg($number, $id, $folder['id_account']);
         $arr['id_account'] = $folder['id_account'];
         return $arr;
       }

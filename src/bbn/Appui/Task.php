@@ -19,6 +19,7 @@ class Task extends bbn\Models\Cls\Db
   private $columns;
 
   protected
+    $noteCls,
     $template = false,
     $id_user,
     $is_dev,
@@ -64,6 +65,7 @@ class Task extends bbn\Models\Cls\Db
       }
     }
     $this->columns = array_keys($this->db->getColumns('bbn_tasks'));
+    $this->noteCls = new \bbn\Appui\Note($this->db);
   }
 
   public static function catCorrespondances(){
@@ -105,11 +107,80 @@ class Task extends bbn\Models\Cls\Db
     return isset($this->user);
   }
 
-  public function getTitle($id_task, $simple=false){
-    if ( $title = $this->db->selectOne('bbn_tasks', 'title', ['id' => $id_task]) ){
+  public function getTitle(string $idTask, bool $simple = false): string
+  {
+    if ($title = $this->db->selectOne([
+      'table' => 'bbn_tasks',
+      'fields' => ['bbn_notes_versions.title'],
+      'join' => [[
+        'table' => 'bbn_notes_versions',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_notes_versions.id_note',
+            'exp' => 'bbn_tasks.id_note'
+          ], [
+            'field' => 'bbn_notes_versions.latest',
+            'value' => 1
+          ]]
+        ]
+      ]],
+      'where' => [
+        'conditions' => [[
+          'field' => 'bbn_tasks.id',
+          'value' => $idTask
+        ]]
+      ]
+    ])) {
       return (!empty($simple) ? (X::_("Task")." ") : '').$title;
     }
     return '';
+  }
+
+  public function setTitle(string $idTask, string $title): bool
+  {
+    if (($idNote = $this->getIdNote($idTask))
+      && ($n = $this->noteCls->get($idNote))
+      && ($title !== $n['title'])
+    ) {
+      return (bool)$this->noteCls->insertVersion($idNote, $title, $n['content'], $this->noteCls->getExcerpt($title, $n['content']));
+    }
+    return false;
+  }
+
+  public function getContent($id_task){
+    return $this->db->selectOne([
+      'table' => 'bbn_tasks',
+      'fields' => ['bbn_notes_versions.content'],
+      'join' => [[
+        'table' => 'bbn_notes_versions',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_notes_versions.id_note',
+            'exp' => 'bbn_tasks.id_note'
+          ], [
+            'field' => 'bbn_notes_versions.latest',
+            'value' => 1
+          ]]
+        ]
+      ]],
+      'where' => [
+        'conditions' => [[
+          'field' => 'bbn_tasks.id',
+          'value' => $id_task
+        ]]
+      ]
+    ]) ?: '';
+  }
+
+  public function setContent(string $idTask, string $content): bool
+  {
+    if (($idNote = $this->getIdNote($idTask))
+      && ($n = $this->noteCls->get($idNote))
+      && ($content !== $n['content'])
+    ) {
+      return (bool)$this->noteCls->insertVersion($idNote, $n['title'], $content, $this->noteCls->getExcerpt($n['title'], $content));
+    }
+    return false;
   }
 
   public function categories(){
@@ -165,6 +236,9 @@ class Task extends bbn\Models\Cls\Db
             }
             break;
           case 'title':
+            $values = $log['value'];
+            break;
+          case 'content':
             $values = $log['value'];
             break;
           case 'comment':
@@ -291,7 +365,8 @@ class Task extends bbn\Models\Cls\Db
       'first' => 'first',
       'duration' => 'duration',
       'num_children' => 'num_children',
-      'title' => 'title',
+      'title' => 'notevers.title',
+      'content' => 'notevers.content',
       'num_notes' => 'num_notes',
       'role' => 'role',
       'state' => 'state',
@@ -321,6 +396,8 @@ class Task extends bbn\Models\Cls\Db
     $where = \count($where) ? implode( " OR ", $where) : '';
     $sql = "
     SELECT `role`, bbn_tasks.*,
+    notevers.title AS title,
+    notevers.content AS content,
     FROM_UNIXTIME(MIN(bbn_tasks_logs.chrono)) AS `first`,
     FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last`,
     {$this->references_select}
@@ -330,12 +407,17 @@ class Task extends bbn\Models\Cls\Db
     FROM bbn_tasks_roles
       JOIN bbn_tasks
         ON bbn_tasks_roles.id_task = bbn_tasks.id
+      JOIN bbn_notes_versions AS notevers
+        ON notevers.id_note = bbn_tasks.id_note
+        AND notevers.latest = 1
       JOIN bbn_tasks_logs
         ON bbn_tasks_logs.id_task = bbn_tasks_roles.id_task
       LEFT JOIN bbn_tasks_notes
         ON bbn_tasks_notes.id_task = bbn_tasks_roles.id_task
+        AND bbn_tasks_notes.active = 1
       LEFT JOIN bbn_tasks AS children
-        ON bbn_tasks_roles.id_task = children.id_parent
+        ON bbn_tasks.id = children.id_parent
+        AND bbn_tasks.active = 1
       {$this->references_join}
     WHERE bbn_tasks_roles.id_user = ?".
       (empty($where) ? '' : " AND ($where)")."
@@ -366,7 +448,8 @@ class Task extends bbn\Models\Cls\Db
       'first' => 'first',
       'duration' => 'duration',
       'num_children' => 'num_children',
-      'title' => 'title',
+      'title' => 'notevers.title',
+      'content' => 'notevers.content',
       'num_notes' => 'num_notes',
       'role' => 'role',
       'state' => 'state',
@@ -378,12 +461,17 @@ class Task extends bbn\Models\Cls\Db
     $dir = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
     $sql = "
     SELECT bbn_tasks.*, role,
+    notevers.title AS title,
+    notevers.content AS content,
     FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
     {$this->references_select}
     COUNT(children.id) AS num_children,
     COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
     IF(bbn_tasks.`state`=".$this->idState('closed').", MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
     FROM bbn_tasks
+      JOIN bbn_notes_versions AS notevers
+        ON notevers.id_note = bbn_tasks.id_note
+        AND notevers.latest = 1
       JOIN bbn_tasks_logs
         ON bbn_tasks_logs.id_task = bbn_tasks.id
       LEFT JOIN bbn_tasks_notes
@@ -393,10 +481,13 @@ class Task extends bbn\Models\Cls\Db
         AND bbn_tasks_roles.id_user = {$this->id_user}
       LEFT JOIN bbn_notes_versions
         ON bbn_notes_versions.id_note = bbn_tasks_notes.id_note
+        AND bbn_tasks_notes.active =1
       LEFT JOIN bbn_tasks AS children
         ON children.id = bbn_tasks.id
+        AND children.active = 1
       {$this->references_join}
-    WHERE (bbn_tasks.title LIKE ?
+    WHERE (notevers.title LIKE ?
+    OR notevers.content LIKE ?
     OR bbn_notes_versions.content LIKE ?)
     AND bbn_tasks.active = 1
     GROUP BY bbn_tasks.id
@@ -441,7 +532,7 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function addLink(){
-    return $this->addNote();
+    return $this->addNote(null, null, null);
   }
 
   public function info($id, $with_comments = false){
@@ -456,7 +547,31 @@ class Task extends bbn\Models\Cls\Db
       $info['roles'] = $this->infoRoles($id);
       $info['notes'] = $with_comments ? $this->getComments($id) : $this->getCommentsIds($id);
       $info['children'] = $this->getChildren($id);
-      $info['aliases'] = $this->db->rselectAll('bbn_tasks', ['id', 'title'], ['id_alias' => $id, 'active' => 1]);
+      $info['aliases'] = $this->db->rselectAll([
+        'table' => 'bbn_tasks',
+        'fields' => [
+          'bbn_tasks.id',
+          'bbn_notes_versions.title'
+        ],
+        'join' => [[
+          'table' => 'bbn_notes_versions',
+          'on' => [
+            'conditions' => [[
+              'field' => 'bbn_notes_versions.id_note',
+              'exp' => 'bbn_tasks.id_note'
+            ], [
+              'field' => 'bbn_notes_versions.latest',
+              'value' => 1
+            ]]
+          ]
+        ]],
+        'where' => [
+          'bbn_tasks.id_alias' => $id,
+          'bbn_tasks.active' => 1
+        ]
+      ]);
+      $info['title'] = $this->getTitle($id);
+      $info['content'] = $this->getContent($id);
       $info['num_children'] = \count($info['children']);
       $info['has_children'] = !empty($info['num_children']);
       $info['reference'] = false;
@@ -484,7 +599,22 @@ class Task extends bbn\Models\Cls\Db
   {
     if ($children = $this->db->rselectAll([
       'table' => 'bbn_tasks',
-      'fields' => [],
+      'fields' => X::mergeArrays($this->db->getFieldsList('bbn_tasks'), [
+        'bbn_notes_versions.title',
+        'bbn_notes_versions.content'
+      ]),
+      'join' => [[
+        'table' => 'bbn_notes_versions',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_notes_versions.id_note',
+            'exp' => 'bbn_tasks.id_note'
+          ], [
+            'field' => 'bbn_notes_versions.latest',
+            'value' => 1
+          ]]
+        ]
+      ]],
       'where' => [
         'conditions' => [[
           'field' => 'id_parent',
@@ -542,10 +672,13 @@ class Task extends bbn\Models\Cls\Db
   private function _format_where(array $cfg){
     $res = [];
     foreach ( $cfg as $i => $c ){
-      if ( \is_array($c) ){
+      if (\is_array($c)) {
         array_push($res, $c);
       }
-      else if ( ($i === 'text') || ($i === 'title') ){
+      else if (($i === 'text')
+        || ($i === 'title')
+        || ($i === 'content')
+      ) {
         array_push($res, [$i, 'LIKE', "%$c%"]);
       }
       else{
@@ -576,8 +709,9 @@ class Task extends bbn\Models\Cls\Db
         'last_action' => 'last_action'
       ],
       'texts' => [
-        'title' => 'bbn_tasks.title',
-        'text' => 'bbn_notes_versions.content'
+        'title' => 'bbn_notes_versions.title',
+        'content' => 'bbn_notes_versions.content',
+        'text' => 'notever.content'
       ],
       'users' => [
         'my_user' => '',
@@ -641,11 +775,15 @@ class Task extends bbn\Models\Cls\Db
       else if ( isset($fields['texts'][$w[0]]) ){
         if ( !empty($w[2]) ){
           if ( $w[0] === 'title' ){
-            $query .= " AND bbn_tasks.title LIKE ? ";
+            $query .= " AND bbn_notes_versions.title LIKE ? AND bbn_notes_versions.latest = 1 ";
+            array_push($args1, "%$w[2]%");
+          }
+          else if ( $w[0] === 'content' ){
+            $query .= " AND bbn_notes_versions.content LIKE ? AND bbn_notes_versions.latest = 1 ";
             array_push($args1, "%$w[2]%");
           }
           else if ( $w[0] === 'text' ){
-            $query .= " AND (bbn_tasks.title LIKE ? OR bbn_notes_versions.content LIKE ?) ";
+            $query .= " AND ((bbn_notes_versions.title LIKE ? OR bbn_notes_versions.content LIKE ?) AND bbn_notes_versions.latest = 1 ";
             array_push($args1, "%$w[2]%", "%$w[2]%");
             $join .= "
         LEFT JOIN bbn_tasks_notes
@@ -697,13 +835,19 @@ class Task extends bbn\Models\Cls\Db
       hex2bin($this->id_user)
     ];
     $sql = "
-      SELECT my_role.role, bbn_tasks.*,
+      SELECT my_role.role,
+      bbn_tasks.*,
+      bbn_notes_versions.title,
+      bbn_notes_versions.content,
       FROM_UNIXTIME(MAX(bbn_tasks_logs.chrono)) AS `last_action`,
       COUNT(children.id) AS num_children,
       COUNT(DISTINCT bbn_tasks_notes.id_note) AS num_notes,
       {$this->references_select}
       IF(bbn_tasks.`state` = ?, MAX(bbn_tasks_logs.chrono), UNIX_TIMESTAMP()) - MIN(bbn_tasks_logs.chrono) AS duration
       FROM bbn_tasks
+        JOIN bbn_notes_versions
+          ON bbn_notes_versions.id_note = bbn_tasks.id_note
+          AND bbn_notes_versions.latest = 1
         LEFT JOIN bbn_tasks_roles AS my_role
           ON my_role.id_task = bbn_tasks.id
           AND my_role.id_user = ?
@@ -713,8 +857,10 @@ class Task extends bbn\Models\Cls\Db
           ON bbn_tasks_logs.id_task = bbn_tasks_roles.id_task
         LEFT JOIN bbn_tasks_notes
           ON bbn_tasks_notes.id_task = bbn_tasks.id
+          AND bbn_tasks_notes.active = 1
         LEFT JOIN bbn_tasks AS children
-          ON bbn_tasks_roles.id_task = children.id_parent
+          ON bbn_tasks.id = children.id_parent
+          AND children.active = 1
         $join
         {$this->references_join}
       WHERE bbn_tasks.active = 1
@@ -747,7 +893,39 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function searchInTask($st){
-    return $this->db->rselectAll('bbn_tasks', ['id', 'title', 'creation_date'], [['title',  'LIKE', '%'.$st.'%']]);
+    return $this->db->rselectAll([
+      'table' => 'bbn_tasks',
+      'fields' => [
+        'bbn_tasks.id',
+        'bbn_notes_versions.title',
+        'bbn_notes_versions.content',
+        'bbn_tasks.creation_date'
+      ],
+      'join' => [[
+        'table' => 'bbn_notes_versions',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_notes_versions.id_note',
+            'exp' => 'bbn_tasks.id_note'
+          ], [
+            'field' => 'bbn_notes_versions.latest',
+            'value' => 1
+          ]]
+        ]
+      ]],
+      'where' => [
+        'logic' => 'OR',
+        'conditions' => [[
+          'field' => 'bbn_notes_versions.title',
+          'operator' => 'contains',
+          'value' => $st
+        ], [
+          'field' => 'bbn_notes_versions.content',
+          'operator' => 'contains',
+          'value' => $st
+        ]]
+      ]
+    ]);
   }
 
   public function fullInfo($id){
@@ -865,7 +1043,7 @@ class Task extends bbn\Models\Cls\Db
               $note->addMedia(
                 $r,
                 $f['image'],
-                json_encode(['url' => $f['url'], 'description' => $f['desc']]),
+                ['url' => $f['url'], 'description' => $f['desc']],
                 $f['title'],
                 'link'
               );
@@ -975,24 +1153,29 @@ class Task extends bbn\Models\Cls\Db
     return $this;
   }
 
-  public function insert(array $cfg){
-    if ( isset($cfg['title'], $cfg['type']) ){
+  public function insert(array $cfg, bool $addRole = true){
+    if (($opt = bbn\Appui\Option::getInstance())
+      && ($idType = $opt->fromCode('tasks', 'types', 'note', 'appui'))
+      && isset($cfg['title'], $cfg['type'])
+      && ($idNote = $this->noteCls->insert($cfg['title'], $cfg['content'] ?? '', $idType))
+    ) {
       if ( $this->db->insert('bbn_tasks', [
-        'title' => $cfg['title'],
+        'id_note' => $idNote,
         'type' => $cfg['type'],
-        'priority' => $cfg['priority'] ?? 5,
-        'id_parent' => $cfg['id_parent'] ?? NULL,
-        'id_alias' => $cfg['id_alias'] ?? NULL,
-        'deadline' => $cfg['deadline'] ?? NULL,
-        'id_user' => $this->id_user ?: NULL,
-        'state' => $cfg['state'] ?? $this->idState('opened'),
+        'priority' => !empty($cfg['priority']) ? $cfg['priority'] : 5,
+        'id_parent' => !empty($cfg['id_parent']) ? $cfg['id_parent'] : null,
+        'id_alias' => !empty($cfg['id_alias']) ? $cfg['id_alias'] : null,
+        'deadline' => !empty($cfg['deadline']) ? $cfg['deadline'] : null,
+        'id_user' => $this->id_user ?: null,
+        'state' => !empty($cfg['state']) ? $cfg['state'] : $this->idState('opened'),
         'creation_date' => $this->date ?: date('Y-m-d H:i:s'),
-        'private' => $cfg['private'] ?? 0,
-        'cfg' => \json_encode(['widgets' => []])
+        'private' => !empty($cfg['private']) ? 1 : 0
       ]) ){
         $id = $this->db->lastId();
         $this->addLog($id, 'insert');
-        $this->addRole($id, 'managers');
+        if ($addRole) {
+          $this->addRole($id, 'managers');
+        }
         /*
         $subject = "Nouveau bug posté par {$this->user}";
         $text = "<p>{$this->user} a posté un nouveau bug</p>".
@@ -1010,67 +1193,108 @@ class Task extends bbn\Models\Cls\Db
   public function update($id_task, $prop, $value){
     if ( $this->exists($id_task) ){
       $ok = false;
-      if ( $prop === 'deadline' ){
-        $prev = $this->db->selectOne('bbn_tasks', 'deadline', ['id' => $id_task]);
-        if ( !$prev && $value ){
-          $this->addLog($id_task, 'deadline_insert', [$value]);
-          $ok = 1;
-        }
-        else if ( $prev && !$value ){
-          $this->addLog($id_task, 'deadline_delete', [$value]);
-          $ok = 1;
-        }
-        if ( $prev && $value && ($prev !== $value) ){
-          $this->addLog($id_task, 'deadline_update', [$prev, $value]);
-          $ok = 1;
-        }
-      }
-      else if ( $prop === 'price' ){
-        $prev = $this->db->selectOne('bbn_tasks', 'price', ['id' => $id_task]);
-        if ( !$prev && $value ){
-          $this->addLog($id_task, 'price_insert', [$value]);
-          $ok = 1;
-        }
-        else if ( $prev && !$value ){
-          $this->addLog($id_task, 'price_delete', [$prev]);
-          $ok = 1;
-        }
-        if ( $prev && $value && ($prev !== $value) ){
-          $this->addLog($id_task, 'price_update', [$prev, $value]);
-          $ok = 1;
-        }
-      }
-      else if ( $prop === 'state' ){
-        $states = $this->states();
-        switch ( $value ){
-          case $states['closed']:
+      switch ($prop) {
+        case 'deadline':
+          $prev = $this->db->selectOne('bbn_tasks', 'deadline', ['id' => $id_task]);
+          if ( !$prev && $value ){
+            $this->addLog($id_task, 'deadline_insert', [$value]);
             $ok = 1;
-            $this->addLog($id_task, 'task_close');
-            $this->stopAllTracks($id_task);
-            break;
-          case $states['holding']:
+          }
+          else if ( $prev && !$value ){
+            $this->addLog($id_task, 'deadline_delete', [$value]);
             $ok = 1;
-            $this->addLog($id_task, 'task_hold');
-            $this->stopAllTracks($id_task);
-            break;
-          case $states['ongoing']:
+          }
+          if ( $prev && $value && ($prev !== $value) ){
+            $this->addLog($id_task, 'deadline_update', [$prev, $value]);
             $ok = 1;
-            $this->addLog($id_task, 'task_start');
-            break;
-          case $states['opened']:
+          }
+          break;
+        case 'price':
+          $prev = $this->db->selectOne('bbn_tasks', 'price', ['id' => $id_task]);
+          if ( !$prev && $value ){
+            $this->addLog($id_task, 'price_insert', [$value]);
             $ok = 1;
-            $this->addLog($id_task, 'task_reopen');
-            break;
-          case $states['unapproved']:
-            $this->addLog($id_task, 'task_unapproved');
-            $this->stopAllTracks($id_task);
+          }
+          else if ( $prev && !$value ){
+            $this->addLog($id_task, 'price_delete', [$prev]);
             $ok = 1;
-            break;
-        }
-      }
-      else if ( $prev = $this->db->selectOne('bbn_tasks', $prop, ['id' => $id_task]) ){
-        $ok = 1;
-        $this->addLog($id_task, $prop.'_update', [$prev, $value]);
+          }
+          if ( $prev && $value && ($prev !== $value) ){
+            $this->addLog($id_task, 'price_update', [$prev, $value]);
+            $ok = 1;
+          }
+          break;
+        case 'state':
+          $states = $this->states();
+          switch ( $value ){
+            case $states['closed']:
+              $ok = 1;
+              $this->addLog($id_task, 'task_close');
+              $this->stopAllTracks($id_task);
+              break;
+            case $states['holding']:
+              $ok = 1;
+              $this->addLog($id_task, 'task_hold');
+              $this->stopAllTracks($id_task);
+              break;
+            case $states['ongoing']:
+              $ok = 1;
+              $this->addLog($id_task, 'task_start');
+              break;
+            case $states['opened']:
+              $ok = 1;
+              $this->addLog($id_task, 'task_reopen');
+              break;
+            case $states['unapproved']:
+              $this->addLog($id_task, 'task_unapproved');
+              $this->stopAllTracks($id_task);
+              $ok = 1;
+              break;
+          }
+          break;
+        case 'title':
+        case 'content':
+          if (($idNote = $this->getIdNote($id_task))
+            && ($n = $this->noteCls->get($idNote))
+          ) {
+            $title = $n['title'];
+            $content = $n['content'];
+            $log = '_update';
+            $vals = [];
+            if (($prop === 'title')
+              && ($title !== $value)
+            ) {
+              $vals = [$title, $value];
+              $title = $value;
+            }
+            else if (($prop === 'content')
+              && ($content !== $value)
+            ) {
+              $prev = $content;
+              if (empty($prev)) {
+                $log = '_insert';
+                $vals = [$value];
+              }
+              else if (empty($value)) {
+                $log = '_delete';
+              }
+              else {
+                $vals = [$content, $value];
+              }
+              $content = $value;
+            }
+            if ($this->noteCls->insertVersion($idNote, $title, $content, $this->noteCls->getExcerpt($title, $content))) {
+              $this->addLog($id_task, $prop.$log, $vals);
+              return true;
+            }
+          }
+          break;
+        default:
+          if ( $prev = $this->db->selectOne('bbn_tasks', $prop, ['id' => $id_task]) ){
+            $ok = 1;
+            $this->addLog($id_task, $prop.'_update', [$prev, $value]);
+          }
+          break;
       }
       if ( $ok ){
         return $this->db->update('bbn_tasks', [$prop => $value], ['id' => $id_task]);
@@ -1080,10 +1304,7 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function delete($id){
-    if ( 
-      ($info = $this->info($id)) &&
-      $this->db->update('bbn_tasks', ['active' => 0], ['id' => $id]) 
-    ){
+    if ($this->db->update('bbn_tasks', ['active' => 0], ['id' => $id])) {
       $this->addLog($id, 'delete');
       /* $subject = "Suppression du bug $info[title]";
       $text = "<p>{$this->user} a supprimé le bug<br><strong>$info[title]</strong></p>";
@@ -1239,8 +1460,11 @@ class Task extends bbn\Models\Cls\Db
       ($ongoing = $this->idState('ongoing'))
     ){
       return $this->db->getRows("
-        SELECT bbn_tasks.*
+        SELECT bbn_tasks.*, bbn_notes_versions.title, bbn_notes_versions.content
         FROM bbn_tasks
+          JOIN bbn_notes_versions
+            ON bbn_notes_versions.id_note = bbn_tasks.id_note
+            AND bbn_notes_versions.latest = 1
         	JOIN bbn_tasks_roles
         		ON bbn_tasks_roles.id_task = bbn_tasks.id
         		AND bbn_tasks_roles.id_user = ?
@@ -1279,29 +1503,9 @@ class Task extends bbn\Models\Cls\Db
     return (bool)$this->db->update('bbn_tasks', ['cfg' => \json_encode($cfg)], ['id' => $id]);
   }
 
-  public function addWidget(string $id, string $code): bool
+  private function getIdNote(string $id): ?string
   {
-    return $this->toggleWidget($id, $code);
-  }
-
-  public function removeWidget(string $id, string $code): bool
-  {
-    return $this->toggleWidget($id, $code, false);
-  }
-
-  public function setGit(string $id, int $idGit): bool
-  {
-    return (bool)$this->db->update('bbn_tasks', ['id_git' => $idGit], ['id' => $id]);
-  }
-
-  private function toggleWidget(string $id, string $code, bool $state = true): bool
-  {
-    $cfg = $this->getCfg($id);
-    if (!isset($cfg['widgets'])) {
-      $cfg['widgets'] = [];
-    }
-    $cfg['widgets'][$code] = empty($state) ? 0 : 1;
-    return $this->setCfg($id, $cfg);
+    return $this->db->selectOne('bbn_tasks', 'id_note', ['id' => $id]);
   }
 
 }
