@@ -23,6 +23,7 @@ class Task extends bbn\Models\Cls\Db
     $template = false,
     $id_user,
     $is_dev,
+    $mgr,
     $user,
     $date = false;
 
@@ -535,8 +536,9 @@ class Task extends bbn\Models\Cls\Db
     return $this->addNote(null, null, null);
   }
 
-  public function info($id, $with_comments = false){
-    if ( $info = $this->db->rselect('bbn_tasks', [], ['id' => $id]) ){
+  public function info(string $id, bool $withComments = false, bool $withChildren = true): ?array
+  {
+    if ($info = $this->db->rselect('bbn_tasks', [], ['id' => $id])) {
       $info['first'] = $this->db->selectOne('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
         'action' => $this->idAction('insert')
@@ -545,8 +547,10 @@ class Task extends bbn\Models\Cls\Db
         'id_task' => $id,
       ], ['chrono' => 'DESC']);
       $info['roles'] = $this->infoRoles($id);
-      $info['notes'] = $with_comments ? $this->getComments($id) : $this->getCommentsIds($id);
-      $info['children'] = $this->getChildren($id);
+      $roleCode = $this->hasRole($id, $this->id_user);
+      $info['role'] = !empty($roleCode) ? $this->idRole($roleCode) : null;
+      $info['notes'] = $withComments ? $this->getComments($id) : $this->getCommentsIds($id);
+      $info['children'] = $withChildren ? $this->getChildren($id) : $this->getChildrenIds($id);
       $info['aliases'] = $this->db->rselectAll([
         'table' => 'bbn_tasks',
         'fields' => [
@@ -572,6 +576,7 @@ class Task extends bbn\Models\Cls\Db
       ]);
       $info['title'] = $this->getTitle($id);
       $info['content'] = $this->getContent($id);
+      $info['num_notes'] = \count($info['notes']);
       $info['num_children'] = \count($info['children']);
       $info['has_children'] = !empty($info['num_children']);
       $info['reference'] = false;
@@ -589,32 +594,18 @@ class Task extends bbn\Models\Cls\Db
         }
       }
       if (!empty($info['id_parent'])) {
-        $info['parent'] = $this->info($info['id_parent'], $with_comments);
+        $info['parent'] = $this->info($info['id_parent'], $withComments, false);
       }
       return $info;
     }
+    return null;
   }
 
-  public function getChildren(string $id): array
+  public function getChildrenIds(string $id): ?array
   {
-    if ($children = $this->db->rselectAll([
+    return $this->db->getColumnValues([
       'table' => 'bbn_tasks',
-      'fields' => X::mergeArrays($this->db->getFieldsList('bbn_tasks'), [
-        'bbn_notes_versions.title',
-        'bbn_notes_versions.content'
-      ]),
-      'join' => [[
-        'table' => 'bbn_notes_versions',
-        'on' => [
-          'conditions' => [[
-            'field' => 'bbn_notes_versions.id_note',
-            'exp' => 'bbn_tasks.id_note'
-          ], [
-            'field' => 'bbn_notes_versions.latest',
-            'value' => 1
-          ]]
-        ]
-      ]],
+      'fields' => ['id'],
       'where' => [
         'conditions' => [[
           'field' => 'id_parent',
@@ -641,12 +632,16 @@ class Task extends bbn\Models\Cls\Db
       'order' => [
         'creation_date' => 'DESC'
       ]
-    ])) {
-      foreach ($children as $i => $c) {
-        $children[$i]['num_children'] = $this->db->count('bbn_tasks', ['id_parent' => $c['id'], 'active' => 1]);
-        $children[$i]['roles'] = $this->infoRoles($c['id']);
-      }
-      return $children;
+      ]);
+  }
+
+  public function getChildren(string $id): array
+  {
+    if ($children = $this->getChildrenIds($id)) {
+      $t = $this;
+      return \array_map(function($cid) use($t){
+        return $t->info($cid);
+      }, $children);
     }
     return [];
   }
