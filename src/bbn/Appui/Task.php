@@ -1162,7 +1162,7 @@ class Task extends bbn\Models\Cls\Db
       if ( $this->db->insert('bbn_tasks', [
         'id_note' => $idNote,
         'type' => $cfg['type'],
-        'priority' => !empty($cfg['priority']) ? $cfg['priority'] : 5,
+        'priority' => !empty($cfg['priority']) ? $cfg['priority'] : 4,
         'id_parent' => !empty($cfg['id_parent']) ? $cfg['id_parent'] : null,
         'id_alias' => !empty($cfg['id_alias']) ? $cfg['id_alias'] : null,
         'deadline' => !empty($cfg['deadline']) ? $cfg['deadline'] : null,
