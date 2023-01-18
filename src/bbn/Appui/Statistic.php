@@ -263,8 +263,15 @@ class Statistic extends bbn\Models\Cls\Db
 
       $cfg           = $this->db_cfg;
       $cfg['values'] = $vals;
-      X::log([$cfg['sql'], $cfg['values']], 'stat');
-      return $this->db->selectOne($cfg);
+      try {
+        $res = $this->db->selectOne($cfg);
+      }
+      catch (\Exception $e) {
+        X::log([$e->getMessage(), $this->hcfg, $cfg['sql'], $cfg['values']], 'stat');
+        throw new Exception(X::_('Impossible to run the stat'));
+      }
+
+      return $res;
     }
   }
 
