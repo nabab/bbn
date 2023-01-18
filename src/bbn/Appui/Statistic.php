@@ -1001,18 +1001,25 @@ class Statistic extends bbn\Models\Cls\Db
           [
             'logic' => 'AND',
             'conditions' => [
+              is_null($this->cfg['value']) ? 
               [
                 'field' => $this->db->cfn($this->cfg['field'], $this->cfg['table']),
-                'operator' => is_null($this->cfg['value']) ? 'isnull' : ($this->cfg['operator'] ?? '='),
+                'operator' => 'isnull'
+              ] : [
+                'field' => $this->db->cfn($this->cfg['field'], $this->cfg['table']),
+                'operator' => $this->cfg['operator'] ?? '=',
                 'value' => $this->cfg['value']
               ], [
                 'field' => $alias1 . '.uid',
                 'operator' => 'isnull'
               ]
             ]
-          ], [
+          ], is_null($this->cfg['value']) ? [
             'field' => 'IFNULL(' . $alias1 . '.ref, ' . $alias1 . '.val)',
-            'operator' => is_null($this->cfg['value']) ? 'isnull' : ($this->cfg['operator'] ?? '='),
+            'operator' => 'isnull'
+          ] : [
+            'field' => 'IFNULL(' . $alias1 . '.ref, ' . $alias1 . '.val)',
+            'operator' => $this->cfg['operator'] ?? '=',
             'value' => $this->cfg['value']
           ]
         ]
