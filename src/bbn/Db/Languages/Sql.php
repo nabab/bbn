@@ -2067,7 +2067,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       if ($num_values !== $q['placeholders']) {
         $this->error(
           X::_('Incorrect arguments count (your values: %u, in the statement: %u)', $num_values, $q['placeholders'])."\n\n"
-            . $statement."\n\n".'start of values'.print_r($params['values'], 1).'Arguments:'
+            . $statement."\n\n".'Number of values'.count($params['values']).'Arguments:'
             . print_r(\func_get_args(), true)
             . print_r($q, true),
           false
