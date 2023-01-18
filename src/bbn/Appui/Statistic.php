@@ -263,6 +263,7 @@ class Statistic extends bbn\Models\Cls\Db
 
       $cfg           = $this->db_cfg;
       $cfg['values'] = $vals;
+      X::log([$cfg['sql'], $cfg['values']], 'stat');
       return $this->db->selectOne($cfg);
     }
   }
