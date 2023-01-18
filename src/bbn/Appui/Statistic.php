@@ -267,7 +267,7 @@ class Statistic extends bbn\Models\Cls\Db
         $res = $this->db->selectOne($cfg);
       }
       catch (\Exception $e) {
-        X::log([$e->getMessage(), $this->hcfg, $cfg['sql'], $cfg['values']], 'stat');
+        X::log([$e->getMessage(), $this->ocfg, $cfg['sql'], $cfg['values']], 'stat');
         throw new Exception(X::_('Impossible to run the stat'));
       }
 
