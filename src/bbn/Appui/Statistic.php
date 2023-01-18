@@ -966,11 +966,11 @@ class Statistic extends bbn\Models\Cls\Db
             'exp' => 'bbn_history.opr'
           ], [
             'field' => $alias1 . '.col',
-            'value' => 'bbn_history.col'
+            'exp' => 'bbn_history.col'
           ], [
             'field' => $alias1 . '.tst',
             'operator' => '>',
-            'value' => 'bbn_history.tst'
+            'exp' => 'bbn_history.tst'
           ]
         ]
       ];
