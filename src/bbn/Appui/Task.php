@@ -1061,7 +1061,7 @@ class Task extends bbn\Models\Cls\Db
         'value' => empty($value) ? '' : json_encode($value),
         'chrono' => empty($this->date) ? microtime(true) : number_format((float)strtotime($this->date), 4, '.', '')
       ];
-      $this->notify($data);
+      //$this->notify($data);
       return $this->db->insert('bbn_tasks_logs', $data);
     }
     return false;
