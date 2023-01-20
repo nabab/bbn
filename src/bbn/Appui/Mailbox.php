@@ -286,11 +286,33 @@ class Mailbox extends Basic
   }
 
 
-  public function getLastUid(): int
+  public function getLastUid(): ?int
   {
-    return $this->last_uid;
+    $msg_nums = imap_search($this->stream, 'ALL');
+
+    if ($msg_nums) {
+      $last_msg_num = max($msg_nums);
+      return imap_uid($this->stream, $last_msg_num);
+    }
+
+    return null;
   }
 
+  public function getNextUid(int $uid): ?int
+  {
+    $emails = imap_search($this->stream, 'ALL');
+
+    if ($emails) {
+      $emails = array_filter($emails, function($val) use ($uid){
+        return $val > $uid;
+      });
+      if ($emails) {
+        return min($emails);
+      }
+    }
+
+    return null;
+  }
 
   public function getNumMsg(): int
   {
@@ -573,7 +595,8 @@ class Mailbox extends Basic
         $structure = $this->getMsgStructure($start);
         X::log($this->getMsgHeader($start), 'header');
         if (!$tmp || !$structure) {
-          throw new \Exception("Wrong number? $start");
+          X::log("wrong numher $start", 'poller_email_error');
+          continue;
         }
 
         $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
