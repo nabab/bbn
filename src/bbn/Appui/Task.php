@@ -929,23 +929,41 @@ class Task extends bbn\Models\Cls\Db
 
   public function infoRoles($id){
     $r = [];
-    if (
-      ($opt = bbn\Appui\Option::getInstance()) &&
-      ($roles = self::getAppuiOptions('roles'))
-    ){
-      $all = $this->db->rselectAll(
-        'bbn_tasks_roles',
-        [],
-        ['id_task' => $id],
-        ['role' => 'ASC']);
-      $n = false;
+    if ($roles = self::getAppuiOptions('roles')) {
+      $userCfg = bbn\User::getInstance()->getClassCfg();
+      $optCfg = bbn\Appui\Option::getInstance()->getClassCfg();
+      $all = $this->db->rselectAll([
+        'table' => 'bbn_tasks_roles',
+        'fields' => [],
+        'join' => [[
+          'table' => $optCfg['table'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($optCfg['arch']['options']['id'], $optCfg['table']),
+              'exp' => 'bbn_tasks_roles.role'
+            ]]
+          ]
+        ], [
+          'table' => $userCfg['table'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($userCfg['arch']['users']['id'], $userCfg['table']),
+              'exp' => 'bbn_tasks_roles.id_user'
+            ], [
+              'field' => $this->db->cfn($userCfg['arch']['users']['active'], $userCfg['table']),
+              'value' => 1
+            ]]
+          ]
+        ]],
+        'where' => ['id_task' => $id],
+        'order' => [$this->db->cfn($userCfg['arch']['users']['username'], $userCfg['table']) => 'asc']
+      ]);
       foreach ( $all as $a ){
         $code = X::getField($roles, ['id' => $a['role']], 'code');
-        if ( $n !== $code ){
-          $n = $code;
-          $r[$n] = [];
+        if (!isset($r[$code])) {
+          $r[$code] = [];
         }
-        array_push($r[$n], $a['id_user']);
+        $r[$code][] = $a['id_user'];;
       }
     }
     return $r;
