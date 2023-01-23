@@ -389,6 +389,9 @@ TEMPLATE;
       if (!isset($renderer)) {
         $renderer = Tpl::renderer($this->template);
       }
+      if (!empty($cfg['References'])) {
+        $this->mailer->addCustomHeader('References', $cfg['References']);
+      }
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
       $ar['text'] = $cfg['text'];
       $ar['text'] = $renderer($ar);
