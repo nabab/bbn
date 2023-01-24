@@ -546,6 +546,7 @@ class Task extends bbn\Models\Cls\Db
       $info['last'] = $this->db->selectOne('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
       ], ['chrono' => 'DESC']);
+      $info['last_action'] = !empty($info['last']) ? date('Y-m-d H:i:s', $info['last']) : $info['creation_date'];
       $info['roles'] = $this->infoRoles($id);
       $roleCode = $this->hasRole($id, $this->id_user);
       $info['role'] = !empty($roleCode) ? $this->idRole($roleCode) : null;
