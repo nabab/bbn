@@ -460,7 +460,6 @@ class Email extends Basic
 
       $cfg = $this->class_cfg['arch']['users_emails'];
       $table = $this->class_cfg['tables']['users_emails'];
-      //die(X::dump($this->pref->getFullBits($acc['id'])));
       return X::map(
         function ($a) use ($types, $cfg, $table) {
           if (!isset($a['uid'])) {
@@ -495,7 +494,8 @@ class Email extends Basic
             'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $a['id']]),
             'last_uid' => $a['last_uid'] ?? null,
             'last_check' => $a['last_check'] ?? null,
-            'hash' => $a['hash'] ?? null
+            'hash' => $a['hash'] ?? null,
+            'subscribed' => $a['subscribed'] ?? false
           ];
           if (!empty($a['items'])) {
             $res['items'] = $a['items'];
