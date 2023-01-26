@@ -773,6 +773,7 @@ class Email extends Basic
         }
         $arr = $mb->getMsg($number, $id, $folder['id_account']);
         $arr['id_account'] = $folder['id_account'];
+        $arr['msg_unique_id'] = $em['msg_unique_id'];
         return $arr;
       }
     }
@@ -981,7 +982,6 @@ class Email extends Basic
           if (!empty($closest)) {
             $closest_email = null;
             foreach ($closest as $c) {
-              X::log($c, '_php_error');
               if ($c['id'] !== $email['id'] && strtotime($c['date']) < strtotime($email['date'])) {
                 if (empty($closest_email)) {
                   $closest_email = $c;
