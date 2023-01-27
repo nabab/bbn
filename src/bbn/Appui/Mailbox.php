@@ -578,6 +578,30 @@ class Mailbox extends Basic
     return false;
   }
 
+  private function transformString($string) {
+    // Use the md5 hash function to generate a 32-character hexadecimal string
+    $hash = md5($string);
+
+    // Initialize an empty result variable
+    $result = '';
+
+    // Loop through the characters of the hash string
+    for ($i = 0; $i < strlen($hash); $i++) {
+      // Get the current character
+      $char = $hash[$i];
+
+      // Append the current character to the result string
+      $result .= $char;
+
+      // If the current position is a multiple of 4, append a dash
+      if (($i + 1) % 4 == 0 && $i != 31) {
+        $result .= '-';
+      }
+    }
+
+    // Return the final result
+    return $result;
+  }
 
   public function getEmailsList(array $folder, int $start, int $end)
   {
@@ -593,7 +617,7 @@ class Mailbox extends Basic
       while ($start <= $end) {
         $tmp = (array)$this->getMsgHeaderinfo($start);
         $structure = $this->getMsgStructure($start);
-        X::log($this->getMsgHeader($start), 'header');
+        X::log(mb_encode_mimeheader($this->getMsgHeader($start), 'UTF-8'), 'header');
         if (!$tmp || !$structure) {
           X::log("wrong numher $start", 'poller_email_error');
           continue;
@@ -651,7 +675,7 @@ class Mailbox extends Basic
         }
         X::log($tmp, 'sync');
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
-        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $tmp['udate'].'/'.$tmp['Size'];
+        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] . $tmp['date_sent'] . $tmp['subject']) . '@bbn.so' ;
         if (!$tmp['message_id']) {
           X::log($tmp, "mail2");
         }
