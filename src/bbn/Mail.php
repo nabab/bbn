@@ -197,7 +197,7 @@ TEMPLATE;
     $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);
     $this->mailer = new PHPMailer(true);
     try {
-      $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
+      $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "US-ASCII";
       $this->mailer->Encoding = isset($cfg['encoding']) ? $cfg['encoding'] : "base64";
       $this->mailer->AllowCharsetEncoding = false;
       if ( isset($cfg['user'], $cfg['pass']) ){
@@ -417,7 +417,7 @@ TEMPLATE;
         }
         $cfg['references'] = implode(' ', $refs);
         X::log(mb_encode_mimeheader($cfg['references']), 'in_reply_to');
-        $this->mailer->addCustomHeader('References:' . mb_encode_mimeheader($cfg['references']));
+        $this->mailer->addCustomHeader('References:' . $cfg['references']);
       }
       if (!empty($cfg['in_reply_to'])) {
         # check if the in-reply-to have chevrons around the message id and remove them

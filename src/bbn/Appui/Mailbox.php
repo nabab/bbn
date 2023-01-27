@@ -603,6 +603,42 @@ class Mailbox extends Basic
     return $result;
   }
 
+
+  // read this https://www.rfc-editor.org/rfc/rfc1342 to understand the utility of this function
+  private function decode_encoded_words($string) {
+
+    preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
+    for ($i = 0; $i < count($matches[0]); $i++) {
+      $encoding = $matches[2][$i];
+      $encoded_text = $matches[3][$i];
+      if (strtolower($encoding) == "q") {
+        $decoded_text = quoted_printable_decode(str_replace("_", " ", $encoded_text));
+      } else {
+        $decoded_text = base64_decode($encoded_text);
+      }
+      $string = str_replace($matches[0][$i], $decoded_text, $string);
+    }
+    return $string;
+  }
+
+  private function decode_encoded_words_array($array) {
+    for($i = 0; $i < count($array); $i++) {
+      $array[$i] = $this->decode_encoded_words($array[$i]);
+    }
+    return $array;
+  }
+
+  private function decode_encoded_words_deep($obj) {
+    if (is_string($obj)) {
+      $obj = $this->decode_encoded_words($obj);
+    } elseif (is_object($obj)) {
+      foreach ($obj as &$property) {
+        $property = $this->decode_encoded_words_deep($property);
+      }
+    }
+    return $obj;
+  }
+
   public function getEmailsList(array $folder, int $start, int $end)
   {
     $current = $this->folders[$folder['uid']];
@@ -615,9 +651,8 @@ class Mailbox extends Basic
     ) {
       $res = [];
       while ($start <= $end) {
-        $tmp = (array)$this->getMsgHeaderinfo($start);
+        $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
         $structure = $this->getMsgStructure($start);
-        X::log(mb_encode_mimeheader($this->getMsgHeader($start), 'UTF-8'), 'header');
         if (!$tmp || !$structure) {
           X::log("wrong numher $start", 'poller_email_error');
           continue;
