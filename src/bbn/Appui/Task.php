@@ -359,6 +359,54 @@ class Task extends bbn\Models\Cls\Db
     }
   }
 
+  public function getPrice(string $id){
+    return $this->db->selectOne('bbn_tasks', 'price', ['id' => $id]);
+  }
+
+  public function getApprovalInfo(string $id): ?array
+  {
+    $approved = null;
+    if (!empty($this->getPrice($id))) {
+      $lastChangePrice = $this->getPriceLog($id) ?: null;
+      if (!empty($lastChangePrice)
+        && \bbn\Str::isJson($lastChangePrice['value'])
+      ) {
+        $lastChangePrice['value'] = \json_decode($lastChangePrice['value'], true);
+        if (\is_array($lastChangePrice['value'])) {
+          $lastChangePrice['value'] = $lastChangePrice['value'][0];
+        }
+      }
+      $approved = $this->getApprovedLog($id) ?: null;
+      if (!empty($approved)
+        && \bbn\Str::isJson($approved['value'])
+      ) {
+        $approved['value'] = \json_decode($approved['value'], true);
+        if (\is_array($approved['value'])) {
+          $approved['value'] = $approved['value'][0];
+        }
+      }
+      if (!empty($lastChangePrice)
+        && !empty($approved)
+        && ($lastChangePrice['chrono'] > $approved['chrono'])
+      ){
+        $approved = null;
+      }
+    }
+    else if ($children = $this->getChildrenIds($id)) {
+      $fromChildren = [];
+      foreach ($children as $child) {
+        if ($c = $this->getApprovalInfo($child)) {
+          $fromChildren[] = $c;
+        }
+      }
+      if (!empty($fromChildren)) {
+        $fromChildren = X::sortBy($fromChildren, 'chrono', 'desc');
+        $approved = $fromChildren[0];
+      }
+    }
+    return $approved;
+  }
+
   public function getList($parent = null, $status = 'opened|ongoing|holding', $id_user = false, $order = 'priority', $dir = 'ASC', $limit = 1000, $start = 0){
     $orders_ok = [
       'id' => 'bbn_tasks.id',
@@ -539,6 +587,8 @@ class Task extends bbn\Models\Cls\Db
   public function info(string $id, bool $withComments = false, bool $withChildren = true): ?array
   {
     if ($info = $this->db->rselect('bbn_tasks', [], ['id' => $id])) {
+      $info['title'] = $this->getTitle($id);
+      $info['content'] = $this->getContent($id);
       $info['first'] = $this->db->selectOne('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
         'action' => $this->idAction('insert')
@@ -552,6 +602,12 @@ class Task extends bbn\Models\Cls\Db
       $info['role'] = !empty($roleCode) ? $this->idRole($roleCode) : null;
       $info['notes'] = $withComments ? $this->getComments($id) : $this->getCommentsIds($id);
       $info['children'] = $withChildren ? $this->getChildren($id) : $this->getChildrenIds($id);
+      $info['children_price'] = $this->getChildrenPrices($id);
+      $info['children_noprice'] = $this->getChildrenNoPrice($id);
+      $info['num_children_noprice'] = count($info['children_noprice']);
+      $info['parent_has_price'] = $this->parentHasPrice($id, true);
+      $info['parent_unapproved'] = $this->parentIsUnapproved($id, true);
+      $info['approved'] = $this->getApprovalInfo($id);
       $info['aliases'] = $this->db->rselectAll([
         'table' => 'bbn_tasks',
         'fields' => [
@@ -575,12 +631,10 @@ class Task extends bbn\Models\Cls\Db
           'bbn_tasks.active' => 1
         ]
       ]);
-      $info['title'] = $this->getTitle($id);
-      $info['content'] = $this->getContent($id);
       $info['num_notes'] = \count($info['notes']);
       $info['num_children'] = \count($info['children']);
       $info['has_children'] = !empty($info['num_children']);
-      $info['reference'] = false;
+      $info['reference'] = null;
       if ( $this->references ){
         foreach ( $this->references as $table => $ref ){
           foreach ( $ref['refs'] as $j => $r ){
@@ -647,10 +701,113 @@ class Task extends bbn\Models\Cls\Db
     return [];
   }
 
+  public function getChildrenPrices(string $id, bool $deep = true): float
+  {
+    $total = 0;
+    if ($children = $this->getChildrenIds($id)) {
+      foreach ($children as $child) {
+        if ($p = $this->getPrice($child)){
+          $total += $p;
+        }
+        else if ($deep && ($subChildren = $this->getChildrenIds($child))) {
+          foreach ($subChildren as $sc) {
+            if ($scp = $this->getPrice($sc)) {
+              $total += $scp;
+            }
+            else if ($this->getChildrenIds($sc)) {
+              $total += $this->getChildrenPrices($sc);
+            }
+          }
+        }
+      }
+    }
+    return $total;
+  }
+
+  public function getChildrenNoPrice(string $id, bool $deep = true): array
+  {
+    $res = [];
+    if (!$this->getPrice($id)
+      && ($children = $this->getChildrenIds($id))
+    ) {
+      $hasPrice = false;
+      foreach ($children as $child) {
+        if ($this->getPrice($child) || $this->getChildrenPrices($child, $deep)) {
+          $hasPrice = true;
+        }
+      }
+      if ($hasPrice) {
+        foreach ($children as $child) {
+          if (!$deep) {
+            if (!$this->getPrice($child)) {
+              $res[] = $child;
+            }
+          }
+          else {
+            if (!$this->getPrice($child) && !$this->getChildrenPrices($child)) {
+              $res[] = $child;
+            }
+          }
+        }
+      }
+    }
+    return $res;
+  }
+
+  public function getUnapprovedChildrenIds(string $id): ?array
+  {
+    if (!($idState = $this->idState('unapproved'))) {
+      throw new \Exception(X::_('No state found with the code unapproved'));
+    }
+    return $this->db->getColumnValues('bbn_tasks', 'id', [
+      'id_parent' => $id,
+      'state' => $idState
+    ]);
+  }
+
+  public function parentHasPrice(string $id, bool $top = false)
+  {
+    if ($idParent = $this->getIdParent($id)) {
+      if ($this->getPrice($idParent)) {
+        return true;
+      }
+      if ($top) {
+        return $this->parentHasPrice($idParent, true);
+      }
+    }
+    return false;
+  }
+
+  public function parentIsUnapproved(string $id, bool $top = false)
+  {
+    if ($idParent = $this->getIdParent($id)) {
+      if ($this->idState('unapproved') === $this->getState($idParent)) {
+        return true;
+      }
+      if ($top) {
+        return $this->parentIsUnapproved($idParent, true);
+      }
+    }
+    return false;
+  }
+
   public function getState($id){
     if ( $this->exists($id) ){
       return $this->db->selectOne('bbn_tasks', 'state', ['id' => $id]);
     }
+  }
+
+  public function getIdParent(string $id): ?string
+  {
+    return $this->db->selectOne('bbn_tasks', 'id_parent', ['id' => $id]);
+  }
+
+  public function getIdRoot(string $id): ?string
+  {
+    if ($idParent = $this->getIdParent($id)) {
+      return $this->getIdParent($idParent) ?: $idParent;
+    }
+    return $idParent;
   }
 
   public function getCommentsIds($id_task){
@@ -1005,17 +1162,21 @@ class Task extends bbn\Models\Cls\Db
     return $this->db->getColumnValues('bbn_tasks_roles', 'id_user', ['id_task' => $id_task]);
   }
 
-  public function getDeciders($id_task){
-    if (
-      $this->exists($id_task) &&
-      ($role = $this->idRole('deciders'))
+  public function getDeciders(string $idTask, bool $top = false): array
+  {
+    if ($this->exists($idTask)
+      && ($role = $this->idRole('deciders'))
     ){
-      return $this->db->getColumnValues('bbn_tasks_roles', 'id_user', [
-        'id_task' => $id_task,
+      $deciders = $this->db->getColumnValues('bbn_tasks_roles', 'id_user', [
+        'id_task' => $idTask,
         'role' => $role
-      ]);
+      ]) ?: [];
+      if ($top && ($idParent = $this->getIdParent($idTask))) {
+        $deciders = X::mergeArrays($deciders, $this->getDeciders($idParent, true));
+      }
+      return \array_unique($deciders);
     }
-    return false;
+    return [];
   }
 
   public function comment($id_task, array $cfg){
@@ -1204,71 +1365,74 @@ class Task extends bbn\Models\Cls\Db
     return false;
   }
 
-  public function update($id_task, $prop, $value){
-    if ( $this->exists($id_task) ){
+  public function update($idTask, $prop, $value){
+    if ( $this->exists($idTask) ){
       $ok = false;
+      $states = $this->states();
       switch ($prop) {
         case 'deadline':
-          $prev = $this->db->selectOne('bbn_tasks', 'deadline', ['id' => $id_task]);
+          $prev = $this->db->selectOne('bbn_tasks', 'deadline', ['id' => $idTask]);
           if ( !$prev && $value ){
-            $this->addLog($id_task, 'deadline_insert', [$value]);
+            $this->addLog($idTask, 'deadline_insert', [$value]);
             $ok = 1;
           }
           else if ( $prev && !$value ){
-            $this->addLog($id_task, 'deadline_delete', [$value]);
+            $this->addLog($idTask, 'deadline_delete', [$value]);
             $ok = 1;
           }
           if ( $prev && $value && ($prev !== $value) ){
-            $this->addLog($id_task, 'deadline_update', [$prev, $value]);
+            $this->addLog($idTask, 'deadline_update', [$prev, $value]);
             $ok = 1;
           }
           break;
         case 'price':
-          $prev = $this->db->selectOne('bbn_tasks', 'price', ['id' => $id_task]);
+          $prev = $this->db->selectOne('bbn_tasks', 'price', ['id' => $idTask]);
           if ( !$prev && $value ){
-            $this->addLog($id_task, 'price_insert', [$value]);
+            $this->addLog($idTask, 'price_insert', [$value]);
             $ok = 1;
           }
           else if ( $prev && !$value ){
-            $this->addLog($id_task, 'price_delete', [$prev]);
+            $this->addLog($idTask, 'price_delete', [$prev]);
             $ok = 1;
           }
           if ( $prev && $value && ($prev !== $value) ){
-            $this->addLog($id_task, 'price_update', [$prev, $value]);
+            $this->addLog($idTask, 'price_update', [$prev, $value]);
             $ok = 1;
+          }
+          if ($ok) {
+            $oldState = $this->getState($idTask);
           }
           break;
         case 'state':
-          $states = $this->states();
           switch ( $value ){
             case $states['closed']:
               $ok = 1;
-              $this->addLog($id_task, 'task_close');
-              $this->stopAllTracks($id_task);
+              $this->addLog($idTask, 'task_close');
+              $this->stopAllTracks($idTask);
               break;
             case $states['holding']:
               $ok = 1;
-              $this->addLog($id_task, 'task_hold');
-              $this->stopAllTracks($id_task);
+              $this->addLog($idTask, 'task_hold');
+              $this->stopAllTracks($idTask);
               break;
             case $states['ongoing']:
               $ok = 1;
-              $this->addLog($id_task, 'task_start');
+              $this->addLog($idTask, 'task_start');
               break;
             case $states['opened']:
               $ok = 1;
-              $this->addLog($id_task, 'task_reopen');
+              $this->addLog($idTask, 'task_reopen');
               break;
             case $states['unapproved']:
-              $this->addLog($id_task, 'task_unapproved');
-              $this->stopAllTracks($id_task);
+              $this->addLog($idTask, 'task_unapproved');
+              $this->stopAllTracks($idTask);
               $ok = 1;
               break;
           }
           break;
         case 'title':
         case 'content':
-          if (($idNote = $this->getIdNote($id_task))
+          if (($idNote = $this->getIdNote($idTask))
             && ($n = $this->noteCls->get($idNote))
           ) {
             $title = $n['title'];
@@ -1298,20 +1462,68 @@ class Task extends bbn\Models\Cls\Db
               $content = $value;
             }
             if ($this->noteCls->insertVersion($idNote, $title, $content, $this->noteCls->getExcerpt($title, $content))) {
-              $this->addLog($id_task, $prop.$log, $vals);
+              $this->addLog($idTask, $prop.$log, $vals);
               return true;
             }
           }
           break;
         default:
-          if ( $prev = $this->db->selectOne('bbn_tasks', $prop, ['id' => $id_task]) ){
+          if ( $prev = $this->db->selectOne('bbn_tasks', $prop, ['id' => $idTask]) ){
             $ok = 1;
-            $this->addLog($id_task, $prop.'_update', [$prev, $value]);
+            $this->addLog($idTask, $prop.'_update', [$prev, $value]);
           }
           break;
       }
-      if ( $ok ){
-        return $this->db->update('bbn_tasks', [$prop => $value], ['id' => $id_task]);
+      if ($ok && $this->db->update('bbn_tasks', [$prop => $value], ['id' => $idTask])) {
+        if ($prop === 'price') {
+          if (($idParent = $this->getIdParent($idTask))) {
+            if (!empty($value)
+              && ($this->getState($idParent) !== $states['unapproved'])
+            ) {
+              $this->update($idParent, 'state', $states['unapproved']);
+            }
+            else if (empty($value)
+              && ($this->getState($idParent) === $states['unapproved'])
+              && !$this->getUnapprovedChildrenIds($idParent)
+            ) {
+              $this->update($idParent, 'state', $states['opened']);
+            }
+          }
+          $this->update($idTask, 'state', empty($value) ? $states['opened'] : $states['unapproved']);
+        }
+        if ($prop === 'state') {
+          if ($value === $states['unapproved']) {
+            if (!!$this->getPrice($idTask) && ($children = $this->getChildrenIds($idTask))) {
+              foreach ($children as $child) {
+                $s = $this->getState($child);
+                if (($s !== $states['unapproved'])
+                  && ($s !== $states['closed'])
+                ) {
+                  $this->update($child, 'state', $states['unapproved']);
+                }
+              }
+            }
+            if (($idParent = $this->getIdParent($idTask))
+              && ($this->getState($idParent) !== $states['unapproved'])
+            ) {
+              $this->update($idParent, 'state', $states['unapproved']);
+            }
+          }
+          else if ($value === $states['opened']) {
+            if ($children = $this->getUnapprovedChildrenIds($idTask)) {
+              foreach ($children as $child) {
+                $this->update($child, 'state', $states['opened']);
+              }
+            }
+            if (($idParent = $this->getIdParent($idTask))
+              && ($this->getState($idParent) === $states['unapproved'])
+              && !$this->getUnapprovedChildrenIds($idParent)
+            ) {
+              $this->update($idParent, 'state', $states['opened']);
+            }
+          }
+        }
+        return true;
       }
     }
     return false;
@@ -1327,15 +1539,44 @@ class Task extends bbn\Models\Cls\Db
     }
   }
 
-  public function approve($id){
-    if (
-      $this->exists($id) &&
-      ($info = $this->db->select('bbn_tasks', ['state', 'price'], ['id' => $id])) &&
-      ($unapproved = $this->idState('unapproved')) &&
-      ($deciders = $this->getDeciders($id)) &&
-      in_array($this->id_user, $deciders)
+  public function approve(string $id, bool $approveChildren = true, bool $approveParent = true){
+    if ($this->exists($id)
+      && ($currentState = $this->getState($id))
+      && ($unapproved = $this->idState('unapproved'))
+      && ($currentState === $unapproved)
+      && ($deciders = $this->getDeciders($id, true))
+      && \in_array($this->id_user, $deciders)
     ){
-      return ($info->state === $unapproved) && $this->addLog($id, 'price_approved', [$info->price]);
+      $price = $this->getPrice($id);
+      if (empty($price)) {
+        $price = $this->getChildrenPrices($id);
+      }
+      if (!($opened = $this->idState('opened'))) {
+        throw new \Exception(X::_('No state found with the code opened'));
+      }
+      if ($approveChildren
+        && ($children = $this->getUnapprovedChildrenIds($id))
+      ) {
+        foreach ($children as $child) {
+          $this->approve($child, true, false);
+        }
+      }
+      if (!$this->getUnapprovedChildrenIds($id)
+        && (($this->getState($id) === $this->idState('opened'))
+          || $this->update($id, 'state', $opened))
+      ) {
+        if (!empty($price)) {
+          $this->addLog($id, 'price_approved', [$price]);
+        }
+        if ($approveParent
+          && ($parent = $this->getIdParent($id))
+          && ($this->getState($parent) === $unapproved)
+          && !$this->getUnapprovedChildrenIds($parent)
+        ) {
+          $this->approve($parent, false);
+        }
+        return true;
+      }
     }
     return false;
   }
