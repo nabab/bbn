@@ -363,6 +363,50 @@ class Task extends bbn\Models\Cls\Db
     return $this->db->selectOne('bbn_tasks', 'price', ['id' => $id]);
   }
 
+  public function getApprovalInfo(string $id): ?array
+  {
+    $approved = null;
+    if (!empty($this->getPrice($id))) {
+      $lastChangePrice = $this->getPriceLog($id) ?: null;
+      if (!empty($lastChangePrice)
+        && \bbn\Str::isJson($lastChangePrice['value'])
+      ) {
+        $lastChangePrice['value'] = \json_decode($lastChangePrice['value'], true);
+        if (\is_array($lastChangePrice['value'])) {
+          $lastChangePrice['value'] = $lastChangePrice['value'][0];
+        }
+      }
+      $approved = $this->getApprovedLog($id) ?: null;
+      if (!empty($approved)
+        && \bbn\Str::isJson($approved['value'])
+      ) {
+        $approved['value'] = \json_decode($approved['value'], true);
+        if (\is_array($approved['value'])) {
+          $approved['value'] = $approved['value'][0];
+        }
+      }
+      if (!empty($lastChangePrice)
+        && !empty($approved)
+        && ($lastChangePrice['chrono'] > $approved['chrono'])
+      ){
+        $approved = null;
+      }
+    }
+    else if ($children = $this->getChildrenIds($id)) {
+      $fromChildren = [];
+      foreach ($children as $child) {
+        if ($c = $this->getApprovalInfo($child)) {
+          $fromChildren[] = $c;
+        }
+      }
+      if (!empty($fromChildren)) {
+        $fromChildren = X::sortBy($fromChildren, 'chrono', 'desc');
+        $approved = $fromChildren[0];
+      }
+    }
+    return $approved;
+  }
+
   public function getList($parent = null, $status = 'opened|ongoing|holding', $id_user = false, $order = 'priority', $dir = 'ASC', $limit = 1000, $start = 0){
     $orders_ok = [
       'id' => 'bbn_tasks.id',
@@ -543,6 +587,8 @@ class Task extends bbn\Models\Cls\Db
   public function info(string $id, bool $withComments = false, bool $withChildren = true): ?array
   {
     if ($info = $this->db->rselect('bbn_tasks', [], ['id' => $id])) {
+      $info['title'] = $this->getTitle($id);
+      $info['content'] = $this->getContent($id);
       $info['first'] = $this->db->selectOne('bbn_tasks_logs', 'chrono', [
         'id_task' => $id,
         'action' => $this->idAction('insert')
@@ -561,6 +607,7 @@ class Task extends bbn\Models\Cls\Db
       $info['num_children_noprice'] = count($info['children_noprice']);
       $info['parent_has_price'] = $this->parentHasPrice($id, true);
       $info['parent_unapproved'] = $this->parentIsUnapproved($id, true);
+      $info['approved'] = $this->getApprovalInfo($id);
       $info['aliases'] = $this->db->rselectAll([
         'table' => 'bbn_tasks',
         'fields' => [
@@ -584,12 +631,10 @@ class Task extends bbn\Models\Cls\Db
           'bbn_tasks.active' => 1
         ]
       ]);
-      $info['title'] = $this->getTitle($id);
-      $info['content'] = $this->getContent($id);
       $info['num_notes'] = \count($info['notes']);
       $info['num_children'] = \count($info['children']);
       $info['has_children'] = !empty($info['num_children']);
-      $info['reference'] = false;
+      $info['reference'] = null;
       if ( $this->references ){
         foreach ( $this->references as $table => $ref ){
           foreach ( $ref['refs'] as $j => $r ){
@@ -755,6 +800,14 @@ class Task extends bbn\Models\Cls\Db
   public function getIdParent(string $id): ?string
   {
     return $this->db->selectOne('bbn_tasks', 'id_parent', ['id' => $id]);
+  }
+
+  public function getIdRoot(string $id): ?string
+  {
+    if ($idParent = $this->getIdParent($id)) {
+      return $this->getIdParent($idParent) ?: $idParent;
+    }
+    return $idParent;
   }
 
   public function getCommentsIds($id_task){
@@ -1509,7 +1562,8 @@ class Task extends bbn\Models\Cls\Db
         }
       }
       if (!$this->getUnapprovedChildrenIds($id)
-        && $this->update($id, 'state', $opened)
+        && (($this->getState($id) === $this->idState('opened'))
+          || $this->update($id, 'state', $opened))
       ) {
         if (!empty($price)) {
           $this->addLog($id, 'price_approved', [$price]);
