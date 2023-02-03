@@ -1,4 +1,5 @@
 <?php
+<?php
 /**
  * Class for sending mails
  *
@@ -416,7 +417,6 @@ TEMPLATE;
           }
         }
         $cfg['references'] = implode(' ', $refs);
-        X::log(mb_encode_mimeheader($cfg['references']), 'in_reply_to');
         $this->mailer->addCustomHeader('References:' . $cfg['references']);
       }
       if (!empty($cfg['in_reply_to'])) {

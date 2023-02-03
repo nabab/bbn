@@ -203,7 +203,7 @@ class Mailbox extends Basic
     }
   }
 
- 	
+
 
   /**
    *  Closes the imap stream.
@@ -221,7 +221,7 @@ class Mailbox extends Basic
   {
     return imap_last_error() ?: null;
   }
-  
+
   public function getMailer(): Mail
   {
     if (!$this->mailer) {
@@ -288,6 +288,8 @@ class Mailbox extends Basic
 
   public function getLastUid(): ?int
   {
+    if (!$this->stream)
+      return null;
     $msg_nums = imap_search($this->stream, 'ALL');
 
     if ($msg_nums) {
@@ -300,6 +302,8 @@ class Mailbox extends Basic
 
   public function getNextUid(int $uid): ?int
   {
+    if (!$this->stream)
+      return null;
     $emails = imap_search($this->stream, 'ALL');
 
     if ($emails) {
@@ -351,7 +355,7 @@ class Mailbox extends Basic
   public function update(string $dir = null)
   {
     if (($dir = $this->selectFolder($dir))
-        && ($imap = imap_check($this->stream))
+      && ($imap = imap_check($this->stream))
     ) {
       if ($imap->Nmsgs > 0) {
         $this->folders[$dir]['last_uid']   = $this->getMsgUid($imap->Nmsgs);
@@ -647,20 +651,25 @@ class Mailbox extends Basic
     $folder_num = $current['num_msg'];
 
     if (isset($this->folders[$folder['uid']]) && ($end >= $start)
-        && $this->selectFolder($folder['uid'])
+      && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
       while ($start <= $end) {
         $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
+        // to fetch the message priority
+        $msg_header = $this->getMsgHeader($start);
+        preg_match('/X-Priority: ([0-9])/', $msg_header, $matches);
+        $priority = $matches[1] ?? 3;
+
         $structure = $this->getMsgStructure($start);
         if (!$tmp || !$structure) {
-          X::log("wrong numher $start", 'poller_email_error');
           continue;
         }
 
         $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
         $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
         $tmp['uid'] = $this->getMsgUid($start);
+        $tmp['priority'] = $priority;
         unset(
           $tmp['Date'],
           $tmp['MailDate'],
@@ -708,7 +717,6 @@ class Mailbox extends Basic
             $tmp[$df] = $ads;
           }
         }
-        X::log($tmp, 'sync');
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
         $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] . $tmp['date_sent'] . $tmp['subject']) . '@bbn.so' ;
         if (!$tmp['message_id']) {
@@ -717,18 +725,14 @@ class Mailbox extends Basic
         $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
         $tmp['attachments'] = [];
         $tmp['is_html']     = false;
-        X::log(['real', $tmp], 'mail');
         if (empty($structure->parts)) {
           $tmp['is_html'] = $structure->subtype === 'HTML';
         }
         else {
-          X::log($structure, 'insertedEmails');
           foreach ($structure->parts as $part) {
-            X::log(['attachment', $part, $tmp], 'insertedEmails');
 
             if ($part->ifdisposition && (strtolower($part->disposition) === 'attachment') && $part->ifparameters) {
               $name_row = X::getRow($part->parameters, ['attribute' => 'name']);
-              X::log(['name_row', $name_row], 'insertedEmails');
               $tmp['attachments'][] = [
                 'name' => $name_row->value,
                 'size' => $part->bytes,
@@ -1090,7 +1094,6 @@ class Mailbox extends Basic
   public function getMsgStructure(int $msgnum)
   {
     if ($this->_is_connected()) {
-      X::log($msgnum, 'nummsg');
       return imap_fetchstructure($this->stream, $msgnum);
     }
 
@@ -1545,7 +1548,7 @@ class Mailbox extends Basic
       }
     }
   }
-  
+
 
 
 
