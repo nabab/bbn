@@ -45,7 +45,8 @@ class Email extends Basic
         'is_read' => 'is_read',
         'id_parent' => 'id_parent',
         'id_thread' => 'id_thread',
-        'external_uids' => 'external_uids'
+        'external_uids' => 'external_uids',
+        'excerpt' => 'excerpt'
       ],
       'users_emails_aliases' => [
         'id_account' => 'id_account',
@@ -185,7 +186,6 @@ class Email extends Basic
 
   public function setAccountStage(string $id_account, int $stage): bool
   {
-    X::log("Setting account $id_account stage to $stage", 'test_stage');
     $a = $this->pref->get($id_account);
     if ($a) {
       $a['stage'] = $stage;
@@ -613,7 +613,9 @@ class Email extends Basic
           if (empty($start)) {
             $start = $mb->getMsgNo($folder['db_uid_max']);
           }
-        } else {
+        }
+
+        if (empty($start)) {
           $start = 1;
         }
 
@@ -626,7 +628,6 @@ class Email extends Basic
 
         $end = $start;
         $num = $real_end - $start;
-        X::log(["Syncing emails from {$start} to {$real_end} ({$num})", $folder, $mb->getLastUid()], 'sync_interval');
         while ($end < $real_end) {
           $end = min($real_end, $start + 999);
           if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
@@ -661,8 +662,6 @@ class Email extends Basic
         }
       }
 
-
-      X::log(["Info", $info]);
       if ($info->Nmsgs > ($res + $folder['num_msg'])) {
         $cfg = $this->class_cfg['arch']['users_emails'];
         $table = $this->class_cfg['tables']['users_emails'];
@@ -730,6 +729,8 @@ class Email extends Basic
         'table' => $table,
         'fields' => $cfg
       ]);
+
+
 
       if ($grid->check()) {
         return $grid->getDatatable();
@@ -832,6 +833,12 @@ class Email extends Basic
 
   }
 
+  public function updateRead($id) {
+    $cfg = $this->class_cfg['arch']['users_emails'];
+    $table = $this->class_cfg['tables']['users_emails'];
+    $this->db->update($table, [$cfg['is_read'] => 1], [$cfg['id'] => $id]);
+  }
+
   public function syncThreads(int $limit)
   {
     $cfg = $this->class_cfg['arch']['users_emails'];
@@ -854,13 +861,12 @@ class Email extends Basic
         'field' => $cfg['date']
       ]
     ]);
-    
+
   }
 
 
   public function insertEmail(array $folder, array $email)
   {
-    X::log(["insertEmail", $folder, $email], 'insertedEmails');
     if (X::hasProps($email, ['from', 'uid'])) {
       $cfg = $this->class_cfg['arch']['users_emails'];
       $table = $this->class_cfg['tables']['users_emails'];
@@ -908,6 +914,40 @@ class Email extends Basic
           ];
         }
 
+        if ($email['priority']) {
+          // if Flagged dont contains none of the priority flag, add it
+          if (!str_contains($email['Flagged'], 'Highest')
+            && !str_contains($email['Flagged'], 'High')
+            && !str_contains($email['Flagged'], 'Normal')
+            && !str_contains($email['Flagged'], 'Low')
+            && !str_contains($email['Flagged'], 'Lowest')
+          ) {
+            switch ($email['priority']) {
+              case 1:
+                $email['Flagged'] .= ' Highest';
+                break;
+              case 2:
+                $email['Flagged'] .= ' High';
+                break;
+              case 3:
+                $email['Flagged'] .= ' Normal';
+                break;
+              case 4:
+                $email['Flagged'] .= ' Low';
+                break;
+              case 5:
+                $email['Flagged'] .= ' Lowest';
+                break;
+            }
+            // trim the space if is in first position
+            if (str_starts_with($email['Flagged'], ' ')) {
+              $email['Flagged'] = substr($email['Flagged'], 1);
+            }
+          }
+        }
+
+
+
         $ar = [
           $cfg['id_user'] => $this->user->getId(),
           $cfg['id_folder'] => $folder['id'],
@@ -923,15 +963,34 @@ class Email extends Basic
           $cfg['id_parent'] => $id_parent,
           $cfg['id_thread'] => $id_thread,
           $cfg['external_uids'] => $external ? json_encode($external) : null,
+          $cfg['excerpt'] => ""
         ];
         $id = false;
 
         if ($existing) {
           $id = $existing;
-          X::log(["existing", $id], 'insertedEmails');
         } else if ($test = $this->db->insert($table, $ar)) {
-          X::log(["add", $test], 'insertedEmails');
           $id = $this->db->lastId();
+          $mb = $this->getMailbox($folder['id_account']);
+          $mb->selectFolder($folder['uid']);
+
+          $number = $mb->getMsgNo($email['uid']);
+          if ($number) {
+            $msg = $mb->getMsg($number, $id, $folder['id_account']);
+            $text = $msg['plain'];
+            if (empty($text)) {
+              $text = $msg['html'];
+            }
+            X::log($text, 'text');
+          } else {
+            $text = "";
+          }
+
+          if (is_null($text)) {
+            $text = "";
+          }
+          // update excerpt column where id is same
+          $this->db->update($table, [$cfg['excerpt'] => $text], [$cfg['id'] => $id]);
           foreach (Mailbox::getDestFields() as $df) {
             if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {
               foreach ($email[$df] as $dest) {
@@ -945,8 +1004,6 @@ class Email extends Basic
 
       }
     }
-    X::log(["NO ID", $email], 'testtt');
-    //throw new \Exception(X::_("Invalid email"));
   }
 
 
