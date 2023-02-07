@@ -216,6 +216,10 @@ class Task extends bbn\Models\Cls\Db
     return self::getAppuiOptionId($code, 'roles');
   }
 
+  public function idPrivilege($code){
+    return self::getAppuiOptionId($code, 'privileges');
+  }
+
   public function getMine($parent = null, $order = 'priority', $dir = 'ASC', $limit = 50, $start = 0){
     return $this->getList($parent, 'opened|ongoing|holding', $this->id_user, $order, $dir, $limit, $start);
   }
@@ -1541,11 +1545,16 @@ class Task extends bbn\Models\Cls\Db
 
   public function approve(string $id, bool $approveChildren = true, bool $approveParent = true){
     if ($this->exists($id)
+      && ($perm = \bbn\User\Permissions::getInstance())
       && ($currentState = $this->getState($id))
       && ($unapproved = $this->idState('unapproved'))
       && ($currentState === $unapproved)
-      && ($deciders = $this->getDeciders($id, true))
-      && \in_array($this->id_user, $deciders)
+      && ((($deciders = $this->getDeciders($id, true))
+          && \in_array($this->id_user, $deciders))
+        || (($idFinancialManager = $this->idPrivilege('financial_manager'))
+          && ($idPermFM = $perm->optionToPermission($idFinancialManager))
+          && $perm->has($idPermFM))
+      )
     ){
       $price = $this->getPrice($id);
       if (empty($price)) {
