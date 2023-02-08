@@ -163,7 +163,14 @@ class View
               $json           = json_encode($translations);
               $tmp            = <<<JAVASCRIPT
 ((data) => {
-  bbn.fn.autoExtend("lng", $json)
+  if (!!bbn.env && bbn.env.isInit) {
+    bbn.fn.autoExtend("lng", $json);
+  }
+  else {
+    document.addEventListener('bbninit', () => {
+      bbn.fn.autoExtend("lng", $json);
+    }, {once: true});
+  }
 })();
 JAVASCRIPT;
               $this->_content = $tmp.$this->_content;
