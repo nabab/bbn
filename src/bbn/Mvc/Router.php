@@ -1028,6 +1028,7 @@ class Router
   private function _find_translation(string $plugin = null): ?string
   {
     if ($locale = $this->getLocale()) {
+      $locale = strtolower(substr($locale, 0, 2));
       $fpath = $plugin ? $this->pluginPath($plugin) : $this->_mvc->appPath();
       if (file_exists($fpath."locale/$locale/$locale.json")) {
         return $fpath."locale/$locale/$locale.json";
