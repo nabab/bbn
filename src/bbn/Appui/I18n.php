@@ -203,7 +203,7 @@ class I18n extends bbn\Models\Cls\Cache
           $res = $this->analyzeHtml($file);
           break;
         case 'php':
-          $res = $this->analyzePhp($file);
+          $res = \array_unique(\array_merge($this->analyzePhp($file), $this->analyzeHtml($file)));
           break;
         case 'js':
           $res = $this->analyzeJs($file);
