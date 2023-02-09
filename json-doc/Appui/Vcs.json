@@ -18,12 +18,12 @@
     ],
     "interfaces": [],
     "fileName": "\/Appui\/Vcs.php",
-    "startLine": 24,
-    "endLine": 259,
-    "numMethods": 34,
-    "numProperties": 0,
+    "startLine": 28,
+    "endLine": 1101,
+    "numMethods": 77,
+    "numProperties": 1,
     "numConstants": 1,
-    "numStaticProperties": 3,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -39,18 +39,29 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
+        "engines": {
+            "git": {
+                "gitlab": {
+                    "name": "GitLab",
+                    "class": "\\bbn\\Appui\\Vcs\\GitLab"
+                }
+            },
+            "svn": []
+        },
+        "taskTable": "bbn_tasks_vcs",
         "optional_is_init": false,
         "option_root_id": null,
         "option_appui_id": null,
         "cacheNamePrefix": null,
-        "git": null,
-        "svn": null,
+        "idServer": null,
+        "server": null,
         "_cache_prefix": null,
         "cache_engine": null,
         "options": null,
         "db": null,
         "opt": null,
-        "pwd": null
+        "pwd": null,
+        "idUser": null
     },
     "isIterable": false,
     "extensionName": false,
@@ -70,9 +81,61 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($db)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->git = new Git($this->db);\n    $this->svn = new Svn($this->db);\n    $this->cacheInit();\n    self::optionalInit();\n\n    $this->cacheNamePrefix = '';\n  }",
-            "startLine": 46,
-            "endLine": 57,
+            "code": "function(bbn\\Db $db, string $idServer = '', string $idUser = '')\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->cacheInit();\n    self::optionalInit();\n    if (!empty($idServer)) {\n      $this->changeServer($idServer);\n      if (!empty($idUser)) {\n        $this->$idUser = $idUser;\n      }\n    }\n\n    $this->cacheNamePrefix = '';\n  }",
+            "startLine": 63,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "returns": [],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\Db",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idServer",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "changeServer": {
+            "name": "changeServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    if (($server = $this->getServer($id))\n      && !empty(self::$engines[$server->type][$server->engine])\n    ) {\n      $this->idServer = $id;\n      $this->server = new self::$engines[$server->type][$server->engine]['class']($this->db, $id);\n    }\n    else {\n      $this->idServer = null;\n      $this->server = null;\n    }\n    return $this;\n  }",
+            "startLine": 81,
+            "endLine": 94,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -81,13 +144,15 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [],
+            "returns": [
+                "bbn\\Appui\\Vcs"
+            ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "db",
+                    "name": "id",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -105,8 +170,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $id, string $token)\n  {\n    if (!$this->pwd->store($token, $id)) {\n      throw new \\Exception(X::_('Error while storing the admin access token: ID: %s , Token: %s', $id, $token));\n    }\n    return true;\n  }",
-            "startLine": 60,
-            "endLine": 66,
+            "startLine": 97,
+            "endLine": 103,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -149,9 +214,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, string $token)\n  {\n    if (!($user = \\bbn\\User::getInstance())) {\n      throw new \\Exception(X::_('No User class instance found'));\n    }\n    if (!($pref = \\bbn\\User\\Preferences::getInstance())) {\n      throw new \\Exception(X::_('No User\\Preferences class instance found'));\n    }\n    if ($exPref = $pref->getByOption($id)) {\n      $this->pwd->userDelete($exPref['id'], $user);\n      $pref->delete($exPref['id']);\n    }\n    if (!($idPref = $pref->add($id, []))) {\n      throw new \\Exception(X::_('Error while adding the user preference: idUser %s - idOption %s', $user->getId(), $id));\n    }\n    if (!$this->pwd->userStore($token, $idPref, $user)) {\n      throw new \\Exception(X::_('Error while storing the user access token: ID: %s , Token: %s', $id, $token));\n    }\n    if (!($serverCls = $this->getServerInstance($id))) {\n      throw new \\Exception(X::_('Unable to connect with the following access token: ID: %s , Token: %s', $id, $token));\n    }\n    if (!($userInfo = $serverCls->getCurrentUser($id))) {\n      throw new \\Exception(X::_('Unable to find user information: ID: %s , Token: %s', $id, $token));\n    }\n    $pref->set($idPref, ['user' => $userInfo]);\n    return true;\n  }",
-            "startLine": 69,
-            "endLine": 95,
+            "code": "function(string $id, string $token)\n  {\n    $this->changeServer($id);\n    if (!($user = User::getInstance())) {\n      throw new \\Exception(X::_('No User class instance found'));\n    }\n    if (!($pref = Preferences::getInstance())) {\n      throw new \\Exception(X::_('No User\\Preferences class instance found'));\n    }\n    if ($exPref = $pref->getByOption($id)) {\n      $this->pwd->userDelete($exPref['id'], $user);\n      $pref->delete($exPref['id']);\n    }\n    if (!($idPref = $pref->add($id, []))) {\n      throw new \\Exception(X::_('Error while adding the user preference: idUser %s - idOption %s', $user->getId(), $id));\n    }\n    if (!$this->pwd->userStore($token, $idPref, $user)) {\n      throw new \\Exception(X::_('Error while storing the user access token: ID: %s , Token: %s', $id, $token));\n    }\n    if (empty($this->server)) {\n      throw new \\Exception(X::_('Unable to connect with the following access token: ID: %s , Token: %s', $id, $token));\n    }\n    if (!($userInfo = $this->server->getCurrentUser())) {\n      throw new \\Exception(X::_('Unable to find user information: ID: %s , Token: %s', $id, $token));\n    }\n    $pref->set($idPref, ['user' => $userInfo]);\n    return true;\n  }",
+            "startLine": 106,
+            "endLine": 133,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -194,17 +259,17 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $name, string $host, string $type, string $adminAccessToken, string $userAccessToken = '')\n  {\n    $this->checkServerHost($host);\n    if (!($idParent = $this->getOptionId('list'))) {\n      throw new \\Exception(X::_('\"list\" option not found'));\n    }\n    $optFields = $this->opt->getFields();\n    $o = [\n      $optFields['id_parent'] => $idParent,\n      $optFields['text'] => $name,\n      $optFields['code'] => $host,\n      'type' => $type\n    ];\n    if (!($idOpt = $this->opt->add($o))) {\n      throw new \\Exception(X::_('Error while inserting the option: %s', \\json_encode($o)));\n    }\n    $this->setAdminAccessToken($idOpt, $adminAccessToken);\n    if (!empty($userAccessToken)) {\n      $this->setUserAccessToken($idOpt, $userAccessToken);\n    }\n    return $idOpt;\n  }",
-            "startLine": 98,
-            "endLine": 119,
+            "code": "function(string $name, string $host, string $type, string $engine, string $adminAccessToken, string $userAccessToken = '')\n  {\n    string $host,\n    string $type,\n    string $engine,\n    string $adminAccessToken,\n    string $userAccessToken = ''\n  ): string\n  {\n    if (!($idParent = $this->getOptionId('list'))) {\n      throw new \\Exception(X::_('\"list\" option not found'));\n    }\n    $reg = '\/(http[s]?:\\\/\\\/)?(?\\'code\\'[[:alpha:]\\.]+(?!\\\/$)?)\/m';\n    preg_match_all($reg, $host, $matches);\n    if (!empty($matches['code'])) {\n      $host = $matches['code'][0];\n    }\n    $this->checkServerHost($host);\n    $optFields = $this->opt->getFields();\n    $o = [\n      $optFields['id_parent'] => $idParent,\n      $optFields['text'] => $name,\n      $optFields['code'] => $host,\n      'type' => $type,\n      'engine' => $engine\n    ];\n    if (!($idOpt = $this->opt->add($o))) {\n      throw new \\Exception(X::_('Error while inserting the option: %s', \\json_encode($o)));\n    }\n    $this->setAdminAccessToken($idOpt, $adminAccessToken);\n    if (!empty($userAccessToken)) {\n      $this->setUserAccessToken($idOpt, $userAccessToken);\n    }\n    return $idOpt;\n  }",
+            "startLine": 136,
+            "endLine": 170,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 5,
-            "numberOfRequiredParameters": 4,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 5,
             "returns": [
                 "string"
             ],
@@ -238,7 +303,7 @@
                     "default_name": ""
                 },
                 {
-                    "name": "adminAccessToken",
+                    "name": "engine",
                     "position": 3,
                     "type": "string",
                     "required": true,
@@ -247,8 +312,17 @@
                     "default_name": ""
                 },
                 {
-                    "name": "userAccessToken",
+                    "name": "adminAccessToken",
                     "position": 4,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "userAccessToken",
+                    "position": 5,
                     "type": "string",
                     "required": false,
                     "has_default": true,
@@ -266,18 +340,20 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, string $name, string $host, string $type)\n  {\n    $optFields = $this->opt->getFields();\n    $o = [\n      $optFields['text'] => $name,\n      $optFields['code'] => $host,\n      'type' => $type\n    ];\n    if (!$this->opt->set($id, $o)) {\n      throw new \\Exception(X::_('Error while updating the option with ID %s: %s', $id, \\json_encode($o)));\n    }\n    return false;\n  }",
-            "startLine": 122,
-            "endLine": 134,
+            "code": "function(string $id, string $name, string $host, string $type, string $engine)\n  {\n    preg_match_all($reg, $host, $matches);\n    if (!empty($matches['code'])) {\n      $host = $matches['code'][0];\n    }\n    $this->checkServerHost($host);\n    $optFields = $this->opt->getFields();\n    $o = [\n      $optFields['text'] => $name,\n      $optFields['code'] => $host,\n      'type' => $type,\n      'engine' => $engine\n    ];\n    if (!$this->opt->set($id, $o)) {\n      throw new \\Exception(X::_('Error while updating the option with ID %s: %s', $id, \\json_encode($o)));\n    }\n    return true;\n  }",
+            "startLine": 173,
+            "endLine": 191,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 4,
-            "returns": [],
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 5,
+            "returns": [
+                "bool"
+            ],
             "parent": false,
             "arguments": [
                 {
@@ -315,6 +391,15 @@
                     "has_default": false,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "engine",
+                    "position": 4,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
                 }
             ]
         },
@@ -328,8 +413,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    $t = $this;\n    return \\array_map(function($o) use($t){\n      return $t->normalizeServer($o);\n    }, $this->opt->fullOptions($this->getOptionId('list')));\n  }",
-            "startLine": 137,
-            "endLine": 143,
+            "startLine": 194,
+            "endLine": 200,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -353,34 +438,25 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, int $page = 1, int $perPage = 25)\n  {\n    $list = [];\n    if ($serverCls = $this->getServerInstance($id)) {\n      $list = $serverCls->getProjectsList($id, $page, $perPage);\n    }\n    return $list;\n  }",
-            "startLine": 146,
-            "endLine": 153,
+            "code": "function(int $page = 1, int $perPage = 25)\n  {\n    return $this->server->getProjectsList($page, $perPage);\n  }",
+            "startLine": 203,
+            "endLine": 206,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "page",
-                    "position": 1,
+                    "position": 0,
                     "type": "int",
                     "required": false,
                     "has_default": true,
@@ -389,7 +465,7 @@
                 },
                 {
                     "name": "perPage",
-                    "position": 2,
+                    "position": 1,
                     "type": "int",
                     "required": false,
                     "has_default": true,
@@ -407,35 +483,26 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProject($idServer, $idProject);\n    }\n    return null;\n  }",
-            "startLine": 156,
-            "endLine": 162,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProject($idProject);\n  }",
+            "startLine": 209,
+            "endLine": 212,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 null,
-                "object"
+                "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "idProject",
-                    "position": 1,
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -453,34 +520,25 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProjectBranches($idServer, $idProject);\n    }\n    return [];\n  }",
-            "startLine": 165,
-            "endLine": 171,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectBranches($idProject);\n  }",
+            "startLine": 215,
+            "endLine": 218,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "idProject",
-                    "position": 1,
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -498,34 +556,25 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProjectTags($idServer, $idProject);\n    }\n    return [];\n  }",
-            "startLine": 174,
-            "endLine": 180,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectTags($idProject);\n  }",
+            "startLine": 221,
+            "endLine": 224,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "idProject",
-                    "position": 1,
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -543,34 +592,25 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProjectUsers($idServer, $idProject);\n    }\n    return [];\n  }",
-            "startLine": 183,
-            "endLine": 189,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectUsers($idProject);\n  }",
+            "startLine": 227,
+            "endLine": 230,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "idProject",
-                    "position": 1,
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -578,6 +618,32 @@
                     "default_name": ""
                 }
             ]
+        },
+        "getProjectUsersRoles": {
+            "name": "getProjectUsersRoles",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return $this->server->getProjectUsersRoles();\n  }",
+            "startLine": 233,
+            "endLine": 236,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
         },
         "getProjectUsersEvents": {
             "name": "getProjectUsersEvents",
@@ -588,34 +654,25 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProjectUsersEvents($idServer, $idProject);\n    }\n    return [];\n  }",
-            "startLine": 192,
-            "endLine": 198,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectUsersEvents($idProject);\n  }",
+            "startLine": 239,
+            "endLine": 242,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "idProject",
-                    "position": 1,
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -633,34 +690,25 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProjectEvents($idServer, $idProject);\n    }\n    return [];\n  }",
-            "startLine": 201,
-            "endLine": 207,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectEvents($idProject);\n  }",
+            "startLine": 245,
+            "endLine": 248,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
             "returns": [
                 "array"
             ],
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
                     "name": "idProject",
-                    "position": 1,
+                    "position": 0,
                     "type": "string",
                     "required": true,
                     "has_default": false,
@@ -678,54 +726,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idServer, string $idProject)\n  {\n    if ($serverCls = $this->getServerInstance($idServer)) {\n      return $serverCls->getProjectCommitsEvents($idServer, $idProject);\n    }\n    return [];\n  }",
-            "startLine": 210,
-            "endLine": 216,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "idServer",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "idProject",
-                    "position": 1,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "getAppuiUsers": {
-            "name": "getAppuiUsers",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Vcs",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $idServer)\n  {\n    if ($prefs = $this->db->rselectAll([\n      'table' => 'bbn_users_options',\n      'fields' => [\n        'id' => 'id_user',\n        'info' => 'JSON_EXTRACT(cfg, \"$.user\")'\n      ],\n      'where' => [\n        'conditions' => [[\n          'field' => 'id_option',\n          'value' => $idServer\n        ], [\n          'field' => 'JSON_EXTRACT(cfg, \"$.user\")',\n          'operator' => 'isnotnull'\n        ]]\n      ]\n    ])) {\n      return \\array_map(function($p){\n        $p['info'] = \\json_decode($p['info'], true);\n        return $p;\n      }, $prefs);\n    }\n    return [];\n  }",
-            "startLine": 219,
-            "endLine": 243,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectCommitsEvents($idProject);\n  }",
+            "startLine": 251,
+            "endLine": 254,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -740,7 +743,7 @@
             "parent": false,
             "arguments": [
                 {
-                    "name": "idServer",
+                    "name": "idProject",
                     "position": 0,
                     "type": "string",
                     "required": true,
@@ -749,6 +752,1968 @@
                     "default_name": ""
                 }
             ]
+        },
+        "getProjectLabels": {
+            "name": "getProjectLabels",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject)\n  {\n    return $this->server->getProjectLabels($idProject);\n  }",
+            "startLine": 257,
+            "endLine": 260,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUsers": {
+            "name": "getUsers",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($users = $this->server->getUsers()) {\n      if ($appuiUsers = $this->getAppuiUsers($this->idServer)) {\n        $users = \\array_map(function($u) use($appuiUsers){\n          $appui = X::getRow($appuiUsers, ['idVcs' => $u['id']]) ?: [];\n          $u['idAppui'] = $appui['id'] ?? null;\n          $u['originalInfo'] = $appui['info'] ?? null;\n          return $u;\n        }, $users);\n      }\n      return $users;\n    }\n    return [];\n  }",
+            "startLine": 263,
+            "endLine": 277,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "insertBranch": {
+            "name": "insertBranch",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, string $branch, string $fromBranch)\n  {\n    return $this->server->insertBranch($idProject, $branch, $fromBranch);\n  }",
+            "startLine": 280,
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "fromBranch",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "deleteBranch": {
+            "name": "deleteBranch",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, string $branch)\n  {\n    return $this->server->deleteBranch($idProject, $branch);\n  }",
+            "startLine": 286,
+            "endLine": 289,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "insertProjectUser": {
+            "name": "insertProjectUser",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idUser, string $idRole)\n  {\n    return $this->server->insertProjectUser($idProject, $idUser, $idRole);\n  }",
+            "startLine": 292,
+            "endLine": 295,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idRole",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeProjectUser": {
+            "name": "removeProjectUser",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idUser)\n  {\n    return $this->server->removeProjectUser($idProject, $idUser);\n  }",
+            "startLine": 298,
+            "endLine": 301,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createProjectIssue": {
+            "name": "createProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    return $this->server->createProjectIssue($idProject, $title, $description, $labels, $assigned, $private, $date);\n  }",
+            "startLine": 304,
+            "endLine": 315,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 7,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "description",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "labels",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "assigned",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "private",
+                    "position": 5,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 6,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "editProjectIssue": {
+            "name": "editProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false)\n  {\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    return $this->server->editProjectIssue($idProject, $idIssue, $title, $description, $labels, $assigned, $private);\n  }",
+            "startLine": 318,
+            "endLine": 329,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 7,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "title",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "description",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "labels",
+                    "position": 4,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "assigned",
+                    "position": 5,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "private",
+                    "position": 6,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectIssues": {
+            "name": "getProjectIssues",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject)\n  {\n    if ($issues = $this->server->getProjectIssues($idProject)) {\n      $t = $this;\n      $issues = \\array_map(function($i) use ($t, $idProject){\n        $i['idAppuiTask'] = $t->getAppuiTaskId($idProject, $i['id']);\n        return $i;\n      }, $issues);\n      return $issues;\n    }\n    return [];\n  }",
+            "startLine": 331,
+            "endLine": 342,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectIssue": {
+            "name": "getProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    if ($issue = $this->server->getProjectIssue($idProject, $idIssue)) {\n      $issue['idAppuiTask'] = $this->getAppuiTaskId($idProject, $issue['id']);\n      return $issue;\n    }\n    return null;\n  }",
+            "startLine": 345,
+            "endLine": 352,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "closeProjectIssue": {
+            "name": "closeProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    return $this->server->closeProjectIssue($idProject, $idIssue);\n  }",
+            "startLine": 355,
+            "endLine": 358,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "reopenProjectIssue": {
+            "name": "reopenProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    return $this->server->reopenProjectIssue($idProject, $idIssue);\n  }",
+            "startLine": 361,
+            "endLine": 364,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "assignProjectIssue": {
+            "name": "assignProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, int $idUser)\n  {\n    return $this->server->assignProjectIssue($idProject, $idIssue, $idUser);\n  }",
+            "startLine": 367,
+            "endLine": 370,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectIssueComment": {
+            "name": "getProjectIssueComment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    return $this->server->getProjectIssueComment($idProject, $idIssue, $idComment);\n  }",
+            "startLine": 373,
+            "endLine": 376,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idComment",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getProjectIssueComments": {
+            "name": "getProjectIssueComments",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    return $this->server->getProjectIssueComments($idProject, $idIssue);\n  }",
+            "startLine": 379,
+            "endLine": 382,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "insertProjectIssueComment": {
+            "name": "insertProjectIssueComment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = '')\n  {\n    return $this->server->insertProjectIssueComment($idProject, $idIssue, $content, $pvt, $date);\n  }",
+            "startLine": 385,
+            "endLine": 388,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "pvt",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 4,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "editProjectIssueComment": {
+            "name": "editProjectIssueComment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false)\n  {\n    return $this->server->editProjectIssueComment($idProject, $idIssue, $idComment, $content, $pvt);\n  }",
+            "startLine": 391,
+            "endLine": 394,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idComment",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "pvt",
+                    "position": 4,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "deleteProjectIssueComment": {
+            "name": "deleteProjectIssueComment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    return $this->server->deleteProjectIssueComment($idProject, $idIssue, $idComment);\n  }",
+            "startLine": 397,
+            "endLine": 400,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idComment",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "createProjectLabel": {
+            "name": "createProjectLabel",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, string $name, string $color)\n  {\n    return $this->server->createProjectLabel($idProject, $name, $color);\n  }",
+            "startLine": 403,
+            "endLine": 406,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "color",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addLabelToProjectIssue": {
+            "name": "addLabelToProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    return $this->server->addLabelToProjectIssue($idProject, $idIssue, $label);\n  }",
+            "startLine": 409,
+            "endLine": 412,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "label",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeLabelFromProjectIssue": {
+            "name": "removeLabelFromProjectIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    return $this->server->removeLabelFromProjectIssue($idProject, $idIssue, $label);\n  }",
+            "startLine": 415,
+            "endLine": 418,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "label",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "analyzeWebhook": {
+            "name": "analyzeWebhook",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    $d = $this->server->analyzeWebhook($data);\n    if ($d = $this->server->analyzeWebhook($data)) {\n      if (!empty($d['type'])) {\n        switch ($d['type']) {\n          case 'comment':\n            if (!empty($d['idProject'])\n              && !empty($d['idIssue'])\n              && $this->getAppuiTaskByIssue($d['idProject'], $d['idIssue'])\n            ) {\n              return $this->addToTasksQueue($d['idProject'], 'import', $d);\n            }\n            break;\n        }\n      }\n    }\n  }",
+            "startLine": 421,
+            "endLine": 438,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addToTasksQueue": {
+            "name": "addToTasksQueue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $idProject, string $type, $task, string $idServer = '')\n  {\n    if (!($idServer = empty($idServer) ? $this->idServer : $idServer)) {\n      return false;\n    }\n    return (bool)self::getDb()->insert('queue', [\n      'id_server' => $idServer,\n      'id_project' => $idProject,\n      'type' => $type,\n      'task' => !Str::isJson($task) ? \\json_encode($task) : $task\n    ]);\n  }",
+            "startLine": 441,
+            "endLine": 452,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "task",
+                    "position": 2,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idServer",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "processTasksQueue": {
+            "name": "processTasksQueue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    $db = self::getDb();\n    $res = [\n      'todo' => 0,\n      'processed' => 0,\n      'failed' => 0\n    ];\n    if ($queue = $db->selectAll([\n      'table' => 'queue',\n      'fields' => [],\n      'where' => [\n        'conditions' => [[\n          'field' => 'started',\n          'operator' => 'isnull'\n        ], [\n          'field' => 'failed',\n          'value' => 0\n        ], [\n          'field' => 'active',\n          'value' => 1\n        ]]\n      ],\n      'order' => [[\n        'field' => 'created',\n        'dir' => 'asc'\n      ]]\n    ])) {\n      $res['todo'] = count($queue);\n      foreach ($queue as $q) {\n        $success = false;\n        $db->update('queue', ['started' => date('Y-m-d H:i:s')], ['id' => $q->id]);\n        try {\n          if (!empty($q->id_server)\n            && ($t = \\json_decode($q->task))\n          ) {\n            $this->changeServer($q->id_server);\n            if (!empty($t->type)) {\n              switch ($t->type) {\n                case 'comment':\n                  $success = $this->processComment($q->id_project, $q->type, $t);\n                  break;\n              }\n            }\n          }\n        }\n        catch(\\Exception $e){\n          $success = false;\n          \\bbn\\X::adump($e->getMessage());\n        }\n        $db->update('queue', [\n          'ended' => date('Y-m-d H:i:s'),\n          'failed' => empty($success) ? 1 : 0\n        ], [\n          'id' => $q->id\n        ]);\n        $res['processed']++;\n        if (empty($success)) {\n          $res['failed']++;\n        }\n      }\n    }\n    return $res;\n  }",
+            "startLine": 455,
+            "endLine": 518,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "importIssueToTask": {
+            "name": "importIssueToTask",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    if (!($idTask = $this->getAppuiTaskId($idProject, $idIssue))) {\n      if ($issue = $this->getProjectIssue($idProject, $idIssue)) {\n        $task = new Task($this->db);\n        $idCatSupportTask = $this->opt->fromCode('support', 'cats', 'task', 'appui');\n        \/\/ Use the external user's ID\n        $idUser = BBN_EXTERNAL_USER_ID;\n        \/\/ Check if the vcs user is an appui user\n        if ($appuiUser = $this->getAppuiUser($issue['author']['id'])){\n          $idUser = $appuiUser['id'];\n        }\n        if (!empty($idUser)) {\n          \/\/ Set the task's user\n          $task->setUser($idUser);\n          \/\/ Set the task's date\n          $task->setDate(date('Y-m-d H:i:s', strtotime($issue['created'])));\n          \/\/ Create the task\n          if (($idTask = $task->insert([\n              'title' => $issue['title'],\n              'type' => $idCatSupportTask,\n              'state' => $this->opt->fromCode($issue['state'], 'states', 'task', 'appui'),\n              'cfg' => \\json_encode(['widgets' => ['notes' => 1]])\n            ]))\n            && ($idTaskLink = $this->addAppuiTaskLink($idTask, $idProject, $idIssue))\n          ) {\n            \/\/ Comments\n            if (!empty($issue['notes'])\n              && ($issueNotes = $this->getProjectIssueComments($idProject, $idIssue))\n            ) {\n              foreach ($issueNotes as $note) {\n                \/\/ Check if the note already exists and if it's a real note\n                if (empty($note['auto']) &&\n                  !$this->getAppuiTaskNote($idProject, $idIssue, $note['id'])\n                ) {\n                  \/\/ Use the external user's ID\n                  $idUser = BBN_EXTERNAL_USER_ID;\n                  \/\/ Check if the git user is an appui user\n                  if ($appuiUser = $this->getAppuiUser($note['author']['id'])) {\n                    $idUser = $appuiUser['id'];\n                  }\n                  if (!empty($idUser)\n                    && ($idNote = $this->addAppuiTaskNote($idProject, $idTask, $idUser, $note['content'], $note['updated']))\n                  ) {\n                    $this->addAppuiTaskNoteLink($idTaskLink, $idNote, $idProject, $note['id']);\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n    return $idTask;\n  }",
+            "startLine": 521,
+            "endLine": 575,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addAppuiTaskLink": {
+            "name": "addAppuiTaskLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idTask, int $idProject, int $idIssue)\n  {\n    if (!empty($this->idServer)\n      && $this->db->tableExists(self::$taskTable)\n      && $this->db->insert(self::$taskTable, [\n        'id_task' => $idTask,\n        'id_server' => $this->idServer,\n        'id_project' => $idProject,\n        'id_issue' => $idIssue,\n      ])\n    ) {\n      return $this->db->lastId();\n    }\n    return null;\n  }",
+            "startLine": 578,
+            "endLine": 592,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idTask",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idIssue",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addAppuiTaskNoteLink": {
+            "name": "addAppuiTaskNoteLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idParent, string $idNote, int $idProject, int $idComment)\n  {\n    if (!empty($this->idServer)\n      && $this->db->tableExists(self::$taskTable)\n      && $this->db->insert(self::$taskTable, [\n        'id_parent' => $idParent,\n        'id_note' => $idNote,\n        'id_server' => $this->idServer,\n        'id_project' => $idProject,\n        'id_comment' => $idComment,\n      ])\n    ) {\n      return $this->db->lastId();\n    }\n    return null;\n  }",
+            "startLine": 595,
+            "endLine": 610,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idParent",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idNote",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idProject",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idComment",
+                    "position": 3,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeAppuiTaskNoteLink": {
+            "name": "removeAppuiTaskNoteLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idParent, string $idNote)\n  {\n    return $this->db->tableExists(self::$taskTable)\n      && (bool)$this->db->delete(self::$taskTable, [\n        'id_parent' => $idParent,\n        'id_note' => $idNote\n      ]);\n  }",
+            "startLine": 613,
+            "endLine": 620,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idParent",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idNote",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "addAppuiTaskNote": {
+            "name": "addAppuiTaskNote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $idProject, string $idTask, string $idUser, string $content, string $date)\n  {\n    if ($this->getAppuiTask($idProject, $idTask)) {\n      $notes = new Note($this->db);\n      $notesCfg = $notes->getClassCfg();\n      $notesFields = $notesCfg['arch']['notes'];\n      $notesVersionsFields = $notesCfg['arch']['versions'];\n      $task = new Task($this->db);\n      \/\/ Set the task's user\n      $task->setUser($idUser);\n      \/\/ Set the task's date\n      $task->setDate(date('Y-m-d H:i:s', strtotime($date)));\n      \/\/ Add the note to the task\n      if ($idNote = $task->comment($idTask, [\n        'title' => '',\n        'text' => $content\n      ])) {\n        \/\/ Set the correct user ID\n        $this->db->update($notesCfg['table'], [\n          $notesFields['creator'] => $idUser\n        ], [\n          $notesFields['id'] => $idNote\n        ]);\n        $this->db->update($notesCfg['tables']['versions'], [\n          $notesVersionsFields['id_user'] => $idUser\n        ], [\n          $notesVersionsFields['id_note'] => $idNote,\n          $notesVersionsFields['latest'] => 1\n        ]);\n        return $idNote;\n      }\n    }\n    return null;\n  }",
+            "startLine": 623,
+            "endLine": 656,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 5,
+            "returns": [
+                null,
+                "string"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idTask",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 4,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "editAppuiTaskNote": {
+            "name": "editAppuiTaskNote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $idProject, string $idTask, int $idComment, string $idUser, string $content, string $date = '')\n  {\n    if (($task = $this->getAppuiTask($idProject, $idTask))\n      && ($note = $this->getAppuiTaskNote($idProject, $task['id_issue'], $idComment))\n      && ($idNote = $note['id_note'])\n    ) {\n      $notes = new Note($this->db);\n      $notesCfg = $notes->getClassCfg();\n      $notesVersionsFields = $notesCfg['arch']['versions'];\n      if (($n = $notes->get($idNote))\n        && $notes->update($idNote, '', $content, $n['private'], $n['locked'])\n      ){\n        \/\/ Set the correct user ID and date\n        $this->db->update($notesCfg['tables']['versions'], [\n          $notesVersionsFields['id_user'] => $idUser,\n          $notesVersionsFields['creation'] => $date\n        ], [\n          $notesVersionsFields['id_note'] => $idNote,\n          $notesVersionsFields['latest'] => 1\n        ]);\n        return true;\n      }\n    }\n    return false;\n  }",
+            "startLine": 659,
+            "endLine": 683,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 5,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idTask",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idComment",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "content",
+                    "position": 4,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "date",
+                    "position": 5,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "removeAppuiTaskNote": {
+            "name": "removeAppuiTaskNote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $idProject, string $idTask, int $idComment)\n  {\n    if (($task = $this->getAppuiTask($idProject, $idTask))\n      && ($note = $this->getAppuiTaskNote($idProject, $task['id_issue'], $idComment))\n    ) {\n      return (bool)$this->db->delete(self::$taskTable, ['id' => $note['id']]);\n    }\n    return false;\n  }",
+            "startLine": 686,
+            "endLine": 694,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idTask",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idComment",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAppuiTaskNoteByNote": {
+            "name": "getAppuiTaskNoteByNote",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idNote)\n  {\n    if ($this->db->tableExists(self::$taskTable)) {\n      return $this->db->rselect(self::$taskTable, [], ['id_note' => $idNote]);\n    }\n    return null;\n  }",
+            "startLine": 697,
+            "endLine": 703,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idNote",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAppuiTaskByTask": {
+            "name": "getAppuiTaskByTask",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idTask)\n  {\n    if ($this->db->tableExists(self::$taskTable)) {\n      return $this->db->rselect(self::$taskTable, [], ['id_task' => $idTask]);\n    }\n    return null;\n  }",
+            "startLine": 706,
+            "endLine": 712,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idTask",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAppuiTaskById": {
+            "name": "getAppuiTaskById",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $id)\n  {\n    if ($this->db->tableExists(self::$taskTable)) {\n      return $this->db->rselect(self::$taskTable, [], ['id' => $id]);\n    }\n    return null;\n  }",
+            "startLine": 715,
+            "endLine": 721,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAppuiUser": {
+            "name": "getAppuiUser",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(int $idVcs, string $idServer = '')\n  {\n    $idServer = empty($idServer) ? $this->idServer : $idServer;\n    if (!empty($idServer)\n      && $pref = $this->db->rselect([\n        'table' => 'bbn_users_options',\n        'fields' => [\n          'id' => 'id_user',\n          'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, \"$.user.id\"))',\n          'info' => 'JSON_EXTRACT(cfg, \"$.user\")'\n        ],\n        'where' => [\n          'conditions' => [[\n            'field' => 'id_option',\n            'value' => $idServer\n          ], [\n            'field' => 'JSON_EXTRACT(cfg, \"$.user\")',\n            'operator' => 'isnotnull'\n          ], [\n            'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, \"$.user.id\"))',\n            'value' => $idVcs\n          ]]\n        ]\n      ])\n    ) {\n      $pref['info'] = \\json_decode($pref['info'], true);\n      return $pref;\n    }\n    return null;\n  }",
+            "startLine": 724,
+            "endLine": 753,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                null,
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idVcs",
+                    "position": 0,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idServer",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getAppuiUsers": {
+            "name": "getAppuiUsers",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idServer = '')\n  {\n    $idServer = empty($idServer) ? $this->idServer : $idServer;\n    if (!empty($idServer)\n      && $prefs = $this->db->rselectAll([\n        'table' => 'bbn_users_options',\n        'fields' => [\n          'id' => 'id_user',\n          'idVcs' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, \"$.user.id\"))',\n          'info' => 'JSON_EXTRACT(cfg, \"$.user\")'\n        ],\n        'where' => [\n          'conditions' => [[\n            'field' => 'id_option',\n            'value' => $idServer\n          ], [\n            'field' => 'JSON_EXTRACT(cfg, \"$.user\")',\n            'operator' => 'isnotnull'\n          ]]\n        ]\n      ])\n    ) {\n      return \\array_map(function($p){\n        $p['info'] = \\json_decode($p['info'], true);\n        return $p;\n      }, $prefs);\n    }\n    return [];\n  }",
+            "startLine": 756,
+            "endLine": 784,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idServer",
+                    "position": 0,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUserByAppuiUser": {
+            "name": "getUserByAppuiUser",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idAppuiUser, string $idServer = '')\n  {\n    $idServer = empty($idServer) ? $this->idServer : $idServer;\n    if (!empty($idServer)) {\n      return $this->db->selectOne([\n        'table' => 'bbn_users_options',\n        'fields' => ['JSON_UNQUOTE(JSON_EXTRACT(cfg, \"$.user.id\"))'],\n        'where' => [\n          'conditions' => [[\n            'field' => 'id_option',\n            'value' => $idServer\n          ], [\n            'field' => 'id_user',\n            'value' => $idAppuiUser\n          ], [\n            'field' => 'JSON_EXTRACT(cfg, \"$.user\")',\n            'operator' => 'isnotnull'\n          ]]\n        ]\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 787,
+            "endLine": 809,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "returns": [],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idAppuiUser",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idServer",
+                    "position": 1,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getMainDataPath": {
+            "name": "getMainDataPath",
+            "summary": "Gets the data path of the appui-vcs plugin",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return bbn\\Mvc::getDataPath('appui-vcs');\n  }",
+            "startLine": 816,
+            "endLine": 819,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "string"
+            ],
+            "parent": false,
+            "arguments": []
+        },
+        "getDb": {
+            "name": "getDb",
+            "summary": "Returns an instance of bbn\\Db of the tasks queue database",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    if ($dbPath = self::makeDb()) {\n      return new Db([\n        'engine' => 'sqlite',\n        'db' => $dbPath\n      ]);\n    }\n    return null;\n  }",
+            "startLine": 825,
+            "endLine": 834,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                null,
+                "bbn\\Db"
+            ],
+            "parent": false,
+            "arguments": []
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
@@ -850,16 +2815,16 @@
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
-            "summary": "",
+            "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Appui\\Vcs",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())), function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 187,
-            "endLine": 196,
+            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "startLine": 193,
+            "endLine": 203,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -868,7 +2833,9 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [],
+            "returns": [
+                "array"
+            ],
             "parent": false,
             "arguments": []
         },
@@ -882,8 +2849,32 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 199,
-            "endLine": 202,
+            "startLine": 206,
+            "endLine": 209,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [],
+            "parent": false,
+            "arguments": []
+        },
+        "getOptionsTreeRef": {
+            "name": "getOptionsTreeRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "startLine": 212,
+            "endLine": 215,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -906,8 +2897,32 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 205,
-            "endLine": 208,
+            "startLine": 218,
+            "endLine": 221,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [],
+            "parent": false,
+            "arguments": []
+        },
+        "getOptionsRef": {
+            "name": "getOptionsRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
+            "startLine": 224,
+            "endLine": 227,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -930,8 +2945,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 211,
-            "endLine": 214,
+            "startLine": 230,
+            "endLine": 233,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -954,8 +2969,32 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 217,
-            "endLine": 220,
+            "startLine": 236,
+            "endLine": 239,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [],
+            "parent": false,
+            "arguments": []
+        },
+        "getOptionsTextValueRef": {
+            "name": "getOptionsTextValueRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "startLine": 242,
+            "endLine": 245,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -978,8 +3017,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 229,
-            "endLine": 232,
+            "startLine": 254,
+            "endLine": 257,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1005,8 +3044,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 235,
-            "endLine": 247,
+            "startLine": 260,
+            "endLine": 272,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1031,8 +3070,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 250,
-            "endLine": 253,
+            "startLine": 275,
+            "endLine": 278,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1057,8 +3096,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 256,
-            "endLine": 259,
+            "startLine": 281,
+            "endLine": 284,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1084,8 +3123,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 262,
-            "endLine": 265,
+            "startLine": 287,
+            "endLine": 290,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1111,8 +3150,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return ($id = self::getAppuiOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 268,
-            "endLine": 271,
+            "startLine": 293,
+            "endLine": 296,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1134,9 +3173,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    return !!$this->getAdminAccessToken($id);\n  }",
-            "startLine": 21,
-            "endLine": 24,
+            "code": "function(string $id = '')\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "startLine": 24,
+            "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1144,7 +3183,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "bool"
             ],
@@ -1154,8 +3193,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -1170,9 +3209,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    return $this->pwd->get($id);\n  }",
-            "startLine": 27,
-            "endLine": 30,
+            "code": "function(string $id = '')\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "startLine": 30,
+            "endLine": 33,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1180,7 +3219,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 null,
                 "string"
@@ -1191,8 +3230,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -1207,9 +3246,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if (!($user = \\bbn\\User::getInstance())) {\n      throw new \\Exception(X::_('No User class instance found'));\n    }\n    if (!($pref = \\bbn\\User\\Preferences::getInstance())) {\n      throw new \\Exception(X::_('No User\\Preferences class instance found'));\n    }\n    if (!($userPref = $pref->getByOption($id))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id));\n    }\n    return $token;\n  }",
-            "startLine": 33,
-            "endLine": 51,
+            "code": "function(string $id = '')\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "startLine": 36,
+            "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1217,7 +3256,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "string"
             ],
@@ -1227,8 +3266,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -1243,9 +3282,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if (!($server = $this->opt->option($id))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id));\n    }\n    return $this->normalizeServer($server);\n  }",
-            "startLine": 54,
-            "endLine": 60,
+            "code": "function(string $id = '')\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "startLine": 70,
+            "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1253,7 +3292,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "object"
             ],
@@ -1263,16 +3302,40 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
             ]
         }
     },
-    "properties": null,
+    "properties": {
+        "engines": {
+            "static": true,
+            "visibility": "public",
+            "value": {
+                "git": {
+                    "gitlab": {
+                        "name": "GitLab",
+                        "class": "\\bbn\\Appui\\Vcs\\GitLab"
+                    }
+                },
+                "svn": []
+            }
+        }
+    },
     "staticProperties": {
+        "engines": {
+            "git": {
+                "gitlab": {
+                    "name": "GitLab",
+                    "class": "\\bbn\\Appui\\Vcs\\GitLab"
+                }
+            },
+            "svn": []
+        },
+        "taskTable": "bbn_tasks_vcs",
         "optional_is_init": false,
         "option_root_id": null,
         "option_appui_id": null

@@ -9,8 +9,8 @@
     "interfaces": [],
     "fileName": "\/Api\/GitLab\/Branch.php",
     "startLine": 4,
-    "endLine": 30,
-    "numMethods": 2,
+    "endLine": 58,
+    "numMethods": 4,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -90,6 +90,110 @@
             "numberOfRequiredParameters": 2,
             "returns": [
                 "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the brach"
+                }
+            ]
+        },
+        "insertBranch": {
+            "name": "insertBranch",
+            "summary": "Creates a new branch into the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Branch",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch, string $ref)\n  {\n    return $this->post($this->projectURL . $project . '\/repository\/' . $this->branchURL, [\n      'branch' => $branch,\n      'ref' => $ref\n    ]);\n  }",
+            "startLine": 37,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the new branch"
+                },
+                {
+                    "name": "ref",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The branch name to create branch from"
+                }
+            ]
+        },
+        "deleteBranch": {
+            "name": "deleteBranch",
+            "summary": "Deletes a specific branch of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Branch",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch)\n  {\n    return $this->delete($this->projectURL . $project . '\/repository\/' . $this->branchURL . $branch);\n  }",
+            "startLine": 52,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
             ],
             "parent": false,
             "arguments": [

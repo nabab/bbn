@@ -18,16 +18,17 @@
         "bbn\\Api\\GitLab\\Tag",
         "bbn\\Api\\GitLab\\Event",
         "bbn\\Api\\GitLab\\Issue",
-        "bbn\\Api\\GitLab\\Note"
+        "bbn\\Api\\GitLab\\Note",
+        "bbn\\Api\\GitLab\\Label"
     ],
     "interfaces": [],
     "fileName": "\/Api\/GitLab.php",
     "startLine": 16,
-    "endLine": 206,
-    "numMethods": 34,
-    "numProperties": 0,
+    "endLine": 268,
+    "numMethods": 50,
+    "numProperties": 1,
     "numConstants": 0,
-    "numStaticProperties": 0,
+    "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
     "traitNames": [
@@ -37,7 +38,8 @@
         "bbn\\Api\\GitLab\\Tag",
         "bbn\\Api\\GitLab\\Event",
         "bbn\\Api\\GitLab\\Issue",
-        "bbn\\Api\\GitLab\\Note"
+        "bbn\\Api\\GitLab\\Note",
+        "bbn\\Api\\GitLab\\Label"
     ],
     "traitAliases": [],
     "isTrait": false,
@@ -47,6 +49,14 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
+        "accessLevels": {
+            "5": "Minimal access",
+            "10": "Guest",
+            "20": "Reporter",
+            "30": "Developer",
+            "40": "Maintainer",
+            "50": "Owner"
+        },
         "token": null,
         "host": null,
         "lastError": "",
@@ -59,6 +69,7 @@
         "eventURL": "events\/",
         "issueURL": "issues\/",
         "noteURL": "notes\/",
+        "labelURL": "labels\/",
         "userID": null
     },
     "isIterable": false,
@@ -80,8 +91,8 @@
             "visibility": "public",
             "final": false,
             "code": "function(string $accessToken, string $host = '')\n  {\n    if (empty($accessToken)) {\n      throw new \\Error(_('The access token is mandatory'));\n    }\n\n    $this->token = $accessToken;\n    $host        = !empty(\\trim($host)) ? \\trim($host) : 'localhost';\n    $this->host  = $host . (\\str_ends_with($host, '\/') ? '' : '\/') . 'api\/v4\/';\n  }",
-            "startLine": 67,
-            "endLine": 76,
+            "startLine": 83,
+            "endLine": 92,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -123,8 +134,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->lastError;\n  }",
-            "startLine": 83,
-            "endLine": 86,
+            "startLine": 99,
+            "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -149,8 +160,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return !empty($this->lastError);\n  }",
-            "startLine": 93,
-            "endLine": 96,
+            "startLine": 109,
+            "endLine": 112,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -175,8 +186,8 @@
             "visibility": "public",
             "final": false,
             "code": "function()\n  {\n    return $this->lastResponseHeader;\n  }",
-            "startLine": 103,
-            "endLine": 106,
+            "startLine": 119,
+            "endLine": 122,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -200,7 +211,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->request($this->userURL);\n  }",
+            "code": "function()\n  {\n    return $this->request($this->userURL, ['per_page' => 5000]);\n  }",
             "startLine": 14,
             "endLine": 17,
             "isDeprecated": false,
@@ -279,6 +290,147 @@
             ],
             "parent": false,
             "arguments": []
+        },
+        "getProjectUsers": {
+            "name": "getProjectUsers",
+            "summary": "Gets the users list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/members\/all');\n  }",
+            "startLine": 51,
+            "endLine": 54,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "insertProjectUser": {
+            "name": "insertProjectUser",
+            "summary": "Inserts an user into the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $user, int $role)\n  {\n    return $this->post($this->projectURL . $project . '\/members', [\n      'user_id' => $user,\n      'access_level' => $role\n    ]);\n  }",
+            "startLine": 64,
+            "endLine": 70,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The user ID"
+                },
+                {
+                    "name": "role",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The user role ID"
+                }
+            ]
+        },
+        "removeProjectUser": {
+            "name": "removeProjectUser",
+            "summary": "Removes an user from the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $user)\n  {\n    return $this->delete($this->projectURL . $project . '\/members\/' . $user);\n  }",
+            "startLine": 79,
+            "endLine": 82,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The user ID"
+                }
+            ]
         },
         "getProjects": {
             "name": "getProjects",
@@ -387,7 +539,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, bool $includeStats = false)\n  {\n    $params = [];\n    if ($includeStats) {\n      $params['statistics'] = true;\n    }\n    return $this->request($this->projectURL . $project, $params);\n  }",
+            "code": "function($project, bool $includeStats = false)\n  {\n    $params = [];\n    if ($includeStats) {\n      $params['statistics'] = 'true';\n    }\n    return $this->request($this->projectURL . $project, $params);\n  }",
             "startLine": 62,
             "endLine": 69,
             "isDeprecated": false,
@@ -424,43 +576,6 @@
                 }
             ]
         },
-        "getProjectUsers": {
-            "name": "getProjectUsers",
-            "summary": "Gets the users list of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/users');\n  }",
-            "startLine": 77,
-            "endLine": 80,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "project",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "ID or URL-encoded path of the project"
-                }
-            ]
-        },
         "getProjectGroups": {
             "name": "getProjectGroups",
             "summary": "Gets the groups list of the given project",
@@ -471,8 +586,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/groups');\n  }",
-            "startLine": 88,
-            "endLine": 91,
+            "startLine": 77,
+            "endLine": 80,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -508,8 +623,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project, string $branch = '', string $filePath = '', string $since = '', string $until = '')\n  {\n    $params = [];\n    if (!empty($filePath)) {\n      $params['path'] = \\urldecode($filePath);\n    }\n    if (!empty($branch)) {\n      $params['branch'] = $branch;\n    }\n    if (!empty($since)) {\n      $params['since'] = \\date('c', \\strtotime($since));\n    }\n    if (!empty($until)) {\n      $params['until'] = \\date('c', \\strtotime($until));\n    }\n    return $this->request($this->projectURL . $project . '\/repository\/commits', $params);\n  }",
-            "startLine": 103,
-            "endLine": 119,
+            "startLine": 92,
+            "endLine": 108,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -585,8 +700,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project, string $id)\n  {\n    return $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id);\n  }",
-            "startLine": 127,
-            "endLine": 130,
+            "startLine": 116,
+            "endLine": 119,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -632,8 +747,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project, string $id, string $filePath = '')\n  {\n    $diff = $this->request($this->projectURL . $project . '\/repository\/commits\/' . $id . '\/diff');\n    if (!empty($filePath)) {\n      if (!\\is_null($i = \\bbn\\X::find($diff, function($d) use($filePath){\n        return ($d->old_path === $filePath) || ($d->new_path === $filePath);\n      }))) {\n        return \\bbn\\X::toArray($diff[$i]);\n      }\n      return [];\n    }\n    return $diff;\n  }",
-            "startLine": 139,
-            "endLine": 151,
+            "startLine": 128,
+            "endLine": 140,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -738,6 +853,110 @@
             "numberOfRequiredParameters": 2,
             "returns": [
                 "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the brach"
+                }
+            ]
+        },
+        "insertBranch": {
+            "name": "insertBranch",
+            "summary": "Creates a new branch into the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch, string $ref)\n  {\n    return $this->post($this->projectURL . $project . '\/repository\/' . $this->branchURL, [\n      'branch' => $branch,\n      'ref' => $ref\n    ]);\n  }",
+            "startLine": 37,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "branch",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the new branch"
+                },
+                {
+                    "name": "ref",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The branch name to create branch from"
+                }
+            ]
+        },
+        "deleteBranch": {
+            "name": "deleteBranch",
+            "summary": "Deletes a specific branch of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $branch)\n  {\n    return $this->delete($this->projectURL . $project . '\/repository\/' . $this->branchURL . $branch);\n  }",
+            "startLine": 52,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "bool"
             ],
             "parent": false,
             "arguments": [
@@ -1064,7 +1283,7 @@
         },
         "getIssue": {
             "name": "getIssue",
-            "summary": "Gets a specific issue",
+            "summary": "Gets a specific issue (only administrator)",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\GitLab",
@@ -1099,6 +1318,53 @@
                 }
             ]
         },
+        "getProjectIssue": {
+            "name": "getProjectIssue",
+            "summary": "Gets a specific project issue",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $iid);\n  }",
+            "startLine": 70,
+            "endLine": 73,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                }
+            ]
+        },
         "getIssues": {
             "name": "getIssues",
             "summary": "Gets the issues list of the given project",
@@ -1108,9 +1374,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL, ['scope' => 'all']);\n  }",
-            "startLine": 69,
-            "endLine": 72,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL, [\n      'scope' => 'all',\n      'page' => 0,\n      'per_page' => 5000\n    ]);\n  }",
+            "startLine": 81,
+            "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1146,8 +1412,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL, [\n      'scope' => 'all',\n      'state' => 'closed'\n    ]);\n  }",
-            "startLine": 80,
-            "endLine": 86,
+            "startLine": 96,
+            "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1183,8 +1449,8 @@
             "visibility": "public",
             "final": false,
             "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL, [\n      'scope' => 'all',\n      'state' => 'opened'\n    ]);\n  }",
-            "startLine": 94,
-            "endLine": 100,
+            "startLine": 110,
+            "endLine": 116,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1210,63 +1476,6 @@
                 }
             ]
         },
-        "getIssueNotes": {
-            "name": "getIssueNotes",
-            "summary": "Gets the notes list of a specific issue of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project, int $issue, string $sort = 'asc')\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $issue . '\/' . $this->noteURL, ['sort' => $sort]);\n  }",
-            "startLine": 110,
-            "endLine": 113,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "project",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "ID or URL-encoded path of the project"
-                },
-                {
-                    "name": "issue",
-                    "position": 1,
-                    "type": "int",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": "",
-                    "description": "The issue ID"
-                },
-                {
-                    "name": "sort",
-                    "position": 2,
-                    "type": "string",
-                    "required": false,
-                    "has_default": true,
-                    "default": "asc",
-                    "default_name": "",
-                    "description": "The sorting direction 'asc' or 'desc'"
-                }
-            ]
-        },
         "createIssue": {
             "name": "createIssue",
             "summary": "Creates a new issue to the given project",
@@ -1276,20 +1485,20 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, string $title, string $date = '')\n  {\n    $params = [\n      'title' => \\urlencode($title)\n    ];\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    if ($issue = $this->post($this->projectURL . $project . '\/' . $this->issueURL, $params)) {\n      return $issue['id'];\n    }\n    return null;\n  }",
-            "startLine": 122,
-            "endLine": 134,
+            "code": "function($project, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    $params = [\n      'title' => $title,\n      'description' => $description,\n      'labels' => \\implode(',', $labels),\n      'issue_type' => 'issue'\n    ];\n    if (!empty($private)) {\n      $params['confidential'] = 'true';\n    }\n    if (!empty($assigned)) {\n      $params['assignee_ids'] = $assigned;\n    }\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    if ($issue = $this->post($this->projectURL . $project . '\/' . $this->issueURL, $params)) {\n      return $issue;\n    }\n    return null;\n  }",
+            "startLine": 130,
+            "endLine": 159,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 7,
             "numberOfRequiredParameters": 2,
             "returns": [
                 null,
-                "int"
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1314,8 +1523,48 @@
                     "description": "The issue's title"
                 },
                 {
-                    "name": "date",
+                    "name": "description",
                     "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue's description"
+                },
+                {
+                    "name": "labels",
+                    "position": 3,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The labels"
+                },
+                {
+                    "name": "assigned",
+                    "position": 4,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The ID of the user to whom the issue is assigned"
+                },
+                {
+                    "name": "private",
+                    "position": 5,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If the issue is confidential"
+                },
+                {
+                    "name": "date",
+                    "position": 6,
                     "type": "string",
                     "required": false,
                     "has_default": true,
@@ -1325,29 +1574,28 @@
                 }
             ]
         },
-        "createIssueNote": {
-            "name": "createIssueNote",
-            "summary": "",
+        "editIssue": {
+            "name": "editIssue",
+            "summary": "Edites an issue on the given project",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, int $issue, string $content, string $date = '')\n  {\n    $params = [\n      'body' => \\urlencode($content)\n    ];\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    if (($iss = $this->getIssue($issue))\n      && !empty($iss['iid'])\n      && ($note = $this->post($this->projectURL . $project . '\/' . $this->issueURL . $iss['iid'], $params))\n    ) {\n      return $note['id'];\n    }\n    return null;\n  }",
-            "startLine": 7,
-            "endLine": 22,
+            "code": "function($project, int $iid, string $title, string $description = '', array $labels = [], int $assigned = 0, bool $private = false)\n  {\n    int $iid,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = 0,\n    bool $private = false\n  ): array\n  {\n    $params = [\n      'title' => $title,\n      'description' => $description,\n      'labels' => \\implode(',', $labels),\n      'confidential' => empty($private) ? 'false' : 'true',\n      'assignee_ids' => $assigned\n    ];\n    return $this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, $params);\n  }",
+            "startLine": 173,
+            "endLine": 191,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
+            "numberOfParameters": 7,
             "numberOfRequiredParameters": 3,
             "returns": [
-                null,
-                "int"
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -1358,16 +1606,390 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
                 },
                 {
-                    "name": "issue",
+                    "name": "iid",
                     "position": 1,
                     "type": "int",
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "title",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue's title"
+                },
+                {
+                    "name": "description",
+                    "position": 3,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue's description"
+                },
+                {
+                    "name": "labels",
+                    "position": 4,
+                    "type": "array",
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The labels"
+                },
+                {
+                    "name": "assigned",
+                    "position": 5,
+                    "type": "int",
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The ID of the user to whom the issue is assigned"
+                },
+                {
+                    "name": "private",
+                    "position": 6,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If the issue is confidential"
+                }
+            ]
+        },
+        "closeIssue": {
+            "name": "closeIssue",
+            "summary": "Closes an issue of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid)\n  {\n    return $this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'state_event' => 'close'\n    ]);\n  }",
+            "startLine": 200,
+            "endLine": 205,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue interal ID"
+                }
+            ]
+        },
+        "reopenIssue": {
+            "name": "reopenIssue",
+            "summary": "Reopens an issue of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid)\n  {\n    return $this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'state_event' => 'reopen'\n    ]);\n  }",
+            "startLine": 214,
+            "endLine": 219,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                }
+            ]
+        },
+        "assignIssue": {
+            "name": "assignIssue",
+            "summary": "Assigns an issue of the given project to an user",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $user)\n  {\n    return $this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'assignee_ids' => $user\n    ]);\n  }",
+            "startLine": 229,
+            "endLine": 234,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "user",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The user ID"
+                }
+            ]
+        },
+        "getIssueNotes": {
+            "name": "getIssueNotes",
+            "summary": "Gets the notes list of a specific issue of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, string $sort = 'asc', $order = 'creation')\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL, [\n      'sort' => $sort,\n      'order_by' => $order === 'creation' ? 'created_at' : 'update_at'\n    ]);\n  }",
+            "startLine": 15,
+            "endLine": 21,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "sort",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "asc",
+                    "default_name": "",
+                    "description": "The sorting direction 'asc' or 'desc'"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "creation",
+                    "default_name": "",
+                    "description": "Order by 'creation' date or 'modification' date"
+                }
+            ]
+        },
+        "getIssueNote": {
+            "name": "getIssueNote",
+            "summary": "Gets a note of a specific issue of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $note)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL . $note);\n  }",
+            "startLine": 31,
+            "endLine": 34,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "note",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note ID"
+                }
+            ]
+        },
+        "createIssueNote": {
+            "name": "createIssueNote",
+            "summary": "Create an issue note of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, string $content, bool $internal = false, string $date = '')\n  {\n    $params = [\n      'body' => $content,\n      'internal' => empty($internal) ? 'false' : 'true'\n    ];\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    return $this->post($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL, $params);\n  }",
+            "startLine": 46,
+            "endLine": 56,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
                 },
                 {
                     "name": "content",
@@ -1376,22 +1998,401 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The note content"
+                },
+                {
+                    "name": "internal",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The internal flag"
                 },
                 {
                     "name": "date",
-                    "position": 3,
+                    "position": 4,
                     "type": "string",
                     "required": false,
                     "has_default": true,
                     "default": "",
+                    "default_name": "",
+                    "description": "The note date"
+                }
+            ]
+        },
+        "editIssueNote": {
+            "name": "editIssueNote",
+            "summary": "Edit an issue note of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $note, string $content, bool $internal = false)\n  {\n    $params = [\n      'body' => $content,\n      \/\/'internal' => empty($internal) ? 'false' : 'true'\n    ];\n    return $this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL . $note, $params);\n  }",
+            "startLine": 67,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "note",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note ID"
+                },
+                {
+                    "name": "content",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note content"
+                },
+                {
+                    "name": "internal",
+                    "position": 4,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
                     "default_name": ""
+                }
+            ]
+        },
+        "deleteIssueNote": {
+            "name": "deleteIssueNote",
+            "summary": "Delete an issue note of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $note)\n  {\n    return $this->delete($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL . $note);\n  }",
+            "startLine": 84,
+            "endLine": 87,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "note",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note ID"
+                }
+            ]
+        },
+        "getProjectLabels": {
+            "name": "getProjectLabels",
+            "summary": "Gets the labels list of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->labelURL, [\n      'with_counts' => true,\n      'page' => 0,\n      'per_page' => 5000\n    ]);\n  }",
+            "startLine": 12,
+            "endLine": 19,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                }
+            ]
+        },
+        "createProjectLabel": {
+            "name": "createProjectLabel",
+            "summary": "Creates a label to the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, string $name, string $color)\n  {\n    return $this->post($this->projectURL . $project . '\/' . $this->labelURL, [\n      'name' => $name,\n      'color' => $color\n    ]);\n  }",
+            "startLine": 29,
+            "endLine": 35,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "name",
+                    "position": 1,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The label namne"
+                },
+                {
+                    "name": "color",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The label color"
+                }
+            ]
+        },
+        "addLabelToProjectIssue": {
+            "name": "addLabelToProjectIssue",
+            "summary": "Adds an issue label to the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, string $label)\n  {\n    return !!$this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'add_labels' => $label\n    ]);\n  }",
+            "startLine": 45,
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "label",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The label name"
+                }
+            ]
+        },
+        "removeLabelFromProjectIssue": {
+            "name": "removeLabelFromProjectIssue",
+            "summary": "Removes an issue label from the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, string $label)\n  {\n    return !!$this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'remove_labels' => $label\n    ]);\n  }",
+            "startLine": 60,
+            "endLine": 65,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "label",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The label name"
                 }
             ]
         }
     },
-    "properties": null,
-    "staticProperties": [],
+    "properties": {
+        "accessLevels": {
+            "static": true,
+            "visibility": "public",
+            "doc": {
+                "description": "@var array The access levels",
+                "tags": []
+            },
+            "value": {
+                "5": "Minimal access",
+                "10": "Guest",
+                "20": "Reporter",
+                "30": "Developer",
+                "40": "Maintainer",
+                "50": "Owner"
+            }
+        }
+    },
+    "staticProperties": {
+        "accessLevels": {
+            "5": "Minimal access",
+            "10": "Guest",
+            "20": "Reporter",
+            "30": "Developer",
+            "40": "Maintainer",
+            "50": "Owner"
+        }
+    },
     "constants": null,
     "summary": "GitLab API class",
     "description": "",

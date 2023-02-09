@@ -1,15 +1,15 @@
 {
     "doc": {
-        "description": "VCS\\Svn class\n",
+        "description": "VCS\\Git class\n",
         "tags": {
             "category": "Appui",
             "package": "Appui\\Vcs",
             "author": "Mirko Argentino <mirko@bbn.solutions>",
             "license": "http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License",
-            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/Appui\/Vcs\/Svn"
+            "link": "https:\/\/bbn.io\/bbn-php\/doc\/class\/Appui\/Vcs\/Git"
         }
     },
-    "name": "bbn\\Appui\\Vcs\\Svn",
+    "name": "bbn\\Appui\\Vcs\\GitLab",
     "namespace": true,
     "traits": [
         "bbn\\Appui\\Vcs\\Common"
@@ -19,10 +19,10 @@
             "name": "bbn\\Appui\\Vcs\\Server"
         }
     },
-    "fileName": "\/Appui\/Vcs\/Svn.php",
-    "startLine": 18,
-    "endLine": 345,
-    "numMethods": 42,
+    "fileName": "\/Appui\/Vcs\/GitLab.php",
+    "startLine": 19,
+    "endLine": 811,
+    "numMethods": 46,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -53,9 +53,9 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Appui\\Vcs",
-    "shortName": "Svn",
+    "shortName": "GitLab",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Vcs\\Svn",
+        "file": "bbn\\Appui\\Vcs\\GitLab",
         "returns": []
     },
     "methods": {
@@ -64,13 +64,13 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, string $idServer)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->idServer = $idServer;\n    $this->server = $this->getServer($this->id);\n    $this->checkServerHost($this->server->host);\n    $this->userConnection = new \\stdClass();\n    $this->adminConnection = new \\stdClass();\n  }",
-            "startLine": 45,
-            "endLine": 55,
+            "code": "function(bbn\\Db $db, string $idServer)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->idServer = $idServer;\n    $this->server = $this->getServer();\n    $this->checkServerHost($this->server->host);\n    $this->userConnection = new bbn\\Api\\GitLab($this->server->userAccessToken, $this->server->host);\n    $this->adminConnection = new bbn\\Api\\GitLab($this->getAdminAccessToken(), $this->server->host);\n  }",
+            "startLine": 47,
+            "endLine": 57,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -98,7 +98,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "erver"
                 }
             ]
         },
@@ -107,13 +108,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "function(bool $asAdmin = false)\n  {\n    return $asAdmin ? $this->adminConnection : $this->userConnection;\n  }",
-            "startLine": 58,
-            "endLine": 61,
+            "startLine": 64,
+            "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -134,7 +135,8 @@
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "dmin"
                 }
             ]
         },
@@ -143,13 +145,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [];\n  }",
-            "startLine": 63,
-            "endLine": 66,
+            "code": "function()\n  {\n    return $this->getConnection()->getUser();\n  }",
+            "startLine": 73,
+            "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -169,13 +171,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $page = 1, int $perPage = 25)\n  {\n    return [];\n  }",
-            "startLine": 69,
-            "endLine": 72,
+            "code": "function(int $page = 1, int $perPage = 25)\n  {\n    $list = $this->getConnection()->getProjectsList($page, $perPage) ?: [];\n    $list['data'] = \\array_map([$this, 'normalizeProject'], $list['data']);\n    return $list;\n  }",
+            "startLine": 84,
+            "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -205,7 +207,8 @@
                     "required": false,
                     "has_default": true,
                     "default": 25,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "age"
                 }
             ]
         },
@@ -214,13 +217,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return null;\n  }",
-            "startLine": 75,
-            "endLine": 78,
+            "code": "function(string $idProject)\n  {\n    if ($proj = $this->getConnection(true)->getProject($idProject, true)) {\n      return $this->normalizeProject((object)$proj);\n    }\n    return null;\n  }",
+            "startLine": 96,
+            "endLine": 102,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -242,7 +245,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -251,13 +255,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 81,
-            "endLine": 84,
+            "code": "function(string $idProject)\n  {\n    return X::sortBy(\n      \\array_map(\n        [$this, 'normalizeBranch'],\n        $this->getConnection()->getBranches($idProject) ?: []\n      ),\n      'created',\n      'desc'\n    );\n  }",
+            "startLine": 109,
+            "endLine": 119,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -278,7 +282,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -287,13 +292,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 87,
-            "endLine": 90,
+            "code": "function(string $idProject)\n  {\n    return $this->getConnection()->getTags($idProject) ?: [];\n  }",
+            "startLine": 126,
+            "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -314,7 +319,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -323,13 +329,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 93,
-            "endLine": 96,
+            "code": "function(string $idProject)\n  {\n    return \\array_map([$this, 'normalizeMember'], $this->getConnection(true)->getProjectUsers($idProject) ?: []);\n  }",
+            "startLine": 136,
+            "endLine": 139,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -350,7 +356,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -359,13 +366,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [];\n  }",
-            "startLine": 99,
-            "endLine": 102,
+            "code": "function()\n  {\n    return bbn\\Api\\GitLab::$accessLevels;\n  }",
+            "startLine": 145,
+            "endLine": 148,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -385,13 +392,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 105,
-            "endLine": 108,
+            "code": "function(string $idProject)\n  {\n    return \\array_map([$this, 'normalizeEvent'], $this->getConnection()->getUsersEvents($idProject) ?: []);\n  }",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -412,7 +419,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -421,13 +429,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 111,
-            "endLine": 114,
+            "code": "function(string $idProject)\n  {\n    return \\array_map([$this, 'normalizeEvent'], $this->getConnection()->getEvents($idProject) ?: []);\n  }",
+            "startLine": 165,
+            "endLine": 168,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -448,7 +456,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -457,13 +466,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 117,
-            "endLine": 120,
+            "code": "function(string $idProject)\n  {\n    return \\array_values(\n      \\array_filter(\n        \\array_map(\n          [$this, 'normalizeEvent'],\n          $this->getConnection()->getCommitsEvents($idProject) ?: []\n        ),\n        function($e){\n          return $e['type'] === 'commit';\n        }\n      )\n    );\n  }",
+            "startLine": 175,
+            "endLine": 188,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -484,7 +493,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -493,13 +503,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 123,
-            "endLine": 126,
+            "code": "function(string $idProject)\n  {\n    return X::sortBy(\\array_map(\n      [$this, 'normalizeLabel'],\n      $this->getConnection()->getProjectLabels($idProject) ?: []\n    ), 'name', 'asc');\n  }",
+            "startLine": 195,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -520,22 +530,49 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
+        },
+        "getUsers": {
+            "name": "getUsers",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function()\n  {\n    return \\array_map([$this, 'normalizeUser'], $this->getConnection(true)->getUsers() ?: []);\n  }",
+            "startLine": 207,
+            "endLine": 210,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": []
         },
         "normalizeBranch": {
             "name": "normalizeBranch",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $branch)\n  {\n    return [];\n  }",
-            "startLine": 129,
-            "endLine": 132,
+            "code": "function(object $branch)\n  {\n    return [\n      'id' => $branch->commit->id,\n      'ref' => $branch->commit->short_id,\n      'name' => $branch->name,\n      'created' => Date::format($branch->commit->created_at, 'dbdate'),\n      'default' => $branch->default,\n      'author' => [\n        'id' => '',\n        'name' => $branch->commit->author_name,\n        'username' => '',\n        'email' => $branch->commit->author_email\n      ],\n      'url' => $branch->web_url\n    ];\n  }",
+            "startLine": 217,
+            "endLine": 233,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -565,13 +602,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $event)\n  {\n    return (array)$event;\n  }",
-            "startLine": 135,
-            "endLine": 138,
+            "code": "function(object $event)\n  {\n    $data = [\n      'id' => $event->id,\n      'created' => Date::format($event->created_at, 'dbdate'),\n      'author' => $this->normalizeUser($event->author),\n      'type' => '',\n      'title' => '',\n      'text' => '',\n      'originalEvent' => $event\n    ];\n    switch ($event->action_name) {\n      case 'pushed to':\n        $data = X::mergeArrays($data, [\n          'type' => 'commit',\n          'text' => $event->push_data->commit_title,\n          'branch' => $event->push_data->ref\n        ]);\n        break;\n      case 'pushed new':\n        $data = X::mergeArrays($data, [\n          'type' => 'branch',\n          'text' => X::_('Branch created'),\n          'branch' => $event->push_data->ref\n        ]);\n        break;\n      case 'imported':\n        $data = X::mergeArrays($data, [\n          'type' => 'import',\n          'title' => X::_('Project imported')\n        ]);\n        break;\n      case 'removed':\n      case 'deleted':\n        if (isset($event->push_data)) {\n          $data = X::mergeArrays($data, [\n            'type' => 'branch',\n            'title' => X::_('Branch removed'),\n            'branch' => $event->push_data->ref\n          ]);\n        }\n        break;\n      case 'accepted':\n        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {\n          $data = X::mergeArrays($data, [\n            'type' => 'merge',\n            'title' => X::_('Merge request accepted'),\n            'text' => $event->target_title ?: ''\n          ]);\n        }\n        break;\n      case 'opened':\n        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {\n          $data = X::mergeArrays($data, [\n            'type' => 'merge',\n            'title' => X::_('Merge request created'),\n            'text' => $event->target_title ?: ''\n          ]);\n        }\n        break;\n      case 'joined':\n        $data = X::mergeArrays($data, [\n          'type' => 'user',\n          'title' => X::_('Has been included among the users of the project')\n        ]);\n        break;\n      case 'left':\n        $data = X::mergeArrays($data, [\n          'type' => 'user',\n          'title' => X::_('Has been removed from project users')\n        ]);\n        break;\n    }\n    return $data;\n  }",
+            "startLine": 240,
+            "endLine": 314,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -601,13 +638,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $user)\n  {\n    return [\n      'id' => '',\n      'name' => '',\n      'username' => '',\n      'avatar' => '',\n      'url' => ''\n    ];\n  }",
-            "startLine": 141,
-            "endLine": 150,
+            "code": "function(object $user)\n  {\n    return [\n      'id' => $user->id,\n      'name' => $user->name,\n      'username' => $user->username,\n      'email' => $user->email ?? '',\n      'avatar' => $user->avatar_url,\n      'url' => $user->web_url\n    ];\n  }",
+            "startLine": 321,
+            "endLine": 331,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -637,13 +674,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $member)\n  {\n    return X::mergeArrays([\n      'created' => '',\n      'author' => [],\n      'expire' => '',\n      'role' => ''\n    ], $this->normalizeUser($member));\n  }",
-            "startLine": 153,
-            "endLine": 161,
+            "code": "function(object $member)\n  {\n    return X::mergeArrays([\n      'created' => Date::format($member->created_at, 'dbdate'),\n      'author' => !empty($member->created_by) ? $this->normalizeUser($member->created_by) : [],\n      'expire' => !empty($member->expires_at) ? Date::format($member->expires_at, 'dbdate') : '',\n      'role' => $this->getProjectUsersRoles()[$member->access_level]\n    ], $this->normalizeUser($member));\n  }",
+            "startLine": 338,
+            "endLine": 346,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -673,13 +710,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $label)\n  {\n    return [\n      'id' => '',\n      'name' => '',\n      'description' => '',\n      'backgroundColor' => '',\n      'fontColor' => '',\n      'openedIssues' => '',\n      'closedIssues' => ''\n    ];\n  }",
-            "startLine": 164,
-            "endLine": 175,
+            "code": "function(object $label)\n  {\n    return [\n      'id' => $label->id,\n      'name' => $label->name,\n      'description' => $label->description ?: '',\n      'backgroundColor' => $label->color,\n      'fontColor' => $label->text_color,\n      'openedIssues' => $label->open_issues_count,\n      'closedIssues' => $label->closed_issues_count\n    ];\n  }",
+            "startLine": 353,
+            "endLine": 364,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -709,13 +746,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $project)\n  {\n    return [\n      'id' => '',\n      'type' => 'svn',\n      'name' => '',\n      'fullname' => '',\n      'description' => '',\n      'path' => '',\n      'fullpath' => '',\n      'url' => '',\n      'urlGit' => '',\n      'urlSsh' => '',\n      'namespace' => [\n        'id' => '',\n        'idParent' => '',\n        'name' => '',\n        'path' => '',\n        'fullpath' => '',\n        'url' => ''\n      ],\n      'created' => '',\n      'creator' => '',\n      'private' => '',\n      'visibility' => '',\n      'defaultBranch' => '',\n      'archived' => '',\n      'avatar' => '',\n      'license' => [\n        'name' => '',\n        'code' => ''\n      ],\n      'noCommits' => '',\n      'size' => '',\n      'noForks' => '',\n      'noStars' => ''\n    ];\n  }",
-            "startLine": 178,
-            "endLine": 215,
+            "code": "function(object $project)\n  {\n    return [\n      'id' => $project->id,\n      'type' => 'git',\n      'name' => $project->name,\n      'fullname' => $project->name_with_namespace,\n      'description' => $project->description ?: '',\n      'path' => $project->path,\n      'fullpath' => $project->path_with_namespace,\n      'url' => $project->web_url,\n      'urlGit' => $project->http_url_to_repo,\n      'urlSsh' => $project->ssh_url_to_repo,\n      'namespace' => (object)[\n        'id' => $project->namespace->id,\n        'idParent' => $project->namespace->parent_id,\n        'name' => $project->namespace->name,\n        'path' => $project->namespace->path,\n        'fullpath' => $project->namespace->full_path,\n        'url' => $project->namespace->web_url\n      ],\n      'created' => Date::format($project->created_at, 'dbdate'),\n      'creator' => $project->creator_id,\n      'private' => !empty($project->owner),\n      'visibility' => $project->visibility,\n      'defaultBranch' => $project->default_branch,\n      'archived' => $project->archived,\n      'avatar' => $project->avatar_url,\n      'license' => (object)[\n        'name' => $project->license->name,\n        'code' => $project->license->nickname\n      ],\n      'noCommits' => $project->statistics['commit_count'],\n      'size' => $project->statistics['repository_size'],\n      'noForks' => $project->forks_count,\n      'noStars' => $project->star_count\n    ];\n  }",
+            "startLine": 371,
+            "endLine": 408,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -740,18 +777,54 @@
                 }
             ]
         },
+        "normalizeIssue": {
+            "name": "normalizeIssue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(object $issue)\n  {\n    return [\n      'id' => $issue->id,\n      'iid' => $issue->iid,\n      'title' => $issue->title,\n      'description' => $issue->description ?: '',\n      'url' => $issue->web_url,\n      'author' => $this->normalizeUser((object)$issue->author),\n      'created' => Date::format($issue->created_at, 'dbdate'),\n      'updated' => !empty($issue->updated_at) ?\n        Date::format($issue->updated_at, 'dbdate') :\n        Date::format($issue->created_at, 'dbdate'),\n      'closed' => !empty($issue->closed_at) ? Date::format($issue->closed_at, 'dbdate') : '',\n      'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser((object)$issue->closed_by) : [],\n      'assigned' => !empty($issue->assignees) ? $this->normalizeUser((object)$issue->assignees[0]) : [],\n      'private' => $issue->confidential,\n      'labels' => $issue->labels,\n      'state' => $issue->state,\n      'notes' => $issue->user_notes_count,\n      'tasks' => [\n        'count' => $issue->task_completion_status->count ?: 0,\n        'completed' => $issue->task_completion_status->completed_count ?: 0,\n      ],\n      'originalIssue' => $issue\n    ];\n  }",
+            "startLine": 415,
+            "endLine": 441,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "issue",
+                    "position": 0,
+                    "type": "object",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "insertBranch": {
             "name": "insertBranch",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch, string $fromBranch)\n  {\n    return [];\n  }",
-            "startLine": 218,
-            "endLine": 221,
+            "code": "function(string $idProject, string $branch, string $fromBranch)\n  {\n    return $this->getConnection()->insertBranch($idProject, $branch, $fromBranch);\n  }",
+            "startLine": 450,
+            "endLine": 453,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -772,7 +845,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "branch",
@@ -790,7 +864,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ranch"
                 }
             ]
         },
@@ -799,13 +874,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch)\n  {\n    return false;\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "function(string $idProject, string $branch)\n  {\n    return $this->getConnection()->deleteBranch($idProject, $branch);\n  }",
+            "startLine": 461,
+            "endLine": 464,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -826,7 +901,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "branch",
@@ -844,13 +920,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser, int $idRole)\n  {\n    return [];\n  }",
-            "startLine": 230,
-            "endLine": 233,
+            "code": "function(string $idProject, int $idUser, int $idRole)\n  {\n    return $this->getConnection()->insertProjectUser($idProject, $idUser, $idRole);\n  }",
+            "startLine": 473,
+            "endLine": 476,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -871,7 +947,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idUser",
@@ -880,7 +957,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ser"
                 },
                 {
                     "name": "idRole",
@@ -889,7 +967,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ols"
                 }
             ]
         },
@@ -898,13 +977,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser)\n  {\n    return false;\n  }",
-            "startLine": 236,
-            "endLine": 239,
+            "code": "function(string $idProject, int $idUser)\n  {\n    return $this->getConnection()->removeProjectUser($idProject, $idUser);\n  }",
+            "startLine": 484,
+            "endLine": 487,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -925,7 +1004,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idUser",
@@ -934,48 +1014,23 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ser"
                 }
             ]
-        },
-        "getUsers": {
-            "name": "getUsers",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return [];\n  }",
-            "startLine": 242,
-            "endLine": 245,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
         },
         "getProjectIssues": {
             "name": "getProjectIssues",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
-            "startLine": 248,
-            "endLine": 251,
+            "code": "function(string $idProject)\n  {\n    return \\array_map(\n      [$this, 'normalizeIssue'],\n      $this->getConnection()->getIssues($idProject)\n    );\n  }",
+            "startLine": 494,
+            "endLine": 500,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -996,7 +1051,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 }
             ]
         },
@@ -1005,13 +1061,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return [];\n  }",
-            "startLine": 253,
-            "endLine": 256,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    return $this->normalizeIssue((object)$this->getConnection(true)->getIssue($idIssue));\n  }",
+            "startLine": 507,
+            "endLine": 510,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1032,7 +1088,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1050,13 +1107,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    return null;\n  }",
-            "startLine": 258,
-            "endLine": 269,
+            "code": "function(string $idProject, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    if ($issue = $this->getConnection()->createIssue($idProject, $title, $description, $labels, $assigned, $private, $date)) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "startLine": 523,
+            "endLine": 537,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1078,7 +1135,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "title",
@@ -1141,13 +1199,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false)\n  {\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    return null;\n  }",
-            "startLine": 272,
-            "endLine": 283,
+            "code": "function(string $idProject, int $idIssue, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false)\n  {\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->editIssue($idProject, $i['iid'], $title, $description, $labels, $assigned, $private))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "startLine": 549,
+            "endLine": 566,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1169,7 +1227,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1232,13 +1291,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return null;\n  }",
-            "startLine": 286,
-            "endLine": 289,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->closeIssue($idProject, $i['iid']))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "startLine": 574,
+            "endLine": 583,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1260,7 +1319,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1269,7 +1329,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 }
             ]
         },
@@ -1278,13 +1339,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return null;\n  }",
-            "startLine": 292,
-            "endLine": 295,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->reopenIssue($idProject, $i['iid']))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "startLine": 591,
+            "endLine": 600,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1306,7 +1367,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1315,7 +1377,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 }
             ]
         },
@@ -1324,13 +1387,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idUser)\n  {\n    return null;\n  }",
-            "startLine": 298,
-            "endLine": 301,
+            "code": "function(string $idProject, int $idIssue, int $idUser)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->assignIssue($idProject, $i['iid'], $idUser))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "startLine": 609,
+            "endLine": 618,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1352,7 +1415,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1361,10 +1425,68 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 },
                 {
                     "name": "idUser",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ser"
+                }
+            ]
+        },
+        "getProjectIssueComment": {
+            "name": "getProjectIssueComment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->getIssueNote($idProject, $i['iid'], $idComment))\n    ){\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return [];\n  }",
+            "startLine": 626,
+            "endLine": 635,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "idProject",
+                    "position": 0,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "roject"
+                },
+                {
+                    "name": "idIssue",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ssue"
+                },
+                {
+                    "name": "idComment",
                     "position": 2,
                     "type": "int",
                     "required": true,
@@ -1379,13 +1501,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return [];\n  }",
-            "startLine": 304,
-            "endLine": 307,
+            "code": "function(string $idProject, int $idIssue)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return \\array_map(\n        [$this, 'normalizeIssueComment'],\n        $this->getConnection()->getIssueNotes($idProject, $i['iid'])\n      );\n    }\n    return [];\n  }",
+            "startLine": 643,
+            "endLine": 654,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1406,12 +1528,50 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ssue"
+                }
+            ]
+        },
+        "normalizeIssueComment": {
+            "name": "normalizeIssueComment",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(object $comment)\n  {\n    return [\n      'id' => $comment->id,\n      'author' => $this->normalizeUser((object)$comment->author),\n      'created' => Date::format($comment->created_at, 'dbdate'),\n      'updated' => !empty($comment->updated_at) ?\n        Date::format($comment->updated_at, 'dbdate') :\n        Date::format($comment->created_at, 'dbdate'),\n      'content' => $comment->body,\n      'auto' => $comment->system,\n      'private' => $comment->internal,\n      'attachment' => $comment->attachment,\n      'originalComment' => $comment\n    ];\n  }",
+            "startLine": 661,
+            "endLine": 676,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "comment",
+                    "position": 0,
+                    "type": "object",
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1424,13 +1584,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = '')\n  {\n    return [];\n  }",
-            "startLine": 310,
-            "endLine": 313,
+            "code": "function(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = '')\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->createIssueNote($idProject, $i['iid'], $content, $pvt, $date))\n    ) {\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return null;\n  }",
+            "startLine": 687,
+            "endLine": 696,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1452,7 +1612,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1461,7 +1622,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 },
                 {
                     "name": "content",
@@ -1497,13 +1659,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false)\n  {\n    return [];\n  }",
-            "startLine": 316,
-            "endLine": 319,
+            "code": "function(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->editIssueNote($idProject, $i['iid'], $idComment, $content, $pvt))\n    ) {\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return null;\n  }",
+            "startLine": 707,
+            "endLine": 716,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1525,7 +1687,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1534,7 +1697,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 },
                 {
                     "name": "idComment",
@@ -1543,7 +1707,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "omment"
                 },
                 {
                     "name": "content",
@@ -1570,13 +1735,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    return false;\n  }",
-            "startLine": 322,
-            "endLine": 325,
+            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->deleteIssueNote($idProject, $i['iid'], $idComment);\n    }\n    return false;\n  }",
+            "startLine": 725,
+            "endLine": 733,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1597,7 +1762,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1606,7 +1772,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 },
                 {
                     "name": "idComment",
@@ -1615,7 +1782,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "omment"
                 }
             ]
         },
@@ -1624,13 +1792,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $name, string $color)\n  {\n    return null;\n  }",
-            "startLine": 328,
-            "endLine": 331,
+            "code": "function(string $idProject, string $name, string $color)\n  {\n    if ($label = $this->getConnection()->createProjectLabel($idProject, $name, $color)) {\n      return $this->normalizeLabel((object)$label);\n    }\n    return null;\n  }",
+            "startLine": 742,
+            "endLine": 748,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1652,7 +1820,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "name",
@@ -1679,13 +1848,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    return false;\n  }",
-            "startLine": 334,
-            "endLine": 337,
+            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->addLabelToProjectIssue($idProject, $i['iid'], $label);\n    }\n    return false;\n  }",
+            "startLine": 757,
+            "endLine": 765,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1706,7 +1875,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1715,7 +1885,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 },
                 {
                     "name": "label",
@@ -1733,13 +1904,13 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    return false;\n  }",
-            "startLine": 340,
-            "endLine": 343,
+            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->removeLabelFromProjectIssue($idProject, $i['iid'], $label);\n    }\n    return false;\n  }",
+            "startLine": 774,
+            "endLine": 782,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1760,7 +1931,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "roject"
                 },
                 {
                     "name": "idIssue",
@@ -1769,7 +1941,8 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ssue"
                 },
                 {
                     "name": "label",
@@ -1782,12 +1955,48 @@
                 }
             ]
         },
+        "analyzeWebhook": {
+            "name": "analyzeWebhook",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function(array $data)\n  {\n    $d = [\n      'idProject' => $data['project_id'] ?? null,\n      'idUser' => $data['user_id'] ?? (!empty($data['user']) ? $data['user']['id'] : null),\n    ];\n    switch ($data['event_type']) {\n      case 'note':\n        if (empty($data['object_attributes']['system'])) {\n          $d = X::mergeArrays($d, [\n            'type' => 'comment',\n            'action' => 'insert',\n            'idIssue' => $data['issue']['id'],\n            'idComment' => $data['object_attributes']['id'],\n            'text' => $data['object_attributes']['note'],\n            'created' => Date::format($data['object_attributes']['created_at'], 'dbdate'),\n            'updated' => !empty($data['object_attributes']['updated_at']) ?\n              Date::format($data['object_attributes']['updated_at'], 'dbdate') :\n              Date::format($data['object_attributes']['created_at'], 'dbdate')\n          ]);\n        }\n        break;\n    }\n    return $d;\n  }",
+            "startLine": 785,
+            "endLine": 809,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
         "hasAdminAccessToken": {
             "name": "hasAdminAccessToken",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -1823,7 +2032,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -1860,7 +2069,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -1896,7 +2105,7 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "file": "bbn\\Appui\\Vcs\\GitLab",
             "static": false,
             "visibility": "public",
             "final": false,
@@ -1931,7 +2140,7 @@
     "properties": null,
     "staticProperties": [],
     "constants": null,
-    "summary": "VCS\\Svn class",
+    "summary": "VCS\\Git class",
     "description": "",
     "description_parts": []
 }

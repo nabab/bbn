@@ -3,14 +3,14 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Api\\GitLab\\User",
+    "name": "bbn\\Api\\GitLab\\Label",
     "namespace": true,
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Api\/GitLab\/User.php",
+    "fileName": "\/Api\/GitLab\/Label.php",
     "startLine": 4,
-    "endLine": 85,
-    "numMethods": 6,
+    "endLine": 68,
+    "numMethods": 4,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -24,116 +24,25 @@
     "modifiers": 0,
     "parentClass": null,
     "isSubclassOf": false,
-    "defaultProperties": {
-        "userID": null
-    },
+    "defaultProperties": [],
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Api\\GitLab",
-    "shortName": "User",
+    "shortName": "Label",
     "contentConstructor": null,
     "methods": {
-        "getUsers": {
-            "name": "getUsers",
-            "summary": "Gets the users list",
+        "getProjectLabels": {
+            "name": "getProjectLabels",
+            "summary": "Gets the labels list of the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "file": "bbn\\Api\\GitLab\\Label",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->request($this->userURL, ['per_page' => 5000]);\n  }",
-            "startLine": 14,
-            "endLine": 17,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getUser": {
-            "name": "getUser",
-            "summary": "Gets a user info.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(int $id = NULL)\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
-            "startLine": 25,
-            "endLine": 28,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": "",
-                    "description": "The user id"
-                }
-            ]
-        },
-        "getUserID": {
-            "name": "getUserID",
-            "summary": "Gets the current user ID",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if (empty($this->userID)\n      && ($r = $this->request('user'))\n    ) {\n      $this->userID = $r['id'];\n    }\n    return $this->userID;\n  }",
-            "startLine": 35,
-            "endLine": 43,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getProjectUsers": {
-            "name": "getProjectUsers",
-            "summary": "Gets the users list of the given project",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/members\/all');\n  }",
-            "startLine": 51,
-            "endLine": 54,
+            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->labelURL, [\n      'with_counts' => true,\n      'page' => 0,\n      'per_page' => 5000\n    ]);\n  }",
+            "startLine": 12,
+            "endLine": 19,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -159,18 +68,18 @@
                 }
             ]
         },
-        "insertProjectUser": {
-            "name": "insertProjectUser",
-            "summary": "Inserts an user into the given project",
+        "createProjectLabel": {
+            "name": "createProjectLabel",
+            "summary": "Creates a label to the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "file": "bbn\\Api\\GitLab\\Label",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, int $user, int $role)\n  {\n    return $this->post($this->projectURL . $project . '\/members', [\n      'user_id' => $user,\n      'access_level' => $role\n    ]);\n  }",
-            "startLine": 64,
-            "endLine": 70,
+            "code": "function($project, string $name, string $color)\n  {\n    return $this->post($this->projectURL . $project . '\/' . $this->labelURL, [\n      'name' => $name,\n      'color' => $color\n    ]);\n  }",
+            "startLine": 29,
+            "endLine": 35,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -195,47 +104,47 @@
                     "description": "ID or URL-encoded path of the project"
                 },
                 {
-                    "name": "user",
+                    "name": "name",
                     "position": 1,
-                    "type": "int",
+                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The user ID"
+                    "description": "The label namne"
                 },
                 {
-                    "name": "role",
+                    "name": "color",
                     "position": 2,
-                    "type": "int",
+                    "type": "string",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The user role ID"
+                    "description": "The label color"
                 }
             ]
         },
-        "removeProjectUser": {
-            "name": "removeProjectUser",
-            "summary": "Removes an user from the given project",
+        "addLabelToProjectIssue": {
+            "name": "addLabelToProjectIssue",
+            "summary": "Adds an issue label to the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "file": "bbn\\Api\\GitLab\\Label",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, int $user)\n  {\n    return $this->delete($this->projectURL . $project . '\/members\/' . $user);\n  }",
-            "startLine": 79,
-            "endLine": 82,
+            "code": "function($project, int $iid, string $label)\n  {\n    return !!$this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'add_labels' => $label\n    ]);\n  }",
+            "startLine": 45,
+            "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
             "returns": [
                 "bool"
             ],
@@ -252,14 +161,81 @@
                     "description": "ID or URL-encoded path of the project"
                 },
                 {
-                    "name": "user",
+                    "name": "iid",
                     "position": 1,
                     "type": "int",
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
-                    "description": "The user ID"
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "label",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The label name"
+                }
+            ]
+        },
+        "removeLabelFromProjectIssue": {
+            "name": "removeLabelFromProjectIssue",
+            "summary": "Removes an issue label from the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Label",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, string $label)\n  {\n    return !!$this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid, [\n      'remove_labels' => $label\n    ]);\n  }",
+            "startLine": 60,
+            "endLine": 65,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "label",
+                    "position": 2,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The label name"
                 }
             ]
         }

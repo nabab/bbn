@@ -8,8 +8,8 @@
     "traits": [],
     "interfaces": [],
     "fileName": "\/Appui\/Vcs\/Common.php",
-    "startLine": 9,
-    "endLine": 89,
+    "startLine": 11,
+    "endLine": 109,
     "numMethods": 4,
     "numProperties": 0,
     "numConstants": 0,
@@ -27,7 +27,8 @@
     "defaultProperties": {
         "db": null,
         "opt": null,
-        "pwd": null
+        "pwd": null,
+        "idUser": null
     },
     "isIterable": false,
     "extensionName": false,
@@ -44,9 +45,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    return !!$this->getAdminAccessToken($id);\n  }",
-            "startLine": 21,
-            "endLine": 24,
+            "code": "function(string $id = '')\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "startLine": 24,
+            "endLine": 27,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -54,7 +55,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "bool"
             ],
@@ -64,8 +65,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -80,9 +81,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    return $this->pwd->get($id);\n  }",
-            "startLine": 27,
-            "endLine": 30,
+            "code": "function(string $id = '')\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "startLine": 30,
+            "endLine": 33,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -90,7 +91,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 null,
                 "string"
@@ -101,8 +102,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -117,9 +118,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if (!($user = \\bbn\\User::getInstance())) {\n      throw new \\Exception(X::_('No User class instance found'));\n    }\n    if (!($pref = \\bbn\\User\\Preferences::getInstance())) {\n      throw new \\Exception(X::_('No User\\Preferences class instance found'));\n    }\n    if (!($userPref = $pref->getByOption($id))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id));\n    }\n    return $token;\n  }",
-            "startLine": 33,
-            "endLine": 51,
+            "code": "function(string $id = '')\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "startLine": 36,
+            "endLine": 67,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -127,7 +128,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "string"
             ],
@@ -137,8 +138,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -153,9 +154,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if (!($server = $this->opt->option($id))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id));\n    }\n    return $this->normalizeServer($server);\n  }",
-            "startLine": 54,
-            "endLine": 60,
+            "code": "function(string $id = '')\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "startLine": 70,
+            "endLine": 76,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -163,7 +164,7 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfRequiredParameters": 0,
             "returns": [
                 "object"
             ],
@@ -173,8 +174,8 @@
                     "name": "id",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }

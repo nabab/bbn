@@ -9,8 +9,8 @@
     "interfaces": [],
     "fileName": "\/Api\/GitLab\/Note.php",
     "startLine": 4,
-    "endLine": 25,
-    "numMethods": 1,
+    "endLine": 90,
+    "numMethods": 5,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
@@ -31,18 +31,18 @@
     "shortName": "Note",
     "contentConstructor": null,
     "methods": {
-        "createIssueNote": {
-            "name": "createIssueNote",
-            "summary": "",
+        "getIssueNotes": {
+            "name": "getIssueNotes",
+            "summary": "Gets the notes list of a specific issue of the given project",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Api\\GitLab\\Note",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, int $issue, string $content, string $date = '')\n  {\n    $params = [\n      'body' => \\urlencode($content)\n    ];\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    if (($iss = $this->getIssue($issue))\n      && !empty($iss['iid'])\n      && ($note = $this->post($this->projectURL . $project . '\/' . $this->issueURL . $iss['iid'], $params))\n    ) {\n      return $note['id'];\n    }\n    return null;\n  }",
-            "startLine": 7,
-            "endLine": 22,
+            "code": "function($project, int $iid, string $sort = 'asc', $order = 'creation')\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL, [\n      'sort' => $sort,\n      'order_by' => $order === 'creation' ? 'created_at' : 'update_at'\n    ]);\n  }",
+            "startLine": 15,
+            "endLine": 21,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -50,10 +50,9 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 4,
-            "numberOfRequiredParameters": 3,
+            "numberOfRequiredParameters": 2,
             "returns": [
-                null,
-                "int"
+                "array"
             ],
             "parent": false,
             "arguments": [
@@ -64,16 +63,142 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
                 },
                 {
-                    "name": "issue",
+                    "name": "iid",
                     "position": 1,
                     "type": "int",
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "sort",
+                    "position": 2,
+                    "type": "string",
+                    "required": false,
+                    "has_default": true,
+                    "default": "asc",
+                    "default_name": "",
+                    "description": "The sorting direction 'asc' or 'desc'"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "",
+                    "required": false,
+                    "has_default": true,
+                    "default": "creation",
+                    "default_name": "",
+                    "description": "Order by 'creation' date or 'modification' date"
+                }
+            ]
+        },
+        "getIssueNote": {
+            "name": "getIssueNote",
+            "summary": "Gets a note of a specific issue of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $note)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL . $note);\n  }",
+            "startLine": 31,
+            "endLine": 34,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "note",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note ID"
+                }
+            ]
+        },
+        "createIssueNote": {
+            "name": "createIssueNote",
+            "summary": "Create an issue note of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, string $content, bool $internal = false, string $date = '')\n  {\n    $params = [\n      'body' => $content,\n      'internal' => empty($internal) ? 'false' : 'true'\n    ];\n    if (!empty($date)) {\n      $params['created_at'] = \\date('c', \\strtotime($date));\n    }\n    return $this->post($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL, $params);\n  }",
+            "startLine": 46,
+            "endLine": 56,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
                 },
                 {
                     "name": "content",
@@ -82,16 +207,161 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The note content"
+                },
+                {
+                    "name": "internal",
+                    "position": 3,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "The internal flag"
                 },
                 {
                     "name": "date",
-                    "position": 3,
+                    "position": 4,
                     "type": "string",
                     "required": false,
                     "has_default": true,
                     "default": "",
+                    "default_name": "",
+                    "description": "The note date"
+                }
+            ]
+        },
+        "editIssueNote": {
+            "name": "editIssueNote",
+            "summary": "Edit an issue note of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $note, string $content, bool $internal = false)\n  {\n    $params = [\n      'body' => $content,\n      \/\/'internal' => empty($internal) ? 'false' : 'true'\n    ];\n    return $this->put($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL . $note, $params);\n  }",
+            "startLine": 67,
+            "endLine": 74,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "returns": [
+                "array"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "note",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note ID"
+                },
+                {
+                    "name": "content",
+                    "position": 3,
+                    "type": "string",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note content"
+                },
+                {
+                    "name": "internal",
+                    "position": 4,
+                    "type": "bool",
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
                     "default_name": ""
+                }
+            ]
+        },
+        "deleteIssueNote": {
+            "name": "deleteIssueNote",
+            "summary": "Delete an issue note of the given project",
+            "description": "",
+            "description_parts": [],
+            "file": "bbn\\Api\\GitLab\\Note",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "function($project, int $iid, int $note)\n  {\n    return $this->delete($this->projectURL . $project . '\/' . $this->issueURL . $iid . '\/' . $this->noteURL . $note);\n  }",
+            "startLine": 84,
+            "endLine": 87,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "returns": [
+                "bool"
+            ],
+            "parent": false,
+            "arguments": [
+                {
+                    "name": "project",
+                    "position": 0,
+                    "type": "",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ID or URL-encoded path of the project"
+                },
+                {
+                    "name": "iid",
+                    "position": 1,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The issue internal ID"
+                },
+                {
+                    "name": "note",
+                    "position": 2,
+                    "type": "int",
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The note ID"
                 }
             ]
         }
