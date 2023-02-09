@@ -1,5 +1,4 @@
 <?php
-<?php
 /**
  * Class for sending mails
  *
