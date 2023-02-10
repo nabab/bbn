@@ -316,7 +316,7 @@ class Router
                 'component_name' => $name,
                 'ext' => $f,
                 'mode' => $mode,
-                'i18n' => $mode === 'js' ? $this->_find_translation($plugin ?? null) : null,
+                'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,
                 ], true
               );
               break;
@@ -356,7 +356,7 @@ class Router
           'ext' => $t,
           'plugin' => $plugin,
           'mode' => $mode,
-          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
+          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,
           ], true
         );
       }
@@ -392,7 +392,7 @@ class Router
           'plugin' => $this->pluginPath($pluginName),
           'plugin_name' => $pluginName,
           'mode' => $mode,
-          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
+          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,
           ], false
         );
       }
@@ -1145,7 +1145,7 @@ class Router
           'plugin_name' => $plugin_name,
           'ext' => $t,
           'mode' => $mode,
-          'i18n' => $t === 'js' ? $this->_find_translation($plugin ?? null) : null,
+          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,
           ], true
         );
       }
