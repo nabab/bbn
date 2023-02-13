@@ -194,7 +194,7 @@ class Cms extends DbCls
   {
     $seo = '';
     if ($note = $this->get($id_note, true, true)) {
-      $seo = '<noscript>' . PHP_EOL . '<h1>' . $note['title'] . '</h1>' . PHP_EOL;
+      $seo = PHP_EOL . '<h2>' . $note['title'] . '</h2>' . PHP_EOL;
       if (!empty($note['items'])) {
         foreach($note['items'] as $it) {
           if (!empty($it['type']) && ($it['type'] === 'container')) {
@@ -207,7 +207,7 @@ class Cms extends DbCls
           }
         }
 
-        $seo .= '</noscript>' . PHP_EOL;
+        $seo .= PHP_EOL;
       }
     }
 
