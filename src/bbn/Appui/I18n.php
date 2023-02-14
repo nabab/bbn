@@ -698,7 +698,7 @@ class I18n extends bbn\Models\Cls\Cache
       if (!empty($languages)) {
         foreach ($languages as $lng){
           // the path of po and mo files
-          $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
+          $idx = $this->getIndexValue($id_option) ?: 1;
           if (is_file($locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po')) {
             $tmp[$lng] = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           }
@@ -946,7 +946,7 @@ class I18n extends bbn\Models\Cls\Cache
         $success = false;
         foreach ($languages as $lng){
           // the path of po and mo files
-          $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
+          $idx = $this->getIndexValue($id_option) ?: 1;
           $po  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           $mo  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
 
@@ -1032,7 +1032,7 @@ class I18n extends bbn\Models\Cls\Cache
         $success = false;
         foreach ($languages as $lng){
           // the path of po and mo files
-          $idx = is_file($locale_dir.'/index.txt') ? file_get_contents($locale_dir.'/index.txt') : '';
+          $idx = $this->getIndexValue($id_option) ?: 1;
           $po  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
           $mo  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
           // if the file po exist takes its content
@@ -1276,11 +1276,23 @@ class I18n extends bbn\Models\Cls\Cache
    * Returns the path of the file index.txt inside the locale folder
    *
    * @param string $id_option
-   * @return void
+   * @return string
    */
-  public function getIndexPath(string $id_option)
+  public function getIndexPath(string $id_option): string
   {
     return $this->getLocaleDirPath($id_option).'/index.txt';
+  }
+
+
+  /**
+   * Returns the version number contained in the index.txt file inside the folder locale or 0 if the file doesn't exists
+   * @param string $idPath
+   * @return int
+   */
+  public function getIndexValue(string $idPath): int
+  {
+    $indexPath = $this->getIndexPath($idPath);
+    return \is_file($indexPath) ? (int)\file_get_contents($indexPath) : 0;
   }
 
 
@@ -1337,27 +1349,25 @@ class I18n extends bbn\Models\Cls\Cache
     $localeDir = $this->getLocaleDirPath($idPath);
     /** @var (array) $languages based on locale dirs found in the path */
     $currentLangs = array_map('basename', Dir::getDirs($localeDir) ?: []);
-    /** @var string $indexPath */
-    $indexPath = $this->getIndexPath($idPath);
-    // The version number contained in the txt file inside the folder locale
-    $versionNumber = \is_file($indexPath) ? (int)\file_get_contents($indexPath) : 0;
     if (empty($languages)) {
       $languages = $currentLangs;
     }
     if (empty($languages)) {
       $languages = \array_map(fn($o) => $o['code'], $this->getPrimariesLangs());
     }
+    $fromAction = [];
     if (!empty($languages)) {
       if ($toRemove = \array_diff($currentLangs, $languages)) {
         foreach ($toRemove as $d) {
           \array_splice($currentLangs, \array_search($d, $currentLangs, true), 1);
-          if ($files = Dir::getFiles("$localeDir/$d")) {
-            foreach ($files as $f) {
-              if ($mode === 'files') {
-                Dir::delete("$localeDir/$d/LC_MESSAGES");
-                Dir::delete("$localeDir/$d/$d.json");
-              }
-            }
+          switch ($mode) {
+            case 'files':
+              Dir::delete("$localeDir/$d/LC_MESSAGES");
+              Dir::delete("$localeDir/$d/$d.json");
+              break;
+            case 'options':
+              Dir::delete("$localeDir/$d/options.json");
+              break;
           }
           if (!Dir::getFiles("$localeDir/$d")) {
             Dir::delete("$localeDir/$d");
@@ -1369,158 +1379,224 @@ class I18n extends bbn\Models\Cls\Cache
           $languages[] = $d;
         }
       }
-      $parent = $this->options->parent($idPath);
-      /** @var bool $json Will be true if some translations are put into a JSON file */
-      $json = false;
-      /** @var array $toJSON */
-      $toJSON = [];
       Dir::createPath($localeDir);
-      if ($mode === 'files') {
-        /** @var string $domain The domain on which will be bound gettext */
-        $domain = $this->options->text($idPath);
-        \file_put_contents($indexPath, ++$versionNumber);
-        $domain .= $versionNumber;
-        /** @var array $data Takes all strings found in the files of this path */
-        $data = $this->getTranslationsStrings($idPath, $this->getLanguage($idPath), $languages);
-        if (!empty($data['res'])) {
-          \clearstatcache();
-          foreach ($languages as $lang) {
-            /** @var string $dir The path of locale dir for this id_option foreach lang */
-            $dir = "$localeDir/$lang/LC_MESSAGES";
-            /** creates the path of the dirs */
-            Dir::createPath($dir);
-            /** @var  $po & $mo files path */
-            $files = Dir::getFiles($dir);
-            foreach ($files as $f) {
-              $ext = Str::fileExt($f);
-              if (($ext === 'po') || ($ext === 'mo')) {
-                \unlink($f);
-              }
-            }
-            // the new files
-            $poFile = "$dir/$domain.po";
-            //create the file at the given path
-            \fopen($poFile, 'x');
-            //instantiate the parser
-            $fileHandler  = new Sepia\PoParser\SourceHandler\FileSystem($poFile);
-            $poParser     = new Sepia\PoParser\Parser($fileHandler);
-            $catalog      = Sepia\PoParser\Parser::parseFile($poFile);
-            $compiler     = new Sepia\PoParser\PoCompiler();
-            $headersClass = new Sepia\PoParser\Catalog\Header();
-            if ($catalog->getHeaders()) {
-              //headers for new po file
-              $headers = [
-                "Project-Id-Version: 1",
-                "Report-Msgid-Bugs-To: info@bbn.so",
-                "last-Translator: BBN Solutions <support@bbn.solutions>",
-                "Language-Team: ".strtoupper($lang).' <'.strtoupper($lang).'@li.org>',
-                "MIME-Version: 1.0",
-                "Content-Type: text/plain; charset=UTF-8",
-                "Content-Transfer-Encoding: 8bit",
-                "POT-Creation-Date: ".date('Y-m-d H:iO'),
-                "POT-Revision-Date: ".date('Y-m-d H:iO'),
-                "Language: ".$lang,
-                "X-Domain: ".$domain,
-                "Plural-Forms: nplurals=2; plural=n != 1;"
-              ];
-              //set the headers on the Catalog object
-              $headersClass->setHeaders($headers);
-              $catalog->addHeaders($headersClass);
-            }
-            $constroot = 'BBN_'.strtoupper($parent['code']).'_PATH';
-            if (!defined($constroot)) {
-              X::log($this->options->option($idPath));
-              throw new \Exception("Impossible to find the root for option, see Misc log");
-            }
-            $root = constant($constroot);
-            foreach ($data['res'] as $index => $r) {
-              if ($catalog->getEntry($r['original_exp'])) {
-                //prepare the new entry for the Catalog
-                $entry = new Sepia\PoParser\Catalog\Entry($r['original_exp'], $r[$lang]);
-                // set the reference for the entry
-                if (!empty($r['path'])) {
-                  $entry->setReference($r['path']);
-                  foreach($r['path'] as $path){
-                    $name = '';
-                    $ext = Str::fileExt($path);
-                    if (($ext === 'js')
-                      || ($ext === 'php')
-                      || ($ext === 'html')
-                    ) {
-                      $tmp = \substr($path, \strlen($root), -(\strlen($ext) + 1));
-                      if (\strpos($tmp, 'components') === 0) {
-                        $name = \dirname($tmp);
-                      }
-                      elseif (\strpos($tmp, 'mvc') === 0) {
-                        if (\strpos($tmp, 'js/') === 4) {
-                          $name = \preg_replace('/js\//', '', $tmp, 1);
-                        }
-                        else if (\strpos($tmp, 'html/') === 4) {
-                          $name = \preg_replace('/html\//', '', $tmp, 1);
-                        }
-                      }
-                      //case of plugins inside current (apst-app), temporary we decided to don't take it inside the json file of apst-app
-                      elseif ((\strpos($tmp, 'plugins') === 0) && ($root === BBN_APP_PATH)) {
-                        continue;
-                      }
-                      elseif (\strpos($tmp, 'bbn/') === 0) {
-                        $optCode = $this->options->code($idPath);
-                        $tmp  = \str_replace($optCode.'/', '', \substr($tmp, 4));
-                        if (\strpos($tmp, 'components') === 4) {
-                          $final = \str_replace(\substr($tmp, 0,4), '', $tmp);
-                          $name = \dirname($final);
-                        }
-                        elseif (\strpos($tmp, 'mvc') === 4) {
-                          if ((\strpos($tmp, 'js/') !== 8)
-                            && (\strpos($tmp, 'html/') !== 8)
-                          ) {
-                            continue;
-                          }
-                          $final = \str_replace(substr($tmp, 0, 4), '', $tmp);
-                          $name  = \preg_replace(['/js\//', '/html\//'], '', $final, 1);
-                        }
-                      }
-                      if (empty($toJSON[$lang][$name])) {
-                        $toJSON[$lang][$name] = [];
-                      }
-                      //array of all js files found in po file
-                      $toJSON[$lang][$name][$data['res'][$index]['original_exp']] = $data['res'][$index][$lang];
+      switch ($mode) {
+        case 'files':
+          $fromAction = $this->generateFilesPo($idPath, $languages);
+          $this->generateFilesMo($idPath, $languages);
+          break;
+        case 'options':
+          $fromAction = $this->generateFilesOptions($idPath, $languages);
+          break;
+      }
+    }
+    return \array_merge([
+      'locale' => $localeDir,
+      'languages' => $languages,
+      'new_dir' => $toCreate,
+      'ex_dir' => $toRemove,
+      'path' => $this->getPathToExplore($idPath)
+    ], $fromAction);
+  }
+
+
+  private function generateFilesPo(string $idPath, array $languages): array
+  {
+    /** @var string $domain The domain on which will be bound gettext */
+    $domain = $this->options->text($idPath);
+    // The position of locale directory
+    $localeDir = $this->getLocaleDirPath($idPath);
+    /** @var string $indexPath */
+    $indexPath = $this->getIndexPath($idPath);
+    // The version number contained in the txt file inside the folder locale
+    $versionNumber = $this->getIndexValue($idPath);
+    \file_put_contents($indexPath, ++$versionNumber);
+    $domain .= $versionNumber;
+    $parent = $this->options->parent($idPath);
+    /** @var bool $json Will be true if some translations are put into a JSON file */
+    $json = false;
+    /** @var array $toJSON */
+    $toJSON = [];
+    /** @var array $data Takes all strings found in the files of this path */
+    $data = $this->getTranslationsStrings($idPath, $this->getLanguage($idPath), $languages);
+    if (!empty($data['res'])) {
+      \clearstatcache();
+      foreach ($languages as $lang) {
+        /** @var string $dir The path of locale dir for this id_option foreach lang */
+        $dir = "$localeDir/$lang/LC_MESSAGES";
+        /** creates the path of the dirs */
+        Dir::createPath($dir);
+        /** @var  $po & $mo files path */
+        $files = Dir::getFiles($dir);
+        foreach ($files as $f) {
+          $ext = Str::fileExt($f);
+          if (($ext === 'po') || ($ext === 'mo')) {
+            \unlink($f);
+          }
+        }
+        // the new files
+        $poFile = "$dir/$domain.po";
+        //create the file at the given path
+        \fopen($poFile, 'x');
+        //instantiate the parser
+        $fileHandler  = new \Sepia\PoParser\SourceHandler\FileSystem($poFile);
+        $poParser     = new \Sepia\PoParser\Parser($fileHandler);
+        $catalog      = \Sepia\PoParser\Parser::parseFile($poFile);
+        $compiler     = new \Sepia\PoParser\PoCompiler();
+        $headersClass = new \Sepia\PoParser\Catalog\Header();
+        if ($catalog->getHeaders()) {
+          //headers for new po file
+          $headers = [
+            "Project-Id-Version: 1",
+            "Report-Msgid-Bugs-To: info@bbn.so",
+            "last-Translator: BBN Solutions <support@bbn.solutions>",
+            "Language-Team: ".strtoupper($lang).' <'.strtoupper($lang).'@li.org>',
+            "MIME-Version: 1.0",
+            "Content-Type: text/plain; charset=UTF-8",
+            "Content-Transfer-Encoding: 8bit",
+            "POT-Creation-Date: ".date('Y-m-d H:iO'),
+            "POT-Revision-Date: ".date('Y-m-d H:iO'),
+            "Language: ".$lang,
+            "X-Domain: ".$domain,
+            "Plural-Forms: nplurals=2; plural=n != 1;"
+          ];
+          //set the headers on the Catalog object
+          $headersClass->setHeaders($headers);
+          $catalog->addHeaders($headersClass);
+        }
+        $constroot = 'BBN_'.strtoupper($parent['code']).'_PATH';
+        if (!defined($constroot)) {
+          X::log($this->options->option($idPath));
+          throw new \Exception("Impossible to find the root for option, see Misc log");
+        }
+        $root = constant($constroot);
+        foreach ($data['res'] as $index => $r) {
+          if (!$catalog->getEntry($r['original_exp'])) {
+            //prepare the new entry for the Catalog
+            $entry = new \Sepia\PoParser\Catalog\Entry($r['original_exp'], $r[$lang]);
+            // set the reference for the entry
+            if (!empty($r['path'])) {
+              $entry->setReference($r['path']);
+              foreach($r['path'] as $path){
+                $name = '';
+                $ext = Str::fileExt($path);
+                if (($ext === 'js')
+                  || ($ext === 'php')
+                  || ($ext === 'html')
+                ) {
+                  $tmp = \substr($path, \strlen($root), -(\strlen($ext) + 1));
+                  if (\strpos($tmp, 'components') === 0) {
+                    $name = \dirname($tmp);
+                  }
+                  elseif (\strpos($tmp, 'mvc') === 0) {
+                    if (\strpos($tmp, 'js/') === 4) {
+                      $name = \preg_replace('/js\//', '', $tmp, 1);
+                    }
+                    else if (\strpos($tmp, 'html/') === 4) {
+                      $name = \preg_replace('/html\//', '', $tmp, 1);
                     }
                   }
+                  elseif ((\strpos($tmp, 'plugins') === 0) && ($root === BBN_APP_PATH)) {
+                    continue;
+                  }
+                  elseif (\strpos($tmp, 'bbn/') === 0) {
+                    $optCode = $this->options->code($idPath);
+                    $tmp  = \str_replace($optCode.'/', '', \substr($tmp, 4));
+                    if (\strpos($tmp, 'components') === 4) {
+                      $final = \str_replace(\substr($tmp, 0,4), '', $tmp);
+                      $name = \dirname($final);
+                    }
+                    elseif (\strpos($tmp, 'mvc') === 4) {
+                      if ((\strpos($tmp, 'js/') !== 8)
+                        && (\strpos($tmp, 'html/') !== 8)
+                      ) {
+                        continue;
+                      }
+                      $final = \str_replace(substr($tmp, 0, 4), '', $tmp);
+                      $name  = \preg_replace(['/js\//', '/html\//'], '', $final, 1);
+                    }
+                  }
+                  if (empty($toJSON[$lang][$name])) {
+                    $toJSON[$lang][$name] = [];
+                  }
+                  //array of all js files found in po file
+                  $toJSON[$lang][$name][$data['res'][$index]['original_exp']] = $data['res'][$index][$lang];
                 }
-                //add the prepared entry to the catalog
-                $catalog->addEntry($entry);
               }
             }
-            //compile the catalog
-            $file = $compiler->compile($catalog);
-            //save the catalog in the file
-            $fileHandler->save($file);
-            \clearstatcache();
-            if (!empty($toJSON[$lang])) {
-              $file_name = $localeDir . '/' . $lang . '/' . $lang . '.json';
-              \bbn\File\Dir::createPath(dirname($file_name));
-              // put the content of the array js_files in a json file
-              $json = (boolean)\file_put_contents($file_name, \json_encode($toJSON[$lang], JSON_PRETTY_PRINT));
-            }
+            //add the prepared entry to the catalog
+            $catalog->addEntry($entry);
           }
-          \clearstatcache();
-          $this->cacheSet(
-            $idPath, 'get_translations_table',
-            $this->getTranslationsTable($this->id_project, $idPath)
-          );
-          $this->cacheSet(
-            $idPath, 'get_translations_widget',
-            $this->getTranslationsWidget($this->id_project, $idPath)
-          );
+        }
+        //compile the catalog
+        $file = $compiler->compile($catalog);
+        //save the catalog in the file
+        $fileHandler->save($file);
+        \clearstatcache();
+        if (!empty($toJSON[$lang])) {
+          $file_name = "$localeDir/$lang/$lang.json";
+          Dir::createPath(dirname($file_name));
+          // put the content of the array js_files in a json file
+          $json = (boolean)\file_put_contents($file_name, \json_encode($toJSON[$lang], JSON_PRETTY_PRINT));
         }
       }
-      else if ($mode === 'options') {
-
-      }
-
-
+      \clearstatcache();
+      $this->cacheSet(
+        $idPath,
+        'get_translations_table',
+        $this->getTranslationsTable($this->id_project, $idPath)
+      );
+      $this->cacheSet(
+        $idPath,
+        'get_translations_widget',
+        $this->getTranslationsWidget($this->id_project, $idPath)
+      );
     }
+    return [
+      'json' => $json,
+      'no_strings' => empty($data['res'])
+    ];
+  }
+
+
+  private function generateFilesOptions(string $idPath, array $languages): array
+  {
+    if (($localeDir = $this->getLocaleDirPath($idPath))
+      && !empty($languages)
+      && ($code = $this->options->code($idPath))
+    ) {
+      if (\strpos($code, 'appui-') === 0) {
+        $idOpt = $this->options->fromCode(\preg_replace('/appui-/', '', $code, 1), 'appui');
+      }
+    }
+    return [];
+  }
+
+
+  private function generateFilesMo(string $idPath, array $languages): bool
+  {
+    if (($domain = $this->options->text($idPath))
+      && ($localeDir = $this->getLocaleDirPath($idPath))
+      && ($indexPath = $this->getIndexPath($idPath))
+      && !empty($languages)
+    ) {
+      $versionNumber = $this->getIndexValue($indexPath) ?: 1;
+      $success = true;
+      foreach ($languages as $lang) {
+        $file = "$localeDir/$lang/LC_MESSAGES/$domain$versionNumber.";
+        if (\is_file($file.'mo')) {
+          \unlink($file.'mo');
+        }
+        if (\is_file($file.'po')
+          && ($translations = \Gettext\Translations::fromPoFile($file.'po'))
+          && !$translations->toMoFile($file.'mo')
+        ) {
+          $success = false;
+        }
+      }
+      return $success;
+    }
+    return false;
   }
 
 
