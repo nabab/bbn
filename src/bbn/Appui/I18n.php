@@ -319,6 +319,7 @@ class I18n extends bbn\Models\Cls\Cache
 
 
   /**
+   * @deprecated
    * get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs)
    *
    * @return void
@@ -326,7 +327,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function getNumOptions()
   {
     /** @var  $paths takes all options with i18n property setted*/
-    $paths = $this->options->findI18n(true);
+    $paths = $this->options->findI18n(null, true);
     $data = [];
     /**
     * creates the property data_widget that will have just num of items found for the option + 1 (the text of the option parent), the * * number of strings translated and the source language indexed to the language
@@ -374,6 +375,7 @@ class I18n extends bbn\Models\Cls\Cache
 
 
   /**
+   * @deprecated
    * get the num of items['text'] in original language and num translations foreach lang in configured langs (for this project uses all primaries as configured langs)
    *
    * @return void
@@ -429,6 +431,7 @@ class I18n extends bbn\Models\Cls\Cache
 
 
   /**
+   * @deprecated
    * Gets the option with the property i18n setted and its items
    *
    * @return void
@@ -436,7 +439,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function getOptions()
   {
     /** @var ( array) $paths get all options having i18n property setted and its items */
-    $paths = $this->options->findI18n(true);
+    $paths = $this->options->findI18n(null, true);
     $res   = [];
     foreach ($paths as $p => $val){
       $res[$p] = [
@@ -618,11 +621,13 @@ class I18n extends bbn\Models\Cls\Cache
       }
     }
 
-    return [
+    $ret = [
       'locale_dirs' => $locale_dirs,
       'result' => $result,
       'success' => $success,
     ];
+    $this->cacheSet($id_option, 'get_translations_widget', $ret);
+    return $ret;
   }
 
 
@@ -633,42 +638,48 @@ class I18n extends bbn\Models\Cls\Cache
    * @param string $id_option
    * @return void
    */
-  public function getOptionsTranslationsWidget($lang)
+  public function getOptionsTranslationsWidget(string $idPath): array
   {
-    $langs = [];
     $result = [];
-    $primaries = $this->getPrimariesLangs();
-    if ($options = $this->options->findI18nByLang($lang)) {
-      foreach ($primaries as $p) {
+    $languages = [];
+    if ($localeDir = $this->getLocaleDirPath($idPath)) {
+      $languages  = \array_map(fn($a) => X::basename($a), Dir::getDirs($localeDir) ?: []);
+      foreach ($languages as $lang) {
         $count = 0;
-        foreach ($options as $item) {
-          if (($id = $this->db->selectOne('bbn_i18n', 'id', [
-              'exp' => $this->normlizeText($item['text']),
-              'lang' => $lang
-            ]))
-            && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
-              'id_exp' => $id,
-              'lang' => $p['code']
-            ])
-          ) {
-            $count++;
+        $countDB = 0;
+        if (\is_file("$localeDir/$lang/options.json")) {
+          $options = \json_decode(\file_get_contents("$localeDir/$lang/options.json"), true);
+          foreach ($options as $exp => $opt) {
+            if (!empty($opt['translation'])) {
+              $count++;
+            }
+            if (($id = $this->db->selectOne('bbn_i18n', 'id', [
+                'exp' => $this->normlizeText($exp),
+                'lang' => $opt['language']
+              ]))
+              && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
+                'id_exp' => $id,
+                'lang' => $lang
+              ])
+            ) {
+              $countDB++;
+            }
           }
         }
-        $result[$p['code']] = [
-          'lang' => $p['code'],
-          'num' => count($options),
+        $result[$lang] = [
+          'lang' => $lang,
+          'num' => !empty($options) ? count($options) : 0,
           'num_translations' => $count,
-          'num_translations_db' => $count
+          'num_translations_db' => $countDB
         ];
       }
     }
-
-    return [
-      'locale_dirs' => \array_map(function($p){
-        return $p['code'];
-      }, $primaries),
+    $ret = [
+      'locale_dirs' => $languages,
       'result' => $result
     ];
+    $this->cacheSet($idPath, 'get_options_translations_widget', $ret);
+    return $ret;
   }
 
 
@@ -1003,8 +1014,9 @@ class I18n extends bbn\Models\Cls\Cache
   }
 
 
-  public function getTranslationsTable($id_project, $id_option)
+  public function getTranslationsTable($id_project, $id_option): array
   {
+    $ret = [];
     if (!empty($id_option)
         && ($o = $this->options->option($id_option))
     ) {
@@ -1019,7 +1031,7 @@ class I18n extends bbn\Models\Cls\Cache
       $languages  = array_map(
         function ($a) {
           return X::basename($a);
-        }, bbn\File\Dir::getDirs($locale_dir)
+        }, Dir::getDirs($locale_dir)
       ) ?: [];
 
       $i       = 0;
@@ -1034,7 +1046,6 @@ class I18n extends bbn\Models\Cls\Cache
           // the path of po and mo files
           $idx = $this->getIndexValue($id_option) ?: 1;
           $po  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
-          $mo  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.mo';
           // if the file po exist takes its content
           if ($translations = $this->parsePoFile($po)) {
             foreach ($translations as $i => $t){
@@ -1143,8 +1154,7 @@ class I18n extends bbn\Models\Cls\Cache
         }
       }
 
-      return [
-
+      $ret = [
         'path_source_lang' => $path_source_lang,
         'path' => $o['text'],
         'success' => $success,
@@ -1155,78 +1165,85 @@ class I18n extends bbn\Models\Cls\Cache
         'errors' => $errors
       ];
     }
-
+    $this->cacheSet($id_option, 'get_translations_table', $ret);
+    return $ret;
   }
 
 
-  public function getOptionsTranslationsTable(string $lang)
+  public function getOptionsTranslationsTable(string $idPath): array
   {
-    if (($options = $this->options->findI18nByLang($lang))
-      && ($languages = $this->getPrimariesLangs())
-    ) {
-      $res = [];
-      $langText = X::getField($languages, ['code' => $lang], 'text');
-      $languages = \array_map(fn($l) => $l['code'], $languages);
-      foreach ($options as $opt) {
-        $original = $this->normlizeText($opt['text']);
-        if (!($id = $this->db->selectOne('bbn_i18n', 'id', [
-          'exp' => $original,
-          'lang' => $lang
-        ]))) {
-          if ($this->db->insert('bbn_i18n', [
-            'exp' => $original,
-            'lang' => $lang
-          ])) {
-            $id = $this->db->lastId();
-          }
-          else {
-            throw new \Exception(X::_('Impossible to insert the original string %s in the original language %s', $original, $langText));
-          }
-        }
-        if (!empty($id)) {
-          if (!$this->db->selectOne('bbn_i18n_exp', 'id', [
-            'id_exp' => $id,
-            'lang' => $lang
-          ])) {
-            if (!$this->db->insert('bbn_i18n_exp', [
-              'id_exp' => $id,
-              'expression' => $original,
-              'lang' => $lang
-            ])) {
-              throw new \Exception(X::_('Impossible to insert the string %s in the language %s', $original, $langText));
+    $ret = [];
+    if ($localeDir = $this->getLocaleDirPath($idPath)) {
+      $languages  = \array_map(fn($a) => X::basename($a), Dir::getDirs($localeDir) ?: []);
+      $rows = [];
+      $primaryLanguages = $this->getPrimariesLangs();
+      foreach ($languages as $lang) {
+        if (\is_file("$localeDir/$lang/options.json")) {
+          $options = \json_decode(\file_get_contents("$localeDir/$lang/options.json"), true);
+          foreach ($options as $exp => $opt) {
+            $idx = X::find($rows, ['exp' => $exp]);
+            if (\is_null($idx)) {
+              if (!($idExp = $this->db->selectOne('bbn_i18n', 'id', [
+                'exp' => $this->normlizeText($exp),
+                'lang' => $opt['language']
+              ]))) {
+                if ($this->db->insert('bbn_i18n', [
+                  'exp' => $this->normlizeText($exp),
+                  'lang' => $opt['language']
+                ])) {
+                  $idExp = $this->db->lastId();
+                }
+                else {
+                  $langText = X::getField($primaryLanguages, ['code' => $lang], 'text');
+                  throw new \Exception(X::_('Impossible to insert the original string %s in the original language %s', $this->normlizeText($exp), $langText));
+                }
+              }
+              if (!empty($idExp)) {
+                if (!$this->db->selectOne('bbn_i18n_exp', 'id', [
+                  'id_exp' => $idExp,
+                  'lang' => $opt['language']
+                ])) {
+                  $this->insertOrUpdateTranslation($idExp, $exp, $opt['language']);
+                }
+                $r = [
+                  'id_exp' => $idExp,
+                  'exp' => $this->normlizeText($exp),
+                  $opt['language'] . '_po' => $exp,
+                  $opt['language'] . '_db' => $this->db->selectOne('bbn_i18n_exp', 'expression', [
+                    'id_exp' => $idExp,
+                    'lang' => $opt['language']
+                  ]) ?: '',
+                  'occurrence' => count($opt['paths']),
+                  'paths' => $opt['paths']
+                ];
+                if ($lang !== $opt['language']) {
+                  $r[$lang . '_po'] = $opt['translation'];
+                  $r[$lang . '_db'] = '';
+                }
+                $rows[] = $r;
+              }
             }
-          }
-          $idx = X::find($res, ['id_exp' => $id]);
-          if (\is_null($idx)) {
-            $res[] = [
-              'id_exp' => $id,
-              'exp' => $original,
-              $lang . '_db' => $original,
-              $lang . '_po' => '',
-              'occurrence' => 0,
-              'paths' => []
-            ];
-            $idx = count($res) - 1;
-          }
-          $row =& $res[$idx];
-          $row['occurence']++;
-          foreach ($languages as $lng){
-            $row[$lng . '_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]) ?: '';
-            $row[$lng . '_po'] = '';
+            else {
+              $rows[$idx][$lang . '_po'] = $opt['translation'];
+              $rows[$idx][$lang . '_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', [
+                'id_exp' => $rows[$idx]['id_exp'],
+                'lang' => $lang
+              ]) ?: '';
+            }
           }
         }
       }
-
-      return [
-        'path_source_lang' => $lang,
-        'path' => X::_('Options - %s', $langText),
+      $ret = [
+        //'path_source_lang' => $lang,
+        'path' => ($o = $this->options->text($idPath)),
         'languages' => $languages,
-        'total' => count($res),
-        'strings' => $res,
-        'id_option' => $lang
+        'total' => count($rows),
+        'strings' => $rows,
+        'id_option' => $idPath
       ];
+      $this->cacheSet($idPath, 'get_options_translations_table', $ret);
     }
-
+    return $ret;
   }
 
 
@@ -1541,16 +1558,8 @@ class I18n extends bbn\Models\Cls\Cache
         }
       }
       \clearstatcache();
-      $this->cacheSet(
-        $idPath,
-        'get_translations_table',
-        $this->getTranslationsTable($this->id_project, $idPath)
-      );
-      $this->cacheSet(
-        $idPath,
-        'get_translations_widget',
-        $this->getTranslationsWidget($this->id_project, $idPath)
-      );
+      $this->getTranslationsTable($this->id_project, $idPath);
+      $this->getTranslationsWidget($this->id_project, $idPath);
     }
     return [
       'json' => $json,
@@ -1565,11 +1574,55 @@ class I18n extends bbn\Models\Cls\Cache
       && !empty($languages)
       && ($code = $this->options->code($idPath))
     ) {
-      if (\strpos($code, 'appui-') === 0) {
-        $idOpt = $this->options->fromCode(\preg_replace('/appui-/', '', $code, 1), 'appui');
+      $toJSON = [];
+      $options = [];
+      if (($parent = $this->options->parent($idPath))
+        && ($parentCode = $this->options->code($parent['id']))
+      ) {
+        if (($parentCode === 'lib')
+          && (\strpos($code, 'appui-') === 0)
+        ) {
+          if ($idOpt = $this->options->fromCode(\preg_replace('/appui-/', '', $code, 1), 'appui')) {
+            $options = $this->options->findI18n($idOpt);
+          }
+        }
       }
+      if (!empty($options)) {
+        foreach ($options as $opt) {
+          $codePath = $this->options->getCodePath($opt['id']);
+          if ($codePath) {
+            $codePath = \implode('/', \array_reverse($codePath));
+            foreach ($languages as $lang) {
+              if (!isset($toJSON[$lang])) {
+                $toJSON[$lang] = [];
+              }
+              $t = $this->normlizeText($opt['text']);
+              if (!isset($toJSON[$lang][$t])) {
+                $toJSON[$lang][$t] = [
+                  'language' => $opt['language'],
+                  'paths' => [$codePath],
+                  'original' => $opt['text'],
+                  'translation' => $this->getTranslation($t, $opt['language'], $lang) ?: ''
+                ];
+              }
+              else if (!\in_array($codePath, $toJSON[$lang][$t]['paths'])) {
+                $toJSON[$lang][$t]['paths'][] = $codePath;
+              }
+            }
+          }
+        }
+      }
+      foreach ($toJSON as $lang => $str) {
+        Dir::createPath("$localeDir/$lang");
+        \file_put_contents("$localeDir/$lang/options.json", \json_encode($str, JSON_PRETTY_PRINT));
+      }
+      $this->getOptionsTranslationsTable($idPath);
+      $this->getOptionsTranslationsWidget($idPath);
     }
-    return [];
+    return [
+      'json' => !empty($toJSON),
+      'no_strings' => empty($options)
+    ];
   }
 
 

@@ -3228,7 +3228,11 @@ class Option extends bbn\Models\Cls\Db
         ]
       )
       ) {
-        if (isset($old_cfg['inheritance'], $cfg['inheritance']) && $old_cfg['inheritance'] !== $cfg['inheritance']) {
+        if ((isset($old_cfg['inheritance'], $cfg['inheritance'])
+            && ($old_cfg['inheritance'] !== $cfg['inheritance']))
+          || (isset($old_cfg['i18n_inheritance'], $cfg['i18n_inheritance'])
+            && ($old_cfg['i18n_inheritance'] !== $cfg['i18n_inheritance']))
+        ) {
           $this->deleteCache($id, true);
         }
         else{
@@ -4219,14 +4223,28 @@ class Option extends bbn\Models\Cls\Db
 
   /**
    * Returns an array containing all options that have the property i18n set
-   *
+   * @param string|null $startFromID
    * @param bool $items
    * @return array
    */
-  public function findI18n($items = false)
+  public function findI18n(?string $startFromID = null, $items = false)
   {
     $res = [];
     if ($this->check()) {
+      $where = [[
+        'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))',
+        'operator' => 'isnotnull'
+      ], [
+        'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))',
+        'operator' => '!=',
+        'value' => ''
+      ]];
+      if (bbn\Str::isUid($startFromID)) {
+        $where[] = [
+          'field' => $this->fields['id'],
+          'value' => $startFromID
+        ];
+      }
       $opts = $this->db->rselectAll([
         'table' => $this->class_cfg['table'],
         'fields' => [
@@ -4236,21 +4254,14 @@ class Option extends bbn\Models\Cls\Db
           $this->fields['text'],
           'language' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))'
         ],
-        'where' => [[
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))',
-          'operator' => 'isnotnull'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', "$.i18n"))',
-          'operator' => '!=',
-          'value' => ''
-        ]]
+        'where' => $where
       ]);
 
       if ($opts) {
         foreach ($opts as $opt){
           if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
-            $cfg = $this->getCfg($opt[$this->fields['id']]);
             $res[] = $opt;
+            $cfg = $this->getCfg($opt[$this->fields['id']]);
             if (!empty($cfg['i18n_inheritance'])) {
               $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
             }
@@ -4318,23 +4329,36 @@ class Option extends bbn\Models\Cls\Db
    *
    * @return null|array
    */
-  public function findI18nLangs(): ?array
+  public function findI18nLangs(?string $startFromID = null): ?array
   {
     if ($this->check()) {
-      return $this->db->getFieldValues([
-        'table' => $this->class_cfg['table'],
-        'fields' => [
-          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
-        ],
-        'where' => [[
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
-          'operator' => 'isnotnull'
-        ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
-          'operator' => '!=',
-          'value' => ''
-        ]]
-      ]);
+      if (empty($startFromID)) {
+        return \array_unique($this->db->getFieldValues([
+          'table' => $this->class_cfg['table'],
+          'fields' => [
+            'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
+          ],
+          'where' => [[
+            'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
+            'operator' => 'isnotnull'
+          ], [
+            'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
+            'operator' => '!=',
+            'value' => ''
+          ]]
+        ]));
+      }
+      $res = [];
+      $cfg = $this->getCfg($startFromID);
+      if (!empty($cfg['i18n'])) {
+        $res[] = $cfg['i18n'];
+      }
+      if ($items = $this->items($startFromID)) {
+        foreach ($items as $item) {
+          $res = X::mergeArrays($res, $this->findI18n($item));
+        }
+      }
+      return \array_unique($res);
     }
     return null;
   }
