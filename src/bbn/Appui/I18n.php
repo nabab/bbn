@@ -1205,6 +1205,14 @@ class I18n extends bbn\Models\Cls\Cache
                 ])) {
                   $this->insertOrUpdateTranslation($idExp, $exp, $opt['language']);
                 }
+                if (!empty($opt['translation'])
+                  && !$this->db->selectOne('bbn_i18n_exp', 'id', [
+                    'id_exp' => $idExp,
+                    'lang' => $lang
+                  ])
+                ) {
+                  $this->insertOrUpdateTranslation($idExp, $opt['translation'], $lang);
+                }
                 $r = [
                   'id_exp' => $idExp,
                   'exp' => $this->normlizeText($exp),
@@ -1224,6 +1232,19 @@ class I18n extends bbn\Models\Cls\Cache
               }
             }
             else {
+              if (($idExp = $this->db->selectOne('bbn_i18n', 'id', [
+                'exp' => $this->normlizeText($exp),
+                'lang' => $opt['language']
+              ]))) {
+                if (!empty($opt['translation'])
+                  && !$this->db->selectOne('bbn_i18n_exp', 'id', [
+                    'id_exp' => $idExp,
+                    'lang' => $lang
+                  ])
+                ) {
+                  $this->insertOrUpdateTranslation($idExp, $opt['translation'], $lang);
+                }
+              }
               $rows[$idx][$lang . '_po'] = $opt['translation'];
               $rows[$idx][$lang . '_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', [
                 'id_exp' => $rows[$idx]['id_exp'],
@@ -1584,6 +1605,26 @@ class I18n extends bbn\Models\Cls\Cache
         ) {
           if ($idOpt = $this->options->fromCode(\preg_replace('/appui-/', '', $code, 1), 'appui')) {
             $options = $this->options->findI18n($idOpt);
+          }
+        }
+        else if (($parentCode === 'app')
+          && ($code === 'main')
+          && ($allOptions = $this->options->fullOptions(false))
+        ) {
+          foreach ($allOptions as $o) {
+            if ($o['code'] === 'appui') {
+              $idAlias = $this->options->fromCode('plugin', 'list', 'templates', 'option', 'appui');
+              if ($appuiOptions = $this->options->fullOptions($o['id'])) {
+                foreach ($appuiOptions as $ao) {
+                  if ($ao['id_alias'] !== $idAlias) {
+                    $options = X::mergeArrays($options, $this->options->findI18n($ao['id']));
+                  }
+                }
+              }
+            }
+            else {
+              $options = X::mergeArrays($options, $this->options->findI18n($o['id']));
+            }
           }
         }
       }

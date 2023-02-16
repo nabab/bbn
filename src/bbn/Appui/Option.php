@@ -4240,10 +4240,10 @@ class Option extends bbn\Models\Cls\Db
         'value' => ''
       ]];
       if (bbn\Str::isUid($startFromID)) {
-        $where[] = [
+        $where = [[
           'field' => $this->fields['id'],
           'value' => $startFromID
-        ];
+        ]];
       }
       $opts = $this->db->rselectAll([
         'table' => $this->class_cfg['table'],
@@ -4260,8 +4260,10 @@ class Option extends bbn\Models\Cls\Db
       if ($opts) {
         foreach ($opts as $opt){
           if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
-            $res[] = $opt;
             $cfg = $this->getCfg($opt[$this->fields['id']]);
+            if (!empty($cfg['i18n'])) {
+              $res[] = $opt;
+            }
             if (!empty($cfg['i18n_inheritance'])) {
               $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
             }
