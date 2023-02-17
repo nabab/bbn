@@ -174,6 +174,49 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * Sets the cache
+   * @param string $id
+   * @param string $method
+   * @param mixed $data
+   * @param string|null $locale
+   * @return self
+   */
+  public function setCache(string $id, string $method, $data, ?string $locale = null)
+  {
+    if (empty($locale)) {
+      $locale = $this->getTranslatingLocale($id);
+    }
+
+    if (!empty($locale)) {
+      return $this->cacheSetLocale($id, $locale, $method, $data);
+    }
+
+    return $this->cacheSet($id, $method, $data);
+  }
+
+
+  /**
+   * Gets the cache
+   * @param string $id
+   * @param string $method
+   * @param string|null $locale
+   * @return mixed
+   */
+  public function getCache(string $id, string $method, ?string $locale = null)
+  {
+    if (empty($locale)) {
+      $locale = $this->getTranslatingLocale($id);
+    }
+
+    if (!empty($locale)) {
+      return $this->cacheGetLocale($id, $locale, $method);
+    }
+
+    return $this->cacheGet($id, $method);
+  }
+
+
+  /**
    * Deletes the options' cache, specifically for an ID or globally
    * If specific, it will also destroy the cache of the parent
    *
@@ -557,30 +600,22 @@ class Option extends bbn\Models\Cls\Db
   public function nativeOption($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $originalLang = $this->findI18nById($id);
-      $lang = '';
-      if (\defined('BBN_LANG')
-        && !empty($originalLang)
-        && (BBN_LANG !== $originalLang)
-      ) {
-        $lang = BBN_LANG;
-      }
-      if ($opt = $this->cacheGet($id, __FUNCTION__ . (!empty($lang) ? "_$lang" : ''))) {
+      $originalLocale = $this->findI18nById($id);
+      $locale = $this->getTranslatingLocale($id);
+      if ($opt = $this->getCache($id, __FUNCTION__, $locale)) {
         return $opt;
       }
-
       $tab = $this->db->tsn($this->class_cfg['table']);
       $cfn = $this->db->cfn($this->fields['id'], $tab);
       $opt = $this->getRow([$cfn => $id]);
       if ($opt) {
-        if (!empty($lang)) {
+        if (!empty($locale) && \class_exists('\bbn\Appui\I18n')) {
           $i18nCls = new \bbn\Appui\I18n($this->db);
-          $opt['_originalText'] = $opt[$this->fields['text']];
-          if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLang, $lang)) {
+          if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
             $opt[$this->fields['text']] = $trans;
           }
         }
-        $this->cacheSet($id, __FUNCTION__ . (!empty($lang) ? "_$lang" : ''), $opt);
+        $this->setCache($id, __FUNCTION__, $opt, $locale);
         return $opt;
       }
     }
@@ -919,20 +954,18 @@ class Option extends bbn\Models\Cls\Db
   public function options($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      //var_dump("MY ID: $id");
-      if ($r = $this->cacheGet($id, __FUNCTION__)) {
+      $locale = $this->getTranslatingLocale($id);
+      if ($r = $this->getCache($id, __FUNCTION__, $locale)) {
         return $r;
       }
 
       $cf  =& $this->fields;
-      $res = $this->db->selectAllByKeys([
+      $opts = $this->db->rselectAll([
         'tables' => [$this->class_cfg['table']],
         'fields' => [
-          'id' => $this->class_cfg['table'].'.'.$cf['id'],
-          'text' => 'IFNULL('.
-            $this->db->cfn($cf['text'], $this->class_cfg['table'], true).', '.
-            $this->db->cfn($cf['text'], 'alias', true).
-            ')'
+          $this->db->cfn($cf['id'], $this->class_cfg['table']),
+          $this->db->cfn($cf['text'], $this->class_cfg['table']),
+          $this->db->cfn($cf['id_alias'], $this->class_cfg['table'])
         ],
         'join' => [
           [
@@ -941,17 +974,31 @@ class Option extends bbn\Models\Cls\Db
             'type'  => 'LEFT',
             'on'    => [
               [
-                'field' => $this->class_cfg['table'].'.'.$cf['id_alias'],
+                'field' => $this->db->cfn($cf['id_alias'], $this->class_cfg['table']),
                 'exp'   => 'alias.'.$cf['id']
               ]
             ]
           ]
         ],
-        'where' => [$this->class_cfg['table'].'.'.$cf['id_parent'] => $id],
+        'where' => [$this->db->cfn($cf['id_parent'], $this->class_cfg['table']) => $id],
         'order' => ['text' => 'ASC']
       ]);
+      $res = [];
+      foreach ($opts as $o) {
+        if (\is_null($o[$cf['text']]) && !empty($o[$cf['id_alias']])) {
+          $o[$cf['text']] = $this->text($o[$cf['id_alias']]);
+        }
+        if (!empty($o[$cf['text']])
+          && !empty($locale)
+          && ($t = $this->getTranslation($o[$cf['id']], $locale))
+        ) {
+          $o[$cf['text']] = $t;
+        }
+        $res[$o[$cf['id']]] = $o[$cf['text']];
+      }
 
-      $this->cacheSet($id, __FUNCTION__, $res);
+      \asort($res);
+      $this->setCache($id, __FUNCTION__, $res, $locale);
       return $res;
     }
 
@@ -979,18 +1026,22 @@ class Option extends bbn\Models\Cls\Db
   public function optionsByCode($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      if ($r = $this->cacheGet($id, __FUNCTION__)) {
+      if ($r = $this->getCache($id, __FUNCTION__)) {
         return $r;
       }
 
-      $opt = $this->db->selectAllByKeys(
-        $this->class_cfg['table'],
-        [$this->fields['code'], $this->fields['text']],
-        [$this->fields['id_parent'] => $id],
-        [$this->fields['text'] => 'ASC']
-      );
-      $this->cacheSet($id, __FUNCTION__, $opt);
-      return $opt;
+      $opts = $this->nativeOptions($id);
+      if ($opts) {
+        $res = [];
+        foreach ($opts as $o) {
+          $res[$o[$this->fields['code']]] = $o[$this->fields['text']];
+        }
+        \asort($res);
+        $opts = $res;
+      }
+
+      $this->setCache($id, __FUNCTION__, $opts);
+      return $opts;
     }
 
     return null;
@@ -1301,7 +1352,7 @@ class Option extends bbn\Models\Cls\Db
       if (\is_array($list)) {
         $res = [];
         foreach ($list as $i){
-          $o               = $this->option($i);
+          $o = $this->option($i);
           $res[$o[$this->fields['code']]] = [
             $this->fields['id'] => $o[$this->fields['id']],
             $this->fields['code'] => $o[$this->fields['code']],
@@ -1363,6 +1414,9 @@ class Option extends bbn\Models\Cls\Db
       if ($results = $this->db->rselectAll($cf['table'], [], [$this->fields['id_alias'] => $id])) {
         foreach ($results as $d) {
           $this->_set_value($d);
+          if (!empty($d[$this->fields['text']])) {
+            $d[$this->fields['text']] = $this->text($d[$this->fields['id']]);
+          }
           $r[] = $d;
         }
       }
@@ -1408,7 +1462,7 @@ class Option extends bbn\Models\Cls\Db
   public function getAliasOptions($code = null): ?array
   {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      if ($r = $this->cacheGet($id, __FUNCTION__)) {
+      if ($r = $this->getCache($id, __FUNCTION__)) {
         return $r;
       }
 
@@ -1419,7 +1473,7 @@ class Option extends bbn\Models\Cls\Db
         }
       }
 
-      $this->cacheSet($id, __FUNCTION__, $res);
+      $this->setCache($id, __FUNCTION__, $res);
       return $res;
     }
 
@@ -1667,15 +1721,19 @@ class Option extends bbn\Models\Cls\Db
       throw new \Exception(X::_("Impossible to find the option requested in flatOptions"));
     }
 
-    return $this->db->rselectAll(
-      $this->class_cfg['table'],
-      [
-        $this->class_cfg['arch']['options']['id'],
-        $this->class_cfg['arch']['options']['text']
-      ],
-      [$this->class_cfg['arch']['options']['id'] => $this->treeIds($id)],
-      [$this->class_cfg['arch']['options']['text'] => 'ASC']
-    );
+    $res = [];
+    if ($ids = $this->treeIds($id)) {
+      foreach ($ids as $id) {
+        if ($o = $this->nativeOption($id)) {
+          $res[] = [
+            $this->fields['id'] => $o[$this->fields['id']],
+            $this->fields['text'] => $o[$this->fields['text']]
+          ];
+        }
+      }
+    }
+    X::sortBy($res, $this->class_cfg['arch']['options']['text'], 'asc');
+    return $res;
   }
 
 
@@ -2264,12 +2322,30 @@ class Option extends bbn\Models\Cls\Db
    */
   public function text($code = null): ?string
   {
+    if ($opt = $this->nativeOption(\func_get_args())) {
+      return $opt[$this->fields['text']];
+    }
+
+    return null;
+  }
+
+
+  public function rawText($code = null): ?string
+  {
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      return $this->db->selectOne(
-        $this->class_cfg['table'], $this->fields['text'], [
-        $this->fields['id'] => $id
+      if ($this->cacheHas($id, __FUNCTION__)) {
+        return $this->getCache($id, __FUNCTION__);
+      }
+
+      $text = $this->db->selectOne(
+        $this->class_cfg['table'],
+        $this->fields['text'],
+        [
+          $this->fields['id'] => $id
         ]
       );
+      $this->setCache($id, __FUNCTION__, $text);
+      return $text;
     }
 
     return null;
@@ -2312,7 +2388,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function itext($code = null): ?string
   {
-    return $this->getTranslation($code);
+    return $this->getTranslation($this->fromCode(\func_get_args()));
   }
 
 
@@ -2731,7 +2807,7 @@ class Option extends bbn\Models\Cls\Db
         && ($o = $this->option($id))
     ) {
       $c =& $this->fields;
-
+      $o[$c['text']] = $this->rawText($o[$c['id']]);
       if (!empty($data)) {
         $data = array_merge($o, $data);
         $this->_prepare($data);
@@ -3310,6 +3386,8 @@ class Option extends bbn\Models\Cls\Db
       $num    = 0;
       $cf     =& $this->fields;
       if ($o_dest && $o_src) {
+        $o_dest[$cf['text']] = $this->rawText($o_dest[$cf['id']]);
+        $o_src[$cf['text']] = $this->rawText($o_src[$cf['id']]);
         $o_final = X::mergeArrays($o_src, $o_dest);
         // Order remains the dest one
         $o_final[$cf['num']] = $o_dest[$cf['num']];
@@ -3550,6 +3628,8 @@ class Option extends bbn\Models\Cls\Db
       if ($simple) {
         $opt =& $this;
         $fn  = function ($o) use (&$opt) {
+
+          $o[$opt->fields['text']] = $opt->rawText($o[$opt->fields['id']]);
 
           $cfg = $opt->getCfg($o[$this->fields['id']]);
           if (!is_array($cfg) || !empty($cfg['inherit_from'])) {
@@ -3875,7 +3955,11 @@ class Option extends bbn\Models\Cls\Db
       if (isset($originals['items'])) {
         $originals = $originals['items'];
       }
-
+      $t = $this;
+      $originals = $this->map(function($o) use($t){
+        $o[$t->fields['text']] = $t->rawText($o[$this->fields['id']]);
+        return $o;
+      }, $originals, $deep);
       $opts = $this->map($f, $originals, $deep);
       if (\is_array($opts)) {
         $changes = 0;
@@ -4034,7 +4118,7 @@ class Option extends bbn\Models\Cls\Db
       $id = $this->default;
     }
 
-    if ($tmp = $this->cacheGet($id, __FUNCTION__)) {
+    if ($tmp = $this->getCache($id, __FUNCTION__)) {
       return $tmp;
     }
 
@@ -4050,7 +4134,7 @@ class Option extends bbn\Models\Cls\Db
       }
     }
 
-    $this->cacheSet($id, __FUNCTION__, $res);
+    $this->setCache($id, __FUNCTION__, $res);
     return $res;
   }
 
@@ -4105,7 +4189,7 @@ class Option extends bbn\Models\Cls\Db
           foreach ($opts as $opt){
             $o = [
               'icon' => $opt[$this->fields['cfg']]['icon'] ?? 'nf nf-fa-cog',
-              'text' => $opt[$this->fields['text']],
+              'text' => $this->getTranslation($opt[$this->fields['id']]) ?: $opt[$this->fields['text']],
               'id' => $opt[$this->fields['id']]
             ];
             if ($deep && !empty($opt[$this->fields['cfg']]['permissions'])) {
@@ -4331,7 +4415,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @return null|array
    */
-  public function findI18nLangs(?string $startFromID = null): ?array
+  public function findI18nLocales(?string $startFromID = null): ?array
   {
     if ($this->check()) {
       if (empty($startFromID)) {
@@ -4369,11 +4453,11 @@ class Option extends bbn\Models\Cls\Db
   /**
    * Returns an array containing all options that have the property i18n set
    *
-   * @param string $lang
+   * @param string $locale
    * @param bool $items
    * @return array
    */
-  public function findI18nByLang(string $lang, $items = false): array
+  public function findI18nByLocale(string $locale, $items = false): array
   {
     $res = [];
     if ($this->check()) {
@@ -4387,7 +4471,7 @@ class Option extends bbn\Models\Cls\Db
           'language' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
         ],
         'where' => [
-          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))' => $lang
+          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))' => $locale
         ]
       ]) ?: [];
       if ($opts) {
@@ -4447,21 +4531,18 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
-  public function getTranslation(string $code, string $lang = ''): ?string
+  public function getTranslation(string $id, string $locale = ''): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
-      && ($originalLang = $this->findI18nById($id))
+    if (bbn\Str::isUid($id)
+      && ($originalLocale = $this->findI18nById($id))
       && ($text = $this->text($id))
     ) {
-      if (empty($lang)
-        && \defined('BBN_LANG')
-        && (BBN_LANG !== $originalLang)
-      ) {
-        $lang = BBN_LANG;
+      if (empty($locale)) {
+        $locale = $this->getTranslatingLocale($id);
       }
-      if (!empty($lang)) {
+      if (!empty($locale) && \class_exists('\bbn\Appui\I18n')) {
         $i18nCls = new \bbn\Appui\I18n($this->db);
-        return  $i18nCls->getTranslation($text, $originalLang, $lang);
+        return  $i18nCls->getTranslation($text, $originalLocale, $locale);
       }
     }
     return null;
@@ -4753,7 +4834,7 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
-  private function findI18nChildren(array $opt, bool $cascade = false, array &$res, string $lang = null){
+  private function findI18nChildren(array $opt, bool $cascade = false, array &$res, string $locale = null){
     $fid = $this->fields['id'];
     if ($children = $this->fullOptions($opt[$fid])) {
       foreach ($children as $child) {
@@ -4766,16 +4847,37 @@ class Option extends bbn\Models\Cls\Db
             $this->fields['text'] => $child[$this->fields['text']],
             'language' => !empty($cfg['i18n']) ? $cfg['i18n'] : $opt['language']
           ];
-          if (empty($lang) || ($child['language'] === $lang)) {
+          if (empty($locale)
+            || ($child['language'] === $locale)
+          ) {
             $res[] = $child;
           }
-          if (!empty($cfg['i18n_inheritance']) || (empty($cfg['i18n']) && $cascade)) {
-            $this->findI18nChildren($child, ($cfg['i18n_inheritance'] === 'cascade') || (empty($cfg['i18n']) && $cascade), $res);
+          if (!empty($cfg['i18n_inheritance'])
+            || (empty($cfg['i18n']) && $cascade)
+          ) {
+            $c = ($cfg['i18n_inheritance'] === 'cascade')
+              || (empty($cfg['i18n']) && $cascade);
+            $this->findI18nChildren($child, $c, $res);
           }
         }
       }
     }
     return $res;
+  }
+
+
+  private function getTranslatingLocale(string $id): ?string
+  {
+    $originalLocale = $this->findI18nById($id);
+    $locale = null;
+    if (!empty($originalLocale)
+      && \defined('BBN_LANG')
+      && (BBN_LANG !== $originalLocale)
+    ) {
+      $locale = BBN_LANG;
+    }
+
+    return $locale;
   }
 
 

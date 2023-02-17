@@ -1631,18 +1631,19 @@ class I18n extends bbn\Models\Cls\Cache
       if (!empty($options)) {
         foreach ($options as $opt) {
           $codePath = $this->options->getCodePath($opt['id']);
-          if ($codePath) {
+          $text = $this->options->rawText($opt['id']);
+          if ($codePath && !empty($text)) {
             $codePath = \implode('/', \array_reverse($codePath));
             foreach ($languages as $lang) {
               if (!isset($toJSON[$lang])) {
                 $toJSON[$lang] = [];
               }
-              $t = $this->normlizeText($opt['text']);
+              $t = $this->normlizeText($text);
               if (!isset($toJSON[$lang][$t])) {
                 $toJSON[$lang][$t] = [
                   'language' => $opt['language'],
                   'paths' => [$codePath],
-                  'original' => $opt['text'],
+                  'original' => $t,
                   'translation' => $this->getTranslation($t, $opt['language'], $lang) ?: ''
                 ];
               }
