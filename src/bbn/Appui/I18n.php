@@ -303,16 +303,17 @@ class I18n extends bbn\Models\Cls\Cache
    *
    * @return array
    */
-  public function getPrimariesLangs(): array
+  public function getPrimariesLangs(bool $onlyCodes = false): array
   {
     if ($languages = $this->options->fullOptions('languages', 'i18n', 'appui')) {
-      return array_values(
+      $res = array_values(
         array_filter(
           $languages, function ($v) {
             return !empty($v['primary']);
           }
         )
       );
+      return $onlyCodes ? \array_map(fn($l) => $l['code'], $res) : $res;
     }
     return [];
   }
@@ -576,9 +577,9 @@ class I18n extends bbn\Models\Cls\Cache
         foreach ($languages as $lng){
           // the root to file po & mo
           $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.po';
-          $mo = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.mo';
           // if a file po already exists takes its content
           if (is_file($po)) {
+            $locale_dirs[] = $lng;
             $num_translations = 0;
             if ($translations = $this->parsePoFile($po)) {
               foreach($translations as $tr){
@@ -616,9 +617,6 @@ class I18n extends bbn\Models\Cls\Cache
 
       $i++;
       $success = true;
-      if (!empty($languages)) {
-        $locale_dirs = $languages;
-      }
     }
 
     $ret = [
@@ -643,7 +641,7 @@ class I18n extends bbn\Models\Cls\Cache
     $result = [];
     $languages = [];
     if ($localeDir = $this->getLocaleDirPath($idPath)) {
-      $languages  = \array_map(fn($a) => X::basename($a), Dir::getDirs($localeDir) ?: []);
+      $languages  = $this->getPrimariesLangs(true);
       foreach ($languages as $lang) {
         $count = 0;
         $countDB = 0;
@@ -1391,7 +1389,7 @@ class I18n extends bbn\Models\Cls\Cache
       $languages = $currentLangs;
     }
     if (empty($languages)) {
-      $languages = \array_map(fn($o) => $o['code'], $this->getPrimariesLangs());
+      $languages = $this->getPrimariesLangs(true);
     }
     $fromAction = [];
     if (!empty($languages)) {
