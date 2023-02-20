@@ -340,7 +340,7 @@ class Email extends Basic
       'id_option' => X::getField($types, ['code' => 'folders'], 'id'),
       'text' => $name,
       'uid' => $name,
-      'subcribed' => true
+      'subscribed' => true
     ];
 
     if ($id_parent) {
