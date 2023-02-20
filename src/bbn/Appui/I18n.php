@@ -189,7 +189,8 @@ class I18n extends bbn\Models\Cls\Cache
       'functions' => [
         '_' => 'gettext',
         'bbn._' => 'gettext'
-      ]
+      ],
+      'file' => $file
       ]
     )
     ) {
@@ -1699,13 +1700,16 @@ class I18n extends bbn\Models\Cls\Cache
       && ($indexPath = $this->getIndexPath($idPath))
       && !empty($languages)
     ) {
-      $versionNumber = $this->getIndexValue($indexPath) ?: 1;
+      $versionNumber = $this->getIndexValue($idPath) ?: 1;
       $success = true;
       foreach ($languages as $lang) {
         $file = "$localeDir/$lang/LC_MESSAGES/$domain$versionNumber.";
         if (\is_file($file.'mo')) {
           \unlink($file.'mo');
         }
+        \bbn\X::log($file.'po', 'mirkomo');
+        \bbn\X::log(\is_file($file.'po'), 'mirkomo');
+        \bbn\X::log(\Gettext\Translations::fromPoFile($file.'po'), 'mirkomo');
         if (\is_file($file.'po')
           && ($translations = \Gettext\Translations::fromPoFile($file.'po'))
           && !$translations->toMoFile($file.'mo')
