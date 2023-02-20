@@ -790,6 +790,35 @@ class I18n extends bbn\Models\Cls\Cache
   }
 
 
+  public function getNumTranslations(string $idExp, ?string $originalLocale = ''): int
+  {
+    if (!Str::isUid($idExp) && !empty($originalLocale)) {
+      $idExp = $this->db->selectOne('bbn_i18n', 'id', [
+        'exp' => $idExp,
+        'lang' => $originalLocale
+      ]);
+    }
+
+    if (Str::isUid($idExp)) {
+      return $this->db->count([
+        'table' => 'bbn_i18n_exp',
+        'fields' => [],
+        'where' => [
+          'conditions' => [[
+            'field' => 'id_exp',
+            'value' => $idExp
+          ], [
+            'field' => 'expression',
+            'operator' => 'isnotnull'
+          ]]
+        ]
+      ]);
+    }
+
+    return 0;
+  }
+
+
   /**
    * Returns the strings contained in the given path
    *
@@ -837,7 +866,7 @@ class I18n extends bbn\Models\Cls\Cache
       }
 
       if (!empty($current_dirs)) {
-        foreach ($to_explore_dirs as $c){
+        foreach ($current_dirs as $c){
           if ($ana = $this->analyzeFolder($c, true)) {
             foreach ($ana as $exp => $an) {
               if (!isset($res[$exp])) {
