@@ -1525,7 +1525,7 @@ class Str
    */
   public static function removeComments(string $st): string
   {
-    $pattern = '/<!--.*?-->|(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
+    $pattern = '/(?=<!--)([\s\S]*?)-->|(?:(?:\/\*(?:[^*]|(?:\*+[^*\/]))*\*+\/)|(?:(?<!\:|\\\|\')\/\/.*))/';
     return trim(preg_replace($pattern, '', $st));
   }
 

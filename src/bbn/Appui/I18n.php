@@ -70,7 +70,9 @@ class I18n extends bbn\Models\Cls\Cache
     $php = file_get_contents($file);
     if ($tmp = \Gettext\Translations::fromPhpCodeString(
       $php, [
-      'functions' => ['_' => 'gettext'],
+      'functions' => [
+        '_' => 'gettext'
+      ],
       'file' => $file
       ]
     )
@@ -177,6 +179,11 @@ class I18n extends bbn\Models\Cls\Cache
   {
     $res = [];
     $js  = file_get_contents($file);
+    if (bbn\Str::fileExt($file) === 'php') {
+      $re = '/\<{1}\?{1}(php){0,1}.*\?{1}\>{1}/m';
+      $js = preg_replace($re, '', $js);
+    }
+    $js = \bbn\Str::removeComments($js);
     if ($tmp = \Gettext\Translations::fromVueJsString(
       '<template>'.$js.'</template>', [
       'functions' => [
@@ -547,11 +554,8 @@ class I18n extends bbn\Models\Cls\Cache
         && ($o = $this->options->option($id_option))
         && isset($o['language'])
     ) {
-        // @var $to_explore the path to explore
-        $to_explore = $this->getPathToExplore($id_option);
         // @var $locale_dir the path to locale dir
         $locale_dir = $this->getLocaleDirPath($id_option);
-        //die(var_dump($locale_dir, $to_explore));
 
         //the txt file in the locale folder
         $index = $this->getIndexPath($id_option);
@@ -694,8 +698,6 @@ class I18n extends bbn\Models\Cls\Cache
         && defined($parent['code'])
     ) {
       $tmp = [];
-      // @var  $to_explore the path to explore
-      $to_explore = $this->getPathToExplore($id_option);
       // @var  $locale_dir locale dir in the path
       $locale_dir = $this->getLocaleDirPath($id_option);
       $dirs       = \bbn\File\Dir::getDirs($locale_dir) ?: [];
@@ -834,7 +836,7 @@ class I18n extends bbn\Models\Cls\Cache
         ) ?: [];
       }
 
-      if (!empty($to_explore_dirs)) {
+      if (!empty($current_dirs)) {
         foreach ($to_explore_dirs as $c){
           if ($ana = $this->analyzeFolder($c, true)) {
             foreach ($ana as $exp => $an) {
@@ -936,9 +938,6 @@ class I18n extends bbn\Models\Cls\Cache
       // @var  $path_source_lang the property language of the id_option (the path)
       $path_source_lang = $this->options->getProp($id_option, 'language');
 
-      // @var  $to_explore the path to explore
-      $to_explore = $this->getPathToExplore($id_option);
-
       $locale_dir = $this->getLocaleDirPath($id_option);
 
       $languages = array_map(
@@ -1022,8 +1021,6 @@ class I18n extends bbn\Models\Cls\Cache
       //on the option the property is language, on the project i18n
       $path_source_lang = $this->options->getProp($id_option, 'language');
 
-      // @var  $to_explore the path to explore
-      $to_explore = $this->getPathToExplore($id_option);
       //the path of the locale dirs
       $locale_dir = $this->getLocaleDirPath($id_option);
       $languages  = array_map(

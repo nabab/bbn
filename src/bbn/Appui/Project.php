@@ -38,6 +38,8 @@ class Project extends bbn\Models\Cls\Db
 
   protected $fs;
 
+  protected $options;
+
   protected $appui;
 
   protected static $environments = [];
@@ -531,7 +533,7 @@ class Project extends bbn\Models\Cls\Db
    */
   public function repositoryById(string $id)
   {
-    $idx = \bbn\X::find($this->repositories, ['id' => $id]) ?: '';
+    $idx = \bbn\X::find($this->repositories, ['id' => $id]) ?: null;
     if ($idx !== null) {
       return $this->repositories[$idx];
     }
