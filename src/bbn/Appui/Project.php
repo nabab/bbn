@@ -38,6 +38,8 @@ class Project extends bbn\Models\Cls\Db
 
   protected $fs;
 
+  protected $options;
+
   protected $appui;
 
   protected static $environments = [];
@@ -144,11 +146,12 @@ class Project extends bbn\Models\Cls\Db
   {
     if ($this->id) {
       return [
+        'id' => $this->id,
+        'code' => $this->getCode(),
+        'name' => $this->getName(),
         'path' => $this->getPaths(),
         'langs' => $this->getLangsIds(),
-        'id' => $this->id,
-        'lang' => $this->getLang(),
-        'name' => $this->getName()
+        'lang' => $this->getLang()
       ];
     }
 
@@ -171,6 +174,12 @@ class Project extends bbn\Models\Cls\Db
   public function getId()
   {
     return $this->id;
+  }
+
+
+  public function getCode()
+  {
+    return $this->code;
   }
 
 
@@ -524,7 +533,7 @@ class Project extends bbn\Models\Cls\Db
    */
   public function repositoryById(string $id)
   {
-    $idx = \bbn\X::find($this->repositories, ['id' => $id]) ?: '';
+    $idx = \bbn\X::find($this->repositories, ['id' => $id]) ?: null;
     if ($idx !== null) {
       return $this->repositories[$idx];
     }

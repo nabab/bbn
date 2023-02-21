@@ -32,7 +32,7 @@ abstract class Cache extends bbn\Models\Cls\Basic
     $this->_cache_prefix = str_replace('\\', '/', \get_class($this)).'/';
   }
 
-	protected function _cache_name($uid, $method = ''){
+	protected function _cache_name($uid, $method = '', string $locale = ''){
     if ( is_array($uid) ){
       $uid = md5(serialize($uid));
     }
@@ -40,7 +40,8 @@ abstract class Cache extends bbn\Models\Cls\Basic
       $uid = md5(json_encode($uid));
     }
 		return $this->_cache_prefix.(string)$uid.
-			(empty($method) ? '' : '-'.(string)$method);
+			(empty($method) ? '' : '-'.(string)$method).
+			(empty($locale) ? '' : '-'.(string)$locale);
 	}
 
 	public function cacheDeleteAll(){
@@ -57,8 +58,17 @@ abstract class Cache extends bbn\Models\Cls\Basic
 		return $this->cacher->get($this->_cache_name($uid, $method), $ttl);
 	}
 
+	public function cacheGetLocale($uid, string $locale, $method = '', $ttl = 0){
+		return $this->cacher->get($this->_cache_name($uid, $method, $locale), $ttl);
+	}
+
 	public function cacheSet($uid, $method = '', $data = null, $ttl = 0){
 		$this->cacher->set($this->_cache_name($uid, $method), $data, $ttl);
+		return $this;
+	}
+
+	public function cacheSetLocale($uid, string $locale, $method = '', $data = null, $ttl = 0){
+		$this->cacher->set($this->_cache_name($uid, $method, $locale), $data, $ttl);
 		return $this;
 	}
 
@@ -67,8 +77,18 @@ abstract class Cache extends bbn\Models\Cls\Basic
 		return $this->cacher->getSet($fn, $cn, $ttl);
 	}
 
+	public function cacheGetSetLocale(callable $fn, $uid, string $locale, $method = '', $ttl = 0){
+		$cn = $this->_cache_name($uid, $method, $locale);
+		return $this->cacher->getSet($fn, $cn, $ttl);
+	}
+
 	public function cacheHas($uid, $method = '', $ttl = 0){
 
     return $this->cacheGet($uid, $method, $ttl) ? true : false;
+  }
+
+	public function cacheHasLocale($uid, string $locale, $method = '', $ttl = 0){
+
+    return $this->cacheGetLocale($uid, $locale, $method, $ttl) ? true : false;
   }
 }
