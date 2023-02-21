@@ -1449,6 +1449,7 @@ class I18n extends bbn\Models\Cls\Cache
           $this->generateFilesMo($idPath, $languages);
           break;
         case 'options':
+          $this->importFromFilesOptions($idPath, $languages);
           $fromAction = $this->generateFilesOptions($idPath, $languages);
           break;
       }
@@ -1690,6 +1691,54 @@ class I18n extends bbn\Models\Cls\Cache
       'json' => !empty($toJSON),
       'no_strings' => empty($options)
     ];
+  }
+
+
+  private function importFromFilesOptions(string $idPath, array $languages): bool
+  {
+    if (($localeDir = $this->getLocaleDirPath($idPath))
+      && !empty($languages)
+    ){
+      $imported = 0;
+      foreach ($languages as $lang) {
+        if (\is_file("$localeDir/$lang/options.json")
+          && ($translations = \json_decode(\file_get_contents("$localeDir/$lang/options.json"), true))
+        ) {
+          foreach ($translations as $trans) {
+            if (!empty($trans['original']) && !empty($trans['language'])) {
+              if (!($idExp = $this->db->selectOne('bbn_i18n', 'id', ['exp' => $this->normlizeText($trans['original'])]))
+                && $this->db->insert('bbn_i18n', [
+                  'exp' => $this->normlizeText($trans['original']),
+                  'lang' => $trans['language']
+                ])
+              ) {
+                $idExp = $this->db->lastId();
+              }
+              if (!empty($idExp)) {
+                if (!$this->db->selectOne('bbn_i18n_exp', 'id', ['id_exp' => $idExp, 'lang' => $trans['language']])) {
+                  $imported += $this->db->insert('bbn_i18n_exp', [
+                    'id_exp' => $idExp,
+                    'lang' => $trans['language'],
+                    'expression' => $trans['original']
+                  ]);
+                }
+                if (!empty($trans['translation'])
+                  && !$this->db->selectOne('bbn_i18n_exp', 'id', ['id_exp' => $idExp, 'lang' => $lang])
+                ) {
+                  $imported += $this->db->insert('bbn_i18n_exp', [
+                    'id_exp' => $idExp,
+                    'lang' => $lang,
+                    'expression' => $trans['translation']
+                  ]);
+                }
+              }
+            }
+          }
+        }
+      }
+      return !empty($imported);
+    }
+    return false;
   }
 
 
