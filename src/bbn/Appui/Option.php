@@ -609,7 +609,10 @@ class Option extends bbn\Models\Cls\Db
       $cfn = $this->db->cfn($this->fields['id'], $tab);
       $opt = $this->getRow([$cfn => $id]);
       if ($opt) {
-        if (!empty($locale) && \class_exists('\bbn\Appui\I18n')) {
+        if (!empty($locale)
+          && \class_exists('\bbn\Appui\I18n')
+          && !empty($opt[$this->fields['text']])
+        ) {
           $i18nCls = new \bbn\Appui\I18n($this->db);
           if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
             $opt[$this->fields['text']] = $trans;
