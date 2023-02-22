@@ -186,7 +186,7 @@ class Cms extends DbCls
       if ($res['mime'] === 'json/bbn-cms') {
         foreach ($res['items'] as &$item) {
           if ($item['type'] === 'container') {
-            foreach ($item as &$it) {
+            foreach ($item['items'] as &$it) {
               if ($it['type'] === 'slider') {
                 if ($it['mode'] === 'features') {
                   $it['currentItems'] = $this->note->getFeatures($it['content']);
