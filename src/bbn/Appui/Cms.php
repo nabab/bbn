@@ -228,9 +228,9 @@ class Cms extends DbCls
       switch ($it['type']) {
         case 'gallery':
         case 'carousel':
-          if (!empty($it['source'])) {
-            if (is_string($it['source'])) {
-              $gallery = $this->media->browseByGroup($it['source'], [], 100);
+          if (!empty($it['content'])) {
+            if (is_string($it['content'])) {
+              $gallery = $this->media->browseByGroup($it['content'], [], 100);
               if ($gallery && !empty($gallery['data'])) {
                 foreach ($gallery['data'] as $d) {
                   $tags = $this->media->getTags($d['id']);
@@ -254,8 +254,8 @@ class Cms extends DbCls
 
           break;
         case 'slider':
-          if (!empty($it['id_feature'])) {
-            $features = $this->note->getFeatures($it['id_feature'], false);
+          if (!empty($it['content'])) {
+            $features = $this->note->getFeatures($it['content'], false);
             $seo .= '<ul>';
             foreach ($features as $feature) {
               $seo .= '<li><a href="' . $feature['url'] . '">' . PHP_EOL;
@@ -280,7 +280,7 @@ class Cms extends DbCls
           $seo .= '<hr>' . PHP_EOL;
           break;
         case 'imagetext':
-          $seo .= '<a href="/' . $it['source'] . '"><img src="/' . $it['source'] . '" alt="' .
+          $seo .= '<a href="/' . $it['content'] . '"><img src="/' . $it['content'] . '" alt="' .
               Str::escapeDquotes(
                 $it['caption'] . ' - ' . 
                 (empty($tags) ? '' : X::join($tags, ' | ') . ' | ') .
@@ -292,7 +292,7 @@ class Cms extends DbCls
           }
           break;
         case 'image':
-          $seo .= '<a href="/' . $it['source'] . '"><img src="/' . $it['source'] . '" alt="' .
+          $seo .= '<a href="/' . $it['content'] . '"><img src="/' . $it['content'] . '" alt="' .
               Str::escapeDquotes(
                 $it['caption'] . ' - ' . 
                 (empty($tags) ? '' : X::join($tags, ' | ') . ' | ') .
