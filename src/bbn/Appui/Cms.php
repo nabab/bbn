@@ -189,7 +189,7 @@ class Cms extends DbCls
             foreach ($item as &$it) {
               if ($it['type'] === 'slider') {
                 if ($it['mode'] === 'features') {
-                  $it['currentItems'] = $this->getFeatures($it['content']);
+                  $it['currentItems'] = $this->note->getFeatures($it['content']);
                 }
               }
             }
@@ -197,7 +197,7 @@ class Cms extends DbCls
           else {
             if ($item['type'] === 'slider') {
               if ($item['mode'] === 'features') {
-                $item['currentItems'] = $this->getFeatures($item['content']);
+                $item['currentItems'] = $this->note->getFeatures($item['content']);
               }
             }
         }
