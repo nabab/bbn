@@ -182,6 +182,29 @@ class Cms extends DbCls
       if ($with_medias) {
         $res['medias'] = $this->note->getMedias($id_note);
       }
+
+      if ($res['mime'] === 'json/bbn-cms') {
+        foreach ($res['items'] as &$item) {
+          if ($item['type'] === 'container') {
+            foreach ($item as &$it) {
+              if ($it['type'] === 'slider') {
+                if ($it['mode'] === 'features') {
+                  $it['currentItems'] = $this->getFeatures($it['content']);
+                }
+              }
+            }
+          }
+          else {
+            if ($item['type'] === 'slider') {
+              if ($item['mode'] === 'features') {
+                $item['currentItems'] = $this->getFeatures($item['content']);
+              }
+            }
+        }
+        }
+
+      }
+
     }
 
     $this->cacheSet($id_note, $cacheName, $res);
