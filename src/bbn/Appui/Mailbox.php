@@ -786,7 +786,7 @@ class Mailbox extends Basic
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
     $structure = $this->getMsgStructure($msgno);
-    if (!$structure->parts) {  // simple
+    if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
     else {  // multipart: cycle through each part
