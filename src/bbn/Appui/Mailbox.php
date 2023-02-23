@@ -2,6 +2,7 @@
 
 namespace bbn\Appui;
 
+use utf8;
 use Exception;
 use bbn\Mail;
 use bbn\X;
@@ -119,6 +120,8 @@ class Mailbox extends Basic
    * @var array The mail folders
    */
   protected $folders = [];
+
+  protected $mailer;
 
 
   public static function setDefaultPingInterval(int $val): void
@@ -1545,7 +1548,7 @@ class Mailbox extends Basic
     }
 
     // SUBPART RECURSION
-    if ($structure->parts) {
+    if (!empty($structure->parts)) {
       foreach ($structure->parts as $partno0 => $p2){
         $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1), $id, $id_account);  // 1.2, 1.2.1, etc.
       }
