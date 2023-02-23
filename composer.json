@@ -44,6 +44,7 @@
     "brick/phonenumber": "0.3.*",
     "opis/closure": "^3.5",
     "ezyang/htmlpurifier": "^4.13",
+    "xemlock/htmlpurifier-html5": "dev-master",
     "psr/simple-cache": "1.0.*"
   },
   "require-dev": {
