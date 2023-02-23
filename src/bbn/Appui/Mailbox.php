@@ -1445,13 +1445,13 @@ class Mailbox extends Basic
     // PARAMETERS
     // get all parameters, like charset, Filenames of attachments, etc.
     $params = [];
-    if ($structure->parameters) {
+    if (!empty($structure->parameters)) {
       foreach ($structure->parameters as $x){
         $params[strtolower($x->attribute)] = $x->value;
       }
     }
 
-    if ($structure->dparameters) {
+    if (!empty($structure->dparameters)) {
       foreach ($structure->dparameters as $x){
         $params[strtolower($x->attribute)] = $x->value;
       }
