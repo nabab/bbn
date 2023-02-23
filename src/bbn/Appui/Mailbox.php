@@ -1460,7 +1460,7 @@ class Mailbox extends Basic
     // ATTACHMENT
     // Any part with a filename is an attachment,
     // so an attached text file (type 0) is not mistaken as the message.
-    if ($params['filename'] || $params['name']) {
+    if (!empty($params['filename']) || !empty($params['name'])) {
 
       if (!is_dir(BBN_USER_PATH . 'tmp_mail')) {
         mkdir(BBN_USER_PATH . 'tmp_mail');
@@ -1478,7 +1478,7 @@ class Mailbox extends Basic
 
       $path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       // filename may be given as 'Filename' or 'Name' or both
-      $filename = $params['filename'] ? $params['filename'] : $params['name'];
+      $filename = empty($params['name']) ? $params['filename'] : $params['name'];
 
       // check if the file already exist
       $this->_attachments[] = $filename;
