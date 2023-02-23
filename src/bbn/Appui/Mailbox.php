@@ -800,7 +800,7 @@ class Mailbox extends Basic
         $this->_get_msg_part($msgno, $p, $partno0 + 1, $id, $id_account);
         // check if the part have fdisposition and if disposition its inline
         if (!empty($p->parts)) {
-          foreach ($p->parts as $partno1 => $p2) {
+          foreach ($p->parts as $p2) {
             if ($p2->ifdisposition && (strtolower($p2->disposition) === 'inline')) {
               if ($p2->dparameters) {
                 // search in dparameters when attribute is filename
@@ -808,7 +808,7 @@ class Mailbox extends Basic
                   if (strtolower($dparam->attribute) === 'filename') {
                     $this->_inline_files[] = [
                       'name' => $dparam->value,
-                      'id' => substr($p2->id, 1, -1)
+                      'id' => substr($dparam->id, 1, -1)
                     ];
                   }
                 }
@@ -824,7 +824,7 @@ class Mailbox extends Basic
       $attachments_path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       $res['html'] = preg_replace_callback(
         '/src="cid:(.*?)"/',
-        function ($m) use ($msgno, $attachments_path) {
+        function ($m) use ($attachments_path) {
           $res = $m[0];
           $cid = $m[1];
           // get the name of the file with the cid in inline array
