@@ -793,7 +793,7 @@ class Mailbox extends Basic
       foreach ($structure->parts as $partno0 => $p){
         $this->_get_msg_part($msgno, $p, $partno0 + 1, $id, $id_account);
         // check if the part have fdisposition and if disposition its inline
-        if ($p->parts) {
+        if (!empty($p->parts)) {
           foreach ($p->parts as $partno1 => $p2) {
             if ($p2->ifdisposition && (strtolower($p2->disposition) === 'inline')) {
               if ($p2->dparameters) {
