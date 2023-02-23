@@ -731,8 +731,11 @@ class Mailbox extends Basic
         else {
           foreach ($structure->parts as $part) {
 
-            if ($part->ifdisposition && (strtolower($part->disposition) === 'attachment') && $part->ifparameters) {
-              $name_row = X::getRow($part->parameters, ['attribute' => 'name']);
+            if ($part->ifdisposition
+                && (strtolower($part->disposition) === 'attachment')
+                && $part->ifparameters
+                && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
+            ) {
               $tmp['attachments'][] = [
                 'name' => $name_row->value,
                 'size' => $part->bytes,
