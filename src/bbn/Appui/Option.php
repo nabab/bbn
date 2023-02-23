@@ -4527,6 +4527,7 @@ class Option extends bbn\Models\Cls\Db
           ) {
             return $pcfg['i18n'];
           }
+          return null;
         }
       }
     }
