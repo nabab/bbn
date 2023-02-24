@@ -17,6 +17,7 @@ use Opis\Closure\SerializableClosure;
 class Search extends Basic
 {
   use Dbconfig, Cache;
+  use \bbn\Models\Tts\Optional;
 
   /**
    * @var Db
@@ -41,7 +42,7 @@ class Search extends Basic
   /**
    * @var string
    */
-  protected string $search_cache_name = 'search_%s';
+  protected string $search_cache_name = 'search_%s_%s';
 
   /**
    * @var array
@@ -94,7 +95,7 @@ class Search extends Basic
   protected static array $functions = [];
 
 
-  public function __construct(Model $model, array $cfg = [])
+  public function __construct(Model $model, array $models = [], array $cfg = [])
   {
     //$this->ctrl   = $ctrl;
     // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
@@ -111,19 +112,59 @@ class Search extends Basic
 
     $this->_init_class_cfg($cfg);
     $this->cacheInit();
+    self::optionalInit();
     $this->timer      = new Timer();
-    try {
-      $model->getCustomModelGroup('', 'appui-search');
-    }
-    catch (Exception $e) {
-
-    }
-    foreach ($model->getPlugins() as $pi) {
-      try {
-        $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
+    if (empty($models)) {
+      if (($def = $this->getOption('default'))
+        && !empty($def['id_alias'])
+        && ($models =  $this->getOptions($def['id_alias']))
+      ) {
+        $models = \array_map(fn($m) => $m['alias'] ?? [], $models);
       }
-      catch (Exception $e) {
+    }
+    else {
+      foreach ($models as $i => $m) {
+        if (\bbn\Str::isUid($m)
+          && ($o = $this->getOption($m))
+        ) {
+          $models[$i] = $o;
+        }
+        else {
+          unset($models[$i]);
+        }
+      }
+    }
+    if (empty($models)) {
+      try {
+        $model->getCustomModelGroup('', 'appui-search');
+      }
+      catch (Exception $e) {}
 
+      foreach ($model->getPlugins() as $pi) {
+        try {
+          $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
+        }
+        catch (Exception $e) {}
+      }
+    }
+    else {
+      foreach ($models as $m) {
+        if (isset($m['plugin'])
+          && !empty($m['filename'])
+        ) {
+          if (empty($m['plugin'])) {
+            try {
+              $model->getPluginModel($m['filename'], [], 'appui-search');
+            }
+            catch (Exception $e) {}
+          }
+          else {
+            try {
+              $model->getSubpluginModel($m['filename'], [], $m['plugin'], 'appui-search');
+            }
+            catch (Exception $e) {}
+          }
+        }
       }
     }
   }
@@ -140,7 +181,7 @@ class Search extends Basic
    */
   protected function getSearchCfg(): array
   {
-    if ($cached_data = $this->cacheGet($this->cfg_cache_name, __FUNCTION__)) {
+    if ($cached_data = $this->cacheGet($this->cfg_cache_name, __FUNCTION__.'_'.\md5(\json_encode(self::$functions)))) {
       return $cached_data;
     }
 
@@ -167,7 +208,7 @@ class Search extends Basic
         }
       }
 
-      $this->cacheSet($this->cfg_cache_name, __FUNCTION__, $result);
+      $this->cacheSet($this->cfg_cache_name, __FUNCTION__.'_'.\md5(\json_encode(self::$functions)), $result);
     }
 
     return $result ?? [];
@@ -252,7 +293,7 @@ class Search extends Basic
    */
   public function get(string $search_value, int $step = 0, $start = 0, $limit = 100): array
   {
-    $cache_name = sprintf($this->search_cache_name, $search_value);
+    $cache_name = sprintf($this->search_cache_name, $search_value, \md5(\json_encode(self::$functions)));
 
     // Check if same search is saved for the user
     if (!($config_array = $this->cacheGet($this->user->getId(), $cache_name))) {
