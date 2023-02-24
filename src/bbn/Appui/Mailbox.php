@@ -2,6 +2,7 @@
 
 namespace bbn\Appui;
 
+use utf8;
 use Exception;
 use bbn\Mail;
 use bbn\X;
@@ -119,6 +120,8 @@ class Mailbox extends Basic
    * @var array The mail folders
    */
   protected $folders = [];
+
+  protected $mailer;
 
 
   public static function setDefaultPingInterval(int $val): void
@@ -731,8 +734,11 @@ class Mailbox extends Basic
         else {
           foreach ($structure->parts as $part) {
 
-            if ($part->ifdisposition && (strtolower($part->disposition) === 'attachment') && $part->ifparameters) {
-              $name_row = X::getRow($part->parameters, ['attribute' => 'name']);
+            if ($part->ifdisposition
+                && (strtolower($part->disposition) === 'attachment')
+                && $part->ifparameters
+                && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
+            ) {
               $tmp['attachments'][] = [
                 'name' => $name_row->value,
                 'size' => $part->bytes,
@@ -786,20 +792,20 @@ class Mailbox extends Basic
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
     $structure = $this->getMsgStructure($msgno);
-    if (!$structure->parts) {  // simple
+    if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
     else {  // multipart: cycle through each part
       foreach ($structure->parts as $partno0 => $p){
         $this->_get_msg_part($msgno, $p, $partno0 + 1, $id, $id_account);
         // check if the part have fdisposition and if disposition its inline
-        if ($p->parts) {
-          foreach ($p->parts as $partno1 => $p2) {
+        if (!empty($p->parts)) {
+          foreach ($p->parts as $p2) {
             if ($p2->ifdisposition && (strtolower($p2->disposition) === 'inline')) {
               if ($p2->dparameters) {
                 // search in dparameters when attribute is filename
                 foreach ($p2->dparameters as $dparam) {
-                  if (strtolower($dparam->attribute) === 'filename') {
+                  if (!empty($p2->id) && strtolower($dparam->attribute) === 'filename') {
                     $this->_inline_files[] = [
                       'name' => $dparam->value,
                       'id' => substr($p2->id, 1, -1)
@@ -818,7 +824,7 @@ class Mailbox extends Basic
       $attachments_path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       $res['html'] = preg_replace_callback(
         '/src="cid:(.*?)"/',
-        function ($m) use ($msgno, $attachments_path) {
+        function ($m) use ($attachments_path) {
           $res = $m[0];
           $cid = $m[1];
           // get the name of the file with the cid in inline array
@@ -1439,13 +1445,13 @@ class Mailbox extends Basic
     // PARAMETERS
     // get all parameters, like charset, Filenames of attachments, etc.
     $params = [];
-    if ($structure->parameters) {
+    if (!empty($structure->parameters)) {
       foreach ($structure->parameters as $x){
         $params[strtolower($x->attribute)] = $x->value;
       }
     }
 
-    if ($structure->dparameters) {
+    if (!empty($structure->dparameters)) {
       foreach ($structure->dparameters as $x){
         $params[strtolower($x->attribute)] = $x->value;
       }
@@ -1454,7 +1460,7 @@ class Mailbox extends Basic
     // ATTACHMENT
     // Any part with a filename is an attachment,
     // so an attached text file (type 0) is not mistaken as the message.
-    if ($params['filename'] || $params['name']) {
+    if (!empty($params['filename']) || !empty($params['name'])) {
 
       if (!is_dir(BBN_USER_PATH . 'tmp_mail')) {
         mkdir(BBN_USER_PATH . 'tmp_mail');
@@ -1472,7 +1478,7 @@ class Mailbox extends Basic
 
       $path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       // filename may be given as 'Filename' or 'Name' or both
-      $filename = $params['filename'] ? $params['filename'] : $params['name'];
+      $filename = empty($params['name']) ? $params['filename'] : $params['name'];
 
       // check if the file already exist
       $this->_attachments[] = $filename;
@@ -1542,7 +1548,7 @@ class Mailbox extends Basic
     }
 
     // SUBPART RECURSION
-    if ($structure->parts) {
+    if (!empty($structure->parts)) {
       foreach ($structure->parts as $partno0 => $p2){
         $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1), $id, $id_account);  // 1.2, 1.2.1, etc.
       }

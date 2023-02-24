@@ -4254,6 +4254,149 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+<<<<<<< Updated upstream
+=======
+   * Returns an array containing all languages set
+   *
+   * @return null|array
+   */
+  public function findI18nLocales(?string $startFromID = null): ?array
+  {
+    if ($this->check()) {
+      if (empty($startFromID)) {
+        return \array_unique($this->db->getFieldValues([
+          'table' => $this->class_cfg['table'],
+          'fields' => [
+            'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
+          ],
+          'where' => [[
+            'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
+            'operator' => 'isnotnull'
+          ], [
+            'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))',
+            'operator' => '!=',
+            'value' => ''
+          ]]
+        ]));
+      }
+      $res = [];
+      $cfg = $this->getCfg($startFromID);
+      if (!empty($cfg['i18n'])) {
+        $res[] = $cfg['i18n'];
+      }
+      if ($items = $this->items($startFromID)) {
+        foreach ($items as $item) {
+          $res = X::mergeArrays($res, $this->findI18n($item));
+        }
+      }
+      return \array_unique($res);
+    }
+    return null;
+  }
+
+
+  /**
+   * Returns an array containing all options that have the property i18n set
+   *
+   * @param string $locale
+   * @param bool $items
+   * @return array
+   */
+  public function findI18nByLocale(string $locale, $items = false): array
+  {
+    $res = [];
+    if ($this->check()) {
+      $opts = $this->db->rselectAll([
+        'table' => $this->class_cfg['table'],
+        'fields' => [
+          $this->fields['id'],
+          $this->fields['id_parent'],
+          $this->fields['code'],
+          $this->fields['text'],
+          'language' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))'
+        ],
+        'where' => [
+          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.i18n"))' => $locale
+        ]
+      ]) ?: [];
+      if ($opts) {
+        foreach ($opts as $opt){
+          if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
+            $cfg = $this->getCfg($opt[$this->fields['id']]);
+            $res[] = $opt;
+            if (!empty($cfg['i18n_inheritance'])) {
+              $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
+            }
+          }
+        }
+      }
+      if (!empty($res) && !empty($items)) {
+        $res2 = [];
+        foreach ($res as $r) {
+          $res2[] = \array_merge($r, [
+            'items' => array_values(array_filter($res, function($o) use($r) {
+              return $o[$this->fields['id_parent']] === $r[$this->fields['id']];
+            }))
+          ]);
+        }
+        return $res2;
+      }
+    }
+    return $res;
+  }
+
+
+  public function findI18nById(string $id): ?string
+  {
+    if ($this->check()) {
+      if ($cfg = $this->getCfg($id)) {
+        if (!empty($cfg['i18n'])) {
+          return $cfg['i18n'];
+        }
+      }
+      if ($parents = $this->parents($id)) {
+        foreach ($parents as $i => $parent) {
+          $pcfg = $this->getCfg($parent);
+          if (empty($pcfg)
+            || empty($pcfg['i18n'])
+          ) {
+            continue;
+          }
+          if (!empty($pcfg['i18n_inheritance'])
+            && (($pcfg['i18n_inheritance'] === 'cascade')
+              || (($pcfg['i18n_inheritance'] === 'children')
+                && ($i === 0)))
+          ) {
+            return $pcfg['i18n'];
+          }
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+
+  public function getTranslation(string $id, string $locale = ''): ?string
+  {
+    if (bbn\Str::isUid($id)
+      && ($originalLocale = $this->findI18nById($id))
+      && ($text = $this->text($id))
+    ) {
+      if (empty($locale)) {
+        $locale = $this->getTranslatingLocale($id);
+      }
+      if (!empty($locale) && \class_exists('\bbn\Appui\I18n')) {
+        $i18nCls = new \bbn\Appui\I18n($this->db);
+        return  $i18nCls->getTranslation($text, $originalLocale, $locale);
+      }
+    }
+    return null;
+  }
+
+
+  /**
+>>>>>>> Stashed changes
    * Gets the first row from a result
    *
    * @param array $where
