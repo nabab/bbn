@@ -804,9 +804,8 @@ class Mailbox extends Basic
             if ($p2->ifdisposition && (strtolower($p2->disposition) === 'inline')) {
               if ($p2->dparameters) {
                 // search in dparameters when attribute is filename
-                X::log($p2, "mail-thomas");
                 foreach ($p2->dparameters as $dparam) {
-                  if (strtolower($dparam->attribute) === 'filename') {
+                  if (!empty($p2->id) && strtolower($dparam->attribute) === 'filename') {
                     $this->_inline_files[] = [
                       'name' => $dparam->value,
                       'id' => substr($p2->id, 1, -1)
