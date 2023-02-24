@@ -189,7 +189,14 @@ class Cms extends DbCls
             foreach ($item['items'] as &$it) {
               if ($it['type'] === 'slider') {
                 if ($it['mode'] === 'features') {
-                  $it['currentItems'] = $this->note->getFeatures($it['content']);
+                  $it['currentItems'] = array_map(
+                    function($a) {
+                      $a = $a['media'];
+                      $a['type'] = 'img';
+                      return $a;
+                    },
+                    $this->note->getFeatures($it['content'])
+                  );
                 }
               }
             }
@@ -197,8 +204,15 @@ class Cms extends DbCls
           else {
             if ($item['type'] === 'slider') {
               if ($item['mode'] === 'features') {
-                $item['currentItems'] = $this->note->getFeatures($item['content']);
-              }
+                $item['currentItems'] = array_map(
+                  function($a) {
+                    $a = $a['media'];
+                    $a['type'] = 'img';
+                    return $a;
+                  },
+                  $this->note->getFeatures($item['content'])
+                );
+            }
             }
         }
         }
