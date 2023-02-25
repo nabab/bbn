@@ -191,7 +191,6 @@ class Cms extends DbCls
                 if ($it['mode'] === 'features') {
                   $it['currentItems'] = array_map(
                     function($a) {
-                      $a = $a['media'];
                       $a['type'] = 'img';
                       return $a;
                     },
