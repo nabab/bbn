@@ -193,6 +193,7 @@ class Cms extends DbCls
                     'component' => "appui-note-cms-block-slider-slide",
                     'data' => array_map(
                       function($a) {
+                        $a['component'] = "appui-note-cms-block-slider-slide";
                         $a['content'] = $a['media']['url'];
                         $a['type'] = 'img';
                         return $a;
@@ -211,6 +212,7 @@ class Cms extends DbCls
                   'component' => "appui-note-cms-block-slider-slide",
                   'data' => array_map(
                     function($a) {
+                      $a['component'] = "appui-note-cms-block-slider-slide";
                       $a['content'] = $a['media']['url'];
                       $a['type'] = 'img';
                       return $a;
