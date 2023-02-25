@@ -212,6 +212,7 @@ class Cms extends DbCls
                   'data' => array_map(
                     function($a) {
                       $a['content'] = $a['media']['url'];
+                      $a['type'] = 'img';
                       return $a;
                     },
                     $this->note->getFeatures($item['content'])
