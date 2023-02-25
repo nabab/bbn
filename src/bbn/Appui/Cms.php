@@ -192,6 +192,7 @@ class Cms extends DbCls
                   $it['currentItems'] = array_map(
                     function($a) {
                       $a['type'] = 'img';
+                      $a['content'] = $a['url'];
                       return $a;
                     },
                     $this->note->getFeatures($it['content'])
