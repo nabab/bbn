@@ -191,8 +191,10 @@ class Cms extends DbCls
                 if ($it['mode'] === 'features') {
                   $it['currentItems'] = array_map(
                     function($a) {
-                      $a['type'] = 'img';
-                      return $a;
+                      return [
+                        'component' => "appui-note-cms-block-slider-slide",
+                        'data' => $a
+                      ];
                     },
                     $this->note->getFeatures($it['content'])
                   );
