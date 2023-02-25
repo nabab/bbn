@@ -191,10 +191,12 @@ class Cms extends DbCls
                 if ($it['mode'] === 'features') {
                   $it['currentItems'] = array_map(
                     function($a) {
-                      return [
+                      $b = [
                         'component' => "appui-note-cms-block-slider-slide",
                         'data' => $a
                       ];
+                      $b['data']['content'] = $a['data']['media']['url'];
+                      return $b;
                     },
                     $this->note->getFeatures($it['content'])
                   );
@@ -207,10 +209,12 @@ class Cms extends DbCls
               if ($item['mode'] === 'features') {
                 $item['currentItems'] = array_map(
                   function($a) {
-                    return [
+                    $b = [
                       'component' => "appui-note-cms-block-slider-slide",
                       'data' => $a
                     ];
+                    $b['data']['content'] = $a['data']['media']['url'];
+                    return $b;
                   },
                   $this->note->getFeatures($item['content'])
                 );
