@@ -193,7 +193,7 @@ class Cms extends DbCls
                     'component' => "appui-note-cms-block-slider-slide",
                     'data' => array_map(
                       function($a) {
-                        $a['data']['content'] = $a['data']['media']['url'];
+                        $a['content'] = $a['media']['url'];
                         return $a;
                       },
                       $this->note->getFeatures($it['content'])
@@ -210,7 +210,7 @@ class Cms extends DbCls
                   'component' => "appui-note-cms-block-slider-slide",
                   'data' => array_map(
                     function($a) {
-                      $a['data']['content'] = $a['data']['media']['url'];
+                      $a['content'] = $a['media']['url'];
                       return $a;
                     },
                     $this->note->getFeatures($item['content'])
