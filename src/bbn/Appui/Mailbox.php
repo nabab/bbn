@@ -693,7 +693,10 @@ class Mailbox extends Basic
               $tmp[$k] = (int)$v;
             }
             elseif ($k === 'subject') {
-              $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
+              $tmp[$k] = $this->decode_encoded_words_deep($v);
+              if (mb_detect_encoding($v) !== 'UTF-8') {
+                $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
+              }
               if (strlen($tmp[$k]) > 1000) {
                 $tmp[$k] = Str::cut($tmp[$k], 1000);
               }
@@ -868,8 +871,11 @@ class Mailbox extends Basic
       $res['html'] =  $purifier->purify(quoted_printable_decode($res['html']));
     }
 
-    $res['plain']      = $this->_plainmsg;
-    $res['charset']    = $this->_charset;
+    $res['subject'] = $this->decode_encoded_words_deep($res['subject']);
+    $res['Subject'] = $res['subject'];
+
+    $res['plain']      = quoted_printable_decode($this->_plainmsg);
+    $res['charset']    = quoted_printable_decode($this->_charset);
     $res['attachment'] = $this->_attachments;
     $res['inline']     = $this->_inline_files;
     return $res;
