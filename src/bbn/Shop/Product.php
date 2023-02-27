@@ -125,9 +125,12 @@ class Product extends DbCls
     $cfg = $this->getClassCfg();
     if (
       ($id_note = $this->note->urlToId($url))
-      && ($id = $this->db->selectOne($cfg['table'], $cfg['arch']['products']['id'], [$cfg['arch']['products']['id_note'] => $id_note]))
+      && ($id = $this->db->selectOne($cfg['table'], $cfg['arch']['products']['id'], [
+        $cfg['arch']['products']['id_note'] => $id_note,
+        ]))
     ) {
       $all = $this->get($id);
+
       if ($public) {
         unset($all[$cfg['arch']['products']['price_purchase']]);
         $all['stock'] = (bool)$all['stock'];
@@ -232,7 +235,6 @@ class Product extends DbCls
         $data['id_media'] ?: null,
         $data['id_option']
       );
-
       //media upload end
       $res2 = $this->db->update('bbn_shop_products', [
         
@@ -304,7 +306,8 @@ class Product extends DbCls
     $cfg  = $this->getClassCfg();
     $a = $cfg['arch']['products'];
     return $this->db->getColumnValues($cfg['table'], $a['id'], [
-      $a['id_main'] => $id
+      $a['id_main'] => $id,
+      $a['active'] => 1
     ]);
   }
 
@@ -349,7 +352,9 @@ class Product extends DbCls
     }
 
     $all = $this->db->rselectAll($cfg['table'], [$cols['id'], $cols['id_note']], [
-      $cols['id_main'] => $product['id_main'] ?: $product['id']
+      $cols['id_main'] => $product['id_main'] ?: $product['id'],
+      $cols['active'] => 1
+
     ]);
     foreach ($all as $a) {
       if ($a['id'] !== $product['id']) {
