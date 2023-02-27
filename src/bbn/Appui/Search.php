@@ -161,7 +161,7 @@ class Search extends Basic
         ) {
           if (empty($m['plugin'])) {
             try {
-              $model->getPluginModel($m['filename'], [], 'appui-search');
+              $model->getPluginModel($m['filename'], [], $model->pluginUrl('appui-search'));
             }
             catch (Exception $e) {}
           }
