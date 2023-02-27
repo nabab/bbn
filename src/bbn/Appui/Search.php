@@ -48,7 +48,7 @@ class Search extends Basic
   /**
    * @var string
    */
-  protected string $search_cache_name = 'search_%s_%s';
+  protected string $search_cache_name = 'search_%s';
 
   /**
    * @var array
@@ -260,11 +260,14 @@ class Search extends Basic
               unset($content['alternates']);
               foreach ($alts as $i => $alt) {
                 $tmp = $content;
-                $tmp['cfg'] = X::mergeArrays($tmp['cfg'], $alt);
+                $rep = !empty($alt['replace']);
+                if (isset($alt['replace'])) {
+                  unset($alt['replace']);
+                }
+                $tmp['cfg'] = !empty($rep) ? \array_merge($tmp['cfg'], $alt) : X::mergeArrays($tmp['cfg'], $alt);
                 if (!empty($alt['score'])) {
                   $tmp['score'] = $alt['score'];
                 }
-
                 $result[] = X::mergeArrays($tmp, [
                   'file' => $item['file'] ?? null,
                   'alternative' => $i + 1,
@@ -300,7 +303,7 @@ class Search extends Basic
    */
   public function get(string $search_value, int $step = 0, $start = 0, $limit = 100): array
   {
-    $cache_name = sprintf($this->search_cache_name, $search_value, \md5(\json_encode(self::$functions)));
+    $cache_name = sprintf($this->search_cache_name, $search_value);
 
     // Check if same search is saved for the user
     if (!($config_array = $this->cacheGet($this->user->getId(), $cache_name))) {
