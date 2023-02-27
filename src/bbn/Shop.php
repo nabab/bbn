@@ -380,7 +380,7 @@ class Shop extends Models\Cls\Db
           }
         }
         $cartCfg = $this->cart->getClassCfg();
-        $prod['cart_number'] = count($this->db->rselectAll($cartCfg['tables']['cart_products'], [],[$cartCfg['arch']['cart_products']['id_product'] => $id]));
+        $prod['cart_number'] = $this->db->count($cartCfg['tables']['cart_products'], [$cartCfg['arch']['cart_products']['id_product'] => $id]);
         $prod['sales'] = [
           'total' => $this->sales->getByProduct($id),
           'y'     => ['total' => 0, 'num' => 0],
