@@ -356,6 +356,7 @@ class Shop extends Models\Cls\Db
    *
    * @param string $id
    * @return array|null
+   * 
    */
   public function getFullProduct(string $id): ?array
   {
@@ -378,7 +379,8 @@ class Shop extends Models\Cls\Db
             $prod['variants'][] = $this->getFullProduct($v);
           }
         }
-
+        $cartCfg = $this->cart->getClassCfg();
+        $prod['cart_number'] = count($this->db->rselectAll($cartCfg['tables']['cart_products'], [],[$cartCfg['arch']['cart_products']['id_product'] => $id]));
         $prod['sales'] = [
           'total' => $this->sales->getByProduct($id),
           'y'     => ['total' => 0, 'num' => 0],
