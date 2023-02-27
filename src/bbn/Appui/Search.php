@@ -6,6 +6,7 @@ use Exception;
 use bbn\Db;
 use bbn\X;
 use bbn\User;
+use bbn\User\Permissions;
 use bbn\Tpl;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\Cache;
@@ -28,6 +29,11 @@ class Search extends Basic
    * @var User
    */
   protected User $user;
+
+  /**
+   * @var Permissions
+   */
+  protected Permissions $perm;
 
   /**
    * @var Model
@@ -101,6 +107,7 @@ class Search extends Basic
     // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
     $this->db     = Db::getInstance();
     $this->user   = User::getInstance();
+    $this->perm   = Permissions::getInstance();
 
     if (!$this->db) {
       throw new Exception('Db instance cannot be found!');
@@ -114,13 +121,25 @@ class Search extends Basic
     $this->cacheInit();
     self::optionalInit();
     $this->timer      = new Timer();
-    if (empty($models)) {
-      if (($def = $this->getOption('default'))
-        && !empty($def['id_alias'])
-        && ($models =  $this->getOptions($def['id_alias']))
-      ) {
-        $models = \array_map(fn($m) => $m['alias'] ?? [], $models);
+    if (empty($models)
+      &&($def = $this->getOption('default'))
+      && !empty($def['id_alias'])
+    ) {
+      $models = \array_map(fn($m) => $m['alias'] ?? [], $this->getOptions($def['id_alias']) ?: []);
+    }
+    else if (empty($models)) {
+      try {
+        $model->getCustomModelGroup('', 'appui-search');
       }
+      catch (Exception $e) {}
+
+      foreach ($model->getPlugins() as $pi) {
+        try {
+          $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
+        }
+        catch (Exception $e) {}
+      }
+      return;
     }
     else {
       foreach ($models as $i => $m) {
@@ -134,22 +153,10 @@ class Search extends Basic
         }
       }
     }
-    if (empty($models)) {
-      try {
-        $model->getCustomModelGroup('', 'appui-search');
-      }
-      catch (Exception $e) {}
-
-      foreach ($model->getPlugins() as $pi) {
-        try {
-          $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
-        }
-        catch (Exception $e) {}
-      }
-    }
-    else {
+    if (!empty($models)) {
       foreach ($models as $m) {
-        if (isset($m['plugin'])
+        if ($this->perm->has($m['id'], 'options')
+          && isset($m['plugin'])
           && !empty($m['filename'])
         ) {
           if (empty($m['plugin'])) {
