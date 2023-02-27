@@ -264,10 +264,13 @@ class Search extends Basic
                 if (isset($alt['replace'])) {
                   unset($alt['replace']);
                 }
-                $tmp['cfg'] = !empty($rep) ? \array_merge($tmp['cfg'], $alt) : X::mergeArrays($tmp['cfg'], $alt);
                 if (!empty($alt['score'])) {
                   $tmp['score'] = $alt['score'];
                 }
+                if (isset($alt['score'])) {
+                  unset($alt['score']);
+                }
+                $tmp['cfg'] = !empty($rep) ? \array_merge($tmp['cfg'], $alt) : X::mergeArrays($tmp['cfg'], $alt);
                 $result[] = X::mergeArrays($tmp, [
                   'file' => $item['file'] ?? null,
                   'alternative' => $i + 1,
@@ -280,13 +283,20 @@ class Search extends Basic
               'file' => $item['file'] ?? null,
               'signature' => $item['signature'] ?? null
             ]);
+
             $i++;
           }
         }
       }
     }
 
-    X::sortBy($result, 'score', 'DESC');
+    X::sortBy($result, [[
+      'key' => 'score',
+      'dir' => 'desc'
+    ], [
+      'key' => 'alternative',
+      'dir' => 'asc'
+    ]]);
 
     return array_map(function ($item, $key) {
       return array_merge($item, ['num' => $key]);
