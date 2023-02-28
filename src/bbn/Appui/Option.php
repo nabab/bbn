@@ -602,7 +602,14 @@ class Option extends bbn\Models\Cls\Db
     if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $originalLocale = $this->findI18nById($id);
       $locale = $this->getTranslatingLocale($id);
-      if ($opt = $this->getCache($id, __FUNCTION__, $locale)) {
+      if (!empty($locale)
+        && ($opt = $this->cacheGetLocale($id, $locale, __FUNCTION__))
+      ) {
+        return $opt;
+      }
+      else if (empty($locale)
+        && ($opt = $this->cacheGet($id, __FUNCTION__))
+      ) {
         return $opt;
       }
       $tab = $this->db->tsn($this->class_cfg['table']);
@@ -618,7 +625,12 @@ class Option extends bbn\Models\Cls\Db
             $opt[$this->fields['text']] = $trans;
           }
         }
-        $this->setCache($id, __FUNCTION__, $opt, $locale);
+        if (empty($locale)) {
+          $this->cacheSet($id, __FUNCTION__, $opt);
+        }
+        else {
+          $this->cacheSetLocale($id, $locale, __FUNCTION__, $opt);
+        }
         return $opt;
       }
     }
@@ -4506,13 +4518,21 @@ class Option extends bbn\Models\Cls\Db
 
   public function findI18nById(string $id): ?string
   {
-    if ($this->check()) {
+    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      if ($c = $this->cacheGet($id, __FUNCTION__)) {
+        return $c['i18n'];
+      }
+
+      $i18n = null;
       if ($cfg = $this->getCfg($id)) {
         if (!empty($cfg['i18n'])) {
-          return $cfg['i18n'];
+          $i18n = $cfg['i18n'];
         }
       }
-      if ($parents = $this->parents($id)) {
+
+      if (empty($i18n)
+        && ($parents = $this->parents($id))
+      ) {
         foreach ($parents as $i => $parent) {
           $pcfg = $this->getCfg($parent);
           if (empty($pcfg)
@@ -4520,17 +4540,25 @@ class Option extends bbn\Models\Cls\Db
           ) {
             continue;
           }
+
           if (!empty($pcfg['i18n_inheritance'])
             && (($pcfg['i18n_inheritance'] === 'cascade')
               || (($pcfg['i18n_inheritance'] === 'children')
                 && ($i === 0)))
           ) {
-            return $pcfg['i18n'];
+            $i18n = $pcfg['i18n'];
+            break;
           }
-          return null;
+
+          $i18n = null;
+          break;
         }
       }
+
+      $this->cacheSet($id, __FUNCTION__, ['i18n' => $i18n]);
+      return $i18n;
     }
+
     return null;
   }
 
