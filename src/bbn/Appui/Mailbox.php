@@ -303,6 +303,20 @@ class Mailbox extends Basic
     return null;
   }
 
+  public function getFirstUid(): ?int
+  {
+    if (!$this->stream)
+      return null;
+    $msg_nums = imap_search($this->stream, 'ALL');
+
+    if ($msg_nums) {
+      $first_msg_num = min($msg_nums);
+      return imap_uid($this->stream, $first_msg_num);
+    }
+
+    return null;
+  }
+
   public function getNextUid(int $uid): ?int
   {
     if (!$this->stream)
@@ -649,15 +663,15 @@ class Mailbox extends Basic
   public function getEmailsList(array $folder, int $start, int $end)
   {
     $current = $this->folders[$folder['uid']];
-
+    X::log($start . ' === ' . $end);
     //$folder_last = $this->getMsgNo((int)$current['last_uid']);
     $folder_num = $current['num_msg'];
 
-    if (isset($this->folders[$folder['uid']]) && ($end >= $start)
+    if (isset($this->folders[$folder['uid']])
       && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
-      while ($start <= $end) {
+      while ($start >= $end) {
         $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
         // to fetch the message priority
         $msg_header = $this->getMsgHeader($start);
@@ -763,7 +777,7 @@ class Mailbox extends Basic
         }
 
         $res[] = $tmp;
-        $start++;
+        $start--;
       }
 
       return $res;
@@ -868,11 +882,16 @@ class Mailbox extends Basic
       //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
       $purifier    = new HTMLPurifier($config);
 //        X::ddump($config, $this->_htmlmsg);
-      $res['html'] =  $purifier->purify(quoted_printable_decode($res['html']));
+
+      if ($res['html']) {
+        $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));
+      }
     }
 
-    $res['subject'] = $this->decode_encoded_words_deep($res['subject']);
-    $res['Subject'] = $res['subject'];
+    if (isset($res['subject'])) {
+      $res['subject'] = $this->decode_encoded_words_deep($res['subject']);
+      $res['Subject'] = $res['subject'];
+    }
 
     $res['plain']      = quoted_printable_decode($this->_plainmsg);
     $res['charset']    = quoted_printable_decode($this->_charset);

@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use bbn\X;
+
 /**
  * (Static) content delivery system through requests using filesystem and internal DB for libraries.
  *
@@ -88,6 +90,7 @@ class Cron extends Models\Cls\Basic
    */
   public function getRunner(array $cfg = []): ?Cron\Runner
   {
+    X::log($cfg, 'cron');
     if ($this->check() && $this->controller) {
       return new Cron\Runner($this, $cfg);
     }
