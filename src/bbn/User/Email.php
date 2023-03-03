@@ -660,15 +660,10 @@ class Email extends Basic
         $real_end = $mb->getMsgNo($real_end);
 
         $end = $start;
-<<<<<<< src/bbn/User/Email.php
         X::log("start: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid");
         X::log("start emails listing");
         $all = $mb->getEmailsList($folder, $start, $real_end);
         X::log("end emails listing");
-=======
-        X::log("$start -> $real_end");
-        $all = $mb->getEmailsList($folder, $start, $real_end);
->>>>>>> src/bbn/User/Email.php
         if ($all) {
           //var_dump($start, $end);
           X::log($all, 'emails');
