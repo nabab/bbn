@@ -598,58 +598,87 @@ class Email extends Basic
   }
 
   public function syncEmails(array $folder, int $limit = 0): ?int
+
   {
+
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       $info = $mb->getInfoFolder($folder['uid']);
       $mb->selectFolder($folder['uid']);
-      if (!empty($folder['last_uid'])) {
 
+      if (!empty($folder['last_uid'])) {
         $first_uid = $mb->getFirstUid();
         $last_uid = $mb->getLastUid();
         $start = null;
         $real_end = null;
 
         if (isset($folder['db_uid_min']) && isset($folder['db_uid_max'])) {
-          if ($folder['db_uid_min'] == $mb->getLastUid() && $folder['db_uid_max'] == $mb->getLastUid()) {
+          if ($folder['db_uid_min'] == $first_uid && $folder['db_uid_max'] == $last_uid) {
             return 0;
           }
 
-          if ($folder['db_uid_max'] != $first_uid) {
+          if ($folder['db_uid_max'] != $last_uid) {
+
             $start = $last_uid;
             $real_end = $mb->getNextUid($folder['db_uid_max']);
           } else if ($folder['db_uid_min'] != $first_uid) {
-            $start = $first_uid;
+
+            $start = $folder['db_uid_min'];
             $real_end = $start - $limit;
             if ($real_end < 1) {
               $real_end = 1;
             }
-            if ($mb->getMsgUid($real_end) < $first_uid) {
+            try {
+              if ($mb->getMsgNo($real_end) < $first_uid) {
+                $real_end = $first_uid;
+              }
+            } catch (\Exception $e) {
               $real_end = $first_uid;
             }
+
           }
-        } else {
+        }
+        else {
+
           $start = $last_uid;
           $real_end = $start - $limit;
+
           if ($real_end < 1) {
             $real_end = 1;
           }
-          if ($mb->getMsgUid($real_end) < $first_uid) {
+          try {
+            if ($mb->getMsgNo($real_end) < $first_uid) {
+              $real_end = $first_uid;
+            }
+          } catch (\Exception $e) {
             $real_end = $first_uid;
           }
         }
 
+        $start = $mb->getMsgNo($start);
+        $real_end = $mb->getMsgNo($real_end);
+
         $end = $start;
+<<<<<<< src/bbn/User/Email.php
+        X::log("start: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid");
+        X::log("start emails listing");
+        $all = $mb->getEmailsList($folder, $start, $real_end);
+        X::log("end emails listing");
+=======
         X::log("$start -> $real_end");
         $all = $mb->getEmailsList($folder, $start, $real_end);
+>>>>>>> src/bbn/User/Email.php
         if ($all) {
           //var_dump($start, $end);
           X::log($all, 'emails');
           foreach ($all as $a) {
+            X::log("start insert email");
             if ($this->insertEmail($folder, $a)) {
+              X::log("end insert email");
               $res++;
             } else {
+              X::log("end insert email with error");
               //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
               $this->log(X::_("Impossible to insert the email with ID") . ' ' . $a['message_id']);
             }
@@ -677,6 +706,7 @@ class Email extends Basic
         $table = $this->class_cfg['tables']['users_emails'];
         $num = $res + $folder['num_msg'];
         $s2 = 0;
+
         while ($info->Nmsgs < $num) {
           $msg = $this->db->rselect($table, [$cfg['id'], $cfg['msg_uid']], [$cfg['id_folder'] => $folder['id']], [$cfg['msg_uid'] => 'DESC'], $s2);
           if (!$mb->getMsgNo($msg['msg_uid'])) {
@@ -688,10 +718,8 @@ class Email extends Basic
           $s2++;
         }
       }
-
       return $res;
     }
-
     return null;
   }
 
@@ -884,6 +912,7 @@ class Email extends Basic
 
   public function insertEmail(array $folder, array $email)
   {
+    $id = false;
     if (X::hasProps($email, ['from', 'uid'])) {
       $cfg = $this->class_cfg['arch']['users_emails'];
       $table = $this->class_cfg['tables']['users_emails'];
@@ -981,11 +1010,11 @@ class Email extends Basic
           $cfg['external_uids'] => $external ? json_encode($external) : null,
           $cfg['excerpt'] => ""
         ];
-        $id = false;
 
         if ($existing) {
           $id = $existing;
         } else if ($test = $this->db->insert($table, $ar)) {
+          X::log(['insertEmail' => $test, 'ar' => $ar]);
           $id = $this->db->lastId();
           $mb = $this->getMailbox($folder['id_account']);
           $mb->selectFolder($folder['uid']);
@@ -993,11 +1022,9 @@ class Email extends Basic
           $number = $mb->getMsgNo($email['uid']);
           if ($number) {
             $msg = $mb->getMsg($number, $id, $folder['id_account']);
-            $text = $msg['plain'];
             if (empty($text)) {
               $text = $msg['html'];
             }
-            X::log($text, 'text');
           } else {
             $text = "";
           }
@@ -1020,6 +1047,8 @@ class Email extends Basic
 
       }
     }
+
+    return $id;
   }
 
 
