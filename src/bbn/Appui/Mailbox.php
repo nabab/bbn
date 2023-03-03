@@ -642,7 +642,7 @@ class Mailbox extends Basic
     return $string;
   }
 
-  private function decode_encoded_words_array($array) {
+  private function decode_encoded_words_array(array $array) {
     for($i = 0; $i < count($array); $i++) {
       $array[$i] = $this->decode_encoded_words($array[$i]);
     }
@@ -652,11 +652,13 @@ class Mailbox extends Basic
   private function decode_encoded_words_deep($obj) {
     if (is_string($obj)) {
       $obj = $this->decode_encoded_words($obj);
-    } elseif (is_object($obj)) {
-      foreach ($obj as &$property) {
-        $property = $this->decode_encoded_words_deep($property);
+    }
+    elseif (is_object($obj)) {
+      foreach ($obj as $idx => $val) {
+        $obj->$idx = $this->decode_encoded_words_deep($val);
       }
     }
+
     return $obj;
   }
 
@@ -1078,6 +1080,10 @@ class Mailbox extends Basic
       catch (\Exception $e) {
         throw new \Exception($e->getMessage().' '.(string)$msgnum);
       }
+
+      if (!$res) {
+        X::log($msgnum, 'bad_numbers');
+      }
     }
 
     return $res ?? null;
@@ -1142,11 +1148,18 @@ class Mailbox extends Basic
   public function getMsgHeader($msgnum, $uid = false)
   {
     if ($this->_is_connected()) {
-      if ($uid) {
-        return imap_fetchheader($this->stream, $msgnum, FT_UID);
+      try {
+        if ($uid) {
+          $res = imap_fetchheader($this->stream, $msgnum, FT_UID);
+        }
+
+        $res = imap_fetchheader($this->stream, $msgnum);
+      }
+      catch (Exception $e) {
+        throw new Exception($e->getMessage().' '.(string)$msgnum);
       }
 
-      return imap_fetchheader($this->stream, $msgnum);
+      return $res;
     }
 
     return false;
