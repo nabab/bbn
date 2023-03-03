@@ -740,6 +740,9 @@ class Mailbox extends Basic
           }
         }
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
+        if (!isset($tmp['subject'])) {
+          X::log($tmp, "no_subject");
+        }
         $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so' ;
 
         $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
@@ -884,9 +887,14 @@ class Mailbox extends Basic
 //        X::ddump($config, $this->_htmlmsg);
 
       if ($res['html']) {
+        $save = $res['html'];
         try {
           $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));
         } catch (\Exception $e) {
+          X::log([
+            'error' => $e->getMessage(),
+            'html' => $save
+          ], 'htmlpurifier');
           $res['html'] = '';
         }
       }
