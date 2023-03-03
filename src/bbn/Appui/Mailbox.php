@@ -1131,7 +1131,14 @@ class Mailbox extends Basic
   public function getMsgStructure(int $msgnum)
   {
     if ($this->_is_connected()) {
-      return imap_fetchstructure($this->stream, $msgnum);
+      try {
+        $res = imap_fetchstructure($this->stream, $msgnum);
+      }
+      catch (Exception $e) {
+        throw new Exception($e->getMessage().' '.(string)$msgnum);
+      }
+
+      return $res;
     }
 
     return false;
