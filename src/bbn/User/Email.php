@@ -594,14 +594,16 @@ class Email extends Basic
   }
 
   public function syncEmails(array $folder, int $limit = 0): ?int
+
   {
+
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       $info = $mb->getInfoFolder($folder['uid']);
       $mb->selectFolder($folder['uid']);
-      if (!empty($folder['last_uid'])) {
 
+      if (!empty($folder['last_uid'])) {
         $first_uid = $mb->getFirstUid();
         $last_uid = $mb->getLastUid();
         $start = null;
@@ -625,21 +627,26 @@ class Email extends Basic
               $real_end = $first_uid;
             }
           }
-        } else {
+        }
+        else {
           $start = $last_uid;
           $real_end = $start - $limit;
           if ($real_end < 1) {
             $real_end = 1;
           }
+
           if ($mb->getMsgUid($real_end) < $first_uid) {
             $real_end = $first_uid;
           }
         }
 
+        $start = $mb->getMsgNo($start);
+        $real_end = $mb->getMsgNo($real_end);
+
         $end = $start;
         X::log("$start -> $real_end");
-        X::log($mb->getEmailsList($folder, $start, $real_end));
-        if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
+        $all = $mb->getEmailsList($folder, $start, $real_end);
+        if ($all) {
           //var_dump($start, $end);
           X::log($all, 'emails');
           foreach ($all as $a) {
@@ -673,6 +680,7 @@ class Email extends Basic
         $table = $this->class_cfg['tables']['users_emails'];
         $num = $res + $folder['num_msg'];
         $s2 = 0;
+
         while ($info->Nmsgs < $num) {
           $msg = $this->db->rselect($table, [$cfg['id'], $cfg['msg_uid']], [$cfg['id_folder'] => $folder['id']], [$cfg['msg_uid'] => 'DESC'], $s2);
           if (!$mb->getMsgNo($msg['msg_uid'])) {
@@ -684,10 +692,8 @@ class Email extends Basic
           $s2++;
         }
       }
-
       return $res;
     }
-
     return null;
   }
 
