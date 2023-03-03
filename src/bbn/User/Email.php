@@ -642,8 +642,8 @@ class Email extends Basic
 
         $end = $start;
         X::log("$start -> $real_end");
-        X::log($mb->getEmailsList($folder, $start, $real_end));
-        if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
+        $all = $mb->getEmailsList($folder, $start, $real_end);
+        if ($all) {
           //var_dump($start, $end);
           X::log($all, 'emails');
           foreach ($all as $a) {
