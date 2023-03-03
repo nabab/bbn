@@ -80,12 +80,6 @@ class Email extends Basic
   /** @var array An array of connection objects */
   protected $mboxes = [];
 
-  /** @var user The user object */
-  protected $user;
-
-  /** @var preferences The preferences object */
-  protected $pref;
-
   /** @var bbn\Appui\Option The options object */
   protected $opt;
 
@@ -115,13 +109,24 @@ class Email extends Basic
   }
 
 
-  public function __construct(Db $db, User $user = null, Preferences $preferences = null)
+  public function __construct(
+    private Db $db,
+    /** @var user The user object */
+    protected User $user = null,
+    /** @var preferences The preferences object */
+    protected Preferences $pref = null
+  )
   {
     self::optionalInit();
     $this->_init_class_cfg();
     $this->db = $db;
-    $this->user = $user ?: User::getInstance();
-    $this->pref = $preferences ?: Preferences::getInstance();
+    if (!$this->user) {
+      $this->user = User::getInstance();
+    }
+
+    if (!$this->pref) {
+      $this->pref = Preferences::getInstance();
+    }
   }
 
 
@@ -1022,6 +1027,10 @@ class Email extends Basic
   public function addContactFromMail(array $dest, bool $blacklist = false): ?string
   {
     if (X::hasProp($dest, 'email', true)) {
+      if (!Str::isEmail($dest['email'])) {
+        return null;
+      }
+
       $cfg_contacts = $this->class_cfg['arch']['users_contacts'];
       $cfg_links = $this->class_cfg['arch']['users_contacts_links'];
       $table_contacts = $this->class_cfg['tables']['users_contacts'];
@@ -1098,35 +1107,39 @@ class Email extends Basic
   }
 
 
-  public function retrieveEmail(string $email)
+  public function retrieveEmail(string $email): ?string
   {
-    $contacts = $this->class_cfg['tables']['users_contacts'];
-    $cfg_c = $this->class_cfg['arch']['users_contacts'];
-    $links = $this->class_cfg['tables']['users_contacts_links'];
-    $cfg_l = $this->class_cfg['arch']['users_contacts_links'];
-    return $this->db->selectOne(
-      [
-        'tables' => [$links],
-        'field' => $this->db->cfn($cfg_l['id'], $links),
-        'join' => [
-          [
-            'table' => $contacts,
-            'on' => [
-              [
-                'field' => $cfg_l['id_contact'],
-                'exp' => $this->db->cfn($cfg_c['id'], $contacts)
+    if (Str::isEmail($email)) {
+      $contacts = $this->class_cfg['tables']['users_contacts'];
+      $cfg_c = $this->class_cfg['arch']['users_contacts'];
+      $links = $this->class_cfg['tables']['users_contacts_links'];
+      $cfg_l = $this->class_cfg['arch']['users_contacts_links'];
+      return $this->db->selectOne(
+        [
+          'tables' => [$links],
+          'field' => $this->db->cfn($cfg_l['id'], $links),
+          'join' => [
+            [
+              'table' => $contacts,
+              'on' => [
+                [
+                  'field' => $cfg_l['id_contact'],
+                  'exp' => $this->db->cfn($cfg_c['id'], $contacts)
+                ]
               ]
-            ]
 
+            ]
+          ],
+          'where' => [
+            'value' => $email,
+            'id_user' => $this->user->getId(),
+            'type' => 'email'
           ]
-        ],
-        'where' => [
-          'value' => $email,
-          'id_user' => $this->user->getId(),
-          'type' => 'email'
         ]
-      ]
-    );
+      );
+    }
+
+    return null;
   }
 
 
