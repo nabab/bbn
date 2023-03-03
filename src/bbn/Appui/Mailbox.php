@@ -741,7 +741,7 @@ class Mailbox extends Basic
         }
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
         if (!isset($tmp['subject'])) {
-          X::log($tmp, "no_subject");
+          $tmp['subject'] = '';
         }
         $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so' ;
 
@@ -821,8 +821,8 @@ class Mailbox extends Basic
         // check if the part have fdisposition and if disposition its inline
         if (!empty($p->parts)) {
           foreach ($p->parts as $p2) {
-            if ($p2->ifdisposition && (strtolower($p2->disposition) === 'inline')) {
-              if ($p2->dparameters) {
+            if (isset($p2->ifdisposition) && (strtolower($p2->disposition) === 'inline')) {
+              if (isset($p2->dparameters) && is_array($p2->dparameters)) {
                 // search in dparameters when attribute is filename
                 foreach ($p2->dparameters as $dparam) {
                   if (!empty($p2->id) && strtolower($dparam->attribute) === 'filename') {
@@ -880,7 +880,15 @@ class Mailbox extends Basic
 
       $config = HTMLPurifier_HTML5Config::createDefault();
 
-      $config->set('URI.AllowedSchemes', ['data' => true]);
+      $config->set('URI.AllowedSchemes', [
+        'http' => true,
+        'https' => true,
+        'mailto' => true,
+        'ftp' => true,
+        'nntp' => true,
+        'news' => true,
+        'tel' => true,
+      ]);
 
       //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
       $purifier    = new HTMLPurifier($config);
