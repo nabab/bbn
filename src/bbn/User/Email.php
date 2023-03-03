@@ -112,21 +112,13 @@ class Email extends Basic
   public function __construct(
     private Db $db,
     /** @var user The user object */
-    protected User $user = null,
+    protected User $user = User::getInstance(),
     /** @var preferences The preferences object */
-    protected Preferences $pref = null
+    protected Preferences $pref = Preferences::getInstance()
   )
   {
     self::optionalInit();
     $this->_init_class_cfg();
-    $this->db = $db;
-    if (!$this->user) {
-      $this->user = User::getInstance();
-    }
-
-    if (!$this->pref) {
-      $this->pref = Preferences::getInstance();
-    }
   }
 
 
