@@ -1143,7 +1143,7 @@ class Mailbox extends Basic
         $res = imap_msgno($this->stream, $msguid);
       }
       else {
-        X::log($e->getMessage().' '.(string)$msguid, 'mail-msgNoErrors');
+        X::log('MSGUID: '.(string)$msguid, 'mail-msgNoErrors');
       }
     }
 
