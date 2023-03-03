@@ -601,64 +601,70 @@ class Email extends Basic
       $info = $mb->getInfoFolder($folder['uid']);
       $mb->selectFolder($folder['uid']);
       if (!empty($folder['last_uid'])) {
-        if ($folder['db_uid_max'] == $mb->getLastUid()) {
-          return 0;
-        }
-        if (empty($start) and !empty($folder['db_uid_max'])) {
-          $next = $mb->getNextUid($folder['db_uid_max']);
-          if ($next != null) {
-            $start = $mb->getMsgNo($next);
+
+        $first_uid = $mb->getFirstUid();
+        $last_uid = $mb->getLastUid();
+        $start = null;
+        $real_end = null;
+
+        if (isset($folder['db_uid_min']) && isset($folder['db_uid_max'])) {
+          if ($folder['db_uid_min'] == $mb->getLastUid() && $folder['db_uid_max'] == $mb->getLastUid()) {
+            return 0;
           }
 
-          if (empty($start)) {
-            $start = $mb->getMsgNo($folder['db_uid_max']);
+          if ($folder['db_uid_max'] != $first_uid) {
+            $start = $last_uid;
+            $real_end = $mb->getNextUid($folder['db_uid_max']);
+          } else if ($folder['db_uid_min'] != $first_uid) {
+            $start = $first_uid;
+            $real_end = $start - $limit;
+            if ($real_end < 1) {
+              $real_end = 1;
+            }
+            if ($mb->getMsgUid($real_end) < $first_uid) {
+              $real_end = $first_uid;
+            }
           }
-        }
-
-        if (empty($start)) {
-          $start = 1;
-        }
-
-        $real_end = $start + $limit;
-
-
-        if ($real_end > $mb->getMsgNo($folder['last_uid'])) {
-          $real_end = $mb->getMsgNo($folder['last_uid']);
+        } else {
+          $start = $last_uid;
+          $real_end = $start - $limit;
+          if ($real_end < 1) {
+            $real_end = 1;
+          }
+          if ($mb->getMsgUid($real_end) < $first_uid) {
+            $real_end = $first_uid;
+          }
         }
 
         $end = $start;
-        $num = $real_end - $start;
-        while ($end < $real_end) {
-          $end = min($real_end, $start + 999);
-          if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
-            $start += 1000;
-            //var_dump($start, $end);
-            foreach ($all as $a) {
-              if ($this->insertEmail($folder, $a)) {
-                $res++;
-              } else {
-                //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
-                $this->log(X::_("Impossible to insert the email with ID") . ' ' . $a['message_id']);
-              }
+        X::log("$start -> $real_end");
+        X::log($mb->getEmailsList($folder, $start, $real_end));
+        if ($all = $mb->getEmailsList($folder, $start, $real_end)) {
+          //var_dump($start, $end);
+          X::log($all, 'emails');
+          foreach ($all as $a) {
+            if ($this->insertEmail($folder, $a)) {
+              $res++;
+            } else {
+              //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
+              $this->log(X::_("Impossible to insert the email with ID") . ' ' . $a['message_id']);
             }
-
-            if ($end === $real_end) {
-              $hash = md5(json_encode(['numMsg' => $folder['num_msg'], 'lastUid' => $folder['last_uid']]));
-              $this->pref->updateBit($folder['id'], [
-                'last_check' => date('Y-m-d H:i:s'),
-                'hash' => $hash
-              ], true);
-              break;
-            }
-          } else {
-            throw new \Exception(
-              X::_("Impossible to get the emails for folder")
-              . ' ' . $folder['uid']
-              . ' ' . X::_("from") . ' ' . $start
-              . ' ' . X::_("to") . ' ' . $end
-              . ' (' . $real_end . ')'
-            );
           }
+
+          $hash = md5(json_encode(['numMsg' => $folder['num_msg'], 'lastUid' => $folder['last_uid']]));
+          $this->pref->updateBit($folder['id'], [
+            'last_check' => date('Y-m-d H:i:s'),
+            'hash' => $hash
+          ], true);
+        } else {
+          X::log(X::_("Impossible to get the emails for folder") . ' ' . $folder['uid'] . ' ' . X::_("from") . ' ' . $start . ' ' . X::_("to") . ' ' . $end . ' (' . $real_end . ')');
+          throw new \Exception(
+            X::_("Impossible to get the emails for folder")
+            . ' ' . $folder['uid']
+            . ' ' . X::_("from") . ' ' . $start
+            . ' ' . X::_("to") . ' ' . $end
+            . ' (' . $real_end . ')'
+          );
         }
       }
 
@@ -690,6 +696,13 @@ class Email extends Basic
     $mb = $this->getMailbox($folder['id_account']);
     $mb->selectFolder($folder['uid']);
     return $mb->getLastUid();
+  }
+
+  public function getFirstUid($folder)
+  {
+    $mb = $this->getMailbox($folder['id_account']);
+    $mb->selectFolder($folder['uid']);
+    return $mb->getFirstUid();
   }
 
 
@@ -729,7 +742,6 @@ class Email extends Basic
         'table' => $table,
         'fields' => $cfg
       ]);
-
 
 
       if ($grid->check()) {
@@ -833,7 +845,8 @@ class Email extends Basic
 
   }
 
-  public function updateRead($id) {
+  public function updateRead($id)
+  {
     $cfg = $this->class_cfg['arch']['users_emails'];
     $table = $this->class_cfg['tables']['users_emails'];
     $this->db->update($table, [$cfg['is_read'] => 1], [$cfg['id'] => $id]);
@@ -945,7 +958,6 @@ class Email extends Basic
             }
           }
         }
-
 
 
         $ar = [
