@@ -1137,11 +1137,17 @@ class Mailbox extends Basic
    */
   public function getMsgNo($msguid)
   {
+    $res = false;
     if ($this->_is_connected()) {
-      return imap_msgno($this->stream, $msguid);
+      try {
+        $res = imap_msgno($this->stream, $msguid);
+      }
+      catch (Exception $e) {
+        $this->log($e->getMessage().' '.(string)$msguid);
+      }
     }
 
-    return false;
+    return $res;
   }
 
 
