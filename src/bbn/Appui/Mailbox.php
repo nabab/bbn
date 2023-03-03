@@ -821,11 +821,11 @@ class Mailbox extends Basic
         // check if the part have fdisposition and if disposition its inline
         if (!empty($p->parts)) {
           foreach ($p->parts as $p2) {
-            if (isset($p2->ifdisposition) && (strtolower($p2->disposition) === 'inline')) {
+            if (isset($p2->ifdisposition) && isset($p2->disposition) && (strtolower($p2->disposition) === 'inline')) {
               if (isset($p2->dparameters) && is_array($p2->dparameters)) {
                 // search in dparameters when attribute is filename
                 foreach ($p2->dparameters as $dparam) {
-                  if (!empty($p2->id) && strtolower($dparam->attribute) === 'filename') {
+                  if (!empty($p2->id) && isset($dparam->attribute) && strtolower($dparam->attribute) === 'filename') {
                     $this->_inline_files[] = [
                       'name' => $dparam->value,
                       'id' => substr($p2->id, 1, -1)
