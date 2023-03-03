@@ -1139,10 +1139,10 @@ class Mailbox extends Basic
   {
     $res = false;
     if ($this->_is_connected()) {
-      try {
+      if (Str::isNumber($msguid) && ($msguid > 0)) {
         $res = imap_msgno($this->stream, $msguid);
       }
-      catch (Exception $e) {
+      else {
         X::log($e->getMessage().' '.(string)$msguid, 'mail-msgNoErrors');
       }
     }
