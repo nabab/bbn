@@ -740,10 +740,8 @@ class Mailbox extends Basic
           }
         }
         $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
-        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] . $tmp['date_sent'] . $tmp['subject']) . '@bbn.so' ;
-        if (!$tmp['message_id']) {
-          X::log($tmp, "mail2");
-        }
+        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so' ;
+
         $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
         $tmp['attachments'] = [];
         $tmp['is_html']     = false;
@@ -886,7 +884,11 @@ class Mailbox extends Basic
 //        X::ddump($config, $this->_htmlmsg);
 
       if ($res['html']) {
-        $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));
+        try {
+          $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));
+        } catch (\Exception $e) {
+          $res['html'] = '';
+        }
       }
     }
 
