@@ -659,18 +659,21 @@ class Email extends Basic
         if (!$start || !$real_end) {
           X::log("start: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid", 'poller_email_error');
         }
-
-        try {
-          $start = $mb->getMsgNo($start);
-          $real_end = $mb->getMsgNo($real_end);
-        } catch (\Exception $e) {
-          $start = $last_uid;
-          $real_end = $first_uid;
-
-          if ($folder['db_uid_min'] != $first_uid) {
-            $start = $folder['db_uid_min'];
+        else {
+          try {
+            $start = $mb->getMsgNo($start);
+            $real_end = $mb->getMsgNo($real_end);
+          }
+          catch (\Exception $e) {
+            $start = $last_uid;
+            $real_end = $first_uid;
+  
+            if ($folder['db_uid_min'] != $first_uid) {
+              $start = $folder['db_uid_min'];
+            }
           }
         }
+
 
 
 
