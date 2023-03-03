@@ -1078,7 +1078,7 @@ class Mailbox extends Basic
         $res = imap_headerinfo($this->stream, $msgnum);
       }
       catch (\Exception $e) {
-        throw new \Exception($e->getMessage().' '.(string)$msgnum);
+        $this->log($e->getMessage().' '.(string)$msgnum);
       }
 
       if (!$res) {
@@ -1135,13 +1135,13 @@ class Mailbox extends Basic
         $res = imap_fetchstructure($this->stream, $msgnum);
       }
       catch (Exception $e) {
-        throw new Exception($e->getMessage().' '.(string)$msgnum);
+        $this->log($e->getMessage().' '.(string)$msgnum);
       }
 
-      return $res;
+      return $res ?: null;
     }
 
-    return false;
+    return null;
   }
 
 
@@ -1163,13 +1163,13 @@ class Mailbox extends Basic
         $res = imap_fetchheader($this->stream, $msgnum);
       }
       catch (Exception $e) {
-        throw new Exception($e->getMessage().' '.(string)$msgnum);
+        $this->log($e->getMessage().' '.(string)$msgnum);
       }
 
-      return $res;
+      return $res ?: null;
     }
 
-    return false;
+    return null;
   }
 
 
