@@ -669,118 +669,123 @@ class Mailbox extends Basic
     //$folder_last = $this->getMsgNo((int)$current['last_uid']);
     $folder_num = $current['num_msg'];
 
+    $tmp = [];
     if (isset($this->folders[$folder['uid']])
       && $this->selectFolder($folder['uid'])
     ) {
       $res = [];
       while ($start >= $end) {
-        $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
-        // to fetch the message priority
-        $msg_header = $this->getMsgHeader($start);
-        preg_match('/X-Priority: ([0-9])/', $msg_header, $matches);
-        $priority = $matches[1] ?? 3;
+        try {
+          $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
+          // to fetch the message priority
+          $msg_header = $this->getMsgHeader($start);
+          preg_match('/X-Priority: ([0-9])/', $msg_header, $matches);
+          $priority = $matches[1] ?? 3;
 
-        $structure = $this->getMsgStructure($start);
-        if (!$tmp || !$structure) {
-          continue;
-        }
-
-        $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
-        $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
-        $tmp['uid'] = $this->getMsgUid($start);
-        $tmp['priority'] = $priority;
-        unset(
-          $tmp['Date'],
-          $tmp['MailDate'],
-          $tmp['Subject'],
-          $tmp['sender'],
-          $tmp['toaddress'],
-          $tmp['fromaddress'],
-          $tmp['senderaddress'],
-          $tmp['reply_toaddress']
-        );
-        foreach ($tmp as $k => $v) {
-          if (is_string($v)) {
-            $tmp[$k] = trim($v);
-            if (empty($v)) {
-              $tmp[$k] = false;
-            }
-            elseif (Str::isNumber($v)) {
-              $tmp[$k] = (int)$v;
-            }
-            elseif ($k === 'subject') {
-              $tmp[$k] = $this->decode_encoded_words_deep($v);
-              if (mb_detect_encoding($v) !== 'UTF-8') {
-                $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
-              }
-              if (strlen($tmp[$k]) > 1000) {
-                $tmp[$k] = Str::cut($tmp[$k], 1000);
-              }
-            }
+          $structure = $this->getMsgStructure($start);
+          if (!$tmp || !$structure) {
+            continue;
           }
-        }
 
-        foreach (self::getDestFields() as $df) {
-          if (!empty($tmp[$df])) {
-            $ads = [];
-            foreach ($tmp[$df] as $a) {
-              if (isset($a->host)) {
-                $ads[] = [
-                  'name' => empty($a->personal) ? null : mb_convert_encoding(iconv_mime_decode($a->personal, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8"),
-                  'email' => strtolower($a->mailbox.'@'.$a->host),
-                  'host' => $a->host
-                ];
-              }
-              else {
-                $this->log((array)$a);
-              }
-            }
-
-            $tmp[$df] = $ads;
-          }
-        }
-        $tmp['references']  = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
-        if (!isset($tmp['subject'])) {
-          $tmp['subject'] = '';
-        }
-        $tmp['message_id']  = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so' ;
-
-        $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
-        $tmp['attachments'] = [];
-        $tmp['is_html']     = false;
-        if (empty($structure->parts)) {
-          $tmp['is_html'] = $structure->subtype === 'HTML';
-        }
-        else {
-          foreach ($structure->parts as $part) {
-
-            if ($part->ifdisposition
-                && (strtolower($part->disposition) === 'attachment')
-                && $part->ifparameters
-                && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
-            ) {
-              $tmp['attachments'][] = [
-                'name' => $name_row->value,
-                'size' => $part->bytes,
-                'type' => Str::fileExt($name_row->value)
-              ];
-            }
-            elseif (!empty($part->parts)) {
-              foreach ($part->parts as $p) {
-                if ($p->subtype === 'HTML') {
-                  $tmp['is_html'] = true;
-                  break;
+          $tmp['date_sent'] = date('Y-m-d H:i:s', strtotime($tmp['Date']));
+          $tmp['date_server'] = date('Y-m-d H:i:s', strtotime($tmp['MailDate']));
+          $tmp['uid'] = $this->getMsgUid($start);
+          $tmp['priority'] = $priority;
+          unset(
+            $tmp['Date'],
+            $tmp['MailDate'],
+            $tmp['Subject'],
+            $tmp['sender'],
+            $tmp['toaddress'],
+            $tmp['fromaddress'],
+            $tmp['senderaddress'],
+            $tmp['reply_toaddress']
+          );
+          foreach ($tmp as $k => $v) {
+            if (is_string($v)) {
+              $tmp[$k] = trim($v);
+              if (empty($v)) {
+                $tmp[$k] = false;
+              } elseif (Str::isNumber($v)) {
+                $tmp[$k] = (int)$v;
+              } elseif ($k === 'subject') {
+                $tmp[$k] = $this->decode_encoded_words_deep($v);
+                if (mb_detect_encoding($v) !== 'UTF-8') {
+                  $tmp[$k] = mb_convert_encoding(iconv_mime_decode($v, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8");
+                }
+                if (strlen($tmp[$k]) > 1000) {
+                  $tmp[$k] = Str::cut($tmp[$k], 1000);
                 }
               }
             }
-            elseif ($part->subtype === 'HTML') {
-              $tmp['is_html'] = true;
+          }
+
+          foreach (self::getDestFields() as $df) {
+            if (!empty($tmp[$df])) {
+              $ads = [];
+              foreach ($tmp[$df] as $a) {
+                if (isset($a->host)) {
+                  $ads[] = [
+                    'name' => empty($a->personal) ? null : mb_convert_encoding(iconv_mime_decode($a->personal, ICONV_MIME_DECODE_CONTINUE_ON_ERROR, "UTF-8"), "UTF-8"),
+                    'email' => strtolower($a->mailbox . '@' . $a->host),
+                    'host' => $a->host
+                  ];
+                } else {
+                  $this->log((array)$a);
+                }
+              }
+
+              $tmp[$df] = $ads;
             }
           }
-        }
+          $tmp['references'] = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
+          if (!isset($tmp['subject'])) {
+            $tmp['subject'] = '';
+          }
+          $tmp['message_id'] = isset($tmp['message_id']) ? substr($tmp['message_id'], 1, -1) : $this->transformString($tmp['uid'] ?? "" . $tmp['date_sent'] ?? "" . $tmp['subject'] ?? "") . '@bbn.so';
 
-        $res[] = $tmp;
-        $start--;
+          $tmp['in_reply_to'] = empty($tmp['in_reply_to']) ? false : substr($tmp['in_reply_to'], 1, -1);
+          $tmp['attachments'] = [];
+          $tmp['is_html'] = false;
+          if (empty($structure->parts)) {
+            $tmp['is_html'] = $structure->subtype === 'HTML';
+          } else {
+            foreach ($structure->parts as $part) {
+
+              if ($part->ifdisposition
+                && (strtolower($part->disposition) === 'attachment')
+                && $part->ifparameters
+                && ($name_row = X::getRow($part->parameters, ['attribute' => 'name']))
+              ) {
+                $tmp['attachments'][] = [
+                  'name' => $name_row->value,
+                  'size' => $part->bytes,
+                  'type' => Str::fileExt($name_row->value)
+                ];
+              } elseif (!empty($part->parts)) {
+                foreach ($part->parts as $p) {
+                  if ($p->subtype === 'HTML') {
+                    $tmp['is_html'] = true;
+                    break;
+                  }
+                }
+              } elseif ($part->subtype === 'HTML') {
+                $tmp['is_html'] = true;
+              }
+            }
+          }
+
+          $res[] = $tmp;
+          $start--;
+        } catch (\Exception $e) {
+          X::log([
+            'error' => $e->getMessage(),
+            'tmp' => $tmp,
+            'start' => $start,
+            'header' => $this->getMsgHeader($start),
+          ], 'poller_email_error');
+          $start--;
+        }
       }
 
       return $res;
