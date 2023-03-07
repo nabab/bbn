@@ -429,7 +429,7 @@ class Search extends Basic
       //X::ddump($config_array, "DDDD", $this->executeFunctions($search_value), $search_value, $this->search_cfg);
       $num_cfg = count($config_array);
       if (!$start && !$step) {
-        array_walk($config_array, function ($a) {
+        array_walk($config_array, function (&$a) {
           $a['cfg']['start'] = 0;
         });
       }
