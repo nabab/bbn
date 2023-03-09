@@ -440,7 +440,7 @@ class Email extends Basic
           $res['id_account'] = $id_account;
           $this->getAccount($id_account, true);
           if ($sync) {
-            $this->syncEmails($res);
+            //$this->syncEmails($res);
           }
         }
 
@@ -450,6 +450,18 @@ class Email extends Basic
 
     return null;
 
+  }
+
+  public function getInfoFolder($id)
+  {
+    $folder = $this->getFolder($id);
+    if ($folder) {
+      $mb = $this->getMailbox($folder['id_account']);
+      if ($mb) {
+        return $mb->getInfoFolder($folder['uid']);
+      }
+    }
+    return null;
   }
 
 
@@ -580,7 +592,7 @@ class Email extends Basic
             $cfg['id_user'] => $this->user->getId()
           ]
         ),
-        'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $a['id']]),
+        'num_msg' => $this->db->count($table, [$cfg['id_folder'] => $id]),
         'last_uid' => $a['last_uid'] ?? null,
         'last_check' => $a['last_check'] ?? null,
         'hash' => $a['hash'] ?? null
@@ -600,6 +612,12 @@ class Email extends Basic
   public function syncEmails(array $folder, int $limit = 0): ?int
 
   {
+    // log pid
+    $pid = getmypid();
+    X::log([
+      'pid' => $pid,
+      'folder' => $folder
+    ], 'pid');
 
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
       $res = 0;
@@ -689,6 +707,7 @@ class Email extends Basic
         if ($all) {
           //var_dump($start, $end);
           foreach ($all as $a) {
+            X::log($all);
             if ($this->insertEmail($folder, $a)) {
               $res++;
             } else {
@@ -934,11 +953,12 @@ class Email extends Basic
         $cfg['id'],
         [
           $cfg['id_user'] => $this->user->getId(),
-          $cfg['msg_unique_id'] => $email['message_id'],
           $cfg['msg_uid'] => $email['uid'],
           $cfg['id_folder'] => $folder['id']
         ]
       );
+      $uid = $email['uid'];
+      X::log("$existing => $uid", 'existing');
       foreach (Mailbox::getDestFields() as $df) {
         if (!empty($email[$df])) {
           foreach ($email[$df] as &$dest) {
@@ -1041,7 +1061,7 @@ class Email extends Basic
           if ($number) {
             $msg = $mb->getMsg($number, $id, $folder['id_account']);
             if (empty($text)) {
-              $text = $msg['html'];
+              $text = $msg['plain'];
             }
           } else {
             $text = "";
