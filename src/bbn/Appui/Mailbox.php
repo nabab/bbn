@@ -817,7 +817,7 @@ class Mailbox extends Basic
     $res = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($msgno));
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
-    $structure = (array)$this->decode_encoded_words_deep($this->getMsgStructure($msgno));
+    $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
