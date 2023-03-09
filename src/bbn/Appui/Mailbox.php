@@ -678,6 +678,14 @@ class Mailbox extends Basic
       while ($start >= $end) {
         try {
           $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
+
+          // for each string in the array decode quoted printable
+          foreach ($tmp as $key => $value) {
+            if (is_string($value)) {
+              $tmp[$key] = quoted_printable_decode($value);
+            }
+          }
+
           // to fetch the message priority
           $msg_header = $this->getMsgHeader($start);
           preg_match('/X-Priority: ([0-9])/', $msg_header, $matches);
@@ -780,7 +788,7 @@ class Mailbox extends Basic
           $start--;
         } catch (\Exception $e) {
           X::log([
-            'error' => $e->getMessage(),
+            'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
             'tmp' => $tmp,
             'start' => $start,
             'header' => $this->getMsgHeader($start),
@@ -817,7 +825,7 @@ class Mailbox extends Basic
     $res = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($msgno));
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
-    $structure = (array)$this->decode_encoded_words_deep($this->getMsgStructure($msgno));
+    $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
@@ -914,10 +922,18 @@ class Mailbox extends Basic
       }
     }
 
-    $res['plain']      = quoted_printable_decode($this->_plainmsg);
-    $res['charset']    = quoted_printable_decode($this->_charset);
+    $res['plain']      = $this->_plainmsg;
+    $res['charset']    = $this->_charset;
     $res['attachment'] = $this->_attachments;
     $res['inline']     = $this->_inline_files;
+
+    // set res to string and quoted printable decode
+    foreach ($res as $k => $v) {
+      if (is_string($v)) {
+        $res[$k] = quoted_printable_decode($v);
+      }
+    }
+
     return $res;
   }
 
