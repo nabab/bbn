@@ -788,7 +788,7 @@ class Mailbox extends Basic
           $start--;
         } catch (\Exception $e) {
           X::log([
-            'error' => $e->getMessage(),
+            'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
             'tmp' => $tmp,
             'start' => $start,
             'header' => $this->getMsgHeader($start),
