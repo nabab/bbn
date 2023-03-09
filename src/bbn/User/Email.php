@@ -1025,9 +1025,14 @@ class Email extends Basic
           $cfg['excerpt'] => ""
         ];
 
+        X::log([
+          "Insert email",
+          $ar
+        ], 'poller_email_error');
+
         if ($existing) {
           $id = $existing;
-        } else if ($test = $this->db->insert($table, $ar)) {
+        } else if ($this->db->insert($table, $ar)) {
           $id = $this->db->lastId();
           $mb = $this->getMailbox($folder['id_account']);
           $mb->selectFolder($folder['uid']);
