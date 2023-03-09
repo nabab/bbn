@@ -329,6 +329,8 @@ class Mailbox extends Basic
       });
       if ($emails) {
         return min($emails);
+      } else {
+        return $uid;
       }
     }
 
@@ -665,7 +667,6 @@ class Mailbox extends Basic
   public function getEmailsList(array $folder, int $start, int $end)
   {
     $current = $this->folders[$folder['uid']];
-    X::log($start . ' === ' . $end);
     //$folder_last = $this->getMsgNo((int)$current['last_uid']);
     $folder_num = $current['num_msg'];
 
@@ -813,10 +814,10 @@ class Mailbox extends Basic
 
 
     // HEADER
-    $res = (array)$this->getMsgHeaderinfo($msgno);
+    $res = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($msgno));
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
-    $structure = $this->getMsgStructure($msgno);
+    $structure = (array)$this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
@@ -911,11 +912,6 @@ class Mailbox extends Basic
           $res['html'] = '';
         }
       }
-    }
-
-    if (isset($res['subject'])) {
-      $res['subject'] = $this->decode_encoded_words_deep($res['subject']);
-      $res['Subject'] = $res['subject'];
     }
 
     $res['plain']      = quoted_printable_decode($this->_plainmsg);
@@ -1137,17 +1133,11 @@ class Mailbox extends Basic
    */
   public function getMsgNo($msguid)
   {
-    $res = false;
     if ($this->_is_connected()) {
-      if (Str::isNumber($msguid) && ($msguid > 0)) {
-        $res = imap_msgno($this->stream, $msguid);
-      }
-      else {
-        X::log('MSGUID: '.(string)$msguid, 'mail-msgNoErrors');
-      }
+      return imap_msgno($this->stream, $msguid);
     }
 
-    return $res;
+    return false;
   }
 
 

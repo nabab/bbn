@@ -619,15 +619,14 @@ class Email extends Basic
           }
 
           if ($folder['db_uid_max'] != $last_uid) {
-
             $start = $last_uid;
             $real_end = $mb->getNextUid($folder['db_uid_max']);
           } else if ($folder['db_uid_min'] != $first_uid) {
-
+            $test = $folder['db_uid_min'];
             $start = $folder['db_uid_min'];
             $real_end = $start - $limit;
             if ($real_end < 1) {
-              $real_end = 1;
+              $real_end = $first_uid;
             }
             try {
               if ($mb->getMsgNo($real_end) < $first_uid) {
@@ -640,12 +639,11 @@ class Email extends Basic
           }
         }
         else {
-
           $start = $last_uid;
           $real_end = $start - $limit;
 
           if ($real_end < 1) {
-            $real_end = 1;
+            $real_end = $first_uid;
           }
           try {
             if ($mb->getMsgNo($real_end) < $first_uid) {
@@ -656,42 +654,44 @@ class Email extends Basic
           }
         }
 
+        $log = false;
         if (!$start || !$real_end) {
           X::log("start: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid", 'poller_email_error');
+          $log = true;
         }
-        else {
-          try {
-            $start = $mb->getMsgNo($start);
-            $real_end = $mb->getMsgNo($real_end);
-          }
-          catch (\Exception $e) {
+
+        try {
+          $start = $mb->getMsgNo($start);
+          $real_end = $mb->getMsgNo($real_end);
+        } catch (\Exception $e) {
+          $start = $mb->getMsgNo($last_uid);
+          $real_end = $mb->getMsgNo($first_uid);
+
+          if ($folder['db_uid_min'] && $folder['db_uid_max'] == $last_uid) {
+            $start = $folder['db_uid_min'];
+          } else if ($folder['db_uid_max'] != $last_uid) {
             $start = $last_uid;
-            $real_end = $first_uid;
-  
-            if ($folder['db_uid_min'] != $first_uid) {
-              $start = $folder['db_uid_min'];
-            }
+            $real_end = $mb->getNextUid($folder['db_uid_max']);
           }
         }
 
+        if ($log) {
+          X::log("sstart: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid", 'poller_email_error');
+        }
 
+        if (!$start || !$real_end) {
+          return 0;
+        }
 
 
         $end = $start;
-        X::log("start: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid");
-        X::log("start emails listing");
         $all = $mb->getEmailsList($folder, $start, $real_end);
-        X::log("end emails listing");
         if ($all) {
           //var_dump($start, $end);
-          X::log($all, 'emails');
           foreach ($all as $a) {
-            X::log("start insert email");
             if ($this->insertEmail($folder, $a)) {
-              X::log("end insert email");
               $res++;
             } else {
-              X::log("end insert email with error");
               //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
               $this->log(X::_("Impossible to insert the email with ID") . ' ' . $a['message_id']);
             }
@@ -935,7 +935,8 @@ class Email extends Basic
         [
           $cfg['id_user'] => $this->user->getId(),
           $cfg['msg_unique_id'] => $email['message_id'],
-          $cfg['msg_uid'] => $email['uid']
+          $cfg['msg_uid'] => $email['uid'],
+          $cfg['id_folder'] => $folder['id']
         ]
       );
       foreach (Mailbox::getDestFields() as $df) {
@@ -947,7 +948,7 @@ class Email extends Basic
                 $this->addSentToLink($id, Date('Y-m-d H:i:s', strtotime($email['date'])));
               }
             } elseif (!($id = $this->addContactFromMail($dest))) {
-              throw new \Exception(X::_("Impossible to add the contact") . ' ' . $dest['email']);
+              X::log("Impossible to add contact from mail" . $dest['email'], 'poller_email_error');
             }
 
             $dest['id'] = $id;
@@ -1027,7 +1028,6 @@ class Email extends Basic
         if ($existing) {
           $id = $existing;
         } else if ($test = $this->db->insert($table, $ar)) {
-          X::log(['insertEmail' => $test, 'ar' => $ar]);
           $id = $this->db->lastId();
           $mb = $this->getMailbox($folder['id_account']);
           $mb->selectFolder($folder['uid']);
