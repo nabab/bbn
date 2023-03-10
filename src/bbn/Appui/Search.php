@@ -155,7 +155,7 @@ class Search extends Basic
     }
     if (!empty($models)) {
       foreach ($models as $m) {
-        if ($this->perm->has($m['id'], 'options')
+        if ($this->perm->has($this->perm->optionToPermission($m['id']), 'options')
           && isset($m['plugin'])
           && !empty($m['filename'])
         ) {
