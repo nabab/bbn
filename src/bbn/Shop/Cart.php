@@ -117,7 +117,22 @@ class Cart extends DbCls
       }
     }
     if ($idCart = $this->selectOne($this->fields['id'], $where, [$this->fields['creation'] => 'DESC'])) {
-      if ($this->db->selectOne($salesCfg['table'], $salesFields['id'], [$salesFields['id_cart'] => $idCart])) {
+      if ($this->db->selectOne([
+        'table' => $salesCfg['table'],
+        'fields' => $salesFields['id'],
+        'where' => [[
+          'field' => $salesFields['id_cart'],
+          'value' => $idCart
+        ], [
+          'field' => $salesFields['status'],
+          'operator' => '!=',
+          'value' => 'failed'
+        ], [
+          'field' => $salesFields['status'],
+          'operator' => '!=',
+          'value' => 'unpaid'
+        ]]
+      ])) {
         return null;
       }
       return $idCart;
