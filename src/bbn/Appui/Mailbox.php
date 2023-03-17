@@ -679,6 +679,11 @@ class Mailbox extends Basic
         try {
           $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
 
+          // imap decode the subject
+          if (isset($tmp['subject']) && is_string($tmp['subject'])) {
+            $tmp['subject'] = imap_mime_header_decode($tmp['subject'])[0]->text;
+          }
+
           // for each string in the array decode quoted printable
           foreach ($tmp as $key => $value) {
             if (is_string($value)) {
@@ -825,6 +830,18 @@ class Mailbox extends Basic
     $res = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($msgno));
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
+
+    if (isset($res['subject']) && is_string($res['subject'])) {
+      $res['subject'] = imap_mime_header_decode($res['subject'])[0]->text;
+    }
+
+    foreach ($res as $key => $value) {
+      if (is_string($value)) {
+        $res[$key] = quoted_printable_decode($value);
+      }
+    }
+
+
     $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
