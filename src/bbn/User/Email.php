@@ -620,6 +620,7 @@ class Email extends Basic
     ], 'pid');
 
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
+      X::log($folder, 'monreuf');
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       $info = $mb->getInfoFolder($folder['uid']);
@@ -673,6 +674,7 @@ class Email extends Basic
         }
 
         $log = false;
+
         if (!$start || !$real_end) {
           X::log("start: $start, real_end: $real_end, first_uid: $first_uid, last_uid: $last_uid", 'poller_email_error');
           $log = true;
@@ -709,6 +711,24 @@ class Email extends Basic
           foreach ($all as $a) {
             X::log($all);
             if ($this->insertEmail($folder, $a)) {
+              $a = $this->pref->get($folder['id_account']);
+              if ($a) {
+                if (!$a['sync']) {
+                  $a['sync'] = [];
+                }
+                if (!isset($a['sync']['folders'])) {
+                  $a['sync']['folders'] = [];
+                }
+                $cfg = $this->class_cfg['arch']['users_emails'];
+                $table = $this->class_cfg['tables']['users_emails'];
+                $a['sync']['folders'][$folder['id']] = [
+                  'id' => $folder['id'],
+                  'name' => $folder['uid'],
+                  'db_msg' => $this->db->count($table, [$cfg['id_folder'] => $folder['id']]),
+                  'msg' => $info->Nmsgs,
+                ];
+                $this->pref->set($folder['id_account'], $a);
+              }
               $res++;
             } else {
               //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
@@ -731,6 +751,25 @@ class Email extends Basic
             . ' (' . $real_end . ')'
           );
         }
+      } else {
+        $a = $this->pref->get($folder['id_account']);
+        if ($a) {
+          if (!$a['sync']) {
+            $a['sync'] = [];
+          }
+          if (!isset($a['sync']['folders'])) {
+            $a['sync']['folders'] = [];
+          }
+          $cfg = $this->class_cfg['arch']['users_emails'];
+          $table = $this->class_cfg['tables']['users_emails'];
+          $a['sync']['folders'][$folder['id']] = [
+            'id' => $folder['id'],
+            'name' => $folder['uid'],
+            'db_msg' => $this->db->count($table, [$cfg['id_folder'] => $folder['id']]),
+            'msg' => $info->Nmsgs,
+          ];
+          $this->pref->set($folder['id_account'], $a);
+        }
       }
 
       if ($info->Nmsgs > ($res + $folder['num_msg'])) {
@@ -752,6 +791,7 @@ class Email extends Basic
       }
       return $res;
     }
+
     return null;
   }
 

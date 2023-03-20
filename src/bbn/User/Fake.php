@@ -12,6 +12,7 @@ use bbn\Str;
 use bbn\User;
 use bbn\User\Common;
 use bbn\User\Implementor;
+use bbn\Models\Tts\Dbconfig;
 
 
 /**
@@ -30,6 +31,7 @@ use bbn\User\Implementor;
 final class Fake extends Basic implements Implementor
 {
   use Common;
+  //use Dbconfig;
 
   /** @var User $realUser */
   protected $realUser;
@@ -42,8 +44,9 @@ final class Fake extends Basic implements Implementor
    */
   public function __construct($id, User $usr)
   {
+    //$this->_init_class_cfg([]);
     $this->realUser = $usr;
-    $this->class_cfg = $this->realUser->getClassCopnfig();
+    $this->class_cfg = $this->realUser->getClassConfig();
     $f = $this->class_cfg['arch']['users'];
     $this->db = $this->realUser->getDbInstance();
     $this->id = $id;
