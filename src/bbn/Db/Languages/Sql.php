@@ -2161,6 +2161,85 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
   }
 
+  private function correctTypes(array $data, array $cfg): array
+  {
+    foreach ($data as $c => $v) {
+      if (!empty($cfg[$c])
+        && !empty($cfg[$c]['type'])
+      ) {
+        $type = \strtolower($cfg[$c]['type']);
+        $nullable = !empty($cfg[$c]['nullable']);
+
+        // Binary
+        if ($type === 'binary') {
+          if (Str::isBuid($v)) {
+            $data[$c] = bin2hex($v);
+          }
+          elseif (empty($v) && $nullable) {
+            $data[$c] = null;
+          }
+        }
+
+        // Integer
+        elseif (!\str_contains($type, 'point')
+          && \str_contains($type, 'int')
+        ) {
+          if (($v === '') && $nullable) {
+            $data[$c] = null;
+          }
+          else {
+            $int = (int)$v;
+            if (($int < PHP_INT_MAX) && ($int > -PHP_INT_MAX)) {
+              $data[$c] = $int;
+            }
+            else {
+              $data[$c] = (string)$v;
+            }
+          }
+        }
+
+        // Decimal
+        elseif (($type === 'decimal')
+          || ($type === 'float')
+          || ($type === 'real')
+        ) {
+          if (($v === '') && $nullable) {
+            $data[$c] = null;
+          }
+          else {
+            $data[$c] = (float)$v;
+          }
+        }
+
+        // Text
+        elseif (\str_contains($type, 'char')
+          || \str_contains($type, 'text')
+        ) {
+          if (empty($v) && $nullable) {
+            $data[$c] = null;
+          }
+          else {
+            $data[$c] = \normalizer_normalize(trim(trim($v, " "), "\t"));
+          }
+        }
+
+        elseif ($type === 'json') {
+          if (empty($v) && $nullable) {
+            $data[$c] = null;
+          }
+          elseif (Str::isJson($v)
+            &&  strpos($v, '": ')
+            && ($json = \json_decode($v))
+          ) {
+            $data[$c] = \json_encode($json);
+          }
+        }
+      }
+    }
+
+    return $data;
+  }
+
   /**
    * Adds the specs of a query to the $queries object.
    *
