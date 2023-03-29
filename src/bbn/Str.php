@@ -1019,7 +1019,7 @@ class Str
           }
         }
         // If it is a decimal, not starting or ending with a zero
-        elseif (self::isDecimal($st) && (substr($st, 0, 1) !== '0') && (substr($st, -1) !== '0')) {
+        elseif (self::isDecimal($st)) {
           return (float)$st;
         }
 
