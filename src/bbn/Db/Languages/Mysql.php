@@ -44,6 +44,35 @@ class Mysql extends Sql
    */
   protected $username;
 
+  public static $driverNativeType = [
+    'STRING' => 'string',
+    'VAR_STRING' => 'string',
+    'TINY' => 'int',
+    'BIT' => 'int',
+    'SHORT' => 'int',
+    'LONG' => 'int',
+    'LONGLONG' => 'int',
+    'INT24' => 'int',
+    'FLOAT' => 'float',
+    'DOUBLE' => 'double',
+    'DECIMAL' => 'decimal',
+    'NEWDECIMAL' => 'decimal',
+    'GEOMETRY' => '',
+    'TIMESTAMP' => 'string',
+    'YEAR' => 'int',
+    'SET' => 'string',
+    'ENUM' => 'string',
+    'DATE' => 'string',
+    'NEWDATE' => 'string',
+    'TIME' => 'string',
+    'DATETIME' => 'string',
+    'TINY_BLOB' => 'string',
+    'MEDIUM_BLOB' => 'string',
+    'LONG_BLOB' => 'string',
+    'BLOB' => 'string',
+    'NULL' => ''
+  ];
+
   /**
    * Constructor
    *
@@ -1448,6 +1477,76 @@ MYSQL
     return false;
   }
 
+  public function __toString()
+  {
+    return 'mysql';
+  }
+
+  public function correctTypes(mixed $data, array $cfg): mixed
+  {
+    if (!empty($cfg)
+      && !empty($cfg['native_type'])
+      && !empty(self::$driverNativeType[$cfg['native_type']])
+      && \is_array($cfg['flags'])
+    ) {
+      $type = \strtolower(self::$driverNativeType[$cfg['native_type']]);
+      $nullable = !\in_array('not_null', $cfg['flags']);
+
+      switch ($type) {
+        // Integer
+        case 'int':
+          if (($data === '') && $nullable) {
+            $data = null;
+          }
+          elseif (Str::isInteger($data)) {
+            $int = (int)$data;
+            if (($int < PHP_INT_MAX) && ($int > -PHP_INT_MAX)) {
+              $data = $int;
+            }
+            else {
+              $data = (string)$data;
+            }
+          }
+          break;
+
+        // Float
+        case 'float':
+        case 'decimal':
+        case 'double':
+          if (($data === '') && $nullable) {
+            $data = null;
+          }
+          elseif (Str::isDecimal($data)) {
+            $data = (float)$data;
+          }
+          break;
+
+        // Text
+        case 'string':
+          if (\is_string($data)) {
+            if (empty($data) && $nullable) {
+              $data = null;
+            }
+            elseif (Str::isBuid($data)) {
+              $data = bin2hex($data);
+            }
+            elseif (Str::isJson($data)
+              &&  strpos($data, '": ')
+              && ($json = \json_decode($data))
+            ) {
+              $data = \json_encode($json);
+            }
+            else {
+              $data = \normalizer_normalize(trim(trim($data, " "), "\t"));
+            }
+          }
+          break;
+      }
+    }
+
+    return $data;
+  }
+
   /**
    * Returns a statement for column definition.
    *
@@ -1528,8 +1627,4 @@ MYSQL
     return $st;
   }
 
-  public function __toString()
-  {
-    return 'mysql';
-  }
 }

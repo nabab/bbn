@@ -167,7 +167,9 @@ class Query extends \PDOStatement implements Actions
   public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed
   {
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetch($mode, $orientation, $offset));
+    $f = parent::fetch($mode, $orientation, $offset);
+    return $this->correctTypes($f);
+    return bbn\Str::correctTypes($f);
   }
 
 
@@ -190,6 +192,7 @@ class Query extends \PDOStatement implements Actions
       $res = parent::fetchAll($fetch_style);
     }
 
+    return $this->correctTypes($res);
     return bbn\Str::correctTypes($res);
   }
 
@@ -201,7 +204,9 @@ class Query extends \PDOStatement implements Actions
   public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetchColumn($column_number));
+    $f = parent::fetchColumn($column_number);
+    return $this->correctTypes($f);
+    return bbn\Str::correctTypes($f);
   }
 
 
@@ -213,7 +218,9 @@ class Query extends \PDOStatement implements Actions
   public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetchObject($class_name,$ctor_args));
+    $f = parent::fetchObject($class_name,$ctor_args);
+    return $this->correctTypes($f);
+    return bbn\Str::correctTypes($f);
   }
 
 
@@ -358,6 +365,34 @@ class Query extends \PDOStatement implements Actions
     }
 
     return null;
+  }
+
+
+  private function correctTypes(mixed $d, int $index = 0): mixed
+  {
+    if (\is_array($d)) {
+      $i = 0;
+      foreach ($d as $k => $v) {
+        $d[$k] = $this->correctTypes($v, $i);
+        $i++;
+      }
+    }
+    elseif (\is_object($d)) {
+      $vs = \get_object_vars($d);
+      $i = 0;
+      foreach ($vs as $k => $v) {
+        $d->$k = $this->correctTypes($v, $i);
+        $i++;
+      }
+    }
+    else {
+      $cm = parent::getColumnMeta($index);
+      $ct = $this->db->correctTypes($d, $cm);
+      //\bbn\X::log([$cm, $d ,$ct], 'mirko');
+      return $ct;
+    }
+
+    return $d;
   }
 
 
