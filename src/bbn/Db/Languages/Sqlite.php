@@ -1336,9 +1336,4 @@ class Sqlite extends Sql
     return 'sqlite';
   }
 
-  public function correctTypes(mixed $data, array $cfg): mixed
-  {
-    return Str::correctTypes($data);
-  }
-
 }

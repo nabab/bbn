@@ -169,7 +169,6 @@ class Query extends \PDOStatement implements Actions
     $this->execute();
     $f = parent::fetch($mode, $orientation, $offset);
     return $this->correctTypes($f);
-    return bbn\Str::correctTypes($f);
   }
 
 
@@ -193,7 +192,6 @@ class Query extends \PDOStatement implements Actions
     }
 
     return $this->correctTypes($res);
-    return bbn\Str::correctTypes($res);
   }
 
 
@@ -206,7 +204,6 @@ class Query extends \PDOStatement implements Actions
     $this->execute();
     $f = parent::fetchColumn($column_number);
     return $this->correctTypes($f);
-    return bbn\Str::correctTypes($f);
   }
 
 
@@ -220,7 +217,6 @@ class Query extends \PDOStatement implements Actions
     $this->execute();
     $f = parent::fetchObject($class_name,$ctor_args);
     return $this->correctTypes($f);
-    return bbn\Str::correctTypes($f);
   }
 
 

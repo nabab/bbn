@@ -2165,7 +2165,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
   public function correctTypes(mixed $data, array $cfg): mixed
   {
-    return $data;
+    return Str::correctTypes($data);
   }
 
   /**
@@ -2649,7 +2649,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           /** @todo Put hash back! */
           //$cfg['run'] = $this->query($cfg['sql'], $cfg['hash'], $cfg['values'] ?? []);
           /** @var \bbn\Db\Query */
-
+          //\bbn\X::log($cfg, 'mirko1');
           $cfg['run'] = $this->query($cfg['sql'], $this->getQueryValues($cfg));
         }
 
