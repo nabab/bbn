@@ -1180,7 +1180,6 @@ class Appui
                   $dashboards[$item['code']] = [
                     'text' => $item['text'],
                     'code' => $item['code'],
-                    'id_option' => $list[$i]['id_option'],
                     'items' => []
                   ];
                 }

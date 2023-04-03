@@ -690,6 +690,9 @@ class Project extends bbn\Models\Cls\Db
         $this->setIdLangs();
       }
 
+      if (!$this->id_langs = $this->options->fromCode('path', $id)) {
+        $this->setPath();
+      }
       //the id of the child option 'path'
       $this->id_path = $this->options->fromCode('path', $id) ?: null;
       return true;
@@ -711,7 +714,111 @@ class Project extends bbn\Models\Cls\Db
         [
           'text' => 'Languages',
           'code' => 'lang',
-          'id_parent' => $this->id,
+          'id_parent' => $this->id
+        ]
+      );
+    }
+  }
+
+
+  /**
+   * If the child option lang is not yet created it creates the option
+   *
+   * @return void
+   */
+  private function setPath()
+  {
+    if (empty($this->id_langs)) {
+      $this->id_path = $this->options->add(
+        [
+          'text' => 'Path',
+          'code' => 'path',
+          'icon' => 'nf nf-fa-code_fork',
+          'id_parent' => $this->id
+        ]
+      );
+      $this->options->setCfg($this->id_path, [
+        "show_code" => 1,
+        "show_alias" => 1,
+        "show_value" => 1,
+        "show_icon" => 1,
+        "allow_children" => 1,
+        "inheritance" => "cascade"
+      ]);
+      $lib_path = $this->options->add(
+        [
+          'text' => 'Libraries',
+          'code' => 'lib',
+          'icon' => 'nf nf-custom-folder_config',
+          'id_parent' => $this->id_path
+        ]
+      );
+      $app_path = $this->options->add(
+        [
+          'text' => 'Main application',
+          'code' => 'app',
+          'icon' => 'nf nf-mdi-folder_star',
+          'id_parent' => $this->id_path
+        ]
+      );
+      $data_path = $this->options->add(
+        [
+          'text' => 'Data',
+          'icon' => 'nf nf-mdi-folder_account',
+          'code' => 'data',
+          'id_parent' => $this->id_path
+        ]
+      );
+      $this->options->add(
+        [
+          "id_alias" => [
+            "bbn-project",
+            "types",
+            "ide",
+            "appui"
+          ],
+          "text" => "main",
+          "code" => "main",
+          "path" => "\/",
+          "bcolor" => "#0c1b71",
+          "fcolor" => "#fdfdfd",
+          "default" => true,
+          "language" => "en",
+          'id_parent' => $app_path
+        ]
+      );
+      $this->options->add(
+        [
+          "id_alias" => [
+            "cls",
+            "types",
+            "ide",
+            "appui"
+          ],
+          "text" => "bbn",
+          "code" => "bbn",
+          "path" => "bbn\/bbn\/src\/bbn",
+          "bcolor" => "#261b78",
+          "fcolor" => "#fdfdfd",
+          "language" => "en",
+          'id_parent' => $lib_path
+        ]
+      );
+      $this->options->add(
+        [
+          "id_alias" => [
+            "bbn-project",
+            "types",
+            "ide",
+            "appui"
+          ],
+          "text" => "appui-ide",
+          "code" => "appui-ide",
+          "path" => "bbn\/appui-ide",
+          "bcolor" => "#261b78",
+          "fcolor" => "#fdfdfd",
+          "language" => "en",
+          'id_parent' => $lib_path
         ]
       );
     }
