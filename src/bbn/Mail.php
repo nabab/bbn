@@ -483,7 +483,6 @@ TEMPLATE;
       }
 
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
-      $ar['title'] = $subject;
       $text = $renderer($ar);
 
       self::setContent($text);
