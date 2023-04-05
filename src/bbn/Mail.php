@@ -188,12 +188,15 @@ TEMPLATE;
     if ( !\defined('BBN_ADMIN_EMAIL') || !\defined('BBN_IS_DEV') ){
       die("You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...");
     }
+
     if ( !isset($cfg['from']) && isset($cfg['user']) ){
       $cfg['from'] = $cfg['user'];
     }
+
     if (!isset($cfg['from'])) {
       $cfg['from'] = BBN_ADMIN_EMAIL;
     }
+
     if (!PHPMailer::validateAddress($cfg['from'])) {
       X::logError(0, "A \"From\" eMail address must be provided", __FILE__, __LINE__);
       $this->error("A \"From\" eMail address must be provided");
@@ -241,6 +244,7 @@ TEMPLATE;
     }
     catch (\Exception $e) {
       $this->log($this->mailer->ErrorInfo);
+      $this->log($e->getMessage());
       $this->mailer = false;
     }
   }
@@ -393,42 +397,7 @@ TEMPLATE;
       if (!empty($cfg['from'])) {
         $this->setFrom($cfg['from']);
       }
-      $ar = [];
-      $subject = $cfg['subject'] ?? ($cfg['title'] ?? '');
-      $enc = mb_detect_encoding($subject);
-      if ($enc !== $this->mailer->CharSet) {
-        $subject = mb_convert_encoding($subject, $this->mailer->CharSet, $enc);
-      }
 
-      $this->mailer->Subject = $subject;
-
-      
-      if (empty($cfg['text'])) {
-        $ar['text'] = '';
-      }
-      else {
-        $ar['text'] = $cfg['text'];
-        $enc = mb_detect_encoding($ar['text']);
-        //X::ddump($enc, $this->mailer->CharSet);
-        if ($enc !== $this->mailer->CharSet) {
-          $ar['text'] = mb_convert_encoding($ar['text'], $this->mailer->CharSet, $enc);
-        }
-      }
-
-      if (isset($cfg['attachments'])) {
-        if (\is_string($cfg['attachments'])) {
-          $cfg['attachments'] = [$cfg['attachments']];
-        }
-        foreach ($cfg['attachments'] as $name => $att) {
-          if (is_file($att)) {
-            // 2nd parameter is the file's name in the mail
-            $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);
-          }
-        }
-      }
-      if (!isset($renderer)) {
-        $renderer = Tpl::renderer($this->template);
-      }
       if (!empty($cfg['references'])) {
         // check if each reference have chevrons around the message id and remove them
         $refs = [];
@@ -454,6 +423,7 @@ TEMPLATE;
         $cfg['references'] = implode(' ', $refs);
         $this->mailer->addCustomHeader('References:' . $cfg['references']);
       }
+
       if (!empty($cfg['in_reply_to'])) {
         # check if the in-reply-to have chevrons around the message id and remove them
         if (preg_match('/^<(.*)>$/', $cfg['in_reply_to'], $m)) {
@@ -471,6 +441,47 @@ TEMPLATE;
         }
         $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));
       }
+
+      $ar  = [
+        'title' => $cfg['subject'] ?? ($cfg['title'] ?? '')
+      ];
+      $enc = mb_detect_encoding($ar['title']);
+      if ($enc !== $this->mailer->CharSet) {
+        $ar['title'] = mb_convert_encoding($ar['title'], $this->mailer->CharSet, $enc);
+      }
+
+      $this->mailer->Subject = $ar['title'];
+
+      
+      if (empty($cfg['text'])) {
+        $ar['text'] = '';
+      }
+      else {
+        $ar['text'] = $cfg['text'];
+        $enc = mb_detect_encoding($ar['text']);
+        //X::ddump($enc, $this->mailer->CharSet);
+        if ($enc !== $this->mailer->CharSet) {
+          $ar['text'] = mb_convert_encoding($ar['text'], $this->mailer->CharSet, $enc);
+        }
+      }
+
+      if (isset($cfg['attachments'])) {
+        if (\is_string($cfg['attachments'])) {
+          $cfg['attachments'] = [$cfg['attachments']];
+        }
+
+        foreach ($cfg['attachments'] as $name => $att) {
+          if (is_file($att)) {
+            // 2nd parameter is the file's name in the mail
+            $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);
+          }
+        }
+      }
+
+      if (!isset($renderer)) {
+        $renderer = Tpl::renderer($this->template);
+      }
+
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
       $ar['title'] = $subject;
       $text = $renderer($ar);
@@ -483,6 +494,7 @@ TEMPLATE;
       catch (\Exception $e) {
         $this->log($e->getMessage());
       }
+
       if ($r && !empty($this->imap_string)) {
         $mail_string = $this->mailer->getSentMIMEMessage();
         if (!\is_resource($this->imap)
@@ -490,6 +502,7 @@ TEMPLATE;
         ) {
           $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
         }
+
         if ((!\is_resource($this->imap)
             && !($this->imap instanceof \IMAP\Connection))
           || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
@@ -497,12 +510,14 @@ TEMPLATE;
           $this->log(\imap_errors());
         }
       }
+
       if (!$r) {
         $err = \imap_last_error();
         $this->log($err);
         X::log($err);
       }
     }
+
     $this->mailer->ClearAllRecipients();
     $this->mailer->ClearAttachments();
     return $r;
