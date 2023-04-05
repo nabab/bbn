@@ -198,6 +198,8 @@ TEMPLATE;
     $this->mailer = new PHPMailer(true);
     try {
       $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
+      //$this->mailer->Encoding = isset($cfg['encoding']) ? $cfg['encoding'] : "base64";
+      $this->mailer->AllowCharsetEncoding = true;
       if ( isset($cfg['user'], $cfg['pass']) ){
         // SMTP connection will not close after each email sent, reduces SMTP overhead
         $this->mailer->isSMTP();
@@ -389,8 +391,47 @@ TEMPLATE;
       if (!isset($renderer)) {
         $renderer = Tpl::renderer($this->template);
       }
-      if (!empty($cfg['References'])) {
-        $this->mailer->addCustomHeader('References', $cfg['References']);
+      if (!empty($cfg['references'])) {
+        // check if each reference have chevrons around the message id and remove them
+        $refs = [];
+        $cfg['references'] = explode(' ', $cfg['references']);
+        foreach ($cfg['references'] as $ref) {
+          if (preg_match('/^<(.*)>$/', $ref, $m)) {
+            $mailbox = explode('@', $m[1])[0];
+            $hostname = explode('@', $m[1])[1];
+            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);
+          }
+          else {
+            $mailbox = explode('@', $ref)[0];
+            $hostname = explode('@', $ref)[1];
+            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);
+          }
+        }
+        // for each ref add '<' and '>' around the message id if not present
+        for ($i = 0; $i < count($refs); $i++) {
+          if (!preg_match('/^<(.*)>$/', $refs[$i])) {
+            $refs[$i] = '<' . $refs[$i] . '>';
+          }
+        }
+        $cfg['references'] = implode(' ', $refs);
+        $this->mailer->addCustomHeader('References:' . $cfg['references']);
+      }
+      if (!empty($cfg['in_reply_to'])) {
+        # check if the in-reply-to have chevrons around the message id and remove them
+        if (preg_match('/^<(.*)>$/', $cfg['in_reply_to'], $m)) {
+          $mailbox = explode('@', $m[1])[0];
+          $hostname = explode('@', $m[1])[1];
+          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);
+        } else {
+          $mailbox = explode('@', $cfg['in_reply_to'])[0];
+          $hostname = explode('@', $cfg['in_reply_to'])[1];
+          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);
+        }
+        // add '<' and '>' around the message id if not present
+        if (!preg_match('/^<(.*)>$/', $cfg['in_reply_to'])) {
+          $cfg['in_reply_to'] = '<' . $cfg['in_reply_to'] . '>';
+        }
+        $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));
       }
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
       $ar['text'] = $cfg['text'];
