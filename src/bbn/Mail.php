@@ -40,6 +40,8 @@
 
 namespace bbn;
 
+use Exception;
+use bbn\X;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class Mail extends Models\Cls\Basic
@@ -155,8 +157,9 @@ TEMPLATE;
     $md5 = md5($content);
     if ( $md5 !== self::$_hash_content ){
       self::$_hash_content = $md5;
-      $inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-      self::$_content = $inliner->convert($content);
+      //$inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
+      //self::$_content = $inliner->convert($content);
+      self::$_content = $content;
     }
   }
 
@@ -192,14 +195,16 @@ TEMPLATE;
       $cfg['from'] = BBN_ADMIN_EMAIL;
     }
     if (!PHPMailer::validateAddress($cfg['from'])) {
-      die(X::_("A \"From\" eMail address must be provided"));
+      X::logError(0, "A \"From\" eMail address must be provided", __FILE__, __LINE__);
+      $this->error("A \"From\" eMail address must be provided");
     }
+
     $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);
     $this->mailer = new PHPMailer(true);
     try {
-      $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
-      //$this->mailer->Encoding = isset($cfg['encoding']) ? $cfg['encoding'] : "base64";
-      $this->mailer->AllowCharsetEncoding = true;
+      $this->mailer->CharSet = $cfg['charset'] ?? 'UTF-8';
+      $this->mailer->Encoding = $cfg['encoding'] ?? "quoted-printable";
+      //$this->mailer->AllowCharsetEncoding = false;
       if ( isset($cfg['user'], $cfg['pass']) ){
         // SMTP connection will not close after each email sent, reduces SMTP overhead
         $this->mailer->isSMTP();
@@ -236,6 +241,20 @@ TEMPLATE;
     }
     catch (\Exception $e) {
       $this->log($this->mailer->ErrorInfo);
+      $this->mailer = false;
+    }
+  }
+
+
+  public function __destruct()
+  {
+    if ( $this->mailer ){
+      try {
+        $this->mailer->smtpClose();
+      }
+      catch(Exception $e) {
+
+      }
     }
   }
 
@@ -327,6 +346,7 @@ TEMPLATE;
   public function send($cfg){
     $valid = false;
     $r = false;
+
     if (!defined('BBN_IS_PROD') || !BBN_IS_PROD) {
       $cfg['to'] = BBN_ADMIN_EMAIL;
       $cfg['cc'] = '';
@@ -373,10 +393,27 @@ TEMPLATE;
         $this->setFrom($cfg['from']);
       }
       $ar = [];
-      $this->mailer->Subject = $ar['title'] = $cfg['subject'] ?? ($cfg['title'] ?? '');
-      if (!isset($cfg['text'])) {
-        $cfg['text'] = '';
+      $subject = $cfg['subject'] ?? ($cfg['title'] ?? '');
+      $enc = mb_detect_encoding($subject);
+      if ($enc !== $this->mailer->CharSet) {
+        $subject = mb_convert_encoding($subject, $this->mailer->CharSet, $enc);
       }
+
+      $this->mailer->Subject = $subject;
+
+      
+      if (empty($cfg['text'])) {
+        $ar['text'] = '';
+      }
+      else {
+        $ar['text'] = $cfg['text'];
+        $enc = mb_detect_encoding($ar['text']);
+        //X::ddump($enc, $this->mailer->CharSet);
+        if ($enc !== $this->mailer->CharSet) {
+          $ar['text'] = mb_convert_encoding($ar['text'], $this->mailer->CharSet, $enc);
+        }
+      }
+
       if (isset($cfg['attachments'])) {
         if (\is_string($cfg['attachments'])) {
           $cfg['attachments'] = [$cfg['attachments']];
@@ -434,10 +471,11 @@ TEMPLATE;
         $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));
       }
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
-      $ar['text'] = $cfg['text'];
-      $ar['text'] = $renderer($ar);
-      self::setContent($ar['text']);
-      $this->mailer->msgHTML(self::$_content, $this->path, true);
+      $ar['title'] = $subject;
+      $text = $renderer($ar);
+
+      self::setContent($text);
+      $this->mailer->msgHTML(self::$_content, $this->path);
       try {
         $r = $this->mailer->send();
       }
