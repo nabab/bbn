@@ -3346,7 +3346,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           if (X::hasProps($c, ['conditions', 'logic'])) {
             $tmp = $this->_adapt_bit($cfg, $c, $having);
             if (!empty($tmp[0]['conditions'])) {
-              $new['conditions'][] = $c;
+              $new['conditions'][] = $tmp[0];
             }
 
             if (!empty($tmp[1]['conditions'])) {
