@@ -204,6 +204,7 @@ TEMPLATE;
 
     $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);
     $this->mailer = new PHPMailer(true);
+
     try {
       $this->mailer->CharSet = $cfg['charset'] ?? 'UTF-8';
       $this->mailer->Encoding = $cfg['encoding'] ?? "quoted-printable";
@@ -227,6 +228,7 @@ TEMPLATE;
         else{
           $this->mailer->SMTPSecure = 'tls';
         }
+
         $this->mailer->Host = $has_host ? $cfg['host'] : 'localhost';
         $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
         $this->mailer->SMTPKeepAlive = true;
@@ -239,6 +241,7 @@ TEMPLATE;
           $this->setImap($cfg);
         }
       }
+
       $this->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
       $this->setTemplate(isset($cfg['template']) ? $cfg['template'] : self::getDefaultTemplate());
     }
@@ -370,6 +373,7 @@ TEMPLATE;
               explode(";", $cfg[$dest_field])
             );
           }
+
           foreach ($cfg[$dest_field] as $dest) {
             if (PHPMailer::validateAddress($dest)) {
               switch ($dest_field) {
@@ -420,6 +424,7 @@ TEMPLATE;
             $refs[$i] = '<' . $refs[$i] . '>';
           }
         }
+
         $cfg['references'] = implode(' ', $refs);
         $this->mailer->addCustomHeader('References:' . $cfg['references']);
       }
@@ -439,6 +444,7 @@ TEMPLATE;
         if (!preg_match('/^<(.*)>$/', $cfg['in_reply_to'])) {
           $cfg['in_reply_to'] = '<' . $cfg['in_reply_to'] . '>';
         }
+
         $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));
       }
 
@@ -484,9 +490,9 @@ TEMPLATE;
 
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
       $text = $renderer($ar);
-
       self::setContent($text);
       $this->mailer->msgHTML(self::$_content, $this->path);
+
       try {
         $r = $this->mailer->send();
       }
