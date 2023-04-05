@@ -253,6 +253,7 @@ TEMPLATE;
         $this->mailer->smtpClose();
       }
       catch(Exception $e) {
+        $this->log("Impossible to close the connection");
 
       }
     }
