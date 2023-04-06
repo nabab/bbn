@@ -4364,7 +4364,7 @@ class Option extends bbn\Models\Cls\Db
               $res[] = $opt;
             }
             if (!empty($cfg['i18n_inheritance'])) {
-              $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
+              $this->findI18nChildren($opt, $res, $cfg['i18n_inheritance'] === 'cascade');
             }
           }
         }
@@ -4495,7 +4495,7 @@ class Option extends bbn\Models\Cls\Db
             $cfg = $this->getCfg($opt[$this->fields['id']]);
             $res[] = $opt;
             if (!empty($cfg['i18n_inheritance'])) {
-              $this->findI18nChildren($opt, $cfg['i18n_inheritance'] === 'cascade', $res);
+              $this->findI18nChildren($opt, $res, $cfg['i18n_inheritance'] === 'cascade');
             }
           }
         }
@@ -4866,7 +4866,7 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
-  private function findI18nChildren(array $opt, bool $cascade = false, array &$res, string $locale = null){
+  private function findI18nChildren(array $opt, array &$res, bool $cascade = false, string $locale = null){
     $fid = $this->fields['id'];
     if ($children = $this->fullOptions($opt[$fid])) {
       foreach ($children as $child) {
@@ -4889,7 +4889,7 @@ class Option extends bbn\Models\Cls\Db
           ) {
             $c = ($cfg['i18n_inheritance'] === 'cascade')
               || (empty($cfg['i18n']) && $cascade);
-            $this->findI18nChildren($child, $c, $res);
+            $this->findI18nChildren($child, $res, $c);
           }
         }
       }
