@@ -2161,83 +2161,51 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
   }
 
-  private function correctTypes(array $data, array $cfg): array
+  public function correctTypes($st)
   {
-    foreach ($data as $c => $v) {
-      if (!empty($cfg[$c])
-        && !empty($cfg[$c]['type'])
-      ) {
-        $type = \strtolower($cfg[$c]['type']);
-        $nullable = !empty($cfg[$c]['nullable']);
-
-        // Binary
-        if ($type === 'binary') {
-          if (Str::isBuid($v)) {
-            $data[$c] = bin2hex($v);
+    if (\is_string($st)) {
+      if (Str::isBuid($st)) {
+        $st = \bin2hex($st);
+      }
+      else{
+        /* if (Str::isJson($st)) {
+          if (\strpos($st, '": ') && ($json = \json_decode($st))) {
+            return \json_encode($json);
           }
-          elseif (empty($v) && $nullable) {
-            $data[$c] = null;
-          }
-        }
 
-        // Integer
-        elseif (!\str_contains($type, 'point')
-          && \str_contains($type, 'int')
+          return $st;
+        } */
+
+        $st = \trim(\trim($st, " "), "\t");
+        /* if (self::isInteger($st)
+            && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))
         ) {
-          if (($v === '') && $nullable) {
-            $data[$c] = null;
-          }
-          else {
-            $int = (int)$v;
-            if (($int < PHP_INT_MAX) && ($int > -PHP_INT_MAX)) {
-              $data[$c] = $int;
-            }
-            else {
-              $data[$c] = (string)$v;
-            }
+          $tmp = (int)$st;
+          if (($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX)) {
+            return $tmp;
           }
         }
+        // If it is a decimal, not starting or ending with a zero
+        elseif (self::isDecimal($st)) {
+          return (float)$st;
+        } */
 
-        // Decimal
-        elseif (($type === 'decimal')
-          || ($type === 'float')
-          || ($type === 'real')
-        ) {
-          if (($v === '') && $nullable) {
-            $data[$c] = null;
-          }
-          else {
-            $data[$c] = (float)$v;
-          }
-        }
-
-        // Text
-        elseif (\str_contains($type, 'char')
-          || \str_contains($type, 'text')
-        ) {
-          if (empty($v) && $nullable) {
-            $data[$c] = null;
-          }
-          else {
-            $data[$c] = \normalizer_normalize(trim(trim($v, " "), "\t"));
-          }
-        }
-
-        elseif ($type === 'json') {
-          if (empty($v) && $nullable) {
-            $data[$c] = null;
-          }
-          elseif (Str::isJson($v)
-            &&  strpos($v, '": ')
-            && ($json = \json_decode($v))
-          ) {
-            $data[$c] = \json_encode($json);
-          }
-        }
+        return \normalizer_normalize($st);
+      }
+    }
+    elseif (\is_array($st)) {
+      foreach ($st as $k => $v) {
+        $st[$k] = $this->correctTypes($v);
+      }
+    }
+    elseif (\is_object($st)) {
+      $vs = get_object_vars($st);
+      foreach ($vs as $k => $v) {
+        $st->$k = $this->correctTypes($v);
       }
     }
 
-    return $data;
+    return $st;
   }
 
   /**

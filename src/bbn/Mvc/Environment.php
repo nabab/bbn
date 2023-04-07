@@ -491,7 +491,7 @@ class Environment
       }
       else {
         $this->_has_post = true;
-        $this->_post     = bbn\Str::correctTypes($this->_post);
+        //$this->_post     = bbn\Str::correctTypes($this->_post);
         foreach ($this->_post as $k => $v) {
           if (X::indexOf($k, '_bbn_') === 0) {
             if (!defined(strtoupper(substr($k, 1)))) {
