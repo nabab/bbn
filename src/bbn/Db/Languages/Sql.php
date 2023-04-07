@@ -2177,7 +2177,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         } */
 
         $st = \trim(\trim($st, " "), "\t");
-        /* if (self::isInteger($st)
+        /* if (Str::isInteger($st)
             && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))
         ) {
           $tmp = (int)$st;
@@ -2186,7 +2186,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
         }
         // If it is a decimal, not starting or ending with a zero
-        elseif (self::isDecimal($st)) {
+        elseif (Str::isDecimal($st)) {
           return (float)$st;
         } */
 

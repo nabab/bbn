@@ -615,6 +615,9 @@ class Option extends bbn\Models\Cls\Db
       $tab = $this->db->tsn($this->class_cfg['table']);
       $cfn = $this->db->cfn($this->fields['id'], $tab);
       $opt = $this->getRow([$cfn => $id]);
+      if (!empty($opt['code']) && bbn\Str::isInteger($opt['code'])) {
+        $opt['code'] = (int)$opt['code'];
+      }
       if ($opt) {
         if (!empty($locale)
           && \class_exists('\bbn\Appui\I18n')
@@ -1428,6 +1431,11 @@ class Option extends bbn\Models\Cls\Db
       $cf = $this->getClassCfg();
       if ($results = $this->db->rselectAll($cf['table'], [], [$this->fields['id_alias'] => $id])) {
         foreach ($results as $d) {
+          if (!empty($d[$this->fields['code']])
+            && bbn\Str::isInteger($d[$this->fields['code']])
+          ) {
+            $d[$this->fields['code']] = (int)$d[$this->fields['code']];
+          }
           $this->_set_value($d);
           if (!empty($d[$this->fields['text']])) {
             $d[$this->fields['text']] = $this->text($d[$this->fields['id']]);
@@ -2287,6 +2295,9 @@ class Option extends bbn\Models\Cls\Db
       $opt = $this->db->rselectAll($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id], [($this->isSortable($id) ? $c['num'] : $c['code']) => 'ASC']);
       $res = [];
       foreach ($opt as $r){
+        if (!empty($r[$c['code']]) && bbn\Str::isInteger($r[$c['code']])) {
+          $r[$c['code']] = (int)$r[$c['code']];
+        }
         $res[$r[$c['id']]] = $r[$c['code']];
       }
 
@@ -2311,11 +2322,15 @@ class Option extends bbn\Models\Cls\Db
   public function code(string $id): ?string
   {
     if ($this->check() && bbn\Str::isUid($id)) {
-      return $this->db->selectOne(
+      $code = $this->db->selectOne(
         $this->class_cfg['table'], $this->fields['code'], [
         $this->fields['id'] => $id
         ]
       );
+      if (!empty($code) && bbn\Str::isInteger($code)) {
+        $code = (int)$code;
+      }
+      return $code;
     }
 
     return null;
@@ -4358,6 +4373,11 @@ class Option extends bbn\Models\Cls\Db
 
       if ($opts) {
         foreach ($opts as $opt){
+          if (!empty($opt[$this->fields['code']])
+            && bbn\Str::isInteger($opt[$this->fields['code']])
+          ) {
+            $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];
+          }
           if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
             $cfg = $this->getCfg($opt[$this->fields['id']]);
             if (!empty($cfg['i18n'])) {
@@ -4491,6 +4511,11 @@ class Option extends bbn\Models\Cls\Db
       ]) ?: [];
       if ($opts) {
         foreach ($opts as $opt){
+          if (!empty($opt[$this->fields['code']])
+            && bbn\Str::isInteger($opt[$this->fields['code']])
+          ) {
+            $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];
+          }
           if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
             $cfg = $this->getCfg($opt[$this->fields['id']]);
             $res[] = $opt;
@@ -4630,7 +4655,7 @@ class Option extends bbn\Models\Cls\Db
       }
     }
 
-    return $this->db->rselectAll(
+    $res = $this->db->rselectAll(
       [
       'tables' => [$tab],
       'fields' => $cols,
@@ -4660,6 +4685,16 @@ class Option extends bbn\Models\Cls\Db
       'start' => $start
       ]
     );
+    if (!empty($res)) {
+      foreach ($res as $i => $r) {
+        if (!empty($r[$this->fields['code']])
+          && bbn\Str::isInteger($r[$this->fields['code']])
+        ) {
+          $res[$i][$this->fields['code']] = (int)$r[$this->fields['code']];
+        }
+      }
+    }
+    return $res;
   }
 
 
