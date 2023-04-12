@@ -2161,52 +2161,97 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
   }
 
-  public function correctTypes($st)
+  private function correctTypes(mixed $data, array $cfg): mixed
   {
-    if (\is_string($st)) {
-      if (Str::isBuid($st)) {
-        $st = \bin2hex($st);
+    $i = 0;
+    if ($isObj = \is_object($data)) {
+      $data = (array)$data;
+    }
+    foreach ($data as $c => $v) {
+      if (\is_array($v) || \is_object($v)) {
+        $data[$c] = $this->correctTypes($v, $cfg);
       }
-      else{
-        if (Str::isJson($st)) {
-          if (\strpos($st, '": ') && ($json = \json_decode($st))) {
-            return \json_encode($json);
-          }
+      else if (!empty($cfg[$i])
+        && !empty($cfg[$i]['type'])
+      ) {
+        $type = \strtolower($cfg[$i]['type']);
+        $nullable = !empty($cfg[$i]['nullable']);
 
-          return $st;
+        // Binary
+        if ($type === 'binary') {
+          if (Str::isBuid($v)) {
+            $data[$c] = bin2hex($v);
+          }
+          elseif (empty($v) && $nullable) {
+            $data[$c] = null;
+          }
         }
 
-        $st = \trim(\trim($st, " "), "\t");
-        if (Str::isInteger($st)
-            && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))
+        // Integer
+        elseif (!\str_contains($type, 'point')
+          && \str_contains($type, 'int')
         ) {
-          $tmp = (int)$st;
-          if (($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX)) {
-            return $tmp;
+          if (($v === '') && $nullable) {
+            $data[$c] = null;
+          }
+          else {
+            $int = (int)$v;
+            if (($int < PHP_INT_MAX) && ($int > -PHP_INT_MAX)) {
+              $data[$c] = $int;
+            }
+            else {
+              $data[$c] = (string)$v;
+            }
           }
         }
-        // If it is a decimal, not starting or ending with a zero
-        elseif (Str::isDecimal($st)) {
-          return (float)$st;
+
+        // Decimal
+        elseif (($type === 'decimal')
+          || ($type === 'float')
+          || ($type === 'real')
+        ) {
+          if (($v === '') && $nullable) {
+            $data[$c] = null;
+          }
+          else {
+            $data[$c] = (float)$v;
+          }
         }
 
-        return \normalizer_normalize($st);
+        // Text
+        elseif (\str_contains($type, 'char')
+          || \str_contains($type, 'text')
+        ) {
+          if (empty($v) && $nullable) {
+            $data[$c] = null;
+          }
+          else {
+            $data[$c] = \normalizer_normalize(trim(trim($v, " "), "\t"));
+          }
+        }
+
+        elseif ($type === 'json') {
+          if (empty($v) && $nullable) {
+            $data[$c] = null;
+          }
+          elseif (Str::isJson($v)
+            &&  strpos($v, '": ')
+            && ($json = \json_decode($v))
+          ) {
+            $data[$c] = \json_encode($json);
+          }
+        }
       }
-    }
-    elseif (\is_array($st)) {
-      foreach ($st as $k => $v) {
-        $st[$k] = $this->correctTypes($v);
-      }
-    }
-    elseif (\is_object($st)) {
-      $vs = get_object_vars($st);
-      foreach ($vs as $k => $v) {
-        $st->$k = $this->correctTypes($v);
-      }
+      $i++;
     }
 
-    return $st;
+    if (!empty($isObj)) {
+      $data = (object)$data;
+    }
+
+    return $data;
   }
+
 
   /**
    * Adds the specs of a query to the $queries object.
@@ -2763,7 +2808,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           'values_desc' => [],
           'bbn_db_processed' => true,
           'available_fields' => [],
-          'generate_id' => false
+          'generate_id' => false,
+          'fields_types' => []
         ]
       );
       $models      = [];
@@ -2867,6 +2913,21 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
 
           $res['available_fields'][$idx] = $res['available_fields'][$col];
+        }
+      }
+
+      // Fields types
+      foreach (\array_values($res['fields']) as $c) {
+        if (isset($res['available_fields'][$c])) {
+          $colSimpleName = $this->colSimpleName($c);
+          $colCfg = $models[$res['available_fields'][$c]]['fields'][$colSimpleName];
+          $res['fields_types'][] = [
+            'type' => $colCfg['type'],
+            'nullable' => !empty($colCfg['null'])
+          ];
+        }
+        else {
+          $res['fields_types'][] = false;
         }
       }
 
@@ -3883,7 +3944,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $this->log([$args, $this->processCfg($args)]);
       }
       else{
-        return $r->getObject();
+        if ($ret = $r->getObject()) {
+          return $this->correctTypes($ret, $this->last_cfg['fields_types']);
+        }
+        return $ret;
       }
     }
 
@@ -3922,7 +3986,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      return $r->getObjects();
+      if ($ret = $r->getObjects()) {
+        return $this->correctTypes($ret, $this->last_cfg['fields_types']);
+      }
+      return $ret;
     }
 
     return null;
@@ -3952,7 +4019,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      return $r->getIrow();
+      if ($ret = $r->getIrow()) {
+        return $this->correctTypes($ret, $this->last_cfg['fields_types']);
+      }
+      return $ret;
     }
 
     return null;
@@ -3991,7 +4061,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      return $r->getIrows();
+      if ($ret = $r->getIrows()) {
+        return $this->correctTypes($ret, $this->last_cfg['fields_types']);
+      }
+      return $ret;
     }
 
     return null;
@@ -4021,7 +4094,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
     if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
-      return $r->getRow();
+      if ($ret = $r->getRow()) {
+        return $this->correctTypes($ret, $this->last_cfg['fields_types']);
+      }
+      return $ret;
     }
 
     return null;
@@ -4060,7 +4136,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
       if (method_exists($r, 'getRows')) {
-        return $r->getRows();
+        if ($ret = $r->getRows()) {
+          return $this->correctTypes($ret, $this->last_cfg['fields_types']);
+        }
+        return $ret;
       }
 
       $this->log('ERROR IN RSELECT_ALL', $r);
@@ -4090,7 +4169,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
       if (method_exists($r, 'getIrow')) {
-        return ($a = $r->getIrow()) ? $a[0] : false;
+        if ($a = $r->getIrow()) {
+          $a = $this->correctTypes($a, $this->last_cfg['fields_types']);
+          return $a[0];
+        }
+        return false;
       }
 
       $this->log('ERROR IN SELECT_ONE', $this->last_cfg, $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
