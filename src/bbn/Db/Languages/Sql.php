@@ -2918,12 +2918,19 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
       // Fields types
       foreach (\array_values($res['fields']) as $c) {
-        if (isset($res['available_fields'][$c])) {
+        if (isset($res['available_fields'][$c])
+          && ($res['available_fields'][$c] !== false)
+        ) {
           $colSimpleName = $this->colSimpleName($c);
-          $colCfg = $models[$res['available_fields'][$c]]['fields'][$colSimpleName];
+          $t = $res['available_fields'][$c];
+          if (!isset($models[$t]['fields'][$colSimpleName])
+            && isset($tables_full[$t])
+          ) {
+            $t = $tables_full[$t];
+          }
           $res['fields_types'][] = [
-            'type' => $colCfg['type'],
-            'nullable' => !empty($colCfg['null'])
+            'type' => $models[$t]['fields'][$colSimpleName]['type'],
+            'nullable' => !empty($models[$t]['fields'][$colSimpleName]['null'])
           ];
         }
         else {

@@ -167,7 +167,7 @@ class Query extends \PDOStatement implements Actions
   public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed
   {
     $this->execute();
-    return parent::fetch($mode, $orientation, $offset);
+    return $this->correctTypes(parent::fetch($mode, $orientation, $offset));
   }
 
 
@@ -190,7 +190,7 @@ class Query extends \PDOStatement implements Actions
       $res = parent::fetchAll($fetch_style);
     }
 
-    return $res;
+    return $this->correctTypes($res);
   }
 
 
@@ -201,7 +201,7 @@ class Query extends \PDOStatement implements Actions
   public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
-    return parent::fetchColumn($column_number);
+    return $this->correctTypes(parent::fetchColumn($column_number));
   }
 
 
@@ -213,7 +213,7 @@ class Query extends \PDOStatement implements Actions
   public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
-    return parent::fetchObject($class_name,$ctor_args);
+    return $this->correctTypes(parent::fetchObject($class_name,$ctor_args));
   }
 
 
@@ -358,6 +358,41 @@ class Query extends \PDOStatement implements Actions
     }
 
     return null;
+  }
+
+
+  private function correctTypes($st)
+  {
+    if (\is_string($st)) {
+      if (\bbn\Str::isBuid($st)) {
+        $st = \bin2hex($st);
+      }
+      else{
+        if (\bbn\Str::isJson($st)) {
+          if (\strpos($st, '": ') && ($json = \json_decode($st))) {
+            return \json_encode($json);
+          }
+
+          return $st;
+        }
+
+        $st = \trim(\trim($st, " "), "\t");
+        return \normalizer_normalize($st);
+      }
+    }
+    elseif (\is_array($st)) {
+      foreach ($st as $k => $v) {
+        $st[$k] = $this->correctTypes($v);
+      }
+    }
+    elseif (\is_object($st)) {
+      $vs = \get_object_vars($st);
+      foreach ($vs as $k => $v) {
+        $st->$k = $this->correctTypes($v);
+      }
+    }
+
+    return $st;
   }
 
 
