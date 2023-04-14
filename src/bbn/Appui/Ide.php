@@ -759,7 +759,7 @@ class Ide
                 }
               }
 
-              if (($cfg['type'] === 'lib') || ($cfg['type'] === 'cli')) {
+              if (($cfg['type'] === 'lib') || ($cfg['type'] === 'cli') || ($cfg['type'] === 'classes')) {
                 $path .= $cfg['path'];
               }
             }

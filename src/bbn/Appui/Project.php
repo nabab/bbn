@@ -179,11 +179,17 @@ class Project extends bbn\Models\Cls\Db
         /** @var string $path_type type found in the url (mvc, component, lib cli) */
         $path_type = array_shift($bits);
         /** @var array $path_row option corresponding to the type $path_type */
-        $path_row = X::getRow($path_info['types'], ['type' => $path_type]);
+        $path_row = X::getRow($path_info['types'], ['url' => $path_type]);
         if (!$path_row) {
+          X::log($path_info['types'], 'erroride');
           throw new Exception(X::_('Impossible to find the type %s', $path_type));
         }
-        $res['typology'] = $this->getType($path_type);
+        if ($path_type === 'lib') {
+          $res['typology'] = $this->getType('cls');
+        } else {
+          $res['typology'] = $this->getType($path_type);
+        }
+
         $real .= $path_type.'/';
         X::log($real, 'node');
         if ($force && !$type) {
@@ -194,7 +200,11 @@ class Project extends bbn\Models\Cls\Db
           }
         }
 
-        $path_info = X::getRow($res['typology']['tabs'], ['url' => $type]);
+        if (!empty($res['typology']['tabs'])) {
+          $path_info = X::getRow($res['typology']['tabs'], ['url' => $type]);
+        } else {
+          $path_info = $res['typology'];
+        }
         // add directly what remain in the url
 
         if (!empty($res['typology']['directories'])) {
@@ -225,7 +235,7 @@ class Project extends bbn\Models\Cls\Db
           $real .= '/';
         }
       }
-      $res['file'] = $real;
+      $res['file'] = str_replace('//', '/', $real);;
       $res['extensions'] = $path_info['extensions'];
       return $res;
     }
@@ -434,6 +444,8 @@ class Project extends bbn\Models\Cls\Db
   {
     // get info of the current path selected in first dropdown
     $currentPathArray = $this->getPath($id_path);
+
+    X::log($currentPathArray, 'currentPathArray');
     /*
      * {
     "id": "a50d890bc4b711edb71952540000cfbe",
@@ -503,7 +515,13 @@ class Project extends bbn\Models\Cls\Db
     if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {
       throw new Exception('Invalid Path');
     }
+    X::log([
+      'path' => $path,
+    ], 'componentsFiles');
     $path = Url::sanitize($path);
+    X::log([
+      'path' => $path,
+    ], 'componentsFiles');
     $o = self::getOptionsObject();
     // get current path type options
     $typePath = $o->option($currentPathArray['id_alias']);
@@ -539,16 +557,12 @@ class Project extends bbn\Models\Cls\Db
     elseif ($currentType['type'] === 'components') {
       X::log("retrieveComponentFiles", 'node');
       // check if path is not empty
-      if ($path) {
-        // remove all after the last slash
-        $path = preg_replace('/\/[^\/]*$/', '', $path);
-      }
       $todo = $this->retrieveComponentFiles($finalPath, $path, $onlydirs);
       X::log([
         'finalPath' => $finalPath,
         'path' => $path,
         'onlydirs' => $onlydirs
-      ], 'node');
+      ], 'componentsFiles');
     }
     // fill $todo with all files / folders
     else {
@@ -602,6 +616,7 @@ class Project extends bbn\Models\Cls\Db
    * @return array
    */
   private function _getNode(array $t, array $cfg): ?array {
+    X::log([$cfg, $t]);
     if (!isset($t) || empty($t['name'])) {
       return null;
     }
@@ -611,10 +626,6 @@ class Project extends bbn\Models\Cls\Db
     $name      = $t['basename'];
     //if is type and is components
     if ($cfg['type']['type'] === 'components') {
-      X::log([
-        'name' => $name,
-        $t['name'],
-      ]);
       //if is the component, with no subfolders
       if(empty($this->fs->getDirs($t['name'])) && !empty($cnt = $this->fs->getFiles($t['name']))) {
         $component = true;
@@ -720,9 +731,9 @@ class Project extends bbn\Models\Cls\Db
     }
 
     $public_path = $cfg['publicPath'];
-    if (($cfg['type']['type'] === 'components') && ($public_path !== '/')) {
-      $public_path = dirname($public_path) . '/';
-    }
+    X::log($public_path);
+
+    X::log($public_path);
 
     X::log([
       'name' => $name,
@@ -749,6 +760,8 @@ class Project extends bbn\Models\Cls\Db
       'tab' => $t['tab'],
       'ext' => $t['file'] ? $t['ext'] : false
     ];
+
+    X::log($res['uid']);
 
     /*if(!empty($tree_popup)) {
       $cfg['tree_popup'] = !empty($tree_popup);
