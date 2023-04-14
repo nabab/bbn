@@ -1484,7 +1484,6 @@ class Mvc implements Mvc\Api
   public function addInc(string $name, object $obj): void
   {
     if (isset($this->inc->{$name})) {
-      return;
       throw new \Exception(X::_("Impossible to add twice the same property (%s) to inc", $name));
     }
 
