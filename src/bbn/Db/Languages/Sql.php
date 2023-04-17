@@ -2191,7 +2191,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         elseif (!\str_contains($type, 'point')
           && \str_contains($type, 'int')
         ) {
-          if (($v === '') && $nullable) {
+          if ((($v === '') || \is_null($v)) && $nullable) {
             $data[$c] = null;
           }
           else {
