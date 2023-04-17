@@ -1338,6 +1338,9 @@ class Task extends bbn\Models\Cls\Db
       && isset($cfg['title'], $cfg['type'])
       && ($idNote = $this->noteCls->insert($cfg['title'], $cfg['content'] ?? '', $idType))
     ) {
+      $creationDate = $this->date ?: date('Y-m-d H:i:s');
+      $max = $this->db->selectOne('bbn_tasks', 'MAX(easy_id)', ['YEAR(creation_date)' => date('Y', strtotime($creationDate))]);
+      $easyId = !empty($max) ? $max + 1 : 1;
       if ( $this->db->insert('bbn_tasks', [
         'id_note' => $idNote,
         'type' => $cfg['type'],
@@ -1347,7 +1350,8 @@ class Task extends bbn\Models\Cls\Db
         'deadline' => !empty($cfg['deadline']) ? $cfg['deadline'] : null,
         'id_user' => $this->id_user ?: null,
         'state' => !empty($cfg['state']) ? $cfg['state'] : $this->idState('opened'),
-        'creation_date' => $this->date ?: date('Y-m-d H:i:s'),
+        'creation_date' => $creationDate,
+        'easy_id' => $easyId,
         'private' => !empty($cfg['private']) ? 1 : 0
       ]) ){
         $id = $this->db->lastId();
