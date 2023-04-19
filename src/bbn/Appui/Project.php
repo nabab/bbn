@@ -348,10 +348,19 @@ class Project extends bbn\Models\Cls\Db
    * Returns the main infos of the given project
    *
    * @param string $id
-   * @return void
+   * @return array
    *
-  public function getProjectInfo()
+   *
+   */
+
+  public function getProjectInfo(bool $force = false)
   {
+    if ($force) {
+      $info = $this->getFullTree();
+      $info['path'] = $this->getPaths();
+      $this->projectInfo = $info;
+      return $this->projectInfo;
+    }
     if ($this->id) {
       return [
         'id' => $this->id,
@@ -365,24 +374,25 @@ class Project extends bbn\Models\Cls\Db
 
     return [];
   }
-   *
-   * /
 
   /**
    * function to get all path of the project and format each path
    *
    * @param bool $force  force update $this->projectInfo
    * @return array
+   *
+   *
+   *
+   *   public function getProjectInfo(bool $force = false): array
+   *  {
+          if ($force || !$this->projectInfo) {
+            $info = $this->getFullTree();
+            $info['path'] = $this->getPaths();
+            $this->projectInfo = $info;
+          }
+          return $this->projectInfo;
+      }
    */
-  public function getProjectInfo(bool $force = false): array
-  {
-    if ($force || !$this->projectInfo) {
-      $info = $this->getFullTree();
-      $info['path'] = $this->getPaths();
-      $this->projectInfo = $info;
-    }
-    return $this->projectInfo;
-  }
 
   /**
    * function to get difference between local and git version
