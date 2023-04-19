@@ -52,7 +52,7 @@
     "phpunit/phpunit": "10.1.1",
     "pdepend/pdepend": "2.10.*",
     "phpmd/phpmd": "2.10.*",
-    "sebastian/phpcpd": "6.0.*",
+    "sebastian/phpcpd": "6.0.3",
     "friendsofphp/php-cs-fixer": "3.3.*",
     "phpunitgen/core": "3.0.*",
     "mockery/mockery": "1.4.*"
