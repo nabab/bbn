@@ -1436,6 +1436,11 @@ class Task extends bbn\Models\Cls\Db
               $this->stopAllTracks($idTask);
               $ok = 1;
               break;
+            case $states['canceled']:
+              $this->addLog($idTask, 'task_cancel');
+              $this->stopAllTracks($idTask);
+              $ok = 1;
+              break;
           }
           break;
         case 'title':
