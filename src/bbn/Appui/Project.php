@@ -353,14 +353,8 @@ class Project extends bbn\Models\Cls\Db
    *
    */
 
-  public function getProjectInfo(bool $force = false)
+  public function getProjectInfo()
   {
-    if ($force) {
-      $info = $this->getFullTree();
-      $info['path'] = $this->getPaths();
-      $this->projectInfo = $info;
-      return $this->projectInfo;
-    }
     if ($this->id) {
       return [
         'id' => $this->id,
@@ -961,7 +955,8 @@ class Project extends bbn\Models\Cls\Db
               'language' => $option['language'] ?? BBN_LANG,
               'alias' => $option['alias'],
               'parent' => $path,
-              'path' => $option['path'] === '/' ? '/' : $option['path']
+              'path' => $option['path'] === '/' ? '/' : $option['path'],
+              'id_option' => $option['id']
             ];
             $res[] = $tmp;
           }
