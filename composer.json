@@ -31,7 +31,7 @@
     "pear/archive_tar": "1.4.*",
     "gettext/gettext": "4.8.1",
     "nesbot/carbon": "2.57.*",
-    "nikic/php-parser": "4.13.*",
+    "nikic/php-parser": "4.15.*",
     "sabre/dav": "4.1.*",
     "erusev/parsedown": "1.7.*",
     "phpdocumentor/reflection-docblock": "5.2.*",
