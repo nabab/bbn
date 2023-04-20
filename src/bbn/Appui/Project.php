@@ -368,8 +368,7 @@ class Project extends bbn\Models\Cls\Db
 
     return [];
   }
-   *
-   * /
+  
 
   /**
    * function to get all path of the project and format each path
