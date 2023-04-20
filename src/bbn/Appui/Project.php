@@ -348,8 +348,11 @@ class Project extends bbn\Models\Cls\Db
    * Returns the main infos of the given project
    *
    * @param string $id
-   * @return void
+   * @return array
    *
+   *
+   */
+
   public function getProjectInfo()
   {
     if ($this->id) {
@@ -383,6 +386,69 @@ class Project extends bbn\Models\Cls\Db
     }
     return $this->projectInfo;
   }
+
+  /**
+   * function to get difference between local and git version
+   *
+   * @return array
+   */
+  private function _getDifferenceGit()
+  {
+    return [];
+  }
+
+  /**
+   * function to get git status of the element
+   *
+   * @param bool $ele  given element to check its status
+   * @return bool
+   */
+  private function _checkGit($ele): bool
+  {
+    $difference_git = $this->getDifferenceGit();
+    $info_git = false;
+    if (!empty($difference_git['ide'])) {
+      foreach($difference_git['ide'] as $commit){
+        $info_git = strpos($commit['ele'], $ele) === 0;
+        if (!empty($info_git)) {
+          return $info_git;
+        }
+      }
+    }
+    return $info_git;
+  }
+
+  /**
+   * function to get array to fill the tree component
+   *
+   * @param string $path  given path of the file selected
+   * @param string $id_path  given id_path of the directory
+   * @param string $type  type given in order to fill the tree
+   * @return array
+   */
+  public function openTree(string $path, string $id_path, string $type = null): array
+  {
+    return $this->_getTree($path, $id_path, $type);
+  }
+
+  /**
+   * function to get all path of the project and format each path
+   *
+   * @param bool $force  force update $this->projectInfo
+   * @return array
+   *
+   *
+   *
+   *   public function getProjectInfo(bool $force = false): array
+   *  {
+          if ($force || !$this->projectInfo) {
+            $info = $this->getFullTree();
+            $info['path'] = $this->getPaths();
+            $this->projectInfo = $info;
+          }
+          return $this->projectInfo;
+      }
+   */
 
   /**
    * function to get difference between local and git version
@@ -951,7 +1017,8 @@ class Project extends bbn\Models\Cls\Db
               'language' => $option['language'] ?? BBN_LANG,
               'alias' => $option['alias'],
               'parent' => $path,
-              'path' => $option['path'] === '/' ? '/' : $option['path']
+              'path' => $option['path'] === '/' ? '/' : $option['path'],
+              'id_option' => $option['id']
             ];
             $res[] = $tmp;
           }
