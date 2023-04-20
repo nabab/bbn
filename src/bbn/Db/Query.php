@@ -167,7 +167,7 @@ class Query extends \PDOStatement implements Actions
   public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed
   {
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetch($mode, $orientation, $offset));
+    return $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));
   }
 
 
@@ -190,7 +190,7 @@ class Query extends \PDOStatement implements Actions
       $res = parent::fetchAll($fetch_style);
     }
 
-    return bbn\Str::correctTypes($res);
+    return $this->db->correctTypes($res);
   }
 
 
@@ -201,7 +201,7 @@ class Query extends \PDOStatement implements Actions
   public function fetchColumn(int $column_number = 0): mixed
   {
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetchColumn($column_number));
+    return $this->db->correctTypes(parent::fetchColumn($column_number));
   }
 
 
@@ -213,7 +213,7 @@ class Query extends \PDOStatement implements Actions
   public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \stdClass
   {
     $this->execute();
-    return bbn\Str::correctTypes(parent::fetchObject($class_name,$ctor_args));
+    return $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));
   }
 
 

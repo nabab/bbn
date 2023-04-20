@@ -2161,6 +2161,53 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
   }
 
+  public function correctTypes($st)
+  {
+    if (\is_string($st)) {
+      if (Str::isBuid($st)) {
+        $st = \bin2hex($st);
+      }
+      else{
+        if (Str::isJson($st)) {
+          if (\strpos($st, '": ') && ($json = \json_decode($st))) {
+            return \json_encode($json);
+          }
+
+          return $st;
+        }
+
+        $st = \trim(\trim($st, " "), "\t");
+        if (Str::isInteger($st)
+            && ((substr((string)$st, 0, 1) !== '0') || ($st === '0'))
+        ) {
+          $tmp = (int)$st;
+          if (($tmp < PHP_INT_MAX) && ($tmp > -PHP_INT_MAX)) {
+            return $tmp;
+          }
+        }
+        // If it is a decimal, not starting or ending with a zero
+        elseif (Str::isDecimal($st)) {
+          return (float)$st;
+        }
+
+        return \normalizer_normalize($st);
+      }
+    }
+    elseif (\is_array($st)) {
+      foreach ($st as $k => $v) {
+        $st[$k] = $this->correctTypes($v);
+      }
+    }
+    elseif (\is_object($st)) {
+      $vs = get_object_vars($st);
+      foreach ($vs as $k => $v) {
+        $st->$k = $this->correctTypes($v);
+      }
+    }
+
+    return $st;
+  }
+
   /**
    * Adds the specs of a query to the $queries object.
    *
@@ -3267,7 +3314,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           if (X::hasProps($c, ['conditions', 'logic'])) {
             $tmp = $this->_adapt_bit($cfg, $c, $having);
             if (!empty($tmp[0]['conditions'])) {
-              $new['conditions'][] = $c;
+              $new['conditions'][] = $tmp[0];
             }
 
             if (!empty($tmp[1]['conditions'])) {

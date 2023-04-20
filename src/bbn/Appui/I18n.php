@@ -1756,9 +1756,6 @@ class I18n extends bbn\Models\Cls\Cache
         if (\is_file($file.'mo')) {
           \unlink($file.'mo');
         }
-        \bbn\X::log($file.'po', 'mirkomo');
-        \bbn\X::log(\is_file($file.'po'), 'mirkomo');
-        \bbn\X::log(\Gettext\Translations::fromPoFile($file.'po'), 'mirkomo');
         if (\is_file($file.'po')
           && ($translations = \Gettext\Translations::fromPoFile($file.'po'))
           && !$translations->toMoFile($file.'mo')

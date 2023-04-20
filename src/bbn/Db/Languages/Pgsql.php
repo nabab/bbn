@@ -169,6 +169,8 @@ class Pgsql extends Sql
 
       $this->pdo = new \PDO(...$cfg['args']);
       $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
       $this->cfg = $cfg;
       $this->setHash($cfg['args']);
 

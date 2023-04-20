@@ -40,6 +40,8 @@
 
 namespace bbn;
 
+use Exception;
+use bbn\X;
 use PHPMailer\PHPMailer\PHPMailer;
 
 class Mail extends Models\Cls\Basic
@@ -155,8 +157,9 @@ TEMPLATE;
     $md5 = md5($content);
     if ( $md5 !== self::$_hash_content ){
       self::$_hash_content = $md5;
-      $inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
-      self::$_content = $inliner->convert($content);
+      //$inliner = new \TijsVerkoyen\CssToInlineStyles\CssToInlineStyles();
+      //self::$_content = $inliner->convert($content);
+      self::$_content = $content;
     }
   }
 
@@ -185,19 +188,27 @@ TEMPLATE;
     if ( !\defined('BBN_ADMIN_EMAIL') || !\defined('BBN_IS_DEV') ){
       die("You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...");
     }
+
     if ( !isset($cfg['from']) && isset($cfg['user']) ){
       $cfg['from'] = $cfg['user'];
     }
+
     if (!isset($cfg['from'])) {
       $cfg['from'] = BBN_ADMIN_EMAIL;
     }
+
     if (!PHPMailer::validateAddress($cfg['from'])) {
-      die(X::_("A \"From\" eMail address must be provided"));
+      X::logError(0, "A \"From\" eMail address must be provided", __FILE__, __LINE__);
+      $this->error("A \"From\" eMail address must be provided");
     }
+
     $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);
     $this->mailer = new PHPMailer(true);
+
     try {
-      $this->mailer->CharSet = isset($cfg['charset']) ? $cfg['charset'] : "UTF-8";
+      $this->mailer->CharSet = $cfg['charset'] ?? 'UTF-8';
+      $this->mailer->Encoding = $cfg['encoding'] ?? "quoted-printable";
+      //$this->mailer->AllowCharsetEncoding = false;
       if ( isset($cfg['user'], $cfg['pass']) ){
         // SMTP connection will not close after each email sent, reduces SMTP overhead
         $this->mailer->isSMTP();
@@ -217,6 +228,7 @@ TEMPLATE;
         else{
           $this->mailer->SMTPSecure = 'tls';
         }
+
         $this->mailer->Host = $has_host ? $cfg['host'] : 'localhost';
         $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;
         $this->mailer->SMTPKeepAlive = true;
@@ -229,11 +241,32 @@ TEMPLATE;
           $this->setImap($cfg);
         }
       }
+
       $this->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
+      if ($cfg['reply-to'] ?? false) {
+        $this->setReplyTo($cfg['reply-to']);
+      }
+
       $this->setTemplate(isset($cfg['template']) ? $cfg['template'] : self::getDefaultTemplate());
     }
     catch (\Exception $e) {
       $this->log($this->mailer->ErrorInfo);
+      $this->log($e->getMessage());
+      $this->mailer = false;
+    }
+  }
+
+
+  public function __destruct()
+  {
+    if ( $this->mailer ){
+      try {
+        $this->mailer->smtpClose();
+      }
+      catch(Exception $e) {
+        $this->log("Impossible to close the connection");
+
+      }
     }
   }
 
@@ -301,7 +334,6 @@ TEMPLATE;
       $name = $email;
     }
     $this->mailer->setFrom($email, $name);
-    $this->mailer->addReplyTo($email, $name);
     return $this;
   }
 
@@ -325,6 +357,7 @@ TEMPLATE;
   public function send($cfg){
     $valid = false;
     $r = false;
+
     if (!defined('BBN_IS_PROD') || !BBN_IS_PROD) {
       $cfg['to'] = BBN_ADMIN_EMAIL;
       $cfg['cc'] = '';
@@ -343,6 +376,7 @@ TEMPLATE;
               explode(";", $cfg[$dest_field])
             );
           }
+
           foreach ($cfg[$dest_field] as $dest) {
             if (PHPMailer::validateAddress($dest)) {
               switch ($dest_field) {
@@ -370,15 +404,81 @@ TEMPLATE;
       if (!empty($cfg['from'])) {
         $this->setFrom($cfg['from']);
       }
-      $ar = [];
-      $this->mailer->Subject = $ar['title'] = $cfg['subject'] ?? ($cfg['title'] ?? '');
-      if (!isset($cfg['text'])) {
-        $cfg['text'] = '';
+
+      if (!empty($cfg['references'])) {
+        // check if each reference have chevrons around the message id and remove them
+        $refs = [];
+        $cfg['references'] = explode(' ', $cfg['references']);
+        foreach ($cfg['references'] as $ref) {
+          if (preg_match('/^<(.*)>$/', $ref, $m)) {
+            $mailbox = explode('@', $m[1])[0];
+            $hostname = explode('@', $m[1])[1];
+            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);
+          }
+          else {
+            $mailbox = explode('@', $ref)[0];
+            $hostname = explode('@', $ref)[1];
+            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);
+          }
+        }
+        // for each ref add '<' and '>' around the message id if not present
+        for ($i = 0; $i < count($refs); $i++) {
+          if (!preg_match('/^<(.*)>$/', $refs[$i])) {
+            $refs[$i] = '<' . $refs[$i] . '>';
+          }
+        }
+
+        $cfg['references'] = implode(' ', $refs);
+        $this->mailer->addCustomHeader('References:' . $cfg['references']);
       }
+
+      if (!empty($cfg['in_reply_to'])) {
+        # check if the in-reply-to have chevrons around the message id and remove them
+        if (preg_match('/^<(.*)>$/', $cfg['in_reply_to'], $m)) {
+          $mailbox = explode('@', $m[1])[0];
+          $hostname = explode('@', $m[1])[1];
+          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);
+        } else {
+          $mailbox = explode('@', $cfg['in_reply_to'])[0];
+          $hostname = explode('@', $cfg['in_reply_to'])[1];
+          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);
+        }
+        // add '<' and '>' around the message id if not present
+        if (!preg_match('/^<(.*)>$/', $cfg['in_reply_to'])) {
+          $cfg['in_reply_to'] = '<' . $cfg['in_reply_to'] . '>';
+        }
+
+        $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));
+      }
+
+      $ar  = [
+        'title' => $cfg['subject'] ?? ($cfg['title'] ?? '')
+      ];
+      $enc = mb_detect_encoding($ar['title']);
+      if ($enc !== $this->mailer->CharSet) {
+        $ar['title'] = mb_convert_encoding($ar['title'], $this->mailer->CharSet, $enc);
+      }
+
+      $this->mailer->Subject = $ar['title'];
+
+      
+      if (empty($cfg['text'])) {
+        $ar['text'] = '';
+      }
+      else {
+        $ar['text'] = $cfg['text'];
+        $enc = mb_detect_encoding($ar['text']);
+        //X::ddump($enc, $this->mailer->CharSet);
+        if ($enc !== $this->mailer->CharSet) {
+          $ar['text'] = mb_convert_encoding($ar['text'], $this->mailer->CharSet, $enc);
+        }
+      }
+
       if (isset($cfg['attachments'])) {
         if (\is_string($cfg['attachments'])) {
           $cfg['attachments'] = [$cfg['attachments']];
         }
+
         foreach ($cfg['attachments'] as $name => $att) {
           if (is_file($att)) {
             // 2nd parameter is the file's name in the mail
@@ -386,23 +486,23 @@ TEMPLATE;
           }
         }
       }
+
       if (!isset($renderer)) {
         $renderer = Tpl::renderer($this->template);
       }
-      if (!empty($cfg['References'])) {
-        $this->mailer->addCustomHeader('References', $cfg['References']);
-      }
+
       $ar['url'] = \defined('BBN_URL') ? BBN_URL : '';
-      $ar['text'] = $cfg['text'];
-      $ar['text'] = $renderer($ar);
-      self::setContent($ar['text']);
-      $this->mailer->msgHTML(self::$_content, $this->path, true);
+      $text = $renderer($ar);
+      self::setContent($text);
+      $this->mailer->msgHTML(self::$_content, $this->path);
+
       try {
         $r = $this->mailer->send();
       }
       catch (\Exception $e) {
         $this->log($e->getMessage());
       }
+
       if ($r && !empty($this->imap_string)) {
         $mail_string = $this->mailer->getSentMIMEMessage();
         if (!\is_resource($this->imap)
@@ -410,6 +510,7 @@ TEMPLATE;
         ) {
           $this->imap = \imap_open($this->imap_string, $this->imap_user, $this->imap_pass);
         }
+
         if ((!\is_resource($this->imap)
             && !($this->imap instanceof \IMAP\Connection))
           || !\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, "\\Seen")
@@ -417,12 +518,14 @@ TEMPLATE;
           $this->log(\imap_errors());
         }
       }
+
       if (!$r) {
         $err = \imap_last_error();
         $this->log($err);
         X::log($err);
       }
     }
+
     $this->mailer->ClearAllRecipients();
     $this->mailer->ClearAttachments();
     return $r;

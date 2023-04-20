@@ -39,14 +39,14 @@ class Email extends Basic
         'date' => 'date',
         'id_sender' => 'id_sender',
         'subject' => 'subject',
+        'excerpt' => 'excerpt',
         'size' => 'size',
         'attachments' => 'attachments',
         'flags' => 'flags',
         'is_read' => 'is_read',
         'id_parent' => 'id_parent',
         'id_thread' => 'id_thread',
-        'external_uids' => 'external_uids',
-        'excerpt' => 'excerpt'
+        'external_uids' => 'external_uids'
       ],
       'users_emails_aliases' => [
         'id_account' => 'id_account',
