@@ -371,22 +371,6 @@ class Project extends bbn\Models\Cls\Db
   
 
   /**
-   * function to get all path of the project and format each path
-   *
-   * @param bool $force  force update $this->projectInfo
-   * @return array
-   */
-  public function getProjectInfo(bool $force = false): array
-  {
-    if ($force || !$this->projectInfo) {
-      $info = $this->getFullTree();
-      $info['path'] = $this->getPaths();
-      $this->projectInfo = $info;
-    }
-    return $this->projectInfo;
-  }
-
-  /**
    * function to get difference between local and git version
    *
    * @return array
