@@ -1308,6 +1308,15 @@ class Task extends bbn\Models\Cls\Db
     return 0;
   }
 
+  public function removeTask(string $id): bool
+  {
+    if (bbn\Str::isUid($id)) {
+      return (bool)$this->db->update('bbn_tasks', ['active' => 0], ['id' => $id]);
+    }
+
+    return false;
+  }
+
   public function setDate($date){
     $this->date = $date;
     return $this;
