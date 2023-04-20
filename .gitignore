@@ -16,3 +16,4 @@ filemode = false
 .phpunit.result.cache
 .php_cs.cache
 .env
+composer.lock

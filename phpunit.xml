@@ -1,37 +1,19 @@
-<phpunit
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/3.7/phpunit.xsd"
-         backupGlobals="true"
-         backupStaticAttributes="false"
-         colors="true"
-         convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true"
-         convertWarningsToExceptions="true"
-         forceCoversAnnotation="false"
-         processIsolation="false"
-         stopOnError="false"
-         stopOnFailure="false"
-         stopOnIncomplete="false"
-         stopOnSkipped="false"
-         timeoutForSmallTests="1"
-         timeoutForMediumTests="10"
-         timeoutForLargeTests="60"
-         stderr="true"
-         verbose="false">
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.1/phpunit.xsd" backupGlobals="true" colors="true" processIsolation="false" stopOnError="false" stopOnFailure="false" stopOnIncomplete="false" stopOnSkipped="false" timeoutForSmallTests="1" timeoutForMediumTests="10" timeoutForLargeTests="60" stderr="true" cacheDirectory=".phpunit.cache" backupStaticProperties="false" requireCoverageMetadata="false">
   <testsuites>
     <testsuite name="Classes">
       <directory>tests</directory>
     </testsuite>
   </testsuites>
   <php>
-    <const name="BBN_APP_PATH" value="./" />
-    <const name="BBN_APP_NAME" value="Testing" />
-    <const name="BBN_DATA_PATH" value="tests/storage/" />
-    <const name="BBN_APP_PREFIX" value="appui" />
-    <const name="BBN_LIB_PATH" value="vendor" />
-    <const name="BBN_ADMIN_EMAIL" value="admin@test.com" />
-    <const name="BBN_DEFAULT_MODE" value="public" />
-    <const name="BBN_CUR_PATH" value="/" />
-    <const name="BBN_TESTING_EVN" value="true" />
+    <const name="BBN_APP_PATH" value="./"/>
+    <const name="BBN_APP_NAME" value="Testing"/>
+    <const name="BBN_DATA_PATH" value="tests/storage/"/>
+    <const name="BBN_APP_PREFIX" value="appui"/>
+    <const name="BBN_LIB_PATH" value="vendor"/>
+    <const name="BBN_ADMIN_EMAIL" value="admin@test.com"/>
+    <const name="BBN_DEFAULT_MODE" value="public"/>
+    <const name="BBN_CUR_PATH" value="/"/>
+    <const name="BBN_TESTING_EVN" value="true"/>
   </php>
 </phpunit>
