@@ -412,52 +412,7 @@ class Project extends bbn\Models\Cls\Db
   {
     return $this->_getTree($path, $id_path, $type);
   }
-
-
-  /**
-   * function to get difference between local and git version
-   *
-   * @return array
-   */
-  private function _getDifferenceGit()
-  {
-    return [];
-  }
-
-  /**
-   * function to get git status of the element
-   *
-   * @param bool $ele  given element to check its status
-   * @return bool
-   */
-  private function _checkGit($ele): bool
-  {
-    $difference_git = $this->getDifferenceGit();
-    $info_git = false;
-    if (!empty($difference_git['ide'])) {
-      foreach($difference_git['ide'] as $commit){
-        $info_git = strpos($commit['ele'], $ele) === 0;
-        if (!empty($info_git)) {
-          return $info_git;
-        }
-      }
-    }
-    return $info_git;
-  }
-
-  /**
-   * function to get array to fill the tree component
-   *
-   * @param string $path  given path of the file selected
-   * @param string $id_path  given id_path of the directory
-   * @param string $type  type given in order to fill the tree
-   * @return array
-   */
-  public function openTree(string $path, string $id_path, string $type = null): array
-  {
-    return $this->_getTree($path, $id_path, $type);
-  }
-
+  
   /**
    * function to get the tree array to fill tree component
    *
