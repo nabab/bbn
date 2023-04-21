@@ -660,43 +660,47 @@ class Task extends bbn\Models\Cls\Db
     return null;
   }
 
-  public function getChildrenIds(string $id): ?array
+  public function getChildrenIds(string $id, bool $includeDeleted = false): ?array
   {
+    $where = [[
+      'field' => 'id_parent',
+      'value' => $id
+    ], [
+      'logic' => 'OR',
+      'conditions' => [[
+        'field' => 'private',
+        'value' => 0
+      ], [
+        'conditions' => [[
+          'field' => 'private',
+          'value' => 1
+        ], [
+          'field' => 'id_user',
+          'value' => $this->id_user
+        ]]
+      ]]
+    ]];
+    if (!$includeDeleted) {
+      $where[] = [
+        'field' => 'active',
+        'value' => 1
+      ];
+    }
     return $this->db->getColumnValues([
       'table' => 'bbn_tasks',
       'fields' => ['id'],
       'where' => [
-        'conditions' => [[
-          'field' => 'id_parent',
-          'value' => $id
-        ], [
-          'field' => 'active',
-          'value' => 1
-        ], [
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => 'private',
-            'value' => 0
-          ], [
-            'conditions' => [[
-              'field' => 'private',
-              'value' => 1
-            ], [
-              'field' => 'id_user',
-              'value' => $this->id_user
-            ]]
-          ]]
-        ]]
+        'conditions' => $where
       ],
       'order' => [
         'creation_date' => 'DESC'
       ]
-      ]);
+    ]);
   }
 
-  public function getChildren(string $id): array
+  public function getChildren(string $id, bool $includeDeleted = false): array
   {
-    if ($children = $this->getChildrenIds($id)) {
+    if ($children = $this->getChildrenIds($id, $includeDeleted)) {
       $t = $this;
       return \array_map(function($cid) use($t){
         return $t->info($cid);
@@ -765,7 +769,8 @@ class Task extends bbn\Models\Cls\Db
     }
     return $this->db->getColumnValues('bbn_tasks', 'id', [
       'id_parent' => $id,
-      'state' => $idState
+      'state' => $idState,
+      'active' => 1
     ]);
   }
 
@@ -1071,15 +1076,20 @@ class Task extends bbn\Models\Cls\Db
         ]
       ]],
       'where' => [
-        'logic' => 'OR',
         'conditions' => [[
-          'field' => 'bbn_notes_versions.title',
-          'operator' => 'contains',
-          'value' => $st
+          'field' => 'bbn_tasks.active',
+          'value' => 1
         ], [
-          'field' => 'bbn_notes_versions.content',
-          'operator' => 'contains',
-          'value' => $st
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => 'bbn_notes_versions.title',
+            'operator' => 'contains',
+            'value' => $st
+          ], [
+            'field' => 'bbn_notes_versions.content',
+            'operator' => 'contains',
+            'value' => $st
+          ]]
         ]]
       ]
     ]);
@@ -1269,6 +1279,12 @@ class Task extends bbn\Models\Cls\Db
     return $this->db->count('bbn_tasks', ['id' => $id_task]) ? true : false;
   }
 
+  public function isDeleted(string $idTask): bool
+  {
+    return $this->exists($idTask)
+      && !$this->db->selectOne('bbn_tasks', 'active', ['id' => $idTask]);
+  }
+
   public function addRole($id_task, $role, $id_user = null){
     if ( $this->exists($id_task) ){
       if ( !bbn\Str::isUid($role) ){
@@ -1376,6 +1392,7 @@ class Task extends bbn\Models\Cls\Db
   public function update($idTask, $prop, $value){
     if ( $this->exists($idTask) ){
       $ok = false;
+      $toDelete = false;
       $states = $this->states();
       switch ($prop) {
         case 'deadline':
@@ -1435,6 +1452,16 @@ class Task extends bbn\Models\Cls\Db
               $this->addLog($idTask, 'task_unapproved');
               $this->stopAllTracks($idTask);
               $ok = 1;
+              break;
+            case $states['canceled']:
+              $this->addLog($idTask, 'task_cancel');
+              $this->stopAllTracks($idTask);
+              $ok = 1;
+              break;
+            case $states['deleted']:
+              $this->stopAllTracks($idTask);
+              $ok = 1;
+              $toDelete = 1;
               break;
           }
           break;
@@ -1500,36 +1527,51 @@ class Task extends bbn\Models\Cls\Db
           $this->update($idTask, 'state', empty($value) ? $states['opened'] : $states['unapproved']);
         }
         if ($prop === 'state') {
-          if ($value === $states['unapproved']) {
-            if (!!$this->getPrice($idTask) && ($children = $this->getChildrenIds($idTask))) {
-              foreach ($children as $child) {
-                $s = $this->getState($child);
-                if (($s !== $states['unapproved'])
-                  && ($s !== $states['closed'])
-                ) {
-                  $this->update($child, 'state', $states['unapproved']);
+          switch ($value) {
+            case $states['unapproved']:
+              if (!!$this->getPrice($idTask) && ($children = $this->getChildrenIds($idTask))) {
+                foreach ($children as $child) {
+                  $s = $this->getState($child);
+                  if (($s !== $states['unapproved'])
+                    && ($s !== $states['closed'])
+                  ) {
+                    $this->update($child, 'state', $states['unapproved']);
+                  }
                 }
               }
-            }
-            if (($idParent = $this->getIdParent($idTask))
-              && ($this->getState($idParent) !== $states['unapproved'])
-            ) {
-              $this->update($idParent, 'state', $states['unapproved']);
-            }
-          }
-          else if ($value === $states['opened']) {
-            if ($children = $this->getUnapprovedChildrenIds($idTask)) {
-              foreach ($children as $child) {
-                $this->update($child, 'state', $states['opened']);
+              if (($idParent = $this->getIdParent($idTask))
+                && ($this->getState($idParent) !== $states['unapproved'])
+              ) {
+                $this->update($idParent, 'state', $states['unapproved']);
               }
-            }
-            if (($idParent = $this->getIdParent($idTask))
-              && ($this->getState($idParent) === $states['unapproved'])
-              && !$this->getUnapprovedChildrenIds($idParent)
-            ) {
-              $this->update($idParent, 'state', $states['opened']);
-            }
+              break;
+
+            case $states['opened']:
+              if ($children = $this->getUnapprovedChildrenIds($idTask)) {
+                foreach ($children as $child) {
+                  $this->update($child, 'state', $states['opened']);
+                }
+              }
+              if (($idParent = $this->getIdParent($idTask))
+                && ($this->getState($idParent) === $states['unapproved'])
+                && !$this->getUnapprovedChildrenIds($idParent)
+              ) {
+                $this->update($idParent, 'state', $states['opened']);
+              }
+              break;
+
+            case $states['canceled']:
+            case $states['deleted']:
+              if ($children = $this->getChildrenIds($idTask)) {
+                foreach ($children as $child) {
+                  $this->update($child, 'state', $value);
+                }
+              }
+              break;
           }
+        }
+        if ($toDelete) {
+          return $this->delete($idTask);
         }
         return true;
       }
@@ -1537,14 +1579,10 @@ class Task extends bbn\Models\Cls\Db
     return false;
   }
 
-  public function delete($id){
-    if ($this->db->update('bbn_tasks', ['active' => 0], ['id' => $id])) {
-      $this->addLog($id, 'delete');
-      /* $subject = "Suppression du bug $info[title]";
-      $text = "<p>{$this->user} a supprimé le bug<br><strong>$info[title]</strong></p>";
-      $this->email($id, $subject, $text); */
-      return $id;
-    }
+  public function delete($id): bool
+  {
+    return (bool)$this->db->update('bbn_tasks', ['active' => 0], ['id' => $id])
+      && $this->addLog($id, 'delete');
   }
 
   public function approve(string $id, bool $approveChildren = true, bool $approveParent = true){
