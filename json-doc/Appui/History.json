@@ -1772,6 +1772,12 @@
             "apst_app.bbn_addresses": [
                 "id"
             ],
+            "apst_app.bbn_ai_prompt": [
+                "id"
+            ],
+            "apst_app.bbn_ai_prompt_items": [
+                "id"
+            ],
             "apst_app.bbn_cron": [
                 "id"
             ],

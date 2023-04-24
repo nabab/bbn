@@ -17,7 +17,7 @@
     "interfaces": [],
     "fileName": "\/Shop.php",
     "startLine": 68,
-    "endLine": 405,
+    "endLine": 407,
     "numMethods": 27,
     "numProperties": 0,
     "numConstants": 0,
@@ -285,7 +285,7 @@
         },
         "getAdminList": {
             "name": "getAdminList",
-            "summary": "Returns a list of the products for management.",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Shop",
@@ -315,8 +315,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "fg"
+                    "default_name": ""
                 }
             ]
         },
@@ -329,9 +328,9 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    $prod = $this->product->get($id);\n    if ($prod && $prod['id_note']) {\n      $note = $this->cms->get($prod['id_note'], true);\n      if (!empty($prod['front_img'])) {\n        $prod['front_img'] = $this->medias->getMedia($prod['front_img'], true);\n        $prod['source'] = $prod['front_img']['path'];\n      }\n\n      if ($note) {\n        $cfg      = $this->product->getClassCfg();\n        if (empty($prod['id_main'])) {\n          $prod['variants'] = [];\n          if ($variants = $this->db->getColumnValues($cfg['table'], $cfg['arch']['products']['id'], [\n            $cfg['arch']['products']['id_main'] => $id\n          ]));\n          foreach ($variants as $v) {\n            $prod['variants'][] = $this->getFullProduct($v);\n          }\n        }\n\n        $prod['sales'] = [\n          'total' => $this->sales->getByProduct($id),\n          'y'     => ['total' => 0, 'num' => 0],\n          'm'     => ['total' => 0, 'num' => 0],\n          'w'     => ['total' => 0, 'num' => 0],\n          'd'     => ['total' => 0, 'num' => 0],\n        ];\n\n        $keys = array_keys($prod['sales']);\n        for ($i = 0; $i < count($keys) - 1; $i++) {\n          if ($prod['sales'][$keys[$i]]['total']) {\n            $prod['sales'][$keys[$i + 1]] = $this->sales->getByProduct($id, $keys[$i + 1]);\n          }\n        }\n\n        return X::mergeArrays($note, $prod);\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 360,
-            "endLine": 402,
+            "code": "function(string $id)\n  {\n    $prod = $this->product->get($id);\n    if ($prod && $prod['id_note']) {\n      $note = $this->cms->get($prod['id_note'], true);\n      if (!empty($prod['front_img'])) {\n        $prod['front_img'] = $this->medias->getMedia($prod['front_img'], true);\n        $prod['source'] = $prod['front_img']['path'];\n      }\n\n      if ($note) {\n        $cfg      = $this->product->getClassCfg();\n        if (empty($prod['id_main'])) {\n          $prod['variants'] = [];\n          if ($variants = $this->db->getColumnValues($cfg['table'], $cfg['arch']['products']['id'], [\n            $cfg['arch']['products']['id_main'] => $id\n          ]));\n          foreach ($variants as $v) {\n            $prod['variants'][] = $this->getFullProduct($v);\n          }\n        }\n        $cartCfg = $this->cart->getClassCfg();\n        $prod['cart_number'] = $this->db->count($cartCfg['tables']['cart_products'], [$cartCfg['arch']['cart_products']['id_product'] => $id]);\n        $prod['sales'] = [\n          'total' => $this->sales->getByProduct($id),\n          'y'     => ['total' => 0, 'num' => 0],\n          'm'     => ['total' => 0, 'num' => 0],\n          'w'     => ['total' => 0, 'num' => 0],\n          'd'     => ['total' => 0, 'num' => 0],\n        ];\n\n        $keys = array_keys($prod['sales']);\n        for ($i = 0; $i < count($keys) - 1; $i++) {\n          if ($prod['sales'][$keys[$i]]['total']) {\n            $prod['sales'][$keys[$i + 1]] = $this->sales->getByProduct($id, $keys[$i + 1]);\n          }\n        }\n\n        return X::mergeArrays($note, $prod);\n      }\n    }\n\n    return null;\n  }",
+            "startLine": 361,
+            "endLine": 404,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,

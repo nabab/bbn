@@ -2111,7 +2111,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $st)\n  {\n    $pattern = '\/<!--.*?-->|(?:(?:\\\/\\*(?:[^*]|(?:\\*+[^*\\\/]))*\\*+\\\/)|(?:(?<!\\:|\\\\\\|\\')\\\/\\\/.*))\/';\n    return trim(preg_replace($pattern, '', $st));\n  }",
+            "code": "function(string $st)\n  {\n    $pattern = '\/(?=<!--)([\\s\\S]*?)-->|(?:(?:\\\/\\*(?:[^*]|(?:\\*+[^*\\\/]))*\\*+\\\/)|(?:(?<!\\:|\\\\\\|\\')\\\/\\\/.*))\/';\n    return trim(preg_replace($pattern, '', $st));\n  }",
             "startLine": 1526,
             "endLine": 1530,
             "isDeprecated": false,

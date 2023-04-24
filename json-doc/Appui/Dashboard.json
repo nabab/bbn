@@ -105,7 +105,7 @@
         },
         "exists": {
             "name": "exists",
-            "summary": "Returns true if the given code corresoponds to an existing",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Appui\\Dashboard",

@@ -440,7 +440,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset($this->_post)) {\n      if (self::$_input && \\bbn\\Str::isJson(self::$_input)) {\n        $this->_post = json_decode(self::$_input, 1);\n      }\n      elseif (!empty($_POST)) {\n        $this->_post = $_POST;\n      }\n\n      if (!$this->_post) {\n        $this->_post = [];\n      }\n      else {\n        $this->_has_post = true;\n        $this->_post     = bbn\\Str::correctTypes($this->_post);\n        foreach ($this->_post as $k => $v) {\n          if (X::indexOf($k, '_bbn_') === 0) {\n            if (!defined(strtoupper(substr($k, 1)))) {\n              define(strtoupper(substr($k, 1)), $v);\n            }\n\n            unset($this->_post[$k]);\n          }\n        }\n      }\n    }\n\n    return $this->_post;\n  }",
+            "code": "function()\n  {\n    if (!isset($this->_post)) {\n      if (self::$_input && \\bbn\\Str::isJson(self::$_input)) {\n        $this->_post = json_decode(self::$_input, 1);\n      }\n      elseif (!empty($_POST)) {\n        $this->_post = $_POST;\n      }\n\n      if (!$this->_post) {\n        $this->_post = [];\n      }\n      else {\n        $this->_has_post = true;\n        \/\/$this->_post     = bbn\\Str::correctTypes($this->_post);\n        foreach ($this->_post as $k => $v) {\n          if (X::indexOf($k, '_bbn_') === 0) {\n            if (!defined(strtoupper(substr($k, 1)))) {\n              define(strtoupper(substr($k, 1)), $v);\n            }\n\n            unset($this->_post[$k]);\n          }\n        }\n      }\n    }\n\n    return $this->_post;\n  }",
             "startLine": 479,
             "endLine": 508,
             "isDeprecated": false,
@@ -534,7 +534,7 @@
     "properties": null,
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"UkodqX4aQB5Ng12h\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"s5XbSp3znN9014c3D81928JxoWZS3w8\"}"
     },
     "constants": null,
     "summary": "",

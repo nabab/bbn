@@ -7299,7 +7299,7 @@
         },
         "export4Option": {
             "name": "export4Option",
-            "summary": "Creates a simplified array for options from a table model",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Db",
@@ -7329,8 +7329,7 @@
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": "",
-                    "description": "name"
+                    "default_name": ""
                 },
                 {
                     "name": "database",
