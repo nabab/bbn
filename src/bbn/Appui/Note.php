@@ -59,6 +59,7 @@ class Note extends bbn\Models\Cls\Db
         'private' => 'private',
         'locked' => 'locked',
         'pinned' => 'pinned',
+        'important' => 'important',
         'creator' => 'creator',
         'active' => 'active',
       ],
@@ -245,7 +246,8 @@ class Note extends bbn\Models\Cls\Db
     string $lang = '',
     string $id_option = null,
     string $excerpt = '',
-    bool   $pinned = false
+    bool   $pinned = false,
+    bool   $important = false
   ): ?string
   {
     $props = [
@@ -260,7 +262,8 @@ class Note extends bbn\Models\Cls\Db
       'lang',
       'id_option',
       'excerpt',
-      'pinned'
+      'pinned',
+      'important'
     ];
     if (is_array($title)) {
       $cfg = $title;
@@ -307,7 +310,8 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['creator'] => $usr->getId(),
           $cf['arch']['notes']['mime'] => $cfg['mime'],
           $cf['arch']['notes']['lang'] => $cfg['lang'],
-          $cf['arch']['notes']['pinned'] => !empty($cfg['pinned']) ? 1 : 0
+          $cf['arch']['notes']['pinned'] => !empty($cfg['pinned']) ? 1 : 0,
+          $cf['arch']['notes']['important'] => !empty($cfg['important']) ? 1 : 0
         ]
       )
       && ($id_note = $this->db->lastId())
@@ -393,7 +397,8 @@ class Note extends bbn\Models\Cls\Db
      bool   $private = false,
      bool   $locked = false,
      string $excerpt = '',
-     bool   $pinned = false
+     bool   $pinned = false,
+     bool   $important = false
   ): ?int
   {
     $props = [
@@ -402,7 +407,8 @@ class Note extends bbn\Models\Cls\Db
       'private',
       'locked',
       'excerpt',
-      'pinned'
+      'pinned',
+      'important'
     ];
     if (is_array($title)) {
       $cfg = $title;
@@ -597,6 +603,7 @@ class Note extends bbn\Models\Cls\Db
           $cf['arch']['notes']['private'],
           $cf['arch']['notes']['locked'],
           $cf['arch']['notes']['pinned'],
+          $cf['arch']['notes']['important'],
           $cf['arch']['versions']['version'],
           $cf['arch']['versions']['excerpt'],
           $cf['arch']['versions']['title'],
@@ -1091,6 +1098,7 @@ class Note extends bbn\Models\Cls\Db
           $db->cfn($this->fields['private'], $cf['table']),
           $db->cfn($this->fields['locked'], $cf['table']),
           $db->cfn($this->fields['pinned'], $cf['table']),
+          $db->cfn($this->fields['important'], $cf['table']),
           $db->cfn($this->fields['creator'], $cf['table']),
           $db->cfn($this->fields['active'], $cf['table']),
           $db->cfn($cf['arch']['versions']['version'], $cf['tables']['versions']),
@@ -1897,6 +1905,28 @@ class Note extends bbn\Models\Cls\Db
   public function unpin(string $id): bool
   {
     return (bool)$this->db->update($this->class_table, [$this->fields['pinned'] => 0], [$this->fields['id'] => $id]);
+  }
+
+
+  /**
+   * Set the given note as important
+   * @param string $id The note ID
+   * @return bool
+   */
+  public function setImportant(string $id): bool
+  {
+    return (bool)$this->db->update($this->class_table, [$this->fields['important'] => 1], [$this->fields['id'] => $id]);
+  }
+
+
+  /**
+   * Unset the given note as important
+   * @param string $id The note ID
+   * @return bool
+   */
+  public function unsetImportant(string $id): bool
+  {
+    return (bool)$this->db->update($this->class_table, [$this->fields['important'] => 0], [$this->fields['id'] => $id]);
   }
 
 
