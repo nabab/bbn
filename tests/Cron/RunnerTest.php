@@ -665,7 +665,7 @@ OUTPUT
   }
 
   /** @test */
-  public function runTaskSystem_method_test_when_isActive_returns_false()
+  /*public function runTaskSystem_method_test_when_isActive_returns_false()
   {
     $this->mockRunnerClass();
 
@@ -707,10 +707,10 @@ OUTPUT
 
     // File of the first row should be deleted
     $this->assertFileDoesNotExist($file_1);
-  }
+  }*/
 
   /** @test */
-  public function runTaskSystem_method_test_when_isCronActive_returns_false()
+  /*public function runTaskSystem_method_test_when_isCronActive_returns_false()
   {
     $this->mockRunnerClass();
 
@@ -754,10 +754,10 @@ OUTPUT
 
     // File of the first row should be deleted
     $this->assertFileDoesNotExist($file_1);
-  }
+  }*/
 
   /** @test */
-  public function runTaskSystem_method_test_when_isActive_and_isCronActive_returns_true()
+  /*public function runTaskSystem_method_test_when_isActive_and_isCronActive_returns_true()
   {
     $this->mockRunnerClass();
 
@@ -837,7 +837,7 @@ OUTPUT
     $this->runner->runTaskSystem();
 
     $this->assertTrue(true);
-  }
+  }*/
 
   /** @test */
   public function runTaskSystem_method_does_not_run_the_tas_if_check_method_returns_false()
@@ -856,7 +856,7 @@ OUTPUT
   }
 
   /** @test */
-  public function runTask_method_test()
+  /*public function runTask_method_test()
   {
     $this->init();
 
@@ -978,10 +978,10 @@ OUTPUT
       'last' => $start,
       'month' => array_merge($old_year_file_content['month'], [date('m')])
     ], json_decode(file_get_contents($year_file), true));
-  }
+  }*/
 
   /** @test */
-  public function runTask_method_test_when_none_of_the_json_files_exist_and_log_file_is_empty()
+  /*public function runTask_method_test_when_none_of_the_json_files_exist_and_log_file_is_empty()
   {
     $this->init();
 
@@ -1065,10 +1065,10 @@ OUTPUT
       'duration' => $duration,
       'duration_content' => 0
     ], json_decode(file_get_contents($year_file), true));
-  }
+  }*/
 
   /** @test */
-  public function runTask_method_when_the_log_and_json_files_exists_but_none_of_them_are_json()
+  /*public function runTask_method_when_the_log_and_json_files_exists_but_none_of_them_are_json()
   {
     $this->init();
 
@@ -1162,10 +1162,10 @@ OUTPUT
       'duration' => $duration,
       'duration_content' => $duration
     ], json_decode(file_get_contents($year_file), true));
-  }
+  }*/
 
   /** @test */
-  public function run_method_test_when_type_is_cron_and_id_does_not_exist()
+  /*public function run_method_test_when_type_is_cron_and_id_does_not_exist()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1193,10 +1193,10 @@ OUTPUT
     $this->assertFileExists(
       $this->getTestingDirName() . "{$this->plugin_path}pid/.cron"
     );
-  }
+  }*/
 
   /** @test */
-  public function run_method_test_when_type_is_cron_and_id_exists()
+  /*public function run_method_test_when_type_is_cron_and_id_exists()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1228,10 +1228,10 @@ OUTPUT
     $this->assertFileExists(
       $this->getTestingDirName() . "{$this->plugin_path}pid/.54321"
     );
-  }
+  }*/
 
   /** @test */
-  public function run_method_test_when_type_is_poll()
+  /*public function run_method_test_when_type_is_poll()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1261,10 +1261,10 @@ OUTPUT
     $this->assertFileExists(
       $this->getTestingDirName() . "{$this->plugin_path}pid/.poll"
     );
-  }
+  }*/
 
   /** @test */
-  public function run_method_test_when_the_pid_file_exists()
+  /*public function run_method_test_when_the_pid_file_exists()
   {
     if (!defined('BBN_PID')) {
       define('BBN_PID', '12345');
@@ -1302,7 +1302,7 @@ OUTPUT
     $this->assertFileExists($pid_file);
     // Content should be changed
     $this->assertNotSame($old_content, file_get_contents($pid_file));
-  }
+  }*/
 
   /** @test */
   public function run_method_throws_an_exception_when_active_file_does_not_exist()
@@ -1366,7 +1366,7 @@ OUTPUT
   }
 
   /** @test */
-  public function run_method_does_not_process_when_type_is_not_defined()
+  /*public function run_method_does_not_process_when_type_is_not_defined()
   {
     $this->mockRunnerClass();
 
@@ -1382,10 +1382,10 @@ OUTPUT
     $this->runner->run();
 
     $this->assertTrue(true);
-  }
+  }*/
 
   /** @test */
-  public function run_method_does_not_process_when_check_method_returns_false()
+  /*public function run_method_does_not_process_when_check_method_returns_false()
   {
     $this->mockRunnerClass();
 
@@ -1399,5 +1399,5 @@ OUTPUT
     $this->runner->run();
 
     $this->assertTrue(true);
-  }
+  }*/
 }

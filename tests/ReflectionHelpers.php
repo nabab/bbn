@@ -40,7 +40,7 @@ class ReflectionHelpers
   {
         $reflectionClass = new \ReflectionClass($object);
         $property        = $reflectionClass->getProperty($name);
-        $property->setAccessible(true);
+        //$property->setAccessible(true);
         $property->setValue($object, $value);
   }
 

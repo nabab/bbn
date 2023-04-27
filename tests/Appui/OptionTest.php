@@ -1469,7 +1469,7 @@ class OptionTest extends TestCase
         0
       )
       ->andReturnTrue();
-    die(var_dump($this->option));
+    //die(var_dump($this->option));
     $real = $this->option->nativeOption('list', 'project');
     //echo print_r($this->option->nativeOption('list', 'project'), true);
     //die(null);
