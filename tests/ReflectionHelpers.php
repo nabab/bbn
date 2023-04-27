@@ -19,9 +19,10 @@ class ReflectionHelpers
   {
       $reflectionClass = new \ReflectionClass($object);
       $property        = $reflectionClass->getProperty($name);
-      $property->setAccessible(true);
+      //$property->setAccessible(true);
 
-      return $property->getValue($object);
+      return is_string($object) ? $property->getValue() : $property->getValue($object);
+      //return $property->getValue($object);
   }
 
 
@@ -39,7 +40,7 @@ class ReflectionHelpers
   {
         $reflectionClass = new \ReflectionClass($object);
         $property        = $reflectionClass->getProperty($name);
-        $property->setAccessible(true);
+        //$property->setAccessible(true);
         $property->setValue($object, $value);
   }
 
@@ -62,6 +63,5 @@ class ReflectionHelpers
 
       return $method;
   }
-
 
 }
