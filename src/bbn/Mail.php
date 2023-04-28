@@ -243,6 +243,10 @@ TEMPLATE;
       }
 
       $this->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);
+      if ($cfg['reply-to'] ?? false) {
+        $this->setReplyTo($cfg['reply-to']);
+      }
+
       $this->setTemplate(isset($cfg['template']) ? $cfg['template'] : self::getDefaultTemplate());
     }
     catch (\Exception $e) {
@@ -330,7 +334,6 @@ TEMPLATE;
       $name = $email;
     }
     $this->mailer->setFrom($email, $name);
-    $this->mailer->addReplyTo($email, $name);
     return $this;
   }
 

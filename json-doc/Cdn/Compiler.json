@@ -259,7 +259,7 @@
         },
         "hasLinks": {
             "name": "hasLinks",
-            "summary": "Returns true if the given css code contains url parameters.",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Cdn\\Compiler",

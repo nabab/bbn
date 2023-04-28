@@ -7,7 +7,6 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use Exception;
-use PhpOffice\PhpWord\Element\PageBreakTest;
 
 /**
  * An all-in-one hierarchical options management system
