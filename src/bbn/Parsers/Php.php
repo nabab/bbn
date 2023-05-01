@@ -6,6 +6,11 @@ use bbn;
 use bbn\X;
 use bbn\Str;
 use bbn\File\System;
+use Exception;
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionException;
+use phpDocumentor\Reflection\DocBlockFactory;
 
 class Php extends bbn\Models\Cls\Basic
 {
@@ -16,7 +21,7 @@ class Php extends bbn\Models\Cls\Basic
    */
   public function __construct()
   {
-    $this->docParser = \phpDocumentor\Reflection\DocBlockFactory::createInstance();
+    $this->docParser = DocBlockFactory::createInstance();
     $this->parser    = new Doc('', 'php');
   }
 
@@ -25,13 +30,13 @@ class Php extends bbn\Models\Cls\Basic
    * Function to take all the information related to the method sought and if it also contains the method of its relative
    *
    * @param string           $meth Name of the method to search for to take information
-   * @param \ReflectionClass $cls
+   * @param ReflectionClass $cls
    * @return array|null
    */
   public function analyzeMethod(string $meth, $cls): ?array
   {
     if (is_string($cls)) {
-      $cls = new \ReflectionClass($cls);
+      $cls = new ReflectionClass($cls);
     }
 
     $arr = null;
@@ -65,10 +70,10 @@ class Php extends bbn\Models\Cls\Basic
    * Function to take all the information relating to the property sought and if it also contains that of his relative
    *
    * @param string           $prop Name of the property to be searched
-   * @param \ReflectionClass $cls
+   * @param ReflectionClass $cls
    * @return array|null
    */
-  public function analyzeProperty(string $prop, \ReflectionClass $cls): ?array
+  public function analyzeProperty(string $prop, ReflectionClass $cls): ?array
   {
     if ($arr = $this->_get_property_info($prop, $cls)) {
       $parent = $cls->getParentClass();
@@ -93,7 +98,7 @@ class Php extends bbn\Models\Cls\Basic
    * @param \ReflectionClass $cls
    * @return array|null
    */
-  public function analyzeConstant(string $const, \ReflectionClass $cls): ?array
+  public function analyzeConstant(string $const, ReflectionClass $cls): ?array
   {
     if (
         !empty($const)
@@ -145,16 +150,18 @@ class Php extends bbn\Models\Cls\Basic
    * @param string $path
    * @return array|null
    */
-  public function analyzeClass(string $cls, string $path = '', $level = 'public'): ?array
+  public function analyzeClass(string $cls, string $path = '', string $level = null): ?array
   {
-    $rc = new \ReflectionClass($cls);
+    $rc = new ReflectionClass($cls);
     if (!empty($cls) && is_object($rc)) {
       $constructor = $rc->getConstructor();
-      if ($level) {
-        
+      $filter = null;
+      if ($level && defined('ReflectionMethod::IS_' . strtoupper($level))) {
+        $filter = constant('ReflectionMethod::IS_' . strtoupper($level));
       }
-      $methods     = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
-      $props       = $rc->getProperties(\ReflectionMethod::IS_PUBLIC);
+      
+      $methods     = $rc->getMethods($filter);
+      $props       = $rc->getProperties($filter);
       $statprops   = $rc->getStaticProperties();
       $constants   = $rc->getConstants();
       $parent      = $rc->getParentClass();
@@ -176,7 +183,6 @@ class Php extends bbn\Models\Cls\Basic
         'interfaces' => $rc->getInterfaces(),
         'interfaceNames' => $rc->getInterfaceNames(),
         'isInterface' => $rc->isInterface(),
-        'traitNames' => $rc->getTraitNames(),
         'traitAliases' => $rc->getTraitAliases(),
         'isTrait' => $rc->isTrait(),
         'isAbstract' => $rc->isAbstract(),
@@ -203,6 +209,9 @@ class Php extends bbn\Models\Cls\Basic
         'staticProperties' => $statprops,
         'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
       ];
+      if (!empty($res['traits'])) {
+
+      }
       if (
           $res['doc']
           && ($extracted = $this->_extract_description($res['doc']['description']))
@@ -241,7 +250,7 @@ class Php extends bbn\Models\Cls\Basic
               try {
                 $arr[$file] = $this->analyzeCLass($class, $path);
               }
-              catch (\Exception $e) {
+              catch (Exception $e) {
                 die(var_dump($file, $e));
                 if (isset($arr[$file])) {
                   unset($arr[$file]);
@@ -306,7 +315,7 @@ class Php extends bbn\Models\Cls\Basic
    */
   public function parse(string $class_name)
   {
-    $rc = new \ReflectionClass($class_name);
+    $rc = new ReflectionClass($class_name);
     //die(var_dump($rc->hasConstant('PARAM_BOOL')));
     $constants        = $rc->getConstants();
     $parent           = $rc->getParentClass();
@@ -450,10 +459,10 @@ class Php extends bbn\Models\Cls\Basic
   {
     $ok = true;
     try {
-      $ref = new \ReflectionClass($class);
+      $ref = new ReflectionClass($class);
     }
-    catch (\Exception $e) {
-      throw new \Exception($e->getMessage());
+    catch (Exception $e) {
+      throw new Exception($e->getMessage());
     }
 
     if ($ok) {
@@ -628,7 +637,7 @@ class Php extends bbn\Models\Cls\Basic
       try {
         $docBlock = $this->docParser->create($txt);
       }
-      catch (\Exception $e) {
+      catch (Exception $e) {
         $this->log($e->getMessage() . PHP_EOL . PHP_EOL . $txt);
         return null;
       }
@@ -709,10 +718,10 @@ class Php extends bbn\Models\Cls\Basic
   /**
    * Function that returns the content of an element of a class
    *
-   * @param \ReflectionMethod $rfx
+   * @param ReflectionMethod $rfx
    * @return void
    */
-  private function _closureSource(\ReflectionMethod $rfx)
+  private function _closureSource(ReflectionMethod $rfx)
   {
     $args    = [];
     $default = '88888888888888888888888888888888';
@@ -741,7 +750,7 @@ class Php extends bbn\Models\Cls\Basic
             $args[$i] .= ' = ' . ($default === [] ? '[]' : var_export($default, true));
           }
         }
-        catch (\ReflectionException $e) {
+        catch (ReflectionException $e) {
           // No default
           X::log([$rfx->getName(), $e->getMessage()], 'phpParser');
         }
@@ -770,10 +779,10 @@ class Php extends bbn\Models\Cls\Basic
    *
    * @param array            $elements
    * @param string           $typeEle
-   * @param \ReflectionClass $rc
+   * @param ReflectionClass $rc
    * @return array|null
    */
-  private function orderElement(array $elements, string $typeEle, \ReflectionClass $rc): ?array
+  private function orderElement(array $elements, string $typeEle, ReflectionClass $rc): ?array
   {
     if (is_array($elements) && is_string($typeEle)) {
       $arr = [];
@@ -798,9 +807,7 @@ class Php extends bbn\Models\Cls\Basic
           $arr[$ele->name] = array_filter(
               $this->analyzeProperty($ele->name, $rc),
               function ($p, $i) {
-                if ($i !== 'name') {
-                  return $p;
-                }
+                return $i !== 'name';
               },
               ARRAY_FILTER_USE_BOTH
           );
@@ -818,12 +825,13 @@ class Php extends bbn\Models\Cls\Basic
   /**
    * Return an array of information about a method.
    *
-   * @param \ReflectionMethod $method The method object
+   * @param ReflectionMethod $method The method object
    * @return array
    */
-  private function _get_method_info(\ReflectionMethod $method)
+  private function _get_method_info(ReflectionMethod $method)
   {
     $ret = [];
+    $refCls = $method->getDeclaringClass();
     if ($method->hasReturnType()) {
       $type = $method->getReturnType();
       if ($type->allowsNull()) {
@@ -853,14 +861,17 @@ class Php extends bbn\Models\Cls\Basic
       'summary' => '',
       'description' => '',
       'description_parts' => [],
-      'file' => $method->getDeclaringClass()->getName(),
+      'class' => $refCls->getName(),
+      'filename' => $method->getFileName(),
       'static' => $method->isStatic(),
       'visibility' => $method->isPrivate() ? 'private' : ($method->isProtected() ? 'protected' : 'public'),
       'final' => $method->isFinal(),
       'code' => $this->_closureSource($method),
+      'parent' => false,
+      'trait' => false,
       'startLine' => $method->getStartLine(),
       'endLine' => $method->getEndLine(),
-     // 'isClosure' => $method->isClousure(),
+      // 'isClosure' => $method->isClousure(),
       'isDeprecated' => $method->isDeprecated(),
       'isGenerator' => $method->isGenerator(),
       'isInternal' => $method->isInternal(),
@@ -869,39 +880,59 @@ class Php extends bbn\Models\Cls\Basic
       'returnsReference' => $method->returnsReference(),
       'numberOfParameters' => $method->getNumberOfParameters(),
       'numberOfRequiredParameters' => $method->getNumberOfRequiredParameters(),
+      'shortName' => $method->getShortName(),
       'returns' => $ret,
-      'parent' => false,
       'arguments' => array_map(
-          function ($p) {
-            $types = [];
-            $type  = $p->getType();
-            if (is_object($type)) {
-              if (method_exists($type, 'getTypes')) {
-                $types = $type->getTypes();
-              }
-              else {
-                $types = [$type];
-              }
+        function ($p) {
+          $types = [];
+          $type  = $p->getType();
+          if (is_object($type)) {
+            if (method_exists($type, 'getTypes')) {
+              $types = $type->getTypes();
             }
-
-            $type_st = '';
-            foreach ($types as $i => $tp) {
-              $type_st .= $tp->getName() . ($i ? '|' : '');
+            else {
+              $types = [$type];
             }
+          }
 
-            return [
-              'name' => $p->getName(),
-              'position' => $p->getPosition(),
-              'type' => $type_st,
-              'required' => !$p->isOptional(),
-              'has_default' => $p->isDefaultValueAvailable(),
-              'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
-              'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''
-            ];
-          },
-          $method->getParameters()
+          $type_st = '';
+          foreach ($types as $i => $tp) {
+            $type_st .= $tp->getName() . ($i ? '|' : '');
+          }
+
+          return [
+            'name' => $p->getName(),
+            'position' => $p->getPosition(),
+            'type' => $type_st,
+            'required' => !$p->isOptional(),
+            'has_default' => $p->isDefaultValueAvailable(),
+            'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',
+            'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''
+          ];
+        },
+        $method->getParameters()
       )
     ];
+
+    if ($ar['filename'] !== $refCls->getFileName()) {
+      if ($traits = $refCls->getTraits()) {
+        foreach ($traits as $trait) {
+          if ($trait->getFileName() === $ar['filename']) {
+            $ar['trait'] = $trait->getName();
+          }
+        }
+      }
+      if (!$ar['trait']) {
+        $cls = $refCls;
+        while ($cls = $cls->getParentClass()) {
+          if ($cls->getFileName() === $ar['filename']) {
+            $ar['parent'] = $cls->getName();
+            break;
+          }
+        }
+      }
+    }
+
     $comments = $method->getDocComment();
     if (
         ($doc = $this->parseMethodComments($comments))
@@ -994,7 +1025,7 @@ class Php extends bbn\Models\Cls\Basic
   }
 
 
-  private function _get_property_info(string $prop, \ReflectionClass $cls): ?array
+  private function _get_property_info(string $prop, ReflectionClass $cls): ?array
   {
     $arr = null;
     if (
@@ -1007,6 +1038,7 @@ class Php extends bbn\Models\Cls\Basic
       $arr      = [
         'name' => $property->getName(),
         'static' => $property->isStatic(),
+        'declaring' => $property->getDeclaringClass(),
         'visibility' => $property->isPrivate() ? 'private' : ($property->isProtected() ? 'protected' : 'public'),
         'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),
         'parent' => false,

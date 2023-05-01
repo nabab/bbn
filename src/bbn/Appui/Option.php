@@ -11,15 +11,15 @@ use Exception;
 /**
  * An all-in-one hierarchical options management system
  *
- * This class allows to:
- * ---------------------
- * * manage a **hierarchical** table of options
- * * retrieve, edit, add, remove options
- * * grab a whole tree
- * * apply functions on group of options
- * * add user-defined properties
- * * set option configuration and applies it to all its children
- * * And many more...
+ * ## This class allows to:
+ * 
+ * - manage a **hierarchical** table of options
+ * - retrieve, edit, add, remove options
+ * - grab a whole tree
+ * - apply functions on group of options
+ * - add user-defined properties
+ * - set option configuration and applies it to all its children
+ * - And many more...
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
