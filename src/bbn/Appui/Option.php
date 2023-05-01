@@ -288,6 +288,8 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * Retrieves an option's ID from its "codes path"
+   * 
    * Gets an option ID from diverse combinations of elements:
    * - A code or a serie of codes from the most specific to a child of the root
    * - A code or a serie of codes and an id_parent where to find the last code
