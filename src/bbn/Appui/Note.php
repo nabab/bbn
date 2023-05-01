@@ -133,7 +133,7 @@ class Note extends bbn\Models\Cls\Db
     parent::__construct($db);
     $this->_init_class_cfg(self::$default_class_cfg);
     self::optionalInit();
-    $this->defaultUrlType = 'note';
+    $this->urlType = 'note';
     $this->taggerInit(
       $this->class_cfg['tables']['notes_tags'],
       [
