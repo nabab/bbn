@@ -224,6 +224,48 @@ class Php extends bbn\Models\Cls\Basic
   }
 
 
+  public function getLibraryClasses(string $path, string $namespace = ''): ?array
+  {
+    if (
+      !empty($path)
+      && !empty($namespace)
+  ) {
+    $fs = new System();
+    if ($fs->cd($path)) {
+      $files = $fs->scan('.', '.php', false);
+      $arr   = [];
+      if (is_array($files) && count($files)) {
+        foreach ($files as $file) {
+          $bits  = X::split($file, '/');
+          $name  = X::basename(array_pop($bits), '.php');
+          $class = $namespace . '\\' . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
+          $res = [
+            'name' => $name,
+            'file' => $file,
+            'class' => $class
+          ];
+          if (class_exists($class, true)) {
+            $res['type'] = 'class';
+          }
+          elseif (interface_exists($class, true)) {
+            $res['type'] = 'interface';
+          }
+          elseif (trait_exists($class, true)) {
+            $res['type'] = 'trait';
+          }
+          if (!empty($res['type'])) {
+            $arr[] = $res;
+          }
+        }
+      }
+    }
+
+    return $arr;
+  }
+
+  return null;
+
+  }
   /**
    * Function that analyzes the whole library with the same name space returning all the information of all the classes making part of it
    *
@@ -233,32 +275,19 @@ class Php extends bbn\Models\Cls\Basic
    */
   public function analyzeLibrary(string $path, string $namespace = ''): ?array
   {
-    if (
-        !empty($path)
-        && !empty($namespace)
-    ) {
-      $fs = new System();
-      if ($fs->cd($path)) {
-        $files = $fs->scan('.', '.php', false);
-        $arr   = [];
-        if (is_array($files) && count($files)) {
-          foreach ($files as $file) {
-            $bits  = X::split($file, '/');
-            $name  = X::basename(array_pop($bits), '.php');
-            $class = $namespace . '\\' . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
-            if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {
-              try {
-                $arr[$file] = $this->analyzeCLass($class, $path);
-              }
-              catch (Exception $e) {
-                die(var_dump($file, $e));
-                if (isset($arr[$file])) {
-                  unset($arr[$file]);
-                }
-              }
-            }
+    if ($files = $this->getLibraryClasses($path, $namespace)) {
+      $arr = [];
+      foreach ($files as $file) {
+        try {
+          $arr[$file['file']] = $this->analyzeCLass($file['class'], $path);
+        }
+        catch (Exception $e) {
+          die(var_dump($file, $e));
+          if (isset($arr[$file])) {
+            unset($arr[$file]);
           }
         }
+
       }
 
       return $arr;
