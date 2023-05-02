@@ -348,8 +348,10 @@ class Project extends bbn\Models\Cls\Db
    * Returns the main infos of the given project
    *
    * @param string $id
-   * @return void
+   * @return array
    *
+   *
+   */
   public function getProjectInfo()
   {
     if ($this->id) {
@@ -365,24 +367,7 @@ class Project extends bbn\Models\Cls\Db
 
     return [];
   }
-   *
-   * /
-
-  /**
-   * function to get all path of the project and format each path
-   *
-   * @param bool $force  force update $this->projectInfo
-   * @return array
-   */
-  public function getProjectInfo(bool $force = false): array
-  {
-    if ($force || !$this->projectInfo) {
-      $info = $this->getFullTree();
-      $info['path'] = $this->getPaths();
-      $this->projectInfo = $info;
-    }
-    return $this->projectInfo;
-  }
+  
 
   /**
    * function to get difference between local and git version
@@ -427,7 +412,7 @@ class Project extends bbn\Models\Cls\Db
   {
     return $this->_getTree($path, $id_path, $type);
   }
-
+  
   /**
    * function to get the tree array to fill tree component
    *
@@ -951,7 +936,8 @@ class Project extends bbn\Models\Cls\Db
               'language' => $option['language'] ?? BBN_LANG,
               'alias' => $option['alias'],
               'parent' => $path,
-              'path' => $option['path'] === '/' ? '/' : $option['path']
+              'path' => $option['path'] === '/' ? '/' : $option['path'],
+              'id_option' => $option['id']
             ];
             $res[] = $tmp;
           }

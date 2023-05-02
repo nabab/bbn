@@ -231,7 +231,7 @@
         },
         "run": {
             "name": "run",
-            "summary": "Run the stat",
+            "summary": "",
             "description": "",
             "description_parts": [],
             "file": "bbn\\Appui\\Statistic",

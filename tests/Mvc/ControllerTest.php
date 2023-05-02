@@ -57,6 +57,11 @@ class ControllerTest extends TestCase
     return $this->controller;
   }
 
+  protected function init()
+  {
+    $this->controller = new Controller($this->mvc_mock, ...func_get_args());
+  }
+
 
   protected function setUp(): void
   {
@@ -71,13 +76,6 @@ class ControllerTest extends TestCase
     Mockery::close();
   }
 
-
-  protected function init()
-  {
-    $this->controller = new Controller($this->mvc_mock, ...func_get_args());
-  }
-
-
   protected function setMvcMockExpectations()
   {
     $this->mvc_mock->shouldReceive('getDb')->andReturnNull();
@@ -86,6 +84,8 @@ class ControllerTest extends TestCase
     $this->mvc_mock->shouldReceive('getFiles')->andReturn($this->data['files']);
     $this->mvc_mock->shouldReceive('getParams')->once()->andReturn($this->data['params']);
     $this->mvc_mock->shouldReceive('getUrl')->andReturn($this->data['url']);
+    $this->mvc_mock->shouldReceive('getRequest')->andReturn($this->data['url']);
+    $this->mvc_mock->shouldReceive('getPrepath')->andReturn('');
   }
 
 

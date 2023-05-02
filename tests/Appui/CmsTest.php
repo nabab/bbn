@@ -85,9 +85,9 @@ class CmsTest extends TestCase
   /** @test */
   public function constructor_test()
   {
-    $this->assertInstanceOf(Event::class, $this->getNonPublicProperty('_events'));
-    $this->assertInstanceOf(Option::class, $this->getNonPublicProperty('_options'));
-    $this->assertInstanceOf(Note::class, $this->getNonPublicProperty('_notes'));
+    $this->assertInstanceOf(Event::class, $this->getNonPublicProperty('event'));
+    $this->assertInstanceOf(Option::class, $this->getNonPublicProperty('opt'));
+    $this->assertInstanceOf(Note::class, $this->getNonPublicProperty('note'));
     $this->assertSame($this->id_event, $this->getNonPublicProperty('_id_event'));
     $this->assertSame($this->getNonPublicProperty('default_class_cfg'), $this->getClassCgf());
   }

@@ -110,7 +110,8 @@ class MvcTest extends TestCase
   protected function resetMvcInstance()
   {
     if (self::$mvc) {
-      self::$mvc->destory();
+      ReflectionHelpers::getNonPublicMethod('destructSingleton', self::$mvc)->invoke(self::$mvc);
+      //self::$mvc->reset();
       self::$mvc = null;
     }
 
@@ -272,7 +273,7 @@ class MvcTest extends TestCase
     $_app_name_property = $reflectionClass->getProperty('_app_name');
     $_app_name_property->setAccessible(true);
 
-    self::$mvc->destory();
+    ReflectionHelpers::getNonPublicMethod('destructSingleton', self::$mvc)->invoke(self::$mvc);
 
     $this->assertNull($singleton_instance->getValue(self::$mvc));
     $this->assertFalse($singleton_exists->getValue(self::$mvc));
@@ -1137,22 +1138,24 @@ class MvcTest extends TestCase
   /** @test */
   public function addInc_method_adds_a_property_to_the_mvc_object_if_not_already_declared()
   {
-    self::$mvc->addInc('foo', 'bar');
+    $bar = new stdClass();
+    self::$mvc->addInc('foo', $bar);
 
     $this->assertTrue(
       property_exists(self::$mvc->inc, 'foo')
     );
 
-    $this->assertSame('bar', self::$mvc->inc->foo);
+    $this->assertSame($bar, self::$mvc->inc->foo);
   }
 
   /** @test */
-  public function addInc_method_does_not_add_a_property_to_the_mvc_if_already_declared()
+  public function addInc_method_throws_an_exception_if_property_already_declared()
   {
-    self::$mvc->addInc('foo', 'bar');
-    self::$mvc->addInc('foo', 'baz');
-
-    $this->assertSame('bar', self::$mvc->inc->foo);
+    $bar = new stdClass();
+    $baz = new stdClass();
+    self::$mvc->addInc('foo', $bar);
+    $this->expectException(\Exception::class);
+    self::$mvc->addInc('foo', $baz);
   }
 
   /** @test */

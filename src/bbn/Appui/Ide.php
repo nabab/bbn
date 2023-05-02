@@ -12,12 +12,15 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\Mvc\Common;
+use bbn\Models\Tts\Optional;
+
 
 class Ide
 {
 
-  use \bbn\Models\Tts\Optional,
-    \bbn\Mvc\Common;
+  use Optional;
+  use Common;
 
   const BBN_APPUI       = 'appui';
   const BBN_PERMISSIONS = 'permissions';
@@ -66,7 +69,7 @@ class Ide
   /** @var bbn\Db $db */
   protected $db;
 
-  /** @var \bbn\Appui\Option $options */
+  /** @var Option $options */
   protected $options;
 
   /** @var null|string The last error recorded by the class */
@@ -78,7 +81,7 @@ class Ide
   /** @var \bbn\User\Preferences $pref */
   protected $pref;
 
-  /** @var \bbn\Appui\Project $projects */
+  /** @var Project $projects */
   protected $projects;
 
   protected $repositories_list = [];
@@ -101,11 +104,11 @@ class Ide
   /**
    * ide constructor.
    *
-   * @param \bbn\Appui\Option    $options
+   * @param Option    $options
    * @param $routes
    * @param \bbn\User\Preferences $pref
    */
-  public function __construct(\bbn\Db $db,  \bbn\Appui\Option $options, $routes, \bbn\User\Preferences $pref, string $project = '', string $plugin = 'appui-ide')
+  public function __construct(\bbn\Db $db,  Option $options, $routes, \bbn\User\Preferences $pref, string $project = '', string $plugin = 'appui-ide')
   {
     $this->db      = $db;
     $this->options = $options;
@@ -147,17 +150,17 @@ class Ide
     $project_name = false;
     //case project is uid
     if (Str::isUid($project) && !empty($rep = $this->options->option($project))) {
-      $this->projects = new \bbn\Appui\Project($this->db, $project);
-      $project_name   = $rep['name'];
+      $this->projects = new Project($this->db, $project);
+      $project_name   = $rep['text'];
     }
     //case project is name
     elseif ((strlen($project) > 0) && !empty($opt = $this->options->fromCode($project, 'list', self::IDE_PROJECTS, self::BBN_APPUI))) {
-      $this->projects = new \bbn\Appui\Project($this->db, $opt);
-      $project_name   = $project;
+      $this->projects = new Project($this->db, $opt);
+      $project_name   = $this->options->text($opt);
     }
     // case project is not defined get default
     elseif (defined('BBN_APP_NAME') && !empty($opt = $this->options->fromCode(constant('BBN_APP_NAME'), 'list', self::IDE_PROJECTS, self::BBN_APPUI))) {
-      $this->projects = new \bbn\Appui\Project($this->db, $opt);
+      $this->projects = new Project($this->db, $opt);
       $project_name   = constant('BBN_APP_NAME');
     }
 
