@@ -138,7 +138,7 @@ class Mysql extends Sql
     $cfg['args'] = [
       'mysql:'
         . (empty($cfg['db']) ? '' : ('dbname=' . $cfg['db']). ';')
-        . 'host=' . (in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host']) . ';'
+        . 'host=' . $cfg['host'] . ';'
         . 'port=' . $cfg['port'],
       $cfg['user'],
       $cfg['pass'],
