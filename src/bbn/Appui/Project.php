@@ -93,6 +93,7 @@ class Project extends bbn\Models\Cls\Db
   public function urlToPaths(string $url) : array
   {
     $cfg = $this->urlToConfig($url, true);
+    X::log($cfg, 'urlToPathss');
     $file = array_pop(X::split($cfg['file'], '/'));
     $res = [
       'root' => $cfg['info']['parent_code'],
@@ -119,6 +120,7 @@ class Project extends bbn\Models\Cls\Db
       $res['files'] = $cfg['file'];
       $res['extensions'] = $cfg['extensions'];
     }
+    X::log($res, 'urlToPathss');
     return $res;
   }
 
@@ -511,7 +513,7 @@ class Project extends bbn\Models\Cls\Db
     // get current path type options
     $typePath = $o->option($currentPathArray['id_alias']);
     // finalPath is the parameter for the getFiles function
-    $finalPath = $currentPathArray['parent'].$currentPathArray['path'].($typePath['code'] === 'bbn-project' ? '/src' : '');
+    $finalPath = $currentPathArray['parent'].$currentPathArray['path'].($currentPathArray['alias']['code'] === 'bbn-project' ? '/src' : '');
     $isBbnProject = false;
     $todo = [];
     if (!empty($typePath['types'])) {
@@ -1080,7 +1082,7 @@ class Project extends bbn\Models\Cls\Db
           case 'lib':
             $path  = $this->getLibPath();
             $path .= $repository['path'];
-            if ($repository['alias_code'] === 'bbn-project') {
+            if ($repository['alias']['code'] === 'bbn-project') {
               $path .= '/src/';
             }
             break;
@@ -1091,7 +1093,7 @@ class Project extends bbn\Models\Cls\Db
 
             $path  = BBN_HOME_PATH;
             $path .= $repository['path'];
-            if ($repository['alias_code'] === 'bbn-project') {
+            if ($repository['alias']['code'] === 'bbn-project') {
               $path .= '/src/';
             }
             break;
