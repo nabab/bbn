@@ -89,6 +89,12 @@ class System extends bbn\Models\Cls\Basic
           $this->obj  = new \bbn\Api\Nextcloud($cfg);
         }
         break;
+      case 'googledrive':
+        if (!empty($cfg['name'])) {
+          $this->mode = 'googledrive';
+          $this->obj = new \bbn\Api\GoogleDrive($cfg['name']);
+        }
+        break;
       case 'webdav':
         if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
           $this->mode   = 'webdav';
