@@ -279,6 +279,7 @@ class Php extends bbn\Models\Cls\Basic
       $res['description_obj'] = $docblock->getDescription();
       foreach ($tags as $i => $t) {
         $desc          = $t->getDescription() ?: false;
+        
         $res['tags'][] = [
           'index' => $i,
           'type' => method_exists($t, 'getType') ? $t->getType() : null,
@@ -377,10 +378,25 @@ class Php extends bbn\Models\Cls\Basic
             'returns' => $ret,
             'arguments' => array_map(
                 function ($p) use ($m) {
+                  $types = [];
+                  $type  = $p->getType();
+                  if (is_object($type)) {
+                    if (method_exists($type, 'getTypes')) {
+                      $types = $type->getTypes();
+                    }
+                    else {
+                      $types = [$type];
+                    }
+                  }
+  
+                  $type_st = '';
+                  foreach ($types as $i => $tp) {
+                    $type_st .= $tp->getName() . ($i ? '|' : '');
+                  }
                   return [
                   'name' => $p->getName(),
                   'position' => $p->getPosition(),
-                  'type' => $p->getType(),
+                  'type' => $type_st,
                   'required' => !$p->isOptional(),
                   'has_default' => $p->isDefaultValueAvailable(),
                   'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',

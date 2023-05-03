@@ -172,11 +172,12 @@ class Project extends bbn\Models\Cls\Db
       ];
       /** @var string $real the result of this function */
       $real = $res['root'].$res['path'];
+      X::log($path_info, 'azerty');
       // case of folder is a component or a mvc
       $path_info = $path_info['alias'];
       $source_path = $path_info['sourcePath'] ?? '';
-      $real .= $source_path . 'src/';
-      X::log($real, 'node');
+      $real .= $source_path . $path_info['code'] === 'bbn-project' ? 'src/' : '';
+      X::log($real, 'azerty');
       if (!empty($path_info['types'])) {
         /** @var string $path_type type found in the url (mvc, component, lib cli) */
         $path_type = array_shift($bits);
