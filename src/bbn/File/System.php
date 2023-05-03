@@ -90,9 +90,11 @@ class System extends bbn\Models\Cls\Basic
         }
         break;
       case 'googledrive':
-        if (!empty($cfg['name'])) {
+        if (!empty($cfg['credentials'])
+          && !empty($cfg['token'])
+        ) {
           $this->mode = 'googledrive';
-          $this->obj = new \bbn\Api\GoogleDrive($cfg['name']);
+          $this->obj = new \bbn\Api\GoogleDrive($cfg['credentials'], $cfg['token']);
         }
         break;
       case 'webdav':
@@ -1617,20 +1619,24 @@ class System extends bbn\Models\Cls\Basic
 
   private function _is_file(string $path)
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->isFile($path);
-    } else {
-      return is_file($path);
+    switch ($this->mode) {
+      case 'nextcloud':
+      case 'googledrive':
+        return $this->obj->isFile($path);
+      default:
+        return is_file($path);
     }
   }
 
 
   private function _is_dir(string $path)
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->isDir($path);
-    } else {
-      return is_dir($path);
+    switch ($this->mode) {
+      case 'nextcloud':
+      case 'googledrive':
+        return $this->obj->isDir($path);
+      default:
+        return is_dir($path);
     }
   }
 

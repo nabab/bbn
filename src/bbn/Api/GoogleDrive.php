@@ -3,11 +3,7 @@
 namespace bbn\Api;
 
 use bbn\X;
-use bbn\Str;
-use bbn\User;
-use bbn\User\Preferences;
-use bbn\Appui\Option;
-use bbn\Appui\Passwords;
+use bbn\File\Dir;
 
 /**
  * Google Drive API class
@@ -20,19 +16,9 @@ use bbn\Appui\Passwords;
 class GoogleDrive
 {
 
-  private $db;
+  private $credentials;
 
-  private $pref;
-
-  private $opt;
-
-  private $credentialsOpt;
-
-  private $tokensOpt;
-
-  private $pass;
-
-  private $driveName;
+  private $token = null;
 
   private $client = null;
 
@@ -42,110 +28,108 @@ class GoogleDrive
    * Constructor.
    * @param array $cfg
    */
-  public function __construct(string $driveName, ?\bbn\Db $db = null)
+  public function __construct(array $credentials, ?array $token = null)
   {
-    $this->db = !empty($db) ? $db : \bbn\Db::getInstance();
-    $this->driveName = $driveName;
-    $this->pref = Preferences::getInstance();
-    if (empty($this->pref)) {
-      throw new \Exception(X::_('No user preferences instance found'));
+    if (empty($credentials)) {
+      throw new \Exception(X::_('Unable to connect without credentials'));
     }
 
-    $this->opt = Option::getInstance();
-    if (empty($this->opt)) {
-      throw new \Exception(X::_('No appui option instance found'));
-    }
-
-    $this->credentialsOpt = $this->opt->fromCode('credentials', 'googledrive', 'finder', 'appui');
-    if (empty($this->credentialsOpt)) {
-      throw new \Exception(X::_('No credentials option found'));
-    }
-
-    $this->tokensOpt = $this->opt->fromCode('tokens', 'googledrive', 'finder', 'appui');
-    if (empty($this->tokensOpt)) {
-      throw new \Exception(X::_('No tokens option found'));
-    }
-
-    $this->pass = new Passwords($this->db);
+    $this->credentials = $credentials;
+    $this->token = $token;
   }
 
-  public function getFilesList()
+  public function getFilesList(): array
   {
-    return $this->getConnection()->files->listFiles(['pageSize' => 10]);
+    return X::toArray($this->getConnection()->files->listFiles([
+      'includeItemsFromAllDrives' => true,
+      'orderBy' => 'folder,name',
+      'supportsAllDrives' => true
+    ])->files);
   }
 
-  public function setCredentials($credentials): bool
+  public function getFile(string $id): array
   {
-    if (!($pId = $this->getCredentialsPref())) {
-      $pId = $this->pref->add($this->credentialsOpt, ['text' => $this->driveName]);
-    }
-
-    if (!empty($pId)) {
-      return $this->pass->userStore(
-        !Str::isJson($credentials) ? \json_encode($credentials) : $credentials,
-        $pId,
-        User::getInstance()
-      );
-    }
-
-    return false;
+    return X::toArray($this->getConnection()->files->get($id, [
+      'supportsAllDrives' => true
+    ]));
   }
 
-  public function setToken($token): bool
+  public function downloadFile(string $id, string $destination)
   {
-    if (!($pId = $this->getTokensPref())) {
-      $pId = $this->pref->add($this->tokensOpt, ['text' => $this->driveName]);
-    }
-
-    if (!empty($pId)) {
-      return $this->pass->userStore(
-        !Str::isJson($token) ? \json_encode($token) : $token,
-        $pId,
-        User::getInstance()
-      );
-    }
-
-    return false;
+    return ($response = $this->getConnection()->files->get($id, [
+        'supportsAllDrives' => true,
+        'alt' => 'media'
+      ]))
+      && ($file = $response->getBody()->getContents())
+      && Dir::createPath(\dirname($destination))
+      && \file_put_contents($destination, $file);
   }
 
-  public function setTokenByCode(string $code): ?array
+  public function uploadFile()
   {
-    if ($this->getClient()
-      && ($token = $this->fetchTokenCode($code))
+    
+  }
+
+  public function isFile($idOrFile)
+  {
+    $f = $this->isFolder($idOrFile);
+    if (\is_null($f)) {
+      return null;
+    }
+    return $f === false;
+  }
+
+  public function isFolder($idOrFile): ?bool
+  {
+    if (\is_string($idOrFile)) {
+      $idOrFile = $this->getFile($idOrFile);
+    }
+
+    if (\is_array($idOrFile)
+      && isset($idOrFile['mimeType'])
     ) {
-      $this->setToken($token);
-      return $token;
+      return $idOrFile['mimeType'] === 'application/vnd.google-apps.folder';
     }
 
     return null;
   }
 
-  private function getCredentials(): ?array
+  public function getAccessTokenByCode(string $code): ?array
   {
-    if (($pId = $this->getCredentialsPref())
-      && ($c = $this->pass->userGet($pId, User::getInstance()))
-    ) {
-      return \json_decode($c, true);
+    if ($this->getClient()) {
+      return $this->fetchTokenCode($code);
     }
     return null;
   }
 
-  private function getToken(): ?array
+  public function getAccessToken(): ?array
   {
-    if (($pId = $this->getTokensPref())
-      && ($t = $this->pass->userGet($pId, User::getInstance()))
+    if (!empty($this->token)
+      && $this->getClient()
     ) {
-      return \json_decode($t, true);
+      $this->client->setAccessToken($this->token);
+      return $this->client->getAccessToken();
     }
     return null;
   }
 
-  private function deleteToken(): bool
+  public function getRefreshToken(): ?string
   {
-    if ($pId = $this->getTokensPref()) {
-      return (bool)$this->pass->userDelete($pId, User::getInstance());
+    if (!empty($this->token)
+      && $this->getClient()
+    ) {
+      $this->client->setAccessToken($this->token);
+      return $this->client->getRefreshToken();
     }
-    return false;
+    return null;
+  }
+
+  public function createAuthUrl(): ?string
+  {
+    if ($this->getClient()) {
+      return $this->client->createAuthUrl();
+    }
+    return null;
   }
 
   private function fetchTokenCode(string $code, bool $refresh = false): array
@@ -167,31 +151,35 @@ class GoogleDrive
     }
   }
 
-  private function getCredentialsPref(): ?string
+  private function isTokenExpired(): bool
   {
-    if ($all = $this->pref->getAll($this->credentialsOpt, false)) {
-      return X::getField($all, ['text' => $this->driveName], 'id');
+    if ($this->getClient()) {
+      $this->client->setAccessToken($this->token);
+      return $this->client->isAccessTokenExpired();
     }
-    return null;
+    return false;
   }
 
-  private function getTokensPref(): ?string
+  private function refreshExpiredToken(): ?array
   {
-    if ($all = $this->pref->getAll($this->tokensOpt, false)) {
-      return X::getField($all, ['text' => $this->driveName], 'id');
+    if ($this->isTokenExpired()) {
+      if ($code = $this->client->getRefreshToken()) {
+        $token = $this->fetchTokenCode($code, true);
+        $this->client->setAccessToken($token);
+        return $this->client->getAccessToken();
+      }
     }
     return null;
   }
 
   private function getClient(): ?\Google\Client
   {
-    if (empty($this->client)
-      && ($credentials = $this->getCredentials())
-    ) {
+    if (empty($this->client)) {
       $this->client = new \Google\Client();
-      $this->client->setAuthConfig($credentials);
+      $this->client->setAuthConfig($this->credentials);
       $this->client->setAccessType('offline');
       $this->client->addScope("https://www.googleapis.com/auth/drive");
+      $this->client->addScope("https://www.googleapis.com/auth/drive.metadata");
     }
 
     return $this->client;
@@ -202,23 +190,17 @@ class GoogleDrive
     if (empty($this->connection)
       && $this->getClient()
     ) {
-      if ($token = $this->getToken()) {
-        $this->client->setAccessToken($token);
-        if ($this->client->isAccessTokenExpired()) {
-          if ($code = $this->client->getRefreshToken()) {
-            $token = $this->fetchTokenCode($code, true);
-            $this->setToken($token);
-            $this->client->setAccessToken($token);
-          }
-          else {
-            $this->deleteToken();
-            return $this->getConnection();
-          }
-        }
-        $this->connection = new \Google\Service\Drive($this->client);
+      if (empty($this->token)) {
+        return $this->createAuthUrl();
       }
       else {
-        return $this->client->createAuthUrl();
+        if ($this->isTokenExpired()) {
+          if (!$this->refreshExpiredToken()) {
+            return $this->createAuthUrl();
+          }
+        }
+
+        $this->connection = new \Google\Service\Drive($this->client);
       }
     }
 
