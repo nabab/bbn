@@ -143,11 +143,7 @@ class Project extends bbn\Models\Cls\Db
     $path_info = X::getRow($info['path'], ['parent_code' => $root, 'code' => $path]);
     /** @var string $type the last part of the url after _end_ */
     $type = false;
-    X::log([
-      'url' => $url,
-      'root' => $root,
-      'path' => $path,
-    ], 'node');
+
     if (in_array('_end_', $bits)) {
       $type = array_pop($bits);
       // the url structure with _end_ and $type is mandatory
@@ -173,15 +169,13 @@ class Project extends bbn\Models\Cls\Db
       // case of folder is a component or a mvc
       $path_info = $path_info['alias'];
       $source_path = $path_info['sourcePath'] ?? '';
-      $real .= $source_path . 'src/';
-      X::log($real, 'node');
+      $real .= $source_path . $path_info['code'] === 'bbn-project' ? 'src/' : '';
       if (!empty($path_info['types'])) {
         /** @var string $path_type type found in the url (mvc, component, lib cli) */
         $path_type = array_shift($bits);
         /** @var array $path_row option corresponding to the type $path_type */
         $path_row = X::getRow($path_info['types'], ['url' => $path_type]);
         if (!$path_row) {
-          X::log($path_info['types'], 'erroride');
           throw new Exception(X::_('Impossible to find the type %s', $path_type));
         }
         if ($path_type === 'lib') {
@@ -191,7 +185,6 @@ class Project extends bbn\Models\Cls\Db
         }
 
         $real .= $path_type.'/';
-        X::log($real, 'node');
         if ($force && !$type) {
           if (!empty($res['typology']['tabs'])) {
             if ($row = X::getRow($res['typology']['tabs'], ['default' => true])) {
@@ -209,7 +202,6 @@ class Project extends bbn\Models\Cls\Db
 
         if (!empty($res['typology']['directories'])) {
           $real .= X::join($bits, '/');
-          X::log(["typology directories", "real" => $real, "bits" => $bits], 'node');
         }
         // add the directory to explore if 'directories' value is true (public, private, html, ...)
         else {
@@ -429,8 +421,6 @@ class Project extends bbn\Models\Cls\Db
   {
     // get info of the current path selected in first dropdown
     $currentPathArray = $this->getPath($id_path);
-
-    X::log($currentPathArray, 'currentPathArray');
     /*
      * {
     "id": "a50d890bc4b711edb71952540000cfbe",
@@ -500,13 +490,9 @@ class Project extends bbn\Models\Cls\Db
     if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {
       throw new Exception('Invalid Path');
     }
-    X::log([
-      'path' => $path,
-    ], 'componentsFiles');
+
     $path = Url::sanitize($path);
-    X::log([
-      'path' => $path,
-    ], 'componentsFiles');
+
     $o = self::getOptionsObject();
     // get current path type options
     $typePath = $o->option($currentPathArray['id_alias']);
@@ -535,23 +521,15 @@ class Project extends bbn\Models\Cls\Db
 
     // fill $todo with MVC files / folders
     if ($currentType['type'] === 'mvc') {
-      X::log("retrieveMvcFiles", 'node');
       $todo = $this->retrieveMvcFiles($finalPath, $path, $onlydirs);
     }
     // fill $todo with Components files / folders
     elseif ($currentType['type'] === 'components') {
-      X::log("retrieveComponentFiles", 'node');
       // check if path is not empty
       $todo = $this->retrieveComponentFiles($finalPath, $path, $onlydirs);
-      X::log([
-        'finalPath' => $finalPath,
-        'path' => $path,
-        'onlydirs' => $onlydirs
-      ], 'componentsFiles');
     }
     // fill $todo with all files / folders
     else {
-      X::log("retrieveAllFiles", 'node');
       $todo = $this->retrieveAllFiles($finalPath.($path ?: ''), $onlydirs);
     }
     if (is_array($todo)) {
@@ -601,7 +579,7 @@ class Project extends bbn\Models\Cls\Db
    * @return array
    */
   private function _getNode(array $t, array $cfg): ?array {
-    X::log([$cfg, $t]);
+
     if (!isset($t) || empty($t['name'])) {
       return null;
     }
@@ -716,14 +694,7 @@ class Project extends bbn\Models\Cls\Db
     }
 
     $public_path = $cfg['publicPath'];
-    X::log($public_path);
 
-    X::log($public_path);
-
-    X::log([
-      'name' => $name,
-      'cfg' => $cfg['publicPath'],
-    ], 'node');
     //object return of a single node
     $res = [
       'text' => $name,
@@ -746,7 +717,6 @@ class Project extends bbn\Models\Cls\Db
       'ext' => $t['file'] ? $t['ext'] : false
     ];
 
-    X::log($res['uid']);
 
     /*if(!empty($tree_popup)) {
       $cfg['tree_popup'] = !empty($tree_popup);
@@ -1344,7 +1314,6 @@ class Project extends bbn\Models\Cls\Db
 
 
     if (isset($rep)) {
-      X::log([561, $file, $rep, $root], 'real');
       $res = $rep . '/';
       $bits = explode('/', substr($file, \strlen($root)));
       $filename  = array_pop($bits);
@@ -1369,7 +1338,6 @@ class Project extends bbn\Models\Cls\Db
         }
         else {
           $tab_path = array_shift($bits);
-          X::log([$tab_path, $bits], 'real');
         }
 
         $res     .= implode('/', $bits);
