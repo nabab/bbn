@@ -234,24 +234,27 @@ class System extends bbn\Models\Cls\Basic
   public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ($this->check()) {
-      if ($this->mode === 'nextcloud') {
-        return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
-      } else {
-        $is_absolute = strpos($path, '/') === 0;
-        $fs          = &$this;
-        clearstatcache();
-        $type = $including_dirs ? 'both' : 'file';
-        return array_map(
-          function ($a) use ($is_absolute, $fs, $detailed) {
-            if ($detailed) {
-              $a['name'] = $fs->getSystemPath($a['name'], $is_absolute);
-              return $a;
-            }
+      switch ($this->mode) {
+        case 'nextcloud':
+          return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
+        case 'googledrive':
+          return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
+        default:
+          $is_absolute = strpos($path, '/') === 0;
+          $fs          = &$this;
+          clearstatcache();
+          $type = $including_dirs ? 'both' : 'file';
+          return array_map(
+            function ($a) use ($is_absolute, $fs, $detailed) {
+              if ($detailed) {
+                $a['name'] = $fs->getSystemPath($a['name'], $is_absolute);
+                return $a;
+              }
 
-            return $fs->getSystemPath($a, $is_absolute);
-          },
-          $this->_get_items($this->getRealPath($path), $filter ?: $type, $hidden, $detailed)
-        );
+              return $fs->getSystemPath($a, $is_absolute);
+            },
+            $this->_get_items($this->getRealPath($path), $filter ?: $type, $hidden, $detailed)
+          );
       }
     }
 

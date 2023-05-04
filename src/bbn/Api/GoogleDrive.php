@@ -38,19 +38,21 @@ class GoogleDrive
     $this->token = $token;
   }
 
-  public function getFilesList(): array
+  public function getFiles(?string $idParent = null, bool $includeDirs = false, $hidden = null, $filter = null, $detailed = null): array
   {
-    return X::toArray($this->getConnection()->files->listFiles([
-      'includeItemsFromAllDrives' => true,
-      'orderBy' => 'folder,name',
-      'supportsAllDrives' => true
-    ])->files);
+    return $this->getItems(empty($includeDirs) ? 'file' : 'both', $idParent);
+  }
+
+  public function getDirs(?string $idParent = null): array
+  {
+    return $this->getItems('dir', $idParent);
   }
 
   public function getFile(string $id): array
   {
     return X::toArray($this->getConnection()->files->get($id, [
-      'supportsAllDrives' => true
+      'supportsAllDrives' => true,
+      'fields' => '*'
     ]));
   }
 
@@ -67,7 +69,7 @@ class GoogleDrive
 
   public function uploadFile()
   {
-    
+
   }
 
   public function isFile($idOrFile)
@@ -130,6 +132,43 @@ class GoogleDrive
       return $this->client->createAuthUrl();
     }
     return null;
+  }
+
+  private function getRootID(): ?string
+  {
+    if (($root = $this->getFile('root'))
+      && !empty($root['id'])
+    ) {
+      return $root['id'];
+    }
+    return null;
+  }
+
+  private function getItems(string $type = 'both', ?string $idParent = null): array
+  {
+    $params = [
+      'includeItemsFromAllDrives' => true,
+      'orderBy' => 'folder,name',
+      'supportsAllDrives' => true,
+      'fields' => 'files(*)'
+    ];
+    switch ($type) {
+      case 'file':
+        $params['q'] = "mimeType != 'application/vnd.google-apps.folder'";
+        break;
+      case 'dir':
+        $params['q'] = "mimeType = 'application/vnd.google-apps.folder'";
+        break;
+    }
+    if (empty($idParent)) {
+      if ($idRoot = $this->getRootID()) {
+        //$params['q'] = (isset($params['q']) ? $params['q'] . ' AND ' : '') . "'$idRoot' in parents";
+      }
+    }
+    else {
+      $params['q'] = (isset($params['q']) ? $params['q'] . ' AND ' : '') . "'$idParent' in parents";
+    }
+    return X::toArray($this->getConnection()->files->listFiles($params)->files);
   }
 
   private function fetchTokenCode(string $code, bool $refresh = false): array
