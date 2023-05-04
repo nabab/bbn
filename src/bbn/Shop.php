@@ -186,6 +186,15 @@ class Shop extends Models\Cls\Db
    */
   public function getTransactionsList(array $params = []): array
   {
+    if (!empty($params['excel'])) {
+      unset($params['fields']);
+      if (!empty($params['filters'])
+        && !empty($params['filters']['logic'])
+        && empty($params['filters']['conditions'])
+      ) {
+        unset($params['filters']);
+      }
+    }
     $cfg  = $this->sales->getClassCfg();
     $transFields = $cfg['arch']['transactions'];
     $grid = new \bbn\Appui\Grid($this->db, $params, [
@@ -200,7 +209,9 @@ class Shop extends Models\Cls\Db
         if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {
           $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);
         }
-        if ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']])) {
+        if (empty($params['excel'])
+          && ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']]))
+        ) {
           foreach ($d['products'] as $i => $p) {
             $prod = $this->product->get($p['id_product']);
             $d['products'][$i]['product'] = $prod;
@@ -212,8 +223,22 @@ class Shop extends Models\Cls\Db
           }
         }
         $d['client'] = $this->client->get($d[$transFields['id_client']]);
+        if (!empty($params['excel'])
+          && !empty($params['fields'])
+        ) {
+          $tmp = [];
+          foreach ($params['fields'] as $f) {
+            if (empty($f['hidden'])) {
+              
+            }
+          }
+        }
       }
       unset($d);
+      if (!empty($params['excel'])) {
+
+      }
+      die(\bbn\X::hdump($params['excel'], $res));
       return $res;
     }
   }
