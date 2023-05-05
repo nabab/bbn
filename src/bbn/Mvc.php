@@ -749,7 +749,6 @@ class Mvc implements Mvc\Api
     return $this;
   }
 
-
   private function registerPlugin(array $plugin)
   {
     if (isset($plugin['path'], $plugin['url'], $plugin['name'])) {

@@ -159,7 +159,7 @@ class Php extends bbn\Models\Cls\Basic
       if ($level && defined('ReflectionMethod::IS_' . strtoupper($level))) {
         $filter = constant('ReflectionMethod::IS_' . strtoupper($level));
       }
-      
+
       $methods     = $rc->getMethods($filter);
       $props       = $rc->getProperties($filter);
       $statprops   = $rc->getStaticProperties();
@@ -994,6 +994,7 @@ class Php extends bbn\Models\Cls\Basic
     $ar   = [];
     $bits = X::split($desc, PHP_EOL);
     if (!empty($bits)) {
+      X::ddump($bits);
       $ar['summary']           = trim(array_shift($bits));
       $ar['description']       = '';
       $ar['description_parts'] = [];
