@@ -224,21 +224,38 @@ class Shop extends Models\Cls\Db
         }
         $d['client'] = $this->client->get($d[$transFields['id_client']]);
         if (!empty($params['excel'])
-          && !empty($params['fields'])
+          && !empty($params['excel']['fields'])
         ) {
           $tmp = [];
-          foreach ($params['fields'] as $f) {
+          foreach ($params['excel']['fields'] as $f) {
             if (empty($f['hidden'])) {
-              
+              if ($f['field'] === 'shipping_address') {
+                $tmp[$f['field']] = $d['shipping_address']['fulladdress'];
+              }
+              elseif ($f['field'] === 'billing_address') {
+                $tmp[$f['field']] = $d['billing_address']['fulladdress'];
+              }
+              elseif ($f['field'] === 'client.name') {
+                $tmp[$f['field']] = $d['client']['first_name'] . ' ' . $d['client']['last_name'];
+              }
+              elseif ($f['field'] === 'payment_type') {
+                $tmp[$f['field']] = $this->opt->text($d['payment_type']);
+              }
+              else {
+                $tmp[$f['field']] = $d[$f['field']];
+              }
             }
           }
+          $d = $tmp;
         }
       }
       unset($d);
       if (!empty($params['excel'])) {
-
+        $filename = BBN_USER_PATH . 'tmp/transactions_' . date('d-m-Y_H-i-s') . '.xlsx';
+        if (\bbn\X::toExcel($res['data'], $filename, true, $params['excel'])) {
+          return ['file' => $filename];
+        }
       }
-      die(\bbn\X::hdump($params['excel'], $res));
       return $res;
     }
   }
