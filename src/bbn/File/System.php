@@ -163,6 +163,8 @@ class System extends bbn\Models\Cls\Basic
     switch ($this->mode) {
       case 'nextcloud':
         return $this->obj->getRealPath($path);
+      case 'googledrive':
+        return $path;
       case 'webdav':
         return $path;
       default:
@@ -184,6 +186,8 @@ class System extends bbn\Models\Cls\Basic
     switch ($this->mode) {
       case 'nextcloud':
         return $this->obj->getSystemPath($file, $is_absolute);
+      case 'googledrive':
+        return $file;
       case 'webdav':
         return $file;
       default:
@@ -271,6 +275,9 @@ class System extends bbn\Models\Cls\Basic
   public function getDirs(string $path = '', bool $hidden = false, string $detailed = ''): ?array
   {
     if ($this->check()) {
+      if ($this->mode === 'googledrive') {
+        return $this->obj->getDirs($path, $detailed);
+      }
       $is_absolute = strpos($path, '/') === 0;
       $fs          = &$this;
       clearstatcache();
@@ -299,6 +306,11 @@ class System extends bbn\Models\Cls\Basic
   public function cd(string $path): bool
   {
     if ($this->check()) {
+      if ($this->mode === 'googledrive') {
+        $this->previous = $this->current;
+        $this->current = $path;
+        return true;
+      }
       while (strpos($path, '../') === 0) {
         $tmp = X::dirname($this->current);
         if ($tmp !== $this->current) {
@@ -494,21 +506,23 @@ class System extends bbn\Models\Cls\Basic
    */
   public function mkdir(string $dir, int $chmod = 0755, $recursive = false): ?bool
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->mkdir($dir);
-    }
+    switch ($this->mode) {
+      case 'nextcloud':
+      case 'googledrive':
+        return $this->obj->mkdir($dir);
+      default:
+        if ($this->check()) {
+          if (!$dir) {
+            return false;
+          }
 
-    if ($this->check()) {
-      if (!$dir) {
-        return false;
+          clearstatcache();
+          $real = $this->getRealPath($dir);
+          return $this->_mkdir($real, $chmod, $recursive);
+        }
       }
 
-      clearstatcache();
-      $real = $this->getRealPath($dir);
-      return $this->_mkdir($real, $chmod, $recursive);
-    }
-
-    return null;
+      return null;
   }
 
 
@@ -521,6 +535,9 @@ class System extends bbn\Models\Cls\Basic
    */
   public function putContents(string $file, string $content, bool $append = false): bool
   {
+    if ($this->mode === 'googledrive') {
+      return false;
+    }
     $path = X::dirname($file);
     if ($this->check() && $this->isDir($path)) {
       $real = $this->getRealPath($path) . '/';
@@ -542,11 +559,12 @@ class System extends bbn\Models\Cls\Basic
   public function getContents(string $file): ?string
   {
     if ($this->check() && $this->exists($file)) {
-      if ($this->mode === 'nextcloud') {
-        return $this->obj->getContents($file);
-      } else {
-        $real = $this->getRealPath($file);
-        return file_get_contents($real);
+      switch ($this->mode) {
+        case 'nextcloud':
+        case 'googledrive':
+          return $this->obj->getContents($file);
+        default:
+          return file_get_contents($this->getRealPath($file));
       }
     }
 
@@ -616,34 +634,36 @@ class System extends bbn\Models\Cls\Basic
   public function copy(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ($this->check()) {
-      if ($this->mode !== 'nextcloud') {
-        $nfs = &$this;
-        if ($fs) {
-          if (!$fs->check()) {
-            return false;
-          }
-
-          $nfs = &$fs;
-        }
-
-        if ($this->exists($source) && $nfs->exists(X::dirname($dest))) {
-          if ($nfs->exists($dest)) {
-            $dest_is_dir = $nfs->isDir($dest);
-            if ($dest_is_dir && $this->isFile($source)) {
-              $dest .= '/' . X::basename($source);
-            } elseif ((!$dest_is_dir && !$overwrite)
-              || ($dest_is_dir && (count($nfs->getFiles($dest, true, true)) > 0) && !$overwrite)
-            ) {
+      switch ($this->mode) {
+        case 'nextcloud':
+        case 'googledrive':
+          return $this->obj->copy($source, $dest);
+        default:
+          $nfs = &$this;
+          if ($fs) {
+            if (!$fs->check()) {
               return false;
-            } else {
-              $nfs->delete($dest);
             }
+
+            $nfs = &$fs;
           }
 
-          return $this->_copy($this->getRealPath($source), $nfs->getRealPath($dest));
-        }
-      } else {
-        $this->obj->copy($source, $dest);
+          if ($this->exists($source) && $nfs->exists(X::dirname($dest))) {
+            if ($nfs->exists($dest)) {
+              $dest_is_dir = $nfs->isDir($dest);
+              if ($dest_is_dir && $this->isFile($source)) {
+                $dest .= '/' . X::basename($source);
+              } elseif ((!$dest_is_dir && !$overwrite)
+                || ($dest_is_dir && (count($nfs->getFiles($dest, true, true)) > 0) && !$overwrite)
+              ) {
+                return false;
+              } else {
+                $nfs->delete($dest);
+              }
+            }
+
+            return $this->_copy($this->getRealPath($source), $nfs->getRealPath($dest));
+          }
       }
     }
 
@@ -660,6 +680,10 @@ class System extends bbn\Models\Cls\Basic
   public function rename(string $file, $name, bool $overwrite = false): bool
   {
     if ($this->exists($file) && (strpos($name, '/') === false)) {
+      if ($this->mode === 'googledrive') {
+        return $this->_rename($file, $name);
+      }
+
       $path = $this->getRealPath(X::dirname($file));
       if ($this->_exists($path . '/' . $name) && (!$overwrite || !$this->_delete($path . '/' . $name))) {
         return false;
@@ -683,6 +707,9 @@ class System extends bbn\Models\Cls\Basic
   public function move(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
   {
     if ($this->check() && $this->exists($source)) {
+      if ($this->mode === 'googledrive') {
+        return $this->obj->move($source, $dest);
+      }
       $name = X::basename($source);
       if ($fs) {
         if (
@@ -1347,10 +1374,12 @@ class System extends bbn\Models\Cls\Basic
    */
   private function _exists($path): bool
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->exists($path);
-    } else {
-      return file_exists($path);
+    switch ($this->mode) {
+      case 'nextcloud':
+      case 'googledrive':
+        return $this->obj->exists($path);
+      default:
+        return file_exists($path);
     }
   }
 
@@ -1460,9 +1489,12 @@ class System extends bbn\Models\Cls\Basic
   private function _delete(string $path, bool $full = true): bool
   {
     $res = false;
-    if ($this->mode === 'nextcloud') {
+    if (($this->mode === 'nextcloud')
+      || ($this->mode === 'googledrive')
+    ) {
       $res = $this->obj->delete($path);
-    } else {
+    }
+    else {
       if ($this->_is_dir($path)) {
         $files = $this->_get_items($path, 'both', true);
         if (!empty($files)) {
@@ -1551,20 +1583,22 @@ class System extends bbn\Models\Cls\Basic
    */
   private function _rename($source, $dest): bool
   {
-    if ($this->mode !== 'nextcloud') {
-      $file1 = substr($source, strlen($this->prefix));
-      $file2 = substr($dest, strlen($this->prefix));
-      if ($this->mode === 'ssh') {
-        return ssh2_sftp_rename($this->obj, $file1, $file2);
-      }
+    switch ($this->mode) {
+      case 'nextcloud':
+      case 'googledrive':
+        return $this->obj->rename($source, $dest);
+      default:
+        $file1 = substr($source, strlen($this->prefix));
+        $file2 = substr($dest, strlen($this->prefix));
+        if ($this->mode === 'ssh') {
+          return ssh2_sftp_rename($this->obj, $file1, $file2);
+        }
 
-      if ($this->mode === 'ftp') {
-        return ftp_rename($this->obj, $file1, $file2);
-      }
+        if ($this->mode === 'ftp') {
+          return ftp_rename($this->obj, $file1, $file2);
+        }
 
-      return rename($file1, $file2);
-    } else {
-      return $this->obj->rename($source, $dest);
+        return rename($file1, $file2);
     }
   }
 
@@ -1646,24 +1680,29 @@ class System extends bbn\Models\Cls\Basic
 
   private function _filemtime($path)
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->filemtime($path);
-    } else {
-      return filemtime($path);
+    switch ($this->mode) {
+      case 'nextcloud':
+        return $this->obj->filemtime($path);
+      case 'googledrive':
+        return $this->obj->getMtime($path);
+      default:
+        return filemtime($path);
     }
   }
 
 
   private function _filesize($path): ?int
   {
-    if ($this->mode === 'nextcloud') {
-      return $this->obj->getSize($path);
-    } else {
-      if ($this->_is_file($path)) {
-        return filesize($path);
-      }
+    switch ($this->mode) {
+      case 'nextcloud':
+      case 'googledrive':
+        return $this->obj->getSize($path);
+      default:
+        if ($this->_is_file($path)) {
+          return filesize($path);
+        }
 
-      return null;
+        return null;
     }
   }
 
@@ -1674,11 +1713,17 @@ class System extends bbn\Models\Cls\Basic
   private function _download($file): void
   {
     if ($this->_is_file($file)) {
-      if ($this->mode === 'nextcloud') {
-        $this->obj->download($file);
-      } elseif ($this->isFile($file)) {
-        $f = new bbn\File($file);
-        $f->download();
+      switch ($this->mode) {
+        case 'nextcloud':
+        case 'googledrive':
+          $this->obj->download($file);
+          break;
+        default:
+          if ($this->isFile($file)) {
+            $f = new bbn\File($file);
+            $f->download();
+          }
+          break;
       }
     }
   }

@@ -3,7 +3,12 @@
 namespace bbn\Api;
 
 use bbn\X;
+use bbn\File;
 use bbn\File\Dir;
+use bbn\Str;
+use \Google\Client;
+use \Google\Service\Drive;
+use \Google\Service\Drive\DriveFile;
 
 /**
  * Google Drive API class
@@ -38,53 +43,224 @@ class GoogleDrive
     $this->token = $token;
   }
 
-  public function getFiles(?string $idParent = null, bool $includeDirs = false, $detailed = null): array
+  public function getFiles(?string $idParent = null, bool $includeDirs = false, ?string $detailed = null): array
   {
-    return $this->getItems(empty($includeDirs) ? 'file' : 'both', $idParent);
+    return $this->getItems(empty($includeDirs) ? 'file' : 'both', $idParent, $detailed);
   }
 
-  public function getDirs(?string $idParent = null): array
+  public function getDirs(?string $idParent = null, ?string $detailed = null): array
   {
-    return $this->getItems('dir', $idParent);
+    return $this->getItems('dir', $idParent, $detailed);
   }
 
-  public function getFile(string $id): array
+  public function getItem(string $id): ?array
   {
-    return X::toArray($this->getConnection()->files->get($id, [
-      'supportsAllDrives' => true,
-      'fields' => '*'
-    ]));
+    if ($this->getConnection()) {
+      return X::toArray($this->connection->files->get($id, [
+        'supportsAllDrives' => true,
+        'fields' => '*'
+      ]));
+    }
+
+    return null;
   }
 
-  public function downloadFile(string $id, string $destination)
+  public function download(string $id)
   {
-    return ($response = $this->getConnection()->files->get($id, [
+    if (($file = $this->getItem($id))
+      && ($destination = \bbn\Mvc::getTmpPath() . $file['name'])
+      && ($contents = $this->getContents($id))
+      && Dir::createPath(\dirname($destination))
+      && \file_put_contents($destination, $contents)
+    ) {
+      $f = new File($destination);
+      $f->download();
+     }
+  }
+
+  public function upload(array $files, ?string $destination = null): bool
+  {
+    if (empty($destination)) {
+      $destination = $this->getRootID();
+    }
+
+    if (!empty($destination)
+      && $this->getConnection()
+    ) {
+      foreach ($files as $f) {
+        if (\is_file($f['tmp_name'])
+          && ($content = \file_get_contents($f['tmp_name']))
+        ) {
+          $emptyFile = new DriveFile([
+            'name' => $f['name'],
+            'parents' => [$destination]
+          ]);
+          if (!$this->connection->files->create($emptyFile, [
+            'data' => $content,
+            'mimeType' => \mime_content_type($f['tmp_name']),
+            'uploadType' => 'multipart',
+            'fields' => 'id',
+            'supportsAllDrives' => true
+          ])) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  public function mkdir(string $name, string $destination): ?string
+  {
+    if (empty($destination)) {
+      $destination = $this->getRootID();
+    }
+
+    if (!empty($destination)
+      && $this->getConnection()
+    ) {
+      $emptyFile = new DriveFile([
+        'name' => $name,
+        'mimeType' => 'application/vnd.google-apps.folder',
+        'parents' => [$destination]
+      ]);
+      if ($item = $this->connection->files->create($emptyFile, [
+        'fields' => 'id',
+        'supportsAllDrives' => true
+      ])) {
+        return $item->id;
+      }
+    }
+
+    return null;
+  }
+
+  public function delete(string $id): bool
+  {
+    if ($this->exists($id)
+      && ($response = $this->connection->files->delete($id, [
+        'supportsAllDrives' => true
+      ]))
+    ) {
+      return empty($response->getBody()->getContents());
+    }
+
+    return false;
+  }
+
+  public function copy(string $id, string $destination = null): ?string
+  {
+    if ($item = $this->getItem($id)) {
+      $emptyFile = new DriveFile();
+      if (empty($destination)
+        || \in_array($destination, $item['parents'])
+      ) {
+        $f = Str::fileExt($item['name'], true);
+        $filename = $f[0] . date('_Y-m-d-H-i-s_') . (!empty($f[1]) ? '.' . $f[1] : '');
+        $emptyFile->name = X::_("Copy of %s", $filename);
+      }
+
+      if (!empty($destination)) {
+        $emptyFile->parents = [$destination];
+      }
+
+      if ($file = $this->connection->files->copy($id, $emptyFile, [
+        'supportsAllDrives' => true
+      ])) {
+        return $file->id;
+      }
+    }
+
+    return null;
+  }
+
+  public function move(string $id, string $destination): bool
+  {
+    if ($item = $this->getItem($id)) {
+      $emptyFile = new DriveFile();
+      if ($this->connection->files->update($id, $emptyFile, [
+        'supportsAllDrives' => true,
+        'addParents' => $destination,
+        'removeParents' => \implode(',', $item['parents']),
+        'fields' => 'id, parents'
+      ])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public function rename(string $id, string $newName): bool
+  {
+    if ($this->exists($id)) {
+      $emptyFile = new DriveFile();
+      $emptyFile->name = $newName;
+      $emptyFile->modifiedTime = date('c');
+      if ($file = $this->connection->files->update($id, $emptyFile, [
+        'supportsAllDrives' => true,
+        'fields' => 'name'
+      ])) {
+        return $file->name === $newName;
+      }
+    }
+
+    return false;
+  }
+
+  public function exists(string $id): bool
+  {
+    return !empty($this->getItem($id));
+  }
+
+  public function getContents(string $id)
+  {
+    if ($this->getConnection()
+      && ($response = $this->connection->files->get($id, [
         'supportsAllDrives' => true,
         'alt' => 'media'
       ]))
-      && ($file = $response->getBody()->getContents())
-      && Dir::createPath(\dirname($destination))
-      && \file_put_contents($destination, $file);
+    ) {
+      return $response->getBody()->getContents();
+    }
+
+    return null;
   }
 
-  public function uploadFile()
+  public function getSize(string $id)
   {
+    if ($item = $this->getItem($id)) {
+      return $item['size'];
+    }
 
+    return null;
+  }
+
+  public function getMtime(string $id)
+  {
+    if ($item = $this->getItem($id)) {
+      return $item['modifiedTime'];
+    }
+
+    return null;
   }
 
   public function isFile($idOrFile)
   {
-    $f = $this->isFolder($idOrFile);
+    $f = $this->isDir($idOrFile);
     if (\is_null($f)) {
       return null;
     }
     return $f === false;
   }
 
-  public function isFolder($idOrFile): ?bool
+  public function isDir($idOrFile): ?bool
   {
     if (\is_string($idOrFile)) {
-      $idOrFile = $this->getFile($idOrFile);
+      $idOrFile = $this->getItem($idOrFile);
     }
 
     if (\is_array($idOrFile)
@@ -136,7 +312,7 @@ class GoogleDrive
 
   private function getRootID(): ?string
   {
-    if (($root = $this->getFile('root'))
+    if (($root = $this->getItem('root'))
       && !empty($root['id'])
     ) {
       return $root['id'];
@@ -144,7 +320,7 @@ class GoogleDrive
     return null;
   }
 
-  private function getItems(string $type = 'both', ?string $idParent = null): array
+  private function getItems(string $type = 'both', ?string $idParent = null, ?string $detailed = null): array
   {
     $params = [
       'includeItemsFromAllDrives' => true,
@@ -161,14 +337,38 @@ class GoogleDrive
         break;
     }
     if (empty($idParent)) {
+      $params['q'] = (isset($params['q']) ? $params['q'] . ' AND ' : '') . 'sharedWithMe = true';
       if ($idRoot = $this->getRootID()) {
-        //$params['q'] = (isset($params['q']) ? $params['q'] . ' AND ' : '') . "'$idRoot' in parents";
+        $params['q'] .= " OR '$idRoot' in parents";
       }
     }
     else {
       $params['q'] = (isset($params['q']) ? $params['q'] . ' AND ' : '') . "'$idParent' in parents";
     }
-    return X::toArray($this->getConnection()->files->listFiles($params)->files);
+    $ret = [];
+    if ($this->getConnection()
+      && ($items = $this->connection->files->listFiles($params)->files)
+    ) {
+      foreach ($items as $item) {
+        $isDir = $this->isDir(X::toArray($item));
+        $it = [
+          'path' => $item->id,
+          'dir' => !!$isDir,
+          'file' => !$isDir,
+          'name' => $item->name
+        ];
+        if (!empty($detailed)) {
+          if (str_contains($detailed, 's')) {
+            $it['size'] = $item->size;
+          }
+          if (str_contains($detailed, 'm')) {
+            $it['mtime'] = date('Y-m-d H:i:s', strtotime($item->modifiedTime));
+          }
+        }
+        $ret[] = $it;
+      }
+    }
+    return $ret;
   }
 
   private function fetchTokenCode(string $code, bool $refresh = false): array
@@ -202,8 +402,9 @@ class GoogleDrive
   private function refreshExpiredToken(): ?array
   {
     if ($this->isTokenExpired()) {
-      if ($code = $this->client->getRefreshToken()) {
-        $token = $this->fetchTokenCode($code, true);
+      if (($code = $this->client->getRefreshToken())
+        && ($token = $this->fetchTokenCode($code, true))
+      ) {
         $this->client->setAccessToken($token);
         return $this->client->getAccessToken();
       }
@@ -211,10 +412,10 @@ class GoogleDrive
     return null;
   }
 
-  private function getClient(): ?\Google\Client
+  private function getClient(): ?Client
   {
     if (empty($this->client)) {
-      $this->client = new \Google\Client();
+      $this->client = new Client();
       $this->client->setAuthConfig($this->credentials);
       $this->client->setAccessType('offline');
       $this->client->addScope("https://www.googleapis.com/auth/drive");
@@ -230,16 +431,16 @@ class GoogleDrive
       && $this->getClient()
     ) {
       if (empty($this->token)) {
-        return $this->createAuthUrl();
+        throw new \Exception(X::_('No valid token. Create a new one via the createAuthUrl method'));
       }
       else {
         if ($this->isTokenExpired()) {
           if (!$this->refreshExpiredToken()) {
-            return $this->createAuthUrl();
+            throw new \Exception(X::_('Unable to refresh expired token. Create a new one via the createAuthUrl method'));
           }
         }
 
-        $this->connection = new \Google\Service\Drive($this->client);
+        $this->connection = new Drive($this->client);
       }
     }
 
