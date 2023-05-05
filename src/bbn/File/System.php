@@ -238,7 +238,7 @@ class System extends bbn\Models\Cls\Basic
         case 'nextcloud':
           return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
         case 'googledrive':
-          return $this->obj->getFiles($path, $including_dirs, $hidden, $filter, $detailed);
+          return $this->obj->getFiles($path, $including_dirs, $detailed);
         default:
           $is_absolute = strpos($path, '/') === 0;
           $fs          = &$this;

@@ -38,7 +38,7 @@ class GoogleDrive
     $this->token = $token;
   }
 
-  public function getFiles(?string $idParent = null, bool $includeDirs = false, $hidden = null, $filter = null, $detailed = null): array
+  public function getFiles(?string $idParent = null, bool $includeDirs = false, $detailed = null): array
   {
     return $this->getItems(empty($includeDirs) ? 'file' : 'both', $idParent);
   }
