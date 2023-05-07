@@ -1249,7 +1249,7 @@ class Controller implements Api
 
 
   /**
-   * Merges post data and result array witt the current data
+   * Merges post data and result array with the current data
    * and gets the model then sets the output object.
    *
    * @return void
@@ -1273,7 +1273,7 @@ class Controller implements Api
 
 
   /**
-   * Merges post data and result array witt the current data
+   * Merges post data and result array with the current data
    * and gets the model from cache then sets the output object.
    *
    * @param int $ttl
@@ -1864,15 +1864,15 @@ class Controller implements Api
   /**
    * Returns a new Controller instance with the given arguments.
    *
-   * @return self|false
+   * @return Controller|false
    */
-  public function add($path, $data = [], $internal = false)
+  public function add($path, $data = [], $private = false)
   {
     if (substr($path, 0, 2) === './') {
       $path = $this->getCurrentDir() . substr($path, 1);
     }
 
-    if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {
+    if ($route = $this->_mvc->getRoute($path, $private ? 'private' : 'public')) {
       $o = new Controller($this->_mvc, $route, $data);
       $o->process();
       return $o;
@@ -1887,16 +1887,16 @@ class Controller implements Api
    *
    * @param string $path
    * @param array $data
-   * @param bool $internal
+   * @param bool $private
    * @return self
    */
-  public function addToObj(string $path, $data = [], $internal = false): self
+  public function addToObj(string $path, $data = [], $private = false): self
   {
     if (substr($path, 0, 2) === './') {
       $path = $this->getCurrentDir() . substr($path, 1);
     }
 
-    if ($route = $this->_mvc->getRoute($path, $internal ? 'private' : 'public')) {
+    if ($route = $this->_mvc->getRoute($path, $private ? 'private' : 'public')) {
       $o = new Controller($this->_mvc, $route, $data);
       $o->process();
       $this->obj = X::mergeObjects($this->obj, $o->obj);
@@ -1937,6 +1937,17 @@ class Controller implements Api
   public function modelExists(string $path): bool
   {
     return $this->_mvc->modelExists($path);
+  }
+
+  /**
+   * Checks whether the given model exists or not.
+   *
+   * @param string $path
+   * @return boolean
+   */
+  public function controllerExists(string $path, bool $private = false): bool
+  {
+    return $this->_mvc->controllerExists($path, $private);
   }
 
     /**
