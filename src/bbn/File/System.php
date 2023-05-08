@@ -90,11 +90,11 @@ class System extends bbn\Models\Cls\Basic
         }
         break;
       case 'googledrive':
-        if (!empty($cfg['credentials'])
-          && !empty($cfg['token'])
+        if (!empty($cfg['user'])
+          && !empty($cfg['pass'])
         ) {
           $this->mode = 'googledrive';
-          $this->obj = new \bbn\Api\GoogleDrive($cfg['credentials'], $cfg['token']);
+          $this->obj = new \bbn\Api\GoogleDrive($cfg['user'], $cfg['pass']);
         }
         break;
       case 'webdav':
