@@ -4260,6 +4260,24 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * @return int|null
+   */
+  public function getParentPlugin($code = null): ?string
+  {
+    if ($pluginAlias = $this->fromCode('plugin', 'list', 'templates', 'option', 'appui')) {
+      $ids = array_reverse($this->parents(...\func_get_args()));
+      foreach ($ids as $id) {
+        if ($this->alias($id) === $pluginAlias) {
+          return $id;
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  /**
    * @param string|null $id
    * @return int|null
    */

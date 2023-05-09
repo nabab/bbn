@@ -9,9 +9,11 @@ namespace bbn\Appui;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\Mvc;
 use Exception;
+use bbn\Models\Cls\Basic;
 
-class Dashboard
+class Dashboard extends Basic
 {
 
   use bbn\Models\Tts\Optional;
@@ -1002,12 +1004,24 @@ class Dashboard
 
       // Looking for the widgets
       if ($widgets = $this->pref->getBits($this->id, false)) {
+        $mvc = Mvc::getInstance();
         foreach ($widgets as $w) {
           // Getting the option
           if (
             !empty($w[$this->archBits['id_option']])
             && ($o = $this->opt->option($w[$this->archBits['id_option']]))
           ) {
+            if ($id_plugin = $this->opt->getParentPlugin($o['id'])) {
+              $plugin = $this->opt->option($id_plugin);
+              $plugin_name = $plugin['code'];
+              if ($plugin['id_parent'] === BBN_APPUI) {
+                $plugin_name = 'appui-' . $plugin_name;
+              }
+
+              if (!$mvc->hasPlugin($plugin_name)) {
+                continue;
+              }
+            }
             // Checking the permission
             if (($id_perm = $this->perm->optionToPermission($o[$this->archOpt['id']]))
               && $this->perm->has($id_perm)

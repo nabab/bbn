@@ -286,19 +286,24 @@ class Compiler extends Basic
         }
       }
       if ( !rFiles.length ){
-        bbn_resolve();
+        // Adding a timeout in case the lib is requested twice at the same time
+        // @todo Can do better
+        setTimeout(() => {
+          bbn_resolve();
+        }, 125);
         return;
       }
       let script = document.createElement("script");
       script.type = "text/javascript";
       script.src = "$url".replace("%s", rFiles.join(","));
+      document.getElementsByTagName("body")[0].appendChild(script);
       script.onload = function(){
-        bbn_resolve();
+        //bbn.fn.log("Loaded " + script.src);
+        bbn_resolve()
       };
       script.onerror = function(){
         bbn_reject();
       };
-      document.getElementsByTagName("head")[0].appendChild(script);
     })
   })
 JAVASCRIPT;
