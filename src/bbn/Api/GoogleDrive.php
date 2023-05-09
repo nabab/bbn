@@ -33,10 +33,18 @@ class GoogleDrive
    * Constructor.
    * @param array $cfg
    */
-  public function __construct(array $credentials, ?array $token = null)
+  public function __construct($credentials, $token = null)
   {
     if (empty($credentials)) {
       throw new \Exception(X::_('Unable to connect without credentials'));
+    }
+
+    if (Str::isJson($credentials)) {
+      $credentials = \json_decode($credentials, true);
+    }
+
+    if (!empty($token) && Str::isJson($token)) {
+      $token = \json_decode($token, true);
     }
 
     $this->credentials = $credentials;
@@ -335,6 +343,9 @@ class GoogleDrive
       case 'dir':
         $params['q'] = "mimeType = 'application/vnd.google-apps.folder'";
         break;
+    }
+    if ($idParent === '.') {
+      $idParent = null;
     }
     if (empty($idParent)) {
       $params['q'] = (isset($params['q']) ? $params['q'] . ' AND ' : '') . 'sharedWithMe = true';
