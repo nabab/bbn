@@ -9,6 +9,9 @@ use Orhanerday\OpenAi\OpenAi;
 use Exception;
 use bbn\X;
 use bbn\User;
+use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
+use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
+
 
 class Ai extends DbCls
 {
@@ -141,17 +144,30 @@ class Ai extends DbCls
    */
   public function getPromptResponse(string $id_prompt, string $input, bool $insert = true): array
   {
+    // check if input and id_prompt are not empty and not null
+    if (empty($input) || empty($id_prompt)) {
+      return [
+        'success' => false,
+        'error' => 'Input and prompt ID cannot be empty',
+      ];
+    }
+    
     $prompt = $this->rselect($id_prompt);
 
-    //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
-    $build_prompt = $this->buildPrompt($prompt, $input);
+    if (empty($prompt)) {
+      return [
+        'success' => false,
+        'error' => 'Prompt not found',
+      ];
+    }
     
-    $response = $this->request($build_prompt);
-  
-    if ($insert) {
+    //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
+    $build_prompt = $this->buildPrompt($prompt);
+    
+    $response = $this->request($build_prompt, $input);
+    if (!empty($response) && $insert) {
       $this->insertItem($id_prompt, $input, false);
-  
-      $this->insertItem($id_prompt, $response['result'] ?? $response['error'], true);
+      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);
     }
     
     return [
@@ -193,16 +209,28 @@ class Ai extends DbCls
    * @param string $separator Separator string
    * @return string Built prompt string
    */
-  private function buildPrompt(array $prompt, string $input, string $separator = '###'): string
+  private function buildPrompt(array $prompt): string | null
   {
-    $note = $this->note->get($prompt['id_note'], true);
+    $note = $this->note->get($prompt['id_note']);
+    
+    if (empty($note) || empty($note['content'])) {
+      return null;
+    }
+    
     $option = Option::getInstance();
     $build_prompt = $note['content'];
     $build_prompt .= "\n";
-    $build_prompt .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . "\n";
-    $build_prompt .= "The language of the response must be in " . $option->text($note['lang'], 'languages', 'i18n', 'appui');
-    $build_prompt .= "\n\n" . $separator . "\n\n";
-    $build_prompt .= $input;
+    
+    $format = X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt');
+    
+    if ($format) {
+      $build_prompt .= $format . "\n";
+    }
+    
+    if (!empty($note['lang'])) {
+      $build_prompt .= "The language of the response must be in " . $option->text($note['lang'], 'languages', 'i18n', 'appui');
+    }
+    
     return $build_prompt;
   }
   
@@ -212,16 +240,59 @@ class Ai extends DbCls
    * @param string $prompt Prompt string to send to the API
    * @return array Response array containing success flag and result or error message
    */
-  private function request(string $prompt): array
+  public function request(string | null $prompt , string $input): array
   {
-    $complete = $this->ai->completion([
-      'model' => 'text-davinci-003',
-      'prompt' => $prompt,
-      'temperature' => 0.7,
-      'max_tokens' => 2000,
-      'frequency_penalty' => 0,
-      'presence_penalty' => 0,
-    ]);
+    // check if prompt is not empty but can be null
+    if (empty($prompt) && !is_null($prompt)) {
+      return [
+        'success' => false,
+        'error' => 'Prompt cannot be empty',
+      ];
+    }
+  
+    $config = new Gpt3TokenizerConfig();
+    $tokenizer = new Gpt3Tokenizer($config);
+    
+    
+    if (!$prompt) {
+      
+      $max_tokens = 4000 - $tokenizer->count($input);
+      
+      $complete = $this->ai->chat(
+        [
+          "model" => "gpt-3.5-turbo",
+          "messages" => [
+            [
+              "role" => "user",
+              "content" => $input
+            ]
+          ],
+          "max_tokens" => $max_tokens,
+        ],
+      );
+      
+    } else {
+  
+      $max_tokens = 4000 - $tokenizer->count($input . $prompt);
+  
+      $complete = $this->ai->chat(
+        [
+          "model" => "gpt-3.5-turbo",
+          "messages" => [
+            [
+              "role" => "system",
+              "content" => $prompt
+            ],
+            [
+              "role" => "user",
+              "content" => $input
+            ]
+          ],
+          "max_tokens" => $max_tokens,
+        ]
+      );
+    }
+
     
     $complete = json_decode($complete, true);
     
@@ -234,7 +305,7 @@ class Ai extends DbCls
     
     return [
       'success' => true,
-      'result' => $complete['choices'][0]['text']
+      'result' => $complete['choices'][0]['message']
     ];
   }
 }

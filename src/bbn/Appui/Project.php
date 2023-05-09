@@ -141,6 +141,7 @@ class Project extends bbn\Models\Cls\Db
     $info = $this->getProjectInfo();
     /** @var array $path_info full option for the current path */
     $path_info = X::getRow($info['path'], ['parent_code' => $root, 'code' => $path]);
+
     /** @var string $type the last part of the url after _end_ */
     $type = false;
 
