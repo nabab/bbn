@@ -11,15 +11,15 @@ use Exception;
 /**
  * An all-in-one hierarchical options management system
  *
- * This class allows to:
- * ---------------------
- * * manage a **hierarchical** table of options
- * * retrieve, edit, add, remove options
- * * grab a whole tree
- * * apply functions on group of options
- * * add user-defined properties
- * * set option configuration and applies it to all its children
- * * And many more...
+ * ## This class allows to:
+ * 
+ * - manage a **hierarchical** table of options
+ * - retrieve, edit, add, remove options
+ * - grab a whole tree
+ * - apply functions on group of options
+ * - add user-defined properties
+ * - set option configuration and applies it to all its children
+ * - And many more...
  *
  *
  * @author Thomas Nabet <thomas.nabet@gmail.com>
@@ -288,6 +288,8 @@ class Option extends bbn\Models\Cls\Db
 
 
   /**
+   * Retrieves an option's ID from its "codes path"
+   * 
    * Gets an option ID from diverse combinations of elements:
    * - A code or a serie of codes from the most specific to a child of the root
    * - A code or a serie of codes and an id_parent where to find the last code
@@ -4251,6 +4253,24 @@ class Option extends bbn\Models\Cls\Db
       }
 
       return $res;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @return int|null
+   */
+  public function getParentPlugin($code = null): ?string
+  {
+    if ($pluginAlias = $this->fromCode('plugin', 'list', 'templates', 'option', 'appui')) {
+      $ids = array_reverse($this->parents(...\func_get_args()));
+      foreach ($ids as $id) {
+        if ($this->alias($id) === $pluginAlias) {
+          return $id;
+        }
+      }
     }
 
     return null;

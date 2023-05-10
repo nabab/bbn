@@ -246,10 +246,9 @@ class Pgsql extends Sql
 
     $cfg['code_db']   = $cfg['db'] ?? '';
     $cfg['code_host'] = $cfg['user'].'@'.$cfg['host'];
-    $cfg['args']      = ['pgsql:host='
-      .(in_array($cfg['host'], ['localhost', '127.0.0.1']) && empty($cfg['force_host']) ? gethostname() : $cfg['host'])
-      .';port='.$cfg['port']
-      .(empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
+    $cfg['args']      = ['pgsql:host=' . $cfg['host']
+      . ';port=' . $cfg['port']
+      . (empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
       $cfg['pass'],
       [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],

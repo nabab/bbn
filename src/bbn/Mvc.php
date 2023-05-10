@@ -100,6 +100,8 @@ class Mvc implements Mvc\Api
 
   protected static $db_in_controller = false;
 
+  private $is_routed = false;
+  private $is_controlled = false;
   /**
    * The current controller
    * @var null|Controller
@@ -186,12 +188,12 @@ class Mvc implements Mvc\Api
   public static function initPath()
   {
     if (!self::$_app_name) {
-      self::$_app_name   = BBN_APP_NAME;
-      self::$_app_path   = BBN_APP_PATH;
-      self::$_app_prefix = BBN_APP_PREFIX;
-      self::$_cur_path   = BBN_CUR_PATH;
-      self::$_lib_path   = BBN_LIB_PATH;
-      self::$_data_path  = BBN_DATA_PATH;
+      self::$_app_name   = defined('BBN_APP_NAME') ? BBN_APP_NAME : 'app';
+      self::$_app_path   = defined('BBN_APP_PATH') ? BBN_APP_PATH : '';
+      self::$_app_prefix = defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : '';
+      self::$_cur_path   = defined('BBN_CUR_PATH') ? BBN_CUR_PATH : '';
+      self::$_lib_path   = defined('BBN_LIB_PATH') ? BBN_LIB_PATH : '';
+      self::$_data_path  = defined('BBN_DATA_PATH') ? BBN_DATA_PATH : '';
     }
   }
 
@@ -908,9 +910,9 @@ class Mvc implements Mvc\Api
    *
    * @return array|mixed|null
    */
-  public function getRoute(string $path, string $mode, $root = null): ?array
+  public function getRoute(string $path, string $mode): ?array
   {
-    return $this->router->route($path, $mode, $root);
+    return $this->router->route($path, $mode);
   }
 
 
@@ -1104,6 +1106,18 @@ class Mvc implements Mvc\Api
     }
 
     return false;
+  }
+
+
+  /**
+   * Checks whether the given controller exists or not.
+   *
+   * @param string $path
+   * @return boolean
+   */
+  public function controllerExists(string $path, bool $private = false): bool
+  {
+    return (bool)$this->router->route($path, $private ? 'private' : 'public', true);
   }
 
 

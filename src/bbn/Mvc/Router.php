@@ -408,7 +408,7 @@ class Router
    *
    * @return array|mixed|null
    */
-  public function route(string $path, string $mode): ?array
+  public function route(string $path, string $mode, bool $exact = false): ?array
   {
     if (self::isMode($mode)) {
       // If there is a prepath defined we prepend it to the path
@@ -419,7 +419,7 @@ class Router
       // We only try to retrieve a file path through a whole URL for controllers
       if (\in_array($mode, self::$_controllers, true)) {
         $this->_mode = $mode;
-        return $this->_find_controller($path, $mode);
+        return $this->_find_controller($path, $mode, $exact);
       }
 
       return $this->_find_mv($path, $mode);
@@ -835,7 +835,7 @@ class Router
    *
    * @return mixed
    */
-  private function _find_controller($path, $mode): ?array
+  private function _find_controller(string $path, string $mode, bool $exact = false): ?array
   {
     // Removing trailing slashes
     $path = self::parse($path);
@@ -948,7 +948,7 @@ class Router
         }
       }
 
-      if ($file) {
+      if ($file || $exact) {
         break;
       }
 
@@ -965,7 +965,7 @@ class Router
       }
     }
 
-    if (!$file && !$plugin && !empty($this->_routes['force']) && ($this->_routes['force'] !== $path)) {
+    if (!$file && !$exact && !$plugin && !empty($this->_routes['force']) && ($this->_routes['force'] !== $path)) {
       return $this->_find_controller(self::parse($this->_routes['force']), $mode);
     }
 

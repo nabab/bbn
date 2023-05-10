@@ -186,6 +186,15 @@ class Shop extends Models\Cls\Db
    */
   public function getTransactionsList(array $params = []): array
   {
+    if (!empty($params['excel'])) {
+      unset($params['fields']);
+      if (!empty($params['filters'])
+        && !empty($params['filters']['logic'])
+        && empty($params['filters']['conditions'])
+      ) {
+        unset($params['filters']);
+      }
+    }
     $cfg  = $this->sales->getClassCfg();
     $transFields = $cfg['arch']['transactions'];
     $grid = new \bbn\Appui\Grid($this->db, $params, [
@@ -200,7 +209,9 @@ class Shop extends Models\Cls\Db
         if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {
           $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);
         }
-        if ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']])) {
+        if (empty($params['excel'])
+          && ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']]))
+        ) {
           foreach ($d['products'] as $i => $p) {
             $prod = $this->product->get($p['id_product']);
             $d['products'][$i]['product'] = $prod;
@@ -212,8 +223,39 @@ class Shop extends Models\Cls\Db
           }
         }
         $d['client'] = $this->client->get($d[$transFields['id_client']]);
+        if (!empty($params['excel'])
+          && !empty($params['excel']['fields'])
+        ) {
+          $tmp = [];
+          foreach ($params['excel']['fields'] as $f) {
+            if (empty($f['hidden'])) {
+              if ($f['field'] === 'shipping_address') {
+                $tmp[$f['field']] = $d['shipping_address']['fulladdress'];
+              }
+              elseif ($f['field'] === 'billing_address') {
+                $tmp[$f['field']] = $d['billing_address']['fulladdress'];
+              }
+              elseif ($f['field'] === 'client.name') {
+                $tmp[$f['field']] = $d['client']['first_name'] . ' ' . $d['client']['last_name'];
+              }
+              elseif ($f['field'] === 'payment_type') {
+                $tmp[$f['field']] = $this->opt->text($d['payment_type']);
+              }
+              else {
+                $tmp[$f['field']] = $d[$f['field']];
+              }
+            }
+          }
+          $d = $tmp;
+        }
       }
       unset($d);
+      if (!empty($params['excel'])) {
+        $filename = BBN_USER_PATH . 'tmp/transactions_' . date('d-m-Y_H-i-s') . '.xlsx';
+        if (\bbn\X::toExcel($res['data'], $filename, true, $params['excel'])) {
+          return ['file' => $filename];
+        }
+      }
       return $res;
     }
   }
