@@ -27,7 +27,9 @@ class Ai extends DbCls
     'table' => 'bbn_ai_prompt',
     'tables' => [
       'ai_prompt' => 'bbn_ai_prompt',
-      'ai_prompt_items' => 'bbn_ai_prompt_items'
+      'ai_prompt_items' => 'bbn_ai_prompt_items',
+      'notes_versions' => 'bbn_notes_versions',
+      'notes' => 'bbn_notes'
     ],
     'arch' => [
       'ai_prompt' => [
@@ -37,6 +39,7 @@ class Ai extends DbCls
         'output' => 'output',
         'creation_date' => 'creation_date',
         'usage_count' => 'usage_count',
+        'shortcode' => 'shortcode',
       ],
       'ai_prompt_items' => [
         'id' => 'id',
@@ -46,6 +49,31 @@ class Ai extends DbCls
         'creation_date' => 'creation_date',
         'mime' => 'mime',
         'ai' => 'ai',
+      ],
+      'notes_versions' => [
+        'id_note' => 'id_note',
+        'version' => 'version',
+        'latest' => 'latest',
+        'title' => 'title',
+        'content' => 'content',
+        'excerpt' => 'excerpt',
+        'id_user' => 'id_user',
+        'creation' => 'creation',
+      ],
+      'notes' => [
+        'id' => 'id',
+        'id_parent' => 'id_parent',
+        'id_alias' => 'id_alias',
+        'id_type' => 'id_type',
+        'id_option' => 'id_option',
+        'mime' => 'mime',
+        'lang' => 'lang',
+        'private' => 'private',
+        'locked' => 'locked',
+        'pinned' => 'pinned',
+        'important' => 'important',
+        'creator' => 'creator',
+        'active' => 'active',
       ]
     ]
   ];
@@ -307,5 +335,208 @@ class Ai extends DbCls
       'success' => true,
       'result' => $complete['choices'][0]['message']
     ];
+  }
+  
+  /**
+   * Retrieves prompts based on the specified conditions.
+   *
+   * @param bool $private Determines if private prompts should be included.
+   * @return array An array of prompts matching the conditions.
+   */
+  public function getPrompts(bool $private = true): array
+  {
+    $where = [];
+    
+    if ($private) {
+      // If private, search only for prompts where shortcode is null
+      $where[] = [
+        'field' => $this->class_cfg['arch']['ai_prompt']['shortcode'],
+        'operator' => 'isnull'
+      ];
+    }
+    
+    $prompts = $this->db->rselectAll([
+      'tables' => [$this->class_cfg['tables']['ai_prompt']],
+      'where' => $where,
+      'order' => [[
+        'field' => $this->class_cfg['arch']['ai_prompt']['creation_date'],
+        'dir' => 'DESC'
+      ]],
+    ]);
+    
+    foreach ($prompts as &$p) {
+      $note = $this->note->get($p['id_note']);
+      $p['title'] = $note['title'];
+      $p['content'] = $note['content'];
+      $p['lang'] = $note['lang'];
+    }
+    
+    return $prompts;
+  }
+  
+  /**
+   * Retrieves a prompt based on the specified shortcode.
+   *
+   * @param string $shortcode The shortcode of the prompt.
+   * @return mixed The prompt data if found, otherwise null.
+   */
+  public function getPromptByShortcode(string $shortcode)
+  {
+    $prompt = $this->rselect([
+      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],
+      'where' => [
+        $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
+      ]
+    ]);
+    
+    if (!empty($prompt)) {
+      $note = $this->note->get($prompt['id_note']);
+      $prompt['title'] = $note['title'];
+      $prompt['content'] = $note['content'];
+      $prompt['lang'] = $note['lang'];
+    }
+    
+    return $prompt;
+  }
+  
+  /**
+   * Retrieves a prompt based on the specified ID.
+   *
+   * @param string $id The ID of the prompt.
+   * @return mixed The prompt data if found, otherwise null.
+   */
+  public function getPromptById(string $id)
+  {
+    $prompt = $this->rselect([
+      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],
+      'where' => [
+        $this->default_class_cfg['arch']['ai_prompt']['id'] => $id
+      ]
+    ]);
+    
+    if (!empty($prompt)) {
+      $note = $this->note->get($prompt['id_note']);
+      $prompt['title'] = $note['title'];
+      $prompt['content'] = $note['content'];
+      $prompt['lang'] = $note['lang'];
+    }
+    
+    return $prompt;
+  }
+  
+  /**
+   * Inserts a new prompt into the database.
+   *
+   * @param string $title The title of the prompt.
+   * @param string $content The content of the prompt.
+   * @param string $lang The language of the prompt.
+   * @param string $input The input of the prompt.
+   * @param string $output The output of the prompt.
+   * @param string|null $shortcode The shortcode of the prompt (optional).
+   * @return mixed The ID of the inserted prompt if successful, otherwise null.
+   */
+  public function insertPrompt(string $title, string $content, string $lang, string $input, string $output, string $shortcode = null)
+  {
+    $option = Option::getInstance();
+    
+    // Get the option ID for 'prompt' type from the 'types' table in the 'note' application UI
+    $id_option = $option->fromCode('prompt', 'types', 'note', 'appui');
+    
+    // Insert a new note with the provided title, content, option ID, plain text format, and language
+    $id_note = $this->note->insert($title, $content, $id_option, true, false, NULL, NULL, 'text/plain', $lang);
+    
+    // Insert the prompt into the database with the note ID, input, output, and shortcode
+    return $this->insert([
+      $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,
+      $this->class_cfg['arch']['ai_prompt']['input'] => $input,
+      $this->class_cfg['arch']['ai_prompt']['output'] => $output,
+      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
+    ]);
+  }
+  
+  /**
+   * Updates an existing prompt in the database.
+   *
+   * @param string $id The ID of the prompt to update.
+   * @param string $title The updated title of the prompt.
+   * @param string $content The updated content of the prompt.
+   * @param string $input The updated input of the prompt.
+   * @param string $output The updated output of the prompt.
+   * @return bool True if the update was successful, false otherwise.
+   */
+  public function updatePrompt(string $id, string $title, string $content, string $input, string $output): bool
+  {
+    $prompt = $this->getPromptById($id);
+    
+    if (empty($prompt)) {
+      // If the prompt does not exist, return false to indicate the failure
+      return false;
+    }
+    
+    $note = $this->note->get($prompt['id_note']);
+    
+    if (empty($note)) {
+      // If the associated note does not exist, return false to indicate the failure
+      return false;
+    }
+    
+    // Update the title and content of the associated note
+    $this->note->update($note['id'], $title, $content);
+    
+    // Update the prompt with the provided ID, input, and output values
+    $this->update($id, [
+      $this->class_cfg['arch']['ai_prompt']['input'] => $input,
+      $this->class_cfg['arch']['ai_prompt']['output'] => $output,
+    ]);
+    
+    return true;
+  }
+  
+  public function deletePrompt(string $id) {
+    $prompt = $this->getPromptById($id);
+    
+    if (empty($prompt)) {
+      // If the prompt does not exist, return false to indicate the failure
+      return false;
+    }
+    
+    $note = $this->note->get($prompt['id_note']);
+    
+    if (empty($note)) {
+      // If the associated note does not exist, return false to indicate the failure
+      return false;
+    }
+
+    
+    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
+      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
+    ]);
+  
+    $this->db->delete($this->class_cfg['tables']['notes_versions'], [
+      $this->class_cfg['arch']['notes_versions']['id_note'] => $note['id']
+    ]);
+  
+    // Delete the prompt
+    $this->delete($id);
+  
+    // Delete the associated note
+    $this->note->remove($note['id']);
+    
+    return true;
+  }
+  
+  
+  public function clearConversation(string $id) : bool {
+    if (empty($id)) {
+      return false;
+    }
+    
+    if (!$this->getPromptById($id)) {
+      return false;
+    }
+    
+    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
+      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
+    ]);
   }
 }
