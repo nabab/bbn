@@ -11,6 +11,7 @@ use bbn\X;
 use bbn\User;
 use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
+use bbn\File\System;
 
 
 class Ai extends DbCls
@@ -181,7 +182,7 @@ class Ai extends DbCls
     }
     
     $prompt = $this->rselect($id_prompt);
-
+    
     if (empty($prompt)) {
       return [
         'success' => false,
@@ -203,7 +204,7 @@ class Ai extends DbCls
       'input' => $build_prompt,
       'result' => $response['result'] ?? $response['error'],
     ];
-
+    
   }
   
   /**
@@ -277,7 +278,7 @@ class Ai extends DbCls
         'error' => 'Prompt cannot be empty',
       ];
     }
-  
+    
     $config = new Gpt3TokenizerConfig();
     $tokenizer = new Gpt3Tokenizer($config);
     
@@ -300,9 +301,9 @@ class Ai extends DbCls
       );
       
     } else {
-  
+      
       $max_tokens = 4000 - $tokenizer->count($input . $prompt);
-  
+      
       $complete = $this->ai->chat(
         [
           "model" => "gpt-3.5-turbo",
@@ -320,7 +321,7 @@ class Ai extends DbCls
         ]
       );
     }
-
+    
     
     $complete = json_decode($complete, true);
     
@@ -345,7 +346,9 @@ class Ai extends DbCls
    */
   public function getPrompts(bool $private = true): array
   {
-    $where = [];
+    $where = [
+      'bbn_active' => 1,
+    ];
     
     if ($private) {
       // If private, search only for prompts where shortcode is null
@@ -361,6 +364,15 @@ class Ai extends DbCls
       'order' => [[
         'field' => $this->class_cfg['arch']['ai_prompt']['creation_date'],
         'dir' => 'DESC'
+      ]],
+      'join' => [[
+        'table' => 'bbn_history_uids',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_uid',
+            'exp' => 'id'
+          ]]
+        ]
       ]],
     ]);
     
@@ -407,12 +419,8 @@ class Ai extends DbCls
    */
   public function getPromptById(string $id)
   {
-    $prompt = $this->rselect([
-      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],
-      'where' => [
-        $this->default_class_cfg['arch']['ai_prompt']['id'] => $id
-      ]
-    ]);
+    
+    $prompt = $this->rselect($id);
     
     if (!empty($prompt)) {
       $note = $this->note->get($prompt['id_note']);
@@ -494,7 +502,7 @@ class Ai extends DbCls
   
   public function deletePrompt(string $id) {
     $prompt = $this->getPromptById($id);
-    
+  
     if (empty($prompt)) {
       // If the prompt does not exist, return false to indicate the failure
       return false;
@@ -506,23 +514,48 @@ class Ai extends DbCls
       // If the associated note does not exist, return false to indicate the failure
       return false;
     }
-
     
     $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
       $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
     ]);
   
-    $this->db->delete($this->class_cfg['tables']['notes_versions'], [
-      $this->class_cfg['arch']['notes_versions']['id_note'] => $note['id']
-    ]);
-  
-    // Delete the prompt
     $this->delete($id);
-  
-    // Delete the associated note
-    $this->note->remove($note['id']);
     
     return true;
+  }
+  
+  
+  /**
+   * @throws Exception
+   */
+  public function saveConversation($path, $date, $userFormat, $aiFormat, $prompt, $response) {
+    $timestamp = time();
+    $fs = new System();
+    if ($fs->exists($path)) {
+      $jsonString = $fs->getContents($path);
+      $jsonData = json_decode($jsonString, true);
+  
+    } else {
+      $jsonData = [];
+  
+    }
+    $jsonData[] = [
+      "ai" => 0,
+      "creation_date" => $date,
+      "text" => $prompt,
+      'id' => bin2hex(random_bytes(10)),
+      'format' => $userFormat ?? 'textarea'
+    ];
+    $jsonData[] = [
+      "ai" => 1,
+      "creation_date" => $timestamp,
+      "text" => $response,
+      'id' => bin2hex(random_bytes(10)),
+      'format' => $aiFormat ?? 'textarea'
+    ];
+    $jsonData = json_encode($jsonData);
+    $fs->putContents($path, $jsonData);
+  
   }
   
   
@@ -538,5 +571,7 @@ class Ai extends DbCls
     $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
       $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
     ]);
+    
+    return true;
   }
 }
