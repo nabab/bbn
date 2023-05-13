@@ -6,9 +6,11 @@ use bbn\Appui\Cms;
 use bbn\Appui\Event;
 use bbn\Appui\Note;
 use bbn\Appui\Option;
+use bbn\Appui\Url;
 use bbn\Db;
 use PHPUnit\Framework\TestCase;
 use tests\Reflectable;
+use tests\ReflectionHelpers;
 
 class CmsTest extends TestCase
 {
@@ -24,6 +26,8 @@ class CmsTest extends TestCase
 
   protected $notes_mock;
 
+  protected $url_mock;
+
   protected $id_event = 'c4c2c70aaaaa2aaa47652540000aaff';
 
   protected $id_note = '634a2c70aaaaa2aaa47652540000bbcf';
@@ -36,13 +40,23 @@ class CmsTest extends TestCase
     $this->option_mock = \Mockery::mock(Option::class);
     $this->events_mock = \Mockery::mock(Event::class);
     $this->notes_mock  = \Mockery::mock(Note::class);
+    $this->url_mock    = \Mockery::mock(Url::class);
 
     $this->setNonPublicPropertyValue('_id_event', null, Cms::class);
 
     $this->option_mock->shouldReceive('fromCode')
       ->once()
-      ->with('publication', 'event', 'appui')
+      ->with('publication', 'types','event', 'appui')
       ->andReturn($this->id_event);
+    
+    $this->option_mock->shouldReceive('fromRootCode')
+      ->once()
+      ->with('media', 'note', 'appui')
+      ->andReturn($this->id_type);
+    
+    $this->notes_mock->shouldReceive('getClassCfg')
+      ->once()
+      ->andReturn($this->getNonPublicProperty('default_class_cfg', Note::class));
 
     $this->setNonPublicPropertyValue('retriever_instance', $this->option_mock, Option::class);
 
@@ -59,11 +73,12 @@ class CmsTest extends TestCase
     $cfg = $this->getClassCgf();
 
     $this->cms = \Mockery::mock(Cms::class)->makePartial();
+    $this->cms->cacheInit();
 
     $this->setNonPublicPropertyValue('db', $this->db_mock);
-    $this->setNonPublicPropertyValue('_notes', $this->notes_mock);
-    $this->setNonPublicPropertyValue('_events', $this->events_mock);
-    $this->setNonPublicPropertyValue('_options', $this->option_mock);
+    $this->setNonPublicPropertyValue('note', $this->notes_mock);
+    $this->setNonPublicPropertyValue('event', $this->events_mock);
+    $this->setNonPublicPropertyValue('opt', $this->option_mock);
     $this->setNonPublicPropertyValue('class_cfg', $cfg);
   }
 
@@ -89,7 +104,7 @@ class CmsTest extends TestCase
     $this->assertInstanceOf(Option::class, $this->getNonPublicProperty('opt'));
     $this->assertInstanceOf(Note::class, $this->getNonPublicProperty('note'));
     $this->assertSame($this->id_event, $this->getNonPublicProperty('_id_event'));
-    $this->assertSame($this->getNonPublicProperty('default_class_cfg'), $this->getClassCgf());
+    $this->assertSame($this->getNonPublicProperty('class_cfg'), $this->getClassCgf());
   }
 
   /** @test */
@@ -131,14 +146,9 @@ class CmsTest extends TestCase
   {
     $this->partiallyMockCmsInstance();
 
-    $this->notes_mock->shouldReceive('urlToId')
-      ->once()
-      ->with('foo.bar')
-      ->andReturn($this->id_note);
-
     $this->notes_mock->shouldReceive('get')
       ->once()
-      ->with($this->id_note)
+      ->with('foo.bar')
       ->andReturn($expected_note = [
         'id'      => $this->id_note,
         'title'   => 'note_title',
@@ -148,19 +158,29 @@ class CmsTest extends TestCase
         'medias'  => []
       ]);
 
+    $this->notes_mock->shouldReceive('urlToId')
+      ->once()
+      ->with('foo.bar')
+      ->andReturn($this->id_note);
+
     $this->notes_mock->shouldReceive('getUrl')
       ->once()
-      ->with($this->id_note)
+      ->with('foo.bar')
       ->andReturn('foo.bar');
+
+      $this->notes_mock->shouldReceive('getTags')
+      ->once()
+      ->with('foo.bar')
+      ->andReturn([]);
 
     $this->cms->shouldReceive('getStart')
       ->once()
-      ->with($this->id_note)
+      ->with('foo.bar')
       ->andReturn('2021-01-01');
 
     $this->cms->shouldReceive('getEnd')
       ->once()
-      ->with($this->id_note)
+      ->with('foo.bar')
       ->andReturn('2021-01-10');
 
     $expected = array_merge($expected_note, [
