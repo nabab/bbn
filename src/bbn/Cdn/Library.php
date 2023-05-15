@@ -551,7 +551,12 @@ SQL,
           $this->libs[$info['name']] = [];
         }
 
-        $path                                         = 'lib/'.$info['name'].'/'.$info['version'].'/';
+        $path = 'lib/';
+        if (BBN_IS_DEV && @is_dir(BBN_PUBLIC . 'dev/' . $info['name'] . '/' . $info['version'])) {
+          $path = 'dev/';
+        }
+
+        $path .= $info['name'] . '/' . $info['version'] . '/';
         $this->libs[$info['name']][$info['internal']] = [
           'version' => $info['version'],
           'prepend' => [],
@@ -563,8 +568,8 @@ SQL,
           'path' => $path,
           'files' => []
         ];
-        $files                                        =& $this->libs[$info['name']][$info['internal']]['files'];
-        $prepend                                      =& $this->libs[$info['name']][$info['internal']]['prepend'];
+        $files =& $this->libs[$info['name']][$info['internal']]['files'];
+        $prepend =& $this->libs[$info['name']][$info['internal']]['prepend'];
 
         // From here, adding files (no matter the type) to $this->libs array for each library
         // Adding language files if they must be prepent
