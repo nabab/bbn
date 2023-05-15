@@ -48,7 +48,9 @@ class Permissions extends bbn\Models\Cls\Basic
   /** @var array */
   protected $allowedRoutes = [];
 
-  /** @var array */
+  /**
+   * @var array
+   */
   protected $forbiddenRoutes = [];
 
 

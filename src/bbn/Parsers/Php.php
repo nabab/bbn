@@ -29,14 +29,14 @@ class Php extends bbn\Models\Cls\Basic
   /**
    * Function to take all the information related to the method sought and if it also contains the method of its relative
    *
-   * @param string           $meth Name of the method to search for to take information
+   * @param string $meth Name of the method to search for to take information
    * @param ReflectionClass $cls
    * @return array|null
    */
   public function analyzeMethod(string $meth, $cls): ?array
   {
     if (is_string($cls)) {
-      $cls = new ReflectionClass($cls);
+      $cls = new Reflector($cls);
     }
 
     $arr = null;
@@ -94,7 +94,7 @@ class Php extends bbn\Models\Cls\Basic
   /**
    * Function that analyzes the constant passed to him and even if it contains the relative parent of the class of belonging
    *
-   * @param string           $const Name of constant to search for information
+   * @param string $const Name of constant to search for information
    * @param \ReflectionClass $cls
    * @return array|null
    */
@@ -152,7 +152,7 @@ class Php extends bbn\Models\Cls\Basic
    */
   public function analyzeClass(string $cls, string $path = '', string $level = null): ?array
   {
-    $rc = new ReflectionClass($cls);
+    $rc = new Reflector($cls);
     if (!empty($cls) && is_object($rc)) {
       $constructor = $rc->getConstructor();
       $filter = null;
@@ -166,6 +166,7 @@ class Php extends bbn\Models\Cls\Basic
       $constants   = $rc->getConstants();
       $parent      = $rc->getParentClass();
       $res         = [
+        'used' => $rc->getUseStatements(),
         'doc' => $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
@@ -345,7 +346,6 @@ class Php extends bbn\Models\Cls\Basic
   public function parse(string $class_name)
   {
     $rc = new ReflectionClass($class_name);
-    //die(var_dump($rc->hasConstant('PARAM_BOOL')));
     $constants        = $rc->getConstants();
     $parent           = $rc->getParentClass();
     $parent_constants = [];
@@ -967,7 +967,7 @@ class Php extends bbn\Models\Cls\Basic
         ($doc = $this->parseMethodComments($comments))
         && ($extracted = $this->_extract_description(is_array($doc['description']) ? $doc['description']['description'] : $doc['description']))
     ) {
-      $ar = X::mergeArrays($ar, $extracted);
+      $ar = X::mergeArrays($ar, $extracted, ['doc' => $doc]);
     }
 
     if ($doc && !empty($doc['params'])) {
@@ -994,14 +994,14 @@ class Php extends bbn\Models\Cls\Basic
     $ar   = [];
     $bits = X::split($desc, PHP_EOL);
     if (!empty($bits)) {
-      X::ddump($bits);
       $ar['summary']           = trim(array_shift($bits));
+      $ar['description_parts'] = '';
       $ar['description']       = '';
-      $ar['description_parts'] = [];
+      $ar['example'] 					 = '';
       if (!empty($bits)) {
-        $ar['description'] = trim(X::join($bits, PHP_EOL));
-        $num_matches       = preg_match_all('/```(?:php)?(.+)```/s', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
-        $len               = strlen($ar['description']);
+        $ar['description_parts'] = trim(X::join($bits, PHP_EOL));
+        $num_matches       = preg_match_all('/```(?:php)?(.+)```/s', $ar['description_parts'], $matches, PREG_OFFSET_CAPTURE);
+        $len               = strlen($ar['description_parts']);
         $start             = 0;
 
         if ($num_matches) {
@@ -1010,42 +1010,45 @@ class Php extends bbn\Models\Cls\Basic
               if (
                   ($i === 0)
                   && ($m[1] !== 0)
-                  && $tmp = trim(substr($ar['description'], $start, $m[1]))
+                  && $tmp = trim(substr($ar['description_parts'], $start, $m[1]))
               ) {
-                $content = trim(Str::markdown2html($tmp));
+                $content = $tmp;
                 if ($content) {
-                  $ar['description_parts'][] = [
+                  $ar['description'] = $content;
+                  /*$ar['description_parts'][] = [
                     'type' => 'text',
                     'content' => $content
-                  ];
+                  ];*/
                 }
               }
-
-              $ar['description_parts'][] = [
+              $ar['example'] = trim($matches[1][$i][0]);
+              /*$ar['description_parts'][] = [
                 'type' => 'code',
                 'content' => trim($matches[1][$i][0])
-              ];
+              ];*/
               $start                     = $m[1] + strlen($m[0]);
               $end                       = isset($matches[0][$i + 1]) ? $matches[0][$i + 1][1] : $len;
               if (
                   ($start < $len)
-                  && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
+                  && ($tmp = trim(substr($ar['description_parts'], $start, $end - $start)))
               ) {
-                $ar['description_parts'][] = [
+                /*$ar['description_parts'][] = [
                   'type' => 'text',
                   'content' => $tmp
-                ];
+                ];*/
+                $ar['description'] = $tmp;
               }
             }
           }
         }
         else {
-          $content = trim(Str::markdown2html($ar['description']));
+          $content = trim(Str::markdown2html($ar['description_parts']));
           if ($content) {
-            $ar['description_parts'][] = [
+            /*$ar['description_parts'][] = [
               'type' => 'text',
               'content' => $content
-            ];
+            ];*/
+            $ar['description'] = $content;
           }
         }
       }

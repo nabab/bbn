@@ -3,6 +3,7 @@
 namespace bbn\Parsers;
 
 use bbn\X;
+use bbn\Str;
 
 class Generator {
 
@@ -18,39 +19,79 @@ class Generator {
 
   public function generateClass() {
     $res = "<?php\n\n";
-    if ( !empty($this->cfg['namespace'])) {
-      $res .= "namespace " . $this->cfg['namespace'] . ";\n\n";
+    if (!empty($this->cfg['name'])) {
+      $tmp =  explode("\\", $this->cfg['name']);
+      if (count($tmp) > 2) {
+        $str = $tmp[1];
+        $res .= "/**\n" . " *@package " . $str . "\n";
+        $res .= " */\n";
+      }
+    }
+    if (!empty($this->cfg['namespace'])) {
+      $res .= "namespace " . $this->cfg['namespaceName'] . ";\n\n";
     }
 
-    if (str_contains($this->cfg['name'], $this->cfg['namespace'])) {
-      $res .= "class " . substr($this->cfg['name'], strlen($this->cfg['namespace']) + 1);
-    } else {
-      $res .= "class " . $this->cfg['name'];
+    //Add the use statement
+
+    $res .= "//use statement \n\n";
+
+    //Add the description of the class
+
+    if (!empty($this->cfg['doc'])) {
+      if (!empty($this->cfg['doc']['description'])) {
+        $res .=  "/**\n" . str_repeat(' ', $this->spacing) . " * \n";
+        if (strpos($this->cfg['doc']['description'], "\n")) {
+          $arr_description = explode("\n", $this->cfg['doc']['description']);
+          foreach ($arr_description as $arr_d) {
+            $res .= str_repeat(' ', $this->spacing) . " * " . $arr_d ;
+            $res .= "\n";
+          }
+        }
+        else {
+          $res .= str_repeat(' ', $this->spacing) . " * " . $this->cfg['doc']['description'] . "\n";
+        }
+      }
+
+      //Add the tags (author, copyright, etc) of the description's class
+
+      if (!empty($this->cfg['doc']['tags'])) {
+        foreach ($this->cfg['doc']['tags'] as $key => $value) {
+          $res .= str_repeat(' ', $this->spacing) . " * ";
+          $res .= "@" . $key . " " . $value . "\n";
+        }
+        $res .=  "*/\n\n";
+      }
     }
 
-    if ( !empty($this->cfg['extends'])) {
-      $res .= " extends " . $this->cfg['extends'];
-    }
+    //Add the class naming
 
+    if (!empty($this->cfg['shortName'])) {
+      $res .= "class " . $this->cfg['shortName'] . ($this->cfg['parentClass'] ? (" extends " . $this->cfg['parentClass'] ) : "") ;
+    }
     $res .= "\n{\n";
+
+    //Add traits
 
     if ( !empty($this->cfg['traits'])) {
       foreach ($this->cfg['traits'] as $trait) {
-        $res .= str_repeat(' ', $this->spacing) . "use " . $trait->name . ";\n";
+        $res .= str_repeat(' ', $this->spacing) . "use " . $trait . ";\n";
       }
       $res .= "\n";
     }
 
+    //Add properties with all features
 
-    if ( !empty($this->cfg['properties'])) {
-      foreach ($this->cfg['properties'] as $property) {
-        $res .= $this->generateProperty($property) . "\n";
+    if (!empty($this->cfg['properties'])) {
+      foreach ($this->cfg['properties'] as  $property => $value) {
+        $res .= $this->generateProperty($value, $property);
       }
     }
 
     if ( !empty($this->cfg['methods'])) {
       foreach ($this->cfg['methods'] as $method) {
-        $res .= $this->generateMethod($method) . "\n\n";
+        if ($method['parent'] == false && $method['trait'] == false) {
+        	$res .= $this->generateMethod($method) . "\n\n";
+        }
       }
     }
 
@@ -61,42 +102,62 @@ class Generator {
   public function generateMethod(array $cfg) {
     $res = str_repeat(' ', $this->spacing);
 
-    if ( !empty($cfg['doc'])) {
-      $res .= "/**\n" . str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['summary'] . "\n";
-
-      if ($cfg['doc']['description']) {
-        $res .= str_repeat(' ', $this->spacing) . " * \n";
-        $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description'] . "\n";
+    if (!empty($cfg['description_parts'])) {
+      if ( !empty($cfg['summary'])) {
+        $res .= "/**\n" . str_repeat(' ', $this->spacing) . " * " . $cfg['summary'] . "\n";
       }
-      foreach ($cfg['doc']['tags'] as $tag) {
+      if ($cfg['description']) {
         $res .= str_repeat(' ', $this->spacing) . " * \n";
-        if ($tag['name'] === 'param' && !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])) {
-          $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['name'] . " " . $cfg['arguments'][$tag['index']]['type'] . " " . $tag['varname'] . "\n";
-        } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
-          $return = "";
-
-          foreach ($cfg['returns'] as $ret) {
-            if ($ret === null) {
-              $return .= "null|";
-            }
-            // if string contain "?" remove it
-            else if (str_contains($ret, '?')) {
-              $return .= str_replace('?', '', $ret) . "|";
-            } else {
-              $return .= $ret . "|";
-            }
+        if (strpos($cfg['description'], "//")) {
+          $arr_description = explode("//", $cfg['description']);
+          foreach ($arr_description as $arr_d) {
+            $res .= str_repeat(' ', $this->spacing) . " * " . Str::html2text(substr($arr_d, 0, -1)) ;
+            $res .= "\n";
           }
-          $return = substr($return, 0, -1);
+        }
+        else {
+          $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['description'] . "\n";
+        }
+      }
+      if ($cfg['example']) {
+        $res .= str_repeat(' ', $this->spacing) . " * \n";
+        $res .= str_repeat(' ', $this->spacing) . " *```php\n";
+        $arr_example = explode("\n", $cfg['example']);
+        foreach ($arr_example as $arr_e) {
+          $res .= str_repeat(' ', $this->spacing) . " * " . $arr_e . "\n";
+        }
+        $res .= str_repeat(' ', $this->spacing) ." * ```\n";
+      }
+      if (!empty($cfg['doc'])) {
+        foreach ($cfg['doc']['params'] as $tag) {
+          $res .= str_repeat(' ', $this->spacing) . " * \n";
+          if ($tag['tag'] === 'param' && !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])) {
+            $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['tag'] . " " . $tag['type'] . " " . $tag['name'] . " " . $tag['description'] . "\n";
+          } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
+            $return = "";
 
-          $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['name'] . " " . $return . " " . $tag['varname'] . "\n";
+            foreach ($cfg['returns'] as $ret) {
+              if ($ret === null) {
+                $return .= "null|";
+              }
+              // if string contain "?" remove it
+              else if (str_contains($ret, '?')) {
+                $return .= str_replace('?', '', $ret) . "|";
+              } else {
+                $return .= $ret . "|";
+              }
+            }
+            $return = substr($return, 0, -1);
+
+            $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['name'] . " " . $return /*. " " . $tag['varname'] */. "\n";
+          }
         }
       }
       $res .= str_repeat(' ', $this->spacing) . " */\n";
+      if (!empty($cfg['final']) ) {
+        $res .= "final ";
+      }
     }
-    if (!empty($cfg['final']) ) {
-      $res .= "final ";
-    }
-
     if ( !empty($cfg['public']) ) {
       $res .= "public ";
     } else if ( !empty($cfg['protected']) ) {
@@ -160,18 +221,25 @@ class Generator {
     return $res;
   }
 
-  public function generateProperty(array $cfg = [])
+  public function generateProperty(array $cfg = [], string $prop_name)
   {
-    $res = str_repeat(' ', $this->spacing);
-    $res .= $cfg['protected'] ? 'protected ' : ($cfg['private'] ? 'private ' : 'public ');
+    if ($cfg['parent'] == false && strlen($cfg['doc']['description']) > 1) {
+      $res .= ($cfg['doc']['description'] ? (str_repeat(' ', $this->spacing) . "/** " . $cfg['doc']['description']. " */\n") : "");
+      $res .= str_repeat(' ', $this->spacing) . $cfg["visibility"];
+      if ($cfg['static'] == true) {
+        $res .= ' static ';
+      }
+      $res .= " $" . $prop_name;
 
-    if (!empty($cfg['static'])) {
-      $res .= 'static ';
+      if ($cfg['doc']['description']) {
+        $array = explode(" ", $cfg['doc']['description']);
+        ($array [1] == "array" ? ($res .= " = []") : $res .= "");
+      }
+
+      return($res .= ";\n\n");
     }
-    if (!empty($cfg['name'])) {
-      $res .= "$" . $cfg['name'] . ";" . "\n";
+    else {
+      return($res .= "");
     }
-    return $res;
   }
-
 }
