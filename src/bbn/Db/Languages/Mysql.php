@@ -1530,6 +1530,15 @@ MYSQL
     return $st;
   }
 
+  public function getColMaxLength(string $column, string $table = null): ?int
+  {
+    [$tab, $col] = X::split($this->colFullName($column, $table), '.');
+    if (!$tab) {
+      throw new \Exception("error: no tab");
+    }
+    return $this->selectOne($tab, "max(length($col))");
+  }
+
   public function __toString()
   {
     return 'mysql';

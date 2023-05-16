@@ -714,6 +714,13 @@ class Db implements Db\Actions
     return $this->language->modelize($table, $force);
   }
 
+  /**
+   * 
+   */
+  public function getColMaxLength(string $column, string $table = null): ?int
+  {
+    return $this->language->getColMaxLength($column, $table);
+  } 
 
   /** 
    * Return the table's structure as an indexed array.
