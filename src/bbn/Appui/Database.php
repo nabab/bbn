@@ -1773,7 +1773,7 @@ class Database extends bbn\Models\Cls\Cache
     if ($length > 32) {
       return $max;
     }
-    elseif ($length > 20) {
+    if ($length > 20) {
       return strval($length) . 'em';
     }
     return strval($length + 3) . 'em';
