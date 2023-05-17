@@ -1502,8 +1502,10 @@ class Database extends bbn\Models\Cls\Cache
 
     /** @var string An alias which will be used as prefix for all aliases */
     $alias = Str::genpwd(5);
+
     /** @var int An incremental index for the tables alias */
     $tIdx  = 0;
+  
     foreach ($model['fields'] as $col => $f) {
       $this->iterOnField($res, $col, $f, $table, $alias, $tIdx, $model);  
     }
@@ -1519,8 +1521,7 @@ class Database extends bbn\Models\Cls\Cache
     if (!empty($f['option'])) {
       $js['text'] = $f['option']['text'];
     }
-    $displayColumn = false;
-    $this->setColumnEditor($col, $model, $tIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
+    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
 
     $res['php']['fields'][$col] = $field;
     if (!empty($f['option'])) {
@@ -1549,7 +1550,7 @@ class Database extends bbn\Models\Cls\Cache
     $f['option']['editable'] = $val;
   }
 
-  private function setColumnEditor(&$col, &$model, &$tIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
+  private function setColumnEditor(&$col, &$model, &$tIdx, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
   {
     if (empty($model['cols'][$col])) {
       return;
@@ -1567,6 +1568,7 @@ class Database extends bbn\Models\Cls\Cache
         $tIdx++;
         // Getting the model from the foreign table
         $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
+        $displayColumn = false;
         $this->setDisplayColumn($tmodel, $alias, $tIdx, $field, $displayColumn);
         if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
           if (!isset($f['option']['editor'])) {
@@ -1585,9 +1587,6 @@ class Database extends bbn\Models\Cls\Cache
     }
   }
 
-  // TODO:
-  // - check if foreign key
-  // - make a dropdown/a appui-database-data-browser
   private function setBbnEditor($f, &$js, &$model, &$c) {
     if (!empty($model['keys'][$c]['ref_table'])) {
       $num = $this->currentConn->count($model['keys'][$c]['ref_table']);
@@ -1686,9 +1685,7 @@ class Database extends bbn\Models\Cls\Cache
       $dcols = [];
       foreach ($tmodel['option']['dcolumns'] as $dcol) {
         $dcols[] = $this->db->cfn($dcol, $alias.'_t'.$tIdx, true);
-        if (!$displayColumn) {
-          $displayColumn = $dcol;
-        }
+        $displayColumn = $dcol;
       }
 
       // add display columns
@@ -1743,9 +1740,12 @@ class Database extends bbn\Models\Cls\Cache
   }
 
   /**
-   * Get the width of the js part
+   * Get the width of the js of the js cell
+   * 
+   * @param array $js the js config array
+   * @param array $f the field array
    */
-  private function setJsWidth(&$js, $f)
+  private function setJsWidth(array &$js, array $f)
   {
     if (empty($f['width'])) {
       if ($f['type'] === 'date') {
