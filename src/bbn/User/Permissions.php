@@ -5,6 +5,15 @@
 namespace bbn\User;
 
 use Exception, bbn, bbn\X, bbn\Str, bbn\User, bbn\Db, bbn\Appui\Option, bbn\Mvc, bbn\File\System;
+use SomeNamespace\ClassName;
+use SomeTrait;
+use AnotherTrait as AliasedTrait;
+/*use function SomeNamespace\someFunction;
+use function AnotherNamespace\anotherFunction as renamedFunction;
+
+use SomeNamespace\{CONSTANT_NAME, someFunction as otherFunction};
+use AnotherNamespace\{ANOTHER_CONSTANT as RENAMED_CONSTANT, anotherFunction};*/
+
 /**
  * A permission system linked to options, User classes and preferences.
  *

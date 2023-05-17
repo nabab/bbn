@@ -4,16 +4,16 @@ namespace bbn\Parsers;
 
 /**
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) Ozgur (Ozzy) Giritli <ozgur@zeronights.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
  * 
@@ -71,11 +71,11 @@ class Reflector extends ReflectionClass {
 
 	/**
 	 * Read file source up to the line where our class is defined.
-	 * 
+	 *
 	 * @return string
 	 */
 	private function readFileSource() {
-		
+
 		$file = fopen($this->getFileName(), 'r');
 		$line = 0;
 		$source = '';
@@ -91,7 +91,7 @@ class Reflector extends ReflectionClass {
 		}
 
 		fclose($file);
-		
+
 		return $source;
 	}
 

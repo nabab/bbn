@@ -33,7 +33,18 @@ class Generator {
 
     //Add the use statement
 
-    $res .= "//use statement \n\n";
+    if (!empty($this->cfg['uses'])) {
+      foreach ($this->cfg['uses'] as $key => $value) {
+        //$res .= "Clé : " . $key . ", Valeur : " . $value . ";\n";
+        /*X::ddump($value);*/
+    		$res .= "use " . $value;
+				if (basename(str_replace("\\", "/", $value) == $key)) {
+          $res .= " as " . $key;
+        }
+        $res .= ";\n";
+      }
+      $res .= "\n";
+    }
 
     //Add the description of the class
 
@@ -233,7 +244,7 @@ class Generator {
 
       if ($cfg['doc']['description']) {
         $array = explode(" ", $cfg['doc']['description']);
-        ($array [1] == "array" ? ($res .= " = []") : $res .= "");
+        ($array[1] == "array" ? ($res .= " = []") : $res .= "");
       }
 
       return($res .= ";\n\n");
