@@ -1602,73 +1602,70 @@ class Database extends bbn\Models\Cls\Cache
       return;
     }
     if (empty($js['editor']) && (!isset($f['editable']) || $f['editable'])) {
-      switch ($f['type']) {
-        case 'int':
-        case 'smallint':
-        case 'tinyint':
-        case 'bigint':
-        case 'mediumint':
-        case 'real':
-        case 'double':
-        case 'decimal':
-        case 'float':
-          $js['editor'] = 'bbn-numeric';
+      if ($this->typeIsNum($f['type'])) {
+        $js['editor'] = 'bbn-numeric';
           $max = pow(10, $f['maxlength']) - 1;
           $js['options'] = [
             'max' => $max,
             'min' => $f['signed'] ? -$max : 0
           ];
-          break;
-        case 'date':
-          $js['editor'] = 'bbn-datepicker';
-          break;
-        case 'datetime':
-          $js['editor'] = 'bbn-datetimepicker';
-          break;
-        case 'json':
-          $js['editor'] = 'bbn-json-editor';
-          break;
-        case 'enum':
-        case 'set':
-          $js['editor'] = 'bbn-dropdown';
-          $src = [];
-          if (!empty($f['extra'])) {
-            $src = X::split(substr($f['extra'], 1, -1), "','");
-          }
-
-          // Calculating the length based on the longest enum value
-          if (empty($js['width'])) {
-            $maxlength = 1;
-            foreach ($src as $s) {
-              $len = strlen($s);
-              if ($len > $maxlength) {
-                $maxlength = $len;
-              }
-            }
-          }
-
-          $js['options'] = [
-            'source' => $src
-          ];
-          break;
-        case 'binary':
-        case 'varbinary':
-          $js['component'] = 'appui-database-data-binary';
-          $js['cls'] = 'bbn-c';
-          $js['editor'] = 'bbn-upload';
-          break;
-        case 'text':
-        case 'bigtext':
-        case 'smalltext':
-        case 'tinytext':
-        case 'mediumtext':
-          $js['editor'] = 'bbn-textarea';
-          break;
+      } else if ($f['type'] === 'date') {
+        $js['editor'] = 'bbn-datepicker';
+      } else if ($f['type'] === 'datetime') {
+        $js['editor'] = 'bbn-datetimepicker';
+      } else if ($f['type'] === 'json') {
+        $js['editor'] = 'bbn-json-editor';
+      } else if ($f['type'] === 'enum' || $f['type'] === 'set') {
+        $this->setDropdownEditor($js, $f);
+      } else if ($this->typeIsBinary($f['type'])) {
+        $js['component'] = 'appui-database-data-binary';
+        $js['cls'] = 'bbn-c';
+        $js['editor'] = 'bbn-upload';
+      } else if ($this->typeIsText($f['type'])) {
+        $js['editor'] = 'bbn-textarea';
       }
     }
   }
-  
-    
+
+  private function setDropdownEditor(&$js, &$f) {
+    $js['editor'] = 'bbn-dropdown';
+    $src = [];
+    if (!empty($f['extra'])) {
+      $src = X::split(substr($f['extra'], 1, -1), "','");
+    }
+    // Calculating the length based on the longest enum value
+    if (empty($js['width'])) {
+      $maxlength = 1;
+      foreach ($src as $s) {
+        $len = strlen($s);
+        if ($len > $maxlength) {
+          $maxlength = $len;
+        }
+      }
+    }
+    $js['options'] = [
+      'source' => $src
+    ];
+  }
+
+  private function typeIsBinary(string $type): bool
+  {
+    return ($type === 'binary' || $type === 'varbinary');
+  }
+
+  private function typeIsText(string $type): bool
+  {
+    return ($type === 'text' || $type === 'bigtext' || $type === 'smalltext'
+          || $type === 'tinytext' || $type === 'mediumtext');
+  }
+
+  private function typeIsNum(string $type): bool
+  {
+    return ($type === 'int' || $type === 'tinyint' || $type === 'bigint'
+          || $type === 'mediumint' || $type === 'real' || $type === 'double'
+          || $type === 'decimal' || $type === 'float' || $type === 'smallint');
+  }
+
   /**
    * Set the display column
    *
