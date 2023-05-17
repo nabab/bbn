@@ -1504,49 +1504,13 @@ class Database extends bbn\Models\Cls\Cache
     $alias = Str::genpwd(5);
     /** @var int An incremental index for the tables alias */
     $tIdx  = 0;
-    /** @var int An incremental index for the columns alias */
-    $cIdx  = 0;
     foreach ($model['fields'] as $col => $f) {
-      /** @var array The javascript column configuration */
-      $js = [
-        'text' => $col,
-        'field' => $col
-      ];
-      $field = $table.'.'.$col;
-      // Text should be defined before the option is changed in case of a single foreign key
-      if (!empty($f['option'])) {
-        // Taking the text from the option (which will be the col name if not defined)
-        $js['text'] = $f['option']['text'];
-      }
-
-      /** @var bool|string The simple name of the unique column to display for the key  */
-      $displayColumn = false;
-      // Case where the column is part of a key
-      $this->setColumnEditor($col, $model, $tIdx, $cIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
-
-      $res['php']['fields'][$col] = $field;
-      if (!empty($f['option'])) {
-        $f = $f['option'];
-      }
-
-      // Taking all possible properties defined
-      // Width
-      $this->setJsWidth($js, $f);
-
-      // For the cell view
-      if (!empty($f['component'])) {
-        $js['component'] = $f['component'];
-      }
-
-      // The editor/filter component
-      $this->setBbnEditor($f, $js, $model, $c);
-
-      $res['js']['columns'][] = $js;   
+      $this->iterOnField($res, $col, $f, $table, $alias, $tIdx, $model);  
     }
     return $res;
   }
 
-  private function iterOnField(&$res, &$col, &$f, &$table, &$alias, &$tIdx, &$cIdx, &$model) {
+  private function iterOnField(&$res, &$col, &$f, &$table, &$alias, &$tIdx, &$model) {
     $js = [
       'text' => $col,
       'field' => $col
@@ -1556,11 +1520,11 @@ class Database extends bbn\Models\Cls\Cache
       $js['text'] = $f['option']['text'];
     }
     $displayColumn = false;
-    $this->setColumnEditor($col, $model, $tIdx, $cIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
+    $this->setColumnEditor($col, $model, $tIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
 
     $res['php']['fields'][$col] = $field;
     if (!empty($f['option'])) {
-      $f = $f['option'];
+      $js = $f['option'];
     }
     if (!empty($f['component'])) {
       $js['component'] = $f['component'];
@@ -1585,7 +1549,7 @@ class Database extends bbn\Models\Cls\Cache
     $f['option']['editable'] = $val;
   }
 
-  private function setColumnEditor(&$col, &$model, &$tIdx, &$cIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
+  private function setColumnEditor(&$col, &$model, &$tIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
   {
     if (empty($model['cols'][$col])) {
       return;
@@ -1603,7 +1567,7 @@ class Database extends bbn\Models\Cls\Cache
         $tIdx++;
         // Getting the model from the foreign table
         $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
-        $this->setDisplayColumn($tmodel, $alias, $tIdx, $cIdx, $field, $displayColumn);
+        $this->setDisplayColumn($tmodel, $alias, $tIdx, $field, $displayColumn);
         if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
           if (!isset($f['option']['editor'])) {
             $js['editor'] = 'appui-database-data-browser';
@@ -1714,10 +1678,9 @@ class Database extends bbn\Models\Cls\Cache
    * @param [type] $tmodel
    * @param [type] $alias
    * @param [type] $tIdx
-   * @param [type] $cIdx
    * @return void
    */
-  private function setDisplayColumn(&$tmodel, &$alias, &$tIdx, &$cIdx, &$field, &$displayColumn) {
+  private function setDisplayColumn(&$tmodel, &$alias, &$tIdx, &$field, &$displayColumn) {
     // Looking for displayed columns configured
     if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {
       $dcols = [];
@@ -1735,7 +1698,6 @@ class Database extends bbn\Models\Cls\Cache
       // Otherwise looking for the first varchar
       foreach ($tmodel['fields'] as $tcol => $tf) {
         if ($tf['type'] === 'varchar') {
-          $cIdx++;
           // Adding the column to the query
           $field = $alias.'_t'.$tIdx.'.'.$tcol;
           $displayColumn = $tcol;
