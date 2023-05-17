@@ -11,6 +11,7 @@ namespace bbn\Appui;
 use bbn;
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 
 class Database extends bbn\Models\Cls\Cache
 {
@@ -32,6 +33,12 @@ class Database extends bbn\Models\Cls\Cache
    */
   protected $pw;
 
+  /**
+   * The current db connection object
+   *
+   * @var Db
+   */
+  private $currentConn;
 
   /**
    * The last alternative connection made with the connection function.
@@ -40,7 +47,7 @@ class Database extends bbn\Models\Cls\Cache
    * I can put code in it
    * </code>
    *
-   * @var bbn\Db
+   * @var Db
    */
   protected $connections = [
     'mysql' => [],
@@ -62,14 +69,14 @@ class Database extends bbn\Models\Cls\Cache
   /**
    * Constructor
    *
-   * @param bbn\Db $db The main database connection (where options are)
+   * @param Db $db The main database connection (where options are)
    */
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     self::optionalInit();
     $this->o = bbn\Appui\Option::getInstance();
-
+    $this->currentConn = $db;
   }
 
 
@@ -78,9 +85,9 @@ class Database extends bbn\Models\Cls\Cache
    *
    * @param string $host A string user@host
    * @param string $db   The database name
-   * @return bbn\Db|null
+   * @return Db|null
    */
-  public function connection(string $host = null, string $engine = 'mysql', string $db = ''): bbn\Db
+  public function connection(string $host = null, string $engine = 'mysql', string $db = ''): Db
   {
     if (bbn\Str::isUid($host)) {
       $id_host = $host;
@@ -124,7 +131,7 @@ class Database extends bbn\Models\Cls\Cache
               }
 
               try {
-                $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\Db($db_cfg);
+                $this->connections[$parent['code']][$cfg['code'] . $db] = new Db($db_cfg);
               }
               catch (\Exception $e) {
                 throw new \Exception($e->getMessage());
@@ -148,7 +155,7 @@ class Database extends bbn\Models\Cls\Cache
               'db' => $cfg['path'].'/'.$db
             ];
             try {
-              $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\Db($db_cfg);
+              $this->connections[$parent['code']][$cfg['code'] . $db] = new Db($db_cfg);
             }
             catch (\Exception $e) {
               throw new \Exception($e->getMessage());
@@ -161,7 +168,8 @@ class Database extends bbn\Models\Cls\Cache
       }
 
       if (isset($this->connections[$parent['code']][$cfg['code'] . $db])) {
-        return $this->connections[$parent['code']][$cfg['code'] . $db];
+        $this->currentConn = $this->connections[$parent['code']][$cfg['code'] . $db];
+        return $this->currentConn;
       }
     }
 
@@ -1514,7 +1522,7 @@ class Database extends bbn\Models\Cls\Cache
       /** @var bool|string The simple name of the unique column to display for the key  */
       $displayColumn = false;
       // Case where the column is part of a key
-      $this->colIsPartOfKey($col, $model, $tIdx, $cIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
+      $this->setColumnEditor($col, $model, $tIdx, $cIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
 
       $res['php']['fields'][$col] = $field;
       if (!empty($f['option'])) {
@@ -1523,7 +1531,7 @@ class Database extends bbn\Models\Cls\Cache
 
       // Taking all possible properties defined
       // Width
-      $this->getJsWidth($js, $f);
+      $this->setJsWidth($js, $f);
 
       // For the cell view
       if (!empty($f['component'])) {
@@ -1536,6 +1544,30 @@ class Database extends bbn\Models\Cls\Cache
       $res['js']['columns'][] = $js;   
     }
     return $res;
+  }
+
+  private function iterOnField(&$res, &$col, &$f, &$table, &$alias, &$tIdx, &$cIdx, &$model) {
+    $js = [
+      'text' => $col,
+      'field' => $col
+    ];
+    $field = $table.'.'.$col;
+    if (!empty($f['option'])) {
+      $js['text'] = $f['option']['text'];
+    }
+    $displayColumn = false;
+    $this->setColumnEditor($col, $model, $tIdx, $cIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
+
+    $res['php']['fields'][$col] = $field;
+    if (!empty($f['option'])) {
+      $f = $f['option'];
+    }
+    if (!empty($f['component'])) {
+      $js['component'] = $f['component'];
+    }
+    $this->setJsWidth($js, $f);
+    $this->setBbnEditor($f, $js, $model, $c);
+    $res['js']['columns'][] = $js;  
   }
 
   /**
@@ -1553,7 +1585,7 @@ class Database extends bbn\Models\Cls\Cache
     $f['option']['editable'] = $val;
   }
 
-  private function colIsPartOfKey(&$col, &$model, &$tIdx, &$cIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
+  private function setColumnEditor(&$col, &$model, &$tIdx, &$cIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
   {
     if (empty($model['cols'][$col])) {
       return;
@@ -1574,8 +1606,8 @@ class Database extends bbn\Models\Cls\Cache
         $this->setDisplayColumn($tmodel, $alias, $tIdx, $cIdx, $field, $displayColumn);
         if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
           if (!isset($f['option']['editor'])) {
-            $f['option']['editor'] = 'appui-database-table-browser';
-            $f['option']['options'] = [
+            $js['editor'] = 'appui-database-data-browser';
+            $js['options'] = [
               'table' => $model['keys'][$c]['ref_table'],
               'column' => $model['keys'][$c]['ref_column']
             ];
@@ -1594,7 +1626,17 @@ class Database extends bbn\Models\Cls\Cache
   // - make a dropdown/a appui-database-data-browser
   private function setBbnEditor($f, &$js, &$model, &$c) {
     if (!empty($model['keys'][$c]['ref_table'])) {
-      $js['editor'] = 'bbn-dropdown';
+      $num = $this->currentConn->count($model['keys'][$c]['ref_table']);
+      if (!$num) {
+        $js['editor'] = 'bbn-input';
+        $js['options'] = ['type' => 'hidden'];
+        return;
+      }
+      if ($num < 1000) {
+        $js['editor'] = 'bbn-dropdown';
+        return;
+      }
+      $js['editor'] = 'appui-database-data-browser';
       return;
     }
     if (!empty($f['editor'])) {
@@ -1741,7 +1783,7 @@ class Database extends bbn\Models\Cls\Cache
   /**
    * Get the width of the js part
    */
-  private function getJsWidth(&$js, $f)
+  private function setJsWidth(&$js, $f)
   {
     if (empty($f['width'])) {
       if ($f['type'] === 'date') {
