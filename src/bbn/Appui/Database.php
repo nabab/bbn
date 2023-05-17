@@ -1479,7 +1479,7 @@ class Database extends bbn\Models\Cls\Cache
    *
    * @return array|null
    */
-  public function getGridConfig(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?array
+  public function oldGetGridConfig(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
     if ($model = $this->modelize($table, $db, $host, $engine)) {
       /** @var array The empty config, js for bbn-table, php for bbn\appui\grid */
@@ -1712,34 +1712,289 @@ class Database extends bbn\Models\Cls\Cache
     return null;
   }
 
+  public function getGridConfig(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?array
+  {
+    $model = $this->modelize($table, $db, $host, $engine);
+
+    if (!$model) {
+      return null;
+    }
+
+    /** @var array The empty config, js for bbn-table, php for bbn\appui\grid */
+    $res = [
+      'js' => [
+        'columns' => []
+      ],
+      'php' => [
+        'tables' => [$table],
+        'fields' => [],
+        'join' => [],
+        'order' => []
+      ]
+    ];
+    if (!$db) {
+      $db = $this->db->getCurrent();
+    }
+
+    /** @var string An alias which will be used as prefix for all aliases */
+    $alias = Str::genpwd(5);
+    /** @var int An incremental index for the tables alias */
+    $tIdx  = 0;
+    /** @var int An incremental index for the columns alias */
+    $cIdx  = 0;
+    foreach ($model['fields'] as $col => $f) {
+      /** @var array The javascript column configuration */
+      $js = [
+        'text' => $col,
+        'field' => $col
+      ];
+      $field = $table.'.'.$col;
+      // Text should be defined before the option is changed in case of a single foreign key
+      if (!empty($f['option'])) {
+        // Taking the text from the option (which will be the col name if not defined)
+        $js['text'] = $f['option']['text'];
+      }
+
+      /** @var bool|string The simple name of the unique column to display for the key  */
+      $displayColumn = false;
+      // Case where the column is part of a key
+      $this->colIsPartOfKey($col, $model, $tIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table);
+
+      $res['php']['fields'][$col] = $field;
+      if (!empty($f['option'])) {
+        $f = $f['option'];
+      }
+
+      // Taking all possible properties defined
+      // Width
+      $this->getJsWidth($js, $f);
+
+      // For the cell view
+      if (!empty($f['component'])) {
+        $js['component'] = $f['component'];
+      }
+
+      // The editor/filter component
+      $this->setBbnEditor($f, $js, $model, $c);
+
+      $res['js']['columns'][] = $js;   
+    }
+    return $res;
+  }
+
+  private function colIsPartOfKey(&$col, &$model, &$tIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table)
+  {
+    if (empty($model['cols'][$col])) {
+      return;
+    }
+    foreach ($model['cols'][$col] as $c) {
+      if ($c === 'PRIMARY') {
+        if (empty($f['option'])) {
+          $f['editable'] = false;
+        }
+        else {
+          $f['option']['editable'] = false;
+        }
+        $js['component'] = 'appui-database-data-binary';
+        $js['cls'] = 'bbn-c';
+        $js['width'] = 'bbn-c';
+      }
+      // Case where it is a foreign key
+      elseif (!empty($model['keys'][$c]['ref_table'])) {
+        // Incrementing the alias indexes as we'll use them
+        $tIdx++;
+        // Getting the model from the foreign table
+        $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
+        $this->setDisplayColumn($tmodel, $alias, $tIdx, $cIdx, $field, $displayColumn);
+        if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
+          if (!isset($f['option']['editor'])) {
+            $f['option']['editor'] = 'appui-database-table-browser';
+            $f['option']['options'] = [
+              'table' => $model['keys'][$c]['ref_table'],
+              'column' => $model['keys'][$c]['ref_column']
+            ];
+          }
+        }
+
+        // Adding the JOIN part to the query
+        $res['php']['join'][] = $this->makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col);
+        break;
+      }
+    }
+  }
+
+  // TODO:
+  // - check if foreign key
+  // - make a dropdown/a appui-database-data-browser
+  private function setBbnEditor($f, &$js, &$model, &$c) {
+    if (!empty($model['keys'][$c]['ref_table'])) {
+      $js['editor'] = 'bbn-dropdown';
+      return;
+    }
+    if (!empty($f['editor'])) {
+      $js['editor'] = $f['editor'];
+      return;
+    }
+    if (empty($js['editor']) && (!isset($f['editable']) || $f['editable'])) {
+      switch ($f['type']) {
+        case 'int':
+        case 'smallint':
+        case 'tinyint':
+        case 'bigint':
+        case 'mediumint':
+        case 'real':
+        case 'double':
+        case 'decimal':
+        case 'float':
+          $js['editor'] = 'bbn-numeric';
+          $max = pow(10, $f['maxlength']) - 1;
+          $js['options'] = [
+            'max' => $max,
+            'min' => $f['signed'] ? -$max : 0
+          ];
+          break;
+        case 'date':
+          $js['editor'] = 'bbn-datepicker';
+          break;
+        case 'datetime':
+          $js['editor'] = 'bbn-datetimepicker';
+          break;
+        case 'json':
+          $js['editor'] = 'bbn-json-editor';
+          break;
+        case 'enum':
+        case 'set':
+          $js['editor'] = 'bbn-dropdown';
+          $src = [];
+          if (!empty($f['extra'])) {
+            $src = X::split(substr($f['extra'], 1, -1), "','");
+          }
+
+          // Calculating the length based on the longest enum value
+          if (empty($js['width'])) {
+            $maxlength = 1;
+            foreach ($src as $s) {
+              $len = strlen($s);
+              if ($len > $maxlength) {
+                $maxlength = $len;
+              }
+            }
+          }
+
+          $js['options'] = [
+            'source' => $src
+          ];
+          break;
+        case 'binary':
+        case 'varbinary':
+          $js['component'] = 'appui-database-data-binary';
+          $js['cls'] = 'bbn-c';
+          $js['editor'] = 'bbn-upload';
+          break;
+        case 'text':
+        case 'bigtext':
+        case 'smalltext':
+        case 'tinytext':
+        case 'mediumtext':
+          $js['editor'] = 'bbn-textarea';
+          break;
+      }
+    }
+  }
+  
+    
+  /**
+   * Set the display column
+   *
+   * @param [type] $tmodel
+   * @param [type] $alias
+   * @param [type] $tIdx
+   * @param [type] $cIdx
+   * @return void
+   */
+  private function setDisplayColumn(&$tmodel, &$alias, &$tIdx, &$cIdx, &$field, &$displayColumn) {
+    // Looking for displayed columns configured
+    if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {
+      $dcols = [];
+      foreach ($tmodel['option']['dcolumns'] as $dcol) {
+        $dcols[] = $this->db->cfn($dcol, $alias.'_t'.$tIdx, true);
+        if (!$displayColumn) {
+          $displayColumn = $dcol;
+        }
+      }
+
+      // add display columns
+      $field = $this->addDisplayColumn($dcols, $displayColumn);
+    }
+    else {
+      // Otherwise looking for the first varchar
+      foreach ($tmodel['fields'] as $tcol => $tf) {
+        if ($tf['type'] === 'varchar') {
+          $cIdx++;
+          // Adding the column to the query
+          $field = $alias.'_t'.$tIdx.'.'.$tcol;
+          $displayColumn = $tcol;
+          break;
+        }
+      }
+    }
+  }
+
+  private function addDisplayColumn($dcols, $displayColumn) {
+    if (count($dcols) === 1) {
+      return $displayColumn;
+    }
+    // Adding more display column as concat in the query
+    return "CONCAT(".X::join($dcols, ', ').")";
+  }
+
+  private function makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col)
+  {
+    return [
+      'type' => $f['null'] ? 'left' : '',
+      'table' => $model['keys'][$c]['ref_db'].'.'.$model['keys'][$c]['ref_table'],
+      'alias' => $alias.'_t'.$tIdx,
+      'on' => [
+        [
+          'field' => $alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],
+          'exp' => $table.'.'.$col
+        ]
+      ]
+    ];
+  }
+
+  private function getJsWidth(&$js, $f)
+  {
+    if (empty($f['width'])) {
+      if ($f['type'] === 'date') {
+        $js['width'] = 100;
+      }
+      elseif ($f['type'] === 'datetime') {
+        $js['width'] = 140;
+      }
+      elseif ($f['type'] === 'binary') {
+        $js['width'] = 60;
+      }
+      elseif (!empty($f['maxlength']) && ($f['maxlength'] < 40)) {
+        $js['width'] = $this->length2Width($f['maxlength']);
+      }
+      else {
+        $js['minWidth'] = '40em';
+      }
+    }
+    else {
+      $js['width'] = $f['width'];
+    }
+  }
 
   public function length2Width(int $length, $max = '30em'): string
   {
     if ($length > 32) {
       return $max;
     }
-    elseif ($length > 25) {
-      return '25em';
-    }
     elseif ($length > 20) {
-      return '20em';
+      return strval($length) . 'em';
     }
-    elseif ($length > 15) {
-      return '17em';
-    }
-    elseif ($length > 10) {
-      return '13em';
-    }
-    elseif ($length > 5) {
-      return '9em';
-    }
-    elseif ($length > 3) {
-      return '5em';
-    }
-
-    return '3em';
-
+    return strval($length + 3) . 'em';
   }
-
-
 }
