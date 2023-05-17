@@ -1514,7 +1514,7 @@ class Database extends bbn\Models\Cls\Cache
       /** @var bool|string The simple name of the unique column to display for the key  */
       $displayColumn = false;
       // Case where the column is part of a key
-      $this->colIsPartOfKey($col, $model, $tIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table);
+      $this->colIsPartOfKey($col, $model, $tIdx, $cIdx, $displayColumn, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
 
       $res['php']['fields'][$col] = $field;
       if (!empty($f['option'])) {
@@ -1538,19 +1538,29 @@ class Database extends bbn\Models\Cls\Cache
     return $res;
   }
 
-  private function colIsPartOfKey(&$col, &$model, &$tIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table)
+  /**
+   * Set editable value of f to $val
+   *
+   * @param [type] $f
+   * @param boolean $val
+   * @return void
+   */
+  private function setEditable(&$f, bool $val) {
+    if (empty($f['option'])) {
+      $f['editable'] = $val;
+      return;
+    }
+    $f['option']['editable'] = $val;
+  }
+
+  private function colIsPartOfKey(&$col, &$model, &$tIdx, &$cIdx, &$displayColumn, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
   {
     if (empty($model['cols'][$col])) {
       return;
     }
     foreach ($model['cols'][$col] as $c) {
       if ($c === 'PRIMARY') {
-        if (empty($f['option'])) {
-          $f['editable'] = false;
-        }
-        else {
-          $f['option']['editable'] = false;
-        }
+        $this->setEditable($f, false);
         $js['component'] = 'appui-database-data-binary';
         $js['cls'] = 'bbn-c';
         $js['width'] = 'bbn-c';
@@ -1704,7 +1714,19 @@ class Database extends bbn\Models\Cls\Cache
     return "CONCAT(".X::join($dcols, ', ').")";
   }
 
-  private function makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col)
+  /**
+   * Make the Join part of 
+   *
+   * @param [type] $f
+   * @param [type] $model
+   * @param [type] $c
+   * @param [type] $alias
+   * @param [type] $tIdx
+   * @param [type] $table
+   * @param [type] $col
+   * @return array
+   */
+  private function makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col): array
   {
     return [
       'type' => $f['null'] ? 'left' : '',
@@ -1719,6 +1741,9 @@ class Database extends bbn\Models\Cls\Cache
     ];
   }
 
+  /**
+   * Get the width of the js part
+   */
   private function getJsWidth(&$js, $f)
   {
     if (empty($f['width'])) {
@@ -1743,6 +1768,9 @@ class Database extends bbn\Models\Cls\Cache
     }
   }
 
+  /**
+   * Transform the length to a css width
+   */
   public function length2Width(int $length, $max = '30em'): string
   {
     if ($length > 32) {
