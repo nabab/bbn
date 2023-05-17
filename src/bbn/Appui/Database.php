@@ -1759,10 +1759,9 @@ class Database extends bbn\Models\Cls\Cache
       else {
         $js['minWidth'] = '40em';
       }
+      return;
     }
-    else {
-      $js['width'] = $f['width'];
-    }
+    $js['width'] = $f['width'];
   }
 
   /**
