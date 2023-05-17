@@ -1507,12 +1507,12 @@ class Database extends bbn\Models\Cls\Cache
     $tIdx  = 0;
   
     foreach ($model['fields'] as $col => $f) {
-      $this->iterOnField($res, $col, $f, $table, $alias, $tIdx, $model);  
+      $this->iterOnField($res, $col, $f, $table, $alias, $tIdx, $model, $host, $engine);  
     }
     return $res;
   }
 
-  private function iterOnField(&$res, &$col, &$f, &$table, &$alias, &$tIdx, &$model) {
+  private function iterOnField(&$res, &$col, &$f, &$table, &$alias, &$tIdx, &$model, &$host, &$engine) {
     $js = [
       'text' => $col,
       'field' => $col
@@ -1521,8 +1521,8 @@ class Database extends bbn\Models\Cls\Cache
     if (!empty($f['option'])) {
       $js['text'] = $f['option']['text'];
     }
-    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $tmodel, $js, $res, $table, $alias);
-
+    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table, $alias);
+    
     $res['php']['fields'][$col] = $field;
     if (!empty($f['option'])) {
       $js = $f['option'];
@@ -1550,7 +1550,7 @@ class Database extends bbn\Models\Cls\Cache
     $f['option']['editable'] = $val;
   }
 
-  private function setColumnEditor(&$col, &$model, &$tIdx, &$f, &$field, &$host, &$engine, &$tmodel, &$js, &$res, &$table, &$alias)
+  private function setColumnEditor(&$col, &$model, &$tIdx, &$f, &$field, &$host, &$engine, &$js, &$res, &$table, &$alias)
   {
     if (empty($model['cols'][$col])) {
       return;
@@ -1579,8 +1579,6 @@ class Database extends bbn\Models\Cls\Cache
             ];
           }
         }
-
-        // Adding the JOIN part to the query
         $res['php']['join'][] = $this->makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col);
         break;
       }
