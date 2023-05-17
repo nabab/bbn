@@ -1712,7 +1712,7 @@ class Database extends bbn\Models\Cls\Cache
   }
 
   /**
-   * Make the Join part of 
+   * Make the Join part of the query
    *
    * @param [type] $f
    * @param [type] $model
