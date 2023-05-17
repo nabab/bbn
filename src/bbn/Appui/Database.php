@@ -1520,13 +1520,11 @@ class Database extends bbn\Models\Cls\Cache
     $field = $table.'.'.$col;
     if (!empty($f['option'])) {
       $js['text'] = $f['option']['text'];
+      //$f = $f['option'];
     }
     $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table, $alias);
     
     $res['php']['fields'][$col] = $field;
-    if (!empty($f['option'])) {
-      $js = $f['option'];
-    }
     if (!empty($f['component'])) {
       $js['component'] = $f['component'];
     }
