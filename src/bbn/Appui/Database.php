@@ -1528,19 +1528,22 @@ class Database extends bbn\Models\Cls\Cache
       'field' => $col
     ];
     $field = $table.'.'.$col;
+
     if (!empty($f['option'])) {
       $js['text'] = $f['option']['text'];
-      $f = $f['option'];
     }
     $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table);
-    
     $res['php']['fields'][$col] = $field;
+
+    if (!empty($f['option'])) {
+      $f = $f['option'];
+    }
     if (!empty($f['component'])) {
       $js['component'] = $f['component'];
     }
     $this->setJsEditor($f, $js, $model);
     $this->setJsWidth($js, $f);
-    $res['js']['columns'][] = $js;  
+    $res['js']['columns'][] = $js;
   }
 
   private function setPrimaryColumn(&$js, &$f)
@@ -1553,12 +1556,6 @@ class Database extends bbn\Models\Cls\Cache
       return;
     }
     $f['option']['editable'] = false;
-  }
-
-  private function setEditor(&$res, &$js)
-  {
-    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table);
-    $this->setJSEditor($f, $js, $model);
   }
 
   private function setForeignKeyEditor(&$js, &$model, &$c, &$host, &$engine, $tIdx, &$field)
