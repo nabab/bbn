@@ -1523,13 +1523,13 @@ class Database extends bbn\Models\Cls\Cache
       //$f = $f['option'];
     }
     $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table, $alias);
+    $this->setBbnEditor($f, $js, $model, $c);
     
     $res['php']['fields'][$col] = $field;
     if (!empty($f['component'])) {
       $js['component'] = $f['component'];
     }
     $this->setJsWidth($js, $f);
-    $this->setBbnEditor($f, $js, $model, $c);
     $res['js']['columns'][] = $js;  
   }
 
@@ -1686,18 +1686,21 @@ class Database extends bbn\Models\Cls\Cache
 
       // add display columns
       $field = $this->addDisplayColumn($dcols, $displayColumn);
+      return;
     }
-    else {
-      // Otherwise looking for the first varchar
-      foreach ($tmodel['fields'] as $tcol => $tf) {
-        if ($tf['type'] === 'varchar') {
-          // Adding the column to the query
-          $field = $alias.'_t'.$tIdx.'.'.$tcol;
-          $displayColumn = $tcol;
-          break;
-        }
+    $this->getFirstVarchar($tmodel, $alias, $tIdx, $field);
+  }
+
+  private function getFirstVarchar(&$tmodel, &$alias, &$tIdx, &$field)
+  {
+    foreach ($tmodel['field'] as $tableCol => $tableField) {
+      if ($tableField['type'] === 'varchar') {
+        $field = $alias . '_t' . $tIdx . '.' . $tableCol;
+        return $tableCol;
       }
     }
+    // this is unsettling...
+    return [];
   }
 
   private function addDisplayColumn($dcols, $displayColumn) {
@@ -1710,15 +1713,6 @@ class Database extends bbn\Models\Cls\Cache
 
   /**
    * Make the Join part of the query
-   *
-   * @param [type] $f
-   * @param [type] $model
-   * @param [type] $c
-   * @param [type] $alias
-   * @param [type] $tIdx
-   * @param [type] $table
-   * @param [type] $col
-   * @return array
    */
   private function makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col): array
   {
