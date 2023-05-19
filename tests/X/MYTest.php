@@ -5,8 +5,8 @@ namespace X;
 use bbn\X;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class MYTest extends TestCase
 {

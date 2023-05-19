@@ -7,7 +7,7 @@ use bbn\Appui\Option;
 use bbn\Db;
 use bbn\User;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 use When\When;
 
 class EventTest extends TestCase

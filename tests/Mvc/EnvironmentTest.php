@@ -5,7 +5,7 @@ namespace Mvc;
 use bbn\Mvc\Environment;
 use bbn\X;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class EnvironmentTest extends TestCase
 {

@@ -8,10 +8,10 @@ use bbn\Db\Languages\Mysql;
 use bbn\Db\Query;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\MysqlDbSetup;
-use tests\Reflectable;
-use tests\ReflectionHelpers;
+use bbn\tests\Files;
+use bbn\tests\MysqlDbSetup;
+use bbn\tests\Reflectable;
+use bbn\tests\ReflectionHelpers;
 
 class MysqlTest extends TestCase
 {

@@ -7,8 +7,8 @@ use bbn\Cron\Manager;
 use bbn\Db;
 use bbn\Db\Enums\Errors;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class ManagerTest extends TestCase
 {

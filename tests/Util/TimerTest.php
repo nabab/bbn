@@ -4,7 +4,7 @@ namespace Util;
 
 use bbn\Util\Timer;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class TimerTest extends TestCase
 {

@@ -6,9 +6,9 @@ use bbn\Mvc;
 use bbn\Mvc\Controller;
 use Mockery;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Mockable;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Mockable;
+use bbn\tests\Reflectable;
 
 class ControllerTest extends TestCase
 {

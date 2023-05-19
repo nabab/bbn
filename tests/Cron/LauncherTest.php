@@ -5,7 +5,7 @@ namespace Cron;
 use bbn\Cron;
 use bbn\Cron\Launcher;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class LauncherTest extends TestCase
 {

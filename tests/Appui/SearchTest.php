@@ -8,10 +8,10 @@ use bbn\Mvc;
 use bbn\User;
 use bbn\Util\Timer;
 use PHPUnit\Framework\TestCase;
-use tests\MysqlDbSetup;
-use tests\Files;
-use tests\Reflectable;
-use tests\ReflectionHelpers;
+use bbn\tests\MysqlDbSetup;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
+use bbn\tests\ReflectionHelpers;
 
 class SearchTest extends TestCase
 {

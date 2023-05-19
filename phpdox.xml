@@ -118,10 +118,10 @@
             <!-- An engine and thus build node can have additional configuration child nodes, please check the documentation for the engine to find out more -->
 
             <!--  default engine "html" -->
-            <!--build engine="html" enabled="true" output="html">
+            <build engine="html" enabled="true" output="html">
                 <template dir="${basedir}/templates"/>
                 <file extension="html"/>
-            </build-->
+            </build>
 
         </generator>
     </project>

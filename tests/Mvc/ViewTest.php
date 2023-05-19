@@ -5,8 +5,8 @@ namespace Mvc;
 use bbn\Mvc\Router;
 use bbn\Mvc\View;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class ViewTest extends TestCase
 {

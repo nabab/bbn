@@ -1,6 +1,6 @@
 <?php
 
-namespace tests;
+namespace bbn\tests;
 
 class ReflectionHelpers
 {

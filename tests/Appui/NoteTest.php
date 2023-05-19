@@ -9,8 +9,8 @@ use bbn\Appui\Option;
 use bbn\Db;
 use bbn\User;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class NoteTest extends TestCase
 {
