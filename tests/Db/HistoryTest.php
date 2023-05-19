@@ -6,7 +6,7 @@ use bbn\Appui\Database;
 use bbn\Db;
 use bbn\Db\History;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class HistoryTest extends TestCase
 {

@@ -8,7 +8,7 @@ use bbn\Cache;
 use bbn\Db;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class OptionTest extends TestCase
 {

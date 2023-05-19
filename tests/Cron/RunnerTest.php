@@ -10,8 +10,8 @@ use bbn\Mvc\Controller;
 use bbn\User;
 use bbn\Util\Timer;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class RunnerTest extends TestCase
 {

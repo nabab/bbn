@@ -1,6 +1,6 @@
 <?php
 
-namespace tests\Mvc;
+namespace bbn\tests\Mvc;
 
 use bbn\Db;
 use bbn\Mvc;
@@ -9,14 +9,14 @@ use Locale;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 use ReflectionClass;
 use ReflectionException;
 use stdClass;
-use tests\Mockable;
-use tests\ReflectionHelpers;
-use tests\storage\stubs\stub2;
+use bbn\tests\Mockable;
+use bbn\tests\ReflectionHelpers;
+use bbn\tests\storage\stubs\stub2;
 
 class MvcTest extends TestCase
 {
@@ -475,7 +475,7 @@ class MvcTest extends TestCase
   public function include_model_method_returns_an_array_if_file_exists_and_is_an_object()
   {
     $file_stub = '<?php
-         namespace tests\storage\stubs;
+         namespace bbn\tests\storage\stubs;
          class stub {
             public $property = \'test\';
          }

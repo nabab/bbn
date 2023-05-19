@@ -7,7 +7,7 @@ use bbn\Mvc;
 use bbn\User;
 use bbn\User\Session;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class UserTest extends TestCase
 {

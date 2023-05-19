@@ -7,7 +7,7 @@ use bbn\Db;
 use bbn\Db\Enums\Errors;
 use bbn\Db\Languages\Mysql;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
+use bbn\tests\Reflectable;
 
 class DbTest extends TestCase
 {

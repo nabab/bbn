@@ -9,8 +9,8 @@ use bbn\Appui\Option;
 use bbn\Appui\Url;
 use bbn\Db;
 use PHPUnit\Framework\TestCase;
-use tests\Reflectable;
-use tests\ReflectionHelpers;
+use bbn\tests\Reflectable;
+use bbn\tests\ReflectionHelpers;
 
 class CmsTest extends TestCase
 {

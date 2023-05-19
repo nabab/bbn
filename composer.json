@@ -60,9 +60,9 @@
     "psr-0": {"": "src/"}
   },
   "autoload-dev": {
-    "psr-0": {
-      "": "src/",
-      "tests\\": ""
+    "psr-4": {
+      "bbn\\": "src/bbn/",
+      "bbn\\tests\\": "tests/"
     }
   },
   "minimum-stability": "dev",

@@ -8,8 +8,8 @@ use bbn\Db\Languages\Sqlite;
 use bbn\Db\Query;
 use bbn\Str;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class SqliteTest extends TestCase
 {

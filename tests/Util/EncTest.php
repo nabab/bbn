@@ -4,8 +4,8 @@ namespace Util;
 
 use bbn\Util\Enc;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\ReflectionHelpers;
+use bbn\tests\Files;
+use bbn\tests\ReflectionHelpers;
 
 class EncTest extends TestCase
 {

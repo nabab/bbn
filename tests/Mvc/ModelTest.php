@@ -8,8 +8,8 @@ use bbn\Mvc;
 use bbn\Mvc\Controller;
 use bbn\Mvc\Model;
 use PHPUnit\Framework\TestCase;
-use tests\Files;
-use tests\Reflectable;
+use bbn\tests\Files;
+use bbn\tests\Reflectable;
 
 class ModelTest extends TestCase
 {
