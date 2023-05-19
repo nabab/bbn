@@ -1520,10 +1520,10 @@ class Database extends bbn\Models\Cls\Cache
     $field = $table.'.'.$col;
     if (!empty($f['option'])) {
       $js['text'] = $f['option']['text'];
-      //$f = $f['option'];
+      $f = $f['option'];
     }
     $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table, $alias);
-    $this->setBbnEditor($f, $js, $model, $c);
+    $this->setBbnEditor($f, $js, $model);
     
     $res['php']['fields'][$col] = $field;
     if (!empty($f['component'])) {
@@ -1533,19 +1533,32 @@ class Database extends bbn\Models\Cls\Cache
     $res['js']['columns'][] = $js;  
   }
 
-  /**
-   * Set editable value of f to $val
-   *
-   * @param [type] $f
-   * @param boolean $val
-   * @return void
-   */
-  private function setEditable(&$f, bool $val) {
+  private function setPrimaryColumn(&$js, &$f)
+  {
+    $js['component'] = 'appui-database-data-binary';
+    $js['cls'] = 'bbn-c';
+    $js['width'] = 'bbn-c';
     if (empty($f['option'])) {
-      $f['editable'] = $val;
+      $f['editable'] = false;
       return;
     }
-    $f['option']['editable'] = $val;
+    $f['option']['editable'] = false;
+  }
+
+  private function setForeignKeyEditor(&$js, &$model, &$c, &$host, &$engine, $tIdx, &$field, &$alias)
+  {
+    $tableModel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
+    $displayColumn = false;
+    $this->setDisplayColumn($tableModel, $alias, $tIdx, $field, $displayColumn);
+    if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
+      if (!isset($f['option']['editor'])) {
+        $js['editor'] = 'appui-database-data-browser';
+        $js['options'] = [
+          'table' => $model['keys'][$c]['ref_table'],
+          'column' => $model['keys'][$c]['ref_column']
+        ];
+      }
+    }
   }
 
   private function setColumnEditor(&$col, &$model, &$tIdx, &$f, &$field, &$host, &$engine, &$js, &$res, &$table, &$alias)
@@ -1555,36 +1568,20 @@ class Database extends bbn\Models\Cls\Cache
     }
     foreach ($model['cols'][$col] as $c) {
       if ($c === 'PRIMARY') {
-        $this->setEditable($f, false);
-        $js['component'] = 'appui-database-data-binary';
-        $js['cls'] = 'bbn-c';
-        $js['width'] = 'bbn-c';
+        $this->setPrimaryColumn($js, $f);
       }
       // Case where it is a foreign key
       elseif (!empty($model['keys'][$c]['ref_table'])) {
-        // Incrementing the alias indexes as we'll use them
         $tIdx++;
-        // Getting the model from the foreign table
-        $tmodel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
-        $displayColumn = false;
-        $this->setDisplayColumn($tmodel, $alias, $tIdx, $field, $displayColumn);
-        if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
-          if (!isset($f['option']['editor'])) {
-            $js['editor'] = 'appui-database-data-browser';
-            $js['options'] = [
-              'table' => $model['keys'][$c]['ref_table'],
-              'column' => $model['keys'][$c]['ref_column']
-            ];
-          }
-        }
+        $this->setForeignKeyEditor($js, $model, $c, $host, $engine, $tIdx, $field, $alias);
         $res['php']['join'][] = $this->makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col);
         break;
       }
     }
   }
 
-  private function setBbnEditor($f, &$js, &$model, &$c) {
-    if (!empty($model['keys'][$c]['ref_table'])) {
+/*
+if (!empty($model['keys'][$c]['ref_table'])) {
       $num = $this->currentConn->count($model['keys'][$c]['ref_table']);
       if (!$num) {
         $js['editor'] = 'bbn-input';
@@ -1598,6 +1595,9 @@ class Database extends bbn\Models\Cls\Cache
       $js['editor'] = 'appui-database-data-browser';
       return;
     }
+*/
+
+  private function setBbnEditor($f, &$js, &$model) {
     if (!empty($f['editor'])) {
       $js['editor'] = $f['editor'];
       return;
@@ -1621,6 +1621,7 @@ class Database extends bbn\Models\Cls\Cache
       } else if ($this->typeIsBinary($f['type'])) {
         $js['component'] = 'appui-database-data-binary';
         $js['cls'] = 'bbn-c';
+        // this is where the bbn upload is set
         $js['editor'] = 'bbn-upload';
       } else if ($this->typeIsText($f['type'])) {
         $js['editor'] = 'bbn-textarea';
@@ -1670,30 +1671,28 @@ class Database extends bbn\Models\Cls\Cache
   /**
    * Set the display column
    *
-   * @param [type] $tmodel
+   * @param [type] $tableModel
    * @param [type] $alias
    * @param [type] $tIdx
    * @return void
    */
-  private function setDisplayColumn(&$tmodel, &$alias, &$tIdx, &$field, &$displayColumn) {
+  private function setDisplayColumn(&$tableModel, &$alias, &$tIdx, &$field, &$displayColumn) {
     // Looking for displayed columns configured
-    if (isset($tmodel['option']) && !empty($tmodel['option']['dcolumns'])) {
+    if (isset($tableModel['option']) && !empty($tableModel['option']['dcolumns'])) {
       $dcols = [];
-      foreach ($tmodel['option']['dcolumns'] as $dcol) {
+      foreach ($tableModel['option']['dcolumns'] as $dcol) {
         $dcols[] = $this->db->cfn($dcol, $alias.'_t'.$tIdx, true);
-        $displayColumn = $dcol;
       }
-
-      // add display columns
-      $field = $this->addDisplayColumn($dcols, $displayColumn);
+      $field = (count($dcols) === 1) ? end($dcols) : "CONCAT(".X::join($dcols, ', ').")";
+      $displayColumn = end($dcols);
       return;
     }
-    $this->getFirstVarchar($tmodel, $alias, $tIdx, $field);
+    $this->getFirstVarchar($tableModel, $alias, $tIdx, $field);
   }
 
-  private function getFirstVarchar(&$tmodel, &$alias, &$tIdx, &$field)
+  private function getFirstVarchar(&$tableModel, &$alias, &$tIdx, &$field)
   {
-    foreach ($tmodel['field'] as $tableCol => $tableField) {
+    foreach ($tableModel['field'] as $tableCol => $tableField) {
       if ($tableField['type'] === 'varchar') {
         $field = $alias . '_t' . $tIdx . '.' . $tableCol;
         return $tableCol;
@@ -1701,14 +1700,6 @@ class Database extends bbn\Models\Cls\Cache
     }
     // this is unsettling...
     return [];
-  }
-
-  private function addDisplayColumn($dcols, $displayColumn) {
-    if (count($dcols) === 1) {
-      return $displayColumn;
-    }
-    // Adding more display column as concat in the query
-    return "CONCAT(".X::join($dcols, ', ').")";
   }
 
   /**
@@ -1730,7 +1721,7 @@ class Database extends bbn\Models\Cls\Cache
   }
 
   /**
-   * Get the width of the js of the js cell
+   * Get the width of the js cell
    * 
    * @param array $js the js config array
    * @param array $f the field array
