@@ -1476,6 +1476,16 @@ class Database extends bbn\Models\Cls\Cache
     return $res;
   }
 
+  private string $alias;
+
+  /**
+   * Generate a new alias in the alias property
+   */
+  private function generateNewAlias()
+  {
+    $this->alias = Str::genpwd(5);
+  }
+
   public function getGridConfig(string $table, string $db = '', string $host = '', string $engine = 'mysql'): ?array
   {
     $model = $this->modelize($table, $db, $host, $engine);
@@ -1501,18 +1511,18 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     /** @var string An alias which will be used as prefix for all aliases */
-    $alias = Str::genpwd(5);
+    $this->generateNewAlias();
 
     /** @var int An incremental index for the tables alias */
     $tIdx  = 0;
   
     foreach ($model['fields'] as $col => $f) {
-      $this->iterOnField($res, $col, $f, $table, $alias, $tIdx, $model, $host, $engine);  
+      $this->iterOnField($res, $col, $f, $table, $tIdx, $model, $host, $engine);  
     }
     return $res;
   }
 
-  private function iterOnField(&$res, &$col, &$f, &$table, &$alias, &$tIdx, &$model, &$host, &$engine) {
+  private function iterOnField(&$res, &$col, &$f, &$table, &$tIdx, &$model, &$host, &$engine) {
     $js = [
       'text' => $col,
       'field' => $col
@@ -1522,13 +1532,13 @@ class Database extends bbn\Models\Cls\Cache
       $js['text'] = $f['option']['text'];
       $f = $f['option'];
     }
-    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table, $alias);
-    $this->setBbnEditor($f, $js, $model);
+    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table);
     
     $res['php']['fields'][$col] = $field;
     if (!empty($f['component'])) {
       $js['component'] = $f['component'];
     }
+    $this->setJsEditor($f, $js, $model);
     $this->setJsWidth($js, $f);
     $res['js']['columns'][] = $js;  
   }
@@ -1545,15 +1555,21 @@ class Database extends bbn\Models\Cls\Cache
     $f['option']['editable'] = false;
   }
 
-  private function setForeignKeyEditor(&$js, &$model, &$c, &$host, &$engine, $tIdx, &$field, &$alias)
+  private function setEditor(&$res, &$js)
+  {
+    $this->setColumnEditor($col, $model, $tIdx, $f, $field, $host, $engine, $js, $res, $table);
+    $this->setJSEditor($f, $js, $model);
+  }
+
+  private function setForeignKeyEditor(&$js, &$model, &$c, &$host, &$engine, $tIdx, &$field)
   {
     $tableModel = $this->modelize($model['keys'][$c]['ref_table'], $model['keys'][$c]['ref_db'], $host, $engine);
     $displayColumn = false;
-    $this->setDisplayColumn($tableModel, $alias, $tIdx, $field, $displayColumn);
+    $this->setDisplayColumn($tableModel, $tIdx, $field, $displayColumn);
     if ($displayColumn && (strpos($field, 'CONCAT(') !== 0)) {
       if (!isset($f['option']['editor'])) {
-        $js['editor'] = 'appui-database-data-browser';
-        $js['options'] = [
+        $f['editor'] = 'appui-database-data-browser';
+        $f['options'] = [
           'table' => $model['keys'][$c]['ref_table'],
           'column' => $model['keys'][$c]['ref_column']
         ];
@@ -1561,7 +1577,7 @@ class Database extends bbn\Models\Cls\Cache
     }
   }
 
-  private function setColumnEditor(&$col, &$model, &$tIdx, &$f, &$field, &$host, &$engine, &$js, &$res, &$table, &$alias)
+  private function setColumnEditor(&$col, &$model, &$tIdx, &$f, &$field, &$host, &$engine, &$js, &$res, &$table)
   {
     if (empty($model['cols'][$col])) {
       return;
@@ -1573,8 +1589,8 @@ class Database extends bbn\Models\Cls\Cache
       // Case where it is a foreign key
       elseif (!empty($model['keys'][$c]['ref_table'])) {
         $tIdx++;
-        $this->setForeignKeyEditor($js, $model, $c, $host, $engine, $tIdx, $field, $alias);
-        $res['php']['join'][] = $this->makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col);
+        $this->setForeignKeyEditor($js, $model, $c, $host, $engine, $tIdx, $field);
+        $res['php']['join'][] = $this->makeJoinPart($f, $model, $c, $tIdx, $table, $col);
         break;
       }
     }
@@ -1597,7 +1613,7 @@ if (!empty($model['keys'][$c]['ref_table'])) {
     }
 */
 
-  private function setBbnEditor($f, &$js, &$model) {
+  private function setJSEditor($f, &$js, &$model) {
     if (!empty($f['editor'])) {
       $js['editor'] = $f['editor'];
       return;
@@ -1650,6 +1666,39 @@ if (!empty($model['keys'][$c]['ref_table'])) {
     ];
   }
 
+  /**
+   * Set the display column
+   *
+   * @param [type] $tableModel
+   * @param [type] $tIdx
+   * @return void
+   */
+  private function setDisplayColumn(&$tableModel, &$tIdx, &$field, &$displayColumn) {
+    // Looking for displayed columns configured
+    if (isset($tableModel['option']) && !empty($tableModel['option']['dcolumns'])) {
+      $dcols = [];
+      foreach ($tableModel['option']['dcolumns'] as $dcol) {
+        $dcols[] = $this->db->cfn($dcol, $this->alias.'_t'.$tIdx, true);
+      }
+      $field = (count($dcols) === 1) ? end($dcols) : "CONCAT(".X::join($dcols, ', ').")";
+      $displayColumn = end($dcols);
+      return;
+    }
+    $this->getFirstVarchar($tableModel, $tIdx, $field);
+  }
+
+  private function getFirstVarchar(&$tableModel, &$tIdx, &$field)
+  {
+    foreach ($tableModel['field'] as $tableCol => $tableField) {
+      if ($tableField['type'] === 'varchar') {
+        $field = $this->alias . '_t' . $tIdx . '.' . $tableCol;
+        return $tableCol;
+      }
+    }
+    // this is unsettling...
+    return [];
+  }
+
   private function typeIsBinary(string $type): bool
   {
     return ($type === 'binary' || $type === 'varbinary');
@@ -1669,51 +1718,17 @@ if (!empty($model['keys'][$c]['ref_table'])) {
   }
 
   /**
-   * Set the display column
-   *
-   * @param [type] $tableModel
-   * @param [type] $alias
-   * @param [type] $tIdx
-   * @return void
-   */
-  private function setDisplayColumn(&$tableModel, &$alias, &$tIdx, &$field, &$displayColumn) {
-    // Looking for displayed columns configured
-    if (isset($tableModel['option']) && !empty($tableModel['option']['dcolumns'])) {
-      $dcols = [];
-      foreach ($tableModel['option']['dcolumns'] as $dcol) {
-        $dcols[] = $this->db->cfn($dcol, $alias.'_t'.$tIdx, true);
-      }
-      $field = (count($dcols) === 1) ? end($dcols) : "CONCAT(".X::join($dcols, ', ').")";
-      $displayColumn = end($dcols);
-      return;
-    }
-    $this->getFirstVarchar($tableModel, $alias, $tIdx, $field);
-  }
-
-  private function getFirstVarchar(&$tableModel, &$alias, &$tIdx, &$field)
-  {
-    foreach ($tableModel['field'] as $tableCol => $tableField) {
-      if ($tableField['type'] === 'varchar') {
-        $field = $alias . '_t' . $tIdx . '.' . $tableCol;
-        return $tableCol;
-      }
-    }
-    // this is unsettling...
-    return [];
-  }
-
-  /**
    * Make the Join part of the query
    */
-  private function makeJoinPart($f, $model, $c, $alias, $tIdx, $table, $col): array
+  private function makeJoinPart($f, $model, $c, $tIdx, $table, $col): array
   {
     return [
       'type' => $f['null'] ? 'left' : '',
       'table' => $model['keys'][$c]['ref_db'].'.'.$model['keys'][$c]['ref_table'],
-      'alias' => $alias.'_t'.$tIdx,
+      'alias' => $this->alias.'_t'.$tIdx,
       'on' => [
         [
-          'field' => $alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],
+          'field' => $this->alias.'_t'.$tIdx.'.'.$model['keys'][$c]['ref_column'],
           'exp' => $table.'.'.$col
         ]
       ]
