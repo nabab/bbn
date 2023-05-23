@@ -3,6 +3,10 @@
  * @package time
  */
 namespace bbn;
+
+use DateTime;
+use DateTimeImmutable;
+use Exception;
 /**
  * Deals with date manipulation.
  *
@@ -52,7 +56,7 @@ class Date
   }
   
   public static function validate($date, $format = 'Y-m-d H:i:s'){
-    $d = \DateTime::createFromFormat($format, $date);
+    $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) == $date;
   }
   
@@ -227,6 +231,54 @@ class Date
       }
     }
     return $weeks;
+  }
+
+
+  public static function diff($date1, $date2, $unit = 's')
+  {
+    if (is_int($date1)) {
+      $date1 = date('Y-m-d H:i:s', $date1);
+    }
+    if (is_int($date2)) {
+      $date2 = date('Y-m-d H:i:s', $date2);
+    }
+
+    if (!Str::isDateSql($date1, $date2)) {
+      throw new Exception(X::_("The given dates $date1 and $date2 are not valid"));
+    }
+    $format = 'Y-m-d';
+    if (strlen($date1) > 10) {
+      $format .= ' H:i:s';
+    }
+    $d1 = DateTimeImmutable::createFromFormat($format, $date1);
+    $d2 = DateTimeImmutable::createFromFormat($format, $date2);
+    $diff = $d1->diff($d2);
+    $sign = $diff->format('%R');
+    $mult = $sign === '-' ? -1 : 1;
+    switch ( $unit ){
+      case 's':
+        $res = $diff->s + ($diff->h * 60) + ($diff->days * 24 * 3600);
+        break;
+      case 'i':
+        $res = $diff->i + ($diff->h * 60) + ($diff->days * 24 * 60);
+        break;
+      case 'h':
+        $res = $diff->h + ($diff->days * 24);
+        break;
+      case 'd':
+        $res = $diff->days;
+        break;
+      case 'm':
+        $res = $diff->m + ($diff->y * 12);
+        break;
+      case 'y':
+        $res = $diff->y;
+        break;
+      default:
+        $res = $diff->days;
+    }
+
+    return $res * $mult;
   }
 
 }
