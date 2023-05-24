@@ -19,7 +19,7 @@
     "composer/composer": "2.3.5",
     "zordius/lightncandy": "1.2.*",
     "greenlion/php-sql-parser": "4.5.*",
-    "mpdf/mpdf": "8.1.*",
+    "mpdf/mpdf": "8.0.*",
     "natxet/cssmin": "3.0.*",
     "sunra/php-simple-html-dom-parser": "1.5.*",
     "scssphp/scssphp": "1.6.*",
