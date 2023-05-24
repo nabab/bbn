@@ -154,8 +154,6 @@ class Git extends \Cz\Git\GitRepository
     return false;
   }
 
-  
-  
   public function pushInRemote(string $repository, string $user, string $passw, string $server="github.com"){
     if ($repository && $user && $passw && $server){
       $remote = NULL;

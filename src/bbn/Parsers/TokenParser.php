@@ -26,6 +26,7 @@ use const T_USE;
 use const T_WHITESPACE;
 use const T_FUNCTION;
 use const T_TRAIT;
+use const T_CLASS;
 
 /**
  * Parses a file for namespaces/use/class declarations.
@@ -109,18 +110,15 @@ class TokenParser
     $groupRoot     = '';
     $class         = '';
     $alias         = '';
+    $statements = array();
     $uses_statement    = [];
     $func_statement = [];
-  //  $statements = [][];
-    $is_as = false;
-    $func = '';
     $is_func = false;
-    $is_trait = false;
     $explicitAlias = false;
 
     while (($token = $this->next())) {
       $this->arr[] = $token;
-      if (! $explicitAlias && $token[0] === T_STRING) {
+      if (!$explicitAlias && $token[0] === T_STRING) {
         $class .= $token[1];
         $alias  = $token[1];
       } elseif ($explicitAlias && $token[0] === T_STRING) {
@@ -136,43 +134,30 @@ class TokenParser
       } elseif ($token[0] === T_NS_SEPARATOR) {
         $class .= '\\';
         $alias  = '';
-      } /*elseif ($token[0] === T_AS) {
+      } elseif ($token[0] === T_AS) {
         $explicitAlias = true;
-        $alias         = '';
-        $is_as = true;
-      } */ elseif ($token[0] === T_FUNCTION) {
+      } elseif ($token[0] === T_FUNCTION) {
         $explicitAlias = true;
-        $alias         = '';
-        $func = $token[1];
         $is_func = true;
-      } elseif ($token[0] === T_TRAIT) {
-					$is_trait = true;
       } elseif ($token === ',') {
-        if (!$is_func && !$is_trait) {
+        if (!$is_func) {
           $uses_statement[$alias] = $groupRoot . $class;
           $class                          = '';
           $alias                          = '';
           $explicitAlias                  = false;
-        } /*elseif ($is_as && !$is_func && !$is_trait ) {
-          $uses_statement[$alias] = $groupRoot . $class;
-          $class                          = '';
-          $alias                          = '';
-          $explicitAlias                  = false;
-        } */elseif ($is_func && !$is_trait) {
+        } elseif ($is_func) {
           $func_statement[$alias] = $groupRoot . $class;
           $class                          = '';
           $alias                          = '';
           $explicitAlias                  = false;
         }
       } elseif ($token === ';') {
-        if (!$is_func && !$is_trait) {
+        if (!$is_func) {
           $uses_statement[$alias] = $groupRoot . $class;
-        } /*elseif($is_as && !$is_func && !$is_trait) {
-          $statements[$alias] = $groupRoot . $class;
-        }*/ elseif($is_func && !$is_trait) {
+        } elseif($is_func) {
           $func_statement[$alias] = $groupRoot . $class;
         }
-        break;
+      	break;
       } elseif ($token === '{') {
         $groupRoot = $class;
         $class     = '';
@@ -182,8 +167,9 @@ class TokenParser
         break;
       }
     }
-    //x::ddump($statements);
-    return $uses_statement;
+    $statements[] = $uses_statement;
+    $statements[] = $func_statement;
+    return $statements;
   }
 
   /**
@@ -195,14 +181,27 @@ class TokenParser
      */
   public function parseUseStatements(string $namespaceName)
   {
-    $statements = [];
+    $statements = [
+      "uses" => [],
+      "function" => [],
+    ];
     while (($token = $this->next())) {
       $this->arr[] = $token;
-      if ($token[0] === T_USE) {
-        $statements = array_merge($statements, $this->parseUseStatement());
+      if ($token[0] === T_CLASS) {
+        break;
+      }
+      if ($token[0] === T_USE ) {
+		    $parse = $this->parseUseStatement();
+
+        if (!empty($parse[0])) {
+         // X::ddump($statements);
+        	$statements["uses"] = array_merge($statements["uses"], $parse[0]);
+        }
+        if (!empty($parse[1])) {
+          $statements["function"] = array_merge($statements["function"], $parse[1]);
+        }
         continue;
       }
-
       if ($token[0] !== T_NAMESPACE || $this->parseNamespace() !== $namespaceName) {
         continue;
       }
@@ -210,9 +209,8 @@ class TokenParser
       // Get fresh array for new namespace. This is to prevent the parser to collect the use statements
       // for a previous namespace with the same name. This is the case if a namespace is defined twice
       // or if a namespace with the same name is commented out.
-      $statements = [];
     }
-    //X::ddump($this->arr);
+   	//X::ddump($statements);
     return $statements;
   }
 

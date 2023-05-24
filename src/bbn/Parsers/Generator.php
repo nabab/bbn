@@ -38,7 +38,18 @@ class Generator {
         //$res .= "Clé : " . $key . ", Valeur : " . $value . ";\n";
         /*X::ddump($value);*/
     		$res .= "use " . $value;
-				if (basename(str_replace("\\", "/", $value) == $key)) {
+				if (strcmp(basename(str_replace("\\", "/", $value)), $key) != 0) {
+          $res .= " as " . $key;
+        }
+        $res .= ";\n";
+      }
+      $res .= "\n";
+    }
+
+    if (!empty($this->cfg['uses_function'])) {
+      foreach ($this->cfg['uses_function'] as $key => $value) {
+        $res .= "use function " . $value;
+        if (strcmp(basename(str_replace("\\", "/", $value)), $key) != 0) {
           $res .= " as " . $key;
         }
         $res .= ";\n";
@@ -50,11 +61,11 @@ class Generator {
 
     if (!empty($this->cfg['doc'])) {
       if (!empty($this->cfg['doc']['description'])) {
-        $res .=  "/**\n" . str_repeat(' ', $this->spacing) . " * \n";
+        $res .=  "/**\n";
         if (strpos($this->cfg['doc']['description'], "\n")) {
           $arr_description = explode("\n", $this->cfg['doc']['description']);
           foreach ($arr_description as $arr_d) {
-            $res .= str_repeat(' ', $this->spacing) . " * " . $arr_d ;
+            $res .= " * " . $arr_d ;
             $res .= "\n";
           }
         }
@@ -67,10 +78,10 @@ class Generator {
 
       if (!empty($this->cfg['doc']['tags'])) {
         foreach ($this->cfg['doc']['tags'] as $key => $value) {
-          $res .= str_repeat(' ', $this->spacing) . " * ";
+          $res .= " * ";
           $res .= "@" . $key . " " . $value . "\n";
         }
-        $res .=  "*/\n\n";
+        $res .=  " */\n\n";
       }
     }
 
@@ -113,8 +124,8 @@ class Generator {
   public function generateMethod(array $cfg) {
     $res = str_repeat(' ', $this->spacing);
 
-    if (!empty($cfg['description_parts'])) {
-      if ( !empty($cfg['summary'])) {
+    if (!empty($cfg['description_parts']) || !empty($cfg['summary'])) {
+      if (!empty($cfg['summary'])) {
         $res .= "/**\n" . str_repeat(' ', $this->spacing) . " * " . $cfg['summary'] . "\n";
       }
       if ($cfg['description']) {
@@ -130,6 +141,16 @@ class Generator {
           $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['description'] . "\n";
         }
       }
+      if (!empty($cfg['doc']['todo'])) {
+        $todo = $cfg['doc']['todo'];
+        $res .= " * @" . $todo['tag'] . " " . $todo['text'] . "\n";
+      }
+      /*if (!empty($cfg['doc']['params'])) {
+        X::ddump($cfg['doc']['params']);
+        foreach ($param as $cfg['doc']['params']) {
+          $res .= " * @" . $param['tag'] . " " . $param['type'] . " " . $param['name'] . " " . $param['description'] . "\n";
+        }
+      }*/
       if ($cfg['example']) {
         $res .= str_repeat(' ', $this->spacing) . " * \n";
         $res .= str_repeat(' ', $this->spacing) . " *```php\n";
@@ -142,7 +163,7 @@ class Generator {
       if (!empty($cfg['doc'])) {
         foreach ($cfg['doc']['params'] as $tag) {
           $res .= str_repeat(' ', $this->spacing) . " * \n";
-          if ($tag['tag'] === 'param' && !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])) {
+          if ($tag['tag'] === 'param' /*&& !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])*/) {
             $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['tag'] . " " . $tag['type'] . " " . $tag['name'] . " " . $tag['description'] . "\n";
           } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
             $return = "";
@@ -169,13 +190,16 @@ class Generator {
         $res .= "final ";
       }
     }
-    if ( !empty($cfg['public']) ) {
+    if (!empty($cfg['visibility'])) {
+      $res .= str_repeat(' ', $this->spacing) . $cfg['visibility'] . " ";
+    }
+    /*if ( !empty($cfg['public']) ) {
       $res .= "public ";
     } else if ( !empty($cfg['protected']) ) {
       $res .= "protected ";
     } else if ( !empty($cfg['private']) ) {
       $res .= "private ";
-    }
+    } */
 
     if ( !empty($cfg['static']) ) {
       $res .= "static ";

@@ -162,11 +162,13 @@ class Php extends bbn\Models\Cls\Basic
       $statprops = $rc->getStaticProperties();
       $constants = $rc->getConstants();
       $parent = $rc->getParentClass();
+      $use_statement = $this->analyzeUsedStatement($rc);
       $res = [
         'doc' => $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
-      	'uses' => $this->analyzeUsedStatement($rc),
+      	'uses' => $use_statement["uses"],
+        'uses_function'=> $use_statement["function"],
         'traits' => $rc->getTraitNames(),
         'interfaces' => $rc->getInterfaces(),
         //'isInstantiable' => $rc->isInstantiable(),
@@ -358,6 +360,7 @@ class Php extends bbn\Models\Cls\Basic
     $constants = $rc->getConstants();
     $parent = $rc->getParentClass();
     $parent_constants = [];
+    $use_statement = $this->analyzeUsedStatement($rc);
     if ($parent) {
       $parent_constants = $parent->getConstants();
     }
@@ -368,7 +371,8 @@ class Php extends bbn\Models\Cls\Basic
         'title' => $this->iparse($rc->getDocComment()),
       ],
       'name' => $rc->getName(),
-      'uses' => $this->analyzeUsedStatement($rc),
+      'uses' => $use_statement["uses"],
+      'uses_function'=> $use_statement["function"],
       'constants' => array_map(
         function ($a) use ($constants, $parent_constants) {
           return [
@@ -713,7 +717,9 @@ class Php extends bbn\Models\Cls\Basic
         }
       }
     }
-
+    /*if (isset($arr)){
+      X::ddump($arr);
+    }*/
     return (isset($arr) && is_array($arr)) ? $arr : null;
   }
 
@@ -839,10 +845,6 @@ class Php extends bbn\Models\Cls\Basic
             }
           }
 
-          /*$arr[$idx][$ele->getName()] = [
-            'static' => $ele->isStatic(),
-            'returns' => $ret
-          ];*/
           $arr[$ele->getName()] = $this->analyzeMethod($ele->getName(), $rc);
         } elseif ($typeEle === 'properties') {
           $arr[$ele->name] = array_filter(
@@ -858,6 +860,13 @@ class Php extends bbn\Models\Cls\Basic
       }
     }
 
+		/*
+        if ($doc && !empty($doc['params'])) {
+      foreach ($doc['params'] as $i => $a) {
+        if (!empty($a['description']) && isset($ar['arguments'][$i])) {
+          $ar['arguments'][$i]['description'] = $a['description'];
+        }
+      }*/
     return isset($arr) ? $arr : null;
   }
 
@@ -871,6 +880,7 @@ class Php extends bbn\Models\Cls\Basic
   private function _get_method_info(ReflectionMethod $method)
   {
     $ret = [];
+    $cparser =& $this;
     $refCls = $method->getDeclaringClass();
     if ($method->hasReturnType()) {
       $type = $method->getReturnType();
@@ -949,7 +959,9 @@ class Php extends bbn\Models\Cls\Basic
           ];
         },
         $method->getParameters()
-      )
+      ),
+			//'doc' => $cparser->iparse($m->getDocComment()),
+
     ];
 
     if ($ar['filename'] !== $refCls->getFileName()) {
@@ -985,10 +997,11 @@ class Php extends bbn\Models\Cls\Basic
           $ar['arguments'][$i]['description'] = $a['description'];
         }
       }
-
       unset($a);
     }
-
+    if (!empty($doc)) {
+      $ar['doc'] = $doc;
+    }
     return $ar;
   }
 
