@@ -11,11 +11,10 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
 use phpDocumentor\Reflection\DocBlockFactory;
+use bbn\Parsers\TokenParser;
 
 class Php extends bbn\Models\Cls\Basic
 {
-  
-  
   /**
    * Construct function
    */
@@ -24,8 +23,7 @@ class Php extends bbn\Models\Cls\Basic
     $this->docParser = DocBlockFactory::createInstance();
     $this->parser = new Doc('', 'php');
   }
-  
-  
+
   /**
    * Function to take all the information related to the method sought and if it also contains the method of its relative
    *
@@ -36,9 +34,8 @@ class Php extends bbn\Models\Cls\Basic
   public function analyzeMethod(string $meth, $cls): ?array
   {
     if (is_string($cls)) {
-      $cls = new ReflectionClass($cls);
+      $cls = new Reflector($cls);
     }
-    
     $arr = null;
     if (
       !empty($meth)
@@ -46,26 +43,26 @@ class Php extends bbn\Models\Cls\Basic
       && $cls->hasMethod($meth)
     ) {
       $f = &$this;
-      
+
       //get method in current class
       $arr = $this->_get_method_info($cls->getMethod($meth));
-      
+
       //get method in parent class
       $parent = $cls->getParentClass();
-      
+
       while ($parent) {
         if ($parent->hasMethod($meth)) {
           $arr['parent'] = $this->_get_method_info($parent->getMethod($meth));
         }
-        
+
         $parent = $parent->getParentClass();
       }
     }
-    
+
     return $arr ?: null;
   }
-  
-  
+
+
   /**
    * Function to take all the information relating to the property sought and if it also contains that of his relative
    *
@@ -82,15 +79,15 @@ class Php extends bbn\Models\Cls\Basic
           $arr['parent'] = $arr_parent;
           break;
         }
-        
+
         $parent = $parent->getParentClass();
       }
     }
-    
+
     return $arr ?: null;
   }
-  
-  
+
+
   /**
    * Function that analyzes the constant passed to him and even if it contains the relative parent of the class of belonging
    *
@@ -130,19 +127,19 @@ class Php extends bbn\Models\Cls\Basic
             'parent' => false
           ];
         }
-        
+
         $parent = $parent->getParentClass();
       }
     }
-    
+
     if (isset($arr)) {
       return $arr;
     }
-    
+
     return null;
   }
-  
-  
+
+
   /**
    * Function that analyzes the desired class by returning the information belonging to it
    *
@@ -159,16 +156,19 @@ class Php extends bbn\Models\Cls\Basic
       if ($level && defined('ReflectionMethod::IS_' . strtoupper($level))) {
         $filter = constant('ReflectionMethod::IS_' . strtoupper($level));
       }
-      
+
       $methods = $rc->getMethods($filter);
       $props = $rc->getProperties($filter);
       $statprops = $rc->getStaticProperties();
       $constants = $rc->getConstants();
       $parent = $rc->getParentClass();
+      $use_statement = $this->analyzeUsedStatement($rc);
       $res = [
         'doc' => $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
+      	'uses' => $use_statement["uses"],
+        'uses_function'=> $use_statement["function"],
         'traits' => $rc->getTraitNames(),
         'interfaces' => $rc->getInterfaces(),
         //'isInstantiable' => $rc->isInstantiable(),
@@ -210,7 +210,7 @@ class Php extends bbn\Models\Cls\Basic
         'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
       ];
       if (!empty($res['traits'])) {
-      
+
       }
       if (
         $res['doc']
@@ -218,20 +218,17 @@ class Php extends bbn\Models\Cls\Basic
       ) {
         $res = X::mergeArrays($res, $extracted);
       }
-      
       return $res;
     }
   }
-  
-  
+
+
   public function getLibraryClasses(string $path, string $namespace = ''): ?array
   {
-    if (!empty($namespace)) {
-      if (substr($namespace, -1) !== '\\') {
-        $namespace = '';
-      }
-    }
-    if (!empty($path)) {
+    if (
+      !empty($path)
+      && !empty($namespace)
+    ) {
       $fs = new System();
       if ($fs->cd($path)) {
         $files = $fs->scan('.', '.php', false);
@@ -240,7 +237,7 @@ class Php extends bbn\Models\Cls\Basic
           foreach ($files as $file) {
             $bits = X::split($file, '/');
             $name = X::basename(array_pop($bits), '.php');
-            $class = $namespace . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
+            $class = $namespace . '\\' . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
             $res = [
               'name' => $name,
               'file' => $file,
@@ -259,14 +256,14 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
+
       return $arr;
     }
-    
+
     return null;
-    
+
   }
-  
+
   /**
    * Function that analyzes the whole library with the same name space returning all the information of all the classes making part of it
    *
@@ -287,16 +284,16 @@ class Php extends bbn\Models\Cls\Basic
             unset($arr[$file]);
           }
         }
-        
+
       }
-      
+
       return $arr;
     }
-    
+
     return null;
   }
-  
-  
+
+
   /**
    * Generally analyzes a docBLock returning the information in a structured way
    *
@@ -316,26 +313,41 @@ class Php extends bbn\Models\Cls\Basic
       // Contains \phpDocumentor\Reflection\DocBlock\Description object
       $res['description_obj'] = $docblock->getDescription();
       foreach ($tags as $i => $t) {
-        $desc = $t->getDescription() ?: false;
+        $desc = method_exists($t, 'getDescription') ? $t->getDescription() : false;
         $res['tags'][] = [
           'index' => $i,
           'type' => method_exists($t, 'getType') ? $t->getType() : null,
           'varname' => method_exists($t, 'getVariableName') ? $t->getVariableName() : null,
           'isVariadic' => method_exists($t, 'isVariadic') ? $t->isVariadic() : null,
-          'name' => $t->getName(),
-          'desc0' => (string)$desc,
+          'name' => method_exists($t, 'getName') ? $t->getName() : null,
+          'desc0' => $desc ? (string)$desc : '',
           'desc1' => $desc ? $t->getDescription()->getTags() : '',
           'desc2' => $desc ? $t->getDescription()->render() : ''
         ];
       }
-      
+
       return $res;
     }
-    
+
     return false;
   }
-  
-  
+	
+  public function analyzeUsedStatement(ReflectionClass $class)
+  {
+    $fs = new System();
+
+    $class_path = $class->getFileName();
+    $content = $fs->getContents($class_path);
+    if ($content === null) {
+      return [];
+    }
+    $namespace = preg_quote($class->getNamespaceName());
+    $content   = preg_replace('/^.*?(\bnamespace\s+' . $namespace . '\s*[;{].*)$/s', '\\1', $content);
+    $tokenizer = new TokenParser('<?php ' . $content);
+
+    return $tokenizer->parseUseStatements($class->getNamespaceName());
+  }
+
   /**
    * Function that analyzes the class by returning the information in detail
    *
@@ -345,20 +357,22 @@ class Php extends bbn\Models\Cls\Basic
   public function parse(string $class_name)
   {
     $rc = new ReflectionClass($class_name);
-    //die(var_dump($rc->hasConstant('PARAM_BOOL')));
     $constants = $rc->getConstants();
     $parent = $rc->getParentClass();
     $parent_constants = [];
+    $use_statement = $this->analyzeUsedStatement($rc);
     if ($parent) {
       $parent_constants = $parent->getConstants();
     }
-    
+
     $cparser =& $this;
     $cls = [
       'doc' => [
         'title' => $this->iparse($rc->getDocComment()),
       ],
       'name' => $rc->getName(),
+      'uses' => $use_statement["uses"],
+      'uses_function'=> $use_statement["function"],
       'constants' => array_map(
         function ($a) use ($constants, $parent_constants) {
           return [
@@ -402,7 +416,7 @@ class Php extends bbn\Models\Cls\Basic
               $ret[] = null;
             }
           }
-          
+
           return [
             'name' => $m->getName(),
             'static' => $m->isStatic(),
@@ -424,7 +438,7 @@ class Php extends bbn\Models\Cls\Basic
                     $types = [$type];
                   }
                 }
-                
+
                 $type_st = '';
                 foreach ($types as $i => $tp) {
                   $type_st .= $tp->getName() . ($i ? '|' : '');
@@ -446,7 +460,7 @@ class Php extends bbn\Models\Cls\Basic
         $rc->getMethods()
       )
     ];
-    
+
     /*
     try {
       $obj = $parser->parse($code);
@@ -489,8 +503,8 @@ class Php extends bbn\Models\Cls\Basic
     */
     return $cls;
   }
-  
-  
+
+
   /**
    * Function that analyzes the class by returning the non-detailed information
    *
@@ -506,7 +520,7 @@ class Php extends bbn\Models\Cls\Basic
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
-    
+
     if ($ok) {
       $fs = new System();
       $tmp = $ref->getFileName();
@@ -527,7 +541,7 @@ class Php extends bbn\Models\Cls\Basic
         'traits' => [],
         'unused' => []
       ];
-      
+
       $props = $ref->getProperties();
       if (!empty($props)) {
         foreach ($props as $prop) {
@@ -541,19 +555,19 @@ class Php extends bbn\Models\Cls\Basic
           } elseif ($prop->isStatic()) {
             $type_prop = 'static';
           }
-          
+
           if (!empty($type_prop)) {
             $arr['properties'][$type_prop][] = $prop->getName();
           }
         }
       }
-      
+
       //for parents
       $parents = $ref->getParentClass();
       if (!empty($parents)) {
         foreach ($parents as $parent) {
           $arr['parents'][$parent] = $this->analyze($parent, 'parent');
-          
+
           foreach ($arr['parents'][$parent]['methods'] as $i => $m) {
             if (count($m)) {
               $arr['methods'][$i] = array_merge($m, $arr['methods'][$i]);
@@ -561,13 +575,13 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
+
       //for traits
       $traits = $ref->getTraitNames();
       if (!empty($traits)) {
         foreach ($traits as $trait) {
           $arr['traits'][$trait] = $this->analyze($trait, 'trait');
-          
+
           foreach ($arr['traits'][$trait]['methods'] as $i => $m) {
             if (count($m)) {
               $arr['methods'][$i] = array_merge($arr['methods'][$i], $m);
@@ -575,7 +589,7 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
+
       //for interfaces
       if ($interfaces = $ref->getInterfaceNames()) {
         foreach ($interfaces as $interface) {
@@ -589,7 +603,7 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
+
       if (!empty($arr['methods']['private'])) {
         foreach ($arr['methods']['private'] as $name => $priv) {
           $str = ($priv['static'] ? '::' : '->') . $name;
@@ -598,14 +612,14 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
+
       return $arr;
     }
-    
+
     return null;
   }
-  
-  
+
+
   /**
    * This function returns all the information of the methods cataloged by type
    *
@@ -621,7 +635,7 @@ class Php extends bbn\Models\Cls\Basic
       'protected' => [],
       'public' => []
     ];
-    
+
     foreach ($class_object->getMethods() as $m) {
       $idx = 'public';
       if ($m->isPrivate()) {
@@ -629,7 +643,7 @@ class Php extends bbn\Models\Cls\Basic
       } elseif ($m->isProtected()) {
         $idx = 'protected';
       }
-      
+
       if ($m->getDeclaringClass()->getName() === $class_object->getName()) {
         $doc = is_null($file) ? false : $m->getDocComment();
         $ret = null;
@@ -640,7 +654,7 @@ class Php extends bbn\Models\Cls\Basic
             $ret[] = null;
           }
         }
-        
+
         $methods[$idx][$m->getName()] = [
           'static' => $m->isStatic(),// ? 'static' : 'non-static',
           'returns' => $ret,
@@ -652,15 +666,15 @@ class Php extends bbn\Models\Cls\Basic
         ];
       }
     }
-    
+
     if ($origin === 'parent') {
       unset($methods['private']);
     }
-    
+
     return $methods;
   }
-  
-  
+
+
   /**
    * This function analyzes the docblock of a method by returning the information in a structured way
    *
@@ -677,7 +691,7 @@ class Php extends bbn\Models\Cls\Basic
         $this->log($e->getMessage() . PHP_EOL . PHP_EOL . $txt);
         return null;
       }
-      
+
       if (count($arr['tags'])) {
         $tags = $arr['tags'];
         unset($arr['tags']);
@@ -693,7 +707,7 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
+
       if ($arr['description']) {
         $start_example = stripos($arr['description'], "* ```php");
         $end_example = strpos($arr['description'], "```");
@@ -703,11 +717,13 @@ class Php extends bbn\Models\Cls\Basic
         }
       }
     }
-    
+    /*if (isset($arr)){
+      X::ddump($arr);
+    }*/
     return (isset($arr) && is_array($arr)) ? $arr : null;
   }
-  
-  
+
+
   /**
    * This function analyzes the docblock of a property by returning the information in a structured way
    *
@@ -719,11 +735,11 @@ class Php extends bbn\Models\Cls\Basic
     if (is_string($txt)) {
       $arr = $this->parser->parseDocblock($txt);
     }
-    
+
     return (isset($arr) && is_array($arr)) ? $arr : null;
   }
-  
-  
+
+
   /**
    *This function analyzes the docblock of a class by returning the information in a structured way
    *
@@ -744,11 +760,11 @@ class Php extends bbn\Models\Cls\Basic
         }
       }
     }
-    
+
     return (isset($arr) && is_array($arr)) ? $arr : null;
   }
-  
-  
+
+
   /**
    * Function that returns the content of an element of a class
    *
@@ -770,11 +786,11 @@ class Php extends bbn\Models\Cls\Basic
           foreach ($types as $t) {
             $tmp[] = $t->getName();
           }
-          
+
           $arg .= X::join($tmp, '|') . ' ';
         }
       }
-      
+
       $args[] = $arg . ($p->isPassedByReference() ? '&' : '') . '$' . $p->name;
       if ($p->isOptional()) {
         try {
@@ -787,25 +803,25 @@ class Php extends bbn\Models\Cls\Basic
           X::log([$rfx->getName(), $e->getMessage()], 'phpParser');
         }
       }
-      
+
       $i++;
     }
-    
+
     if ($filename = $rfx->getFileName()) {
       $content = file($filename);
       $s = $rfx->getStartLine();
       if (strpos($content[$s - 1], '  {') === false) {
         $s++;
       }
-      
+
       return 'function(' . implode(', ', $args) . ')' . PHP_EOL . '  {' . PHP_EOL
         . implode('', array_slice($content, $s, $rfx->getEndLine() - $s - 1)) . '  }';
     }
-    
+
     return '';
   }
-  
-  
+
+
   /**
    * Order the elements (methods, porperties and costant of the class) used and the functions analyze
    *
@@ -828,11 +844,7 @@ class Php extends bbn\Models\Cls\Basic
               $ret[] = null;
             }
           }
-          
-          /*$arr[$idx][$ele->getName()] = [
-            'static' => $ele->isStatic(),
-            'returns' => $ret
-          ];*/
+
           $arr[$ele->getName()] = $this->analyzeMethod($ele->getName(), $rc);
         } elseif ($typeEle === 'properties') {
           $arr[$ele->name] = array_filter(
@@ -847,11 +859,18 @@ class Php extends bbn\Models\Cls\Basic
         }
       }
     }
-    
+
+		/*
+        if ($doc && !empty($doc['params'])) {
+      foreach ($doc['params'] as $i => $a) {
+        if (!empty($a['description']) && isset($ar['arguments'][$i])) {
+          $ar['arguments'][$i]['description'] = $a['description'];
+        }
+      }*/
     return isset($arr) ? $arr : null;
   }
-  
-  
+
+
   /**
    * Return an array of information about a method.
    *
@@ -861,13 +880,14 @@ class Php extends bbn\Models\Cls\Basic
   private function _get_method_info(ReflectionMethod $method)
   {
     $ret = [];
+    $cparser =& $this;
     $refCls = $method->getDeclaringClass();
     if ($method->hasReturnType()) {
       $type = $method->getReturnType();
       if ($type->allowsNull()) {
         $ret[] = null;
       }
-      
+
       if (method_exists($type, 'getTypes')) {
         foreach ($type->getTypes() as $stype) {
           if (method_exists($type, 'getName')) {
@@ -880,11 +900,11 @@ class Php extends bbn\Models\Cls\Basic
         $ret[] = $type->getName();
       }
     }
-    
+
     if ($method->isPrivate() || $method->isProtected()) {
       $method->setAccessible(true);
     }
-    
+
     $ar = [
       'name' => $method->getName(),
       'summary' => '',
@@ -922,12 +942,12 @@ class Php extends bbn\Models\Cls\Basic
               $types = [$type];
             }
           }
-          
+
           $type_st = '';
           foreach ($types as $i => $tp) {
             $type_st .= $tp->getName() . ($i ? '|' : '');
           }
-          
+
           return [
             'name' => $p->getName(),
             'position' => $p->getPosition(),
@@ -939,9 +959,11 @@ class Php extends bbn\Models\Cls\Basic
           ];
         },
         $method->getParameters()
-      )
+      ),
+			//'doc' => $cparser->iparse($m->getDocComment()),
+
     ];
-    
+
     if ($ar['filename'] !== $refCls->getFileName()) {
       if ($traits = $refCls->getTraits()) {
         foreach ($traits as $trait) {
@@ -960,7 +982,7 @@ class Php extends bbn\Models\Cls\Basic
         }
       }
     }
-    
+
     $comments = $method->getDocComment();
     if (
       ($doc = $this->parseMethodComments($comments))
@@ -968,21 +990,22 @@ class Php extends bbn\Models\Cls\Basic
     ) {
       $ar = X::mergeArrays($ar, $extracted);
     }
-    
+
     if ($doc && !empty($doc['params'])) {
       foreach ($doc['params'] as $i => $a) {
         if (!empty($a['description']) && isset($ar['arguments'][$i])) {
           $ar['arguments'][$i]['description'] = $a['description'];
         }
       }
-      
       unset($a);
     }
-    
+    if (!empty($doc)) {
+      $ar['doc'] = $doc;
+    }
     return $ar;
   }
-  
-  
+
+
   /**
    * Makes an array of information out of a description string.
    *
@@ -1001,7 +1024,7 @@ class Php extends bbn\Models\Cls\Basic
         $num_matches = preg_match_all('/```(?:php)?(.+)```/s', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
         $len = strlen($ar['description']);
         $start = 0;
-        
+
         if ($num_matches) {
           foreach ($matches[0] as $i => $m) {
             if (isset($m[1])) {
@@ -1018,7 +1041,7 @@ class Php extends bbn\Models\Cls\Basic
                   ];
                 }
               }
-              
+
               $ar['description_parts'][] = [
                 'type' => 'code',
                 'content' => trim($matches[1][$i][0])
@@ -1047,11 +1070,11 @@ class Php extends bbn\Models\Cls\Basic
         }
       }
     }
-    
+
     return $ar;
   }
-  
-  
+
+
   private function _get_property_info(string $prop, ReflectionClass $cls): ?array
   {
     $arr = null;
@@ -1072,7 +1095,7 @@ class Php extends bbn\Models\Cls\Basic
         'value' => $defaults[$prop] ?? null
       ];
     }
-    
+
     return $arr ?: null;
   }
 }
