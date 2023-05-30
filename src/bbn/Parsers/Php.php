@@ -225,10 +225,12 @@ class Php extends bbn\Models\Cls\Basic
 
   public function getLibraryClasses(string $path, string $namespace = ''): ?array
   {
-    if (
-      !empty($path)
-      && !empty($namespace)
-    ) {
+    if (!empty($namespace)) {
+      if (substr($namespace, -1) !== '\\') {
+        $namespace = '';
+      }
+    }
+    if (!empty($path)) {
       $fs = new System();
       if ($fs->cd($path)) {
         $files = $fs->scan('.', '.php', false);
@@ -237,7 +239,7 @@ class Php extends bbn\Models\Cls\Basic
           foreach ($files as $file) {
             $bits = X::split($file, '/');
             $name = X::basename(array_pop($bits), '.php');
-            $class = $namespace . '\\' . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
+            $class = $namespace . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
             $res = [
               'name' => $name,
               'file' => $file,
@@ -245,6 +247,7 @@ class Php extends bbn\Models\Cls\Basic
             ];
             if (class_exists($class, true)) {
               $res['type'] = 'class';
+              //yes
             } elseif (interface_exists($class, true)) {
               $res['type'] = 'interface';
             } elseif (trait_exists($class, true)) {
@@ -256,12 +259,12 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-
+      
       return $arr;
     }
-
+    
     return null;
-
+    
   }
 
   /**
