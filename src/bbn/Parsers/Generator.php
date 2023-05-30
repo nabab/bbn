@@ -198,7 +198,5 @@ class Generator {
     }
     return $res;
   }
-  
-  
-  
+
 }
