@@ -35,10 +35,8 @@ class Generator {
 
     if (!empty($this->cfg['uses'])) {
       foreach ($this->cfg['uses'] as $key => $value) {
-        //$res .= "Clé : " . $key . ", Valeur : " . $value . ";\n";
-        /*X::ddump($value);*/
-    		$res .= "use " . $value;
-				if (strcmp(basename(str_replace("\\", "/", $value)), $key) != 0) {
+        $res .= "use " . $value;
+        if (strcmp(basename(str_replace("\\", "/", $value)), $key) != 0) {
           $res .= " as " . $key;
         }
         $res .= ";\n";
@@ -112,7 +110,7 @@ class Generator {
     if ( !empty($this->cfg['methods'])) {
       foreach ($this->cfg['methods'] as $method) {
         if ($method['parent'] == false && $method['trait'] == false) {
-        	$res .= $this->generateMethod($method) . "\n\n";
+          $res .= $this->generateMethod($method) . "\n\n";
         }
       }
     }
@@ -151,7 +149,7 @@ class Generator {
           $res .= " * @" . $param['tag'] . " " . $param['type'] . " " . $param['name'] . " " . $param['description'] . "\n";
         }
       }*/
-      if ($cfg['example']) {
+      if (!empty($cfg['example'])) {
         $res .= str_repeat(' ', $this->spacing) . " * \n";
         $res .= str_repeat(' ', $this->spacing) . " *```php\n";
         $arr_example = explode("\n", $cfg['example']);
@@ -162,7 +160,7 @@ class Generator {
       }
       if (!empty($cfg['doc'])) {
         foreach ($cfg['doc']['params'] as $tag) {
-          $res .= str_repeat(' ', $this->spacing) . " * \n";
+        //  $res .= str_repeat(' ', $this->spacing);
           if ($tag['tag'] === 'param' /*&& !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])*/) {
             $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['tag'] . " " . $tag['type'] . " " . $tag['name'] . " " . $tag['description'] . "\n";
           } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
@@ -170,7 +168,7 @@ class Generator {
 
             foreach ($cfg['returns'] as $ret) {
               if ($ret === null) {
-                $return .= "null|";
+                $return .= "?";
               }
               // if string contain "?" remove it
               else if (str_contains($ret, '?')) {
@@ -185,6 +183,9 @@ class Generator {
           }
         }
       }
+      if (!empty($cfg['returns'])) {
+      	$res .= str_repeat(' ', $this->spacing) . " * @return " . $cfg['returns']. "\n";
+    	}
       $res .= str_repeat(' ', $this->spacing) . " */\n";
       if (!empty($cfg['final']) ) {
         $res .= "final ";
@@ -193,14 +194,6 @@ class Generator {
     if (!empty($cfg['visibility'])) {
       $res .= str_repeat(' ', $this->spacing) . $cfg['visibility'] . " ";
     }
-    /*if ( !empty($cfg['public']) ) {
-      $res .= "public ";
-    } else if ( !empty($cfg['protected']) ) {
-      $res .= "protected ";
-    } else if ( !empty($cfg['private']) ) {
-      $res .= "private ";
-    } */
-
     if ( !empty($cfg['static']) ) {
       $res .= "static ";
     }
@@ -258,7 +251,15 @@ class Generator {
 
   public function generateProperty(array $cfg = [], string $prop_name)
   {
-    if ($cfg['parent'] == false && strlen($cfg['doc']['description']) > 1) {
+    $count = 0;
+
+    if (!empty($cfg['parent'])) {
+      $count += 1 ? $cfg['parent'] == false : 0;
+    }
+    if (!empty($cfg['doc']['description'])) {
+      $count += 1 ? (strlen($cfg['doc']['description']) > 1) : 0;
+    }
+    if ($count > 0) {
       $res .= ($cfg['doc']['description'] ? (str_repeat(' ', $this->spacing) . "/** " . $cfg['doc']['description']. " */\n") : "");
       $res .= str_repeat(' ', $this->spacing) . $cfg["visibility"];
       if ($cfg['static'] == true) {

@@ -209,11 +209,13 @@ class Php extends bbn\Models\Cls\Basic
         'staticProperties' => $statprops,
         'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
       ];
-      if (!empty($res['traits'])) {
-
-      }
+      /*if (!empty($res['traits'])) {}
+      
+      if (!empty( $res['doc'])) {
+        X::ddump($res['description']);
+      }*/
       if (
-        $res['doc']
+        $res['doc']['description']
         && ($extracted = $this->_extract_description($res['doc']['description']))
       ) {
         $res = X::mergeArrays($res, $extracted);
@@ -259,12 +261,9 @@ class Php extends bbn\Models\Cls\Basic
           }
         }
       }
-      
       return $arr;
     }
-    
     return null;
-    
   }
 
   /**
@@ -334,7 +333,6 @@ class Php extends bbn\Models\Cls\Basic
 
     return false;
   }
-	
   public function analyzeUsedStatement(ReflectionClass $class)
   {
     $fs = new System();
@@ -712,15 +710,16 @@ class Php extends bbn\Models\Cls\Basic
       }
 
       if ($arr['description']) {
-        $start_example = stripos($arr['description'], "* ```php");
+        $start_example = strpos($arr['description'], "* ```php");
         $end_example = strpos($arr['description'], "```");
+       // X::ddump($start_example, $end_example);
         if (($start_example !== false) && ($end_example !== false)) {
           $arr['example_method'] = (string)$docBlock->getDescription(); //substr($arr['description'], $start_example+1,);
           $arr['description'] = $this->parser->parseDocblock($txt);//$docBlock->getSummary();
         }
       }
     }
-    /*if (isset($arr)){
+   /* if (isset($arr)){
       X::ddump($arr);
     }*/
     return (isset($arr) && is_array($arr)) ? $arr : null;
@@ -1021,11 +1020,12 @@ class Php extends bbn\Models\Cls\Basic
     if (!empty($bits)) {
       $ar['summary'] = trim(array_shift($bits));
       $ar['description'] = '';
-      $ar['description_parts'] = [];
+      $ar['description_parts'] = '';
+      $ar['example'] = '';
       if (!empty($bits)) {
-        $ar['description'] = trim(X::join($bits, PHP_EOL));
-        $num_matches = preg_match_all('/```(?:php)?(.+)```/s', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
-        $len = strlen($ar['description']);
+        $ar['description_parts'] = trim(X::join($bits, PHP_EOL));
+        $num_matches = preg_match_all('/```(?:php)?(.+)```/s', $ar['description_parts'], $matches, PREG_OFFSET_CAPTURE);
+        $len = strlen($ar['description_parts']);
         $start = 0;
 
         if ($num_matches) {
@@ -1034,46 +1034,42 @@ class Php extends bbn\Models\Cls\Basic
               if (
                 ($i === 0)
                 && ($m[1] !== 0)
-                && $tmp = trim(substr($ar['description'], $start, $m[1]))
+                && $tmp = trim(substr($ar['description_parts'], $start, $m[1]))
               ) {
-                $content = trim(Str::markdown2html($tmp));
+                $content = $tmp;
                 if ($content) {
-                  $ar['description_parts'][] = [
-                    'type' => 'text',
-                    'content' => $content
-                  ];
+                  $ar['description'] = $content;
                 }
               }
+     					$ar['example'] = trim($matches[1][$i][0]);
 
-              $ar['description_parts'][] = [
+              /*$ar['description_parts'][] = [
                 'type' => 'code',
                 'content' => trim($matches[1][$i][0])
-              ];
+              ];*/
               $start = $m[1] + strlen($m[0]);
               $end = isset($matches[0][$i + 1]) ? $matches[0][$i + 1][1] : $len;
               if (
                 ($start < $len)
                 && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
               ) {
-                $ar['description_parts'][] = [
+                  $ar['description'] = $tmp;
+                /*$ar['description_parts'][] = [
                   'type' => 'text',
                   'content' => $tmp
-                ];
+                ];*/
               }
             }
           }
         } else {
-          $content = trim(Str::markdown2html($ar['description']));
+          $content = trim(Str::markdown2html($ar['description_parts']));
           if ($content) {
-            $ar['description_parts'][] = [
-              'type' => 'text',
-              'content' => $content
-            ];
+             	$ar['description'] =  $content;
           }
         }
       }
     }
-
+    //X::ddump($ar);
     return $ar;
   }
 
@@ -1098,7 +1094,6 @@ class Php extends bbn\Models\Cls\Basic
         'value' => $defaults[$prop] ?? null
       ];
     }
-
     return $arr ?: null;
   }
 }
