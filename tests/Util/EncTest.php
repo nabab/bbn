@@ -1,6 +1,6 @@
 <?php
 
-namespace Util;
+namespace bbn\Util;
 
 use bbn\Util\Enc;
 use PHPUnit\Framework\TestCase;

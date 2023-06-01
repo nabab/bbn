@@ -1,6 +1,6 @@
 <?php
 
-namespace Db;
+namespace bbn\Db;
 
 use bbn\Cache;
 use bbn\Db;

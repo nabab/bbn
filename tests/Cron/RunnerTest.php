@@ -1,6 +1,6 @@
 <?php
 
-namespace Cron;
+namespace bbn\Cron;
 
 use bbn\Appui\Observer;
 use bbn\Cron;

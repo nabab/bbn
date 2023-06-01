@@ -1,6 +1,6 @@
 <?php
 
-namespace X;
+namespace bbn\X;
 
 use bbn\X;
 use Illuminate\Support\Str;

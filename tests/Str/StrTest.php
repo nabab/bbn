@@ -1,6 +1,6 @@
 <?php
 
-namespace Str;
+namespace bbn\Str;
 
 use bbn\Str;
 use PHPUnit\Framework\TestCase;

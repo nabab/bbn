@@ -63,7 +63,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "bbn\\tests\\": "tests/"
+      "bbn\\": "tests/"
     }
   },
   "minimum-stability": "dev",

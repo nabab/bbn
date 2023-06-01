@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\tests;
+namespace tests;
 
 use bbn\Db\Enums\Errors;
 

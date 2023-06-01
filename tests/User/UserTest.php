@@ -1,6 +1,6 @@
 <?php
 
-namespace User;
+namespace bbn\User;
 
 use bbn\Db;
 use bbn\Mvc;

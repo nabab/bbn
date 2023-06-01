@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\tests\Mvc;
+namespace tests\Mvc;
 
 use bbn\Db;
 use bbn\Mvc;
@@ -229,7 +229,7 @@ class MvcTest extends TestCase
 
     // Here we will create a DB class stub
     $db_class_stub = '<?php
-      namespace foo;
+      namespace bbn\foo;
       class Db {
       
       }';
@@ -475,7 +475,7 @@ class MvcTest extends TestCase
   public function include_model_method_returns_an_array_if_file_exists_and_is_an_object()
   {
     $file_stub = '<?php
-         namespace bbn\tests\storage\stubs;
+         namespace tests\storage\stubs;
          class stub {
             public $property = \'test\';
          }

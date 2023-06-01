@@ -1,6 +1,6 @@
 <?php
 
-namespace Mvc;
+namespace bbn\Mvc;
 
 use bbn\Mvc\Router;
 use bbn\Mvc\View;
