@@ -1,6 +1,6 @@
 <?php
 
-namespace Appui;
+namespace bbn\Appui;
 
 use bbn\Appui\Medias;
 use bbn\Appui\Option;

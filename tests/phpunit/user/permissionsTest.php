@@ -1,5 +1,5 @@
 <?php
-namespace bbn\tests\appui;
+namespace tests\appui;
 
 use bbn\Appui\Chat;
 use bbn;

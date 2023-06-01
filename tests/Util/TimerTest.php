@@ -1,6 +1,6 @@
 <?php
 
-namespace Util;
+namespace bbn\Util;
 
 use bbn\Util\Timer;
 use PHPUnit\Framework\TestCase;

@@ -1,5 +1,5 @@
 <?php
-namespace bbn;
+namespace bbn\bbn;
 
 use bbn\X;
 

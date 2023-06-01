@@ -1,6 +1,6 @@
 <?php
 
-namespace Mvc;
+namespace bbn\Mvc;
 
 use bbn\Cache;
 use bbn\Db;

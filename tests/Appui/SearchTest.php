@@ -1,6 +1,6 @@
 <?php
 
-namespace Appui;
+namespace bbn\Appui;
 
 use bbn\Appui\Search;
 use bbn\Db;
