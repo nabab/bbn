@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Db;
+namespace bbn\tests\Db;
 
 use bbn\Appui\Database;
 use bbn\Db;

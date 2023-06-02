@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Cron;
+namespace bbn\tests\Cron;
 
 use bbn\Appui\Notification;
 use bbn\Cron\Manager;

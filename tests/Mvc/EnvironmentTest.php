@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Mvc;
+namespace bbn\tests\Mvc;
 
 use bbn\Mvc\Environment;
 use bbn\X;

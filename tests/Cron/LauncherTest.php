@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Cron;
+namespace bbn\tests\Cron;
 
 use bbn\Cron;
 use bbn\Cron\Launcher;
