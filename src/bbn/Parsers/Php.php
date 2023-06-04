@@ -108,9 +108,7 @@ class Php extends bbn\Models\Cls\Basic
         'value' => $cls->getConstant($const),
         'class' => $cls->name,
         'parent' => false,
-        'private' => $cst->isPrivate(),
-        'protected' => $cst->isProtected(),
-        'public' => $cst->isPublic(),
+				'visibility' => $cst->isPrivate() ? 'private' : ($cst->isProtected() ? 'protected' : ($cst->isPublic() ? 'public' : '')),
         'doc' => $this->parsePropertyComments($cst->getDocComment()),
       ];
       $parent = $cls->getParentClass();
@@ -121,8 +119,7 @@ class Php extends bbn\Models\Cls\Basic
             'name' => $cst->name,
             'doc' => $this->parsePropertyComments($cst->getDocComment()),
             'value' => $parent->getConstant($const),
-            'protected' => $cst->isProtected(),
-            'public' => $cst->isPublic(),
+            'visibility' => $cst->isPrivate() ? 'private' : ($cst->isProtected() ? 'protected' : ($cst->isPublic() ? 'public' : '')),
             'class' => $parent->name,
             'parent' => false
           ];
@@ -160,7 +157,7 @@ class Php extends bbn\Models\Cls\Basic
       $methods = $rc->getMethods($filter);
       $props = $rc->getProperties($filter);
       $statprops = $rc->getStaticProperties();
-      $constants = $rc->getConstants();
+      $constants = $this->transformObjectToArray($rc->getConstants($filter));
       $parent = $rc->getParentClass();
       $use_statement = $this->analyzeUsedStatement($rc);
       $res = [
@@ -207,7 +204,7 @@ class Php extends bbn\Models\Cls\Basic
         'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,
         'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,
         'staticProperties' => $statprops,
-        'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
+        'constants' => $constants ? $this->orderElement($constants, 'constants', $rc) : null
       ];
       /*if (!empty($res['traits'])) {}
       
@@ -712,16 +709,12 @@ class Php extends bbn\Models\Cls\Basic
       if ($arr['description']) {
         $start_example = strpos($arr['description'], "* ```php");
         $end_example = strpos($arr['description'], "```");
-       // X::ddump($start_example, $end_example);
         if (($start_example !== false) && ($end_example !== false)) {
           $arr['example_method'] = (string)$docBlock->getDescription(); //substr($arr['description'], $start_example+1,);
           $arr['description'] = $this->parser->parseDocblock($txt);//$docBlock->getSummary();
         }
       }
     }
-   /* if (isset($arr)){
-      X::ddump($arr);
-    }*/
     return (isset($arr) && is_array($arr)) ? $arr : null;
   }
 
@@ -857,7 +850,7 @@ class Php extends bbn\Models\Cls\Basic
             ARRAY_FILTER_USE_BOTH
           );
         } elseif ($typeEle === 'constants') {
-          $arr[$ele->name] = $this->analyzeConstant($ele->name, $rc);
+						$arr[$ele] = $this->analyzeConstant($ele, $rc);
         }
       }
     }
@@ -1096,4 +1089,16 @@ class Php extends bbn\Models\Cls\Basic
     }
     return $arr ?: null;
   }
+
+  private function transformObjectToArray($obj)
+  {
+    $result = [];
+    $index = 0;
+    foreach ($obj as $name => $value) {
+        $result[$index] = $name;
+        $index++;
+    }
+    return $result;
+	}
+
 }

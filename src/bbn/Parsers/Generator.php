@@ -106,7 +106,11 @@ class Generator {
         $res .= $this->generateProperty($value, $property);
       }
     }
-
+    if (!empty($this->cfg['constants'])) {
+      foreach ($this->cfg['constants'] as  $constant => $value) {
+        $res .= $this->generateConstant($value, $constant);
+      }
+    }
     if ( !empty($this->cfg['methods'])) {
       foreach ($this->cfg['methods'] as $method) {
         if ($method['parent'] == false && $method['trait'] == false) {
@@ -122,9 +126,11 @@ class Generator {
   public function generateMethod(array $cfg) {
     $res = str_repeat(' ', $this->spacing);
 
-    if (!empty($cfg['description_parts']) || !empty($cfg['summary'])) {
+    if (!empty($cfg['description_parts']) || !empty($cfg['summary']) ||!empty($cfg['doc']['params']) ||
+        !empty($cfg['doc']['throws']) || !empty($cfg['doc']['todo'])) {
+          $res .= "/**\n";
       if (!empty($cfg['summary'])) {
-        $res .= "/**\n" . str_repeat(' ', $this->spacing) . " * " . $cfg['summary'] . "\n";
+        $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['summary'] . "\n";
       }
       if ($cfg['description']) {
         $res .= str_repeat(' ', $this->spacing) . " * \n";
@@ -141,7 +147,11 @@ class Generator {
       }
       if (!empty($cfg['doc']['todo'])) {
         $todo = $cfg['doc']['todo'];
-        $res .= " * @" . $todo['tag'] . " " . $todo['text'] . "\n";
+        $res .=  str_repeat(' ', $this->spacing) . " * @" . $todo['tag'] . " " . $todo['text'] . "\n";
+      }
+      if (!empty($cfg['doc']['throws'])) {
+        $todo = $cfg['doc']['throws'];
+        $res .=  str_repeat(' ', $this->spacing) . " * @" . $todo['tag'] . " " . $todo['type'] . "\n";
       }
       /*if (!empty($cfg['doc']['params'])) {
         X::ddump($cfg['doc']['params']);
@@ -160,7 +170,7 @@ class Generator {
       }
       if (!empty($cfg['doc'])) {
         foreach ($cfg['doc']['params'] as $tag) {
-        //  $res .= str_repeat(' ', $this->spacing);
+          //  $res .= str_repeat(' ', $this->spacing);
           if ($tag['tag'] === 'param' /*&& !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])*/) {
             $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['tag'] . " " . $tag['type'] . " " . $tag['name'] . " " . $tag['description'] . "\n";
           } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
@@ -184,8 +194,22 @@ class Generator {
         }
       }
       if (!empty($cfg['returns'])) {
-      	$res .= str_repeat(' ', $this->spacing) . " * @return " . $cfg['returns']. "\n";
-    	}
+        $return = "";
+        $len = count($cfg['returns']);
+        foreach ($cfg['returns'] as $ret) {
+          if ($ret === null) {
+            $null_value .= "|null";
+            $len -= 1;
+          }
+          else if ($ret !== null) {
+            $return .= ($ret == $cfg["class"]) ? "self" : $ret;
+            $len -= 1;
+            $return .= $len > 0 ? "|" : "";
+          }
+        }
+        $return .= $null_value ? $null_value : "";
+        $res .= str_repeat(' ', $this->spacing) . " * @return " . $return. "\n";
+      }
       $res .= str_repeat(' ', $this->spacing) . " */\n";
       if (!empty($cfg['final']) ) {
         $res .= "final ";
@@ -227,9 +251,9 @@ class Generator {
         }
         foreach ($cfg['returns'] as $ret) {
           if ($ret === null && !$has_null) {
-            $res_returns .= "null|";
+            $res_returns .= "?";
           } else if ($ret !== null) {
-            $res_returns .= $ret . "|";
+            $res_returns .= (($ret == $cfg["class"]) ? "self" : $ret) . "|";
           }
         }
         $last_pipe = strrpos($res_returns, '|');
@@ -252,15 +276,28 @@ class Generator {
   public function generateProperty(array $cfg = [], string $prop_name)
   {
     $count = 0;
-
-    if (!empty($cfg['parent'])) {
-      $count += 1 ? $cfg['parent'] == false : 0;
+    foreach ($cfg as $property => $value ) {
+      if ($property == "parent" && $value === false) {
+        $count += 1;
+      }
     }
     if (!empty($cfg['doc']['description'])) {
       $count += 1 ? (strlen($cfg['doc']['description']) > 1) : 0;
     }
-    if ($count > 0) {
-      $res .= ($cfg['doc']['description'] ? (str_repeat(' ', $this->spacing) . "/** " . $cfg['doc']['description']. " */\n") : "");
+    if ($count != 0) {
+      if ($cfg['doc']['description'] || $cfg['doc']['tags'])
+      {
+        $res .= str_repeat(' ', $this->spacing) . "/**\n";
+      }
+      $res .= ($cfg['doc']['description'] ? (str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description']): "");
+      if (!empty($cfg['doc']['tags'])) {
+        $tags = $cfg['doc']['tags'];
+        $res .= str_repeat(' ', $this->spacing) . " * \n";
+        foreach($tags as $tag) {
+          $res .= str_repeat(' ', $this->spacing) . " * @" .$tag['tag'] . " " . $tag['type'];
+        }
+      }
+      $res .= "\n" . str_repeat(' ', $this->spacing) . " */\n";
       $res .= str_repeat(' ', $this->spacing) . $cfg["visibility"];
       if ($cfg['static'] == true) {
         $res .= ' static ';
@@ -268,9 +305,78 @@ class Generator {
       $res .= " $" . $prop_name;
 
       if ($cfg['doc']['description']) {
-        $array = explode(" ", $cfg['doc']['description']);
-        ($array[1] == "array" ? ($res .= " = []") : $res .= "");
+        $ar = explode(" ", $cfg['doc']['description']);
+        ($ar[1] == "array" ? ($res .= " = []") : $res .= "");
+        
+        $string = $cfg['doc']['description'];
+        if (strpos($string, "\n") !== false) {
+          $array = explode("\n", $string);
+          $count = count($array);
+          foreach ($array as $index => $line) {
+            if ($index < $count - 1) {
+              $res .= str_repeat(' ', $this->spacing) . " * " . $line . "\n";
+            } else {
+              $res .= str_repeat(' ', $this->spacing) . " * " . $line;
+            }
+          }
+
+        } else {
+          $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description'];
+        }
       }
+
+
+      return($res .= ";\n\n");
+    }
+    else {
+      return($res .= "");
+    }
+  }
+  public function generateConstant(array $cfg = [], string $prop_name)
+  {
+    $count = 0;
+    foreach ($cfg as $property => $value ) {
+      if ($property == "parent" && $value === false) {
+        $count += 1;
+      }
+    }
+    if (!empty($cfg['doc']['description'])) {
+      $count += 1 ? (strlen($cfg['doc']['description']) > 1) : 0;
+    }
+    if ($count != 0) {
+      if ($cfg['doc']['description'] || $cfg['doc']['tags'])
+      {
+        $res .= str_repeat(' ', $this->spacing) . "/**\n";
+      }
+      if ($cfg['doc']['description']) {
+        $string = $cfg['doc']['description'];
+
+        if (strpos($string, "\n") !== false) {
+          $array = explode("\n", $string);
+          $count = count($array);
+          foreach ($array as $index => $line) {
+            if ($index < $count - 1) {
+              $res .= str_repeat(' ', $this->spacing) . " * " . $line . "\n";
+            } else {
+              $res .= str_repeat(' ', $this->spacing) . " * " . $line;
+            }
+          }
+
+        } else {
+          $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description'];
+        }
+      }
+      if (!empty($cfg['doc']['tags'])) {
+        $tags = $cfg['doc']['tags'];
+        $res .= str_repeat(' ', $this->spacing) . " * \n";
+        foreach($tags as $tag) {
+          $res .= str_repeat(' ', $this->spacing) . " * @" .$tag['tag'] . " " . $tag['type'];
+        }
+      }
+      $res .= "\n" . str_repeat(' ', $this->spacing) . " */\n";
+      $res .= str_repeat(' ', $this->spacing) . $cfg["visibility"]. ' ';
+      $val = ($cfg['value'] === true) ? "true" : (($cfg['value'] === false) ? "false" : $cfg['value']);
+      $res .= "const " . $prop_name . " = " . $val;
 
       return($res .= ";\n\n");
     }

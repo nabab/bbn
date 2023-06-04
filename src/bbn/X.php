@@ -450,9 +450,9 @@ class X
 
 
   /**
+   * Generates a storage path based on a given date format
    *
    * ```php
-   *
    * X::makeStoragePath('foo/bar', 'd/m/Y');
    * // (string) "/foo/bar/27/06/2021/1/"
    *
@@ -461,7 +461,6 @@ class X
    *
    * X::makeStoragePath('foo/bar', 'Y/m/d', 1); // path contains a "1" dir which contains 2 dirs or files
    * // (string) "/foo/bar/2021/06/27/2/"
-   *
    * ```
    * @param string $path
    * @param string $format
