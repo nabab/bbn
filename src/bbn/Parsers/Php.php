@@ -70,6 +70,7 @@ class Php extends bbn\Models\Cls\Basic
    * @param ReflectionClass $cls
    * @return array|null
    */
+
   public function analyzeProperty(string $prop, ReflectionClass $cls): ?array
   {
     if ($arr = $this->_get_property_info($prop, $cls)) {
@@ -86,7 +87,6 @@ class Php extends bbn\Models\Cls\Basic
 
     return $arr ?: null;
   }
-
 
   /**
    * Function that analyzes the constant passed to him and even if it contains the relative parent of the class of belonging
@@ -108,7 +108,7 @@ class Php extends bbn\Models\Cls\Basic
         'value' => $cls->getConstant($const),
         'class' => $cls->name,
         'parent' => false,
-				'visibility' => $cst->isPrivate() ? 'private' : ($cst->isProtected() ? 'protected' : ($cst->isPublic() ? 'public' : '')),
+        'visibility' => $cst->isPrivate() ? 'private' : ($cst->isProtected() ? 'protected' : ($cst->isPublic() ? 'public' : '')),
         'doc' => $this->parsePropertyComments($cst->getDocComment()),
       ];
       $parent = $cls->getParentClass();
@@ -164,7 +164,7 @@ class Php extends bbn\Models\Cls\Basic
         'doc' => $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
-      	'uses' => $use_statement["uses"],
+        'uses' => $use_statement["uses"],
         'uses_function'=> $use_statement["function"],
         'traits' => $rc->getTraitNames(),
         'interfaces' => $rc->getInterfaces(),
@@ -206,11 +206,6 @@ class Php extends bbn\Models\Cls\Basic
         'staticProperties' => $statprops,
         'constants' => $constants ? $this->orderElement($constants, 'constants', $rc) : null
       ];
-      /*if (!empty($res['traits'])) {}
-      
-      if (!empty( $res['doc'])) {
-        X::ddump($res['description']);
-      }*/
       if (
         $res['doc']['description']
         && ($extracted = $this->_extract_description($res['doc']['description']))
@@ -834,7 +829,6 @@ class Php extends bbn\Models\Cls\Basic
           $ret = null;
           if ($ele->hasReTurnType()) {
             $type = $ele->getReturnType();
-            //  $ret  = [$type->getName()];
             if ($type->allowsNull()) {
               $ret[] = null;
             }
@@ -850,18 +844,10 @@ class Php extends bbn\Models\Cls\Basic
             ARRAY_FILTER_USE_BOTH
           );
         } elseif ($typeEle === 'constants') {
-						$arr[$ele] = $this->analyzeConstant($ele, $rc);
+          $arr[$ele] = $this->analyzeConstant($ele, $rc);
         }
       }
     }
-
-		/*
-        if ($doc && !empty($doc['params'])) {
-      foreach ($doc['params'] as $i => $a) {
-        if (!empty($a['description']) && isset($ar['arguments'][$i])) {
-          $ar['arguments'][$i]['description'] = $a['description'];
-        }
-      }*/
     return isset($arr) ? $arr : null;
   }
 
@@ -955,7 +941,6 @@ class Php extends bbn\Models\Cls\Basic
         },
         $method->getParameters()
       ),
-			//'doc' => $cparser->iparse($m->getDocComment()),
 
     ];
 
@@ -1034,35 +1019,25 @@ class Php extends bbn\Models\Cls\Basic
                   $ar['description'] = $content;
                 }
               }
-     					$ar['example'] = trim($matches[1][$i][0]);
-
-              /*$ar['description_parts'][] = [
-                'type' => 'code',
-                'content' => trim($matches[1][$i][0])
-              ];*/
+              $ar['example'] = trim($matches[1][$i][0]);
               $start = $m[1] + strlen($m[0]);
               $end = isset($matches[0][$i + 1]) ? $matches[0][$i + 1][1] : $len;
               if (
                 ($start < $len)
                 && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
               ) {
-                  $ar['description'] = $tmp;
-                /*$ar['description_parts'][] = [
-                  'type' => 'text',
-                  'content' => $tmp
-                ];*/
+                $ar['description'] = $tmp;
               }
             }
           }
         } else {
           $content = trim(Str::markdown2html($ar['description_parts']));
           if ($content) {
-             	$ar['description'] =  $content;
+            $ar['description'] =  $content;
           }
         }
       }
     }
-    //X::ddump($ar);
     return $ar;
   }
 
@@ -1076,6 +1051,11 @@ class Php extends bbn\Models\Cls\Basic
       && $cls->hasProperty($prop)
     ) {
       $property = $cls->getProperty($prop);
+      $isNative = false;
+      // Check whether the property is declared in the specific class
+      if ($property->getDeclaringClass()->getName() === $cls->getName()) {
+        $isNative = true;
+      }
       $defaults = $cls->getDefaultProperties();
       $arr = [
         'name' => $property->getName(),
@@ -1084,21 +1064,21 @@ class Php extends bbn\Models\Cls\Basic
         'visibility' => $property->isPrivate() ? 'private' : ($property->isProtected() ? 'protected' : 'public'),
         'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),
         'parent' => false,
-        'value' => $defaults[$prop] ?? null
+        'value' => $defaults[$prop] ?? null,
+        'native' => $isNative
       ];
     }
     return $arr ?: null;
   }
-
   private function transformObjectToArray($obj)
   {
     $result = [];
     $index = 0;
     foreach ($obj as $name => $value) {
-        $result[$index] = $name;
-        $index++;
+      $result[$index] = $name;
+      $index++;
     }
     return $result;
-	}
+  }
 
 }

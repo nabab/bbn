@@ -19,6 +19,7 @@ class Generator {
 
   public function generateClass() {
     $res = "<?php\n\n";
+    $arr_traits = [];
     if (!empty($this->cfg['name'])) {
       $tmp =  explode("\\", $this->cfg['name']);
       if (count($tmp) > 2) {
@@ -94,6 +95,7 @@ class Generator {
 
     if ( !empty($this->cfg['traits'])) {
       foreach ($this->cfg['traits'] as $trait) {
+        $arr_traits[] = $trait;
         $res .= str_repeat(' ', $this->spacing) . "use " . $trait . ";\n";
       }
       $res .= "\n";
@@ -102,8 +104,16 @@ class Generator {
     //Add properties with all features
 
     if (!empty($this->cfg['properties'])) {
+      $parseArrTraits = $this->getLastParts($arr_traits);
       foreach ($this->cfg['properties'] as  $property => $value) {
-        $res .= $this->generateProperty($value, $property);
+        if (!empty($parseArrTraits)) {
+          if (!in_array($property, $parseArrTraits)) {
+            $res .= $this->generateProperty($value, $property);
+          }
+        } else {
+          $res .= $this->generateProperty($value, $property);
+
+        }
       }
     }
     if (!empty($this->cfg['constants'])) {
@@ -128,7 +138,7 @@ class Generator {
 
     if (!empty($cfg['description_parts']) || !empty($cfg['summary']) ||!empty($cfg['doc']['params']) ||
         !empty($cfg['doc']['throws']) || !empty($cfg['doc']['todo'])) {
-          $res .= "/**\n";
+      $res .= "/**\n";
       if (!empty($cfg['summary'])) {
         $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['summary'] . "\n";
       }
@@ -147,18 +157,33 @@ class Generator {
       }
       if (!empty($cfg['doc']['todo'])) {
         $todo = $cfg['doc']['todo'];
-        $res .=  str_repeat(' ', $this->spacing) . " * @" . $todo['tag'] . " " . $todo['text'] . "\n";
+        if (strpos($todo['text'], "```php")) {
+          $string = $todo['text'];
+          $codeStart = strpos($string, "```php");
+          $codeEnd = strpos($string, "```", $codeStart + 6);
+
+          if ($codeStart !== false && $codeEnd !== false) {
+            $beforeCode = substr($string, 0, $codeStart);
+            $beforeCode = str_replace("\n", "", $beforeCode);
+            $code = substr($string, $codeStart + 6, $codeEnd - ($codeStart + 6));
+          }
+          $res .=  str_repeat(' ', $this->spacing) . " * @" . $todo['tag'] . " " . $beforeCode . "\n";
+          $res .= str_repeat(' ', $this->spacing) . " * \n";
+          $res .= str_repeat(' ', $this->spacing) . " *```php\n";
+          $arr_code = explode("\n", $code);
+          foreach ($arr_code as $arr_c) {
+            $res .= str_repeat(' ', $this->spacing) . " * " . $arr_c . "\n";
+          }
+          $res .= str_repeat(' ', $this->spacing) ." * ```\n";
+        }
+        else {
+          $res .=  str_repeat(' ', $this->spacing) . " * @" . $todo['tag'] . " " . $todo['text'] . "\n";
+        }
       }
       if (!empty($cfg['doc']['throws'])) {
         $todo = $cfg['doc']['throws'];
         $res .=  str_repeat(' ', $this->spacing) . " * @" . $todo['tag'] . " " . $todo['type'] . "\n";
       }
-      /*if (!empty($cfg['doc']['params'])) {
-        X::ddump($cfg['doc']['params']);
-        foreach ($param as $cfg['doc']['params']) {
-          $res .= " * @" . $param['tag'] . " " . $param['type'] . " " . $param['name'] . " " . $param['description'] . "\n";
-        }
-      }*/
       if (!empty($cfg['example'])) {
         $res .= str_repeat(' ', $this->spacing) . " * \n";
         $res .= str_repeat(' ', $this->spacing) . " *```php\n";
@@ -170,8 +195,7 @@ class Generator {
       }
       if (!empty($cfg['doc'])) {
         foreach ($cfg['doc']['params'] as $tag) {
-          //  $res .= str_repeat(' ', $this->spacing);
-          if ($tag['tag'] === 'param' /*&& !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])*/) {
+          if ($tag['tag'] === 'param') {
             $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['tag'] . " " . $tag['type'] . " " . $tag['name'] . " " . $tag['description'] . "\n";
           } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
             $return = "";
@@ -194,7 +218,6 @@ class Generator {
         }
       }
       if (!empty($cfg['returns'])) {
-        $return = "";
         $len = count($cfg['returns']);
         foreach ($cfg['returns'] as $ret) {
           if ($ret === null) {
@@ -276,23 +299,22 @@ class Generator {
   public function generateProperty(array $cfg = [], string $prop_name)
   {
     $count = 0;
-    foreach ($cfg as $property => $value ) {
-      if ($property == "parent" && $value === false) {
-        $count += 1;
+    if (!empty($cfg['native'])) {
+      if ($cfg['native'] === false) {
+        $count = 1;
       }
     }
-    if (!empty($cfg['doc']['description'])) {
-      $count += 1 ? (strlen($cfg['doc']['description']) > 1) : 0;
+    if (!empty($cfg['doc']['tags'])) {
+       $count = 2;
     }
-    if ($count != 0) {
-      if ($cfg['doc']['description'] || $cfg['doc']['tags'])
+    if (!($count == 1 || $count == 2)) {
+      if (!empty($cfg['doc']['description']) || !empty($cfg['doc']['tags']))
       {
         $res .= str_repeat(' ', $this->spacing) . "/**\n";
       }
-      $res .= ($cfg['doc']['description'] ? (str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description']): "");
+      $res .= (!empty($cfg['doc']['description']) ? (str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description']): "");
       if (!empty($cfg['doc']['tags'])) {
         $tags = $cfg['doc']['tags'];
-        $res .= str_repeat(' ', $this->spacing) . " * \n";
         foreach($tags as $tag) {
           $res .= str_repeat(' ', $this->spacing) . " * @" .$tag['tag'] . " " . $tag['type'];
         }
@@ -304,25 +326,9 @@ class Generator {
       }
       $res .= " $" . $prop_name;
 
-      if ($cfg['doc']['description']) {
-        $ar = explode(" ", $cfg['doc']['description']);
-        ($ar[1] == "array" ? ($res .= " = []") : $res .= "");
-        
-        $string = $cfg['doc']['description'];
-        if (strpos($string, "\n") !== false) {
-          $array = explode("\n", $string);
-          $count = count($array);
-          foreach ($array as $index => $line) {
-            if ($index < $count - 1) {
-              $res .= str_repeat(' ', $this->spacing) . " * " . $line . "\n";
-            } else {
-              $res .= str_repeat(' ', $this->spacing) . " * " . $line;
-            }
-          }
-
-        } else {
-          $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description'];
-        }
+      if (!empty($cfg['doc']['description'])) {
+        $array = explode(" ", $cfg['doc']['description']);
+        ($array[1] == "array" ? ($res .= " = []") : $res .= "");
       }
 
 
@@ -344,11 +350,11 @@ class Generator {
       $count += 1 ? (strlen($cfg['doc']['description']) > 1) : 0;
     }
     if ($count != 0) {
-      if ($cfg['doc']['description'] || $cfg['doc']['tags'])
+      if (!empty($cfg['doc']['description']) || !empty($cfg['doc']['tags']))
       {
         $res .= str_repeat(' ', $this->spacing) . "/**\n";
       }
-      if ($cfg['doc']['description']) {
+      if (!empty($cfg['doc']['description'])) {
         $string = $cfg['doc']['description'];
 
         if (strpos($string, "\n") !== false) {
@@ -383,5 +389,15 @@ class Generator {
     else {
       return($res .= "");
     }
+  }
+  public function getLastParts(array $array): array
+  {
+    $result = [];
+    foreach ($array as $item) {
+      $parts = explode('\\', $item);
+      $lastPart = end($parts);
+      $result[] = strtolower($lastPart);
+    }
+    return $result;
   }
 }
