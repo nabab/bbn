@@ -45,50 +45,6 @@ class Cms extends DbCls
 
   private static $_id_event;
 
-    /**
-     *
-     * @param string|null $id
-     * @return void
-     */
-  private static function _set_id_event($id)
-  {
-      self::$_id_event = $id;
-  }
-
-  /**
-   * If a date is given for $end checks if it's after the start date.
-   *
-   * @param string|null $start
-   * @param null|string $end
-   * @return Boolean
-   */
-  private function _check_date(?string $start, ?string $end): bool
-  {
-    if (!isset($start)) {
-      return false;
-    }
-
-    $start = strtotime($start);
-    if (!$start) {
-      throw new Exception(X::_("The end date is not valid"));
-    }
-
-    if (empty($end)) {
-      return true;
-    }
-
-    $end = strtotime($end);
-    if (!$end) {
-      throw new Exception(X::_("The end date is not valid"));
-    }
-
-    if ($end <= $start) {
-      //throw new Exception(X::_("The end date is before the start"));
-      return false;
-    }
-
-    return true;
-  }
 
   /**
    * Cms constructor.
@@ -165,6 +121,7 @@ class Cms extends DbCls
     if ($res = $this->cacheGet($id_note, $cacheName)) {
       return $res;
     }
+
     $res = [];
     if (!empty($id_note) && ($note = $this->note->get($id_note))) {
       $res             = $note;
@@ -176,55 +133,17 @@ class Cms extends DbCls
       if (($res['id_media'] = $this->getDefaultMedia($id_note)) && !$with_medias) {
         $res['media'] = $this->getMedia($res['id_media']);
       }
+
       if (!$with_content) {
         unset($res['content']);
       }
+
       if ($with_medias) {
         $res['medias'] = $this->note->getMedias($id_note);
       }
 
       if ($res['mime'] === 'json/bbn-cms') {
-        foreach ($res['items'] as &$item) {
-          if ($item['type'] === 'container') {
-            foreach ($item['items'] as &$it) {
-              if ($it['type'] === 'slider') {
-                if ($it['mode'] === 'features') {
-                  $it['currentItems'] = [[
-                    'component' => "appui-note-cms-block-slider-slide",
-                    'data' => array_map(
-                      function($a) {
-                        $a['component'] = "appui-note-cms-block-slider-slide";
-                        $a['content'] = $a['media']['url'];
-                        $a['type'] = 'img';
-                        return $a;
-                      },
-                      $this->note->getFeatures($it['content'])
-                    )
-                  ]];
-                }
-              }
-            }
-          }
-          else {
-            if ($item['type'] === 'slider') {
-              if ($item['mode'] === 'features') {
-                $item['currentItems'] = [[
-                  'component' => "appui-note-cms-block-slider-slide",
-                  'data' => array_map(
-                    function($a) {
-                      $a['component'] = "appui-note-cms-block-slider-slide";
-                      $a['content'] = $a['media']['url'];
-                      $a['type'] = 'img';
-                      return $a;
-                    },
-                    $this->note->getFeatures($item['content'])
-                  )
-                ]];
-              }
-            }
-        }
-        }
-
+        $res['items'] = $this->normalizeItems($res['items']);
       }
 
     }
@@ -1174,6 +1093,195 @@ class Cms extends DbCls
   public function clearCache(string $idNote): bool
   {
     return !$this->cacheDelete($idNote)->cacheHas($idNote);
+  }
+
+
+  /**
+   *
+   * @param string|null $id
+   * @return void
+   */
+  private static function _set_id_event($id)
+  {
+      self::$_id_event = $id;
+  }
+
+  /**
+   * If a date is given for $end checks if it's after the start date.
+   *
+   * @param string|null $start
+   * @param null|string $end
+   * @return Boolean
+   */
+  private function _check_date(?string $start, ?string $end): bool
+  {
+    if (!isset($start)) {
+      return false;
+    }
+
+    $start = strtotime($start);
+    if (!$start) {
+      throw new Exception(X::_("The end date is not valid"));
+    }
+
+    if (empty($end)) {
+      return true;
+    }
+
+    $end = strtotime($end);
+    if (!$end) {
+      throw new Exception(X::_("The end date is not valid"));
+    }
+
+    if ($end <= $start) {
+      //throw new Exception(X::_("The end date is before the start"));
+      return false;
+    }
+
+    return true;
+  }
+
+
+  private function normalizeItems(array $items): array
+  {
+    foreach ($items as &$item) {
+      if ($item['type'] === 'container') {
+        foreach ($item['items'] as &$it) {
+          if ($it['type'] === 'slider') {
+            switch ($it['mode']) {
+              case 'features':
+                $it = $this->normalizeItemFeatures($it);
+                break;
+              case 'publications':
+                $it = $this->normalizeItemPublications($it);
+                break;
+              case 'gallery':
+                $it = $this->normalizeItemGallery($it);
+                break;
+            }
+          }
+        }
+      }
+      else {
+        if ($item['type'] === 'slider') {
+          switch ($item['mode']) {
+            case 'features':
+              $item = $this->normalizeItemFeatures($item);
+              break;
+            case 'publications':
+              $item = $this->normalizeItemPublications($item);
+              break;
+            case 'gallery':
+              $item = $this->normalizeItemGallery($item);
+              break;
+          }
+        }
+      }
+    }
+
+    return $items;
+  }
+
+
+  private function normalizeItemFeatures(array $item): array
+  {
+    $item['items'] = [[
+      'component' => "appui-note-cms-block-slider-slide",
+      'data' => array_map(
+        function($a) {
+          $a['component'] = "appui-note-cms-block-slider-slide";
+          $a['content'] = $a['media']['url'];
+          $a['type'] = 'img';
+          return $a;
+        },
+        $this->note->getFeatures($item['content'])
+      )
+    ]];
+
+    return $item;
+  }
+
+
+  private function normalizeItemPublications(array $item): array
+  {
+    $itemType = $item['noteType'];
+    if (!empty($item['noteType'])
+      && ($item['noteType'] === 'news')
+    ) {
+      $itemType = null;
+      $filters = [
+        'conditions' => [[
+          'field' => 'start',
+          'operator' => '<=',
+          'value' => date('Y-m-d H:i:s')
+        ], [
+          'field' => 'id_type',
+          'operator' => '!=',
+          'value' => $this->opt->fromCode('pages', 'types', 'note', 'appui'),
+        ], [
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => 'end',
+            'operator' => '>=',
+            'value' => date('Y-m-d H:i:s')
+          ], [
+            'field' => 'end',
+            'operator' => 'isnull'
+          ]]
+        ]]
+      ];
+    }
+
+    if (!empty($item['content'])) {
+      $filters['conditions'][] = [
+        'field' => 'id_option',
+        'value' => $item['content']
+      ];
+    }
+
+    $item['items'] = [[
+      'component' => "appui-note-cms-block-slider-slide",
+      'data' => array_map(
+        function($a) {
+          $a['component'] = "appui-note-cms-block-slider-slide";
+          $a['type'] = 'img';
+          $a['content'] = $a['front_img']['url'];
+          return $a;
+        },
+        $this->getAll(
+          false,
+          $filters,
+          [$item['order'] => 'desc'],
+          $item['limit'],
+          0,
+          $itemType
+        )['data']
+      )
+    ]];
+
+    return $item;
+  }
+
+
+  private function normalizeItemGallery(array $item): array
+  {
+    $item['items'] = [[
+      'component' => "appui-note-cms-block-slider-slide",
+      'data' => array_map(
+        function($a) {
+          $a['component'] = "appui-note-cms-block-slider-slide";
+          $a['type'] = 'img';
+          $a['content'] = $a['front_img']['url'];
+          return $a;
+        },
+        $this->media->browseByGroup(
+          $item['content'],
+          ['limit' => $item['limit']]
+        )
+      )
+    ]];
+
+    return $item;
   }
 
 }
