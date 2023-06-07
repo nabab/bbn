@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Mvc;
+namespace bbn\tests\Mvc;
 
 use bbn\Mvc;
 use bbn\Mvc\Controller;
@@ -426,7 +426,7 @@ class ControllerTest extends TestCase
   public function incl_method_includes_a_php_file_within_the_controller_path()
   {
     $file_stub = '<?php 
-  namespace bbn\foo;
+  namespace bbn\tests\foo;
   class test {}
 ';
     $file_path = self::createFile('test.php',  $file_stub, 'controllers');
@@ -438,7 +438,7 @@ class ControllerTest extends TestCase
     unlink($file_path);
 
     $file_stub = '<?php 
-  namespace bbn\foo2;
+  namespace bbn\tests\foo2;
   class test2 {}
 ';
     $file_path = self::createFile('test2.php',  $file_stub, 'controllers');
@@ -472,12 +472,12 @@ class ControllerTest extends TestCase
   {
     // Will create php files with classes defined to test files inclusion
     $file_stub = "<?php
-    namespace bbn\foo3;
+    namespace bbn\tests\foo3;
     class test3 {}
     ";
 
     $file_stub2 = "<?php
-    namespace bbn\foo4;
+    namespace bbn\tests\foo4;
     class test4 {}
     ";
 
@@ -503,7 +503,7 @@ class ControllerTest extends TestCase
   {
     // Will create a plugin file with a class defined to test plugin class is registered
     $file_stub = "<?php
-    namespace bbn\foo5;
+    namespace bbn\tests\foo5;
     class test5 {}
     ";
 

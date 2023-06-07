@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui;
+namespace bbn\tests\Appui;
 
 use bbn\Appui\Event;
 use bbn\Appui\Option;

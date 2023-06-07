@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui;
+namespace bbn\tests\Appui;
 
 use bbn\Appui\History;
 use bbn\Appui\Option;
