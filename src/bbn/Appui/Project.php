@@ -19,6 +19,7 @@ use bbn\Models\Tts\Optional;
 use bbn\Appui\Url;
 use bbn\File\System;
 use bbn\User\Preferences;
+use bbn\Api\Git;
 
 use function yaml_parse;
 
@@ -121,6 +122,104 @@ class Project extends bbn\Models\Cls\Db
     }
     return $res;
   }
+  
+  public function getGitDiff(string $path) {
+    $arr = [
+      'ide' => [],
+      'elements' => []
+    ];
+    
+    $git = new Git($path);
+    $fs = new System();
+    
+    try {
+      $difference_git = $git->diff();
+    }
+    catch (\Exception $e) {
+      $difference_git = false;
+    }
+  
+    if ( !empty($difference_git) ){
+      $arr['elements'] = array_map(function($a) use($path){
+        return [
+          'ele' => $path.'/'.(!empty($i = strpos($a['file'], ' -> ')) ? substr($a['file'], $i+4)  : $a['file']),
+          'state' => $a['action']
+        ];
+      }, $difference_git);
+    
+      $branches = [
+        'components' => ['.php','.js','.html', '.less', '.css'],
+        'mvc' => [
+          'public' => ['.php'],
+          'private' => ['.php'],
+          'model' => ['.php'],
+          'js' => ['.js'],
+          'html' => ['.php', '.html'],
+          'css' => ['.css', '.less']
+        ]
+      ];
+    
+      foreach ( $arr['elements'] as $val ){
+        $relative = str_replace($path.'/src/',"",$val['ele']);
+        $part = explode('/', $relative);
+        $root = array_shift($part);
+        if ( $root === 'components' ){
+          if ( $fs->isFile($val['ele']) ){
+            $part = explode('.', $relative);
+            $relative = array_shift($part);
+          }
+          foreach( $branches['components'] as $ext ){
+            $info = [
+              'ele' => $path.'/src/'.$relative.$ext,
+              'state' => $val['state']
+            ];
+            if ( array_search($info, $arr['ide']) === false ){
+              $arr['ide'][] = $info;
+            }
+          }
+        }
+        elseif( $root === 'mvc' ){
+          $relative = explode("/", $relative);
+          array_shift($relative);
+          array_shift($relative);
+          $relative_origin = implode('/', $relative);
+          foreach ( $branches['mvc'] as $folder => $exts ){
+            $element = $path.'/src/'. $root. '/'.$folder.'/';
+            if ( $fs->isFile($val['ele']) ){
+              $part = explode('.', $relative_origin);
+              $relative = array_shift($part);
+              foreach ( $exts as $ext ){
+                $element = $path.'/src/'. $root. '/'.$folder.'/'.$relative;
+                $element .= $ext;
+                $info = [
+                  'ele' => $element,
+                  'state' => $val['state']
+                ];
+                if ( array_search($info, $arr['ide']) === false ){
+                  $arr['ide'][] = $info;
+                }
+              }
+            }
+            else{
+              $info = [
+                'ele' => $element.$relative_origin,
+                'state' => $val['state']
+              ];
+              if ( array_search($info, $arr['ide']) === false ){
+                $arr['ide'][] = $info;
+              }
+            }
+          }
+        }
+        else{
+          if ( array_search($val, $arr['ide']) === false ){
+            $arr['ide'][] = $val;
+          }
+        }
+      }
+    }
+    return $arr;
+  }
 
   /**
    * Gets the configuration of an URL
@@ -141,6 +240,7 @@ class Project extends bbn\Models\Cls\Db
     $info = $this->getProjectInfo();
     /** @var array $path_info full option for the current path */
     $path_info = X::getRow($info['path'], ['parent_code' => $root, 'code' => $path]);
+
     /** @var string $type the last part of the url after _end_ */
     $type = false;
 
@@ -499,6 +599,8 @@ class Project extends bbn\Models\Cls\Db
     // finalPath is the parameter for the getFiles function
     $finalPath = $currentPathArray['parent'].$currentPathArray['path'].($typePath['code'] === 'bbn-project' ? '/src' : '');
     $isBbnProject = false;
+    $difference_git = $this->getGitDiff($currentPathArray['parent'].$currentPathArray['path']);
+  
     $todo = [];
     if (!empty($typePath['types'])) {
       // do if the path is a bbn-project
@@ -532,15 +634,36 @@ class Project extends bbn\Models\Cls\Db
     else {
       $todo = $this->retrieveAllFiles($finalPath.($path ?: ''), $onlydirs);
     }
+  
+    $check_git = function ($ele) use ($difference_git) {
+      $info_git = false;
+      if (!empty($difference_git['ide'])) {
+        foreach($difference_git['ide'] as $commit){
+          $info_git = str_starts_with($commit['ele'], $ele);
+          if (!empty($info_git)) {
+            return true;
+          }
+        }
+      }
+    
+      return $info_git;
+    };
+    
     if (is_array($todo)) {
       //we browse the element
+      $fs = new \bbn\File\System();
       $files = [];
       $filtered = array_values(array_filter(
         $todo,
-        function($a) use (&$files) {
+        function($a) use (&$files, &$fs, $check_git){
           // get name and extension of each files
           $ext  = \bbn\Str::fileExt($a['name']);
           $name = \bbn\Str::fileExt($a['name'], 1)[0];
+          if ($fs->isDir($a['name'])) {
+            $name = '0' . $name;
+          } else {
+            $name = '1' . $name;
+          }
           if (!isset($files[$name])) {
             $files[$name] = true;
             return true;
@@ -552,13 +675,16 @@ class Project extends bbn\Models\Cls\Db
       $files = [];
       $folders = [];
       // launch _getNode on all path of $currentPathArray to get array of nodes
-      $fn = function($a) use (&$currentPathArray, $that, &$files,  &$folders) {
+      $fn = function($a) use (&$currentPathArray, $that, &$files,  &$folders, &$fs, $check_git) {
+        
         $tmp = $that->_getNode($a, $currentPathArray);
-        if ($tmp['file']) {
-          $files[$tmp['name']] = $tmp;
+        if ($fs->isFile($a['name'])) {
+          $tmp['git'] = $check_git($a['name']);
+          $files['1' . $tmp['name']] = $tmp;
         }
         else {
-          $folders[$tmp['name']] = $tmp;
+          $tmp['git'] = $check_git($a['name']);
+          $folders['0' . $tmp['name']] = $tmp;
         }
         return $tmp;
       };
