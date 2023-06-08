@@ -855,30 +855,6 @@ class Project extends bbn\Models\Cls\Db
 
 
   /**
-   * Returns an array containing about the repositories in  the project
-   *
-   * @return void
-
-  public function getPaths()
-  {
-    $paths = [];
-    if ($this->check() && $this->id_path && !empty($this->repositories)) {
-      foreach ($this->repositories as $rep) {
-        $paths[] = [
-          'id_option' => $rep['id'],
-          'path' => $this->getRootPath($rep['name']),
-          'code' => $rep['code'],
-          'text' => $rep['text'],
-          'language' => $rep['language'] ?? ''
-        ];
-      }
-    }
-
-    return $paths;
-  }
-  */
-
-  /**
    * function to get all path of the project and format each path
    *
    * @param bool $withPath  adds the full path to the results
