@@ -1168,10 +1168,14 @@ MYSQL
           $st .= ',' . PHP_EOL;
         }
 
-        $st .= $this->getAlterColumn($table, array_merge($col, [
-          'col_name' => $name,
-          'no_table_exp' => true
-        ]));
+        $columnMrg = [];
+        try {
+          $columnMrg = array_merge($col, ['col_name' => $name, 'no_table_exp' => true]);
+        } catch (Exception $e) {
+          throw $e;
+        }
+
+        $st .= $this->getAlterColumn($table, $columnMrg);
       }
     }
 
