@@ -1301,20 +1301,24 @@ class Sqlite extends Sql
       $st .= ' NOT NULL';
     }
 
-    if (array_key_exists('default', $col) && $col['default'] !== null) {
-      $st .= ' DEFAULT ';
-      if (($col['default'] === 'NULL')
-        || bbn\Str::isNumber($col['default'])
-        || strpos($col['default'], '(')
-        || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
-      ) {
-        $st .= (string)$col['default'];
+    if (array_key_exists('default', $col)) {
+      if (!empty($col['defaultExpression'])) {
+        $st .= ' DEFAULT ';
+        if ($col['default'] === null) {
+          $st .= ' NULL';
+        }
+        else {
+          $st .= (string)$col['default'];
+        }
       }
       else {
-        $st .= "'" . trim($col['default'], "'") . "'";
+        $def = (string)$col['default'];
+        if (!empty($col['default'])) {
+          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
+        }
       }
     }
-
+    
     return $st;
   }
 

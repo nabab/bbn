@@ -1526,10 +1526,14 @@ MYSQL
           $st .= (string)$col['default'];
         }
       }
-      elseif (!empty($col['default'])) {
-        $st .= " DEFAULT '" . Str::escapeQuotes(trim($col['default'], "'")) . "'";
+      else {
+        $def = (string)$col['default'];
+        if (!empty($col['default'])) {
+          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
+        }
       }
     }
+
 
     return $st;
   }

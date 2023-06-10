@@ -1535,26 +1535,24 @@ PGSQL
 
     if (!empty($col['virtual'])) {
       $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
-    } elseif (array_key_exists('default', $col)) {
-      if ($for_alter) {
-        $st .= ',' . PHP_EOL;
-        $st .= 'ALTER COLUMN ' . $this->escape($name);
-        $st .= ' SET DEFAULT ';
+    }
+    elseif (array_key_exists('default', $col)) {
+      if (!empty($col['defaultExpression'])) {
+        $st .= ' DEFAULT ';
+        if ($col['default'] === null) {
+          $st .= ' NULL';
+        }
+        else {
+          $st .= (string)$col['default'];
+        }
       }
       else {
-        $st .= ' DEFAULT ';
+        $def = (string)$col['default'];
+        if (!empty($col['default'])) {
+          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
+        }
       }
 
-      if (($col['default'] === 'NULL')
-        || Str::isNumber($col['default'])
-        || strpos($col['default'], '(')
-        || in_array(strtoupper($col['default']), ['CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'])
-      ) {
-        $st .= (string)$col['default'];
-      }
-      else {
-        $st .= "'" . trim($col['default'], "'") . "'";
-      }
     }
 
     return rtrim($st, ',' . PHP_EOL);
