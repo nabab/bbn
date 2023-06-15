@@ -61,6 +61,9 @@ trait Common
   }
 
 
+  /**
+   * Log to a specific log with debug info
+   */
   public function log()
   {
     if (Mvc::getDebug()) {
@@ -70,7 +73,13 @@ trait Common
   }
 
 
-  public function pluginDataPath($plugin = null): ?string
+  /**
+   * Returns the path of a plugin in the data
+   *
+   * @param string $plugin
+   * @return string|null
+   */
+  public function pluginDataPath(string $plugin = null): ?string
   {
     if (($this->_plugin || $plugin) && \defined('BBN_DATA_PATH')) {
       return BBN_DATA_PATH.'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
@@ -80,37 +89,73 @@ trait Common
   }
 
 
-  public function getPlugins()
+  /**
+   * Returns all the plugins available with their name, path and url
+   * @return array|null
+   */
+  public function getPlugins(): ?array
   {
     return $this->_mvc->getPlugins();
   }
 
 
-  public function hasPlugin($plugin)
+  /**
+   * Checks whether a plugin is available
+   *
+   * @param string $plugin The plugin name
+   * @return boolean
+   */
+  public function hasPlugin(string $plugin): bool
   {
     return $this->_mvc->hasPlugin($plugin);
   }
 
 
-  public function isPlugin($plugin = null)
+  /**
+   * Checks whether a plugin exists
+   *
+   * @param string|null $plugin The plugin name
+   * @return boolean
+   */
+  public function isPlugin(string $plugin = null): bool
   {
     return $this->_mvc->isPlugin($plugin ?: $this->pluginName($this->_plugin));
   }
 
 
-  public function pluginPath($plugin = null, $raw = false)
+
+  /**
+   * Returns the path of a plugin from its root directory (app, lib...) based on its name
+   *
+   * @param string|null $plugin The plugin name
+   * @param boolean $raw If true will not include `src`
+   * @return string|null
+   */
+  public function pluginPath(string $plugin = null, $raw = false): ?string
   {
     return $this->_mvc->pluginPath($plugin ?: $this->pluginName($this->_plugin), $raw);
   }
 
 
-  public function pluginUrl($plugin = null)
+  /**
+   * Returns the url of a plugin based on its name
+   *
+   * @param string|null $plugin The plugin name
+   * @return string|null
+   */
+  public function pluginUrl(string $plugin = null): ?string
   {
     return $this->_mvc->pluginUrl($plugin ?: $this->pluginName($this->_plugin));
   }
 
 
-  public function pluginName($path = null)
+  /**
+   * Returns the name of a plugin based on its path
+   *
+   * @param string|null $path The plugin path
+   * @return string|null
+   */
+  public function pluginName($path = null): ?string
   {
     return $this->_mvc->pluginName($path ?: $this->_path);
   }
@@ -122,21 +167,21 @@ trait Common
   }
 
 
-  public function getRoutes()
+  public function getRoutes(): ?array
   {
     return $this->_mvc->getRoutes();
   }
 
 
-  public function getAliases()
+  public function getAliases(): ?array
   {
     return $this->_mvc->getRoutes('alias');
   }
 
 
-  public function getRoute($path, $mode, $root = null)
+  public function getRoute(string $path, string $mode)
   {
-    return $this->_mvc->getRoute($path, $mode, $root);
+    return $this->_mvc->getRoute($path, $mode);
   }
 
 
