@@ -69,12 +69,13 @@ class Provider extends DbCls
     ]
   ];
 
-  protected function providerGetEmails(string $id_provider) :?array
+  public function getEmails(string $id_provider) :?array
   { 
     $cfg = $this->getClassCfg();
-    return $this->db->rselectAll($cfg['tables']['emails'], 'email', [
+    $emails = $this->db->rselectAll($cfg['tables']['emails'], 'email', [
       $cfg['arch']['emails']['id_provider'] => $id_provider
     ]);
+    return $emails ?: [];
   }
 
   protected function providerEmailExists(string $id_provider, string $email) :?bool

@@ -27,6 +27,11 @@ class Sales extends DbCls
    */
   protected $client;
 
+  /**
+   * @var Provider
+   */
+  protected $provider;
+
   protected static $default_class_cfg = [
     'errors' => [
     ],
@@ -62,6 +67,7 @@ class Sales extends DbCls
     $this->db = $db;
     $this->cart = new Cart($this->db);
     $this->client = new Client($this->db);
+    $this->provider = new Provider($this->db);
     // Setting up the class configuration
     $this->_init_class_cfg($cfg);
   }
@@ -343,6 +349,65 @@ class Sales extends DbCls
     return false;
   }
 
+   /**
+   * Sends the order confirm email to the client
+   * @param string $idTransaction
+   * @param \bbn\Mail $mailCls
+   * @return bool
+   */
+  public function sendConfirmEmailToProviders(string $idTransaction, \bbn\Mail $mailCls = null)
+  {
+    if ($opt = Option::getInstance())
+    {
+      if (empty($mailCls)) {
+        $mailCls = new Mail();
+      }
+      $masksCls = new Masks($this->db);
+      if ($template = $masksCls->getDefault($opt->fromCode('provider_order_confirm', 'masks', 'appui'))) {
+        $productCls = new Product($this->db);
+        $providers = [];
+        $products = $this->cart->getProducts($this->getIdCart($idTransaction));
+        foreach ( $products as $product){ 
+          $idProvider = $productCls->getProvider($product['id_product']);
+          if (!in_array($idProvider, $providers)) {
+            $providers[] = $idProvider;
+          }
+        }
+        if (!empty($providers)) {
+          $nr = 0;
+          foreach ($providers as $providerId) {
+            $nr ++;
+            $providersEmails = $this->provider->getEmails($providerId);
+            if (!empty($providersEmails)) {
+              foreach ($providersEmails as $email){
+                $d = $this->getMailDataProvider($idTransaction, $providerId);
+                $title = Tpl::render($template['title'], $d);
+                $content = Tpl::render($template['content'], $d);
+                if (!$mailCls->send([
+                  'to' => $email['email'],
+                  'title' => $title,
+                  'text' => $content
+                ])) {
+                  \bbn\X::log([
+                    'provider' => $providerId,
+                    'providersEmails' => $email,
+                  ], 'error_sending_provider_confirmation_email');
+                }
+                else {
+                  \bbn\X::log([
+                    'provider' => $providerId,
+                    'providersEmails' => $providersEmails,
+                    'email' => $email,                    
+                  ], 'send_conf_to_providers');
+                }
+              }
+            }
+          }
+        }
+      }
+    }//aggiungere return
+  }
+
   /**
    * Sends an email to notify a new order
    * @param string $idTransaction The transaction ID
@@ -406,5 +471,42 @@ class Sales extends DbCls
     }
     return null;
   }
+
+  /**
+   * Gets the transaction info for the provider to use on an email 
+   * @param string $idTransaction
+   * @return null|array
+   */
+  private function getMailDataProvider(string $idTransaction, string $idProvider): ?array
+  {
+    if (($opt = Option::getInstance())
+      && ($transaction = $this->get($idTransaction))
+    ) {
+      $products = $this->cart->getProductsDetail($transaction[$this->fields['id_cart']]);
+      $transaction['products'] = X::getRows($products, function($a) use ($idProvider){
+        return $a['product']['id_provider'] === $idProvider;
+      });
+      $total = 0;
+      foreach ($transaction['products'] as $i => $p) {
+        $transaction['products'][$i]['product']['price'] = '€ ' . (string)number_format(round((float)($p['amount'] / $p['quantity']), 2), 2, ',', '');
+        $transaction['products'][$i]['amount'] = '€ ' . (string)number_format(round((float)$p['amount'], 2), 2, ',', '');
+        $total += $p['amount'];
+      }
+      $shippingAddress = $this->getShippingAddress($idTransaction);
+      $shippingCost = $this->cart->shippingCostPerProvider($idProvider,$shippingAddress['id_address'], $transaction['id_cart']); 
+      $transaction['shippingCost'] = '€ ' . (string)number_format(round((float)$shippingCost, 2), 2, ',', '');
+      $transaction['total'] = '€ ' . (string)number_format(round((float) $total + $shippingCost, 2), 2, ',', '');
+
+      $transaction['shippingAddress'] = $shippingAddress;
+      $transaction['billingAddress'] = $this->getBillingAddress($idTransaction);
+      $transaction['shippingAddress']['country'] = $opt->text($transaction['shippingAddress']['country']);
+      $transaction['billingAddress']['country'] = $opt->text($transaction['billingAddress']['country']);
+      $transaction[$this->fields['payment_type']] = $opt->text($transaction[$this->fields['payment_type']]);
+      $transaction['formattedMoment'] = date('d/m/Y', strtotime($transaction[$this->fields['moment']]));
+      return $transaction;
+    }
+    return null;
+  }
+
 
 }
