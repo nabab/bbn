@@ -3828,7 +3828,7 @@ class Option extends bbn\Models\Cls\Db
    * @param array    $options   An array of option(s) as export returns it
    * @param array|string|int|null $id_parent The option target, if not specified {@link default}
    * @param array|null $todo
-   * @return int The number of affected rows
+   * @return iterable|null
    */
   public function import(array $options, $id_parent = null, array &$todo = null)
   {
@@ -3886,13 +3886,17 @@ class Option extends bbn\Models\Cls\Db
         }
 
         if ($id = $this->add($o, true)) {
+          yield 1;
           if (!empty($tmp)) {
             $todo[$id] = $tmp;
           }
 
           $num++;
           if (!empty($items)) {
-            $num += $this->import($items, $id, $todo);
+            foreach ($this->import($items, $id, $todo) as $success) {
+              $num += $success;
+              yield $success;
+            }
           }
         }
         else {
@@ -3931,10 +3935,8 @@ class Option extends bbn\Models\Cls\Db
         }
       }
 
-      return $num;
     }
 
-    return null;
   }
 
 

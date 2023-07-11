@@ -1,5 +1,7 @@
 <?php
 namespace bbn\Util;
+
+use bbn\Mvc;
 /**
  * A few recurrent functions
  *
@@ -55,8 +57,8 @@ trait Info
 	 */
 	public static function log($st,$file='misc')
 	{
-		if ( \defined('BBN_DATA_PATH') ){
-			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
+		if ( is_dir(Mvc::getTmpPath() . 'logs') ){
+			$log_file = Mvc::getTmpPath() . 'logs/'.$file.'.log';
 			$i = debug_backtrace()[0];
 			$r = "[".date('d/m/Y H:i:s')."]\t".$i['file']." - line ".$i['line']."\n";
 			if ( !\is_string($st) )

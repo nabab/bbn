@@ -48,11 +48,6 @@ class Session
     if (self::singletonExists()) {
       throw new Exception("Impossible to create a new session, one already exists");
     }
-    /*
-    if (defined('BBN_DATA_PATH') && !$this->isOpened()) {
-      session_save_path(BBN_DATA_PATH.'sessions');
-    }
-    */
     self::singletonInit($this);
 
     if ($id = session_id()) {

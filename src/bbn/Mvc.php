@@ -98,6 +98,11 @@ class Mvc implements Mvc\Api
    */
   private static $_data_path;
 
+  /**
+   * @var string The temp path
+   */
+  private static $_tmp_path;
+
   protected static $db_in_controller = false;
 
   private $is_routed = false;
@@ -188,12 +193,13 @@ class Mvc implements Mvc\Api
   public static function initPath()
   {
     if (!self::$_app_name) {
-      self::$_app_name   = defined('BBN_APP_NAME') ? BBN_APP_NAME : 'app';
-      self::$_app_path   = defined('BBN_APP_PATH') ? BBN_APP_PATH : '';
-      self::$_app_prefix = defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : '';
-      self::$_cur_path   = defined('BBN_CUR_PATH') ? BBN_CUR_PATH : '';
-      self::$_lib_path   = defined('BBN_LIB_PATH') ? BBN_LIB_PATH : '';
-      self::$_data_path  = defined('BBN_DATA_PATH') ? BBN_DATA_PATH : '';
+      self::$_app_name   = defined('BBN_APP_NAME') ? constant('BBN_APP_NAME') : 'app';
+      self::$_app_path   = defined('BBN_APP_PATH') ? constant('BBN_APP_PATH') : '';
+      self::$_app_prefix = defined('BBN_APP_PREFIX') ? constant('BBN_APP_PREFIX') : '';
+      self::$_cur_path   = defined('BBN_CUR_PATH') ? constant('BBN_CUR_PATH') : '';
+      self::$_lib_path   = defined('BBN_LIB_PATH') ? constant('BBN_LIB_PATH') : '';
+      self::$_data_path  = defined('BBN_DATA_PATH') ? constant('BBN_DATA_PATH') : '';
+      self::$_tmp_path  = defined('BBN_TMP_PATH') ? constant('BBN_TMP_PATH') : '';
     }
   }
 
@@ -205,6 +211,7 @@ class Mvc implements Mvc\Api
    */
   public static function getAppName(): string
   {
+    self::initPath();
     return self::$_app_name;
   }
 
@@ -216,6 +223,7 @@ class Mvc implements Mvc\Api
    */
   public static function getAppPrefix(): ?string
   {
+    self::initPath();
     return self::$_app_prefix;
   }
 
@@ -229,6 +237,7 @@ class Mvc implements Mvc\Api
    */
   public static function getAppPath($raw = false): string
   {
+    self::initPath();
     return self::$_app_path . ($raw ? '' : 'src/');
   }
 
@@ -240,6 +249,7 @@ class Mvc implements Mvc\Api
    */
   public static function getCurPath(): string
   {
+    self::initPath();
     return self::$_cur_path;
   }
 
@@ -251,6 +261,7 @@ class Mvc implements Mvc\Api
    */
   public static function getLibPath(): string
   {
+    self::initPath();
     return self::$_lib_path;
   }
 
@@ -264,7 +275,8 @@ class Mvc implements Mvc\Api
    */
   public static function getDataPath(string $plugin = null): string
   {
-    return BBN_DATA_PATH . ($plugin ? 'plugins/' . $plugin . '/' : '');
+    self::initPath();
+    return self::$_data_path . ($plugin ? 'plugins/' . $plugin . '/' : '');
   }
 
 
@@ -277,7 +289,8 @@ class Mvc implements Mvc\Api
    */
   public static function getTmpPath(string $plugin = null): string
   {
-    return self::$_app_name ? self::getDataPath() . 'tmp/' . ($plugin ? $plugin . '/' : '') : '';
+    self::initPath();
+    return self::$_tmp_path . ($plugin ? 'plugins/' . $plugin . '/' : '');
   }
 
 
@@ -292,6 +305,7 @@ class Mvc implements Mvc\Api
    */
   public static function getLogPath(string $plugin = null): string
   {
+    self::initPath();
     return self::$_app_name ? self::getDataPath() . 'logs/' . ($plugin ? $plugin . '/' : '') : '';
   }
 
@@ -307,7 +321,8 @@ class Mvc implements Mvc\Api
    */
   public static function getCachePath(string $plugin = null): string
   {
-    return BBN_DATA_PATH . 'cache/' . ($plugin ? $plugin . '/' : '');
+    self::initPath();
+    return self::getTmpPath() . 'cache/' . ($plugin ? $plugin . '/' : '');
   }
 
 
@@ -320,6 +335,7 @@ class Mvc implements Mvc\Api
    */
   public static function getContentPath(string $plugin = null): string
   {
+    self::initPath();
     return self::$_app_name ? self::getDataPath() . ($plugin ? 'plugins/' . $plugin . '/' : 'content/') : '';
   }
 
@@ -368,9 +384,6 @@ class Mvc implements Mvc\Api
    */
   public static function getUserTmpPath(string $id_user = null, string $plugin = null): ?string
   {
-    if (!self::$_app_name) {
-      return null;
-    }
 
     if (!$id_user) {
       $usr = \bbn\User::getInstance();
@@ -380,7 +393,7 @@ class Mvc implements Mvc\Api
     }
 
     if ($id_user) {
-      return self::getDataPath() . 'users/' . $id_user . '/tmp/' . ($plugin ? $plugin . '/' : '');
+      return self::getTmpPath() . 'users/' . $id_user . '/tmp/' . ($plugin ? $plugin . '/' : '');
     }
 
     return null;

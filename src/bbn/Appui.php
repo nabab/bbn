@@ -1636,9 +1636,9 @@ class Appui
   /**
    * Import the options from the default bbn file in the current environment.
    *
-   * @return int
+   * @return iterable
    */
-  public function importOptions(): int
+  public function importOptions()
   {
     $res = 0;
     if ($opt = $this->getOption()) {
@@ -1677,7 +1677,15 @@ class Appui
           }
         }
 
-        $res += (int)$opt->import($appui_options, $root);
+        foreach ($opt->import($appui_options, $root) as $success) {
+          if ($success) {
+            $res++;
+            if ($res % 100 === 0) {
+              yield $res;
+            }
+          }
+        }
+
         if (!defined('BBN_APPUI')) {
           define('BBN_APPUI', $opt->fromCode('appui'));
         }
@@ -1685,8 +1693,6 @@ class Appui
         $opt->deleteCache(null);
       }
     }
-
-    return $res;
   }
 
 
@@ -2295,11 +2301,10 @@ class Appui
         $installer->report('Error during admin user creation', false, true);
       }
 
-      if ($res = $this->importOptions()) {
-        $installer->report("{$res} options imported");
-      }
-      else {
-        $installer->report('No new option created');
+      $numOptions = 0;
+      foreach ($this->importOptions() as $res) {
+        $numOptions += $res;
+        $installer->report("{$numOptions} options imported");
       }
 
 

@@ -162,23 +162,12 @@ class Shop extends Models\Cls\Db
   public function getProvidersList(array $params = []): array
   {
     $cfg  = $this->providers->getClassCfg();
-    $fields = array_merge($cfg['arch']['providers'], ['emails' => "GROUP_CONCAT(`email`)"]);
     $grid = new \bbn\Appui\Grid($this->db, $params, [
       'tables' => $cfg['table'],
-      'fields' => $fields,
-      'join' => [[
-        'table' => 'bbn_shop_providers_emails',
-        'type' => 'left',
-        'on' => [
-          'conditions' => [[
-            'field' => $cfg['arch']['emails']['id_provider'],
-            'exp' => $cfg['arch']['providers']['id']
-          ]]
-        ]
-      ]],
-      'group_by' =>  $cfg['arch']['providers']['id'],
+      'fields' => $cfg['arch']['providers'],
       'limit' => 100
     ]);
+
     if ($grid->check()) {
       $res = $grid->getDatatable();
       foreach ($res['data'] as &$d) {

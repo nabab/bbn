@@ -172,8 +172,8 @@ class X
    */
   public static function log($st, string $file = 'misc'): void
   {
-    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
-      $log_file  = BBN_DATA_PATH.'logs/'.$file.'.log';
+    if (is_dir(Mvc::getTmpPath() . 'logs')) {
+      $log_file  = Mvc::getTmpPath().'logs/'.$file.'.log';
       $backtrace = array_filter(
         debug_backtrace(), function ($a) {
           return $a['function'] === 'log';
@@ -212,8 +212,8 @@ class X
    */
   public static function logError($errno, $errstr, $errfile, $errline): void
   {
-    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
-      $file      = BBN_DATA_PATH.'logs/_php_error.json';
+    if (is_dir(Mvc::getTmpPath().'logs')) {
+      $file      = Mvc::getTmpPath().'logs/_php_error.json';
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
       foreach ($backtrace as &$b) {
         if (!empty($b['file'])) {

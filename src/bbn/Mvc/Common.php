@@ -81,8 +81,24 @@ trait Common
    */
   public function pluginDataPath(string $plugin = null): ?string
   {
-    if (($this->_plugin || $plugin) && \defined('BBN_DATA_PATH')) {
-      return BBN_DATA_PATH.'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
+    if ($this->_plugin || $plugin) {
+      return $this->dataPath().'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the path of a plugin in the data
+   *
+   * @param string $plugin
+   * @return string|null
+   */
+  public function pluginTmpPath(string $plugin = null): ?string
+  {
+    if ($this->_plugin || $plugin) {
+      return $this->tmpPath().'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
     }
 
     return null;

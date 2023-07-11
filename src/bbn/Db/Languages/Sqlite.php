@@ -154,11 +154,11 @@ class Sqlite extends Sql
       $cfg['db']   = $info['basename'];
     }
     elseif (\defined('BBN_DATA_PATH')
-      && is_dir(BBN_DATA_PATH.'db')
+      && is_dir(constant('BBN_DATA_PATH').'db')
       && (strpos($cfg['db'], '/') === false)
     ) {
-      $cfg['host'] = BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR;
-      if (!is_file(BBN_DATA_PATH.'db'.DIRECTORY_SEPARATOR.$cfg['db'])
+      $cfg['host'] = constant('BBN_DATA_PATH').'db'.DIRECTORY_SEPARATOR;
+      if (!is_file(constant('BBN_DATA_PATH').'db'.DIRECTORY_SEPARATOR.$cfg['db'])
         && (strpos($cfg['db'], '.') === false)
       ) {
         $cfg['db'] .= '.sqlite';
