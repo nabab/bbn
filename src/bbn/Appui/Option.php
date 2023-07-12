@@ -3818,6 +3818,16 @@ class Option extends bbn\Models\Cls\Db
   }
 
 
+  public function importAll(array $options, $id_parent = null) {
+    $res = 0;
+    foreach ($this->import($options, $id_parent) as $num) {
+      $res += $num;
+    }
+
+    return $res;
+  }
+
+
   /**
    * Insert into the option table an exported array of options
    *
@@ -3956,9 +3966,12 @@ class Option extends bbn\Models\Cls\Db
   {
     $res    = null;
     $target = $this->fromCode($target);
+    $res = 0;
     if (bbn\Str::isUid($target)) {
       if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {
-        $res = $this->import($opt, $target);
+        foreach ($this->import($opt, $target) as $num) {
+          $res += $num;
+        }
         $this->deleteCache($target);
       }
     }
@@ -4250,7 +4263,9 @@ class Option extends bbn\Models\Cls\Db
       $idPlugins = $this->getAliasItems($pluginAlias);
       $res = 0;
       foreach ($idPlugins as $idPlugin) {
-        $res += (int)$this->import($export['items'], $idPlugin);
+        foreach ($this->import($export['items'], $idPlugin) as $num) {
+          $res += $num;
+        }
       }
 
       return $res;
@@ -4302,7 +4317,12 @@ class Option extends bbn\Models\Cls\Db
     }
 
     if (($export = $this->export($idAlias, 'sfull')) && !empty($export['items'])) {
-      return (int)$this->import($export['items'], $id);
+      $res = 0;
+      foreach ($this->import($export['items'], $id) as $num) {
+        $res += $num;
+      }
+
+      return $res;
     }
 
     return null;
@@ -4324,7 +4344,9 @@ class Option extends bbn\Models\Cls\Db
           && !empty($export['items'])
       ) {
         foreach ($all as $a) {
-          $res += (int)$this->import($export['items'], $a[$this->fields['id']]);
+          foreach ($this->import($export['items'], $a[$this->fields['id']]) as $num) {
+            $res += $num;
+          }
         }
       }
 
