@@ -2185,6 +2185,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           elseif (empty($v) && $nullable) {
             $data[$c] = null;
           }
+          else {
+            $data[$c] = $v;
+          }
         }
 
         // Integer
@@ -2210,7 +2213,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           || ($type === 'float')
           || ($type === 'real')
         ) {
-          if (($v === '') && $nullable) {
+          if ((($v === '') || \is_null($v)) && $nullable) {
             $data[$c] = null;
           }
           else {
@@ -2222,7 +2225,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         elseif (\str_contains($type, 'char')
           || \str_contains($type, 'text')
         ) {
-          if (empty($v) && $nullable) {
+          if (\is_null($v) && $nullable) {
             $data[$c] = null;
           }
           else {
@@ -2231,7 +2234,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         }
 
         elseif ($type === 'json') {
-          if (empty($v) && $nullable) {
+          if (\is_null($v) && $nullable) {
             $data[$c] = null;
           }
           elseif (Str::isJson($v)
