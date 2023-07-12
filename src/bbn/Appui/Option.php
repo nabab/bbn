@@ -3891,7 +3891,6 @@ class Option extends bbn\Models\Cls\Db
             $todo[$id] = $tmp;
           }
 
-          $num++;
           if (!empty($items)) {
             foreach ($this->import($items, $id, $todo) as $success) {
               $num += $success;
@@ -3921,7 +3920,7 @@ class Option extends bbn\Models\Cls\Db
               throw new \Exception(
                 X::_(
                   "Error while importing: impossible to set the alias %s",
-                  json_encode($td['id_alias'], JSON_PRETTY_PRINT)
+                  json_encode($td, JSON_PRETTY_PRINT)
                 )
               );
             }
