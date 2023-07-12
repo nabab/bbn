@@ -269,7 +269,7 @@ class X
       file_put_contents($file, Json_encode($r, JSON_PRETTY_PRINT));
     }
     else {
-      throw new Exception(X::_("Impossible to write the error log file"));
+      die(X::_("Impossible to write the error log file"));
     }
   }
 
