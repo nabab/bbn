@@ -1681,6 +1681,7 @@ class Appui
         $next = $step;
         foreach ($opt->import($appui_options, $root) as $success) {
           if ($success) {
+            $res += $success;
             if ($res >= $next) {
               $next += $step;
               yield $res;
