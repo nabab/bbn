@@ -268,6 +268,9 @@ class X
       self::sortBy($r, 'last_date', 'DESC');
       file_put_contents($file, Json_encode($r, JSON_PRETTY_PRINT));
     }
+    else {
+      throw new Exception(X::_("Impossible to write the error log file"));
+    }
   }
 
 
