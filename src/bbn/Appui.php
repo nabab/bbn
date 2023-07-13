@@ -2116,7 +2116,7 @@ class Appui
    *
    * @return int
    */
-  public function updateHistory(): int
+  public function updateHistory(): iterable
   {
     $tot_insert     = 0;
     $inserted       = 0;
@@ -2149,11 +2149,6 @@ class Appui
       $history_rows     = $db->getColumnValues('bbn_options', 'id');
       $num_history_rows = count($history_rows);
       foreach ($history_rows as $o) {
-        ++$tot_insert;
-        if (0 === $tot_insert % 100) {
-          echo "{$tot_insert} / {$num_history_rows} rows written".PHP_EOL;
-        }
-
         if ($db->insert(
           'bbn_history_uids',
           [
@@ -2173,14 +2168,18 @@ class Appui
               ]
             )
         ) {
-          ++$inserted;
+          yield 1;
+        }
+        else {
+          yield 0;
         }
       }
 
       // Create constraints
-      $constraints = $this->getHistoryConstraints();
-      foreach ($constraints as $ctable => $ckeys) {
-        $db->query($db->getCreateConstraints($ctable, ['keys' => $ckeys]));
+      if ($constraints = $this->getHistoryConstraints()) {
+        foreach ($constraints as $ctable => $ckeys) {
+          $db->query($db->getCreateConstraints($ctable, ['keys' => $ckeys]));
+        }
       }
     }
 
@@ -2363,12 +2362,19 @@ class Appui
       // If history is active
       if (!empty($settings['history'])) {
         $installer->report(X::_("History update starting, it might take a while..."));
-        if ($this->updateHistory()) {
-          $installer->report(X::_("History update successful"));
+        $step = 100;
+        $next    = $step;
+        foreach ($this->updateHistory() as $success) {
+          if ($success) {
+            $res += $success;
+            if ($res >= $next) {
+              $next += $step;
+              $installer->report(X::_("$res entries inserted..."));
+            }
+          }
         }
-        else {
-          $installer->report('Error during history update', false, true);
-        }
+
+        $installer->report(X::_("History update successful"));
       }
 
       $cache->deleteAll('');
