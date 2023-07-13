@@ -3903,7 +3903,6 @@ class Option extends bbn\Models\Cls\Db
 
           if (!empty($items)) {
             foreach ($this->import($items, $id, $todo) as $success) {
-              $num += $success;
               yield $success;
             }
           }
