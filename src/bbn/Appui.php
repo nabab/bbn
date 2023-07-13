@@ -2116,7 +2116,7 @@ class Appui
    *
    * @return int
    */
-  public function updateHistory(): iterable
+  public function updateHistory()
   {
     $tot_insert     = 0;
     $inserted       = 0;
@@ -2303,10 +2303,8 @@ class Appui
         $installer->report('Error during admin user creation', false, true);
       }
 
-      $numOptions = 0;
       foreach ($this->importOptions() as $res) {
-        $numOptions += $res;
-        $installer->report("{$numOptions} options imported");
+        $installer->report("{$res} options imported");
       }
 
 
@@ -2326,6 +2324,7 @@ class Appui
 
       $cache->deleteAll('');
 
+      $installer->report("{$res} Permissions creation...");
       if ($res = $this->updatePermissions()) {
         $installer->report("{$res} Permissions created");
       }
