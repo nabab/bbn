@@ -17,26 +17,38 @@ class Generator {
   }
   
   public function generateClass() {
+    //X::ddump('Tests');
     $res = "<?php\n\n";
-    if ( !empty($this->cfg['namespace'])) {
-      $res .= "namespace " . $this->cfg['namespace'] . ";\n\n";
+    if ( !empty($this->cfg['realNamespace'])) {
+      $res .= "namespace " . $this->cfg['realNamespace'] . ";\n\n";
     }
     
-    if (str_contains($this->cfg['name'], $this->cfg['namespace'])) {
+    /*if (str_contains($this->cfg['name'], $this->cfg['namespace'])) {
       $res .= "class " . substr($this->cfg['name'], strlen($this->cfg['namespace']) + 1);
     } else {
       $res .= "class " . $this->cfg['name'];
+    }*/
+
+    if (!empty($this->cfg['uses'])) {
+      foreach ($this->cfg['uses'] as $fqn => $alias) {
+        $res .= "use $fqn";
+        if (end(X::split($fqn, "\\")) !== $alias) {
+          $res .= " as $alias";
+        }
+        $res .= ";" . PHP_EOL;
+      }
     }
+    $res .= PHP_EOL . "class " . $this->cfg['realName'];
     
-    if ( !empty($this->cfg['extends'])) {
-      $res .= " extends " . $this->cfg['extends'];
+    if ( !empty($this->cfg['parentClass'])) {
+      $res .= " extends " . ($this->cfg['uses'][$this->cfg['parentClass']] ?? $this->cfg['parentClass']) ;
     }
 
     $res .= "\n{\n";
     
     if ( !empty($this->cfg['traits'])) {
       foreach ($this->cfg['traits'] as $trait) {
-        $res .= str_repeat(' ', $this->spacing) . "use " . $trait->name . ";\n";
+        $res .= str_repeat(' ', $this->spacing) . "use " . ($this->cfg['uses'][$trait] ?? $trait) . ";\n";
       }
       $res .= "\n";
     }
@@ -104,12 +116,15 @@ class Generator {
       $res .= "final ";
     }
     
-    if ( !empty($cfg['public']) ) {
+    /*if ( !empty($cfg['public']) ) {
       $res .= "public ";
     } else if ( !empty($cfg['protected']) ) {
       $res .= "protected ";
     } else if ( !empty($cfg['private']) ) {
       $res .= "private ";
+    }*/
+    if ( !empty($cfg['visibility']) ) {
+      $res .= $cfg['visibility'] . ' ';
     }
     
     if ( !empty($cfg['static']) ) {

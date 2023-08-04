@@ -141,6 +141,59 @@ class Php extends bbn\Models\Cls\Basic
     
     return null;
   }
+
+  public function getUses($code) {
+    $res = [];
+    $usable = ['T_WHITESPACE', 'T_NAME_QUALIFIED', 'T_AS', 'T_STRING'];
+    $isUse = false;
+     $tokens = token_get_all($code, TOKEN_PARSE);
+    foreach ($tokens as $i => $token) {
+      if (is_array($token)) {
+        $t = token_name($token[0]);
+        if ($t === 'T_CLASS') {
+          break;
+        }
+        if ($isUse) {
+          if (in_array($t, $usable)) {
+            switch ($t) {
+              case 'T_NAME_QUALIFIED':
+                $isUse['fqn'] = $token[1];
+                break;
+              case 'T_AS':
+                $isUse['as'] = true;
+                break;
+              case 'T_STRING':
+                if (!$isUse['as']) {
+                  throw new Exception("No alias without as");
+                }
+                $isUse['alias'] = $token[1];
+                break;
+            }
+            if (!empty($isUse['fqn'])) {
+              if (!isset($res[$isUse['fqn']])) {
+                $res[$isUse['fqn']] = '';
+              }
+              elseif ($isUse['alias']) {
+                $res[$isUse['fqn']] = $isUse['alias'];
+              }
+            }
+          }
+          else {
+            $isUse = false;
+          }
+        }
+        if ($t === 'T_USE') {
+          $isUse = ['fqn' => '', 'alias' => '', 'as' => false];
+        }
+      }
+    }
+    foreach ($res as $fqn => $alias) {
+      if (empty($alias)) {
+        $res[$fqn] = basename(str_replace("\\", "/", $fqn));
+      }
+    }
+    return $res;
+  }
   
   
   /**
@@ -159,7 +212,9 @@ class Php extends bbn\Models\Cls\Basic
       if ($level && defined('ReflectionMethod::IS_' . strtoupper($level))) {
         $filter = constant('ReflectionMethod::IS_' . strtoupper($level));
       }
-      
+      $fullname = $rc->getName();
+      $name = basename(str_replace("\\", "/", $fullname));
+      $namespace = str_replace("/", "\\", dirname(str_replace("\\", "/", $fullname)));
       $methods = $rc->getMethods($filter);
       $props = $rc->getProperties($filter);
       $statprops = $rc->getStaticProperties();
@@ -169,6 +224,8 @@ class Php extends bbn\Models\Cls\Basic
         'doc' => $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
+        'realName' => $name,
+        'realNamespace' => $namespace,
         'traits' => $rc->getTraitNames(),
         'interfaces' => $rc->getInterfaces(),
         //'isInstantiable' => $rc->isInstantiable(),
@@ -209,6 +266,8 @@ class Php extends bbn\Models\Cls\Basic
         'staticProperties' => $statprops,
         'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
       ];
+      $code = file_get_contents($res['fileName']);
+      $res['uses'] = $this->getUses($code);
       if (!empty($res['traits'])) {
       
       }
@@ -354,11 +413,14 @@ class Php extends bbn\Models\Cls\Basic
     }
     
     $cparser =& $this;
+    $full_name = $rc->getName();
+    $name = basename(str_replace("\\", "/", $fullname));
+    $namespace = str_replace("/", "\\", dirname(str_replace("\\", "/", $fullname)));
     $cls = [
       'doc' => [
         'title' => $this->iparse($rc->getDocComment()),
       ],
-      'name' => $rc->getName(),
+      'name' => $name,
       'constants' => array_map(
         function ($a) use ($constants, $parent_constants) {
           return [
@@ -373,7 +435,7 @@ class Php extends bbn\Models\Cls\Basic
           }
         )
       ),
-      'namespace' => $rc->getNamespaceName(),
+      'namespace' => $namespace,
       'traits' => $rc->getTraits(),
       'interfaces' => $rc->getInterfaces(),
       'parent' => $parent ? $parent->getName() : null,
