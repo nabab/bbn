@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\tests\User;
+namespace bbn\tests;
 
 use bbn\Db;
 use bbn\Mvc;

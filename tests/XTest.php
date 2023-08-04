@@ -35,7 +35,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function init_count_method_init_the_counters_for_the_given_name_if_not_exists()
+  public function _init_count_method_init_the_counters_for_the_given_name_if_not_exists()
   {
     $method = $this->getNonPublicMethod('_init_count');
 
@@ -47,7 +47,7 @@ class XTest extends TestCase
   }
 
   /** @test */
-  public function init_count_method_init_the_counters_when_no_name_is_given()
+  public function _init_count_method_init_the_counters_when_no_name_is_given()
   {
     $method = $this->getNonPublicMethod('_init_count');
 

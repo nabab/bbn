@@ -1,5 +1,7 @@
 <?php
 
+namespace bbn\tests;
+
 use bbn\Date;
 use PHPUnit\Framework\TestCase;
 
