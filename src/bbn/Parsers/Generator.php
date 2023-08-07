@@ -67,7 +67,10 @@ class Generator {
 
     if ( !empty($this->cfg['traits'])) {
       foreach ($this->cfg['traits'] as $trait) {
-        $res .= str_repeat(' ', $this->spacing) . "use " . ($this->cfg['uses'][$trait] ?? $trait) . ";\n";
+        if ( !empty($this->cfg['realNamespace'])) {
+          $use = str_replace(($this->cfg['realNamespace'] . "\\"), "", ($this->cfg['uses'][$trait] ?? $trait));
+        }
+        $res .= str_repeat(' ', $this->spacing) . "use " . $use . ";\n";
       }
       $res .= "\n";
     }
@@ -86,6 +89,12 @@ class Generator {
     
     if ( !empty($this->cfg['methods'])) {
       foreach ($this->cfg['methods'] as $method) {
+        if (!empty($method['trait'])) {
+          continue;
+        }
+        if ($method['class'] !== $this->cfg['name']) {
+          continue;
+        }
         $res .= $this->generateMethod($method) . "\n\n";
       }
     }
