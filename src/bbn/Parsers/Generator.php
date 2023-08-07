@@ -6,14 +6,25 @@ use bbn\X;
 
 class Generator {
   
-  private $cfg;
+  public $blala = 1;
   
-  private $spacing;
+  public function __construct(
+    private array $cfg = [],
+    private int $spacing = 2
+  ) {
   
-  public function __construct(array $cfg = [], int $spacing = 2)
+  }
+
+  public function formatExport($value): string 
   {
-    $this->cfg = $cfg;
-    $this->spacing = $spacing;
+    $export = var_export($value, true);
+    if (is_array($value)) {
+      $export = preg_replace("/^([ ]*)(.*)/m", '$1$1$2', $export);
+      $array = preg_split("/\r\n|\n|\r/", $export);
+      $array = preg_replace(["/\s*array\s\($/", "/\)(,)?$/", "/\s=>\s$/"], [NULL, ']$1', ' => ['], $array);
+      $export = str_replace('['.PHP_EOL.']','[]', join(PHP_EOL, array_filter(["["] + $array)));
+    }
+    return $export;
   }
   
   public function generateClass() {
@@ -43,9 +54,17 @@ class Generator {
     if ( !empty($this->cfg['parentClass'])) {
       $res .= " extends " . ($this->cfg['uses'][$this->cfg['parentClass']] ?? $this->cfg['parentClass']) ;
     }
+    if ( !empty($this->cfg['interfaceNames'])) {
+      $res .= " implements " . join(", ", array_map(function($elem) {
+        if ( !empty($this->cfg['realNamespace'])) {
+          return str_replace(($this->cfg['realNamespace'] . "\\"), "", $elem);
+        }
+      }, $this->cfg['interfaceNames']));
+    }
 
     $res .= "\n{\n";
     
+
     if ( !empty($this->cfg['traits'])) {
       foreach ($this->cfg['traits'] as $trait) {
         $res .= str_repeat(' ', $this->spacing) . "use " . ($this->cfg['uses'][$trait] ?? $trait) . ";\n";
@@ -54,10 +73,15 @@ class Generator {
     }
     
     
-    if ( !empty($this->cfg['properties'])) {
-      foreach ($this->cfg['properties'] as $property) {
-        $res .= $this->generateProperty($property) . "\n";
-      }
+    if (!empty($this->cfg['properties'])) {
+      foreach ($this->cfg['properties'] as $property => $info) {
+        if ($info['promoted']) {
+          continue;
+        }
+        $static = ($info["static"]) ? " static" : "";
+        $val = is_null($info["value"]) ? "" : " = " . $this->formatExport($info["value"]);
+        $res .= str_repeat(" ", $this->spacing) . $info["visibility"] . $static .' $'. $property .  $val . ";" . PHP_EOL;
+      } 
     }
     
     if ( !empty($this->cfg['methods'])) {
@@ -137,7 +161,9 @@ class Generator {
       if (!empty($cfg['arguments'])) {
         foreach ($cfg['arguments'] as $arg) {
           $argStr = "";
-        
+          if (!empty($arg['promoted'])) {
+            $argStr .= $arg['promoted'] . " ";
+          }
           if (!empty($arg['type'])) {
             $argStr .= $arg['type'] . " ";
           }
@@ -145,7 +171,7 @@ class Generator {
           $argStr .= "$" . $arg['name'];
         
           if (!empty($arg['has_default'])) {
-            $argStr .= " = " . var_export($arg['default'], true);
+            $argStr .= " = " .  $this->formatExport($arg['default']);
           }
         
           $res .= $argStr . ", ";
@@ -156,6 +182,7 @@ class Generator {
       }
     
       $res .= ") ";
+      
       
       if ( !empty($cfg['returns']) ) {
         $has_null = false;
@@ -175,21 +202,21 @@ class Generator {
             $res_returns .= $ret . "|";
           }
         }
-
         $last_pipe = strrpos($res_returns, '|');
         
         $res .= substr($res_returns, 0, $last_pipe) . " ";
         
         
       }
-    
+      
     }
-  
+    
+   // X::ddump($res, $cfg[]);
     if (!empty($cfg['code'])) {
       // Get the position of the first opening curly brace
       $pos = strpos($cfg['code'], '{');
-    
-      // Get everything from the opening curly brace to the end of the string
+        
+        // Get everything from the opening curly brace to the end of the string
       $newCode = substr($cfg['code'], $pos);
     
       // Add the code to the function definition
