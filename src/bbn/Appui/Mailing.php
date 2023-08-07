@@ -8,13 +8,22 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
 use bbn\X;
-use Error;
+use bbn\Str;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\Mail;
+use bbn\Date;
+use bbn\User;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Cls\Db as ClassDb;
 
-class Mailing extends bbn\Models\Cls\Db
+class Mailing extends ClassDb
 {
-  use bbn\Models\Tts\Optional;
+  use Optional;
+  use Dbconfig;
 
   private $_test_emails;
 
@@ -26,78 +35,43 @@ class Mailing extends bbn\Models\Cls\Db
   protected $medias;
   protected $mailer;
 
+  /** @var array */
+  protected static $default_class_cfg = [
+    'table' => 'bbn_emailings',
+    'tables' => [
+      'emailings' => 'bbn_emailings',
+      'emails' => 'bbn_emails'
+    ],
+    'arch' => [
+      'emailings' => [
+        'id' => 'id',
+        'id_note' => 'id_note',
+        'version' => 'version',
+        'state' => 'state',
+        'sender' => 'sender',
+        'recipients' => 'recipients',
+        'sent' => 'sent'
+      ],
+      'emails' => [
+        'id' => 'id',
+        'email' => 'email',
+        'id_mailing' => 'id_mailing',
+        'subject' => 'subject',
+        'text' => 'text',
+        'cfg' => 'cfg',
+        'status' => 'status',
+        'delivery' => 'delivery',
+        'read' => 'read',
+        'priority' => 'priority'
+      ]
+    ]
+  ];
 
-  /**
-   * Gets a notes instance by constructing one if needed.
-   *
-   * @return Note
-   */
-  private function _note(): Note
-  {
-    if (!$this->notes) {
-      $this->notes = new Note($this->db);
-    }
-    return $this->notes;
-  }
-
-  /**
-   * Gets a medias instance by constructing one if needed.
-   *
-   * @return Medias
-   */
-  private function _medias(): Medias
-  {
-    if (!$this->medias) {
-      $this->medias = new Medias($this->db);
-    }
-    return $this->medias;
-  }
-
-  private static function _get_cfgs()
-  {
-    if (is_null(self::$_cfgs)) {
-      $cfgs = self::getOptions('sender');
-      self::$_cfgs = [];
-      foreach ($cfgs as $cfg) {
-        if (bbn\X::hasProps($cfg, ['host', 'from'])) {
-          self::$_cfgs[] = $cfg;
-        }
-      }
-    }
-    return self::$_cfgs;
-  }
-
-  public static function _get_cfg(string $id)
-  {
-    return bbn\X::getRow(
-      self::_get_cfgs() ?: [],
-      bbn\Str::isUid($id) ? ['id' => $id] : ['code' => $id]
-    );
-  }
-
-  private static function _get_mailer(string $id = null): ?bbn\Mail
-  {
-    if (!$id) {
-      if ($cfgs = self::_get_cfgs()) {
-        $cfg = $cfgs[0];
-      }
-    }
-    else{
-      $cfg = self::_get_cfg($id);
-    }
-    if (!empty($cfg)) {
-      if (!isset(self::$_mailers[$cfg['id']])) {
-        self::$_mailers[$cfg['id']] = new bbn\Mail($cfg);
-      }
-      return self::$_mailers[$cfg['id']];
-    }
-    return null;
-  }
-
-  public function __construct(bbn\Db $db, array $cfg = null)
+  public function __construct(Db $db, array $cfg = null)
   {
     if ($db->check()) {
       self::optionalInit();
+      $this->_init_class_cfg();
       $this->getOptionsTextValue('text');
       $this->db = $db;
     }
@@ -138,11 +112,13 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function isSending(string $id = null): bool
   {
-    $cond = ['state' => 'sending'];
+    $cfg = $this->class_cfg['arch']['emailings'];
+    $table = $this->class_cfg['tables']['emailings'];
+    $cond = [$cfg['state'] => 'sending'];
     if ($id) {
-      $cond['id'] = $id;
+      $cond[$cfg['id']] = $id;
     }
-    return $this->db->count('bbn_emailings', $cond) > 0;
+    return $this->db->count($table, $cond) > 0;
   }
 
   /**
@@ -153,11 +129,13 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function isSuspended(string $id = null): bool
   {
-    $cond = ['state' => 'suspended'];
+    $cfg = $this->class_cfg['arch']['emailings'];
+    $table = $this->class_cfg['tables']['emailings'];
+    $cond = [$cfg['state'] => 'suspended'];
     if ($id) {
-      $cond['id'] = $id;
+      $cond[$cfg['id']] = $id;
     }
-    return $this->db->count('bbn_emailings', $cond) > 0;
+    return $this->db->count($table, $cond) > 0;
   }
 
   /*
@@ -180,13 +158,15 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function getNextMailing(): ?array
   {
+    $cfg = $this->class_cfg['arch']['emailings'];
+    $table = $this->class_cfg['tables']['emailings'];
     if ($this->check() 
         && ($id = $this->db->selectOne(
-          'bbn_emailings', 'id', [
-          ['state', 'LIKE', 'ready'],
-          ['sent', '<', Date('Y-m-d H:i:s')],
-          ['sent', 'isnotnull']
-          ], ['sent' => 'ASC']
+          $table, $cfg['id'], [
+          [$cfg['state'], 'LIKE', 'ready'],
+          [$cfg['sent'], '<', Date('Y-m-d H:i:s')],
+          [$cfg['sent'], 'isnotnull']
+          ], [$cfg['sent'] => 'ASC']
         ))
     ) {
       return $this->getMailing($id);
@@ -203,13 +183,17 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function changeState(string $id, string $new_state): bool
   {
+    $cfg = $this->class_cfg['arch']['emailings'];
+    $table = $this->class_cfg['tables']['emailings'];
     if ($this->check()) {
-      $cur = $this->db->selectOne("bbn_emailings", 'state', ['id' => $id]);
+      $cur = $this->db->selectOne($table, $cfg['state'], ['id' => $id]);
       if (($cur === 'sent') || ($cur === 'cancelled')) {
         return false;
       }
-      return (bool)$this->db->update("bbn_emailings", ['state' => $new_state], ['id' => $id]);
+
+      return (bool)$this->db->update($table, [$cfg['state'] => $new_state], [$cfg['id'] => $id]);
     }
+
     return false;
   }
 
@@ -221,9 +205,12 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function getMedias(string $id): ?array
   {
-    if ($this->check() && ($row = $this->db->select('bbn_emailings', ['id_note', 'version'], ['id' => $id]))) {
+    $cfg = $this->class_cfg['arch']['emailings'];
+    $table = $this->class_cfg['tables']['emailings'];
+    if ($this->check() && ($row = $this->db->select($table, [$cfg['id_note'], $cfg['version']], [$cfg['id'] => $id]))) {
       return $this->_note()->getMedias($row->id_note, $row->version);
     }
+
     return null;
   }
 
@@ -236,8 +223,10 @@ class Mailing extends bbn\Models\Cls\Db
   public function getMailing(string $id): ?array
   {
     if ($this->check()) {
+      $cfg = $this->class_cfg['arch']['emailings'];
+      $table = $this->class_cfg['tables']['emailings'];
       $notes = $this->_note();
-      if (($row = $this->db->rselect('bbn_emailings', [], ['id' => $id])) 
+      if (($row = $this->db->rselect($table, [], [$cfg['id'] => $id])) 
           && ($note = $notes->get($row['id_note']))
       ) {
         return array_merge($note, $row);
@@ -255,36 +244,50 @@ class Mailing extends bbn\Models\Cls\Db
   public function process(int $limit = 10): ?int
   {
     if ($this->check()) {
+      $cfgEmailings = $this->class_cfg['arch']['emailings'];
+      $tableEmailings = $this->class_cfg['tables']['emailings'];
+      $cfgEmails = $this->class_cfg['arch']['emails'];
+      $tableEmails = $this->class_cfg['tables']['emails'];
       $sent = 0;
       $successes = 0;
       $mailings = [];
-      foreach ($this->db->rselectAll(
-        [
-        'table' => 'bbn_emails',
-        'fields' => ['bbn_emails.id', 'email', 'id_mailing', 'subject', 'text', 'cfg', 'status', 'delivery', 'read', 'priority'],
+      $cfg = [
+        'table' => $tableEmails,
+        'fields' => [
+          'id' => $tableEmails . '.' . $cfgEmails['id'],
+          'email' => $cfgEmails['email'],
+          'id_mailing' => $cfgEmails['id_mailing'],
+          'subject' => $cfgEmails['subject'],
+          'text' => $cfgEmails['text'],
+          'cfg' => $cfgEmails['cfg'],
+          'status' => $cfgEmails['status'],
+          'delivery' => $cfgEmails['delivery'],
+          'read' => $cfgEmails['read'],
+          'priority' => $cfgEmails['priority']
+        ],
         'join' => [[
-          'table' => 'bbn_emailings',
+          'table' => $tableEmailings,
           'type' => 'left',
           'on' => [
             'conditions' => [
               [
-                'field' => 'id_mailing',
-                'exp' => 'bbn_emailings.id'
+                'field' => $cfgEmails['id_mailing'],
+                'exp' => $tableEmailings . '.' . $cfgEmailings['id']
               ]
             ]
           ]
         ]],
         'where' => [
           'conditions' => [
-            'status' => 'ready',
+            $cfgEmails['status'] => 'ready',
             [
               'logic' => 'OR',
               'conditions' => [
                 [
-                  'field' => 'delivery',
+                  'field' => $cfgEmails['delivery'],
                   'operator' => 'isnull'
                 ], [
-                  'field' => 'delivery',
+                  'field' => $cfgEmails['delivery'],
                   'operator' => '<',
                   'exp' => 'NOW()'
                 ]
@@ -293,23 +296,24 @@ class Mailing extends bbn\Models\Cls\Db
               'logic' => 'OR',
               'conditions' => [
                 [
-                  'field' => 'bbn_emailings.state',
+                  'field' => $tableEmailings . '.' . $cfgEmailings['state'],
                   'operator' => 'isnull'
                 ], [
-                  'field' => 'bbn_emailings.state',
+                  'field' => $tableEmailings . '.' . $cfgEmailings['state'],
                   'value' => 'ready'
                 ], [
-                  'field' => 'bbn_emailings.state',
+                  'field' => $tableEmailings . '.' . $cfgEmailings['state'],
                   'value' => 'sending'
                 ]
               ]
             ]
           ]
         ],
-        'order' => ['priority'],
+        'order' => [$cfgEmails['priority']],
         'limit' => $limit
-        ]
-      ) as $r) {
+      ];
+
+      foreach ($this->db->rselectAll($cfg) as $r) {
         $sent++;
         $ok = false;
         $att = [];
@@ -317,11 +321,13 @@ class Mailing extends bbn\Models\Cls\Db
           if (!isset($mailings[$r['id_mailing']])) {
             $mailings[$r['id_mailing']] = $this->getMailing($r['id_mailing']);
           }
+
           $mailing = &$mailings[$r['id_mailing']];
           if ($mailing['state'] === 'ready') {
             $this->changeState($r['id_mailing'], 'sending');
             $mailing['state'] = 'sending';
           }
+
           $text = $mailing['content'];
           $subject = $mailing['title'];
           $sender = $mailing['sender'];
@@ -341,7 +347,7 @@ class Mailing extends bbn\Models\Cls\Db
             $r['cfg'] = json_decode($r['cfg'], true);
             if (!empty($r['cfg']['attachments'])) {
               foreach ($r['cfg']['attachments'] as $a){
-                $f = \bbn\X::indexOf($a, '/') === 0 ? $a : \bbn\Mvc::getContentPath().$a;
+                $f = X::indexOf($a, '/') === 0 ? $a : Mvc::getContentPath().$a;
                 if (file_exists($f)) {
                   $att[] = $f;
                 }
@@ -349,7 +355,8 @@ class Mailing extends bbn\Models\Cls\Db
             }
           }
         }
-        if ($subject && $text && \bbn\Str::isEmail($r['email'])) {
+
+        if ($subject && $text && Str::isEmail($r['email'])) {
           $params = [
             'to' => $r['email'],
             'subject' => $subject,
@@ -358,23 +365,26 @@ class Mailing extends bbn\Models\Cls\Db
           if (count($att)) {
             $params['attachments'] = $att;
           }
+
           if ($ok = $this->send($params, $sender)) {
             $successes++;
           }
         }
+
         $this->db->update(
-          'bbn_emails', [
-          'status' => $ok ? 'success' : 'failure',
-          'delivery' => date('Y-m-d H:i:s')
-          ], ['id' => $r['id']]
+          $tableEmails, [
+          $cfgEmails['status'] => $ok ? 'success' : 'failure',
+          $cfgEmails['delivery'] => date('Y-m-d H:i:s')
+          ], [$cfgEmails['id'] => $r['id']]
         );
       }
+
       foreach ($mailings as $id => $m) {
         if (($m['state'] === 'sending')
             && !$this->db->count(
-              'bbn_emails', [
-              'id_mailing' => $id,
-              'status'=> 'ready'
+              $tableEmails, [
+                $cfgEmails['id_mailing'] => $id,
+                $cfgEmails['status'] => 'ready'
               ]
             )
         ) {
@@ -406,7 +416,7 @@ class Mailing extends bbn\Models\Cls\Db
     $notes = $this->_note();
     if ($this->check()
         && $notes
-        && bbn\X::hasProps($cfg, ['title', 'content', 'sender'], true)
+        && X::hasProps($cfg, ['title', 'content', 'sender'], true)
         && ($id_type = Note::getOptionId('mailings','types'))
         && ($id_note = $notes->insert($cfg['title'], $cfg['content'], $id_type))
         // Cannot give a date if no recipients selected
@@ -415,13 +425,16 @@ class Mailing extends bbn\Models\Cls\Db
       if (empty($cfg['sent'])) {
         $cfg['sent'] = null;
       }
+
+      $cfgEmailings = $this->class_cfg['arch']['emailings'];
+      $tableEmailings = $this->class_cfg['tables']['emailings'];
       if ($this->db->insert(
-        'bbn_emailings', [
-        'id_note' => $id_note,
-        'version' => 1,
-        'sender' => $cfg['sender'],
-        'recipients' => $cfg['recipients'] ?: null,
-        'sent' => $cfg['sent']
+        $tableEmailings, [
+          $cfgEmailings['id_note'] => $id_note,
+          $cfgEmailings['version'] => 1,
+          $cfgEmailings['sender'] => $cfg['sender'],
+          $cfgEmailings['recipients'] => $cfg['recipients'] ?: null,
+          $cfgEmailings['sent'] => $cfg['sent']
         ]
       )
       ) {
@@ -439,7 +452,7 @@ class Mailing extends bbn\Models\Cls\Db
             }
           }
         }
-        if (bbn\X::hasProps($cfg, ['recipients', 'sent', 'emails'], true)) {
+        if (X::hasProps($cfg, ['recipients', 'sent', 'emails'], true)) {
           $cfg['res'] = $this->insertEmails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);
         }
         return $cfg;
@@ -448,18 +461,40 @@ class Mailing extends bbn\Models\Cls\Db
     return null;
   }
 
+  public function insertEmail(string $to, string $subject, string $text, array $cfg = [], string $sender = null): bool
+  {
+    if (Str::isEmail($to)) {
+      $cfgEmails = $this->class_cfg['arch']['emails'];
+      $tableEmails = $this->class_cfg['tables']['emails'];
+      if ($this->db->insert(
+        $tableEmails, [
+          $cfgEmails['email'] => $to,
+          $cfgEmails['subject'] => $subject,
+          $cfgEmails['text'] => $text,
+          $cfgEmails['cfg'] => $cfg ? json_encode($cfg) : null
+        ])
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public function insertEmails(string $id_mailing, string $date, array $emails, int $priority = 5): ?array
   {
-    if (!empty($date) && \bbn\Date::validateSQL($date)) {
+    if (!empty($date) && Date::validateSQL($date)) {
       $res = [];
+      $cfgEmails = $this->class_cfg['arch']['emails'];
+      $tableEmails = $this->class_cfg['tables']['emails'];
       foreach ($emails as $item) {
         if ($this->db->insertIgnore(
-          'bbn_emails', [
-            'email' => $item['email'],
-            'id_mailing' => $id_mailing,
-            'priority' => $priority,
-            'status' => 'ready',
-            'delivery' => $date
+          $tableEmails, [
+            $cfgEmails['email'] => $item['email'],
+            $cfgEmails['id_mailing'] => $id_mailing,
+            $cfgEmails['priority'] => $priority,
+            $cfgEmails['status'] => 'ready',
+            $cfgEmails['delivery'] => $date
           ]
         )
         ) {
@@ -475,37 +510,39 @@ class Mailing extends bbn\Models\Cls\Db
   public function edit($id, $cfg): ?array
   {
     $notes = $this->_note();
-    $user = bbn\User::getInstance();
+    $user = User::getInstance();
     $medias = $this->_medias();
     $res = 0;
     
     if ($this->check() 
         && $user && $notes 
-        && bbn\X::hasProps($cfg, ['title', 'content', 'sender']) 
+        && X::hasProps($cfg, ['title', 'content', 'sender']) 
         && ($mailing = $this->getMailing($id))
     ) {
       $cfg['id'] = $id;
       if ($this->countSent($id)) {
-        throw new Error(X::_("Impossible to edit a message already sent or partially sent, you need to duplicate it."));
+        throw new Exception(X::_("Impossible to edit a message already sent or partially sent, you need to duplicate it."));
       }
       $version = $mailing['version'];
       if (($cfg['title'] !== $mailing['title']) || ($cfg['content'] !== $mailing['content'])) {
         $version = $notes->insertVersion($mailing['id_note'], $cfg['title'], $cfg['content']);
       }
+      $cfgEmailings = $this->class_cfg['arch']['emailings'];
+      $tableEmailings = $this->class_cfg['tables']['emailings'];
       $this->db->update(
-        'bbn_emailings', [
-        'version' => $version,
-        'sender' => $cfg['sender'],
-        'recipients' => $cfg['recipients'] ?: null,
-        'sent' => $cfg['sent']
+        $tableEmailings, [
+          $cfgEmailings['version'] => $version,
+          $cfgEmailings['sender'] => $cfg['sender'],
+          $cfgEmailings['recipients'] => $cfg['recipients'] ?: null,
+          $cfgEmailings['sent'] => $cfg['sent']
         ], [
-        'id' => $id
+          $cfgEmailings['id'] => $id
         ]
       );
       foreach ($cfg['attachments'] as $f){
         // It exists already, the file is not sent
         if (is_array($f)) {
-          $idx = empty($mailing['medias']) ? false : \bbn\X::find($mailing['medias'], ['name' => $f['name']]);
+          $idx = empty($mailing['medias']) ? false : X::find($mailing['medias'], ['name' => $f['name']]);
           if ($idx !== null) {
             if ($version === $mailing['version']) {
               // If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments
@@ -534,13 +571,15 @@ class Mailing extends bbn\Models\Cls\Db
       if (!$cfg['sent'] || ($mailing['recipients'] !== $cfg['recipients'])) {
         $this->deleteAllEmails($id);
       }
-      if (bbn\X::hasProps($cfg, ['recipients', 'sent', 'emails'], true)) {
+      if (X::hasProps($cfg, ['recipients', 'sent', 'emails'], true)) {
         $cfg['res'] = $this->insertEmails($cfg['id'], $cfg['sent'], $cfg['emails'], $cfg['priority'] ?? 5);
       }
       return $cfg;
     }
     return null;
   }
+
+
   /**
    * Deletes the mailing and relative emails.
    *
@@ -549,13 +588,13 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function delete(string $id):? int
   {
-    // We do not delete mailings which have been sent
-    if ($this->countSent($id)) {
-      //return 0;
-    }
     $success = null;
     $mailing = $this->getMailing($id);
     if (!empty($mailing['id_note'])) {
+      $cfgEmailings = $this->class_cfg['arch']['emailings'];
+      $tableEmailings = $this->class_cfg['tables']['emailings'];
+      $cfgEmails = $this->class_cfg['arch']['emails'];
+      $tableEmails = $this->class_cfg['tables']['emails'];
       $notes = $this->_note();
       //if the notes has media removes media before to remove the note
       if ($medias = $notes->getMedias($mailing['id_note'])) {
@@ -565,16 +604,18 @@ class Mailing extends bbn\Models\Cls\Db
       }
 
       // if there are emails with the given id_mailing
-      if ($this->db->count('bbn_emails', ['id_mailing' => $id])) {
+      if ($this->db->count($tableEmails, [$cfgEmails['id_mailing'] => $id])) {
         //it removes the emails ready or cancelled relative to this id_mailing
         $this->deleteAllEmails($id);
       }
-      if (!$this->db->count('bbn_emails', ['id_mailing' => $id])) {
+
+      if (!$this->db->count($tableEmails, [$cfgEmails['id_mailing'] => $id])) {
         //deletes the row
-        $success = $this->db->delete("bbn_emailings", ['id' => $id]);
+        $success = $this->db->delete($tableEmailings, [$cfgEmailings['id'] => $id]);
         //$notes->remove($mailing['id_note']);
       }
     }
+
     return $success;
   }
 
@@ -597,11 +638,17 @@ class Mailing extends bbn\Models\Cls\Db
               $notes->removeMedia($media['id'],$mailing['id_note']);
             }
           }
-          $notes->remove($mailing['id_note']);  
-          $success = $this->db->delete('bbn_$_uids', ['bbn_uid' => $id]);
+
+          $notes->remove($mailing['id_note']);
+          if (History::isEnabled()) {
+            $success = $this->db->delete('bbn_history_uids', ['bbn_uid' => $id]);
+          }
         }
-        else {
-          $success = $this->db->delete('bbn_emailings', ['id' => $id]);
+
+        $cfgEmailings = $this->class_cfg['arch']['emailings'];
+        $tableEmailings = $this->class_cfg['tables']['emailings'];
+        if (!$success) {
+          $success = $this->db->delete($tableEmailings, [$cfgEmailings['id'] => $id]);
         }
       }
       
@@ -619,8 +666,11 @@ class Mailing extends bbn\Models\Cls\Db
   public function deleteEmail(string $id_email):? int
   {
     if (!empty($id_email)) {
-      return $this->db->delete('bbn_users_emails', ['id' => $id_email]);
+      $cfgEmails = $this->class_cfg['arch']['emails'];
+      $tableEmails = $this->class_cfg['tables']['emails'];
+      return $this->db->delete($tableEmails, [$cfgEmails['id'] => $id_email]);
     }
+
     return 0;
   }
 
@@ -633,12 +683,14 @@ class Mailing extends bbn\Models\Cls\Db
   public function deleteAllEmails(string $id_mailing):? int
   {
     $success = null;
-    $emails = $this->db->rselectAll('bbn_emails', [], ['id_mailing' => $id_mailing]);
+    $cfgEmails = $this->class_cfg['arch']['emails'];
+    $tableEmails = $this->class_cfg['tables']['emails'];
+    $emails = $this->db->rselectAll($tableEmails, [], [$cfgEmails['id_mailing'] => $id_mailing]);
     if (!empty($emails)) {
       $n = 0;
       foreach ($emails as $e){
-        if (($e['status'] === 'ready') || ($e['status'] === 'cancelled')) {
-          if ($this->db->delete('bbn_emails', ['id' => $e['id']])) {
+        if (($e[$cfgEmails['status']] === 'ready') || ($e[$cfgEmails['status']] === 'cancelled')) {
+          if ($this->db->delete($tableEmails, [$cfgEmails['id'] => $e[$cfgEmails['id']]])) {
             $n++;
           }
         }
@@ -658,9 +710,11 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function changeEmailStatus(string $id_email, string $state): bool
   {
+    $cfgEmails = $this->class_cfg['arch']['emails'];
+    $tableEmails = $this->class_cfg['tables']['emails'];
     return $this->db->update(
-      'bbn_emails', ['status' => $state], [
-      'id' => $id_email,
+      $tableEmails, [$cfgEmails['status'] => $state], [
+        $cfgEmails['id'] => $id_email,
       ]
     );
   }
@@ -673,9 +727,11 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function getEmails(string $id):? array
   {
+    $cfgEmails = $this->class_cfg['arch']['emails'];
+    $tableEmails = $this->class_cfg['tables']['emails'];
     return $this->db->rselectAll(
-      'bbn_emails', [], [
-      'id_mailing' => $id
+      $tableEmails, $cfgEmails, [
+        $cfgEmails['id_mailing'] => $id
       ]
     );
   }
@@ -688,12 +744,14 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function countSent(string $id): ?int
   {
+    $cfgEmails = $this->class_cfg['arch']['emails'];
+    $tableEmails = $this->class_cfg['tables']['emails'];
     if ($this->check()) {
       return $this->db->count(
-        'bbn_emails', [
-        'id_mailing' => $id,
-        ['status', '!=', 'ready'],
-        ['email', '!=', $this->getTestEmails()]
+        $tableEmails, [
+          $cfgEmails['id_mailing'] => $id,
+          [$cfgEmails['status'], '!=', 'ready'],
+          [$cfgEmails['email'], '!=', $this->getTestEmails()]
         ]
       );
     }
@@ -714,11 +772,12 @@ class Mailing extends bbn\Models\Cls\Db
       foreach ($emails as $e){
         //here I've to check if ready or cancelled??
         if ($this->changeEmailStatus($e['id'], $status)) {
-          $count ++;
+          $count++;
         };
       }
-      return $count;
     }
+
+    return $count;
   } 
 
   /**
@@ -755,10 +814,17 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function getLasts(int $limit = 10)
   {
+    $cfgEmailings = $this->class_cfg['arch']['emailings'];
+    $tableEmailings = $this->class_cfg['tables']['emailings'];
     return $this->db->rselectAll(
       [
-      'table' => 'bbn_emailings',
-      'fields' => ['id', 'title', 'sent', 'state'],
+      'table' => $tableEmailings,
+      'fields' => [
+        'id' => $cfgEmailings['id'],
+        'title' => $cfgEmailings['title'],
+        'sent' => $cfgEmailings['sent'],
+        'state' => $cfgEmailings['state']
+      ],
       'join' => [
         [
           'table' => 'bbn_notes_versions',
@@ -766,22 +832,22 @@ class Mailing extends bbn\Models\Cls\Db
             'conditions' => [
               [
                 'field' => 'bbn_notes_versions.id_note',
-                'exp' => 'bbn_emailings.id_note'
+                'exp' => $tableEmailings . '.' . $cfgEmailings['id_note']
               ], [
                 'field' => 'bbn_notes_versions.version',
-                'exp' => 'bbn_emailings.version'
+                'exp' => $tableEmailings . '.' . $cfgEmailings['version']
               ]
             ]
           ]
         ]
       ],
       'where' => [
-        ['state', '!=', 'sending'],
-        ['sent', 'isnotnull'],
-        ['sent', '<', Date('Y-m-d H:i:s')]
+        [$cfgEmailings['state'], '!=', 'sending'],
+        [$cfgEmailings['sent'], 'isnotnull'],
+        [$cfgEmailings['sent'], '<', Date('Y-m-d H:i:s')]
       ],
       'order' => [
-        'sent' => 'DESC'
+        $cfgEmailings['sent'] => 'DESC'
       ],
       'limit' => $limit
       ]
@@ -796,10 +862,17 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function getNexts(int $limit = 10)
   {
+    $cfgEmailings = $this->class_cfg['arch']['emailings'];
+    $tableEmailings = $this->class_cfg['tables']['emailings'];
     return $this->db->rselectAll(
       [
-        'table' => 'bbn_emailings',
-        'fields' => ['id', 'title', 'sent', 'state'],
+        'table' => $tableEmailings,
+        'fields' => [
+          'id' => $cfgEmailings['id'],
+          'title' => $cfgEmailings['title'],
+          'sent' => $cfgEmailings['sent'],
+          'state' => $cfgEmailings['state']
+        ],
         'join' => [
           [
             'table' => 'bbn_notes_versions',
@@ -807,21 +880,21 @@ class Mailing extends bbn\Models\Cls\Db
               'conditions' => [
                 [
                   'field' => 'bbn_notes_versions.id_note',
-                  'exp' => 'bbn_emailings.id_note'
+                  'exp' => $tableEmailings . '.' . $cfgEmailings['id_note']
                 ], [
                   'field' => 'bbn_notes_versions.version',
-                  'exp' => 'bbn_emailings.version'
+                  'exp' => $tableEmailings . '.' . $cfgEmailings['version']
                 ]
               ]
             ]
           ]
         ],
         'where' => [
-          ['state', '=', 'ready'],
-          ['sent', 'isnotnull'],
+          [$cfgEmailings['state'], '=', 'ready'],
+          [$cfgEmailings['sent'], 'isnotnull'],
         ],
         'order' => [
-          'sent' => 'ASC'
+          $cfgEmailings['sent'] => 'ASC'
         ],
         'limit' => $limit
       ]
@@ -836,10 +909,17 @@ class Mailing extends bbn\Models\Cls\Db
    */
   public function getSendings()
   {
+    $cfgEmailings = $this->class_cfg['arch']['emailings'];
+    $tableEmailings = $this->class_cfg['tables']['emailings'];
     return $this->db->rselectAll(
       [
-        'table' => 'bbn_emailings',
-        'fields' => ['id', 'title', 'sent', 'state'],
+        'table' => $tableEmailings,
+        'fields' => [
+          'id' => $cfgEmailings['id'],
+          'title' => $cfgEmailings['title'],
+          'sent' => $cfgEmailings['sent'],
+          'state' => $cfgEmailings['state']
+        ],
         'join' => [
           [
             'table' => 'bbn_notes_versions',
@@ -847,22 +927,101 @@ class Mailing extends bbn\Models\Cls\Db
               'conditions' => [
                 [
                   'field' => 'bbn_notes_versions.id_note',
-                  'exp' => 'bbn_emailings.id_note'
+                  'exp' => $tableEmailings . '.' . $cfgEmailings['id_note']
                 ], [
                   'field' => 'bbn_notes_versions.version',
-                  'exp' => 'bbn_emailings.version'
+                  'exp' => $tableEmailings . '.' . $cfgEmailings['version']
                 ]
               ]
             ]
           ]
         ],
         'where' => [
-          ['state', '=', 'sending']
+          [$cfgEmailings['state'], '=', 'sending']
         ],
         'order' => [
-          'sent' => 'DESC'
+          $cfgEmailings['sent'] => 'DESC'
         ]
       ]
     );
   }
+
+
+  /**
+   * Gets a notes instance by constructing one if needed.
+   *
+   * @return Note
+   */
+  private function _note(): Note
+  {
+    if (!$this->notes) {
+      $this->notes = new Note($this->db);
+    }
+    return $this->notes;
+  }
+
+  /**
+   * Gets a medias instance by constructing one if needed.
+   *
+   * @return Medias
+   */
+  private function _medias(): Medias
+  {
+    if (!$this->medias) {
+      $this->medias = new Medias($this->db);
+    }
+    return $this->medias;
+  }
+
+  private static function _get_cfgs()
+  {
+    if (is_null(self::$_cfgs)) {
+      $cfgs = self::getOptions('sender');
+      self::$_cfgs = [];
+      foreach ($cfgs as $cfg) {
+        if (X::hasProps($cfg, ['host', 'from'])) {
+          self::$_cfgs[] = $cfg;
+        }
+      }
+    }
+    return self::$_cfgs;
+  }
+
+  public static function _get_cfg(string $id)
+  {
+    return X::getRow(
+      self::_get_cfgs() ?: [],
+      Str::isUid($id) ? ['id' => $id] : ['code' => $id]
+    );
+  }
+
+
+  private static function _get_default_cfg(): ?array
+  {
+    if ($cfgs = self::_get_cfgs()) {
+      return $cfgs[0];
+    }   
+    
+    return null;
+  }
+
+  private static function _get_mailer(string $id = null): ?Mail
+  {
+    if (!$id) {
+      if ($cfgs = self::_get_cfgs()) {
+        $cfg = $cfgs[0];
+      }
+    }
+    else{
+      $cfg = self::_get_cfg($id);
+    }
+    if (!empty($cfg)) {
+      if (!isset(self::$_mailers[$cfg['id']])) {
+        self::$_mailers[$cfg['id']] = new Mail($cfg);
+      }
+      return self::$_mailers[$cfg['id']];
+    }
+    return null;
+  }
+
 }

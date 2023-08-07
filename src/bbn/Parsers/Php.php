@@ -48,14 +48,14 @@ class Php extends bbn\Models\Cls\Basic
       $f = &$this;
       
       //get method in current class
-      $arr = $this->_get_method_info($cls->getMethod($meth));
+      $arr = $this->_get_method_info($cls->getMethod($meth), $cls);
       
       //get method in parent class
       $parent = $cls->getParentClass();
       
       while ($parent) {
         if ($parent->hasMethod($meth)) {
-          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth));
+          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth), $cls);
         }
         
         $parent = $parent->getParentClass();
@@ -141,6 +141,66 @@ class Php extends bbn\Models\Cls\Basic
     
     return null;
   }
+
+  public function getUses($code) {
+    $res = [];
+    $usable = ['T_WHITESPACE', 'T_NAME_QUALIFIED', 'T_AS', 'T_STRING'];
+    $isUse = false;
+    $tokens = token_get_all($code, TOKEN_PARSE);
+  //   foreach ($tokens as $token) {
+  //     if (is_array($token)) {
+  //         echo htmlentities("Line {$token[2]}: ". token_name($token[0]). " ('{$token[1]}')". PHP_EOL).'<br>';
+  //     }
+  // }
+  // die();
+  
+    foreach ($tokens as $i => $token) {
+      if (is_array($token)) {
+        $t = token_name($token[0]);
+        if ($t === 'T_CLASS') {
+          break;
+        }
+        if ($isUse) {
+          if (in_array($t, $usable)) {
+            switch ($t) {
+              case 'T_NAME_QUALIFIED':
+                $isUse['fqn'] = $token[1];
+                break;
+              case 'T_AS':
+                $isUse['as'] = true;
+                break;
+              case 'T_STRING':
+                if ($isUse['as']) {
+                  $isUse['alias'] = $token[1];
+                  //throw new Exception("No alias without as");
+                }
+                break;
+            }
+            if (!empty($isUse['fqn'])) {
+              if (!isset($res[$isUse['fqn']])) {
+                $res[$isUse['fqn']] = '';
+              }
+              elseif ($isUse['alias']) {
+                $res[$isUse['fqn']] = $isUse['alias'];
+              }
+            }
+          }
+          else {
+            $isUse = false;
+          }
+        }
+        if ($t === 'T_USE') {
+          $isUse = ['fqn' => '', 'alias' => '', 'as' => false];
+        }
+      }
+    }
+    foreach ($res as $fqn => $alias) {
+      if (empty($alias)) {
+        $res[$fqn] = basename(str_replace("\\", "/", $fqn));
+      }
+    }
+    return $res;
+  }
   
   
   /**
@@ -159,7 +219,9 @@ class Php extends bbn\Models\Cls\Basic
       if ($level && defined('ReflectionMethod::IS_' . strtoupper($level))) {
         $filter = constant('ReflectionMethod::IS_' . strtoupper($level));
       }
-      
+      $fullname = $rc->getName();
+      $name = basename(str_replace("\\", "/", $fullname));
+      $namespace = str_replace("/", "\\", dirname(str_replace("\\", "/", $fullname)));
       $methods = $rc->getMethods($filter);
       $props = $rc->getProperties($filter);
       $statprops = $rc->getStaticProperties();
@@ -169,6 +231,8 @@ class Php extends bbn\Models\Cls\Basic
         'doc' => $this->parseClassComments($rc->getDocComment()),
         'name' => $rc->getName(),
         'namespace' => $rc->getNamespaceName(),
+        'realName' => $name,
+        'realNamespace' => $namespace,
         'traits' => $rc->getTraitNames(),
         'interfaces' => $rc->getInterfaces(),
         //'isInstantiable' => $rc->isInstantiable(),
@@ -209,6 +273,14 @@ class Php extends bbn\Models\Cls\Basic
         'staticProperties' => $statprops,
         'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null
       ];
+      $code = file_get_contents($res['fileName']);
+      //X::ddump($code);
+      try {
+        $res['uses'] = $this->getUses($code);
+      }
+      catch(Exception $e) {
+        throw new Exception("Problem getting uses in $cls");
+      }
       if (!empty($res['traits'])) {
       
       }
@@ -354,11 +426,14 @@ class Php extends bbn\Models\Cls\Basic
     }
     
     $cparser =& $this;
+    $full_name = $rc->getName();
+    $name = basename(str_replace("\\", "/", $fullname));
+    $namespace = str_replace("/", "\\", dirname(str_replace("\\", "/", $fullname)));
     $cls = [
       'doc' => [
         'title' => $this->iparse($rc->getDocComment()),
       ],
-      'name' => $rc->getName(),
+      'name' => $name,
       'constants' => array_map(
         function ($a) use ($constants, $parent_constants) {
           return [
@@ -373,7 +448,7 @@ class Php extends bbn\Models\Cls\Basic
           }
         )
       ),
-      'namespace' => $rc->getNamespaceName(),
+      'namespace' => $namespace,
       'traits' => $rc->getTraits(),
       'interfaces' => $rc->getInterfaces(),
       'parent' => $parent ? $parent->getName() : null,
@@ -386,6 +461,7 @@ class Php extends bbn\Models\Cls\Basic
             'static' => $m->isStatic(),
             'private' => $m->isPrivate(),
             'protected' => $m->isProtected(),
+            'promoted' => $m->isPromoted(),
             'public' => $m->isPublic(),
             'doc' => $cparser->iparse($m->getDocComment())
           ];
@@ -794,7 +870,7 @@ class Php extends bbn\Models\Cls\Basic
     if ($filename = $rfx->getFileName()) {
       $content = file($filename);
       $s = $rfx->getStartLine();
-      if (strpos($content[$s - 1], '  {') === false) {
+      while (strpos(trim($content[$s - 1]), '{') === false) {
         $s++;
       }
       
@@ -858,7 +934,7 @@ class Php extends bbn\Models\Cls\Basic
    * @param ReflectionMethod $method The method object
    * @return array
    */
-  private function _get_method_info(ReflectionMethod $method)
+  private function _get_method_info(ReflectionMethod $method, ReflectionClass $cls)
   {
     $ret = [];
     $refCls = $method->getDeclaringClass();
@@ -941,6 +1017,16 @@ class Php extends bbn\Models\Cls\Basic
         $method->getParameters()
       )
     ];
+
+    if ($ar['name'] === '__construct') {
+      foreach ($ar['arguments'] as $index => $arg) {
+        $prop = $this->_get_property_info($arg['name'], $cls);
+        //$props = $props ? $this->orderElement($props, 'properties', $rc) : null;
+        if ($prop && $prop['promoted']) {   
+          $ar['arguments'][$index]['promoted'] = $prop['visibility'];
+        }
+      }
+    }
     
     if ($ar['filename'] !== $refCls->getFileName()) {
       if ($traits = $refCls->getTraits()) {
@@ -1066,6 +1152,7 @@ class Php extends bbn\Models\Cls\Basic
         'name' => $property->getName(),
         'static' => $property->isStatic(),
         'declaring' => $property->getDeclaringClass(),
+        'promoted' => $property->isPromoted(),
         'visibility' => $property->isPrivate() ? 'private' : ($property->isProtected() ? 'protected' : 'public'),
         'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),
         'parent' => false,
