@@ -461,7 +461,7 @@ class Mailing extends ClassDb
     return null;
   }
 
-  public function insertEmail(string $to, string $subject, string $text, array $cfg = [], string $sender = null): bool
+  public function insertEmail(string $to, string $subject, string $text, array $cfg = []): bool
   {
     if (Str::isEmail($to)) {
       $cfgEmails = $this->class_cfg['arch']['emails'];
