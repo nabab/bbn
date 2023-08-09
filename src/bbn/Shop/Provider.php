@@ -149,7 +149,7 @@ class Provider extends DbCls
 
 
   public function add($name, array $cfg = null): ?string
-  {c
+  {
     $dbcfg = $this->getClassCfg();
     if ($this->insert([
       $dbcfg['arch']['providers']['name'] => $name,
