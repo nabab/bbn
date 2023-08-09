@@ -11,7 +11,10 @@ use bbn\Appui\Medias;
 use bbn\Appui\Note;
 use bbn\Appui\Cms;
 use bbn\Appui\Option;
+use bbn\Appui\Masks;
 use bbn\Db;
+use bbn\Tpl;
+
 
 
 class Provider extends DbCls
@@ -114,6 +117,23 @@ class Provider extends DbCls
     }
   }
   
+  public function sendSoldOutEmail(string $id_provider, array $product)
+  {
+    $masksCls = new Masks($this->db);
+    $mailCls = new \bbn\Appui\Mailing($this->db);
+    if( ($emails = $this->getEmails($id_provider)) &&
+     ($template = $masksCls->getDefault($this->opt->fromCode('product_sold_out', 'masks', 'appui')))
+     ) 
+    {
+      $title = Tpl::render($template['title'], $product['product']);
+      $content = Tpl::render($template['content'], $product['product']);
+      foreach($emails as $email) {
+        $mailCls->insertEmail($email, $title, $content);
+
+      }
+    }
+  }
+
   public function __construct(Db $db, array $cfg = null)
   {
     // The database connection
@@ -129,7 +149,7 @@ class Provider extends DbCls
 
 
   public function add($name, array $cfg = null): ?string
-  {
+  {c
     $dbcfg = $this->getClassCfg();
     if ($this->insert([
       $dbcfg['arch']['providers']['name'] => $name,
