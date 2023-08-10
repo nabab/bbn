@@ -332,13 +332,14 @@ class Sales extends DbCls
       && ($d = $this->getMailData($idTransaction))
       && ($email = $this->client->getEmail($d[$this->fields['id_client']]))
     ) {
-      if (empty($mailCls)) {
-        $mailCls = new Mail();
-      }
       $masksCls = new Masks($this->db);
       if ($template = $masksCls->getDefault($opt->fromCode('client_order', 'masks', 'appui'))) {
         $title = Tpl::render($template['title'], $d);
         $content = Tpl::render($template['content'], $d);
+        if(!$mailCls) {
+          $mailing = new \bbn\Appui\Mailing($this->db);
+          return (bool) $mailing->insertEmail($email, $title, $content);
+        }
         return (bool)$mailCls->send([
           'to' => $email,
           'title' => $title,
@@ -359,9 +360,6 @@ class Sales extends DbCls
   {
     if ($opt = Option::getInstance())
     {
-      if (empty($mailCls)) {
-        $mailCls = new Mail();
-      }
       $masksCls = new Masks($this->db);
       if ($template = $masksCls->getDefault($opt->fromCode('provider_order_confirm', 'masks', 'appui'))) {
         $productCls = new Product($this->db);
@@ -376,30 +374,23 @@ class Sales extends DbCls
         if (!empty($providers)) {
           $nr = 0;
           foreach ($providers as $providerId) {
-            $nr ++;
             $providersEmails = $this->provider->getEmails($providerId);
             if (!empty($providersEmails)) {
               foreach ($providersEmails as $email){
                 $d = $this->getMailDataProvider($idTransaction, $providerId);
                 $title = Tpl::render($template['title'], $d);
                 $content = Tpl::render($template['content'], $d);
-                if (!$mailCls->send([
-                  'to' => $email['email'],
-                  'title' => $title,
-                  'text' => $content
-                ])) {
-                  \bbn\X::log([
-                    'provider' => $providerId,
-                    'providersEmails' => $email,
-                  ], 'error_sending_provider_confirmation_email');
+                if(!$mailCls) {
+                  $mailing = new \bbn\Appui\Mailing($this->db);
+                  $mailing->insertEmail($email['email'], $title, $content);
                 }
                 else {
-                  \bbn\X::log([
-                    'provider' => $providerId,
-                    'providersEmails' => $providersEmails,
-                    'email' => $email,                    
-                  ], 'send_conf_to_providers');
-                }
+                  $mailCls->send([
+                    'to' => $email['email'],
+                    'title' => $title,
+                    'text' => $content
+                  ]);
+                }  
               }
             }
           }
@@ -420,9 +411,6 @@ class Sales extends DbCls
     if (($opt = Option::getInstance())
       && ($d = $this->getMailData($idTransaction))
     ) {
-      if (empty($mailCls)) {
-        $mailCls = new Mail();
-      }
       $masksCls = new Masks($this->db);
       if (!Str::isEmail($email)
         && defined('BBN_ADMIN_EMAIL')
@@ -434,6 +422,10 @@ class Sales extends DbCls
       ) {
         $title = Tpl::render($template['title'], $d);
         $content = Tpl::render($template['content'], $d);
+        if(!$mailCls) {
+          $mailing = new \bbn\Appui\Mailing($this->db);
+          return (bool) $mailing->insertEmail($email, $title, $content);
+        }
         return (bool)$mailCls->send([
           'to' => $email,
           'title' => $title,
