@@ -455,6 +455,56 @@ class Shop extends Models\Cls\Db
 
     return null;
   }
+  /**
+   * 
+   */
+  public function getAbandonedCarts(string $days = '0'): array
+  {
+    $salesCfg  = $this->sales->getClassCfg();
+    $cartCfg  = $this->cart->getClassCfg();
+    $today = new \DateTime();
+    $my_date = date_sub(($today), date_interval_create_from_date_string(strval($days).' days'));
+    $date = $my_date->format('Y-m-d');
+    $grid = new \bbn\Appui\Grid($this->db, [], [
+      'table' => $cartCfg['table'], 
+      'fields' => [], 
+      'where' => [[
+        'logic' => 'AND',
+        'conditions' => [[
+          'field' => $cartCfg['arch']['cart']['id_client'],
+          'operator' => 'isnotnull'
+        ],[
+          'field' => $cartCfg['arch']['cart']['creation'],
+          'value' => $date
+        ]
+        //OR  $salesCfg['arch']['transactions']['status'] === 'unpaid'
+        ]],[
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => $salesCfg['arch']['transactions']['id_cart'],
+            'operator' => 'isnull'
+          ],[
+            'field' => $salesCfg['arch']['transactions']['status'],
+            'operator' => '!=',
+            'value' => 'paid'
+          ]]
+        ]],
+      'join' => [[
+      'table' => $salesCfg['table'],
+      'type' => 'left outer',
+      'on' => [
+        'conditions' => [[
+          'field' => $salesCfg['arch']['transactions']['id_cart'],
+          'operator' => 'eq',
+          'exp' => $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
+        ]]
+      ]
+    ]]]);
+    die(var_dump($grid->getDatatable()));
+    //$salesCfg['arch']['transactions']
+    //$cartCfg['arch']['cart']
 
+    die(var_dump($my_date, 'x', $date));
+  }
 
 }

@@ -117,12 +117,10 @@ class Provider extends DbCls
     }
   }
   
-  public function sendSoldOutEmail(string $id_provider, array $product, \bbn\Mail $mailCls = null)
+  public function sendSoldOutEmail(string $id_provider, array $product)
   {
     $masksCls = new Masks($this->db);
-    if (empty($mailCls)) {
-      $mailCls = new Mail();
-    }
+    $mailCls = new \bbn\Appui\Mailing($this->db);
     if( ($emails = $this->getEmails($id_provider)) &&
      ($template = $masksCls->getDefault($this->opt->fromCode('product_sold_out', 'masks', 'appui')))
      ) 
@@ -130,11 +128,8 @@ class Provider extends DbCls
       $title = Tpl::render($template['title'], $product['product']);
       $content = Tpl::render($template['content'], $product['product']);
       foreach($emails as $email) {
-        $mailCls->send([
-          'to' => $email['email'],
-          'title' => $title,
-          'text' => $content
-        ]);
+        $mailCls->insertEmail($email, $title, $content);
+
       }
     }
   }

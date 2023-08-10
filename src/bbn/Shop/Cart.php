@@ -634,9 +634,14 @@ class Cart extends DbCls
     if (empty($this->idSession)) {
       throw new \Exception(_("No user's session found"));
     }
+    $idClient = null;
+    if (!empty($this->idUser)) {
+      $clientCls = new Client($this->db);
+      $idClient = $clientCls->getIdByUser($this->idUser);
+    }
     return $this->insert([
       $this->fields['id_session'] => $this->idSession,
-      $this->fields['id_client'] => null,
+      $this->fields['id_client'] => $idClient,
       $this->fields['creation'] => date('Y-m-d H:i:s')
     ]);
   }
