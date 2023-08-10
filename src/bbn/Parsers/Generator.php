@@ -49,17 +49,36 @@ class Generator {
         $res .= ";" . PHP_EOL;
       }
     }
+
+    if (!empty($this->cfg['doc'])) {
+      $res .= PHP_EOL . "/**" . PHP_EOL . " * ";
+      if (!empty($this->cfg['doc']['description'])) {
+        $res .= str_replace("\n", "\n * ", $this->cfg['doc']['description']);
+      }
+      if (!empty($this->cfg['doc']['tags'])) {
+        foreach ($this->cfg['doc']['tags'] as $tag => $value) {
+          $res .= PHP_EOL . " * @" . $tag . "  " . $value; 
+        }
+      }
+      $res .= PHP_EOL . " *" . PHP_EOL . " */" . PHP_EOL;
+    }
+
     $res .= PHP_EOL . "class " . $this->cfg['realName'];
     
     if ( !empty($this->cfg['parentClass'])) {
       $res .= " extends " . ($this->cfg['uses'][$this->cfg['parentClass']] ?? $this->cfg['parentClass']) ;
     }
     if ( !empty($this->cfg['interfaceNames'])) {
-      $res .= " implements " . join(", ", array_map(function($elem) {
-        if ( !empty($this->cfg['realNamespace'])) {
-          return str_replace(($this->cfg['realNamespace'] . "\\"), "", $elem);
-        }
-      }, $this->cfg['interfaceNames']));
+      $implements = array_filter($this->cfg['interfaceNames'], function($a) {
+        return str_contains($a, "bbn");
+     });
+      if (!empty($implements)) {
+        $res .= " implements " . join(", ", array_map(function($elem) {
+          if ( !empty($this->cfg['realNamespace'])) {
+            return str_replace(($this->cfg['realNamespace'] . "\\"), "", $elem);
+          }
+        }, $implements));
+      }
     }
 
     $res .= "\n{\n";
@@ -104,9 +123,13 @@ class Generator {
   }
   
   public function generateMethod(array $cfg) {
-    $res = str_repeat(' ', $this->spacing);
+    $res = "";
+    if (!empty($cfg['comments'])) {
+      $res .= $cfg['comments'] . PHP_EOL;
+    }
+    $res .= str_repeat(' ', $this->spacing);
   
-    if ( !empty($cfg['doc'])) {
+    /*if ( !empty($cfg['doc'])) {
       $res .= "/**\n" . str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['summary'] . "\n";
   
   
@@ -140,9 +163,10 @@ class Generator {
         }
       }
       
-      $res .= str_repeat(' ', $this->spacing) . " */\n";
+      $res .= str_repeat(' ', $this->spacing) . " * /\n";
       
-    }
+    }*/
+
 
     
     if ( !empty($cfg['final']) ) {

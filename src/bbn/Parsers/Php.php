@@ -1053,6 +1053,8 @@ class Php extends bbn\Models\Cls\Basic
       && ($extracted = $this->_extract_description(is_array($doc['description']) ? $doc['description']['description'] : $doc['description']))
     ) {
       $ar = X::mergeArrays($ar, $extracted);
+      $ar['doc'] = $doc;
+      $ar['comments'] = "  " . $comments;
     }
     
     if ($doc && !empty($doc['params'])) {
@@ -1083,9 +1085,9 @@ class Php extends bbn\Models\Cls\Basic
       $ar['description'] = '';
       $ar['description_parts'] = [];
       if (!empty($bits)) {
-        $ar['description'] = trim(X::join($bits, PHP_EOL));
-        $num_matches = preg_match_all('/```(?:php)?(.+)```/s', $ar['description'], $matches, PREG_OFFSET_CAPTURE);
-        $len = strlen($ar['description']);
+        $description = trim(X::join($bits, PHP_EOL));
+        $num_matches = preg_match_all('/```(?:php)?(.+)```/s', $description, $matches, PREG_OFFSET_CAPTURE);
+        $len = strlen($description);
         $start = 0;
         
         if ($num_matches) {
@@ -1094,9 +1096,10 @@ class Php extends bbn\Models\Cls\Basic
               if (
                 ($i === 0)
                 && ($m[1] !== 0)
-                && $tmp = trim(substr($ar['description'], $start, $m[1]))
+                && $tmp = trim(substr($description, $start, $m[1]))
               ) {
-                $content = trim(Str::markdown2html($tmp));
+                //$content = trim(Str::markdown2html($tmp));
+                $content = $tmp;
                 if ($content) {
                   $ar['description_parts'][] = [
                     'type' => 'text',
@@ -1113,7 +1116,7 @@ class Php extends bbn\Models\Cls\Basic
               $end = isset($matches[0][$i + 1]) ? $matches[0][$i + 1][1] : $len;
               if (
                 ($start < $len)
-                && ($tmp = trim(substr($ar['description'], $start, $end - $start)))
+                && ($tmp = trim(substr($description, $start, $end - $start)))
               ) {
                 $ar['description_parts'][] = [
                   'type' => 'text',
@@ -1123,12 +1126,19 @@ class Php extends bbn\Models\Cls\Basic
             }
           }
         } else {
-          $content = trim(Str::markdown2html($ar['description']));
+          //$content = trim(Str::markdown2html($description));
+          $content = $description;
           if ($content) {
             $ar['description_parts'][] = [
               'type' => 'text',
               'content' => $content
             ];
+          }
+        }
+        foreach ($ar['description_parts'] as $p) {
+          if ($p['type'] === 'text') {
+            $ar['description'] = $p['content'];
+            break;
           }
         }
       }

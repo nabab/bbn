@@ -45,10 +45,6 @@ if (!\defined("BBN_DATA_PATH")) {
   throw new \Exception("BBN_DATA_PATH must be defined");
 }
 
-
-/**
- * MVC
- */
 class Mvc implements Mvc\Api
 {
   use Models\Tts\Singleton;
