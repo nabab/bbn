@@ -500,5 +500,4 @@ class Sales extends DbCls
     return null;
   }
 
-
 }
