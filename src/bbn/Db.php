@@ -94,7 +94,7 @@ class Db implements Db\Actions
     }
   }
 
-
+  
   /**
    * Closes the connection making the object unusable.
    *

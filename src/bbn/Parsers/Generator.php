@@ -9,6 +9,7 @@ class Generator {
   public $blala = 1;
   
   public function __construct(
+    /** array  */
     private array $cfg = [],
     private int $spacing = 2
   ) {
@@ -197,10 +198,15 @@ class Generator {
           if (!empty($arg['promoted'])) {
             $argStr .= $arg['promoted'] . " ";
           }
+          
           if (!empty($arg['type'])) {
             $argStr .= $arg['type'] . " ";
           }
         
+          if ($cfg['isVariadic']) {
+            $argStr .= "...";
+          }
+
           $argStr .= "$" . $arg['name'];
         
           if (!empty($arg['has_default'])) {
