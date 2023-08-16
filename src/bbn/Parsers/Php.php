@@ -1028,23 +1028,37 @@ class Php extends bbn\Models\Cls\Basic
         function ($p) {
           $types = [];
           $type = $p->getType();
+          
           if (is_object($type)) {
+            if ($type->allowsNull()) {
+              $types[] = 'null';
+            }
             if (method_exists($type, 'getTypes')) {
               $types = $type->getTypes();
+              foreach ($type->getTypes() as $stype) {
+                if (method_exists($type, 'getName')) {
+                  if (!in_array($stype->getName(), $types)) {
+                    $types[] = $stype->getName();
+                  }
+                }
+              }
             } else {
-              $types = [$type];
+              $types[] = $type->getName();
             }
           }
           
           $type_st = '';
           foreach ($types as $i => $tp) {
-            $type_st .= $tp->getName() . ($i ? '|' : '');
+            $type_st .= $tp . ($types[$i + 1] ? '|' : '');
           }
           
           return [
             'name' => $p->getName(),
             'position' => $p->getPosition(),
             'type' => $type_st,
+            'type_arr' => $types,
+            'variadic' => $p->isVariadic(),
+            'reference' => $p->isPassedByReference(),
             'required' => !$p->isOptional(),
             'has_default' => $p->isDefaultValueAvailable(),
             'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',

@@ -17,6 +17,7 @@ class Generator {
     'boolean',
     'void',
     'self',
+    'null',
   ];
   
   public function __construct(
@@ -293,7 +294,7 @@ class Generator {
             $argStr .= $arg['promoted'] . " ";
           }
           
-          if (!empty($arg['type'])) {
+          /*if (!empty($arg['type'])) {
             $type = $arg['type'];
             if (!empty($this->cfg['realNamespace'])
                 && (strpos($type, ($this->cfg['realNamespace'] . '\\')) === 0))
@@ -301,12 +302,50 @@ class Generator {
               $type = str_replace(($this->cfg['realNamespace'] . '\\'), '', $type);
             }
             $argStr .= $type . " ";
-          }
-        
-          if ($cfg['isVariadic']) {
-            $argStr .= "...";
+          }*/
+
+          if (!empty($arg['type_arr'])) {
+            $has_null = false;
+            $type = "";
+            foreach ($arg['type_arr'] as $t) {
+              if (str_contains($t, '?')) {
+                $has_null = true;
+              }
+              else if ($t === 'null') {
+                $has_null = true;
+              }
+            }
+            if ($has_null && sizeof($arg['type_arr']) === 2) {
+              $type .= "?";
+            }
+            else if ($has_null && sizeof($arg['type_arr']) > 2) {
+              $type .= 'null|';
+            }
+            foreach ($arg['type_arr'] as $t) {
+              if ($t !== 'null') {
+                if (!in_array($t, self::$nonClassesReturns)
+                    && !in_array($t, $this->cfg['uses'] ?? [])
+                    && (strpos($t, '\\') !== 0)
+                    && !class_exists(('\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\' : '') . $t))
+                ) {
+                  $t = '\\' . $t;
+                }
+                $type .= $t . "|";
+              }
+            }
+            $last_pipe = strrpos($type, '|');
+            
+            $type = substr($type, 0, $last_pipe);
+            $argStr .= $type . " ";
           }
 
+          
+          if ($arg['variadic']) {
+            $argStr .= "...";
+          }
+          if ($arg['reference']) {
+            $argStr .= "&";
+          }
           $argStr .= "$" . $arg['name'];
         
           if (!empty($arg['has_default'])) {
