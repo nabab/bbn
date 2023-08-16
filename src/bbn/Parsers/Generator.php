@@ -7,6 +7,17 @@ use bbn\X;
 class Generator {
   
   public $blala = 1;
+
+  public static $nonClassesReturns = [
+    'string',
+    'int',
+    'float',
+    'array',
+    'bool',
+    'boolean',
+    'void',
+    'self',
+  ];
   
   public function __construct(
     /** array  */
@@ -31,11 +42,7 @@ class Generator {
   public function generateClass() {
     //X::ddump('Tests');
     $res = "<?php\n\n";
-    if (!empty($this->cfg['dummyComments'])) {
-      foreach ($this->cfg['dummyComments'] as $comment) {
-        $res .= $comment . PHP_EOL . PHP_EOL;
-      }
-    }
+    
     if ( !empty($this->cfg['realNamespace'])) {
       $res .= "namespace " . $this->cfg['realNamespace'] . ";\n\n";
     }
@@ -53,6 +60,14 @@ class Generator {
           $res .= " as $alias";
         }
         $res .= ";" . PHP_EOL;
+      }
+    }
+
+    $res .= PHP_EOL . PHP_EOL;
+
+    if (!empty($this->cfg['dummyComments'])) {
+      foreach ($this->cfg['dummyComments'] as $comment) {
+        $res .= $comment . PHP_EOL . PHP_EOL;
       }
     }
 
@@ -279,7 +294,13 @@ class Generator {
           }
           
           if (!empty($arg['type'])) {
-            $argStr .= $arg['type'] . " ";
+            $type = $arg['type'];
+            if (!empty($this->cfg['realNamespace'])
+                && (strpos($type, ($this->cfg['realNamespace'] . '\\')) === 0))
+            {
+              $type = str_replace(($this->cfg['realNamespace'] . '\\'), '', $type);
+            }
+            $argStr .= $type . " ";
           }
         
           if ($cfg['isVariadic']) {
@@ -311,12 +332,24 @@ class Generator {
           if (str_contains($ret, '?')) {
             $has_null = true;
           }
+          else if ($ret === null) {
+            $has_null = true;
+          }
+        }
+
+        if ($has_null) {
+          $res_returns .= "?";
         }
         
         foreach ($cfg['returns'] as $ret) {
-          if ($ret === null && !$has_null) {
-            $res_returns .= "null|";
-          } else if ($ret !== null) {
+          if ($ret !== null) {
+            if (!in_array($ret, self::$nonClassesReturns)
+                && !in_array($ret, $this->cfg['uses'] ?? [])
+                && (strpos($ret, '\\') !== 0)
+                && !class_exists(('\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\' : '') . $ret))
+            ) {
+              $ret = '\\' . $ret;
+            }
             $res_returns .= $ret . "|";
           }
         }

@@ -997,7 +997,7 @@ class Php extends bbn\Models\Cls\Basic
     if ($method->isPrivate() || $method->isProtected()) {
       $method->setAccessible(true);
     }
-    
+    //die(var_dump($method->getParameters()[0]->getType()->getName()));
     $ar = [
       'name' => $method->getName(),
       'summary' => '',
