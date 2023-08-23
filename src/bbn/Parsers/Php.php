@@ -1049,7 +1049,8 @@ class Php extends bbn\Models\Cls\Basic
           
           $type_st = '';
           foreach ($types as $i => $tp) {
-            $type_st .= $tp . ($types[$i + 1] ? '|' : '');
+            $k = ($i === count($types)) ? '|' : '';
+            $type_st .= $tp . $k;
           }
           
           return [
@@ -1262,7 +1263,7 @@ class Php extends bbn\Models\Cls\Basic
         'trait' => false,
         'static' => $property->isStatic(),
         'declaring' => $property->getDeclaringClass(),
-        'declaring_trait' => $this->getDeclaringTraitForProperty($cls->getName(), $property->getName()),
+        'declaring_trait' => $this->getDeclaringTraitForProperty($cls->getName(), $property->getName())->name,
         'promoted' => $property->isPromoted(),
         'visibility' => $property->isPrivate() ? 'private' : ($property->isProtected() ? 'protected' : 'public'),
         'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),

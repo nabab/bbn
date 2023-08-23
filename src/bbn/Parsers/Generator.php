@@ -18,6 +18,9 @@ class Generator {
     'void',
     'self',
     'null',
+    'object',
+    'iterable',
+    'callable',
   ];
   
   public function __construct(
@@ -38,6 +41,7 @@ class Generator {
       $export = str_replace('['.PHP_EOL.']','[]', join(PHP_EOL, array_filter(["["] + $array)));
     }
     return $export;
+  
   }
   
   public function generateClass() {
@@ -173,7 +177,7 @@ class Generator {
         if ($info['parent']) {
           continue;
         }
-        if ($info['declaring_trait']->name !== $this->cfg['name']) {
+        if ($info['declaring_trait'] !== $this->cfg['name']) {
           continue;
         }
         if (!empty($info['doc']) && (!empty($info['doc']['description'])) || !empty($info['doc']['tags'])) {
@@ -225,57 +229,10 @@ class Generator {
     }
     $res .= str_repeat(' ', $this->spacing);
   
-    /*if ( !empty($cfg['doc'])) {
-      $res .= "/**\n" . str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['summary'] . "\n";
-  
-  
-      if ($cfg['doc']['description']) {
-        $res .= str_repeat(' ', $this->spacing) . " * \n";
-        $res .= str_repeat(' ', $this->spacing) . " * " . $cfg['doc']['description'] . "\n";
-      }
-      
-      foreach ($cfg['doc']['tags'] as $tag) {
-        $res .= str_repeat(' ', $this->spacing) . " * \n";
-        if ($tag['name'] === 'param' && !empty($cfg['arguments']) && !empty($cfg['arguments'][$tag['index']])) {
-          $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['name'] . " " . $cfg['arguments'][$tag['index']]['type'] . " " . $tag['varname'] . "\n";
-        } else if ($tag['name'] === 'return' && !empty($cfg['returns'])) {
-          $return = "";
-          
-          foreach ($cfg['returns'] as $ret) {
-            if ($ret === null) {
-              $return .= "null|";
-            }
-            // if string contain "?" remove it
-            else if (str_contains($ret, '?')) {
-              $return .= str_replace('?', '', $ret) . "|";
-            } else {
-              $return .= $ret . "|";
-            }
-          }
-          
-          $return = substr($return, 0, -1);
-          
-          $res .= str_repeat(' ', $this->spacing) . " * @" . $tag['name'] . " " . $return . " " . $tag['varname'] . "\n";
-        }
-      }
-      
-      $res .= str_repeat(' ', $this->spacing) . " * /\n";
-      
-    }*/
-
-
-    
     if ( !empty($cfg['final']) ) {
       $res .= "final ";
     }
     
-    /*if ( !empty($cfg['public']) ) {
-      $res .= "public ";
-    } else if ( !empty($cfg['protected']) ) {
-      $res .= "protected ";
-    } else if ( !empty($cfg['private']) ) {
-      $res .= "private ";
-    }*/
     if ( !empty($cfg['visibility']) ) {
       $res .= $cfg['visibility'] . ' ';
     }
@@ -286,23 +243,13 @@ class Generator {
   
     if (!empty($cfg['name'])) {
       $res .= "function " . $cfg['name'] . "(";
-    
+      $orig_res = $res;
       if (!empty($cfg['arguments'])) {
         foreach ($cfg['arguments'] as $arg) {
           $argStr = "";
           if (!empty($arg['promoted'])) {
             $argStr .= $arg['promoted'] . " ";
           }
-          
-          /*if (!empty($arg['type'])) {
-            $type = $arg['type'];
-            if (!empty($this->cfg['realNamespace'])
-                && (strpos($type, ($this->cfg['realNamespace'] . '\\')) === 0))
-            {
-              $type = str_replace(($this->cfg['realNamespace'] . '\\'), '', $type);
-            }
-            $argStr .= $type . " ";
-          }*/
 
           if (!empty($arg['type_arr'])) {
             $has_null = false;
@@ -315,14 +262,19 @@ class Generator {
                 $has_null = true;
               }
             }
-            if ($has_null && sizeof($arg['type_arr']) === 2) {
+            if ($has_null && (count($arg['type_arr']) === 2) && (!$arg['has_default'] || !is_null($arg['default']))) {
               $type .= "?";
             }
-            else if ($has_null && sizeof($arg['type_arr']) > 2) {
+            else if ($has_null && (count($arg['type_arr']) > 2)) {
               $type .= 'null|';
             }
             foreach ($arg['type_arr'] as $t) {
               if ($t !== 'null') {
+                if (!empty($this->cfg['realNamespace'])
+                    && (strpos($t, ($this->cfg['realNamespace'] . '\\')) === 0))
+                {
+                  $t = str_replace(($this->cfg['realNamespace'] . '\\'), '', $t);
+                }
                 if (!in_array($t, self::$nonClassesReturns)
                     && !in_array($t, $this->cfg['uses'] ?? [])
                     && (strpos($t, '\\') !== 0)
@@ -352,14 +304,83 @@ class Generator {
             $argStr .= " = " .  $this->formatExport($arg['default']);
           }
         
-          $res .= $argStr . ", ";
+          $orig_res .= $argStr . ", ";
         }
-      
-        // Remove the trailing comma and space
-        $res = substr($res, 0, -2);
+        if (strlen($orig_res) >= 100) {
+          $res .= PHP_EOL . "      ";
+          foreach ($cfg['arguments'] as $arg) {
+            $argStr = "";
+            if (!empty($arg['promoted'])) {
+              $argStr .= $arg['promoted'] . " ";
+            }
+  
+            if (!empty($arg['type_arr'])) {
+              $has_null = false;
+              $type = "";
+              foreach ($arg['type_arr'] as $t) {
+                if (str_contains($t, '?')) {
+                  $has_null = true;
+                }
+                else if ($t === 'null') {
+                  $has_null = true;
+                }
+              }
+              if ($has_null && (count($arg['type_arr']) === 2) && (!$arg['has_default'] || !is_null($arg['default']))) {
+                $type .= "?";
+              }
+              else if ($has_null && (count($arg['type_arr']) > 2)) {
+                $type .= 'null|';
+              }
+              foreach ($arg['type_arr'] as $t) {
+                if ($t !== 'null') {
+                  if (!empty($this->cfg['realNamespace'])
+                      && (strpos($t, ($this->cfg['realNamespace'] . '\\')) === 0))
+                  {
+                    $t = str_replace(($this->cfg['realNamespace'] . '\\'), '', $t);
+                  }
+                  if (!in_array($t, self::$nonClassesReturns)
+                      && !in_array($t, $this->cfg['uses'] ?? [])
+                      && (strpos($t, '\\') !== 0)
+                      && !class_exists(('\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\' : '') . $t))
+                  ) {
+                    $t = '\\' . $t;
+                  }
+                  $type .= $t . "|";
+                }
+              }
+              $last_pipe = strrpos($type, '|');
+              
+              $type = substr($type, 0, $last_pipe);
+              $argStr .= $type . " ";
+            }
+  
+            
+            if ($arg['variadic']) {
+              $argStr .= "...";
+            }
+            if ($arg['reference']) {
+              $argStr .= "&";
+            }
+            $argStr .= "$" . $arg['name'];
+          
+            if (!empty($arg['has_default'])) {
+              $argStr .= " = " .  $this->formatExport($arg['default']);
+            }
+          
+            $res .= $argStr. "," . PHP_EOL . "      ";
+          }
+          $res = substr($res, 0, -8);
+          $res .= PHP_EOL . "  )";
+        }
+        else {
+          $res = $orig_res;
+          $res = substr($res, 0, -2);
+          $res .= ")";
+        }
       }
-    
-      $res .= ")";
+      else {
+        $res .= ")";
+      }
       
       
       if ( !empty($cfg['returns']) ) {
