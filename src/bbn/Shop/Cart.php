@@ -9,6 +9,10 @@ use bbn\Models\Tts\Dbconfig;
 use bbn\Db;
 use bbn\Entities\Address;
 use bbn\Appui\Option;
+use bbn\Appui\Masks;
+use bbn\Tpl;
+use bbn\File\Image;
+
 
 /**
  * Cart class
@@ -757,4 +761,46 @@ class Cart extends DbCls
     return $res;
   }
 
+  public function isPaid(string $idCart): bool
+  {
+    $sales = new Sales($this->db);
+    $salesCfg = $sales->getClassCfg();
+    
+    return (bool)$this->db->selectOne($salesCfg['table'], $salesCfg['arch']['id'],[
+      $salesCfg['arch']['transactions']['id_cart'] => $idCart,
+      $salesCfg['arch']['transactions']['status'] => 'paid'
+    ]);
+  }
+
+  public function sendAbandonedCartEmail(string $idCart, string $idClient): bool
+  {
+    $clientCls = new Client($this->db);
+    $masksCls = new Masks($this->db);
+    $mailCls = new \bbn\Appui\Mailing($this->db);
+    $opt = Option::getInstance();
+    $mailData = [];
+
+    if(
+      ($email = $clientCls->getEmail($idClient)) &&
+      ($template = $masksCls->getDefault($opt->fromCode('abandoned_cart', 'masks', 'appui'))) &&
+      ($mailData['products'] = $this->getProductsDetail($idCart))
+    ) {
+        foreach($mailData['products'] as &$p) {
+          if($p['product']['medias'][0]) {
+            $i = new \bbn\File\Image($p['product']['medias'][0]['full_path']);
+            $p['image'] = $i->toString();
+          }
+          $p['product']['price'] = '€ ' . (string)number_format(round((float)$p['product']['price'] , 2), 2, ',', '');
+          $p['amount'] = '€ ' . (string)number_format(round((float)$p['amount'] , 2), 2, ',', '');
+          unset($p);
+        }
+        $mailData['total'] = '€ ' . (string)number_format(round((float)$this->getProductsAmount($idCart), 2), 2, ',', '');
+        $mailData['link'] = $_SERVER["HTTP_ORIGIN"].'/checkout';
+        $title = Tpl::render($template['title'], $mailData);
+        $content = Tpl::render($template['content'], $mailData);
+        
+        return $mailCls->insertEmail($email, $title, $content);
+    }
+
+  }
 }

@@ -458,16 +458,20 @@ class Shop extends Models\Cls\Db
   /**
    * 
    */
-  public function getAbandonedCarts(string $days = '0'): array
+  public function getAbandonedCarts(int $days): array
   {
     $salesCfg  = $this->sales->getClassCfg();
     $cartCfg  = $this->cart->getClassCfg();
     $today = new \DateTime();
     $my_date = date_sub(($today), date_interval_create_from_date_string(strval($days).' days'));
     $date = $my_date->format('Y-m-d');
-    $grid = new \bbn\Appui\Grid($this->db, [], [
+    unset($salesCfg['arch']['transactions']['id']);
+    $salesCfg['arch']['transactions']['id_transaction'] = $salesCfg['table'].'.'.'id';
+    $fields = array_merge($cartCfg['arch']['cart'], $salesCfg['arch']['transactions']);
+    
+    $grid = new \bbn\Appui\Grid($this->db, ['limit' => 0], [
       'table' => $cartCfg['table'], 
-      'fields' => [], 
+      'fields' => $fields, 
       'where' => [[
         'logic' => 'AND',
         'conditions' => [[
@@ -476,9 +480,8 @@ class Shop extends Models\Cls\Db
         ],[
           'field' => $cartCfg['arch']['cart']['creation'],
           'value' => $date
-        ]
-        //OR  $salesCfg['arch']['transactions']['status'] === 'unpaid'
-        ]],[
+        ]]
+       ],[
           'logic' => 'OR',
           'conditions' => [[
             'field' => $salesCfg['arch']['transactions']['id_cart'],
@@ -488,10 +491,11 @@ class Shop extends Models\Cls\Db
             'operator' => '!=',
             'value' => 'paid'
           ]]
-        ]],
+        ]
+      ],
       'join' => [[
       'table' => $salesCfg['table'],
-      'type' => 'left outer',
+      'type' => 'left',
       'on' => [
         'conditions' => [[
           'field' => $salesCfg['arch']['transactions']['id_cart'],
@@ -499,12 +503,17 @@ class Shop extends Models\Cls\Db
           'exp' => $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
         ]]
       ]
-    ]]]);
-    die(var_dump($grid->getDatatable()));
-    //$salesCfg['arch']['transactions']
-    //$cartCfg['arch']['cart']
-
-    die(var_dump($my_date, 'x', $date));
+    ]],
+    'group_by' => [
+      $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
+    ]
+  ]);
+  if($data = $grid->getDatatable()['data']) {
+    return array_filter($data, function($a){
+      return !$this->cart->isPaid($a['id']);
+    });
   }
+  return [];
+}
 
 }
