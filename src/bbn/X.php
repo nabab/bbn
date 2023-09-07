@@ -212,8 +212,8 @@ class X
    */
   public static function logError($errno, $errstr, $errfile, $errline): void
   {
-    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
-      $file      = BBN_DATA_PATH.'logs/_php_error.json';
+    if (is_dir(Mvc::getTmpPath().'logs')) {
+      $file      = Mvc::getTmpPath().'logs/_php_error.json';
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
       foreach ($backtrace as &$b) {
         if (!empty($b['file'])) {
@@ -267,6 +267,9 @@ class X
 
       self::sortBy($r, 'last_date', 'DESC');
       file_put_contents($file, Json_encode($r, JSON_PRETTY_PRINT));
+    }
+    else {
+      die(X::_("Impossible to write the error log file"));
     }
   }
 

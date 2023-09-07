@@ -345,7 +345,7 @@ TEMPLATE;
     }
     else {
       $this->template = $file;
-      $this->path = BBN_DATA_PATH;
+      $this->path = Mvc::getDataPath();
     }
     return $this;
   }
@@ -358,11 +358,11 @@ TEMPLATE;
     $valid = false;
     $r = false;
 
-    if (!defined('BBN_IS_PROD') || !BBN_IS_PROD) {
-      $cfg['to'] = BBN_ADMIN_EMAIL;
+    if (!defined('BBN_IS_PROD') || !constant('BBN_IS_PROD')) {
+      $cfg['to'] = constant('BBN_ADMIN_EMAIL');
       $cfg['cc'] = '';
       $cfg['bcc'] = '';
-      $this->mailer->AddAddress(BBN_ADMIN_EMAIL);
+      $this->mailer->AddAddress(constant('BBN_ADMIN_EMAIL'));
       $valid = 1;
     }
     else {

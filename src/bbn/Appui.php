@@ -1636,9 +1636,9 @@ class Appui
   /**
    * Import the options from the default bbn file in the current environment.
    *
-   * @return int
+   * @return iterable
    */
-  public function importOptions(): int
+  public function importOptions()
   {
     $res = 0;
     if ($opt = $this->getOption()) {
@@ -1677,7 +1677,18 @@ class Appui
           }
         }
 
-        $res += (int)$opt->import($appui_options, $root);
+        $step = 100;
+        $next = $step;
+        foreach ($opt->import($appui_options, $root) as $success) {
+          if ($success) {
+            $res += $success;
+            if ($res >= $next) {
+              $next += $step;
+              yield $res;
+            }
+          }
+        }
+
         if (!defined('BBN_APPUI')) {
           define('BBN_APPUI', $opt->fromCode('appui'));
         }
@@ -1685,8 +1696,6 @@ class Appui
         $opt->deleteCache(null);
       }
     }
-
-    return $res;
   }
 
 
@@ -2107,7 +2116,7 @@ class Appui
    *
    * @return int
    */
-  public function updateHistory(): int
+  public function updateHistory()
   {
     $tot_insert     = 0;
     $inserted       = 0;
@@ -2140,11 +2149,6 @@ class Appui
       $history_rows     = $db->getColumnValues('bbn_options', 'id');
       $num_history_rows = count($history_rows);
       foreach ($history_rows as $o) {
-        ++$tot_insert;
-        if (0 === $tot_insert % 100) {
-          echo "{$tot_insert} / {$num_history_rows} rows written".PHP_EOL;
-        }
-
         if ($db->insert(
           'bbn_history_uids',
           [
@@ -2164,14 +2168,18 @@ class Appui
               ]
             )
         ) {
-          ++$inserted;
+          yield 1;
+        }
+        else {
+          yield 0;
         }
       }
 
       // Create constraints
-      $constraints = $this->getHistoryConstraints();
-      foreach ($constraints as $ctable => $ckeys) {
-        $db->query($db->getCreateConstraints($ctable, ['keys' => $ckeys]));
+      if ($constraints = $this->getHistoryConstraints()) {
+        foreach ($constraints as $ctable => $ckeys) {
+          $db->query($db->getCreateConstraints($ctable, ['keys' => $ckeys]));
+        }
       }
     }
 
@@ -2295,11 +2303,8 @@ class Appui
         $installer->report('Error during admin user creation', false, true);
       }
 
-      if ($res = $this->importOptions()) {
+      foreach ($this->importOptions() as $res) {
         $installer->report("{$res} options imported");
-      }
-      else {
-        $installer->report('No new option created');
       }
 
 
@@ -2319,6 +2324,7 @@ class Appui
 
       $cache->deleteAll('');
 
+      $installer->report("{$res} Permissions creation...");
       if ($res = $this->updatePermissions()) {
         $installer->report("{$res} Permissions created");
       }
@@ -2355,12 +2361,19 @@ class Appui
       // If history is active
       if (!empty($settings['history'])) {
         $installer->report(X::_("History update starting, it might take a while..."));
-        if ($this->updateHistory()) {
-          $installer->report(X::_("History update successful"));
+        $step = 100;
+        $next    = $step;
+        foreach ($this->updateHistory() as $success) {
+          if ($success) {
+            $res += $success;
+            if ($res >= $next) {
+              $next += $step;
+              $installer->report(X::_("$res entries inserted..."));
+            }
+          }
         }
-        else {
-          $installer->report('Error during history update', false, true);
-        }
+
+        $installer->report(X::_("History update successful"));
       }
 
       $cache->deleteAll('');

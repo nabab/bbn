@@ -1168,10 +1168,14 @@ MYSQL
           $st .= ',' . PHP_EOL;
         }
 
-        $st .= $this->getAlterColumn($table, array_merge($col, [
-          'col_name' => $name,
-          'no_table_exp' => true
-        ]));
+        $columnMrg = [];
+        try {
+          $columnMrg = array_merge($col, ['col_name' => $name, 'no_table_exp' => true]);
+        } catch (Exception $e) {
+          throw $e;
+        }
+
+        $st .= $this->getAlterColumn($table, $columnMrg);
       }
     }
 
@@ -1522,10 +1526,14 @@ MYSQL
           $st .= (string)$col['default'];
         }
       }
-      elseif (!empty($col['default'])) {
-        $st .= " DEFAULT '" . Str::escapeQuotes(trim($col['default'], "'")) . "'";
+      else {
+        $def = (string)$col['default'];
+        if (!empty($col['default'])) {
+          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
+        }
       }
     }
+
 
     return $st;
   }

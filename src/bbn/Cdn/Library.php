@@ -568,8 +568,8 @@ SQL,
           'path' => $path,
           'files' => []
         ];
-        $files =& $this->libs[$info['name']][$info['internal']]['files'];
-        $prepend =& $this->libs[$info['name']][$info['internal']]['prepend'];
+        $files                                        =& $this->libs[$info['name']][$info['internal']]['files'];
+        $prepend                                      =& $this->libs[$info['name']][$info['internal']]['prepend'];
 
         // From here, adding files (no matter the type) to $this->libs array for each library
         // Adding language files if they must be prepent

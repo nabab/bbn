@@ -4,7 +4,9 @@ namespace bbn\Mvc;
 
 use bbn;
 use bbn\X;
+use bbn\Mvc;
 use Exception;
+use stdClass;
 
 class Controller implements Api
 {
@@ -93,6 +95,10 @@ class Controller implements Api
      */
     $mode,
     /**
+     * @var string The URL leading to this controller
+     */
+    $url,
+    /**
      * The data model
      * @var array
      */
@@ -139,11 +145,11 @@ class Controller implements Api
    * It should be called only once from within the script.
    * All subsequent calls to controllers should be done through $this->add($path).
    *
-   * @param bbn\Mvc       $mvc
+   * @param Mvc       $mvc
    * @param array         $files
    * @param array|boolean $data
    */
-  public function __construct(bbn\Mvc $mvc, array $files, $data = false)
+  public function __construct(Mvc $mvc, array $files, $data = false)
   {
     $this->_mvc = $mvc;
     $this->reset($files, $data);
@@ -178,7 +184,7 @@ class Controller implements Api
       $this->files  = $this->_mvc->getFiles();
       $this->params = $this->_mvc->getParams();
       $this->url    = $this->getUrl();
-      $this->obj    = new \stdClass();
+      $this->obj    = new stdClass();
     }
   }
 
@@ -1074,7 +1080,7 @@ class Controller implements Api
    * @param array|null $data
    *
    * @return false|string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getExternalView(string $full_path, string $mode = 'html', ?array $data = null)
   {
@@ -1369,10 +1375,9 @@ class Controller implements Api
   {
     if (
         $this->checkPath($file_name)
-        && \defined('BBN_DATA_PATH')
-        && is_file(BBN_DATA_PATH . $file_name)
+        && is_file($this->dataPath() . $file_name)
     ) {
-      return file_get_contents(BBN_DATA_PATH . $file_name);
+      return file_get_contents($this->dataPath() . $file_name);
     }
 
     return false;
@@ -1406,7 +1411,7 @@ class Controller implements Api
   /**
    * @param $path
    * @return $this
-   * @throws \Exception
+   * @throws Exception
    */
   public function setPrepath($path)
   {
@@ -1415,7 +1420,7 @@ class Controller implements Api
       return $this;
     }
 
-    throw new \Exception(X::_("Prepath $path is not valid"));
+    throw new Exception(X::_("Prepath $path is not valid"));
   }
 
 
@@ -1425,7 +1430,7 @@ class Controller implements Api
    * @params string path to the model
    * @params array data to send to the model
    * @return array|null A data model
-   * @throws \Exception
+   * @throws Exception
    */
   public function getModel()
   {
@@ -1464,7 +1469,7 @@ class Controller implements Api
 
     if (!\is_array($m)) {
       if ($die) {
-        throw new \Exception(X::_("$path is an invalid model"));
+        throw new Exception(X::_("$path is an invalid model"));
       }
 
       return [];
@@ -1569,7 +1574,7 @@ class Controller implements Api
 
     if (!\is_array($m)) {
       if ($die) {
-        throw new \Exception(X::_("$path is an invalid model"));
+        throw new Exception(X::_("$path is an invalid model"));
       }
 
       return [];
@@ -1659,7 +1664,7 @@ class Controller implements Api
 
   /**
    * @return object|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getObjectModel(): ?object
   {
@@ -1680,7 +1685,7 @@ class Controller implements Api
     }
 
     if (empty($m)) {
-      return (new \stdClass());
+      return (new stdClass());
     }
 
     if (X::isAssoc($m)) {

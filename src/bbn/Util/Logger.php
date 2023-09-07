@@ -1,5 +1,8 @@
 <?php
 namespace bbn\Util;
+
+use bbn\Mvc;
+use bbn\X;
 /**
  * A few recurrent functions
  *
@@ -49,7 +52,7 @@ trait Logger
 	public function debug($file='misc')
 	{
 		$i = debug_backtrace();
-		bbn\X::log(print_r($i, 1));
+		X::log(print_r($i, 1));
 	}
 	/**
 	 * Add information to the $info array
@@ -60,8 +63,8 @@ trait Logger
 	 */
 	public function log($st='',$file='misc')
 	{
-		if ( \defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs') ){
-			$log_file = BBN_DATA_PATH.'logs/'.$file.'.log';
+		if (is_dir(Mvc::getTmpPath().'logs')) {
+			$log_file = Mvc::getTmpPath().'logs/'.$file.'.log';
 			$r = "[".date('d/m/Y H:i:s')."]\t";
 			if ( empty($st) && \count($this->reports) > 0 ){
 				$st = implode("\n\n", $this->reports);

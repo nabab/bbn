@@ -10135,7 +10135,7 @@ class OptionTest extends TestCase
 
     $this->assertSame(
       4,
-      $this->option->import($options, $this->item5)
+      $this->option->importAll($options, $this->item5)
     );
   }
 
@@ -10166,7 +10166,7 @@ class OptionTest extends TestCase
 
     $this->assertSame(
       1,
-      $this->option->import($options)
+      $this->option->importAll($options)
     );
   }
 
@@ -10202,7 +10202,7 @@ class OptionTest extends TestCase
 
     $this->assertSame(
       1,
-      $this->option->import($options, ['list', 'appui'])
+      $this->option->importAll($options, ['list', 'appui'])
     );
   }
 
@@ -10232,7 +10232,7 @@ class OptionTest extends TestCase
       [$this->arch['code'] => 'some_code']
     ];
 
-    $this->option->import($options, 'parent_id');
+    $this->option->importAll($options, 'parent_id');
   }
 
   /** @test */
@@ -10267,7 +10267,7 @@ class OptionTest extends TestCase
       $this->arch['id_alias'] => ['id_alias_1', 'id_alias_2'],
     ]];
 
-    $this->option->import($options, 'parent_id');
+    $this->option->importAll($options, 'parent_id');
   }
 
   /** @test */

@@ -434,7 +434,7 @@ class Cart extends DbCls
    * @return array
    */
   public function shippingCostDetail(string $idAddress, string $idCart = ''): array
-  {
+  { 
     if (empty($idCart)) {
       $idCart = $this->getCurrentCartID();
     }
@@ -505,6 +505,98 @@ class Cart extends DbCls
     return $costs;
   }
 
+  /**
+   * Gets the shipping cost for the given address and the given provider
+   * @param string $idAddress The address ID
+   * @param string $idCart The cart ID
+   * @return float
+   */
+  public function shippingCostPerProvider(string $idProvider, string $idAddress, string $idCart = ''): ?float
+  {
+    $detail = $this->shippingCostDetailPerProvider($idProvider, $idAddress, $idCart);
+    return \in_array('disabled', \array_values($detail)) ? null : $detail['total'];
+  }
+  /**
+   * Gets the shipping cost for the given address and provider
+   * @param string $idAddress The address ID
+   * @param string $idCart The cart ID
+   * @return array
+   */
+  public function shippingCostDetailPerProvider(string $idProvider, string $idAddress, string $idCart = ''): array
+  {     
+
+    if (empty($idCart)) {
+      $idCart = $this->getCurrentCartID();
+    }
+    if (!Str::isUid($idCart)) {
+      throw new \Exception(_('The cart ID is an invalid UID'));
+    }
+    $costs = [
+      'total' => 0
+    ];
+    if ($products = $this->getProducts($idCart)) {
+      $providersCosts = [];
+      $providersWeight = [];
+      $providersDefaults = [];
+      $pFields = $this->class_cfg['arch']['cart_products'];
+      foreach ($products as $product) {
+        if (!($provider = $this->productCls->getProvider($product[$pFields['id_product']]))) {
+          throw new \Exception(sprintf(_('No provider found for the product %s'), $product[$pFields['id_product']]));
+        }
+        else if ( ($provider === $idProvider)) {
+          if (!isset($providersCosts[$provider])) {
+            $providersCosts[$provider] = $this->getProviderShippingCosts($provider, $idAddress);
+          }
+          if (!isset($costs[$provider])) {
+            $costs[$provider] = 0;
+          }
+          if (!empty($providersCosts[$provider]['disabled'])) {
+            $costs[$provider] = 'disabled';
+            continue;
+          }
+          if ($weight = $this->productCls->getWeight($product[$pFields['id_product']])) {
+            if (!isset($providersWeight[$provider])) {
+              $providersWeight[$provider] = $weight * $product[$pFields['quantity']];
+            }
+            else {
+              $providersWeight[$provider] += $weight * $product[$pFields['quantity']];
+            }
+          }
+          else if (!isset($providersDefaults[$provider])
+            && !empty($providersCosts[$provider]['default'])
+          ) {
+            $providersDefaults[$provider] = $providersCosts[$provider]['default'];
+            $costs[$provider] = \round($costs[$provider] + $providersCosts[$provider]['default'], 2);
+            $costs['total'] = \round($costs['total'] + $providersCosts[$provider]['default'], 2);
+          }
+          foreach ($providersWeight as $p => $pw) {
+            $weights = \array_keys($providersCosts[$p]['prices']);
+            $tmpw = $weights[0];
+            foreach ($weights as $i => $w) {
+              if ($w <= $pw) {
+                $tmpw = $w;
+              }
+              if (isset($weights[$i + 1]) && ($pw > $w)) {
+                $tmpw = $weights[$i + 1];
+              }
+            }
+            $costs[$p] = \round($costs[$p] + $providersCosts[$p]['prices'][$tmpw], 2);
+            $diff = $pw - $tmpw;
+            if (($diff > 0) && count($providersCosts[$p]['surcharge'])) {
+              $gr = \array_keys($providersCosts[$p]['surcharge'])[0];
+              $m = \array_values($providersCosts[$p]['surcharge'])[0];
+              $num = $diff / $gr;
+              $num = \round($num, 0) + ($num - round($num, 0) > 0 ? 1 : 0);
+              $costs[$p] = \round($costs[$p] + ($m * $num), 2);
+            }
+            $costs['total'] = \round($costs['total'] + $costs[$p], 2);
+          }
+        }
+      }
+    }
+    return $costs;
+  }
+
 
   /**
    * Gets the total weight of the shipping
@@ -542,9 +634,14 @@ class Cart extends DbCls
     if (empty($this->idSession)) {
       throw new \Exception(_("No user's session found"));
     }
+    $idClient = null;
+    if (!empty($this->idUser)) {
+      $clientCls = new Client($this->db);
+      $idClient = $clientCls->getIdByUser($this->idUser);
+    }
     return $this->insert([
       $this->fields['id_session'] => $this->idSession,
-      $this->fields['id_client'] => null,
+      $this->fields['id_client'] => $idClient,
       $this->fields['creation'] => date('Y-m-d H:i:s')
     ]);
   }

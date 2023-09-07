@@ -11,6 +11,7 @@ namespace bbn\Appui;
 use bbn;
 use bbn\Str;
 use bbn\X;
+use bbn\Db;
 
 class Database extends bbn\Models\Cls\Cache
 {
@@ -32,6 +33,12 @@ class Database extends bbn\Models\Cls\Cache
    */
   protected $pw;
 
+  /**
+   * The current db connection object
+   *
+   * @var Db
+   */
+  private $currentConn;
 
   /**
    * The last alternative connection made with the connection function.
@@ -40,7 +47,7 @@ class Database extends bbn\Models\Cls\Cache
    * I can put code in it
    * </code>
    *
-   * @var bbn\Db
+   * @var Db
    */
   protected $connections = [
     'mysql' => [],
@@ -62,14 +69,14 @@ class Database extends bbn\Models\Cls\Cache
   /**
    * Constructor
    *
-   * @param bbn\Db $db The main database connection (where options are)
+   * @param Db $db The main database connection (where options are)
    */
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     self::optionalInit();
     $this->o = bbn\Appui\Option::getInstance();
-
+    $this->currentConn = $db;
   }
 
 
@@ -78,9 +85,9 @@ class Database extends bbn\Models\Cls\Cache
    *
    * @param string $host A string user@host
    * @param string $db   The database name
-   * @return bbn\Db|null
+   * @return Db|null
    */
-  public function connection(string $host = null, string $engine = 'mysql', string $db = ''): bbn\Db
+  public function connection(string $host = null, string $engine = 'mysql', string $db = ''): Db
   {
     if (bbn\Str::isUid($host)) {
       $id_host = $host;
@@ -124,7 +131,7 @@ class Database extends bbn\Models\Cls\Cache
               }
 
               try {
-                $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\Db($db_cfg);
+                $this->connections[$parent['code']][$cfg['code'] . $db] = new Db($db_cfg);
               }
               catch (\Exception $e) {
                 throw new \Exception($e->getMessage());
@@ -148,7 +155,7 @@ class Database extends bbn\Models\Cls\Cache
               'db' => $cfg['path'].'/'.$db
             ];
             try {
-              $this->connections[$parent['code']][$cfg['code'] . $db] = new bbn\Db($db_cfg);
+              $this->connections[$parent['code']][$cfg['code'] . $db] = new Db($db_cfg);
             }
             catch (\Exception $e) {
               throw new \Exception($e->getMessage());
@@ -161,7 +168,8 @@ class Database extends bbn\Models\Cls\Cache
       }
 
       if (isset($this->connections[$parent['code']][$cfg['code'] . $db])) {
-        return $this->connections[$parent['code']][$cfg['code'] . $db];
+        $this->currentConn = $this->connections[$parent['code']][$cfg['code'] . $db];
+        return $this->currentConn;
       }
     }
 
@@ -1468,6 +1476,15 @@ class Database extends bbn\Models\Cls\Cache
     return $res;
   }
 
+  private string $alias;
+
+  /**
+   * Generate a new alias in the alias property
+   */
+  private function generateNewAlias()
+  {
+    $this->alias = Str::genpwd(5);
+  }
 
   /**
    * Generates a grid configuration based on the table structure and columns options.
@@ -1505,17 +1522,7 @@ class Database extends bbn\Models\Cls\Cache
       /** @var int An incremental index for the columns alias */
       $cIdx  = 0;
       foreach ($model['fields'] as $col => $f) {
-        /** @var array The javascript column configuration */
-        $js = [
-          'text' => $col,
-          'field' => $col
-        ];
         $field = $table.'.'.$col;
-        // Text should be defined before the option is changed in case of a single foreign key
-        if (!empty($f['option'])) {
-          // Taking the text from the option (which will be the col name if not defined)
-          $js['text'] = $f['option']['text'];
-        }
 
         /** @var bool|string The simple name of the unique column to display for the key  */
         $displayColumn = false;
@@ -1529,9 +1536,6 @@ class Database extends bbn\Models\Cls\Cache
               else {
                 $f['option']['editable'] = false;
               }
-              $js['component'] = 'appui-database-data-binary';
-              $js['cls'] = 'bbn-c';
-              $js['width'] = 'bbn-c';
             }
             // Case where it is a foreign key
             elseif (!empty($model['keys'][$c]['ref_table'])) {
@@ -1602,108 +1606,6 @@ class Database extends bbn\Models\Cls\Cache
         if (!empty($f['option'])) {
           $f = $f['option'];
         }
-
-        // Taking all possible properties defined
-        // Width
-        if (empty($f['width'])) {
-          if ($f['type'] === 'date') {
-            $js['width'] = 100;
-          }
-          elseif ($f['type'] === 'datetime') {
-            $js['width'] = 140;
-          }
-          elseif ($f['type'] === 'binary') {
-            $js['width'] = 60;
-          }
-          elseif (!empty($f['maxlength']) && ($f['maxlength'] < 40)) {
-            $js['width'] = $this->length2Width($f['maxlength']);
-          }
-          else {
-            $js['minWidth'] = '40em';
-          }
-        }
-        else {
-          $js['width'] = $f['width'];
-        }
-
-        // For the cell view
-        if (!empty($f['component'])) {
-          $js['component'] = $f['component'];
-        }
-
-        // The editor/filter component
-        if (!empty($f['editor'])) {
-          $js['editor'] = $f['editor'];
-        }
-        elseif (empty($js['editor']) && (!isset($f['editable']) || $f['editable'])) {
-          switch ($f['type']) {
-            case 'int':
-            case 'smallint':
-            case 'tinyint':
-            case 'bigint':
-            case 'mediumint':
-            case 'real':
-            case 'double':
-            case 'decimal':
-            case 'float':
-              $js['editor'] = 'bbn-numeric';
-              $max = pow(10, $f['maxlength']) - 1;
-              $js['options'] = [
-                'max' => $max,
-                'min' => $f['signed'] ? -$max : 0
-              ];
-              break;
-            case 'date':
-              $js['editor'] = 'bbn-datepicker';
-              break;
-            case 'datetime':
-              $js['editor'] = 'bbn-datetimepicker';
-              break;
-            case 'json':
-              $js['editor'] = 'bbn-json-editor';
-              break;
-            case 'enum':
-            case 'set':
-              $js['editor'] = 'bbn-dropdown';
-              $src = [];
-              if (!empty($f['extra'])) {
-                $src = X::split(substr($f['extra'], 1, -1), "','");
-              }
-
-              // Calculating the length based on the longest enum value
-              if (empty($js['width'])) {
-                $maxlength = 1;
-                foreach ($src as $s) {
-                  $len = strlen($s);
-                  if ($len > $maxlength) {
-                    $maxlength = $len;
-                  }
-                }
-              }
-
-              $js['options'] = [
-                'source' => $src
-              ];
-              break;
-            case 'binary':
-            case 'varbinary':
-              $js['component'] = 'appui-database-data-binary';
-              $js['cls'] = 'bbn-c';
-              $js['editor'] = 'bbn-upload';
-              break;
-            case 'text':
-            case 'bigtext':
-            case 'smalltext':
-            case 'tinytext':
-            case 'mediumtext':
-              $js['editor'] = 'bbn-textarea';
-              break;
-          }
-        }
-
-
-        $res['js']['columns'][] = $js;
-        
       }
 
       return $res;
@@ -1711,35 +1613,4 @@ class Database extends bbn\Models\Cls\Cache
 
     return null;
   }
-
-
-  public function length2Width(int $length, $max = '30em'): string
-  {
-    if ($length > 32) {
-      return $max;
-    }
-    elseif ($length > 25) {
-      return '25em';
-    }
-    elseif ($length > 20) {
-      return '20em';
-    }
-    elseif ($length > 15) {
-      return '17em';
-    }
-    elseif ($length > 10) {
-      return '13em';
-    }
-    elseif ($length > 5) {
-      return '9em';
-    }
-    elseif ($length > 3) {
-      return '5em';
-    }
-
-    return '3em';
-
-  }
-
-
 }
