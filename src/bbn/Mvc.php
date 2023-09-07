@@ -24,27 +24,6 @@ use bbn\Mvc\Environment;
 use bbn\Mvc\Output;
 use bbn\Mvc\View;
 
-if (!\defined("BBN_DEFAULT_MODE")) {
-  define("BBN_DEFAULT_MODE", 'public');
-}
-
-// Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
-if (!\defined("BBN_CUR_PATH")) {
-  define('BBN_CUR_PATH', '/');
-}
-
-if (!\defined("BBN_APP_NAME")) {
-  throw new \Exception("BBN_APP_NAME must be defined");
-}
-
-if (!\defined("BBN_APP_PATH")) {
-  throw new \Exception("BBN_APP_PATH must be defined");
-}
-
-if (!\defined("BBN_DATA_PATH")) {
-  throw new \Exception("BBN_DATA_PATH must be defined");
-}
-
 
 /**
  * MVC
@@ -805,6 +784,26 @@ class Mvc implements Mvc\Api
    */
   public function __construct($db = null, $routes = [])
   {
+    if (!\defined("BBN_DEFAULT_MODE")) {
+      define("BBN_DEFAULT_MODE", 'public');
+    }
+    
+    // Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
+    if (!\defined("BBN_CUR_PATH")) {
+      define('BBN_CUR_PATH', '/');
+    }
+    
+    if (!\defined("BBN_APP_NAME")) {
+      throw new \Exception("BBN_APP_NAME must be defined");
+    }
+    
+    if (!\defined("BBN_APP_PATH")) {
+      throw new \Exception("BBN_APP_PATH must be defined");
+    }
+    
+    if (!\defined("BBN_DATA_PATH")) {
+      throw new \Exception("BBN_DATA_PATH must be defined");
+    }
     self::singletonInit($this);
     self::initPath();
     $this->env = new Environment();

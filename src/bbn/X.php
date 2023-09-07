@@ -16,9 +16,6 @@ namespace bbn;
 
 use Exception;
 
-if (!defined('BBN_X_MAX_LOG_FILE')) {
-  define('BBN_X_MAX_LOG_FILE', 1048576);
-}
 
 class X
 {
@@ -172,8 +169,11 @@ class X
    */
   public static function log($st, string $file = 'misc'): void
   {
-    if (is_dir(Mvc::getTmpPath() . 'logs')) {
-      $log_file  = Mvc::getTmpPath().'logs/'.$file.'.log';
+    if (!defined('BBN_X_MAX_LOG_FILE')) {
+      define('BBN_X_MAX_LOG_FILE', 1048576);
+    }
+    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
+      $log_file  = BBN_DATA_PATH.'logs/'.$file.'.log';
       $backtrace = array_filter(
         debug_backtrace(), function ($a) {
           return $a['function'] === 'log';

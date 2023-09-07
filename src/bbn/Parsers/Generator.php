@@ -201,12 +201,20 @@ class Generator {
           $res .= PHP_EOL . "   */" . PHP_EOL;
         }
         $static = ($info["static"]) ? " static" : "";
+<<<<<<< src/bbn/Parsers/Generator.php
+        $readonly = ($info["readonly"]) ? " readonly" : "";
+        $type = ($info["type"] !== null) ? (' ' . $info["type"]) : "";
+        $val = is_null($info["value"]) ? "" : " = " . $this->formatExport($info["value"]);
+        $res .= str_repeat(" ", $this->spacing) . $info["visibility"] . $readonly . $static . $type .' $'. $property .  $val . ";" . PHP_EOL;
+=======
         $val = is_null($info["value"]) ? "" : " = " . $this->formatExport($info["value"]);
         $res .= str_repeat(" ", $this->spacing) . $info["visibility"] . $static .' $'. $property .  $val . ";" . PHP_EOL;
+>>>>>>> src/bbn/Parsers/Generator.php
       } 
     }
     
     if ( !empty($this->cfg['methods'])) {
+      $res .= PHP_EOL . PHP_EOL;
       foreach ($this->cfg['methods'] as $method) {
         if (!empty($method['trait'])) {
           continue;
@@ -227,7 +235,11 @@ class Generator {
     if (!empty($cfg['comments'])) {
       $res .= $cfg['comments'] . PHP_EOL;
     }
+<<<<<<< src/bbn/Parsers/Generator.php
+    /*$res .= str_repeat(' ', $this->spacing);
+=======
     $res .= str_repeat(' ', $this->spacing);
+>>>>>>> src/bbn/Parsers/Generator.php
   
     if ( !empty($cfg['final']) ) {
       $res .= "final ";
@@ -423,6 +435,10 @@ class Generator {
     }
     
    // X::ddump($res, $cfg[]);
+<<<<<<< src/bbn/Parsers/Generator.php
+   
+=======
+>>>>>>> src/bbn/Parsers/Generator.php
     if (!empty($cfg['code'])) {
       // Get the position of the first opening curly brace
       $pos = strpos($cfg['code'], '{');
@@ -432,6 +448,10 @@ class Generator {
     
       // Add the code to the function definition
       $res .= "\n" . str_repeat(' ', $this->spacing) . $newCode;
+    }
+    */
+    if (!empty($cfg['code'])) {
+      $res .= $cfg['code'];
     }
     
     return $res;
