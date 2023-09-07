@@ -201,12 +201,16 @@ class Generator {
           $res .= PHP_EOL . "   */" . PHP_EOL;
         }
         $static = ($info["static"]) ? " static" : "";
+        $readonly = ($info["readonly"]) ? " readonly" : "";
+        $type = ($info["type"] !== null) ? (' ' . $info["type"]) : "";
         $val = is_null($info["value"]) ? "" : " = " . $this->formatExport($info["value"]);
-        $res .= str_repeat(" ", $this->spacing) . $info["visibility"] . $static .' $'. $property .  $val . ";" . PHP_EOL;
+        $res .= str_repeat(" ", $this->spacing) . $info["visibility"] . $readonly . $static . $type .' $'. $property .  $val . ";" . PHP_EOL;
+
       } 
     }
     
     if ( !empty($this->cfg['methods'])) {
+      $res .= PHP_EOL . PHP_EOL;
       foreach ($this->cfg['methods'] as $method) {
         if (!empty($method['trait'])) {
           continue;
@@ -227,7 +231,7 @@ class Generator {
     if (!empty($cfg['comments'])) {
       $res .= $cfg['comments'] . PHP_EOL;
     }
-    $res .= str_repeat(' ', $this->spacing);
+    /*$res .= str_repeat(' ', $this->spacing);
   
     if ( !empty($cfg['final']) ) {
       $res .= "final ";
@@ -432,6 +436,10 @@ class Generator {
     
       // Add the code to the function definition
       $res .= "\n" . str_repeat(' ', $this->spacing) . $newCode;
+    }
+    */
+    if (!empty($cfg['code'])) {
+      $res .= $cfg['code'];
     }
     
     return $res;

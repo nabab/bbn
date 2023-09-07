@@ -963,6 +963,13 @@ class Php extends bbn\Models\Cls\Basic
     
     return isset($arr) ? $arr : null;
   }
+
+  private function _get_method_code(ReflectionMethod $method)
+  {
+    $st = file_get_contents($method->getFileName());
+    $ar = X::split($st, PHP_EOL);
+    return X::join(array_splice($ar, $method->getStartLine()-1, ($method->getEndLine() - $method->getStartLine() + 1)), PHP_EOL);
+  }
   
   
   /**
@@ -998,6 +1005,7 @@ class Php extends bbn\Models\Cls\Basic
       $method->setAccessible(true);
     }
     //die(var_dump($method->getParameters()[0]->getType()->getName()));
+
     $ar = [
       'name' => $method->getName(),
       'summary' => '',
@@ -1008,7 +1016,7 @@ class Php extends bbn\Models\Cls\Basic
       'static' => $method->isStatic(),
       'visibility' => $method->isPrivate() ? 'private' : ($method->isProtected() ? 'protected' : 'public'),
       'final' => $method->isFinal(),
-      'code' => $this->_closureSource($method),
+      'code' => $this->_get_method_code($method),
       'parent' => false,
       'trait' => false,
       'startLine' => $method->getStartLine(),
@@ -1262,6 +1270,8 @@ class Php extends bbn\Models\Cls\Basic
         'name' => $property->getName(),
         'trait' => false,
         'static' => $property->isStatic(),
+        'readonly' => $property->isReadOnly(),
+        'type' => $property->hasType() ? $property->getType()->getName() : null,
         'declaring' => $property->getDeclaringClass(),
         'declaring_trait' => $this->getDeclaringTraitForProperty($cls->getName(), $property->getName())->name,
         'promoted' => $property->isPromoted(),
