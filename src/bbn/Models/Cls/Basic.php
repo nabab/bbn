@@ -90,7 +90,7 @@ abstract class Basic
 
   public function getErrors()
   {
-
+    return $this->errors;
   }
 
 

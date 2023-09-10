@@ -197,15 +197,20 @@ trait Common
   {
     if ($val = $this->db->rselect(
       $this->class_cfg['tables']['hotlinks'], [
-      $this->class_cfg['arch']['hotlinks']['magic'],
-      $this->class_cfg['arch']['hotlinks']['id_user'],
+      'magic' => $this->class_cfg['arch']['hotlinks']['magic'],
+      'id_user' => $this->class_cfg['arch']['hotlinks']['id_user'],
+      'expire' => $this->class_cfg['arch']['hotlinks']['expire'],
       ],[
-      $this->class_cfg['arch']['hotlinks']['id'] => $id,
-      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]
+      $this->class_cfg['arch']['hotlinks']['id'] => $id
       ]
     )
     ) {
-      if (self::isMagicString($key, $val[$this->class_cfg['arch']['hotlinks']['magic']])) {
+      if ($val['expire'] < date('Y-m-d H:i:s')) {
+        if (method_exists($this, 'setError')) {
+          $this->setError(27);
+        }
+      }
+      elseif (self::isMagicString($key, $val['magic'])) {
         return $val['id_user'];
       }
     }
