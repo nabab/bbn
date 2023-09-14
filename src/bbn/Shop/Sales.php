@@ -485,16 +485,20 @@ class Sales extends DbCls
         $total += $p['amount'];
       }
       $shippingAddress = $this->getShippingAddress($idTransaction);
+      $shippingAddress['email'] = $this->client->getEmail($shippingAddress['id_client']);
       $shippingCost = $this->cart->shippingCostPerProvider($idProvider,$shippingAddress['id_address'], $transaction['id_cart']); 
       $transaction['shippingCost'] = '€ ' . (string)number_format(round((float)$shippingCost, 2), 2, ',', '');
       $transaction['total'] = '€ ' . (string)number_format(round((float) $total + $shippingCost, 2), 2, ',', '');
-
+      
       $transaction['shippingAddress'] = $shippingAddress;
       $transaction['billingAddress'] = $this->getBillingAddress($idTransaction);
       $transaction['shippingAddress']['country'] = $opt->text($transaction['shippingAddress']['country']);
       $transaction['billingAddress']['country'] = $opt->text($transaction['billingAddress']['country']);
       $transaction[$this->fields['payment_type']] = $opt->text($transaction[$this->fields['payment_type']]);
       $transaction['formattedMoment'] = date('d/m/Y', strtotime($transaction[$this->fields['moment']]));
+      X::log([
+        'order' => (array)$transaction,
+      ], 'transaction');
       return $transaction;
     }
     return null;
