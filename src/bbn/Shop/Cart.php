@@ -779,6 +779,7 @@ class Cart extends DbCls
     $mailCls = new \bbn\Appui\Mailing($this->db);
     $opt = Option::getInstance();
     $mailData = [];
+    
 
     if(
       ($email = $clientCls->getEmail($idClient)) &&
@@ -787,9 +788,12 @@ class Cart extends DbCls
     ) {
         if(!empty($mailData['products'])) {
           foreach($mailData['products'] as &$p) {
-            if($p['product']['medias'][0]) {
+            if($p['product']['medias'][0] && file_exists($p['product']['medias'][0]['full_path'])) {
               $i = new \bbn\File\Image($p['product']['medias'][0]['full_path']);
               $p['image'] = $i->toString();
+            }
+            else {
+              $p['image'] = null;
             }
             $p['product']['price'] = '€ ' . (string)number_format(round((float)$p['product']['price'] , 2), 2, ',', '');
             $p['amount'] = '€ ' . (string)number_format(round((float)$p['amount'] , 2), 2, ',', '');
@@ -799,7 +803,6 @@ class Cart extends DbCls
           $mailData['link'] = $_SERVER["HTTP_ORIGIN"].'/checkout';
           $title = Tpl::render($template['title'], $mailData);
           $content = Tpl::render($template['content'], $mailData);
-          
           return $mailCls->insertEmail($email, $title, $content);
         }
     }
