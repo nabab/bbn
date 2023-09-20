@@ -1774,6 +1774,25 @@ class Str
 
 
   /**
+   * Converts the given camel case string to a lower case separated string.
+   *
+   * ```php
+   *  var_dump(\bbn\Str::fromCamel("fooBar"));
+   *  // (string) 'foo bar'
+   * ```
+   *
+   * @param string $st
+   * @param string $sep   A separator
+   * @param bool   $first Capitalize first character if true
+   * @return string
+   */
+  public static function fromCamel(string $input, string $separator = '_'): string
+  {
+    return ltrim(strtolower(preg_replace('/[A-Z]/', '_$0', $input)), $separator);
+  }
+
+
+  /**
    * Converts HTML to text replacing paragraphs and brs with new lines.
    *
    * ```php

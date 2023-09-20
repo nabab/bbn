@@ -277,7 +277,7 @@ class Compiler extends Basic
       $files_json  = json_encode($files);
             $code .= <<<JAVASCRIPT
   .then(function(){
-    return new Promise(function(bbn_resolve, bbn_reject){
+    return new Promise(function(bbn_resolve2, bbn_reject2){
       let files = $files_json;
       let rFiles = [];
       for (let i = 0; i < files.length; i++) {
@@ -289,21 +289,20 @@ class Compiler extends Basic
         // Adding a timeout in case the lib is requested twice at the same time
         // @todo Can do better
         setTimeout(() => {
-          bbn_resolve();
+          bbn_resolve2();
         }, 125);
         return;
       }
       let script = document.createElement("script");
       script.type = "text/javascript";
-      script.src = "$url".replace("%s", rFiles.join(","));
-      document.getElementsByTagName("body")[0].appendChild(script);
       script.onload = function(){
-        //bbn.fn.log("Loaded " + script.src);
-        bbn_resolve()
+        bbn_resolve2()
       };
       script.onerror = function(){
-        bbn_reject();
+        bbn_reject2();
       };
+      script.src = "$url".replace("%s", rFiles.join(","));
+      document.getElementsByTagName("body")[0].appendChild(script);
     })
   })
 JAVASCRIPT;
@@ -411,7 +410,7 @@ JAVASCRIPT;
       $jsdir = $dir;
       $code .= <<<JAVASCRIPT
 .then(function(){
-  return new Promise(function(bbn_resolve, bbn_reject){
+  return new Promise(function(bbn_resolve2, bbn_reject2){
     let dir = "$jsdir";
     let files = $files_json;
     let url = "$url";
@@ -422,17 +421,17 @@ JAVASCRIPT;
       }
     }
     if ( !rFiles.length ){
-      bbn_resolve();
+      bbn_resolve2();
       return;
     }
     let css = document.createElement("link");
     css.rel = "stylesheet";
     css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(",") + '&');
     css.onload = function(){
-      bbn_resolve();
+      bbn_resolve2();
     };
     css.onerror = function(){
-      bbn_reject();
+      bbn_reject2();
     };
     document.getElementsByTagName("head")[0].appendChild(css);
   })
@@ -488,7 +487,7 @@ JAVASCRIPT;
             $code .= <<<JAVASCRIPT
 
   .then(function(){
-    return new Promise(function(bbn_resolve, bbn_reject){
+    return new Promise(function(bbn_resolve2, bbn_reject2){
       let dir = "$jsdir";
       let files = $files_json;
       let url = "$url";
@@ -499,17 +498,17 @@ JAVASCRIPT;
         }
       }
       if ( !rFiles.length ){
-        bbn_resolve();
+        bbn_resolve2();
         return;
       }
       let css = document.createElement("link");
       css.rel = "stylesheet";
       css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
       css.onload = function(){
-        bbn_resolve();
+        bbn_resolve2();
       };
       css.onerror = function(){
-        bbn_reject();
+        bbn_reject2();
       };
       document.getElementsByTagName("head")[0].appendChild(css);
     })

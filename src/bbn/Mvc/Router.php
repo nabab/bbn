@@ -572,9 +572,9 @@ class Router
     }
 
     if (!$dir) {
-      throw new \Exception(X::_("Impossible to find the directory for %s", $path));
+      return [];
+      //throw new \Exception(X::_("Impossible to find the directory for %s", $path));
     }
-
 
     $res     = [];
     $files   = bbn\File\Dir::getFiles($dir);

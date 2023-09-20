@@ -1285,6 +1285,50 @@ class Mvc implements Mvc\Api
     return (bool)$this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin);
   }
 
+  /**
+   * Returns true if the subplugin JS view exists.
+   *
+   * @param string $path      The path in the subplugin
+   * @param string $plugin    The plugin
+   * @param string $subplugin The subplugin
+   *
+   * @return bool
+   */
+  public function hasSubpluginJs(string $path, string $plugin, string $subplugin): bool
+  {
+    return (bool)$this->router->routeSubplugin(router::parse($path), 'js', $plugin, $subplugin);
+  }
+
+
+  /**
+   * Returns true if the subplugin HTML view exists.
+   *
+   * @param string $path      The path in the subplugin
+   * @param string $plugin    The plugin
+   * @param string $subplugin The subplugin
+   *
+   * @return bool
+   */
+  public function hasSubpluginHtml(string $path, string $plugin, string $subplugin): bool
+  {
+    return (bool)$this->router->routeSubplugin(router::parse($path), 'html', $plugin, $subplugin);
+  }
+
+
+  /**
+   * Returns true if the subplugin CSS view exists.
+   *
+   * @param string $path      The path in the subplugin
+   * @param string $plugin    The plugin
+   * @param string $subplugin The subplugin
+   *
+   * @return bool
+   */
+  public function hasSubpluginCss(string $path, string $plugin, string $subplugin): bool
+  {
+    return (bool)$this->router->routeSubplugin(router::parse($path), 'css', $plugin, $subplugin);
+  }
+
 
   /**
    * Get a subplugin model (a plugin inside the plugin directory of another plugin).
@@ -1308,6 +1352,40 @@ class Mvc implements Mvc\Api
       $model = new Model($this->db, $route, $ctrl, $this);
       $res   = $ttl ? $model->getFromCache($data, '', $ttl) : $model->get($data);
       return $res;
+    }
+
+    throw new \Exception(
+      X::_(
+        "Impossible to find the model %s from subplugin %s in plugin %s",
+        $path,
+        $subplugin,
+        $plugin
+      )
+    );
+  }
+
+
+  /**
+   * Get a subplugin View (a plugin inside the plugin directory of another plugin).
+   *
+   * @param string         $path      The path inside the subplugin directory
+   * @param array          $data      The data for the model
+   * @param Controller     $ctrl      The controller
+   * @param string         $plugin    The plugin name
+   * @param string         $subplugin The subplugin name
+   * @param int            $ttl       The cache TTL
+   *
+   * @return array|null
+   */
+  public function subpluginView(string $path, string $mode, array $data, string $plugin, string $subplugin): string
+  {
+    if (
+      $plugin
+      && $subplugin
+      && ($route = $this->router->routeSubplugin(router::parse($path), $mode, $plugin, $subplugin))
+    ) {
+      $view = new View($route);
+      return $view->get($data);
     }
 
     throw new \Exception(

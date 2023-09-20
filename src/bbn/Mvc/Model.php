@@ -140,6 +140,12 @@ class Model extends DbClass
   }
 
 
+  public function addController()
+  {
+    return $this->_ctrl->add(...\func_get_args());
+  }
+
+
   /**
    * @param string $path
    * @param string $type

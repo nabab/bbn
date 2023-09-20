@@ -35,6 +35,21 @@ class Options extends DbCls
     self::optionalInit(['options', 'entity', 'appui']);
   }
 
+
+  public function getTypes(): array
+  {
+    $res = [];
+    if ($this->check()) {
+      foreach (self::getOptions() as $o) {
+        if (!empty($o['code'])) {
+          $res[$o['code']] = $o['id'];
+        }
+      }
+    }
+
+    return $res;
+  }
+
   public function add($id_entity, $id_type, $id_option): ?string
   {
     if ($this->check()) {
@@ -147,8 +162,8 @@ class Options extends DbCls
   public function getAll($id_entity)
   {
     $res = [];
-    foreach (self::getOptions() as $opt) {
-      $res[$opt['code'] ?? $opt['id']] = $this->get($id_entity, $opt['id']);
+    foreach ($this->getTypes() as $k => $id) {
+      $res[$k] = $this->get($id_entity, $id);
     }
 
     return $res;
