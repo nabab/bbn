@@ -526,8 +526,8 @@ class Project extends bbn\Models\Cls\Db
     "id": "a50d890bc4b711edb71952540000cfbe",
     "id_alias": "a069bd8a3fe411ed98b152540000cfbe",
     "parent_code": "lib",
-    "text": "appui-newide",
-    "code": "appui-newide",
+    "text": "appui-ide",
+    "code": "appui-ide",
     "bcolor": "#261b78",
     "fcolor": "#ffffff",
     "language": "en",
@@ -584,7 +584,7 @@ class Project extends bbn\Models\Cls\Db
         ],
     },
     "parent": "/home/dev-qr/app-ui/vendor/",
-    "path": "bbn/appui-newide",
+    "path": "bbn/appui-ide",
 }
      */
     if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {
