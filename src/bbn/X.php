@@ -2188,7 +2188,7 @@ class X
    * @param array|callable|null $where
    * @return float
    */
-  public static function sum(array $ar, string $field, $where = null): float
+  public static function sum(array $ar, string $field, array|callable|null $where = null): float
   {
     $tot = 0;
     if ($res = $where ? self::filter($ar, $where) : $ar) {

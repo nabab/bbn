@@ -1057,7 +1057,7 @@ class Php extends bbn\Models\Cls\Basic
           
           $type_st = '';
           foreach ($types as $i => $tp) {
-            $k = ($i === count($types)) ? '|' : '';
+            $k = ($i < (count($types) - 1)) ? '|' : '';
             $type_st .= $tp . $k;
           }
           
