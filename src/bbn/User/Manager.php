@@ -272,7 +272,7 @@ You can click the following link to access directly your account:<br>
 
     if ($user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
-      array_values($u),
+      $u,
       $where
     )
     ) {
@@ -357,10 +357,10 @@ You can click the following link to access directly your account:<br>
     $u = $this->class_cfg['arch']['users'];
     foreach ($this->db->rselectAll($this->class_cfg['tables']['users'], $u) as $a){
       $r[] = [
-        'value' => $a[$u['id']],
+        'value' => $a['id'],
         'text' => $this->getName($a, false),
-        'id_group' => $a[$u['id_group']],
-        'active' => $a[$u['active']] ? true : false
+        'id_group' => $a['id_group'],
+        'active' => $a['active'] ? true : false
       ];
     }
 
