@@ -458,7 +458,8 @@ class User extends Basic implements Implementor
           'success' => true
         ];
       }
-    } else {
+    }
+    else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
       $this->ip_address  = $this->class_cfg['ip_address'] && isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';

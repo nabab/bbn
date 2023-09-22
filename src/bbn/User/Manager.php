@@ -85,7 +85,7 @@ You can click the following link to access directly your account:<br>
   {
     $cfg = [
       'table' => $this->class_cfg['tables']['sessions'],
-      'fields' => $this->class_cfg['arch']['sessions'],
+      'fields' => [],
       'where' => [
         [
           'field' => $this->class_cfg['arch']['sessions']['last_activity'],
@@ -164,15 +164,15 @@ You can click the following link to access directly your account:<br>
   {
     $a             =& $this->class_cfg['arch'];
     $t             =& $this->class_cfg['tables'];
+    $id            = $this->db->cfn($a['groups']['id'], $t['groups']);
     $users_id      = $this->db->cfn($a['users']['id'], $t['users'], 1);
     $db            =& $this->db;
-    $fields        = [
-      'num' => "COUNT($users_id)"
-    ];
-    foreach ($a['groups'] as $k => $v){
-      $fields[$k] = $db->cfn($v, $t['groups']);
-    }
-
+    $fields        = \array_map(
+      function ($g) use ($db, $t) {
+        return $db->cfn($g, $t['groups']);
+      }, \array_values($a['groups'])
+    );
+    $fields['num'] = "COUNT($users_id)";
     return $this->db->rselectAll(
       [
       'table' => $t['groups'],
@@ -183,11 +183,11 @@ You can click the following link to access directly your account:<br>
         'on' => [
           'conditions' => [[
             'field' => $this->db->cfn($a['users']['id_group'], $t['users']),
-            'exp' => $this->db->cfn($a['groups']['id'], $t['groups'])
+            'exp' => $id
           ]]
         ]
       ]],
-      'group_by' => ['id']
+      'group_by' => [$id]
       ]
     );
   }
@@ -234,29 +234,38 @@ You can click the following link to access directly your account:<br>
       $sort = $arch['users']['email'];
     }
 
-    $sql  = "SELECT ";
-    $done = [];
-    foreach ($arch['users'] as $n => $f){
-      if (!\in_array($f, $done)) {
-        $sql .= $db->cfn($f, $tables['users'], 1).', ';
-        array_push($done, $f);
-      }
-    }
-
-    $gr   = !empty($group_id) && \bbn\Str::isUid($group_id) ? "AND " . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . " = UNHEX('$group_id')" : '';
-    $sql .= "
-      MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},
-      COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}
-      FROM {$db->escape($tables['users'])}
-        JOIN {$db->tsn($tables['groups'], 1)}
-          ON {$db->cfn($arch['users']['id_group'], $tables['users'], 1)} = {$db->cfn($arch['groups']['id'], $tables['groups'], 1)}
-          $gr
-        LEFT JOIN {$db->tsn($tables['sessions'])}
-          ON {$db->cfn($s['id_user'], $tables['sessions'], 1)} = {$db->cfn($arch['users']['id'], $tables['users'], 1)}
-      WHERE {$db->cfn($arch['users']['active'], $tables['users'], 1)} = 1
-      GROUP BY {$db->cfn($arch['users']['id'], $tables['users'], 1)}
-      ORDER BY {$db->cfn($sort, $tables['users'], 1)}";
-    return $db->getRows($sql);
+    $fields = array_map(function($a) use($db) {
+      return $db->cfn($a, $this->class_cfg['tables']['users']);
+    }, array_values($arch['users']));
+    $fields[$s['last_activity']] = "MAX($s[last_activity])";
+    $fields[$s['sess_id']] = "COUNT($s[sess_id])";
+    return $this->db->rselectAll([
+      'tables' => [$tables['users']],
+      'fields' => $fields,
+      'join' => [[
+        'table' => $tables['sessions'],
+        'on' => [
+          'conditions' => [[
+            'field' => $db->cfn($s['id_user'], $tables['sessions']),
+            'exp' => $db->cfn($arch['users']['id'], $tables['users'])
+          ]]
+        ]
+      ], [
+        'table' => $tables['groups'],
+        'on' => [
+          'conditions' => [[
+            'field' => $db->cfn($arch['users']['id_group'], $tables['users']),
+            'exp' => $db->cfn($arch['groups']['id'], $tables['groups'])
+          ]]
+        ]
+      ]],
+      'where' => [$arch['users']['active'] => 1],
+      'group_by' => [$db->cfn($arch['users']['id'], $tables['users'])],
+      'order' => [[
+        'field' => $db->cfn($sort, $tables['users']),
+        'dir' => 'ASC'
+      ]]
+    ]);
   }
 
 
@@ -279,8 +288,8 @@ You can click the following link to access directly your account:<br>
       if ($session = $this->db->rselect(
         $this->class_cfg['tables']['sessions'],
         $this->class_cfg['arch']['sessions'],
-        ['id_user' => $user[$u['id']]],
-        ['last_activity' => 'DESC']
+        [$this->class_cfg['arch']['sessions']['id_user'] => $user[$u['id']]],
+        [$this->class_cfg['arch']['sessions']['last_activity'] => 'DESC']
       )
       ) {
         $session['id_session'] = $session['id'];
@@ -304,7 +313,7 @@ You can click the following link to access directly your account:<br>
   {
     $g = $this->class_cfg['arch']['groups'];
     if ($group = $this->db->rselect(
-      $this->class_cfg['tables']['groups'], $this->class_cfg['arch']['groups'], [
+      $this->class_cfg['tables']['groups'], [], [
       $g['id'] => $id
       ]
     )
@@ -321,7 +330,7 @@ You can click the following link to access directly your account:<br>
   {
     $g = $this->class_cfg['arch']['groups'];
     if ($group = $this->db->rselect(
-      $this->class_cfg['tables']['groups'], $this->class_cfg['arch']['groups'], [
+      $this->class_cfg['tables']['groups'], [], [
       $g['code'] => $code
       ]
     )
@@ -336,17 +345,13 @@ You can click the following link to access directly your account:<br>
 
   public function getUsers($group_id = null): array
   {
-    $filter = [
-      $this->class_cfg['arch']['users']['active'] => 1
-    ];
-    if ($group_id) {
-      $filter[$this->class_cfg['arch']['users']['id_group']] = $group_id;
-    }
-
     return $this->db->getColumnValues(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users']['id'],
-      $filter
+      [
+        $this->class_cfg['arch']['users']['active'] => 1,
+        $this->class_cfg['arch']['users']['id_group'] => $group_id
+      ]
     );
   }
 
@@ -355,7 +360,7 @@ You can click the following link to access directly your account:<br>
   {
     $r = [];
     $u = $this->class_cfg['arch']['users'];
-    foreach ($this->db->rselectAll($this->class_cfg['tables']['users'], $u) as $a){
+    foreach ($this->db->rselectAll('bbn_users', $u) as $a){
       $r[] = [
         'value' => $a['id'],
         'text' => $this->getName($a, false),
@@ -433,7 +438,7 @@ You can click the following link to access directly your account:<br>
         $idx = 'login';
       }
 
-      return $user[$this->class_cfg['arch']['users'][$idx]];
+      return $user[$idx];
     }
 
     return '';
@@ -588,8 +593,8 @@ You can click the following link to access directly your account:<br>
       if ($options = $this->getOptions($type, $id)) {
         $ids = [];
         foreach ($options as $o) {
-          $old_id = $o[$cfg['arch']['user_options']['id']];
-          unset($o[$cfg['arch']['user_options']['id']]);
+          $old_id = $o['id'];
+          unset($o['id']);
           $o[$col] = $id_new;
           if ($this->db->insertIgnore($cfg['table'], $o)) {
             $ids[$old_id] = $this->db->lastId();
@@ -599,7 +604,7 @@ You can click the following link to access directly your account:<br>
         $bids = [];
         foreach ($ids as $oid => $nid) {
           $bits = $this->db->rselectAll(
-            $cfg['tables']['user_options_bits'], $cfg['arch']['user_options_bits'], [
+            $cfg['tables']['user_options_bits'], [], [
             $cfg['arch']['user_options_bits']['id_user_option'] => $oid,
             $cfg['arch']['user_options_bits']['id_parent'] => null
             ]
@@ -631,7 +636,7 @@ You can click the following link to access directly your account:<br>
             }
 
             $bits = $this->db->rselectAll(
-              $cfg['tables']['user_options_bits'], $cfg['arch']['user_options_bits'], [
+              $cfg['tables']['user_options_bits'], [], [
               $cfg['arch']['user_options_bits']['id_user_option'] => $oid,
               [$cfg['arch']['user_options_bits']['id_parent'], 'isnotnull']
               ]
@@ -845,14 +850,14 @@ You can click the following link to access directly your account:<br>
     ) {
       if (stripos($type,  'group') === 0) {
         return $this->db->rselectAll(
-          $cfg['tables']['user_options'], $cfg['arch']['user_options'], [
+          $cfg['table'], [], [
           $cfg['arch']['user_options']['id_group'] => $id
           ]
         );
       }
       elseif (stripos($type, 'user') === 0) {
         return $this->db->rselectAll(
-          $cfg['tables']['user_options'], $cfg['arch']['user_options'], [
+          $cfg['table'], [], [
           $cfg['arch']['user_options']['id_user'] => $id
           ]
         );
@@ -869,7 +874,7 @@ You can click the following link to access directly your account:<br>
         && ($cfg = $pref->getClassCfg())
     ) {
       return (bool)$this->db->insertIgnore(
-        $cfg['tables']['user_options'], [
+        $cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_user'] => $id_user
         ]
@@ -886,7 +891,7 @@ You can click the following link to access directly your account:<br>
         && ($cfg = $pref->getClassCfg())
     ) {
       return (bool)$this->db->insertIgnore(
-        $cfg['tables']['user_options'], [
+        $cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_group'] => $id_group
         ]
@@ -903,7 +908,7 @@ You can click the following link to access directly your account:<br>
         && ($cfg = $pref->getClassCfg())
     ) {
       return (bool)$this->db->deleteIgnore(
-        $cfg['tables']['user_options'], [
+        $cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_user'] => $id_user
         ]
@@ -920,7 +925,7 @@ You can click the following link to access directly your account:<br>
         && ($cfg = $pref->getClassCfg())
     ) {
       return (bool)$this->db->deleteIgnore(
-        $cfg['tables']['user_options'], [
+        $cfg['table'], [
         $cfg['arch']['user_options']['id_option'] => $id_option,
         $cfg['arch']['user_options']['id_group'] => $id_group
         ]
@@ -1085,16 +1090,13 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
-    $cfg = $this->getClassCfg();
-    $t = $cfg['tables']['user_options'];
-    $a = $cfg['arch']['user_options'];
     return (bool)$this->db->insertIgnore(
-      $t,
+      'bbn_users_options',
       [
-        $a['id_option'] => $id_perm,
-        $a['id_user'] => $id_user,
-        $a['id_group'] => $id_group,
-        $a['public'] => $public
+        'id_option' => $id_perm,
+        'id_user' => $id_user,
+        'id_group' => $id_group,
+        'public' => $public
       ]
     );
   }
@@ -1106,16 +1108,13 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
-    $cfg = $this->getClassCfg();
-    $t = $cfg['tables']['user_options'];
-    $a = $cfg['arch']['user_options'];
     return (bool)$this->db->deleteIgnore(
-      $t,
+      'bbn_users_options',
       [
-        $a['id_option'] => $id_perm,
-        $a['id_user'] => $id_user,
-        $a['id_group'] => $id_group,
-        $a['public'] => $public
+        'id_option' => $id_perm,
+        'id_user' => $id_user,
+        'id_group' => $id_group,
+        'public' => $public
       ]
     );
   }
