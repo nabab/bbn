@@ -360,7 +360,7 @@ You can click the following link to access directly your account:<br>
   {
     $r = [];
     $u = $this->class_cfg['arch']['users'];
-    foreach ($this->db->rselectAll('bbn_users', $u) as $a){
+    foreach ($this->db->rselectAll($this->class_cfg['tables']['users'], $u) as $a){
       $r[] = [
         'value' => $a['id'],
         'text' => $this->getName($a, false),
