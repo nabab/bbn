@@ -800,8 +800,32 @@ class Project extends bbn\Models\Cls\Db
     //on the basis of various checks, set the icon
     //case file but no component
     if (!empty($t['file']) && empty($component)) {
-      if ($t['ext'] === 'js') {
-        $icon = "icon-javascript";
+      //x::ddump($t, $cfg, $tab);
+      //if (isset($cfg['alias']['types']) && ($row = X::getRow($cfg['alias']['types'], ))
+      if ($t['tab']) {
+        switch ($t['tab']) {
+          case 'php':
+            $icon = "nf nf-mdi-language_php";
+            break;
+          case 'private':
+            $icon = "nf nf-mdi-language_php";
+            break;
+          case 'model':
+            $icon = "nf nf-mdi-database";
+            break;
+          case 'html':
+            $icon = "nf nf-mdi-language_html5";
+            break;
+          case 'js':
+            $icon = "nf nf-mdi-language_javascript";
+            break;
+          case 'css':
+            $icon = "nf nf-mdi-language_css3";
+            break;
+        }
+      }
+      elseif ($t['ext'] === 'js') {
+        $icon = "nf nf-md-language_javascript";
       }
       elseif ($t['ext'] === 'less') {
         $icon = 'nf nf-dev-less';

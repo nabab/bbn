@@ -272,13 +272,13 @@ You can click the following link to access directly your account:<br>
 
     if ($user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
-      array_values($u),
+      $u,
       $where
     )
     ) {
       if ($session = $this->db->rselect(
         $this->class_cfg['tables']['sessions'],
-        array_values($this->class_cfg['arch']['sessions']),
+        $this->class_cfg['arch']['sessions'],
         [$this->class_cfg['arch']['sessions']['id_user'] => $user[$u['id']]],
         [$this->class_cfg['arch']['sessions']['last_activity'] => 'DESC']
       )
@@ -336,12 +336,13 @@ You can click the following link to access directly your account:<br>
 
   public function getUsers($group_id = null): array
   {
-    return $this->db->getColArray(
-      "
-      SELECT ".$this->class_cfg['arch']['users']['id']."
-      FROM ".$this->class_cfg['tables']['users']."
-      WHERE {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['active'])} = 1
-      AND ".$this->class_cfg['arch']['users']['id_group']." ".( $group_id ? "= ".(int)$group_id : "!= 1" )
+    return $this->db->getColumnValues(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['id'],
+      [
+        $this->class_cfg['arch']['users']['active'] => 1,
+        $this->class_cfg['arch']['users']['id_group'] => $group_id
+      ]
     );
   }
 
@@ -350,9 +351,9 @@ You can click the following link to access directly your account:<br>
   {
     $r = [];
     $u = $this->class_cfg['arch']['users'];
-    foreach ($this->db->rselectAll('bbn_users') as $a){
+    foreach ($this->db->rselectAll('bbn_users', $u) as $a){
       $r[] = [
-        'value' => $a[$u['id']],
+        'value' => $a['id'],
         'text' => $this->getName($a, false),
         'id_group' => $a[$u['id_group']],
         'active' => $a[$u['active']] ? true : false
@@ -428,7 +429,7 @@ You can click the following link to access directly your account:<br>
         $idx = 'login';
       }
 
-      return $user[$this->class_cfg['arch']['users'][$idx]];
+      return $user[$idx];
     }
 
     return '';

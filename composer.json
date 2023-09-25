@@ -57,14 +57,14 @@
     "mockery/mockery": "1.4.*"
   },
   "autoload": {
-    "psr-0": {"": "src/"}
-  },
-  "autoload-dev": {
-    "psr-0": {
-      "": "src/",
-      "tests\\": ""
+    "psr-4": {
+      "bbn\\": "src/bbn/"
     }
   },
-  "minimum-stability": "dev",
+  "autoload-dev": {
+    "psr-4": {
+      "bbn\\tests\\": "tests/"
+    }
+  },  "minimum-stability": "dev",
   "prefer-stable" : true
 }
