@@ -351,7 +351,7 @@ You can click the following link to access directly your account:<br>
   {
     $r = [];
     $u = $this->class_cfg['arch']['users'];
-    foreach ($this->db->rselectAll('bbn_users', $u) as $a){
+    foreach ($this->db->rselectAll($this->class_cfg['tables']['users'], $u) as $a){
       $r[] = [
         'value' => $a['id'],
         'text' => $this->getName($a, false),
@@ -1081,13 +1081,22 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
+    if (!($pref = \bbn\User\Preferences::getInstance())) {
+      throw new \Exception("No User\Preferences instance!");
+    }
+
+    if (!($prefCfg = $pref->getClassCfg())) {
+      throw new \Exception("No User\Preferences cfg!");
+    }
+
+
     return (bool)$this->db->insertIgnore(
-      'bbn_users_options',
+      $prefCfg['tables']['user_options'],
       [
-        'id_option' => $id_perm,
-        'id_user' => $id_user,
-        'id_group' => $id_group,
-        'public' => $public
+        $prefCfg['arch']['user_options']['id_option'] => $id_perm,
+        $prefCfg['arch']['user_options']['id_user'] => $id_user,
+        $prefCfg['arch']['user_options']['id_group'] => $id_group,
+        $prefCfg['arch']['user_options']['public'] => $public
       ]
     );
   }
@@ -1099,13 +1108,21 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
+    if (!($pref = \bbn\User\Preferences::getInstance())) {
+      throw new \Exception("No User\Preferences instance!");
+    }
+
+    if (!($prefCfg = $pref->getClassCfg())) {
+      throw new \Exception("No User\Preferences cfg!");
+    }
+
     return (bool)$this->db->deleteIgnore(
-      'bbn_users_options',
+      $prefCfg['tables']['user_options'],
       [
-        'id_option' => $id_perm,
-        'id_user' => $id_user,
-        'id_group' => $id_group,
-        'public' => $public
+        $prefCfg['arch']['user_options']['id_option'] => $id_perm,
+        $prefCfg['arch']['user_options']['id_user'] => $id_user,
+        $prefCfg['arch']['user_options']['id_group'] => $id_group,
+        $prefCfg['arch']['user_options']['public'] => $public
       ]
     );
   }
