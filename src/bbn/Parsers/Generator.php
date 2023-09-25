@@ -226,11 +226,53 @@ class Generator {
     
   }
   
-  public function generateMethod(array $cfg) {
+  private function writeDocumentation(array $cfg): string
+  {
     $res = "";
+    $head = PHP_EOL . "  /**";
+    $line = PHP_EOL . "   * ";
+    $end = PHP_EOL . "   */" . PHP_EOL;
+    $params = "";
     if (!empty($cfg['comments'])) {
       $res .= $cfg['comments'] . PHP_EOL;
     }
+    if (!empty($cfg['arguments'])) {
+      if (!empty($cfg['doc']['params'])) {
+        foreach ($cfg['arguments'] as $param) {
+          $str = '';
+          if (!empty($param['type'])) {
+            $str .= $param['type'] . " ";
+          }
+          if (!empty($param['name'])) {
+            $str .= $param['name'] . " ";
+          }
+          if (!empty($param['description'])) {
+            $str .= $param['description'];
+          }
+          $params .= PHP_EOL . "   * @param" . " " . $str;
+        }
+        if (empty($res)) {
+          $res .= $head . $line . $params . $end;
+        }
+        else {
+          $params = "   * " . $params;
+          $arrComments = X::split($res, PHP_EOL);
+          $replace = '';
+          foreach ($arrComments as $comment) {
+            if (str_contains($comment, '@param ')) {
+              $replace .= $comment . PHP_EOL;
+            }
+          }
+          $res = str_replace($replace, $params . PHP_EOL, $res);
+        }
+      }
+    }
+    return $res;
+  }
+  
+  public function generateMethod(array $cfg) {
+    $res = "";
+    $res .= $this->writeDocumentation($cfg);
     /*$res .= str_repeat(' ', $this->spacing);
   
     if ( !empty($cfg['final']) ) {
@@ -427,6 +469,7 @@ class Generator {
     }
     
    // X::ddump($res, $cfg[]);
+   
     if (!empty($cfg['code'])) {
       // Get the position of the first opening curly brace
       $pos = strpos($cfg['code'], '{');

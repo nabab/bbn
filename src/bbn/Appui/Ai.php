@@ -9,9 +9,11 @@ use Orhanerday\OpenAi\OpenAi;
 use Exception;
 use bbn\X;
 use bbn\User;
+use bbn\Str;
 use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 use bbn\File\System;
+use DOMDocument;
 
 
 class Ai extends DbCls
@@ -106,7 +108,7 @@ class Ai extends DbCls
     [
       'value' => 'code-php',
       'text' => 'Code PHP',
-      'prompt' => 'Your response needs to be pure code in PHP',
+      'prompt' => 'Your response should be pure PHP code with documentation comments if relevant, and avoid completly markdown format',
       'component' => 'bbn-code',
     ],
     [
@@ -124,7 +126,7 @@ class Ai extends DbCls
     [
       'value' => 'json-editor',
       'text' => 'JSON',
-      'prompt' => 'Your response needs to be a valid JSON object',
+      'prompt' => 'Your response needs to be a valid JSON string',
       'component' => 'bbn-json-editor',
     ]
   ];
@@ -192,6 +194,8 @@ class Ai extends DbCls
     
     //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
     $build_prompt = $this->buildPrompt($prompt);
+    
+    X::log($build_prompt, 'ai_logs');
     
     $response = $this->request($build_prompt, $input);
     if (!empty($response) && $insert) {
@@ -332,6 +336,9 @@ class Ai extends DbCls
       ];
     }
     
+    $content = $complete['choices'][0]['message']['content'];
+    X::log($content, 'ai_logs');
+    
     return [
       'success' => true,
       'result' => $complete['choices'][0]['message']
@@ -350,13 +357,13 @@ class Ai extends DbCls
       'bbn_active' => 1,
     ];
     
-    if ($private) {
+    /*if ($private) {
       // If private, search only for prompts where shortcode is null
       $where[] = [
         'field' => $this->class_cfg['arch']['ai_prompt']['shortcode'],
         'operator' => 'isnull'
       ];
-    }
+    }*/
     
     $prompts = $this->db->rselectAll([
       'tables' => [$this->class_cfg['tables']['ai_prompt']],
@@ -383,6 +390,8 @@ class Ai extends DbCls
       $p['lang'] = $note['lang'];
     }
     
+    X::log("Prompts:", 'ai_logs');
+    X::log($prompts, 'ai_logs');
     return $prompts;
   }
   
