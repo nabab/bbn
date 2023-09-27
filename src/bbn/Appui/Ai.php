@@ -481,7 +481,7 @@ class Ai extends DbCls
    * @param string $output The updated output of the prompt.
    * @return bool True if the update was successful, false otherwise.
    */
-  public function updatePrompt(string $id, string $title, string $content, string $input, string $output): bool
+  public function updatePrompt(string $id, string $title, string $content, string $input, string $output, string $shortcode = null): bool
   {
     $prompt = $this->getPromptById($id);
     
@@ -504,6 +504,7 @@ class Ai extends DbCls
     $this->update($id, [
       $this->class_cfg['arch']['ai_prompt']['input'] => $input,
       $this->class_cfg['arch']['ai_prompt']['output'] => $output,
+      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
     ]);
     
     return true;
