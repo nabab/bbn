@@ -403,11 +403,8 @@ class Ai extends DbCls
    */
   public function getPromptByShortcode(string $shortcode)
   {
-    $prompt = $this->rselect([
-      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],
-      'where' => [
-        $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
-      ]
+    $prompt = $this->rselect($this->default_class_cfg['tables']['ai_prompt'], [], [
+      $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
     ]);
     
     if (!empty($prompt)) {

@@ -2998,7 +2998,7 @@ class Option extends bbn\Models\Cls\Db
    * @param string $text The new text
    * @return int The number of affected rows
    */
-  public function setText($id, string $text)
+  public function setText($id, ?string $text)
   {
     $res = null;
     if ($this->check()) {
@@ -3885,8 +3885,13 @@ class Option extends bbn\Models\Cls\Db
           unset($o['items']);
         }
 
+
+        $hasNoText = empty($o[$c['text']]);
         if (isset($o[$c['id_alias']])) {
           $tmp['id_alias'] = $o[$c['id_alias']];
+          if ($hasNoText) {
+            $o[$c['text']] = 'waiting for alias';
+          }
           unset($o[$c['id_alias']]);
         }
 
@@ -3919,6 +3924,9 @@ class Option extends bbn\Models\Cls\Db
             if ($id_alias = $this->fromCode(...$td['id_alias'])) {
               try {
                 $this->setAlias($id, $id_alias);
+                if ($hasNoText) {
+                  $this->setText($id, null);
+                }
               }
               catch (\Exception $e) {
                 throw new \Exception($e->getMessage());
