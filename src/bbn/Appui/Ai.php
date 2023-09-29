@@ -403,9 +403,10 @@ class Ai extends DbCls
    */
   public function getPromptByShortcode(string $shortcode)
   {
-    $prompt = $this->rselect($this->default_class_cfg['tables']['ai_prompt'], [], [
-      $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
+    $prompt = $this->rselect($this->class_cfg['tables']['ai_prompt'], [], [
+      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
     ]);
+    X::log([$prompt, $this->db->last()], 'ai_logs');
     
     if (!empty($prompt)) {
       $note = $this->note->get($prompt['id_note']);
