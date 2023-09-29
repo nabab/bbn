@@ -406,7 +406,7 @@ class Ai extends DbCls
     $prompt = $this->rselect($this->class_cfg['tables']['ai_prompt'], [], [
       $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
     ]);
-    X::log([$prompt, $this->db->last()], 'ai_logs');
+    X::log([$prompt, $this->db->last()], 'ai_logs2');
     
     if (!empty($prompt)) {
       $note = $this->note->get($prompt['id_note']);
