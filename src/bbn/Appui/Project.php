@@ -28,6 +28,8 @@ class Project extends bbn\Models\Cls\Db
 
   use Optional;
 
+  private $fullTree;
+
   protected $id;
 
   protected $id_langs;
@@ -360,15 +362,34 @@ class Project extends bbn\Models\Cls\Db
    *
    * @return array
    */
-  public function getFullTree(): array
+  public function getFullTree(bool $force = false): array
   {
+    if (!$force && $this->fullTree) {
+      return $this->fullTree;
+    }
+
     $res = self::getOptionsObject()->fullTree($this->id);
     foreach($res['items'] as $t) {
       $res[$t['code']] = $t;
     }
     unset($res['items']);
+    $this->fullTree = $res;
     return $res;
   }
+
+  public function getDbs(): array
+  {
+    $res = $this->getFullTree()['db'];
+    $o = self::getOptionsObject();
+    foreach ($res['db']['items'] as $i => $db) {
+      foreach ($db['items'] as $j => $conn) {
+        $res['db']['items'][$i]['items'][$j]['engine'] = $o->code($o->getIdParent($conn['alias']['id_parent']));
+      }
+    }
+
+    return $res;
+  }
+
 
   public function check()
   {
@@ -453,7 +474,8 @@ class Project extends bbn\Models\Cls\Db
         'name' => $this->getName(),
         'path' => $this->getPaths(),
         'langs' => $this->getLangsIds(),
-        'lang' => $this->getLang()
+        'lang' => $this->getLang(),
+        'dbs' => $this->getDbs(),
       ];
     }
 
