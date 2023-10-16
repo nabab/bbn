@@ -467,47 +467,94 @@ class Shop extends Models\Cls\Db
     $date = $my_date->format('Y-m-d');
     unset($salesCfg['arch']['transactions']['id']);
     $salesCfg['arch']['transactions']['id_transaction'] = $salesCfg['table'].'.'.'id';
-    $fields = array_merge($cartCfg['arch']['cart'], $salesCfg['arch']['transactions']);
-    
+
+
     $grid = new \bbn\Appui\Grid($this->db, ['limit' => 0], [
       'table' => $cartCfg['table'], 
-      'fields' => $fields, 
-      'where' => [[
-        'logic' => 'AND',
-        'conditions' => [[
-          'field' => $cartCfg['arch']['cart']['id_client'],
-          'operator' => 'isnotnull'
-        ],[
-          'field' => $cartCfg['arch']['cart']['creation'],
-          'value' => $date
-        ]]
-       ],[
-          'logic' => 'OR',
-          'conditions' => [[
-            'field' => $salesCfg['arch']['transactions']['id_cart'],
-            'operator' => 'isnull'
-          ],[
-            'field' => $salesCfg['arch']['transactions']['status'],
-            'operator' => '!=',
-            'value' => 'paid'
-          ]]
+      'fields' => [
+        "id" => "bbn_shop_cart.id",
+        "id_session" => "id_session",
+        "id_client" => "id_client",
+        "creation" => "creation",
+        "id_cart" => "id_cart",
+        "id_shipping_address" => "id_shipping_address",
+        "id_billing_address" => "id_billing_address",
+        "number" => "number",
+        "shipping_cost" => "shipping_cost",
+        "total" => "total",
+        "moment" => "moment",
+        "payment_type" => "payment_type",
+        "reference" => "reference",
+        "url" => "url",
+        "error_message" => "error_message",
+        "error_code" => "error_code",
+        "status" => "status",
+        "test" => "test",
+        "id_transaction" => "bbn_shop_transactions.id"
+      ], 
+      'join' => [
+        [
+          'table' => $salesCfg['table'],
+          'type' => 'left',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => $salesCfg['arch']['transactions']['id_cart'],
+                'operator' => 'eq',
+                'exp' => $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
+              ]
+            ]
+          ]
+        ], [
+          'table' => $cartCfg['table'], 
+          'alias' => 'cart2',
+          'type' => 'left',
+          'on' => [
+            'conditions' => [
+              [
+                'field' => 'cart2.id_client',
+                'exp' => $cartCfg['table'].'.id_client',
+              ], [
+                'field' => 'cart2.creation',
+                'operator' => '>',
+                'exp' => $cartCfg['table'].'. creation',
+              ]
+            ]
+          ]
         ]
       ],
-      'join' => [[
-      'table' => $salesCfg['table'],
-      'type' => 'left',
-      'on' => [
-        'conditions' => [[
-          'field' => $salesCfg['arch']['transactions']['id_cart'],
-          'operator' => 'eq',
-          'exp' => $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
-        ]]
+      'where' => [
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => $cartCfg['arch']['cart']['id_client'],
+            'operator' => 'isnotnull'
+          ],[
+            'field' => $cartCfg['arch']['cart']['creation'],
+            'operator' => '>=',
+            'value' => $date
+          ],[
+            'field' => 'cart2.id',
+            'operator' => 'isnull'
+          ], [
+            'logic' => 'OR',
+            'conditions' => [
+              [
+                'field' => $salesCfg['arch']['transactions']['id_cart'],
+                'operator' => 'isnull'
+              ],[
+                'field' => $salesCfg['arch']['transactions']['status'],
+                'operator' => '!=',
+                'value' => 'paid'
+              ]
+            ]
+          ]
+        ]
+      ],
+      'group_by' => [
+        $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
       ]
-    ]],
-    'group_by' => [
-      $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
-    ]
-  ]);
+   ]);
   if($data = $grid->getDatatable()['data']) {
     return array_filter($data, function($a){
       return !$this->cart->isPaid($a['id']);
