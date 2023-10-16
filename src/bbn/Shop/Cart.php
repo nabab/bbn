@@ -772,23 +772,28 @@ class Cart extends DbCls
     ]);
   }
 
-  public function sendAbandonedCartEmail(string $idCart, string $idClient): bool
+  public function sendAbandonedCartEmail(string $idCart, string $idClient, int $days): bool
   {
+    if(!$this->checkReminder($idCart, $days)) {
+      return false;
+    }
     $clientCls = new Client($this->db);
     $masksCls = new Masks($this->db);
     $mailCls = new \bbn\Appui\Mailing($this->db);
     $opt = Option::getInstance();
     $mailData = [];
-
     if(
       ($email = $clientCls->getEmail($idClient)) &&
       ($template = $masksCls->getDefault($opt->fromCode('abandoned_cart', 'masks', 'appui'))) &&
-      ($mailData['products'] = $this->getProductsDetail($idCart))
-    ) {
+      ($mailData['products'] = $this->getProductsDetail($idCart))) {
+      if(!empty($mailData['products'])) {
         foreach($mailData['products'] as &$p) {
-          if($p['product']['medias'][0]) {
+          if($p['product']['medias'][0] && file_exists($p['product']['medias'][0]['full_path'])) {
             $i = new \bbn\File\Image($p['product']['medias'][0]['full_path']);
             $p['image'] = $i->toString();
+          }
+          else {
+            $p['image'] = null;
           }
           $p['product']['price'] = '€ ' . (string)number_format(round((float)$p['product']['price'] , 2), 2, ',', '');
           $p['amount'] = '€ ' . (string)number_format(round((float)$p['amount'] , 2), 2, ',', '');
@@ -798,9 +803,67 @@ class Cart extends DbCls
         $mailData['link'] = $_SERVER["HTTP_ORIGIN"].'/checkout';
         $title = Tpl::render($template['title'], $mailData);
         $content = Tpl::render($template['content'], $mailData);
-        
-        return $mailCls->insertEmail($email, $title, $content);
+        if($mailCls->insertEmail($email, $title, $content)) {
+          $id_email = $this->db->lastId();
+          return $this->insertReminder($idCart, $id_email);
+        }
+      }
     }
-
+    return false;
   }
+  public function checkReminder(string $id_cart, int $days) 
+   {
+    $req = [
+      'tables' => ['bbn_shop_carts_reminders'],
+      'fields' => [
+        'COUNT(bbn_emails.id)'
+      ],
+      'join'  => [
+        [
+          'table' => 'bbn_shop_cart',
+          'on' => [
+            [
+              'field' => 'id_cart',
+              'exp' => 'bbn_shop_cart.id'
+            ]
+          ]
+            ],[
+              'table' => 'bbn_emails',
+              'on' => [
+                [
+                  'field' => 'bbn_emails.id',
+                  'exp' => 'bbn_shop_carts_reminders.id_email'
+                ]
+              ]
+            ]
+      ],
+      'where' => [
+        'conditions'=> [[
+          'field'=> 'id_cart',
+          'value'=>  $id_cart
+        ],[
+          'logic' => 'OR',
+          'conditions'=> [[
+            'field' => 'delivery',
+            'operator' => '>',
+            'exp' => "creation + INTERVAL $days DAY"
+          ],
+          [
+            'field' => 'status',
+            'value' => 'ready'
+          ]]
+        ]]
+      ],
+      
+    ];
+    return !$this->db->selectOne($req);
+  }
+  public function insertReminder(string $id_cart, string $id_email) : Bool
+  {
+    return $this->db->insert('bbn_shop_carts_reminders', [
+      'id_cart' => $id_cart,
+      'id_email' => $id_email,
+    ]);
+  }
+  
 }
