@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHP version 8
  *
@@ -109,6 +110,21 @@ class Shop extends Models\Cls\Db
    */
   protected $type_note;
 
+  /**
+   * @var Cart
+   */
+  protected $cart;
+
+  /**
+   * @var Client
+   */
+  protected $client;
+
+  /**
+   * @var Provider
+   */
+  protected $providers;
+
   /** 
    * @var array Database structure
    */
@@ -199,7 +215,8 @@ class Shop extends Models\Cls\Db
   {
     if (!empty($params['excel'])) {
       unset($params['fields']);
-      if (!empty($params['filters'])
+      if (
+        !empty($params['filters'])
         && !empty($params['filters']['logic'])
         && empty($params['filters']['conditions'])
       ) {
@@ -220,7 +237,8 @@ class Shop extends Models\Cls\Db
         if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {
           $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);
         }
-        if (empty($params['excel'])
+        if (
+          empty($params['excel'])
           && ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']]))
         ) {
           foreach ($d['products'] as $i => $p) {
@@ -234,7 +252,8 @@ class Shop extends Models\Cls\Db
           }
         }
         $d['client'] = $this->client->get($d[$transFields['id_client']]);
-        if (!empty($params['excel'])
+        if (
+          !empty($params['excel'])
           && !empty($params['excel']['fields'])
         ) {
           $tmp = [];
@@ -242,17 +261,13 @@ class Shop extends Models\Cls\Db
             if (empty($f['hidden'])) {
               if ($f['field'] === 'shipping_address') {
                 $tmp[$f['field']] = $d['shipping_address']['fulladdress'];
-              }
-              elseif ($f['field'] === 'billing_address') {
+              } elseif ($f['field'] === 'billing_address') {
                 $tmp[$f['field']] = $d['billing_address']['fulladdress'];
-              }
-              elseif ($f['field'] === 'client.name') {
+              } elseif ($f['field'] === 'client.name') {
                 $tmp[$f['field']] = $d['client']['first_name'] . ' ' . $d['client']['last_name'];
-              }
-              elseif ($f['field'] === 'payment_type') {
+              } elseif ($f['field'] === 'payment_type') {
                 $tmp[$f['field']] = $this->opt->text($d['payment_type']);
-              }
-              else {
+              } else {
                 $tmp[$f['field']] = $d[$f['field']];
               }
             }
@@ -320,7 +335,7 @@ class Shop extends Models\Cls\Db
     $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);
     $grid = new Grid($this->db, $params, $dbCfg);
     $data = $grid->getDatatable();
-   
+
     if ($data && $data['total']) {
       $editions = $this->product->getEditions();
       $types = $this->product->getTypes();
@@ -377,25 +392,25 @@ class Shop extends Models\Cls\Db
         ]
       ]
     );
-  
+
     array_unshift(
       $dbCfg['fields'],
       ...$this->db->getFieldsList($cfg['table'])
     );
-  
-    $dbCfg['fields']['num_tags'] = 'COUNT(DISTINCT '.$this->db->cfn($notesCfg['arch']['notes_tags']['id_tag'], $notesCfg['tables']['notes_tags'], true).')';
+
+    $dbCfg['fields']['num_tags'] = 'COUNT(DISTINCT ' . $this->db->cfn($notesCfg['arch']['notes_tags']['id_tag'], $notesCfg['tables']['notes_tags'], true) . ')';
     $dbCfg['group_by'] = [$this->db->cfn($cfg['arch']['products']['id'], $cfg['table'])];
     $grid = new \bbn\Appui\Grid($this->db, $tableCfg, $dbCfg);
     if ($grid->check()) {
       $tmp_grid = $grid->getDatatable();
-  
-      $cms   =& $this->cms;
-      $notes =& $this->note;
-      $tmp_grid['data'] = array_map(function($a) use (&$cms, &$notes) {
+
+      $cms   = &$this->cms;
+      $notes = &$this->note;
+      $tmp_grid['data'] = array_map(function ($a) use (&$cms, &$notes) {
         $a['medias'] = $notes->getMedias($a['id_note']);
         $a['id_media'] = $cms->getDefaultMedia($a['id_note']);
         $a['num_medias'] = count($a['medias']);
-        $a['tags'] = [];//$a['num_tags'] ? $notes->getTags($a['id_note']) : [];
+        $a['tags'] = []; //$a['num_tags'] ? $notes->getTags($a['id_note']) : [];
         return $a;
       }, $tmp_grid['data']);
 
@@ -463,14 +478,14 @@ class Shop extends Models\Cls\Db
     $salesCfg  = $this->sales->getClassCfg();
     $cartCfg  = $this->cart->getClassCfg();
     $today = new \DateTime();
-    $my_date = date_sub(($today), date_interval_create_from_date_string(strval($days).' days'));
+    $my_date = date_sub(($today), date_interval_create_from_date_string(strval($days) . ' days'));
     $date = $my_date->format('Y-m-d');
     unset($salesCfg['arch']['transactions']['id']);
-    $salesCfg['arch']['transactions']['id_transaction'] = $salesCfg['table'].'.'.'id';
+    $salesCfg['arch']['transactions']['id_transaction'] = $salesCfg['table'] . '.' . 'id';
 
 
     $grid = new \bbn\Appui\Grid($this->db, ['limit' => 0], [
-      'table' => $cartCfg['table'], 
+      'table' => $cartCfg['table'],
       'fields' => [
         "id" => "bbn_shop_cart.id",
         "id_session" => "id_session",
@@ -491,7 +506,7 @@ class Shop extends Models\Cls\Db
         "status" => "status",
         "test" => "test",
         "id_transaction" => "bbn_shop_transactions.id"
-      ], 
+      ],
       'join' => [
         [
           'table' => $salesCfg['table'],
@@ -501,23 +516,23 @@ class Shop extends Models\Cls\Db
               [
                 'field' => $salesCfg['arch']['transactions']['id_cart'],
                 'operator' => 'eq',
-                'exp' => $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
+                'exp' => $cartCfg['table'] . '.' . $cartCfg['arch']['cart']['id']
               ]
             ]
           ]
         ], [
-          'table' => $cartCfg['table'], 
+          'table' => $cartCfg['table'],
           'alias' => 'cart2',
           'type' => 'left',
           'on' => [
             'conditions' => [
               [
                 'field' => 'cart2.id_client',
-                'exp' => $cartCfg['table'].'.id_client',
+                'exp' => $cartCfg['table'] . '.id_client',
               ], [
                 'field' => 'cart2.creation',
                 'operator' => '>',
-                'exp' => $cartCfg['table'].'. creation',
+                'exp' => $cartCfg['table'] . '. creation',
               ]
             ]
           ]
@@ -529,11 +544,11 @@ class Shop extends Models\Cls\Db
           [
             'field' => $cartCfg['arch']['cart']['id_client'],
             'operator' => 'isnotnull'
-          ],[
+          ], [
             'field' => $cartCfg['arch']['cart']['creation'],
             'operator' => '>=',
             'value' => $date
-          ],[
+          ], [
             'field' => 'cart2.id',
             'operator' => 'isnull'
           ], [
@@ -542,7 +557,7 @@ class Shop extends Models\Cls\Db
               [
                 'field' => $salesCfg['arch']['transactions']['id_cart'],
                 'operator' => 'isnull'
-              ],[
+              ], [
                 'field' => $salesCfg['arch']['transactions']['status'],
                 'operator' => '!=',
                 'value' => 'paid'
@@ -552,15 +567,14 @@ class Shop extends Models\Cls\Db
         ]
       ],
       'group_by' => [
-        $cartCfg['table'].'.'.$cartCfg['arch']['cart']['id']
+        $cartCfg['table'] . '.' . $cartCfg['arch']['cart']['id']
       ]
-   ]);
-  if($data = $grid->getDatatable()['data']) {
-    return array_filter($data, function($a){
-      return !$this->cart->isPaid($a['id']);
-    });
+    ]);
+    if ($data = $grid->getDatatable()['data']) {
+      return array_filter($data, function ($a) {
+        return !$this->cart->isPaid($a['id']);
+      });
+    }
+    return [];
   }
-  return [];
-}
-
 }
