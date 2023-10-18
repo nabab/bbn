@@ -409,7 +409,7 @@ abstract class AbstractLinkType
    *
    * @return mixed|false
    */
-  public function delete($id)
+  public function delete($id): bool
   {
     $param = [
       $this->fields['id_entity'] => $this->entity->getId(),
@@ -418,7 +418,7 @@ abstract class AbstractLinkType
     ];
 
     if ($this->db->delete($this->class_table, $param)) {
-      return $id;
+      return true;
     }
 
     $this->error("Delete");

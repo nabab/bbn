@@ -1066,65 +1066,114 @@ class X
   /**
    * Returns a dump of the given variable.
    *
+   * @param mixed $a      The variable to dump.
+   * @param int $maxLevel The maximum level of recursion. 
+   * @return string
+   */
+  public static function getRawDump($a, int $maxDepth = 0, int $maxLength = 0): string
+  {
+    $r = $a;
+    if (\is_null($a)) {
+      $r = 'null';
+    }
+    elseif ($a === false) {
+      $r = 'false';
+    }
+    elseif ($a === true) {
+      $r = 'true';
+    }
+    elseif ($a === 0) {
+      $r = '0';
+    }
+    elseif ($a === '') {
+      $r = '""';
+    }
+    elseif ($a === []) {
+      $r = '[]';
+    }
+    elseif (!$a) {
+      $r = '0';
+    }
+    elseif (!\is_string($a) && \is_callable($a)) {
+      $r = 'Function';
+    }
+    elseif (\is_object($a)) {
+      $n = \get_class($a);
+      if ($n === 'stdClass') {
+        $r = Str::export($a, false, $maxDepth, $maxLength);
+      }
+      else{
+        $r = $n.' Object';
+      }
+    }
+    elseif (\is_array($a)) {
+      $r = Str::export($a, false, $maxDepth, $maxLength);
+    }
+    elseif (\is_resource($a)) {
+      $r = 'Resource '.get_resource_type($a);
+    }
+    elseif (Str::isBuid($a)) {
+      $tmp = bin2hex($a);
+      if (strlen($tmp) === 32) {
+        $r = '0x'.bin2hex($a);
+      }
+    }
+
+    return $r.PHP_EOL;
+  }
+
+
+  public static function cleanDump(...$args): void
+  {
+    foreach ($args as $a) {
+      echo self::getRawDump($a);
+    }
+  }
+
+
+  public static function cleanHdump(...$args): void
+  {
+    echo self::getRawHdump(...$args);
+  }
+
+
+  public static function singleDump($a, int $maxDepth = 4, int $maxLength = 20): void
+  {
+    echo self::getRawDump($a, $maxDepth, $maxLength);
+  }
+
+
+  public static function singleHdump($a, int $maxDepth = 4, int $maxLength = 20): void
+  {
+    echo nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::getRawDump($a, $maxDepth, $maxLength))), false);
+  }
+
+
+  /**
+   * Returns a dump of the given variable.
+   *
    * @param mixed
    * @return string
    */
-  public static function getDump(): string
+  public static function getDump(...$args): string
   {
-    $args = \func_get_args();
-    $st   = '';
+    $dump = '';
     foreach ($args as $a) {
-      $r = $a;
-      if (\is_null($a)) {
-        $r = 'null';
-      }
-      elseif ($a === false) {
-        $r = 'false';
-      }
-      elseif ($a === true) {
-        $r = 'true';
-      }
-      elseif ($a === 0) {
-        $r = '0';
-      }
-      elseif ($a === '') {
-        $r = '""';
-      }
-      elseif ($a === []) {
-        $r = '[]';
-      }
-      elseif (!$a) {
-        $r = '0';
-      }
-      elseif (!\is_string($a) && \is_callable($a)) {
-        $r = 'Function';
-      }
-      elseif (\is_object($a)) {
-        $n = \get_class($a);
-        if ($n === 'stdClass') {
-          $r = Str::export($a);
-        }
-        else{
-          $r = $n.' Object';
-        }
-      }
-      elseif (\is_array($a)) {
-        $r = Str::export($a);
-      }
-      elseif (\is_resource($a)) {
-        $r = 'Resource '.get_resource_type($a);
-      }
-      elseif (Str::isBuid($a)) {
-        $tmp = bin2hex($a);
-        if (strlen($tmp) === 32) {
-          $r = '0x'.bin2hex($a);
-        }
-      }
-
-      $st .= $r.PHP_EOL;
+      $dump .= self::getRawDump($a);
     }
 
-    return PHP_EOL.$st;
+    $backtrace = debug_backtrace();
+    $st = '';
+    foreach ($backtrace as $i => $b) {
+      if (isset($b['class']) && $b['file'] !== __FILE__) {
+        $st = $b['file'] . ';' . $b['line'] . PHP_EOL;
+        break;
+      }
+    }
+    if (empty($st)) {
+      $st   = __FILE__ . ';' . __LINE__ . PHP_EOL;
+    }
+    return $st . $dump;
   }
 
 
@@ -1134,9 +1183,21 @@ class X
    * @param mixed
    * @return string
    */
-  public static function getHdump(): string
+  public static function getHdump(...$args): string
   {
-    return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::getDump(...\func_get_args()))), false);
+    return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::getDump(...$args))), false);
+  }
+
+
+  /**
+   * Returns an HTML dump of the given variable.
+   *
+   * @param mixed
+   * @return string
+   */
+  public static function getRawHdump(...$args): string
+  {
+    return nl2br(str_replace("  ", "&nbsp;&nbsp;", htmlentities(self::getRawDump(...$args))), false);
   }
 
 
@@ -1147,9 +1208,9 @@ class X
    * @return void
    *
    */
-  public static function dump(): void
+  public static function dump(...$args): void
   {
-    echo self::getDump(...\func_get_args());
+    echo self::getDump(...$args);
   }
 
 

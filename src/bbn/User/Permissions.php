@@ -469,7 +469,7 @@ class Permissions extends bbn\Models\Cls\Basic
 
 
   /**
-   * Alias of fromPath.
+   * Alias of fromPath without exception.
    *
    * @param string|null $id_option The option's UID
    * @param string      $type      The type: access or option
@@ -477,7 +477,14 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function is(string $path, string $type = 'access'): ?string
   {
-    return $this->fromPath($path, $type);
+    $res = null;
+    try {
+      $res = $this->fromPath($path, $type);
+    }
+    catch (\Exception $e) {
+    }
+
+    return $res;
   }
 
 

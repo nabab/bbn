@@ -1391,10 +1391,11 @@ class Str
    *
    * @param mixed $o            The item to be.
    * @param bool  $remove_empty Default: "false".
-   * @param int   $lev          Default: "1".
+   * @param int   $level          Default: "1".
+   * @param int   $maxDepth          Default: "0".
    * @return string
    */
-  public static function export($o, $remove_empty=false, $lev=1): string
+  public static function export($o, bool $remove_empty = false, int $maxDepth = 0, int $maxLength = 0, int $level = 1): string
   {
     $st    = '';
     $space = '    ';
@@ -1418,18 +1419,29 @@ class Str
       $is_assoc  = $is_object || ($is_array && X::isAssoc($o));
       $st       .= $is_assoc ? '{' : '[';
       $st       .= PHP_EOL;
+      $num      = 0;
       foreach ($o as $k => $v){
+        if ($maxLength && ($num >= $maxLength)) {
+          $st .= str_repeat($space, $level);
+          $st .= '...' . PHP_EOL;
+          break;
+        }
         if ($remove_empty && ( ( \is_string($v) && empty($v) ) || ( \is_array($v) && \count($v) === 0 ) )) {
           continue;
         }
 
-        $st .= str_repeat($space, $lev);
+        $st .= str_repeat($space, $level);
         if ($is_assoc) {
           $st .= ( \is_string($k) ? '"'.self::escapeDquote($k).'"' : $k ). ': ';
         }
 
         if (\is_array($v)) {
-          $st .= self::export($v, $remove_empty, $lev + 1);
+          if ($maxDepth && ($level >= $maxDepth)) {
+            $st .= '[...]';
+          }
+          else{
+            $st .= self::export($v, $remove_empty, $maxDepth, $maxLength, $level + 1);
+          }
         }
         elseif ($v === 0) {
           $st .= '0';
@@ -1448,7 +1460,7 @@ class Str
             $st .= '0x'.bin2hex($v);
           }
           elseif (!$remove_empty || !empty($v)) {
-            $st .= '"'.self::escapeDquote($v).'"';
+            $st .= '"' . self::escapeDquote($v) . '"';
           }
         }
         else {
@@ -1461,7 +1473,7 @@ class Str
 
           if ($cls) {
             if ($cls === 'stdClass') {
-              $st .= self::export($v, $remove_empty, $lev + 1);
+              $st .= self::export($v, $remove_empty, $maxDepth, $maxLength, $level + 1);
             }
             else{
               $st .= 'Object '.$cls;
@@ -1470,9 +1482,10 @@ class Str
         }
 
         $st .= ','.PHP_EOL;
+        $num++;
       }
 
-      $st .= str_repeat($space, $lev - 1);
+      $st .= str_repeat($space, $level - 1);
       $st .= $is_assoc ? '}' : ']';
     }
 

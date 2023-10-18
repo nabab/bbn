@@ -96,11 +96,14 @@ class Project extends bbn\Models\Cls\Db
   public function urlToPaths(string $url) : array
   {
     $cfg = $this->urlToConfig($url, true);
+    if (!$cfg) {
+      throw new Exception(X::_('Impossible to find a configuration for the URL'));
+    }
+
     $file = array_pop(X::split($cfg['file'], '/'));
     $res = [
       'root' => $cfg['info']['parent_code'],
-      'path' => $cfg['path'],
-      'files' => (!empty($cfg['typology']['tabs'])) ? $files : $cfg['file'],
+      'path' => $cfg['path']
     ];
     if (!empty($cfg['typology']['tabs'])) {
       $files = [];
@@ -122,6 +125,7 @@ class Project extends bbn\Models\Cls\Db
       $res['files'] = $cfg['file'];
       $res['extensions'] = $cfg['extensions'];
     }
+
     return $res;
   }
   
@@ -250,7 +254,7 @@ class Project extends bbn\Models\Cls\Db
       $type = array_pop($bits);
       // the url structure with _end_ and $type is mandatory
       if (array_pop($bits) !== '_end_') {
-        throw new Exception('Malformed URL');
+        throw new Exception("Malformed URL $url");
       }
     }
     $mvc = Mvc::getInstance();
@@ -475,7 +479,7 @@ class Project extends bbn\Models\Cls\Db
         'path' => $this->getPaths(),
         'langs' => $this->getLangsIds(),
         'lang' => $this->getLang(),
-        'dbs' => $this->getDbs(),
+        'db' => $this->getDbs(),
       ];
     }
 
@@ -543,72 +547,6 @@ class Project extends bbn\Models\Cls\Db
   {
     // get info of the current path selected in first dropdown
     $currentPathArray = $this->getPath($id_path);
-    /*
-     * {
-    "id": "a50d890bc4b711edb71952540000cfbe",
-    "id_alias": "a069bd8a3fe411ed98b152540000cfbe",
-    "parent_code": "lib",
-    "text": "appui-ide",
-    "code": "appui-ide",
-    "bcolor": "#261b78",
-    "fcolor": "#ffffff",
-    "language": "en",
-    "alias": {
-        "id": "a069bd8a3fe411ed98b152540000cfbe",
-        "id_parent": "a063b2f23fe411ed98b152540000cfbe",
-        "id_alias": null,
-        "num": null,
-        "text": "Projects BBN",
-        "code": "bbn-project",
-        "num_children": 0,
-        "icon": "nf nf-fa-cubes",
-        "types": [
-            {
-                "url": "mvc",
-                "icon": "nf nf-fa-code\n",
-                "path": "mvc/",
-                "type": "mvc",
-                "bcolor": "#302c2b",
-                "fcolor": "#86cdea",
-                "bbn_path": "BBN_APP_PATH",
-                "language": "en",
-            },
-            {
-                "url": "components",
-                "icon": "nf nf-mdi-vuejs\n",
-                "path": "components/",
-                "type": "components",
-                "bcolor": "#302c2b",
-                "fcolor": "#44b782",
-                "bbn_path": "BBN_APP_PATH",
-                "language": "en",
-            },
-            {
-                "url": "lib",
-                "icon": "nf nf-mdi-library",
-                "path": "lib/",
-                "type": "classes",
-                "bcolor": "#302c2b",
-                "fcolor": "#ecebeb",
-                "bbn_path": "BBN_APP_PATH",
-                "language": "en",
-            },
-            {
-                "url": "cli",
-                "icon": "nf nf-fa-cogs",
-                "path": "cli/",
-                "type": "cli",
-                "bcolor": "#ced62b",
-                "fcolor": "#000000",
-                "bbn_path": "BBN_APP_PATH",
-                "language": "en",
-            },
-        ],
-    },
-    "parent": "/home/dev-qr/app-ui/vendor/",
-    "path": "bbn/appui-ide",
-}
-     */
     if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {
       throw new Exception('Invalid Path');
     }
