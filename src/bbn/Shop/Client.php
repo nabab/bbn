@@ -94,7 +94,7 @@ class Client extends DbCls
     return $this->db->selectOne($this->class_table, $this->fields['id'], [
       $this->fields['id_user'] => $idUser,
       $this->fields['active'] => 1
-    ]);
+    ]) ?: null;
   }
 
   /**
