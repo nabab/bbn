@@ -61,7 +61,10 @@ class User extends Basic implements Implementor
       21 => 'invalid phone number',
       22 => 'impossible to update the phone number or the verification code',
       23 => 'unknown phone number',
-      24 => 'invalid verification code'
+      24 => 'invalid verification code',
+      25 => 'you have exhausted the number of hotlinks sent, try again later',
+      26 => 'An email has been sent in order to reset your password',
+      27 => 'The hotlink is expired'
     ],
     'table' => 'bbn_users',
     'tables' => [
@@ -258,6 +261,8 @@ class User extends Basic implements Implementor
   /** @var array $class_cfg */
   protected $class_cfg;
 
+  const MAX_EMPTY_ATTEMPTS = 5;
+
 
   /**
    * User constructor.
@@ -453,7 +458,8 @@ class User extends Basic implements Implementor
           'success' => true
         ];
       }
-    } else {
+    }
+    else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
       $this->ip_address  = $this->class_cfg['ip_address'] && isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
@@ -474,9 +480,8 @@ class User extends Basic implements Implementor
       // The user logs in
       if ($this->isLoginRequest($params)) {
         /** @todo separate credentials and salt checking */
-        if (
-          !empty($this->sess_cfg['fingerprint'])
-          && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
+        if (!empty($this->sess_cfg['fingerprint'])
+            && $this->getPrint($this->_get_session('fingerprint')) === $this->sess_cfg['fingerprint']
         ) {
           /** @todo separate credentials and salt checking */
           $this->_check_credentials($params);
@@ -499,7 +504,7 @@ class User extends Basic implements Implementor
           } else {
             $this->setError(7);
           }
-        } else {
+        } elseif ($this->check()) {
           $this->setError(18);
         }
       } else {
@@ -1550,18 +1555,51 @@ class User extends Basic implements Implementor
               [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]]
             )
           )) {
-            $pass = $this->db->selectOne(
+            $numPasses = $this->db->count(
               $this->class_cfg['tables']['passwords'],
-              $arch['passwords']['pass'],
-              [$arch['passwords']['id_user'] => $id],
-              [$arch['passwords']['added'] => 'DESC']
+              [$arch['passwords']['id_user'] => $id]
             );
-            if ($this->_check_password($params[$f['pass']], $pass)) {
-              $this->_login($id);
-            } else {
-              $this->recordAttempt();
-              // Canceling authentication if num_attempts > max_attempts
-              $this->setError($this->checkAttempts() ? 6 : 4);
+            // If no password is recorded we send a connection link
+            if (!$numPasses) {
+              $cfg = json_decode($this->db->selectOne($this->class_cfg['tables']['users'], $this->fields['cfg'], [$arch['users']['id'] => $id]) ?: '[]', true);
+              if (empty($cfg['empty_attempts'])) {
+                $cfg['empty_attempts'] = [
+                  'num' => 0,
+                  'last' => time()
+                ];
+
+              }
+              if ($cfg['empty_attempts']['num'] >= self::MAX_EMPTY_ATTEMPTS) {
+                if ($cfg['empty_attempts']['last'] > (time() - (3*3600))) {
+                  $this->setError(25);
+                }
+                else {
+                  $cfg['empty_attempts']['num'] = 0;
+                  $cfg['empty_attempts']['last'] = time();
+                }
+              }
+
+              if ($this->check()) {
+                $cfg['empty_attempts']['num']++;
+                $this->db->update($this->class_cfg['tables']['users'], [$this->fields['cfg'] => json_encode($cfg)], [$arch['users']['id'] => $id]);
+                $this->getManager()->makeHotlink($id);
+                $this->setError(26);
+              }
+            }
+            else {
+              $pass = $this->db->selectOne(
+                $this->class_cfg['tables']['passwords'],
+                $arch['passwords']['pass'],
+                [$arch['passwords']['id_user'] => $id],
+                [$arch['passwords']['added'] => 'DESC']
+              );
+              if ($this->_check_password($params[$f['pass']], $pass)) {
+                $this->_login($id);
+              } else {
+                $this->recordAttempt();
+                // Canceling authentication if num_attempts > max_attempts
+                $this->setError($this->checkAttempts() ? 6 : 4);
+              }
             }
           } else {
             $this->setError(6);

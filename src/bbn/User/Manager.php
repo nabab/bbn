@@ -234,29 +234,38 @@ You can click the following link to access directly your account:<br>
       $sort = $arch['users']['email'];
     }
 
-    $sql  = "SELECT ";
-    $done = [];
-    foreach ($arch['users'] as $n => $f){
-      if (!\in_array($f, $done)) {
-        $sql .= $db->cfn($f, $tables['users'], 1).', ';
-        array_push($done, $f);
-      }
-    }
-
-    $gr   = !empty($group_id) && \bbn\Str::isUid($group_id) ? "AND " . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . " = UNHEX('$group_id')" : '';
-    $sql .= "
-      MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},
-      COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}
-      FROM {$db->escape($tables['users'])}
-        JOIN {$db->tsn($tables['groups'], 1)}
-          ON {$db->cfn($arch['users']['id_group'], $tables['users'], 1)} = {$db->cfn($arch['groups']['id'], $tables['groups'], 1)}
-          $gr
-        LEFT JOIN {$db->tsn($tables['sessions'])}
-          ON {$db->cfn($s['id_user'], $tables['sessions'], 1)} = {$db->cfn($arch['users']['id'], $tables['users'], 1)}
-      WHERE {$db->cfn($arch['users']['active'], $tables['users'], 1)} = 1
-      GROUP BY {$db->cfn($arch['users']['id'], $tables['users'], 1)}
-      ORDER BY {$db->cfn($sort, $tables['users'], 1)}";
-    return $db->getRows($sql);
+    $fields = array_map(function($a) use($db) {
+      return $db->cfn($a, $this->class_cfg['tables']['users']);
+    }, array_values($arch['users']));
+    $fields[$s['last_activity']] = "MAX($s[last_activity])";
+    $fields[$s['sess_id']] = "COUNT($s[sess_id])";
+    return $this->db->rselectAll([
+      'tables' => [$tables['users']],
+      'fields' => $fields,
+      'join' => [[
+        'table' => $tables['sessions'],
+        'on' => [
+          'conditions' => [[
+            'field' => $db->cfn($s['id_user'], $tables['sessions']),
+            'exp' => $db->cfn($arch['users']['id'], $tables['users'])
+          ]]
+        ]
+      ], [
+        'table' => $tables['groups'],
+        'on' => [
+          'conditions' => [[
+            'field' => $db->cfn($arch['users']['id_group'], $tables['users']),
+            'exp' => $db->cfn($arch['groups']['id'], $tables['groups'])
+          ]]
+        ]
+      ]],
+      'where' => [$arch['users']['active'] => 1],
+      'group_by' => [$db->cfn($arch['users']['id'], $tables['users'])],
+      'order' => [[
+        'field' => $db->cfn($sort, $tables['users']),
+        'dir' => 'ASC'
+      ]]
+    ]);
   }
 
 
@@ -272,13 +281,13 @@ You can click the following link to access directly your account:<br>
 
     if ($user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
-      array_values($u),
+      $u,
       $where
     )
     ) {
       if ($session = $this->db->rselect(
         $this->class_cfg['tables']['sessions'],
-        array_values($this->class_cfg['arch']['sessions']),
+        $this->class_cfg['arch']['sessions'],
         [$this->class_cfg['arch']['sessions']['id_user'] => $user[$u['id']]],
         [$this->class_cfg['arch']['sessions']['last_activity'] => 'DESC']
       )
@@ -336,12 +345,13 @@ You can click the following link to access directly your account:<br>
 
   public function getUsers($group_id = null): array
   {
-    return $this->db->getColArray(
-      "
-      SELECT ".$this->class_cfg['arch']['users']['id']."
-      FROM ".$this->class_cfg['tables']['users']."
-      WHERE {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['active'])} = 1
-      AND ".$this->class_cfg['arch']['users']['id_group']." ".( $group_id ? "= ".(int)$group_id : "!= 1" )
+    return $this->db->getColumnValues(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']['id'],
+      [
+        $this->class_cfg['arch']['users']['active'] => 1,
+        $this->class_cfg['arch']['users']['id_group'] => $group_id
+      ]
     );
   }
 
@@ -350,12 +360,12 @@ You can click the following link to access directly your account:<br>
   {
     $r = [];
     $u = $this->class_cfg['arch']['users'];
-    foreach ($this->db->rselectAll('bbn_users') as $a){
+    foreach ($this->db->rselectAll($this->class_cfg['tables']['users'], $u) as $a){
       $r[] = [
-        'value' => $a[$u['id']],
+        'value' => $a['id'],
         'text' => $this->getName($a, false),
-        'id_group' => $a[$u['id_group']],
-        'active' => $a[$u['active']] ? true : false
+        'id_group' => $a['id_group'],
+        'active' => $a['active'] ? true : false
       ];
     }
 
@@ -428,7 +438,7 @@ You can click the following link to access directly your account:<br>
         $idx = 'login';
       }
 
-      return $user[$this->class_cfg['arch']['users'][$idx]];
+      return $user[$idx];
     }
 
     return '';
@@ -1080,13 +1090,22 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
+    if (!($pref = \bbn\User\Preferences::getInstance())) {
+      throw new \Exception("No User\Preferences instance!");
+    }
+
+    if (!($prefCfg = $pref->getClassCfg())) {
+      throw new \Exception("No User\Preferences cfg!");
+    }
+
+
     return (bool)$this->db->insertIgnore(
-      'bbn_users_options',
+      $prefCfg['tables']['user_options'],
       [
-        'id_option' => $id_perm,
-        'id_user' => $id_user,
-        'id_group' => $id_group,
-        'public' => $public
+        $prefCfg['arch']['user_options']['id_option'] => $id_perm,
+        $prefCfg['arch']['user_options']['id_user'] => $id_user,
+        $prefCfg['arch']['user_options']['id_group'] => $id_group,
+        $prefCfg['arch']['user_options']['public'] => $public
       ]
     );
   }
@@ -1098,13 +1117,21 @@ You can click the following link to access directly your account:<br>
       throw new \Exception("No paraneters!");
     }
 
+    if (!($pref = \bbn\User\Preferences::getInstance())) {
+      throw new \Exception("No User\Preferences instance!");
+    }
+
+    if (!($prefCfg = $pref->getClassCfg())) {
+      throw new \Exception("No User\Preferences cfg!");
+    }
+
     return (bool)$this->db->deleteIgnore(
-      'bbn_users_options',
+      $prefCfg['tables']['user_options'],
       [
-        'id_option' => $id_perm,
-        'id_user' => $id_user,
-        'id_group' => $id_group,
-        'public' => $public
+        $prefCfg['arch']['user_options']['id_option'] => $id_perm,
+        $prefCfg['arch']['user_options']['id_user'] => $id_user,
+        $prefCfg['arch']['user_options']['id_group'] => $id_group,
+        $prefCfg['arch']['user_options']['public'] => $public
       ]
     );
   }
