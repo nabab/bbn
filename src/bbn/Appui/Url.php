@@ -186,7 +186,7 @@ class Url extends bbn\Models\Cls\Db
       $id_url = $tmp;
     }
 
-    if ($id_url && ($data = $this->select($id_url))) {
+    if ($id_url && ($data = $this->rselect($id_url))) {
       return $data;
     }
 
