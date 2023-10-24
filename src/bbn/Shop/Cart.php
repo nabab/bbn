@@ -800,7 +800,7 @@ class Cart extends DbCls
           unset($p);
         }
         $mailData['total'] = '€ ' . (string)number_format(round((float)$this->getProductsAmount($idCart), 2), 2, ',', '');
-        $mailData['link'] = $_SERVER["HTTP_ORIGIN"].'/checkout';
+        $mailData['link'] = BBN_URL.'checkout';
         $title = Tpl::render($template['title'], $mailData);
         $content = Tpl::render($template['content'], $mailData);
         if($mailCls->insertEmail($email, $title, $content)) {
