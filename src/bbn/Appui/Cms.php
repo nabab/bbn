@@ -1064,6 +1064,69 @@ class Cms extends DbCls
   }
 
 
+  public function insertType(array $t): ?string
+  {
+    $idAlias = $this->opt->fromCode('bbn-cms', 'editors', 'note', 'appui');
+    $idParent = $this->opt->fromCode('types', 'note', 'appui');
+    if (!empty($idAlias)
+      && !empty($idParent)
+      && !empty($t['text'])
+      && !empty($t['code'])
+    ) {
+      if (!empty($t['prefix'])
+        && !str_ends_with($t['prefix'], '/')
+      ) {
+        $t['prefix'] .= '/';
+      }
+      return $this->opt->add([
+        'id_parent' => $idParent,
+        'id_alias' => $idAlias,
+        'text' => $t['text'],
+        'code' => $t['code'],
+        'front_img' => !empty($t['front_img']) ? 1 : 0,
+        'prefix' => !empty($t['prefix']) ? $t['prefix'] : ''
+      ]);
+    }
+
+    return null;
+  }
+
+
+  public function updateType(string $id, array $t): bool
+  {
+    if (($old = $this->opt->option($id))
+      && !empty($t['text'])
+      && !empty($t['code'])
+    ) {
+      if (($old['text'] !== $t['text'])
+        && !$this->opt->setText($id, $t['text'])
+      ) {
+        throw new \Exception(X::_("Error during CMS type's text update: %s", $id));
+      }
+
+      if (($old['code'] !== $t['code'])
+        && !$this->opt->setCode($id, $t['code'])
+      ) {
+        throw new \Exception(X::_("Error during CMS type's code update: %s", $id));
+      }
+
+      if ((($old['front_img'] !== $t['front_img'])
+          || ($old['prefix'] !== $t['prefix']))
+        && !$this->opt->setProp($id, [
+          'front_img' => !empty($t['front_img']) ? 1 : 0,
+          'prefix' => !empty($t['prefix']) ? $t['prefix'] : ''
+        ])
+      ) {
+        throw new \Exception(X::_("Error during CMS type's props update: %s", $id));
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+
   public function getTypes(): array
   {
     $o =& $this;
