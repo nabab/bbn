@@ -484,7 +484,7 @@ class Medias extends bbn\Models\Cls\Db
       $root   .= 'media/';
       $path    = X::makeStoragePath($root, '', 0, $this->fs);
       $dpath   = substr($path, strlen($root));
-      $name    = X::basename($file);
+      $name    = normalizer_normalize(X::basename($file));
       $mime    = mime_content_type($file) ?: null;
       $content = [
         'path' => $dpath,
@@ -501,9 +501,9 @@ class Medias extends bbn\Models\Cls\Db
           $cf['arch']['medias']['id_user'] => $this->usr->getId() ?: BBN_EXTERNAL_USER_ID,
           $cf['arch']['medias']['type'] => $id_type,
           $cf['arch']['medias']['mimetype'] => $mime,
-          $cf['arch']['medias']['title'] => $title,
-          $cf['arch']['medias']['description'] => $description,
-          $cf['arch']['medias']['name'] => $name ?? null,
+          $cf['arch']['medias']['title'] => normalizer_normalize($title),
+          $cf['arch']['medias']['description'] => normalizer_normalize($description),
+          $cf['arch']['medias']['name'] => $name ?: null,
           $cf['arch']['medias']['content'] => $content ? json_encode($content) : null,
           $cf['arch']['medias']['private'] => $private ? 1 : 0,
           $cf['arch']['medias']['created'] => date('Y-m-d H:i:s')
@@ -518,10 +518,12 @@ class Medias extends bbn\Models\Cls\Db
           $file,
           $path.$id
         );
-        $new_file = $path.$id.'/'.X::basename($file);
-        chmod($new_file, 0644);
+        // Normalize the filename
+        rename($path.$id.'/'.X::basename($file), $path.$id.'/'.$name);
+        $newFile = $path.$id.'/'.$name;
+        chmod($newFile, 0644);
         if (strpos($mime, 'image/') === 0) {
-          $image = new Image($new_file, $this->fs);
+          $image = new Image($newFile, $this->fs);
           $tst = $this->getThumbsSizesByType($id_type);
           $ts =  !empty($tst) && !empty($tst['thumbs']) ? \array_map(function($t){
             return [
