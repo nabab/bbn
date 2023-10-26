@@ -44,7 +44,7 @@ class Url extends bbn\Models\Cls\Db
       $url = str_replace('//', '/', $url);
     }
 
-    return $url . ($prefix ? '/' . $prefix : '');
+    return normalizer_normalize($url . ($prefix ? '/' . $prefix : ''));
   }
 
 
