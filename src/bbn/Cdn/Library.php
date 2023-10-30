@@ -552,7 +552,9 @@ SQL,
         }
 
         $path = 'lib/';
-        if (BBN_IS_DEV && @is_dir(BBN_PUBLIC . 'dev/' . $info['name'] . '/' . $info['version'])) {
+        if (constant('BBN_IS_DEV')
+            && @is_dir(constant('BBN_PUBLIC') . 'dev/' . $info['name'] . '/' . $info['version'])
+        ) {
           $path = 'dev/';
         }
 
@@ -568,8 +570,8 @@ SQL,
           'path' => $path,
           'files' => []
         ];
-        $files                                        =& $this->libs[$info['name']][$info['internal']]['files'];
-        $prepend                                      =& $this->libs[$info['name']][$info['internal']]['prepend'];
+        $files   =& $this->libs[$info['name']][$info['internal']]['files'];
+        $prepend =& $this->libs[$info['name']][$info['internal']]['prepend'];
 
         // From here, adding files (no matter the type) to $this->libs array for each library
         // Adding language files if they must be prepent
@@ -582,8 +584,8 @@ SQL,
         if (isset($info['content']->files) && is_array($info['content']->files)) {
           // Adding each files - no matter the type
           foreach ($info['content']->files as $f) {
-            if (isset($this->info['theme']) && strpos($f, '%s')) {
-              $f = sprintf($f, $this->info['theme']);
+            if (isset($info['theme']) && strpos($f, '%s')) {
+              $f = sprintf($f, $info['theme']);
             }
 
             if (isset($info['prepend'][$f])) {

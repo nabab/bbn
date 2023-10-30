@@ -201,7 +201,7 @@ class User extends Basic implements Implementor
      * @var bool
      */
     'hotlinks' => false,
-    'show' => 'name',
+    'show' => 'username',
     'mailer' => '\\bbn\\Mail',
     'ip_address' => true
   ];
