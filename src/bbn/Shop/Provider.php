@@ -96,10 +96,9 @@ class Provider extends DbCls
   public function addProviderEmail(string $id_provider, string $email) 
   { 
     $cfg = $this->getClassCfg();
-    $chars = ' \n\r\t\v\x00';
     if (!$this::providerEmailExists($id_provider, $email)) {
       return $this->db->insert($cfg['tables']['emails'], [
-        $cfg['arch']['emails']['email'] => trim($email, $chars),
+        $cfg['arch']['emails']['email'] => $email,
         $cfg['arch']['emails']['id_provider'] => $id_provider
       ]);
     }
