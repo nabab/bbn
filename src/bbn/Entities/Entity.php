@@ -30,7 +30,7 @@ class Entity
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(protected Db $db, array $cfg = null)
   {
     // The database connection
     $this->db = $db;

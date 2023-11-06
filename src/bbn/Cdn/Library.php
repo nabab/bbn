@@ -582,8 +582,8 @@ SQL,
         if (isset($info['content']->files) && is_array($info['content']->files)) {
           // Adding each files - no matter the type
           foreach ($info['content']->files as $f) {
-            if (isset($this->info['theme']) && strpos($f, '%s')) {
-              $f = sprintf($f, $this->info['theme']);
+            if (isset($info['theme']) && strpos($f, '%s')) {
+              $f = sprintf($f, $info['theme']);
             }
 
             if (isset($info['prepend'][$f])) {

@@ -244,6 +244,7 @@ You can click the following link to access directly your account:<br>
       'fields' => $fields,
       'join' => [[
         'table' => $tables['sessions'],
+        'type' => 'left',
         'on' => [
           'conditions' => [[
             'field' => $db->cfn($s['id_user'], $tables['sessions']),
