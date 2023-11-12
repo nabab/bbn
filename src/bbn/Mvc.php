@@ -670,16 +670,13 @@ class Mvc implements Mvc\Api
 
         unset($bbn_inc_data);
 
-        /*
         try {
-          eval('?>'.$bbn_inc_content);
+          eval('use bbn\Str; use bbn\X; ?>'.$bbn_inc_content);
         }
         catch (\Exception $e){
-          //error_log($e->getMessage());
-          X::logError($e->getCode(), , $bbn_inc_file, 1);
+          error_log($e->getMessage());
+          X::logError($e->getCode(), $e->getMessage(), $bbn_inc_file, $e->getLine());
         }
-        */
-        eval('use bbn\X as xx; use bbn\Str as st; ?>' . $bbn_inc_content);
 
         $c = ob_get_contents();
         ob_end_clean();
