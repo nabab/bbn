@@ -93,6 +93,9 @@ class Medias extends bbn\Models\Cls\Db
   /** @var string $imageRoot */
   protected $imageRoot;
 
+  /** @var string $fileRoot */
+  protected $fileRoot;
+
   public function __construct(Db $db)
   {
     parent::__construct($db);
@@ -123,7 +126,20 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     return false;
-    
+  }
+
+  public function setFileRoot(string $root): bool
+  {
+    if ($root) {
+      if (substr($root, -1) !== '/') {
+        $root .= '/';
+      }
+
+      $this->fileRoot = $root;
+      return true;
+    }
+
+    return false;
   }
 
   public function getImageUrl(string $id = null): string
@@ -134,10 +150,25 @@ class Medias extends bbn\Models\Cls\Db
       }
 
       if (!$this->imageRoot) {
-        $this->imageRoot = Mvc::getPluginUrl('appui-note').'/media/image/';
+        $this->setImageRoot(Mvc::getPluginUrl('appui-note').'/media/image/');
       }
 
       return $this->imageRoot . (string)$id;
+    }
+  }
+
+  public function getFileUrl(string $id = null): string
+  {
+    if ($this->exists($id)) {
+      if ($url = $this->getUrl($id)) {
+        return $url;
+      }
+
+      if (!$this->fileRoot) {
+        $this->setFileRoot(Mvc::getPluginUrl('appui-note').'/media/download/');
+      }
+
+      return $this->fileRoot . (string)$id;
     }
   }
 
@@ -1216,8 +1247,8 @@ class Medias extends bbn\Models\Cls\Db
       $file = $this->getPath($data);
       $data['file']      = $file;
       $data['full_path'] = $file;
-      $data['path']      = $this->getImageUrl($data['id']);
       $data['is_image']  = $this->isImage($file);
+      $data['path']      = empty($data['is_image']) ? $this->getFileUrl($data['id']) : $this->getImageUrl($data['id']);
       if ($data['is_image'] && is_file($file)) {
         $img                = new \bbn\File\Image($file);
         $data['is_thumb']   = false;
