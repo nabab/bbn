@@ -307,7 +307,7 @@ class Mvc implements Mvc\Api
    */
   public static function getCachePath(string $plugin = null): string
   {
-    return BBN_DATA_PATH . 'cache/' . ($plugin ? $plugin . '/' : '');
+    return BBN_TMP_PATH . 'cache/' . ($plugin ? $plugin . '/' : '');
   }
 
 
