@@ -186,6 +186,30 @@ abstract class AbstractLinkType
     return $r;
   }
 
+
+  public function hasPeople($id_people): bool
+  {
+    return $this->db->count(
+      $this->class_table, [
+        $this->fields['id_entity'] => $this->entity->getId(),
+        $this->fields['link_type'] => $this->type,
+        $this->fields['id_people'] => $id_people
+      ]
+    ) > 0;
+  }
+
+
+  public function hasAddress($id_address): bool
+  {
+    return $this->db->count(
+      $this->class_table, [
+        $this->fields['id_entity'] => $this->entity->getId(),
+        $this->fields['link_type'] => $this->type,
+        $this->fields['id_address'] => $id_address
+      ]
+    ) > 0;
+  }
+
   /**
    * Returns a Link object from the given id or null if not exists.
    *
@@ -414,6 +438,38 @@ abstract class AbstractLinkType
     $param = [
       $this->fields['id_entity'] => $this->entity->getId(),
       $this->fields['id'] => $id,
+      $this->fields['link_type'] => $this->type
+    ];
+
+    if ($this->db->delete($this->class_table, $param)) {
+      return $id;
+    }
+
+    $this->error("Delete");
+    return false;
+  }
+
+  public function deleteByAddress($id)
+  {
+    $param = [
+      $this->fields['id_entity'] => $this->entity->getId(),
+      $this->fields['id_address'] => $id,
+      $this->fields['link_type'] => $this->type
+    ];
+
+    if ($this->db->delete($this->class_table, $param)) {
+      return $id;
+    }
+
+    $this->error("Delete");
+    return false;
+  }
+
+  public function deleteByPeople($id)
+  {
+    $param = [
+      $this->fields['id_entity'] => $this->entity->getId(),
+      $this->fields['id_people'] => $id,
       $this->fields['link_type'] => $this->type
     ];
 
