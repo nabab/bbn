@@ -614,10 +614,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         ) {
           $res[] = hex2bin($v);
         }
-        elseif (\is_string($v) && ((            ($cfg['values_desc'][$i]['type'] === 'date')
-              && (\strlen($v) < 10)) || (            ($cfg['values_desc'][$i]['type'] === 'time')
-              && (\strlen($v) < 8)) || (            ($cfg['values_desc'][$i]['type'] === 'datetime')
-              && (\strlen($v) < 19))            )
+        elseif (\is_string($v)
+          && ((($cfg['values_desc'][$i]['type'] === 'date') && (\strlen($v) < 10))
+            || (($cfg['values_desc'][$i]['type'] === 'time') && (\strlen($v) < 8))
+            || (($cfg['values_desc'][$i]['type'] === 'datetime') && (\strlen($v) < 19)))
+          && (($cfg['values_desc'][$i]['operator'] !== 'gten')
+            && ($cfg['values_desc'][$i]['operator'] !== 'gtn')
+            && ($cfg['values_desc'][$i]['operator'] !== 'lten')
+            && ($cfg['values_desc'][$i]['operator'] !== 'ltn'))
         ) {
           $res[] = $v.'%';
         }
@@ -1033,6 +1037,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               }
               break;
 
+            case 'gten':
+              if (isset($f['exp'])) {
+                $res .= '>= DATE_ADD(NOW(), INTERVAL '.$f['exp'].')';
+              }
+              else {
+                $res .= '>= DATE_ADD(NOW(), INTERVAL ?)';
+              }
+              break;
+
             case 'gt':
             case '>':
               if (isset($f['exp'])) {
@@ -1040,6 +1053,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               }
               else {
                 $res .= '> ?';
+              }
+              break;
+
+            case 'gtn':
+              if (isset($f['exp'])) {
+                $res .= '> DATE_ADD(NOW(), INTERVAL '.$f['exp'].')';
+              }
+              else {
+                $res .= '> DATE_ADD(NOW(), INTERVAL ?)';
               }
               break;
 
@@ -1053,6 +1075,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               }
               break;
 
+            case 'lten':
+              if (isset($f['exp'])) {
+                $res .= '<= DATE_SUB(NOW(), INTERVAL '.$f['exp'].')';
+              }
+              else {
+                $res .= '<= DATE_SUB(NOW(), INTERVAL ?)';
+              }
+              break;
+
             case 'lt':
             case '<':
               if (isset($f['exp'])) {
@@ -1060,6 +1091,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               }
               else {
                 $res .= '< ?';
+              }
+              break;
+
+            case 'ltn':
+              if (isset($f['exp'])) {
+                $res .= '< DATE_SUB(NOW(), INTERVAL '.$f['exp'].')';
+              }
+              else {
+                $res .= '< DATE_SUB(NOW(), INTERVAL ?)';
               }
               break;
 
