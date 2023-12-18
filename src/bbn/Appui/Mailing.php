@@ -278,36 +278,41 @@ class Mailing extends ClassDb
           ]
         ]],
         'where' => [
-          'conditions' => [
-            $cfgEmails['status'] => 'ready',
-            [
-              'logic' => 'OR',
-              'conditions' => [
-                [
-                  'field' => $cfgEmails['delivery'],
-                  'operator' => 'isnull'
-                ], [
-                  'field' => $cfgEmails['delivery'],
-                  'operator' => '<',
-                  'exp' => 'NOW()'
-                ]
-              ]
+          'conditions' => [[
+            'field' => $cfgEmails['status'],
+            'value' => 'ready'
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $cfgEmails['delivery'],
+              'operator' => 'isnull'
             ], [
-              'logic' => 'OR',
-              'conditions' => [
-                [
-                  'field' => $tableEmailings . '.' . $cfgEmailings['state'],
-                  'operator' => 'isnull'
-                ], [
+              'field' => $cfgEmails['delivery'],
+              'operator' => '<',
+              'exp' => 'NOW()'
+            ]]
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $tableEmailings . '.' . $cfgEmailings['state'],
+              'operator' => 'isnull'
+            ], [
+              'conditions' => [[
+                'field' => $tableEmailings . '.' . $cfgEmailings['sent'],
+                'operator' => '<=',
+                'exp' => 'NOW()'
+              ], [
+                'logic' => 'OR',
+                'conditions' => [[
                   'field' => $tableEmailings . '.' . $cfgEmailings['state'],
                   'value' => 'ready'
                 ], [
                   'field' => $tableEmailings . '.' . $cfgEmailings['state'],
                   'value' => 'sending'
-                ]
-              ]
-            ]
-          ]
+                ]]
+              ]]
+            ]]
+          ]]
         ],
         'order' => [$cfgEmails['priority']],
         'limit' => $limit
@@ -488,7 +493,31 @@ class Mailing extends ClassDb
       $cfgEmails = $this->class_cfg['arch']['emails'];
       $tableEmails = $this->class_cfg['tables']['emails'];
       foreach ($emails as $item) {
-        if ($this->db->insertIgnore(
+        if ($itemID = $this->db->selectOne([
+          'table' => $tableEmails,
+          'fields' => [$cfgEmails['id']],
+          'where' => [[
+            'field' => $cfgEmails['email'],
+            'value' => $item['email']
+          ], [
+            'field' => $cfgEmails['id_mailing'],
+            'value' => $id_mailing
+          ], [
+            'field' => $cfgEmails['status'],
+            'operator' => '!=',
+            'value' => 'success'
+          ]]
+        ])) {
+          if ($this->db->update($tableEmails, [
+            $cfgEmails['priority'] => $priority,
+            $cfgEmails['status'] => 'ready',
+            $cfgEmails['delivery'] => $date
+          ], [$cfgEmails['id'] => $itemID])) {
+            $item['id'] = $itemID;
+            $res[] = $item;
+          }
+        }
+        else if ($this->db->insertIgnore(
           $tableEmails, [
             $cfgEmails['email'] => $item['email'],
             $cfgEmails['id_mailing'] => $id_mailing,
@@ -496,8 +525,7 @@ class Mailing extends ClassDb
             $cfgEmails['status'] => 'ready',
             $cfgEmails['delivery'] => $date
           ]
-        )
-        ) {
+        )) {
           $item['id'] = $this->db->lastId();
           $res[] = $item;
         }
