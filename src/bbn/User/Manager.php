@@ -706,24 +706,24 @@ You can click the following link to access directly your account:<br>
    * @param int    $exp     Timestamp of the expiration date
    * @return manager
    */
-  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null): self
+  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null, string $url = null): self
   {
     if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {
       switch ($message)
       {
         case 'hotlink':
           if ($path = bbn\Mvc::getPluginUrl('appui-usergroup')) {
-            $this->messages[$message]['link'] = BBN_URL.$path.'/main/profile';
+            $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'/main/profile';
           }
           break;
         case 'creation':
           if ($path = bbn\Mvc::getPluginUrl('appui-core')) {
-            $this->messages[$message]['link'] = BBN_URL.$path.'/login/%s';
+            $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'/login/%s';
           }
           break;
         case 'password':
           if ($path = bbn\Mvc::getPluginUrl('appui-core')) {
-            $this->messages[$message]['link'] = BBN_URL.$path.'/login/%s';
+            $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'/login/%s';
           }
           break;
       }
