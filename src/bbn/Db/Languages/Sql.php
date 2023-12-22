@@ -618,10 +618,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           && ((($cfg['values_desc'][$i]['type'] === 'date') && (\strlen($v) < 10))
             || (($cfg['values_desc'][$i]['type'] === 'time') && (\strlen($v) < 8))
             || (($cfg['values_desc'][$i]['type'] === 'datetime') && (\strlen($v) < 19)))
-          && (($cfg['values_desc'][$i]['operator'] !== 'gten')
-            && ($cfg['values_desc'][$i]['operator'] !== 'gtn')
-            && ($cfg['values_desc'][$i]['operator'] !== 'lten')
-            && ($cfg['values_desc'][$i]['operator'] !== 'ltn'))
+          && (!isset($cfg['values_desc'][$i]['operator'])
+            || (($cfg['values_desc'][$i]['operator'] !== 'gten')
+              && ($cfg['values_desc'][$i]['operator'] !== 'gtn')
+              && ($cfg['values_desc'][$i]['operator'] !== 'lten')
+              && ($cfg['values_desc'][$i]['operator'] !== 'ltn')))
         ) {
           $res[] = $v.'%';
         }
