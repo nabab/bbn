@@ -1,7 +1,8 @@
 <?php
 namespace bbn;
 
-use \LightnCandy\LightnCandy;
+use Exception;
+use LightnCandy\LightnCandy;
 
 class Tpl {
 
@@ -25,7 +26,7 @@ class Tpl {
     }
 
     if (!$dir) {
-      throw new \Exception(X::_("Impossible to create the template directory"));
+      throw new Exception(X::_("Impossible to create the template directory"));
     }
 
     $md5 = md5($st);
@@ -47,7 +48,8 @@ class Tpl {
   }
 
 
-  static public function render($st, $data){
+  static public function render($st, $data): string
+  {
     if ( is_callable($tpl = self::renderer($st)) ){
       return $tpl($data);
     }
