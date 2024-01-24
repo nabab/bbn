@@ -1378,18 +1378,19 @@ class Option extends bbn\Models\Cls\Db
             $this->fields['code'] => $o[$this->fields['code']],
             $this->fields['text'] => $o[$this->fields['text']]
           ];
-        }
 
-        if ( !empty($cfg['schema']) ){
-          if ( \is_string($cfg['schema']) ){
-            $cfg['schema'] = json_decode($cfg['schema'], true);
-          }
-
-          foreach ( $cfg['schema'] as $s ){
-            if (!empty($s['field']) && !in_array($s['field'], [$this->fields['id'], $this->fields['code'], $this->fields['text']])) {
-              $res[$o[$this->fields['code']]][$s['field']] = $o[$s['field']] ?? null;
+          if ( !empty($cfg['schema']) ){
+            if ( \is_string($cfg['schema']) ){
+              $cfg['schema'] = json_decode($cfg['schema'], true);
+            }
+  
+            foreach ( $cfg['schema'] as $s ){
+              if (!empty($s['field']) && !in_array($s['field'], [$this->fields['id'], $this->fields['code'], $this->fields['text']])) {
+                $res[$o[$this->fields['code']]][$s['field']] = $o[$s['field']] ?? null;
+              }
             }
           }
+
         }
 
         return $res;
