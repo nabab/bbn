@@ -442,7 +442,7 @@ class Task extends bbn\Models\Cls\Db
       foreach ( $tmp as $s ){
         if ( $t = $this->idState($s) ){
           array_push($statuses, $t);
-          array_push($where, "`bbn_tasks`.`state` = $t");
+          array_push($where, "`bbn_tasks`.`state` = 0x$t");
         }
       }
     }
@@ -481,7 +481,7 @@ class Task extends bbn\Models\Cls\Db
     LIMIT $start, $limit";
 
     $opt = bbn\Appui\Option::getInstance();
-    $res = $this->db->getRows($sql, $id_user);
+    $res = $this->db->getRows($sql, hex2bin($id_user));
     foreach ( $res as $i => $r ){
       $res[$i]['hasChildren'] = $r['num_children'] ? true : false;
     }
