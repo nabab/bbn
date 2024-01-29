@@ -71,7 +71,11 @@ class Date
    */
   public static function format($date='', $mode='', ?string $locale = null)
 	{
-		/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time */
+    if (!$locale && defined('BBN_LOCALE')) {
+      $locale = BBN_LOCALE;
+    }
+
+    /* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time */
 		if ( empty($date) ){
 			$idate = time();
     }
@@ -145,11 +149,15 @@ class Date
    *
    * @return string
    */
-  public static function monthpickerOptions($val = '', ?string $local = null)
+  public static function monthpickerOptions($val = '', ?string $locale = null)
   {
     $arr = [];
+    if (!$locale && defined('BBN_LOCALE')) {
+      $locale = BBN_LOCALE;
+    }
+
     for ( $i = 1; $i <= 12; $i++ ) {
-      $arr[$i] = self::monthName($i, $local);
+      $arr[$i] = self::monthName($i, $locale);
     }
 
     return X::buildOptions($arr, $val);
@@ -172,7 +180,7 @@ class Date
    * @param string|null $local
    * @return false|string
    */
-  public static function intlDateFormat(string $format, int $timestamp, ?string $local = null)
+  public static function intlDateFormat(string $format, int $timestamp, ?string $locale = null)
   {
     if (!extension_loaded('intl')) {
       $formats_map = [
@@ -192,12 +200,20 @@ class Date
       return date($format, $timestamp);
     }
 
-    if (!$local && defined('BBN_LOCALE')) {
-      $local = BBN_LOCALE;
+    if (!$locale && defined('BBN_LOCALE')) {
+      $locale = BBN_LOCALE;
+    }
+
+    if (!$locale) {
+      $locale = setlocale(LC_ALL, 0);
+    }
+
+    if (!$locale) {
+      $locale = 'en_US';
     }
 
     $formatter = new \IntlDateFormatter(
-      $local,
+      $locale,
       \IntlDateFormatter::LONG,
       \IntlDateFormatter::LONG,
       null,
