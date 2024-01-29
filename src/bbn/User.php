@@ -506,7 +506,8 @@ class User extends Basic implements Implementor
         } elseif ($this->check()) {
           $this->setError(18);
         }
-      } else {
+      }
+      else {
         $this->checkSession();
       }
     }
