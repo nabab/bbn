@@ -1701,7 +1701,7 @@ class Task extends bbn\Models\Cls\Db
       if ( $ok ){
         $ok = $this->db->update('bbn_tasks_sessions', [
           'length' => $now - strtotime($active_track['start']),
-          'id_note' => $id_note ?: NULL
+          'id_note' => !empty($id_note) ? $id_note : NULL
         ], [
           'id' => $active_track['id']
         ]);
