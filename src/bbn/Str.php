@@ -1899,4 +1899,23 @@ class Str
   }
 
 
+  /**
+   * From https://github.com/symfony/polyfill-php72/blob/v1.26.0/Php72.php#L24-L38
+   *
+   * @param string $s
+   * @return string
+   */
+  public static function toUtf8(string $s): string {
+    if (mb_check_encoding($s, 'UTF-8')) {
+      return $s;
+    }
+
+    if (mb_check_encoding($s, 'ISO-8859-1')) {
+      return mb_convert_encoding($s, 'UTF-8', 'ISO-8859-1');
+    }
+
+    return mb_convert_encoding($s, 'UTF-8', mb_list_encodings());
+  }
+
+
 }

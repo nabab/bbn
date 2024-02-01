@@ -1,6 +1,8 @@
 <?php
 namespace bbn\Appui;
 
+use bbn\Str;
+
 class Mailbox2
 {
 
@@ -543,39 +545,10 @@ class Mailbox2
       // so append parts together with blank row.
       $charset = $params['charset']; // assume all parts are same charset
       if (strtolower($p->subtype) == 'plain') {
-        if (stripos($charset, 'ISO') !== false) {
-          /*
-          include_once $bbng_app_path . 'classes/convert.php';
-          $utfConverter = new utf8($charset);
-          if ($utfConverter->loadCharset($charset)) {
-            $plainmsg .= $utfConverter->strToUtf8(trim($data)) .PHP_EOL;
-          }
-          else {
-            $plainmsg .= trim($data) .PHP_EOL;
-          }
-          */
-          $plainmsg .= trim(utf8_encode($data)) .PHP_EOL;
-        }
-        else {
-          $plainmsg .= trim($data) .PHP_EOL;
-        }
+        $plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
       }
       else {
-        if (stripos($charset, 'ISO') !== false) {
-          /*
-          include_once $bbng_app_path . 'classes/convert.php';
-          if ($utfConverter = new utf8($charset)) {
-            $htmlmsg .= $utfConverter->strToUtf8(trim($data)) . '<br /><br />';
-          }
-          else {
-            $htmlmsg .= trim($data) . '<br /><br />';
-          }
-          */
-          $htmlmsg .= trim(utf8_encode($data)) . '<br><br>';
-        }
-        else {
-          $htmlmsg .= trim($data) . '<br /><br />';
-        }
+        $htmlmsg .= trim(Str::toUtf8($data)) . '<br><br>';
 
         if (!empty($htmlmsg)) {
           $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
@@ -595,23 +568,7 @@ class Mailbox2
     // There are no PHP functions to parse embedded messages,
     // so this just appends the raw source to the main message.
     elseif ($p->type == 2 && $data && strtolower($p->subtype) == 'plain') {
-      if (stripos($charset, 'ISO') !== false) {
-        /*
-        include_once $bbng_app_path . 'classes/convert.php';
-        $utfConverter = new utf8($charset);
-        if ($utfConverter->loadCharset($charset)) {
-          $plainmsg .= $utfConverter->strToUtf8(trim($data)) . "
-";
-        } else {
-          $plainmsg .= trim($data) . "
-";
-        }
-        */
-        $plainmsg .= trim(utf8_encode($data)) .PHP_EOL;
-      }
-      else {
-        $plainmsg .= trim($data) .PHP_EOL;
-      }
+      $plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
     }
 
     // SUBPART RECURSION
