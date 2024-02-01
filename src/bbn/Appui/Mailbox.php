@@ -1592,30 +1592,10 @@ class Mailbox extends Basic
       // so append parts together with blank row.
       $this->_charset = $params['charset'];  // assume all parts are same charset
       if (strtolower($structure->subtype) === 'plain') {
-        if (stripos($this->_charset, 'ISO') !== false) {
-          //$utfConverter     = new \utf8($this->_charset);
-          //$this->_plainmsg .= $utfConverter->loadCharset($this->_charset) ? $utfConverter->strToUtf8(trim($data)) . PHP_EOL : trim($data) . PHP_EOL;
-          $this->_plainmsg .= trim(utf8_encode($data)).PHP_EOL;
-        }
-        else {
-          $this->_plainmsg .= trim($data).PHP_EOL;
-        }
+        $this->_plainmsg .= trim(Str::toUtf8($data)).PHP_EOL;
       }
       else {
-        if (stripos($this->_charset,'ISO') !== false) {
-          $this->_htmlmsg .= trim(utf8_encode($data)).PHP_EOL;
-          /*
-          if ($utfConverter = new utf8($this->_charset)) {
-            $this->_htmlmsg .= $utfConverter->strToUtf8(trim($data)).'<br><br>';
-          }
-          else {
-            $this->_htmlmsg .= trim($data).'<br><br>';
-          }
-          */
-        }
-        else {
-          $this->_htmlmsg .= trim($data).'<br><br>';
-        }
+        $this->_htmlmsg .= trim(Str::toUtf8($data)).'<br><br>';
 
         if (!empty($this->_htmlmsg)) {
           $body_pattern = "/<body([^>]*)>(.*)<\/body>/smi";
