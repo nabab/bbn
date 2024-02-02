@@ -3800,6 +3800,53 @@ class X
 
 
   /**
+   * Converts an array of associative arrays into a JSONL string.
+   *
+   * This function takes an array of associative arrays and converts each array element into a JSON string. 
+   * Each JSON string is separated by a newline character, creating a JSONL (JSON Lines) format string.
+   *
+   * @param array $arr The array of associative arrays to be converted into JSONL.
+   * @return string A JSONL string where each line is a JSON-encoded representation of an element from the input array.
+   */
+  public static function toJsonl(array $arr)
+  {
+    $res = '';
+    foreach ($arr as $a) {
+      $res .= json_encode($a).PHP_EOL;
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Converts a JSONL string into an array of associative arrays.
+   *
+   * This function parses a JSONL string, where each line is a JSON-encoded string, into an array of associative arrays. 
+   * It throws an exception if any line in the JSONL string cannot be decoded into JSON.
+   *
+   * @param string $str The JSONL string to be converted into an array of associative arrays.
+   * @return array An array of associative arrays decoded from the JSONL string.
+   * @throws Exception if a line in the JSONL string cannot be decoded into JSON.
+   */
+  public static function fromJsonl(string $str)
+  {
+    $res = [];
+    $lines = explode(PHP_EOL, $str);
+    foreach ($lines as $line) {
+      $ar = json_decode($line, true);
+      if ($ar === null && json_last_error() !== JSON_ERROR_NONE) {
+          throw new Exception("Error decoding JSON line");
+      }
+
+      $res[] = $ar;
+    }
+
+    return $res;
+  }
+
+
+  /**
    * @param $name
    * @param $arguments
    * @return mixed|null
