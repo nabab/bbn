@@ -351,10 +351,15 @@ class Mailing extends ClassDb
           if ($r['cfg']) {
             $r['cfg'] = json_decode($r['cfg'], true);
             if (!empty($r['cfg']['attachments'])) {
-              foreach ($r['cfg']['attachments'] as $a){
+              foreach ($r['cfg']['attachments'] as $filename => $a){
                 $f = X::indexOf($a, '/') === 0 ? $a : Mvc::getContentPath().$a;
                 if (file_exists($f)) {
-                  $att[] = $f;
+                  if (!empty($filename) && is_string($filename)) {
+                    $att[$filename] = $f;
+                  }
+                  else {
+                    $att[] = $f;
+                  }
                 }
               }
             }
