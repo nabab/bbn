@@ -2,13 +2,16 @@
 
 namespace bbn\Db\Languages;
 
+use Exception;
+use PDO;
+use PDOException;
+use PDOStatement;
+use bbn\Str;
+use bbn\X;
 use bbn\Db\Engines;
 use bbn\Db\EnginesApi;
 use bbn\Db\SqlEngines;
 use bbn\Db\SqlFormatters;
-use bbn\Str;
-use bbn\X;
-use Exception;
 use PHPSQLParser\PHPSQLParser;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
@@ -103,9 +106,9 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   protected $cache_renewal = 3600;
 
   /**
-   * @var \PDO
+   * @var PDO
    */
-  protected ?\PDO $pdo;
+  protected ?PDO $pdo;
 
   /**
    * @var array $queries
@@ -533,7 +536,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /**
    * Executes the original PDO query function
    *
-   * @return false|\PDOStatement
+   * @return false|PDOStatement
    */
   public function rawQuery()
   {
@@ -1979,7 +1982,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * Executes a writing statement and return the number of affected rows or return a query object for the reading * statement
    *
    * @param $statement
-   * @return false|\PDOStatement
+   * @return false|PDOStatement
    * @throws \Exception
    */
   public function query($statement)
@@ -2172,7 +2175,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $q['exe_time'] = microtime(true) - $time;
         }
       }
-      catch (\PDOException $e) {
+      catch (PDOException $e) {
         $this->error($e);
       }
 
@@ -2200,6 +2203,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         return $r ?: false;
       }
     }
+  }
+
+  public function executeStatement($statement)
+  {
+    return $this->pdo->exec($statement);
   }
 
   public function correctTypes($st)
@@ -3648,7 +3656,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function startFancyStuff(): self
   {
-    $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\bbn\Db\Query::class, [$this]]);
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [\bbn\Db\Query::class, [$this]]);
     $this->_fancy = 1;
 
     return $this;
@@ -3666,7 +3674,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function stopFancyStuff(): self
   {
-    $this->pdo->setAttribute(\PDO::ATTR_STATEMENT_CLASS, [\PDOStatement::class]);
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [PDOStatement::class]);
     $this->_fancy = false;
 
     return $this;
@@ -4977,11 +4985,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
   /**
-   * @param \PDOStatement $PDOStatement
+   * @param PDOStatement $PDOStatement
    * @param ...$args
    * @return bool|array
    */
-  public function fetchAllResults(\PDOStatement $PDOStatement, ...$args)
+  public function fetchAllResults(PDOStatement $PDOStatement, ...$args)
   {
     if (method_exists($PDOStatement, '_fetchAll')) {
       return $PDOStatement->_fetchAll(...$args);

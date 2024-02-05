@@ -4,8 +4,10 @@
  */
 namespace bbn\Db;
 
-use bbn;
+use bbn\Str;
 use PDO;
+use PDOException;
+use PDOStatement;
 
 /**
  * An extended approach of the PDOStatement object
@@ -19,7 +21,7 @@ use PDO;
  * @version 0.2r89
  * @todo Get the count function to work with query with "HAVING"
  */
-class Query extends \PDOStatement implements Actions
+class Query extends PDOStatement implements Actions
 {
 
   /**
@@ -93,7 +95,7 @@ class Query extends \PDOStatement implements Actions
         try{
           return parent::execute($args);
         }
-        catch (\PDOException $e){
+        catch (PDOException $e){
           $this->db->error($e);
         }
       }
@@ -102,32 +104,32 @@ class Query extends \PDOStatement implements Actions
         try{
           return parent::execute(...$args);
         }
-        catch (\PDOException $e){
+        catch (PDOException $e){
           $this->db->error($e);
         }
       }
       else{
         if ($this->values && \is_array($this->values) && count($this->values)) {
           foreach ($this->values as $i => $v){
-            if (bbn\Str::isBuid($v)) {
+            if (Str::isBuid($v)) {
               if ($this->db->getEngine() === 'pgsql') {
-                $this->bindValue($i + 1, $v, \PDO::PARAM_LOB);
+                $this->bindValue($i + 1, $v, PDO::PARAM_LOB);
               } else {
                 $this->bindValue($i + 1, $v);
               }
             }
             else{
               if (\is_int($v)) {
-                $param = \PDO::PARAM_INT;
+                $param = PDO::PARAM_INT;
               }
               elseif (\is_bool($v)) {
-                $param = \PDO::PARAM_BOOL;
+                $param = PDO::PARAM_BOOL;
               }
               elseif ($v === null) {
-                $param = \PDO::PARAM_NULL;
+                $param = PDO::PARAM_NULL;
               }
               else {
-                $param = \PDO::PARAM_STR;
+                $param = PDO::PARAM_STR;
               }
 
               $this->bindValue($i + 1, $v, $param);
@@ -138,7 +140,7 @@ class Query extends \PDOStatement implements Actions
         try{
           return parent::execute();
         }
-        catch (\PDOException $e){
+        catch (PDOException $e){
           $this->db->error($e);
         }
       }
@@ -177,7 +179,7 @@ class Query extends \PDOStatement implements Actions
    * @param bool $ctor_args
    * @return bool|array
    */
-  public function _fetchAll($fetch_style = \PDO::FETCH_BOTH, $fetch_argument = false, $ctor_args = false)
+  public function _fetchAll($fetch_style = PDO::FETCH_BOTH, $fetch_argument = false, $ctor_args = false)
   {
     $this->execute();
     if ($ctor_args) {
@@ -254,7 +256,7 @@ class Query extends \PDOStatement implements Actions
   public function getRow(): ?array
   {
     if (!$this->write) {
-      return $this->fetch(\PDO::FETCH_ASSOC) ?: null;
+      return $this->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     return null;
@@ -267,7 +269,7 @@ class Query extends \PDOStatement implements Actions
   public function getRows(): ?array
   {
     if (!$this->write) {
-      $r = $this->_fetchAll(\PDO::FETCH_ASSOC);
+      $r = $this->_fetchAll(PDO::FETCH_ASSOC);
       return $r === false ? null : $r;
     }
 
@@ -281,7 +283,7 @@ class Query extends \PDOStatement implements Actions
   public function getIrow(): ?array
   {
     if (!$this->write) {
-      return $this->fetch(\PDO::FETCH_NUM) ?: null;
+      return $this->fetch(PDO::FETCH_NUM) ?: null;
     }
 
     return null;
@@ -294,7 +296,7 @@ class Query extends \PDOStatement implements Actions
   public function getIrows(): ?array
   {
     if (!$this->write) {
-      return $this->_fetchAll(\PDO::FETCH_NUM);
+      return $this->_fetchAll(PDO::FETCH_NUM);
     }
 
     return null;
@@ -308,7 +310,7 @@ class Query extends \PDOStatement implements Actions
   {
     if (!$this->write) {
       $r  = [];
-      $ds = $this->_fetchAll(\PDO::FETCH_ASSOC);
+      $ds = $this->_fetchAll(PDO::FETCH_ASSOC);
       foreach ($ds as $d){
         foreach ($d as $k => $v){
           if (!isset($r[$k])) {
@@ -341,7 +343,7 @@ class Query extends \PDOStatement implements Actions
   public function getObject(): ?\stdClass
   {
     if (!$this->write) {
-      return $this->fetch(\PDO::FETCH_OBJ) ?: null;
+      return $this->fetch(PDO::FETCH_OBJ) ?: null;
     }
 
     return null;
@@ -354,7 +356,7 @@ class Query extends \PDOStatement implements Actions
   public function getObjects(): ?array
   {
     if (!$this->write) {
-      return $this->_fetchAll(\PDO::FETCH_OBJ);
+      return $this->_fetchAll(PDO::FETCH_OBJ);
     }
 
     return null;

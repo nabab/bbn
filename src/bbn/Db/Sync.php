@@ -1,11 +1,10 @@
 <?php
 namespace bbn\Db;
 
-use bbn;
 use bbn\Db;
 use bbn\X;
 use bbn\Str;
-
+use bbn\Appui\History;
 class Sync
 {
 
@@ -106,7 +105,7 @@ class Sync
   }
 
   /**
-   * @param bbn\Db $db
+   * @param Db $db
    * @param array $sync_cfg
    * @param array  $tables
    * @param string  $sync_table
@@ -180,9 +179,9 @@ class Sync
   public static function createTable()
   {
     if (\is_array(self::$sync_connection)) {
-      self::$sync_connection = new bbn\Db(self::$sync_connection);
+      self::$sync_connection = new Db(self::$sync_connection);
     }
-    if (class_exists('\\bbn\\Appui\\History') && bbn\Appui\History::$is_used) {
+    if (History::$is_used) {
       self::$has_history = 1;
     }
     /** @todo Replace with DB functions */
@@ -363,7 +362,7 @@ class Sync
   // Looking at the rows from the other DB with status = 0 and setting them to 1
   // Comparing the new rows with the ones from this DB
   // Deleting the rows from this DB which have state = 1
-  public static function sync(bbn\Db $db, $dbs='', $sync_table='', $num_try = 0)
+  public static function sync(Db $db, $dbs='', $sync_table='', $num_try = 0)
   {
     if (!self::isInit()) {
       die("DB sync is not initiated");

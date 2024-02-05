@@ -2,9 +2,11 @@
 
 namespace bbn\Mvc;
 
-use bbn;
-use bbn\X;
 use Exception;
+use stdClass;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\X;
 
 class Controller implements Api
 {
@@ -12,7 +14,7 @@ class Controller implements Api
 
   /**
    * The MVC class from which the controller is called
-   * @var bbn\Mvc
+   * @var Mvc
    */
   private $_mvc;
 
@@ -83,55 +85,58 @@ class Controller implements Api
    */
   private $_plugin_name;
 
-  public
-    /**
-     * The db connection if accepted by the mvc class.
-     */
-    $db,
-    /**
-     * @var string The mode of the controller (dom, cli...), which will determine its route
-     */
-    $mode,
-    /**
-     * The data model
-     * @var array
-     */
-    $data = [],
-    /**
-     * All the parts of the path requested
-     * @var array
-     */
-    $params = [],
-    /**
-     * All the parts of the path requested which are not part of the controller path
-     * @var array
-     */
-    $arguments = [],
-    /**
-     * The data sent through POST
-     * @var array
-     */
-    $post = [],
-    /**
-     * The data sent through GET
-     * @var array
-     */
-    $get = [],
-    /**
-     * A numeric indexed array of the files sent through POST (different from native)
-     * @var array
-     */
-    $files = [],
-    /**
-     * The output object
-     * @var null|object
-     */
-    $obj,
-    /**
-     * An external object that can be filled after the object creation and can be used as a global with the function add_inc
-     * @var stdClass
-     */
-    $inc;
+  /**
+   * @var Db The db connection if accepted by the mvc class.
+   */
+  public Db $db;
+  /**
+   * @var string The mode of the controller (dom, cli...), which will determine its route
+   */
+  public string $mode;
+  /**
+   * @var string The URL leading to this controller
+   */
+  public string $url;
+  /**
+   * The data model
+   * @var array
+   */
+  public array $data = [];
+  /**
+   * All the parts of the path requested
+   * @var array
+   */
+  public array $params = [];
+  /**
+   * All the parts of the path requested which are not part of the controller path
+   * @var array
+   */
+  public array $arguments = [];
+  /**
+   * The data sent through POST
+   * @var array
+   */
+  public array $post = [];
+  /**
+   * The data sent through GET
+   * @var array
+   */
+  public array $get = [];
+  /**
+   * A numeric indexed array of the files sent through POST (different from native)
+   * @var array
+   */
+  public array $files = [];
+  /**
+   * The output object
+   * @var null|object
+   */
+  public ?stdClass $obj;
+  /**
+   * An external object that can be filled after the object creation and can be used as a global with the function add_inc
+   * @var stdClass
+   */
+  public ?stdClass $inc;
 
 
   /**
@@ -139,11 +144,11 @@ class Controller implements Api
    * It should be called only once from within the script.
    * All subsequent calls to controllers should be done through $this->add($path).
    *
-   * @param bbn\Mvc       $mvc
+   * @param Mvc       $mvc
    * @param array         $files
    * @param array|boolean $data
    */
-  public function __construct(bbn\Mvc $mvc, array $files, $data = false)
+  public function __construct(Mvc $mvc, array $files, $data = false)
   {
     $this->_mvc = $mvc;
     $this->reset($files, $data);
@@ -170,7 +175,7 @@ class Controller implements Api
       $this->data         = \is_array($data) ? $data : [];
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
-      /** @var bbn\Db db */
+      /** @var Db db */
       $this->db     = $this->_mvc->getDb();
       $this->inc    = &$this->_mvc->inc;
       $this->post   = $this->_mvc->getPost();
@@ -178,7 +183,7 @@ class Controller implements Api
       $this->files  = $this->_mvc->getFiles();
       $this->params = $this->_mvc->getParams();
       $this->url    = $this->getUrl();
-      $this->obj    = new \stdClass();
+      $this->obj    = new stdClass();
     }
   }
 

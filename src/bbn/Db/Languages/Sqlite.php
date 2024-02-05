@@ -4,7 +4,8 @@
  */
 namespace bbn\Db\Languages;
 
-use bbn;
+use PDO;
+use PDOException;
 use bbn\Str;
 use bbn\X;
 
@@ -117,14 +118,14 @@ class Sqlite extends Sql
       $this->host     = $cfg['host'];
       $this->connection_code = $cfg['host'];
 
-      $this->pdo = new \PDO(...$cfg['args']);
-      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-      $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-      $this->pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
+      $this->pdo = new PDO(...$cfg['args']);
+      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
       $this->cfg = $cfg;
       $this->setHash($cfg['args']);
 
-    } catch (\PDOException $e) {
+    } catch (PDOException $e) {
       $err = X::_("Impossible to create the connection").
         " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
         .X::_("with the following error").$e->getMessage();
@@ -246,7 +247,7 @@ class Sqlite extends Sql
       $table = trim($bits[0]);
     }
 
-    if (bbn\Str::checkName($table) && bbn\Str::checkName($db)) {
+    if (Str::checkName($table) && Str::checkName($db)) {
       if ($db === 'main') {
         return $escaped ? $this->qte.$table.$this->qte : $table;
       }
@@ -273,7 +274,7 @@ class Sqlite extends Sql
       $bits  = explode('.', str_replace($this->qte, '', $table));
       $table = end($bits);
 
-      if (bbn\Str::checkName($table)) {
+      if (Str::checkName($table)) {
         return $escaped ? $this->qte.$table.$this->qte : $table;
       }
     }
@@ -345,7 +346,7 @@ class Sqlite extends Sql
       return null;
     }
 
-    if (empty($database) || !bbn\Str::checkName($database)) {
+    if (empty($database) || !Str::checkName($database)) {
       $database = $this->getCurrent() === 'main' ? '' : '"'.$this->getCurrent().'".';
     }
     elseif ($database === 'main') {
@@ -359,7 +360,7 @@ class Sqlite extends Sql
       FROM '.$database.'"sqlite_master"
         WHERE type = \'table\''
     ) )
-        && $t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM)
+        && $t1 = $this->fetchAllResults($r, PDO::FETCH_NUM)
     ) {
       foreach ($t1 as $t){
         if (strpos($t[0], 'sqlite') !== 0) {
@@ -625,7 +626,7 @@ class Sqlite extends Sql
     if (($table = $this->tableFullName($table, true))
         && ($r = $this->rawQuery("SELECT sql FROM sqlite_master WHERE name = $table"))
     ) {
-      return $r->fetch(\PDO::FETCH_ASSOC)['sql'] ?? '';
+      return $r->fetch(PDO::FETCH_ASSOC)['sql'] ?? '';
     }
 
     return '';
@@ -899,9 +900,9 @@ class Sqlite extends Sql
       $column = [$column];
     }
 
-    $name = bbn\Str::encodeFilename($table);
+    $name = Str::encodeFilename($table);
     foreach ($column as $i => $c){
-      if (!bbn\Str::checkName($c)) {
+      if (!Str::checkName($c)) {
         $this->error("Illegal column $c");
       }
 
@@ -912,7 +913,7 @@ class Sqlite extends Sql
       }
     }
 
-    $name = bbn\Str::cut($name, 50);
+    $name = Str::cut($name, 50);
     if ($table = $this->tableFullName($table, 1)) {
       $query = 'CREATE '.( $unique ? 'UNIQUE ' : '' )."INDEX `$name` ON $table ( ".implode(', ', $column);
       if (($order === "ASC") || ($order === "DESC")) {
@@ -940,7 +941,7 @@ class Sqlite extends Sql
    */
   public function deleteIndex(string $table, string $key): bool
   {
-    if (($this->tableFullName($table, 1)) && bbn\Str::checkName($key)) {
+    if (($this->tableFullName($table, 1)) && Str::checkName($key)) {
       //changed the row above because if the table has no rows query() returns 0
       //return (bool)$this->db->query("ALTER TABLE $table DROP INDEX `$key`");
       return $this->query('DROP INDEX IF EXISTS '.$key) !== false;
@@ -958,7 +959,7 @@ class Sqlite extends Sql
    */
   public function createDatabase(string $database): bool
   {
-    if (bbn\Str::checkFilename($database)) {
+    if (Str::checkFilename($database)) {
       if (empty(strpos($database, '.sqlite'))) {
         $database = $database.'.sqlite';
       }
@@ -981,7 +982,7 @@ class Sqlite extends Sql
    */
   public function dropDatabase(string $database): bool
   {
-    if (bbn\Str::checkFilename($database)) {
+    if (Str::checkFilename($database)) {
       if (empty(strpos($database, '.sqlite'))) {
         $database = $database.'.sqlite';
       }
@@ -1122,7 +1123,7 @@ class Sqlite extends Sql
     $sql   = '';
     foreach ($columns as $n => $c){
       $name = $c['name'] ?? $n;
-      if (isset($c['type']) && bbn\Str::checkName($name)) {
+      if (isset($c['type']) && Str::checkName($name)) {
         $st = $this->colSimpleName($name, true).' '.$c['type'];
         if (!empty($c['maxlength'])) {
           $st .= '('.$c['maxlength'].')';
@@ -1130,7 +1131,7 @@ class Sqlite extends Sql
         elseif (!empty($c['values']) && \is_array($c['values'])) {
           $st .= '(';
           foreach ($c['values'] as $i => $v){
-            $st .= "'".bbn\Str::escapeSquotes($v)."'";
+            $st .= "'".Str::escapeSquotes($v)."'";
             if ($i < count($c['values']) - 1) {
               $st .= ',';
             }
@@ -1148,7 +1149,7 @@ class Sqlite extends Sql
         }
 
         if (isset($c['default'])) {
-          $st .= ' DEFAULT '.($c['default'] === 'NULL' ? 'NULL' : "'".bbn\Str::escapeSquotes($c['default'])."'");
+          $st .= ' DEFAULT '.($c['default'] === 'NULL' ? 'NULL' : "'".Str::escapeSquotes($c['default'])."'");
         }
 
         $lines[] = $st;
