@@ -7,6 +7,7 @@ use stdClass;
 use bbn\Db;
 use bbn\Mvc;
 use bbn\X;
+use bbn\Tpl;
 
 class Controller implements Api
 {
@@ -397,7 +398,7 @@ class Controller implements Api
       $model = $this->data;
     }
 
-    return \is_array($model) ? bbn\Tpl::render($view, $model) : $view;
+    return \is_array($model) ? Tpl::render($view, $model) : $view;
   }
 
 
