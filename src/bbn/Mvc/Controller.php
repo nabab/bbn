@@ -131,7 +131,7 @@ class Controller implements Api
    * The output object
    * @var null|object
    */
-  public ?stdClass $obj;
+  public $obj;
   /**
    * An external object that can be filled after the object creation and can be used as a global with the function add_inc
    * @var stdClass
