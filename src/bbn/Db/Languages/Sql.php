@@ -967,11 +967,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
           switch (strtolower($f['operator'])) {
             case '=':
-              if ($is_uid && $is_bool) {
-                $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
+              if ($is_uid || $is_bool || $is_number|| $is_date) {
+                $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
               }
               else {
-                $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
+                $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
               }
               break;
             case '!=':
@@ -1133,7 +1133,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               break;
 
             default:
-              $res .= $is_uid && $is_bool ? 'LIKE ?' : '= ?';
+              $res .= $is_uid || $is_bool || $is_number|| $is_date ? '= ?' : 'LIKE ?';
               break;
           }
         }
@@ -1732,7 +1732,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               else{
                 $f = [
                   'field' => $key,
-                  'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                  'operator' => is_string($f) && !Str::isUid($f) && !Str::isNumber($f) ? 'LIKE' : '=',
                   'value' => $f
                 ];
               }

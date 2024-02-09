@@ -837,7 +837,7 @@ class User extends Basic implements Implementor
    */
   public function updateActivity(): self
   {
-    if ($id_session = $this->getIdSession() && $this->check()) {
+    if (($id_session = $this->getIdSession()) && $this->check()) {
       $p = &$this->class_cfg['arch']['sessions'];
       $this->db->update(
         $this->class_cfg['tables']['sessions'],

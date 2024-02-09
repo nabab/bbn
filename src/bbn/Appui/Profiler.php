@@ -4,16 +4,22 @@ namespace bbn\Appui;
 /**
  * Undocumented class
  */
-use bbn;
 use bbn\X;
+use bbn\Mvc;
+use bbn\Db;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\Dbconfig;
+use bbn\Util\Timer;
+use bbn\Appui\Grid;
+
 
 /**
  * Class chat
  * @package bbn\Appui
  */
-class Profiler extends bbn\Models\Cls\Db
+class Profiler extends DbCls
 {
-  use bbn\Models\Tts\Dbconfig;
+  use Dbconfig;
 
   protected $is_started = false;
 
@@ -47,12 +53,12 @@ class Profiler extends bbn\Models\Cls\Db
   /**
    * Constructor.
    *
-   * @param bbn\Db $db The db connection
+   * @param Db $db The db connection
    */
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
-    $this->chrono = new \bbn\Util\Timer();
+    $this->chrono = new Timer();
     $this->_init_class_cfg(self::$default_class_cfg);
   }
 
@@ -98,11 +104,11 @@ class Profiler extends bbn\Models\Cls\Db
   /**
    * Finishing the profiling and inserting profile in DB.
    *
-   * @param bbn\Mvc $mvc
+   * @param Mvc $mvc
    *
    * @return bool
    */
-  public function finish(bbn\Mvc $mvc): bool
+  public function finish(Mvc $mvc): bool
   {
     if ($this->is_started && $this->check()) {
       $this->is_started = false;
@@ -140,10 +146,20 @@ class Profiler extends bbn\Models\Cls\Db
             $data['parent'],
             $data['child']
           ]               = X::split($fn, '==>');
-          $data['mem_na'] = $data['mem.na'];
-          $data['mem_nf'] = $data['mem.nf'];
-          $data['mem_aa'] = $data['mem.aa'];
-          unset($data['mem.na'], $data['mem.nf'], $data['mem.aa']);
+          $data['mem_na'] = $data['mem.na'] ?? '';
+          $data['mem_nf'] = $data['mem.nf'] ?? '';
+          $data['mem_aa'] = $data['mem.aa'] ?? '';
+          if (isset($data['mem.na'])) {
+            unset($data['mem.na']);
+          }
+
+          if (isset($data['mem.nf'])) {
+            unset($data['mem.nf']);
+          }
+
+          if (isset($data['mem.aa'])) {
+            unset($data['mem.aa']);
+          }
           $res['data'][] = $data;
         }
 
@@ -173,7 +189,7 @@ class Profiler extends bbn\Models\Cls\Db
       unset($c['content']);
       $data['limit'] = isset($data['limit']) && is_int($data['limit']) ? $data['limit'] : 50;
       $data['start'] = isset($data['start']) && is_int($data['start']) ? $data['start'] : 0;
-      $grid = new \bbn\Appui\Grid(
+      $grid = new Grid(
         $this->db,
         $data,
         [
