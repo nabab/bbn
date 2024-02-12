@@ -323,6 +323,7 @@ class Statistic extends bbn\Models\Cls\Db
         $test      = date('Ymd', $time);
         while ($test <= $today) {
           $res = $this->run($real_start);
+          //X::adump($res, $this->db->last(), $this->db->getLastValues());
           /*
           if ($num_days) {
             X::hdump($res, $this->db->getLastValues());

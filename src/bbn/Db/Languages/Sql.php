@@ -2160,12 +2160,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
         }
         // This is a reading statement, it will prepare the statement and return a query object
-        else{
+        else {
           if (!$q['prepared']) {
             // Native PDO function which will use Db\Query as base class
             $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
           }
-          else{
+          else {
             // Returns the same Db\Query object
             $q['prepared']->init($params['values']);
           }

@@ -378,6 +378,7 @@ class Db implements Db\Actions
     return $this->language->processCfg($args, $force);
   }
 
+
   /**
    * Checks if the database is ready to process a query.
    *
