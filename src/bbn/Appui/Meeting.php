@@ -1,9 +1,14 @@
 <?php
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
 use bbn\Str;
 use bbn\X;
+use bbn\User\Preferences;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Appui\Passwords;
 
 /**
  * Meeting management in Appui
@@ -13,10 +18,10 @@ use bbn\X;
  * @license http://www.opensource.org/licenses/mit-license.html MIT License
  * @link https://bbn.io/bbn-php/doc/class/Appui/Meeting
  */
-class Meeting extends bbn\Models\Cls\Db
+class Meeting extends DbCls
 {
-  use bbn\Models\Tts\Optional;
-  use bbn\Models\Tts\Dbconfig;
+  use Optional;
+  use DbActions;
 
   private $opt;
 
@@ -68,18 +73,18 @@ class Meeting extends bbn\Models\Cls\Db
     $this->opt = self::getOptionsObject();
     $optCfg = $this->opt->getClassCfg();
     if (!$optCfg) {
-      throw new \Error(_('No configuration found for the Option class'));
+      throw new Exception(_('No configuration found for the Option class'));
     }
     $this->optFields = $optCfg['arch']['options'];
-    $pref = \bbn\User\Preferences::getInstance();
+    $pref = Preferences::getInstance();
     if (!empty($pref)) {
       $prefCfg = $pref->getClassCfg();
       if (!$prefCfg) {
-        throw new \Error(_('No configuration found for the Preferences class'));
+        throw new Exception(_('No configuration found for the Preferences class'));
       }
       $this->prefTable = $prefCfg['table'];
       $this->prefFields = $prefCfg['arch']['user_options'];
-      $this->passCls = new \bbn\Appui\Passwords($this->db);
+      $this->passCls = new Passwords($this->db);
     }
   }
 
@@ -87,7 +92,7 @@ class Meeting extends bbn\Models\Cls\Db
   public function getRoom(string $idRoom): ?array
   {
     if (!Str::isUid($idRoom)) {
-      throw new \Error(_('The room id given is not a uuid'));
+      throw new Exception(_('The room id given is not a uuid'));
     }
     if (($room = $this->db->rselect($this->prefTable, [], [$this->prefFields['id'] => $idRoom]))
       && Str::isJson($room[$this->prefFields['cfg']])
@@ -105,7 +110,7 @@ class Meeting extends bbn\Models\Cls\Db
       $server = $this->getOptionId($server);
     }
     if (!Str::isUid($server)) {
-      throw new \Error(_('The server id given is not a uuid'));
+      throw new Exception(_('The server id given is not a uuid'));
     }
     $where = [
       'conditions' => [[
@@ -292,7 +297,7 @@ class Meeting extends bbn\Models\Cls\Db
     $userCfg = $user->getClassCfg();
     $idGroup = $userData[$userCfg['arch']['users']['id_group']] ?? false;
     if (empty($idGroup)) {
-      throw new \Error(sprintf(_('No group found for the user %s'), $idUser));
+      throw new Exception(sprintf(_('No group found for the user %s'), $idUser));
     }
     return $this->getRooms($server, $idUser, $idGroup);
   }
@@ -306,7 +311,7 @@ class Meeting extends bbn\Models\Cls\Db
     $userCfg = $user->getClassCfg();
     $idGroup = $userData[$userCfg['arch']['users']['id_group']] ?? false;
     if (empty($idGroup)) {
-      throw new \Error(sprintf(_('No group found for the user %s'), $idUser));
+      throw new Exception(sprintf(_('No group found for the user %s'), $idUser));
     }
     return $this->getAllRooms($idUser, $idGroup);
   }
@@ -316,13 +321,13 @@ class Meeting extends bbn\Models\Cls\Db
   {
     $idServer = self::getOptionId($server, 'list');
     if (!$idServer) {
-      throw new \Error(sprintf(_('Server not found %s'), $server));
+      throw new Exception(sprintf(_('Server not found %s'), $server));
     }
     if ($this->db->selectOne($this->prefTable, $this->prefFields['id'], [
       $this->prefFields['text'] => $name,
       $this->prefFields['id_option'] => $idServer
     ])) {
-      throw new \Error(sprintf(_('The room %s already exists'), $name));
+      throw new Exception(sprintf(_('The room %s already exists'), $name));
     }
     if ($this->db->insert($this->prefTable, [
       $this->prefFields['text'] => $name,
@@ -350,7 +355,7 @@ class Meeting extends bbn\Models\Cls\Db
   {
     $old = $this->getRoom($idRoom);
     if (!$old) {
-      throw new \Exception(sprintf(_('Room not found %s'), $idRoom));
+      throw new Exception(sprintf(_('Room not found %s'), $idRoom));
     }
     $toUpd = [];
     if (($old[$this->prefFields['id_user']] !== $idUser)){
@@ -369,7 +374,7 @@ class Meeting extends bbn\Models\Cls\Db
         [$this->prefFields['id_option'], '=', $old[$this->prefFields['id_option']]],
         [$this->prefFields['id'], '!=', $idRoom]
       ])) {
-        throw new \Error(sprintf(_('The room %s already exists'), $name));
+        throw new Exception(sprintf(_('The room %s already exists'), $name));
       }
       $toUpd[$this->prefFields['text']] = $name;
     }
@@ -383,10 +388,10 @@ class Meeting extends bbn\Models\Cls\Db
       $oldModerators = $this->getModerators($idRoom);
       foreach ($oldModerators as $m) {
         if (!$this->removeModerator($m, $idRoom)) {
-          throw new \Exception(sprintf(_('Error during the elimination of the moderator %s from the room %s'), $m, $idRoom));
+          throw new Exception(sprintf(_('Error during the elimination of the moderator %s from the room %s'), $m, $idRoom));
         }
         if (!$this->addModerator($m, $idRoom)) {
-          throw new \Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
+          throw new Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
         }
       }
     }
@@ -397,7 +402,7 @@ class Meeting extends bbn\Models\Cls\Db
           if (!\in_array($m, $moderators, true)
             && !$this->removeModerator($m, $idRoom)
           ) {
-            throw new \Exception(sprintf(_('Error during the elimination of the moderator %s from the room %s'), $m, $idRoom));
+            throw new Exception(sprintf(_('Error during the elimination of the moderator %s from the room %s'), $m, $idRoom));
           }
         }
       }
@@ -405,7 +410,7 @@ class Meeting extends bbn\Models\Cls\Db
         if (!\in_array($m, $oldModerators, true)
           && !$this->addModerator($m, $idRoom)
         ) {
-          throw new \Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
+          throw new Exception(sprintf(_('Error during the insertion of the moderator %s to the room %s'), $m, $idRoom));
         }
       }
     }
@@ -426,7 +431,7 @@ class Meeting extends bbn\Models\Cls\Db
   {
     if (Str::isUid($idUser) && Str::isUid($idRoom)) {
       if (!($room = $this->db->rselect($this->prefTable, [], [$this->prefFields['id'] => $idRoom]))) {
-        throw new \Exception(sprintf(_('No room found with the id %s'), $idRoom));
+        throw new Exception(sprintf(_('No room found with the id %s'), $idRoom));
       }
       if ($this->isModerator($idUser, $idRoom)) {
         return true;
@@ -463,10 +468,10 @@ class Meeting extends bbn\Models\Cls\Db
       $t = $this->passCls->userGet($idModerator, $u);
       if (empty($t)) {
         if (!($server = $this->getServerByRoom($idRoom))) {
-          throw new \Error(sprintf(_('No server found by the room %s'), $idRoom));
+          throw new Exception(sprintf(_('No server found by the room %s'), $idRoom));
         }
         if (!$this->passCls->userStore($this->makeJWT($server[$this->optFields['code']], $r[$this->prefFields['text']]), $idModerator, $u)) {
-          throw new \Error(sprintf(_('Error during JWT storing for the user %s for the room %s'), $idUser, $idRoom));
+          throw new Exception(sprintf(_('Error during JWT storing for the user %s for the room %s'), $idUser, $idRoom));
         }
         $t = $this->passCls->userGet($idModerator, $u);
       }
@@ -697,7 +702,7 @@ class Meeting extends bbn\Models\Cls\Db
       $fields['id_room'] => $idRoom,
       $fields['started'] => date('Y-m-d H:i:s')
     ])) {
-      throw new \Error(sprintf(_('Error starting the meeting for the room %s'), $idRoom));
+      throw new Exception(sprintf(_('Error starting the meeting for the room %s'), $idRoom));
     }
     return $this->db->lastId();
   }
@@ -707,7 +712,7 @@ class Meeting extends bbn\Models\Cls\Db
   {
     $m = $this->getMeeting($idMeeting);
     if (empty($m)) {
-      throw new \Error(sprintf(_('Meeting not found with the id %s'), $idMeeting));
+      throw new Exception(sprintf(_('Meeting not found with the id %s'), $idMeeting));
     }
     $date = date('Y-m-d H:i:s');
     $fields = $this->class_cfg['arch']['meetings'];
@@ -718,7 +723,7 @@ class Meeting extends bbn\Models\Cls\Db
         $fields['id'] => $idMeeting
       ])
     ) {
-      throw new \Error(sprintf(_('Error ending the meeting with the id %s'), $idMeeting));
+      throw new Exception(sprintf(_('Error ending the meeting with the id %s'), $idMeeting));
     }
     $fields = $this->class_cfg['arch']['participants'];
     $this->db->update($this->class_cfg['tables']['participants'], [
@@ -929,10 +934,10 @@ class Meeting extends bbn\Models\Cls\Db
   private function getModerator(string $idUser, string $idRoom): ?array
   {
     if (!Str::isUid($idUser)) {
-      throw new \Error(_('The user id given is not a uuid'));
+      throw new Exception(_('The user id given is not a uuid'));
     }
     if (!Str::isUid($idRoom)) {
-      throw new \Error(_('The room id given is not a uuid'));
+      throw new Exception(_('The room id given is not a uuid'));
     }
     return $this->db->rselect($this->prefTable, [], [
       $this->prefFields['id_alias'] => $idRoom,
@@ -958,14 +963,14 @@ class Meeting extends bbn\Models\Cls\Db
       'alg' => 'HS256'
     ]);
     if (!($appId = $this->getAppId($server))) {
-      throw new \Error(sprintf(_('No App ID found for the server %s'), $server));
+      throw new Exception(sprintf(_('No App ID found for the server %s'), $server));
     }
     if (Str::isUid($room)) {
       $r = $this->getRoom($room);
       $room = $r[$this->prefFields['text']] ?? '';
     }
     if (empty($room)) {
-      throw new \Error(sprintf(_('No room name - %s'), $room));
+      throw new Exception(sprintf(_('No room name - %s'), $room));
     }
     // Create token payload as a JSON string
     $payload = json_encode([
@@ -979,7 +984,7 @@ class Meeting extends bbn\Models\Cls\Db
     // Encode payload to base64 string
     $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
     if (!($appSecret = $this->getAppSecret($server))) {
-      throw new \Error(sprintf(_('No App Secret found for the server %s'), $server));
+      throw new Exception(sprintf(_('No App Secret found for the server %s'), $server));
     }
     // Create signature hash
     $signature = hash_hmac(

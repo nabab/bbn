@@ -1,27 +1,29 @@
 <?php
 namespace bbn\Entities;
 
+use bbn\X;
 use bbn\Db;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Entities;
+use bbn\Appui\Option;
+use bbn\Models\Tts\Cache;
+
 
 class Entity
 {
+  use Cache;
 
-  use Dbconfig;
+  protected array $class_cfg;
 
-  /** @var array */
-  protected static $default_class_cfg = [
-    'table' => 'bbn_entities',
-    'tables' => [
-      'entities' => 'bbn_entities'
-    ],
-    'arch' => [
-      'entities' => [
-        'id' => 'id',
-        'name' => 'name'
-      ],
-    ],
-  ];
+  protected $fields;
+
+  protected $props;
+
+  protected $where;
+
+  /** @var null|bool Adherent verification status. */
+  private $checked = null;
+
+  protected $info = ['consulte' => false];
 
   /**
    * Constructor.
@@ -30,160 +32,95 @@ class Entity
    * @param array $cfg
    * @param array $params
    */
-  public function __construct(protected Db $db, array $cfg = null)
+  public function __construct(protected Db $db, protected string $id, protected Entities $entities)
   {
-    // The database connection
-    $this->db = $db;
-    // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
-
+    $this->class_cfg = $this->entities->getClassCfg();
+    $this->fields = $this->class_cfg['arch']['entities'];
+    $this->props = $this->class_cfg['props']['entities'];
+    $this->where = [
+      $this->fields['easy_id'] ? $this->fields['easy_id'] : $this->fields['id'] => $id
+    ];
+    $this->cacheInit();
 	}
 
-	public function search($fn, $cp=null){
-		if ( $cp && is_string($fn) ){
-			$fn = ['adresse' => $fn, 'cp' => $cp];
-		}
-		else if ( !is_array($fn) ){
-			$fn = $this->set_adresse($fn);
-		}
-		if ( !empty($fn['adresse']) && !empty($fn['cp']) ){
-			return $this->db->selectOne('bbn_addresses', 'id', [
-			  'cp' => $fn['cp'],
-			  'adresse' => $fn['adresse']
-      ]);
-		}
-		return false;
-	}
-
-
-  public function seek($p, int $start = 0, int $limit = 100){
-    if ( is_array($p) && ( !empty($p['adresse']) ||
-        !empty($p['email']) ||
-        !empty($p['tel']) ||
-        !empty($p['fax']) )
-    ){
-      $cond = [];
-      
-      if ( !empty($p['email']) && \bbn\Str::isEmail($p['email']) ){
-        array_push($cond, ['email', 'LIKE', $p['email']]);
-      }
-      if ( !empty($p['adresse']) && strlen($p['adresse']) > 7 ){
-        array_push($cond, ['adresse', 'LIKE', '%'.$p['adresse'].'%']);
-      }
-      if ( !empty($p['tel']) && (strlen($p['tel']) >= 6) ){
-        if ( strlen($p['tel']) !== 10 ){
-          array_push($cond, ['tel', 'LIKE', $p['tel'].'%']);
-        }
-        else{
-          array_push($cond, ['tel', 'LIKE', $p['tel']]);
-        }
-      }
-      if ( !empty($p['fax']) && (strlen($p['fax']) >= 6) ){
-        if ( strlen($p['fax']) !== 10 ){
-          array_push($cond, ['fax', 'LIKE', $p['fax'].'%']);
-        }
-        else{
-          array_push($cond, ['fax', 'LIKE', $p['fax']]);
-        }
-      }
-      if ( !empty($p['ville']) ){
-        array_push($cond, ['ville', 'LIKE', $p['ville']]);
-      }
-      if ( !empty($p['cp']) ){
-        array_push($cond, ['cp', 'LIKE', $p['cp']]);
-      }
-      return $this->db->getColumnValues("bbn_addresses", 'id', $cond, ['adresse', 'ville'], $limit, $start);
+  public function check(): bool
+  {
+    if ($this->checked === null) {
+      $this->checked = (bool)$this->db->count($this->class_cfg['tables']['entities'], $this->where);
     }
-		return false;
-	}
 
-
-  public function fullSearch($p, $start = 0, $limit = 0){
-    $r = [];
-    $res = \bbn\Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);
-    return $r;
+    return $this->checked;
   }
 
 
-  public function relations($id){
+  public function getId(): string
+  {
+    return $this->id;
   }
 
 
+  public function getFromTable()
+  {
+    $fields = $this->fields;
+    $table = $this->class_cfg['tables']['entities'];
+    $cfg = [
+      'tables' => [$table],
+      'fields' => array_values($this->getFieldsList()),
+      'where' => $this->where
+    ];
 
-  /*
-   * Fusionne l'historique de différents lieux et les supprime tous sauf le premier
-   *
-   * @var mixed $ids Un tableau d'IDs ou une liste d'arguments
-   */
-  public function fusion($ids){
-    $args = is_array($ids) ? $ids : func_get_args();
-    if ( count($args) > 1 ){
-      $id = array_shift($args);
-      $creation = [$this->db->selectOne('bbn_history', 'tst', [
-        'uid' => $id,
-        'opr' => 'INSERT'
-      ])];
-      foreach ( $args as $a ){
-        if ( $fn = $this->get_info($a) ){
-          $creation[] = $this->db->selectOne('bbn_history', 'tst', [
-            'uid' => $a
-          ]);
-          $cols = $this->db->getFieldsList('apst_liens');
-          $cols['creation'] = 'tst';
-          $links = $this->db->rselectAll([
-            'tables' => ['apst_liens'],
-            'fields' => $cols,
-            'join' => [
-              [
-                'table' => 'bbn_history',
-                'on' => [
-                  'conditions' => [
-                    [
-                      'field' => 'bbn_history.uid',
-                      'operator' => 'eq',
-                      'exp' => 'apst_liens.id'
-                    ]
-                  ],
-                  'logic' => 'AND'
-                ]
-              ]
-            ],
-            'where' => [
-              'id_lieu' => $a
-            ]
-          ]);
-          foreach ( $links as $link ){
-            $this->db->update('apst_liens', ['id_lieu' => $id], ['id' => $link['id']]);
-          }
-          $this->db->query("
-            UPDATE bbn_history
-            SET uid = ?
-            WHERE uid = ?
-            AND opr LIKE 'UPDATE'",
-            hex2bin($id),
-            hex2bin($a)
-          );
-          $this->db->query("
-            DELETE FROM bbn_history
-            WHERE uid = ?",
-            hex2bin($a)
-          );
-          $this->db->query("
-            DELETE FROM bbn_addresses
-            WHERE id = ?",
-            hex2bin($a)
-          );
-        }
-      }
-      $this->db->query("
-        UPDATE bbn_history
-        SET tst = ?
-        WHERE uid = ?
-        AND opr LIKE 'INSERT'",
-        min($creation),
-        hex2bin($id)
-      );
+    if (isset($fields['id_parent'], $this->class_cfg['entities']['props']['id_parent'])) {
+      $cfg['fields'][$this->class_cfg['entities']['props']['id_parent']['alias'] ?? 'parent'] = 'bbn_parents.' . $fields['name'];
+      $cfg['join'] = [[
+        'table' => $this->class_cfg['tables']['entities'],
+        'alias' => 'bbn_parents_entities',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_parents_entities.' . $fields['id'],
+            'exp' => $table . '.' . $fields['id_parent']
+          ]]
+        ]
+      ]];
     }
-    return 1;
+
+    $data = $this->db->rselect($cfg);
+    return $data;
   }
+
+
+  protected function getFieldsList(): array
+  {
+    $fields = $this->fields;
+    $props = $this->props;
+    $db = $this->db;
+    $table = $this->class_cfg['tables']['entities'];
+    return array_map(function ($a) use (&$db, $table) {
+      return $db->cfn($a, $table);
+    }, array_filter($fields, function($k) use (&$props) {
+      return !isset($props[$k]) || !array_key_exists('showable', $props[$k]) || $props[$k]['showable'];
+    }, ARRAY_FILTER_USE_KEY));
+
+  }
+
+
+  protected function getLink(string $id): ?Link
+  {
+    return $this->entities->getLink(Link::class, $id);
+  }
+
+  protected function people(): ?People
+  {
+    return $this->entities->people();
+  }
+
+  protected function address(): ?Address
+  {
+    return $this->entities->address();
+  }
+  
+  public function options(): ?Option
+  {
+    return $this->entities->options();
+  }
+
 }

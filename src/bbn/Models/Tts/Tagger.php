@@ -173,7 +173,7 @@ trait Tagger
       }
 
       if (!$this->class_cfg) {
-        throw new Exception(X::_("Impossible to init the tagger if the class hasn't the trait Dbconfig"));
+        throw new Exception(X::_("Impossible to init the tagger if the class hasn't the trait DbActions"));
       }
 
       if (empty($table) || empty($columns)) {

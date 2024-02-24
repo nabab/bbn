@@ -614,7 +614,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function dbFromItem(string $id_keycol): ?string
   {
-    if ($id_db = $this->dbIdFromItem($id_keycol)
+    if (($id_db = $this->dbIdFromItem($id_keycol))
         && ($r = $this->o->code($id_db))
     ) {
       return $r;
@@ -943,7 +943,7 @@ class Database extends bbn\Models\Cls\Cache
         array_walk(
           $a['keys'],
           function (&$w, $k) use ($table_id, $table) {
-            $w['id_option'] = $this->keyId($k, $table_id);
+            $w['id_option'] = $this->keyId($k, $table);
           }
         );
       }

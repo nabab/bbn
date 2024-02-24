@@ -7,7 +7,7 @@ class Pages extends bbn\Models\Cls\Db
 
   use
     bbn\Models\Tts\References,
-    bbn\Models\Tts\Dbconfig;
+    bbn\Models\Tts\DbActions;
 
 
   protected static

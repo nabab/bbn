@@ -5,14 +5,14 @@ namespace bbn\Shop;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Appui\Option;
 use bbn\Db;
 
 
 class Client extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
 
   /**
    * @var Option

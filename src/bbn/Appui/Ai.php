@@ -2,7 +2,7 @@
 
 namespace bbn\Appui;
 
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Db;
 use Orhanerday\OpenAi\OpenAi;
@@ -17,10 +17,10 @@ use bbn\File\System;
 class Ai extends DbCls
 {
   
-  use Dbconfig;
+  use DbActions;
   
   /**
-   * Default Dbconfig configuration for the class
+   * Default DbActions configuration for the class
    *
    * @var array $default_class_cfg
    */

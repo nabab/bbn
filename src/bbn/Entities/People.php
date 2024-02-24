@@ -3,13 +3,11 @@
 namespace bbn\Entities;
 
 use Exception;
-use PHPSQLParser\Test\Parser\variablesTest;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
 use bbn\Appui\History;
-use bbn\Appui\Option;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
 
 /**
@@ -19,13 +17,19 @@ use bbn\Models\Cls\Db as DbCls;
  */
 class People extends DbCls
 {
-  use Dbconfig;
+  use DbActions {
+    delete as private DbActionsDelete;
+    update as private DbActionsUpdate;
+  }
 
   /**
    * The default configuration for database interaction, specifying the table and fields.
    */
   protected static $default_class_cfg = [
     'table' => 'bbn_people',
+    'tables' => [
+      'people' => 'bbn_people'
+    ],
     'arch' => [
       'people' => [
         'id' => 'id',
@@ -37,19 +41,8 @@ class People extends DbCls
         'mobile' => 'mobile',
         'cfg' => 'cfg',
       ]
-    ],
-    'tables' => [
-      'people' => 'bbn_people'
     ]
   ];
-
-
-  /**
-   * A mapping of alternate civility representations to standard forms.
-   */
-  protected static $notCfg = [];
-
-  protected $options;
 
   private $tableRelations;
 
@@ -79,7 +72,6 @@ class People extends DbCls
   {
     parent::__construct($db);
     $this->_init_class_cfg($cfg);
-    $this->options = Option::getOptions();
   }
 
 
@@ -93,51 +85,45 @@ class People extends DbCls
    */
   public function parse(string $st, $email = false, $mobile = false): ?array
   {
-    $arc = &$this->class_cfg['arch']['people'];
     if (!empty($st)) {
+      $arc = &$this->class_cfg['arch']['people'];
       $fn = [];
       $fn[$arc['fname']] = '';
-      // Import: recherche, suppression et retour de commentaires entre parentheses
-      preg_match('/\(([^\)]+)/', $st, $m);
-      if (count($m) === 2) {
-        $st            = substr($st, 0, strpos($st, $m[0]));
-        $fn['comment'] = $m[1];
-      }
 
       // array_values reinitializes the keys after array_filter
-      $fullname = array_values(X::removeEmpty(explode(" ", $st), 1));
-      if (isset($fullname[0])) {
-        if (isset(self::$civs[Str::changeCase($fullname[0], 'upper')])) {
-          $fn[$arc['civility']] = self::$civs[Str::changeCase($fullname[0], 'upper')];
-          array_shift($fullname);
-          if (isset($fullname[0], self::$civs[Str::changeCase($fullname[0], 'upper')])) {
-            $fn[$arc['civility']] = 'M/MME';
-            array_shift($fullname);
-          }
-
-          if (!isset($fullname[0])) {
+      $nameParts = array_values(X::removeEmpty(explode(" ", $st), true));
+      if (isset($nameParts[0])) {
+        if (isset(self::$civs[Str::changeCase($nameParts[0], 'upper')])) {
+          $fn[$arc['civility']] = self::$civs[Str::changeCase($nameParts[0], 'upper')];
+          array_shift($nameParts);
+          if (!isset($nameParts[0])) {
             return null;
           }
         }
 
         // Cas STE
-        if (isset($fullname[0]) && in_array($fullname[0], self::$stes)) {
-          $fn[$arc['name']] = implode(" ", $fullname);
-        } elseif ((count($fullname) === 3) && strlen($fullname[0]) <= 3) {
-          $fn[$arc['name']]    = Str::changeCase(Str::changeCase($fullname[0] . ' ' . $fullname[1], 'lower'));
-          $fn[$arc['fname']] = Str::changeCase(Str::changeCase($fullname[2], 'lower'));
-        } elseif (count($fullname) > 2) {
+        if (isset($nameParts[0]) && in_array($nameParts[0], self::$stes)) {
+          $fn[$arc['name']] = implode(" ", $nameParts);
+        }
+        elseif ((count($nameParts) === 3) && strlen($nameParts[0]) <= 3) {
+          $fn[$arc['name']]    = Str::changeCase(Str::changeCase($nameParts[0] . ' ' . $nameParts[1], 'lower'));
+          $fn[$arc['fname']] = Str::changeCase(Str::changeCase($nameParts[2], 'lower'));
+        }
+        elseif (count($nameParts) > 2) {
           if (isset($fn[$arc['civility']])) {
-            $fn[$arc['fname']] = Str::changeCase(Str::changeCase(array_pop($fullname), 'lower'));
-            $fn[$arc['name']]    = Str::changeCase(Str::changeCase(implode(" ", $fullname), 'lower'));
-          } else {
-            $fn[$arc['name']] = Str::changeCase(Str::changeCase(implode(" ", $fullname), 'lower'));
+            $fn[$arc['fname']] = Str::changeCase(Str::changeCase(array_pop($nameParts), 'lower'));
+            $fn[$arc['name']]    = Str::changeCase(Str::changeCase(implode(" ", $nameParts), 'lower'));
           }
-        } elseif (count($fullname) < 2 || !isset($fullname[1])) {
-          $fn[$arc['name']] = $fullname[0];
-        } else {
-          $fn[$arc['fname']] = Str::changeCase(Str::changeCase($fullname[1], 'lower'));
-          $fn[$arc['name']]    = Str::changeCase(Str::changeCase($fullname[0], 'lower'));
+          else {
+            $fn[$arc['name']] = Str::changeCase(Str::changeCase(implode(" ", $nameParts), 'lower'));
+          }
+        }
+        elseif (count($nameParts) < 2 || !isset($nameParts[1])) {
+          $fn[$arc['name']] = $nameParts[0];
+        }
+        else {
+          $fn[$arc['fname']] = Str::changeCase(Str::changeCase($nameParts[1], 'lower'));
+          $fn[$arc['name']]    = Str::changeCase(Str::changeCase($nameParts[0], 'lower'));
         }
       }
 
@@ -165,7 +151,7 @@ class People extends DbCls
    */
   public function set_info(array $fn): ?array
   {
-    $arc = &$this->class_cfg['arch']['people'];
+    $fn = $this->prepare($fn);
     if (!empty($fn)) {
       if (!isset($fn[$arc['fname']])) {
         $fn[$arc['fname']] = '';
@@ -219,42 +205,20 @@ class People extends DbCls
    */
   public function get_info($id): array
   {
-    $arc = &$this->class_cfg['arch']['people'];
-    $d = $this->rselect($id);
-    if (!$d) {
-      throw new Exception(_("Impossible to find the people"));
-    }
-    if (!empty($d[$arc['mobile']])) {
-      $d[$arc['mobile']] = (string)$d[$arc['mobile']];
-    }
-
-    if (isset($d[$arc['cfg']])) {
-      $d[$arc['cfg']] = json_decode($d[$arc['cfg']], true);
-      if (is_array($d[$arc['cfg']])) {
-        foreach ($d[$arc['cfg']] as $i => $val) {
-          if (!isset($d[$i])) {
-            $d[$i] = $val;
-          }
-        }
-      }
-
-      unset($d[$arc['cfg']]);
-    }
-
-    return $d;
+    return $this->rselect($id);
   }
 
 
   /**
    * Performs a search based on a given full name.
    *
-   * @param string $fn The full name to search for.
+   * @param array|string $fn The full name to search for.
    * @return string|null The ID of the person found.
    */
-  public function search($fn): ?string
+  public function search(array|string $fn): ?string
   {
     $arc = &$this->class_cfg['arch']['people'];
-    $fn = $this->set_info($this->parse($fn));
+    $fn = $this->set_info(is_string($fn) ? $this->parse($fn) : $fn);
     if (!empty($fn[$arc['fullname']])) {
       $conditions = [
         'logic' => 'OR',
@@ -270,15 +234,19 @@ class People extends DbCls
                 'field' => $arc[$arc['name']],
                 'operator' => 'LIKE',
                 'value' => $fn[$arc['name']]
-              ], [
-                'field' => $arc['fname'],
-                'operator' => 'LIKE',
-                'value' => $fn[$arc['fname']]
               ]
             ]
           ]
         ]
       ];
+      if (!empty($fn[$arc['fname']])) {
+        $conditions['conditions'][1]['conditions'][] = [
+          'field' => $arc['fname'],
+          'operator' => 'LIKE',
+          'value' => $fn[$arc['fname']]
+        ];
+      }
+
       if (!empty($fn[$arc['email']]) || !empty($fn[$arc['mobile']])) {
         $tmp = [
           'logic' => 'AND',
@@ -286,29 +254,68 @@ class People extends DbCls
         ];
         if (!empty($fn[$arc['email']])) {
           $tmp['conditions'][] = [
-            'field' => $arc['email'],
-            'operator' => 'LIKE',
-            'value' => $fn[$arc['email']]
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $arc['email'],
+              'operator' => 'LIKE',
+              'value' => $fn[$arc['email']]
+            ], [
+              'field' => $arc['email'],
+              'operator' => 'isempty'
+            ]]
           ];
         }
+
         if (!empty($fn[$arc['mobile']])) {
           $tmp['conditions'][] = [
-            'field' => $arc['mobile'],
-            'operator' => 'LIKE',
-            'value' => $fn[$arc['mobile']]
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $arc['mobile'],
+              'operator' => 'LIKE',
+              'value' => $fn[$arc['mobile']]
+            ], [
+              'field' => $arc['mobile'],
+              'operator' => 'isempty'
+            ]]
           ];
         }
 
         $tmp['conditions'][] = $conditions;
         $conditions = $tmp;
       }
-
+  
       return $this->selectOne($arc['id'], $conditions);
     }
 
     return null;
   }
 
+	public function seek($p, int $start = 0, int $limit = 100){
+    $arc = &$this->class_cfg['arch']['people'];
+    if (!is_array($p)) {
+      $p = $this->parse($p);
+    }
+
+    if (is_array($p) && (
+        !empty($p[$arc['fullname']])
+        || !empty($p[$arc['email']])
+        || !empty($p[$arc['mobile']])
+        || !empty($p[$arc['name']])
+    )
+    ){
+      $cond = [];
+
+      foreach ($arc as $v) {
+        if ( !empty($p[$v]) ){
+          array_push($cond, [$v, 'contains', $p[$v]]);
+        }
+      }
+
+      return $this->selectValues($arc['id'], $cond, [$arc['fullname']], $limit, $start);
+    }
+
+    return false;
+	}
 
   /**
    * Conducts a full search for people records.
@@ -339,17 +346,9 @@ class People extends DbCls
    * @param mixed $id The ID of the person.
    * @return mixed The relations of the person.
    */
-  public function relations($id, string $table = null): ?array
+  public function relations($id): ?array
   {
-    $arc = &$this->class_cfg['arch']['people'];
-    if ($this->get_info($id)) {
-      $db =& $this->db;
-      return array_values(array_filter($this->getTableRelations(), function($a) use ($db, $id) {
-        return $db->count($a['table'], [$a['col'] => $id]);
-      }));
-    }
-
-    return null;
+    return $this->getRelations($id);
   }
 
 
@@ -398,7 +397,7 @@ class People extends DbCls
 
       if (!empty($fn)) {
         $fn[$arc['cfg']] = empty($fn[$arc['cfg']]) ? null : json_encode($fn[$arc['cfg']]);
-        $ok = $this->update($id, $fn);
+        $ok = $this->DbActionsUpdate($id, $fn);
       }
 
     }
@@ -414,162 +413,15 @@ class People extends DbCls
    * @param mixed $ids IDs of the person records to merge.
    * @return int Result of the merge operation.
    */
-  public function fusion($ids)
+  public function fusion($ids, $main = null)
   {
-    $arc = &$this->class_cfg['arch']['people'];
-    $hasHistory = History::isLinked($this->class_cfg['table']);
-    if ($hasHistory) {
-      History::disable();
-    }
-
-    $args = is_array($ids) ? $ids : func_get_args();
-    $res = 0;
-    if (count($args) > 1) {
-      $id = null;
-      $oldest = null;
-      foreach ($args as $i => $a) {
-        if ($hasHistory) {
-          $tmp = History::getCreationDate($this->class_cfg['table'], $a);
-          if (!$oldest || ($tmp < $oldest)) {
-            $oldest = $tmp;
-            $id = $a;
-          }
-        }
-        elseif ($this->db->selectOne('apst_adherents', 'id', ['id_admin' => $a])) {
-          $id = $a;
-          break;
-        }
-      }
-
-      if (\is_null($id)) {
-        $id = array_shift($args);
-      }
-      else {
-        \array_splice($args, array_search($id, $args), 1);
-      }
-
-      foreach ($args as $a) {
-        if ($this->get_info($a)) {
-          foreach ($this->getTableRelations() as $r) {
-            if ($this->db->count($r['table'], [$r['col'] => $a])) {
-              if (!$this->db->update($r['table'], [$r['col'] => $id], [$r['col'] => $a])) {
-                $this->db->delete($r['table'], [$r['col'] => $a]);
-              }
-            }
-          }
-        }
-      }
-
-      $res = 0;
-      if ($oldest) {
-        $this->db->delete(
-          'bbn_history',
-          [
-            'uid' => $id,
-            'opr' => 'INSERT',
-            ['tst', '>', $oldest]
-          ]
-        );
-      }
-
-      $num = 0;
-      foreach ($this->db->getColumnValues(
-        'bbn_history',
-        'tst',
-        [
-          'uid' => $id,
-          'opr' => 'DELETE'
-        ],
-        [
-          'tst' => 'DESC'
-        ]
-      ) as $deltst) {
-        if (
-          $this->db->count(
-            'bbn_history',
-            [
-              'uid' => $id,
-              'opr' => 'RESTORE',
-              ['tst', '>=', $deltst]
-            ]
-          ) > $num
-        ) {
-          $num++;
-        } else {
-          $this->db->delete(
-            'bbn_history',
-            [
-              'uid' => $id,
-              'opr' => 'DELETE',
-              'tst' => $deltst
-            ]
-          );
-        }
-      }
-
-      $res = 1;
-    }
-
-    History::enable();
-    return $res;
-  }
-
-
-  /**
-   * Deletes a person record and optionally all its related links.
-   *
-   * @param int $id The ID of the person to delete.
-   * @param bool $with_links Whether to also delete related links.
-   * @return bool Success or failure of the delete operation.
-   */
-  public function delete($id, $with_links = false)
-  {
-    $arc = &$this->class_cfg['arch']['people'];
-    if ($this->get_info($id)) {
-      $rels = $this->relations($id);
-      if ($with_links || empty($rels)) {
-        foreach ($rels as $r) {
-          if (!empty($r['model']['null'])) {
-            $this->db->update($r['table'], [$r['col'] => null], [$r['col'] => $id]);
-          }
-          else {
-            if ($r['primary']) {
-              $refs = $this->db->findReferences($r['primary'], $r['table']);
-              foreach ($refs as $ref) {
-                [$db, $table, $col] = X::split($ref, '.');
-                if ($table !== $this->class_cfg['table']) {
-                  $model = $this->db->modelize($table);
-                  if (!empty($model['fields'][$col]['null'])) {
-                    $this->db->update($table, [$col => null], [$col => $id]);
-                  }
-                  else {
-                    $this->db->delete($table, [$col => $id]);
-                  }
-                }
-              }
-            }
-
-            $this->db->delete($r['table'], [$r['col'] => $id]);
-          }
-        }
-
-        $this->update($id, [$arc['email'] => null]);
-        return $this->delete($id);
-      }
-    }
-
-    return false;
+    return History::fusion($ids, $this->class_cfg['table'], $this->db, $main);
   }
 
 
   protected function prepareData(array $fn): array
   {
     $arc = &$this->class_cfg['arch']['people'];
-    foreach (self::$notCfg as $n) {
-      if (array_key_exists($n, $fn)) {
-        unset($fn[$n]);
-      }
-    }
 
     foreach ($fn as $k => $v) {
       if (!in_array($k, $arc)) {
@@ -593,28 +445,5 @@ class People extends DbCls
     }
 
     return $fn;
-  }
-
-
-  private function getTableRelations(): array
-  {
-    if (!isset($this->tableRelations)) {
-      $arc = &$this->class_cfg['arch']['people'];
-      $this->tableRelations = [];
-      $refs = $this->db->findReferences($this->db->cfn($arc['id'], $this->class_cfg['table']));
-      foreach ($refs as $ref) {
-        [$db, $table, $col] = X::split($ref, '.');
-        $model = $this->db->modelize($table);
-        $this->tableRelations[] = [
-          'db' => $db,
-          'table' => $table,
-          'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,
-          'col' => $col,
-          'model' => $model
-        ];
-      }
-    }
-
-    return $this->tableRelations;
   }
 }

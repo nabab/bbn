@@ -17,13 +17,13 @@ use bbn\Mail;
 use bbn\Date;
 use bbn\User;
 use bbn\Models\Tts\Optional;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as ClassDb;
 
 class Mailing extends ClassDb
 {
   use Optional;
-  use Dbconfig;
+  use DbActions;
 
   private $_test_emails;
 
@@ -71,7 +71,7 @@ class Mailing extends ClassDb
   {
     if ($db->check()) {
       self::optionalInit();
-      $this->_init_class_cfg();
+      $this->_init_class_cfg($cfg);
       $this->getOptionsTextValue('text');
       $this->db = $db;
     }

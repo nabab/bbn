@@ -4,10 +4,14 @@
  */
 namespace bbn\Appui;
 
-use bbn;
-use bbn\X;
 use Exception;
-
+use bbn\Db;
+use bbn\Str;
+use bbn\X;
+use bbn\Models\Tts\Retriever;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
 /**
  * An all-in-one hierarchical options management system
  *
@@ -31,36 +35,35 @@ use Exception;
  */
 
 
-class Option extends bbn\Models\Cls\Db
+class Option extends DbCls
 {
-  use bbn\Models\Tts\Retriever;
-  use bbn\Models\Tts\Cache;
-  use bbn\Models\Tts\Dbconfig;
-
+  use Retriever;
+  use Cache;
+  use DbActions;
+  
   //protected const root_hex = '962d50c3e07211e781c6000c29703ca2';
   protected const root_hex = 'c88846c3bff511e7b7d5000c29703ca2';
 
-  protected static /** @var array */
-    $default_class_cfg = [
-      'errors' => [
-      ],
-      'table' => 'bbn_options',
-      'tables' => [
-        'options' => 'bbn_options'
-      ],
-      'arch' => [
-        'options' => [
-          'id' => 'id',
-          'id_parent' => 'id_parent',
-          'id_alias' => 'id_alias',
-          'num' => 'num',
-          'text' => 'text',
-          'code' => 'code',
-          'value' => 'value',
-          'cfg' => 'cfg'
-        ]
+  protected static $default_class_cfg = [
+    'errors' => [
+    ],
+    'table' => 'bbn_options',
+    'tables' => [
+      'options' => 'bbn_options'
+    ],
+    'arch' => [
+      'options' => [
+        'id' => 'id',
+        'id_parent' => 'id_parent',
+        'id_alias' => 'id_alias',
+        'num' => 'num',
+        'text' => 'text',
+        'code' => 'code',
+        'value' => 'value',
+        'cfg' => 'cfg'
       ]
-    ];
+    ]
+  ];
 
   private $is_init = false;
 
@@ -83,7 +86,7 @@ class Option extends bbn\Models\Cls\Db
   /**
    * Returns the existing instance if there is
    * ```php
-   * $opt = bbn\Appui\Option::getOptions();
+   * $opt = Option::getOptions();
    * X::dump($opt);
    * // (options)
    * ```
@@ -99,15 +102,15 @@ class Option extends bbn\Models\Cls\Db
    * Constructor
    *
    * ```php
-   * $db = new bbn\Db();
-   * $opt = new bbn\Appui\Options($db);
+   * $db = new Db();
+   * $opt = new Appui\Options($db);
    * ```
    *
-   * @param bbn\Db $db a database connection object
+   * @param Db $db a database connection object
    * @param array $cfg configuration array
-   * @throws \Exception
+   * @throws Exception
    */
-  public function __construct(bbn\Db $db, array $cfg = [])
+  public function __construct(Db $db, array $cfg = [])
   {
     parent::__construct($db);
     $this->_init_class_cfg($cfg);
@@ -232,7 +235,7 @@ class Option extends bbn\Models\Cls\Db
   public function deleteCache(string $id = null, $deep = false, $subs = false): self
   {
     if ($this->check()) {
-      if (bbn\Str::isUid($id)) {
+      if (Str::isUid($id)) {
         if (($deep || !$subs) && ($items = $this->items($id))) {
           foreach ($items as $it){
             $this->deleteCache($it, $deep, true);
@@ -333,7 +336,7 @@ class Option extends bbn\Models\Cls\Db
         return $this->default;
       }
 
-      if (bbn\Str::isUid($args[0])) {
+      if (Str::isUid($args[0])) {
         if ($num === 1) {
           return $args[0];
         }
@@ -350,7 +353,7 @@ class Option extends bbn\Models\Cls\Db
       }
 
       // They must all have the same form at start with an id_parent as last argument
-      if (!bbn\Str::isUid(end($args))) {
+      if (!Str::isUid(end($args))) {
         $args[] = $this->default;
         $num++;
       }
@@ -431,7 +434,7 @@ class Option extends bbn\Models\Cls\Db
    * @param array $value
    * @param $id
    * @return int|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function setValue(array $value, $id): ?int
   {
@@ -522,7 +525,7 @@ class Option extends bbn\Models\Cls\Db
    *
    * @param string $uid
    * @return Option
-   * @throws \Exception
+   * @throws Exception
    */
   public function setDefault($uid): self
   {
@@ -547,7 +550,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function items($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if (($res = $this->cacheGet($id, __FUNCTION__)) !== false) {
         return $res;
       }
@@ -600,7 +603,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function nativeOption($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $originalLocale = $this->findI18nById($id);
       $locale = $this->getTranslatingLocale($id);
       if (!empty($locale)
@@ -616,7 +619,7 @@ class Option extends bbn\Models\Cls\Db
       $tab = $this->db->tsn($this->class_cfg['table']);
       $cfn = $this->db->cfn($this->fields['id'], $tab);
       $opt = $this->getRow([$cfn => $id]);
-      if (!empty($opt['code']) && bbn\Str::isInteger($opt['code'])) {
+      if (!empty($opt['code']) && Str::isInteger($opt['code'])) {
         $opt['code'] = (int)$opt['code'];
       }
       if ($opt) {
@@ -624,7 +627,7 @@ class Option extends bbn\Models\Cls\Db
           && \class_exists('\bbn\Appui\I18n')
           && !empty($opt[$this->fields['text']])
         ) {
-          $i18nCls = new \bbn\Appui\I18n($this->db);
+          $i18nCls = new I18n($this->db);
           if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
             $opt[$this->fields['text']] = $trans;
           }
@@ -649,7 +652,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function nativeOptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $res = [];
       if ($its = $this->items($id)) {
         foreach ($its as $it){
@@ -685,7 +688,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function rawOption($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       return $this->db->rselect($this->class_cfg['table'], [], [$this->fields['id'] => $id]);
     }
 
@@ -723,7 +726,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function rawOptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $res = [];
       if ($its = $this->items($id)) {
         foreach ($its as $it) {
@@ -783,7 +786,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function rawTree($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($res = $this->rawOption($id)) {
         if ($its = $this->items($id)) {
           $res['items'] = [];
@@ -825,7 +828,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function optionNoAlias($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($opt = $this->nativeOption($id))
     ) {
       $this->_set_value($opt);
@@ -842,10 +845,10 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getValue($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($opt = $this->nativeOption($id))
         && !empty($opt[$this->fields['value']])
-        && bbn\Str::isJson($opt[$this->fields['value']])
+        && Str::isJson($opt[$this->fields['value']])
     ) {
       return json_decode($opt[$this->fields['value']], true);
     }
@@ -878,15 +881,15 @@ class Option extends bbn\Models\Cls\Db
    */
   public function option($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($opt = $this->nativeOption($id))
     ) {
       $this->_set_value($opt);
       $c =& $this->fields;
-      if (bbn\Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
+      if (Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
         $opt['alias'] = $alias;
         if ($opt[$c['id_alias']] === $id) {
-          throw new \Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
+          throw new Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
         }
         else {
           $this->_set_value($opt['alias']);
@@ -926,14 +929,14 @@ class Option extends bbn\Models\Cls\Db
    */
   public function opAlias($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($opt = $this->nativeOption($id))
     ) {
       $this->_set_value($opt);
       $c =& $this->fields;
-      if (bbn\Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
+      if (Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
         if ($opt[$c['id_alias']] === $id) {
-          throw new \Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
+          throw new Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
         }
         else {
           $this->_set_value($alias);
@@ -972,7 +975,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function options($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $locale = $this->getTranslatingLocale($id);
       if ($r = $this->getCache($id, __FUNCTION__, $locale)) {
         return $r;
@@ -1044,7 +1047,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function optionsByCode($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($r = $this->getCache($id, __FUNCTION__)) {
         return $r;
       }
@@ -1175,7 +1178,7 @@ class Option extends bbn\Models\Cls\Db
 
   /**
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function siblings(): ?array
   {
@@ -1212,7 +1215,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fullOptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $list = $this->items($id);
       if (\is_array($list)) {
         $res = [];
@@ -1221,7 +1224,7 @@ class Option extends bbn\Models\Cls\Db
             $res[] = $tmp;
           }
           else {
-            throw new \Exception(X::_("Impossible to find the ID").' '.$i);
+            throw new Exception(X::_("Impossible to find the ID").' '.$i);
           }
         }
 
@@ -1252,7 +1255,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fullOptionsRef($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $all = $this->fullOptions($id) ?? [];
       if ($aliases = $this->getAliases($id)) {
         foreach ($aliases as $a) {
@@ -1288,7 +1291,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function optionsRef($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $all = $this->options($id) ?? [];
       if ($aliases = $this->getAliases($id)) {
         foreach ($aliases as $a) {
@@ -1324,7 +1327,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function itemsRef($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $all = $this->items($id) ?? [];
       if ($aliases = $this->getAliases($id)) {
         foreach ($aliases as $a) {
@@ -1366,7 +1369,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function codeOptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $list = $this->items($id);
       if (\is_array($list)) {
         $res = [];
@@ -1418,7 +1421,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function codeIds($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $list = $this->items($id);
       if (\is_array($list)) {
         $res = [];
@@ -1441,13 +1444,13 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getAliases($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
       $cf = $this->getClassCfg();
       if ($results = $this->db->rselectAll($cf['table'], [], [$this->fields['id_alias'] => $id])) {
         foreach ($results as $d) {
           if (!empty($d[$this->fields['code']])
-            && bbn\Str::isInteger($d[$this->fields['code']])
+            && Str::isInteger($d[$this->fields['code']])
           ) {
             $d[$this->fields['code']] = (int)$d[$this->fields['code']];
           }
@@ -1472,7 +1475,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getAliasItems($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($res = $this->cacheGet($id, __FUNCTION__)) {
         return $res;
       }
@@ -1499,7 +1502,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getAliasOptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($r = $this->getCache($id, __FUNCTION__)) {
         return $r;
       }
@@ -1522,11 +1525,11 @@ class Option extends bbn\Models\Cls\Db
   /**
    * @param null $code
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAliasFullOptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($r = $this->cacheGet($id, __FUNCTION__)) {
         return $r;
       }
@@ -1627,7 +1630,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fullOptionsCfg($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $o =& $this;
       return $this->map(
         function ($a) use ($o) {
@@ -1664,7 +1667,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function soptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
       if ($list = $this->items($id)) {
         foreach ($list as $i){
@@ -1705,7 +1708,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fullSoptions($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $r = [];
       if ($ids = $this->items($id)) {
         foreach ($ids as $id){
@@ -1755,8 +1758,8 @@ class Option extends bbn\Models\Cls\Db
 
   public function flatOptions($code = null): array
   {
-    if (!bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      throw new \Exception(X::_("Impossible to find the option requested in flatOptions"));
+    if (!Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      throw new Exception(X::_("Impossible to find the option requested in flatOptions"));
     }
 
     $res = [];
@@ -1820,7 +1823,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function nativeTree($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($res = $this->nativeOption($id)) {
         $its = $this->items($id);
         if (!empty($its)) {
@@ -1860,7 +1863,7 @@ class Option extends bbn\Models\Cls\Db
   public function tree($code = null): ?array
   {
     $id = $this->fromCode(\func_get_args());
-    if (bbn\Str::isUid($id) && ($text = $this->text($id))) {
+    if (Str::isUid($id) && ($text = $this->text($id))) {
       $res = [
         'id' => $id,
         'text' => $text
@@ -1926,7 +1929,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fullTree($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($res = $this->option($id))
     ) {
       if ($opts = $this->items($id)) {
@@ -1950,7 +1953,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function fullTreeRef($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($res = $this->option($id))
     ) {
       if ($opts = $this->fullOptionsRef($id)) {
@@ -1991,7 +1994,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getCfg($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($tmp = $this->cacheGet($id, __FUNCTION__)) {
         return $tmp;
       }
@@ -1999,14 +2002,14 @@ class Option extends bbn\Models\Cls\Db
       $c   =& $this->class_cfg;
       $f   =& $this->fields;
       $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
-      $cfg = bbn\Str::isJson($cfg) ? json_decode($cfg, true) : [];
+      $cfg = Str::isJson($cfg) ? json_decode($cfg, true) : [];
       $perm = $cfg['permissions'] ?? false;
       // Looking for parent with inheritance
       $parents = array_reverse($this->parents($id));
       $last    = \count($parents) - 1;
       foreach ($parents as $i => $p){
         $parent_cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $p]);
-        $parent_cfg = bbn\Str::isJson($parent_cfg) ? json_decode($parent_cfg, true) : [];
+        $parent_cfg = Str::isJson($parent_cfg) ? json_decode($parent_cfg, true) : [];
         if (!empty($parent_cfg['scfg']) && ($i === $last)) {
           $cfg                 = array_merge((array)$cfg, $parent_cfg['scfg']);
           $cfg['inherit_from'] = $p;
@@ -2083,7 +2086,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getRawCfg($code = null): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $c =& $this->class_cfg;
       $f =& $this->fields;
       return $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
@@ -2134,9 +2137,9 @@ class Option extends bbn\Models\Cls\Db
    */
   public function parents($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $res = [];
-      while (bbn\Str::isUid($id_parent = $this->getIdParent($id))){
+      while (Str::isUid($id_parent = $this->getIdParent($id))){
         if (\in_array($id_parent, $res, true)) {
           break;
         }
@@ -2205,7 +2208,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getIdParent($code = null): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($opt = $this->cacheGet($id, 'nativeOption')) {
         return $opt[$this->fields['id_parent']];
       }
@@ -2239,7 +2242,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function parent($code = null): ?array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($id_parent = $this->getIdParent($id))
     ) {
       return $this->option($id_parent);
@@ -2267,7 +2270,7 @@ class Option extends bbn\Models\Cls\Db
   {
     // Preventing infinite loop
     $done = [$id];
-    if (bbn\Str::isUid($id) && bbn\Str::isUid($id_parent)) {
+    if (Str::isUid($id) && Str::isUid($id_parent)) {
       while ($id = $this->getIdParent($id)){
         if ($id === $id_parent) {
           return true;
@@ -2305,12 +2308,12 @@ class Option extends bbn\Models\Cls\Db
    */
   public function getCodes($code = null): array
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $c   =& $this->fields;
       $opt = $this->db->rselectAll($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id], [($this->isSortable($id) ? $c['num'] : $c['code']) => 'ASC']);
       $res = [];
       foreach ($opt as $r){
-        if (!empty($r[$c['code']]) && bbn\Str::isInteger($r[$c['code']])) {
+        if (!empty($r[$c['code']]) && Str::isInteger($r[$c['code']])) {
           $r[$c['code']] = (int)$r[$c['code']];
         }
         $res[$r[$c['id']]] = $r[$c['code']];
@@ -2336,13 +2339,13 @@ class Option extends bbn\Models\Cls\Db
    */
   public function code(string $id): ?string
   {
-    if ($this->check() && bbn\Str::isUid($id)) {
+    if ($this->check() && Str::isUid($id)) {
       $code = $this->db->selectOne(
         $this->class_cfg['table'], $this->fields['code'], [
         $this->fields['id'] => $id
         ]
       );
-      if (!empty($code) && bbn\Str::isInteger($code)) {
+      if (!empty($code) && Str::isInteger($code)) {
         $code = (int)$code;
       }
       return $code;
@@ -2377,7 +2380,7 @@ class Option extends bbn\Models\Cls\Db
 
   public function rawText($code = null): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($this->cacheHas($id, __FUNCTION__)) {
         return $this->getCache($id, __FUNCTION__);
       }
@@ -2405,7 +2408,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function alias(string $id): ?string
   {
-    if ($this->check() && bbn\Str::isUid($id)) {
+    if ($this->check() && Str::isUid($id)) {
       return $this->db->selectOne(
         $this->class_cfg['table'], $this->fields['id_alias'], [
         $this->fields['id'] => $id
@@ -2450,7 +2453,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function count($code = null): ?int
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       return $this->db->count($this->class_cfg['table'], [$this->fields['id_parent'] => $id]);
     }
 
@@ -2477,7 +2480,7 @@ class Option extends bbn\Models\Cls\Db
   public function optionsByAlias($code = null): ?array
   {
     $id_alias = $this->fromCode(\func_get_args());
-    if (bbn\Str::isUid($id_alias)) {
+    if (Str::isUid($id_alias)) {
       $where = [$this->fields['id_alias'] => $id_alias];
       $list  = $this->getRows($where);
       if (\is_array($list)) {
@@ -2509,7 +2512,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function isSortable($code = null): ?bool
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       $cfg = $this->getCfg($id);
       return !empty($cfg['sortable']);
     }
@@ -2670,8 +2673,8 @@ class Option extends bbn\Models\Cls\Db
       try {
         $this->_prepare($it);
       }
-      catch (\Exception $e) {
-        throw new \Exception($e->getMessage());
+      catch (Exception $e) {
+        throw new Exception($e->getMessage());
       }
 
       if ($it) {
@@ -2753,7 +2756,7 @@ class Option extends bbn\Models\Cls\Db
           $this->deleteCache($id);
         }
 
-        if ($items && bbn\Str::isUid($id)) {
+        if ($items && Str::isUid($id)) {
           foreach ($items as $item){
             $item[$c['id_parent']] = $id;
             $res              += (int)$this->add($item, $force, $return_num, $with_id);
@@ -2844,7 +2847,7 @@ class Option extends bbn\Models\Cls\Db
    * @param array $data
    * @param array|null $cfg
    * @return int|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function merge(string $id, array $data, array $cfg = null)
   {
@@ -2899,10 +2902,10 @@ class Option extends bbn\Models\Cls\Db
    */
   public function remove($code)
   {
-    if (bbn\Str::isUid($id = $this->fromCode(...\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(...\func_get_args()))
         && ($id !== $this->default)
         && ($id !== $this->root)
-        && bbn\Str::isUid($id_parent = $this->getIdParent($id))
+        && Str::isUid($id_parent = $this->getIdParent($id))
     ) {
       $num = 0;
       if ($items = $this->items($id)) {
@@ -2943,7 +2946,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function removeFull($code)
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($id !== $this->default)
         && ($id !== $this->root)
     ) {
@@ -3278,7 +3281,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function unsetProp($id, $prop)
   {
-    if (!empty($prop) && bbn\Str::isUid($id) && ($o = $this->optionNoAlias($id))) {
+    if (!empty($prop) && Str::isUid($id) && ($o = $this->optionNoAlias($id))) {
       if (\is_string($prop)) {
         $prop = [$prop];
       }
@@ -3635,13 +3638,13 @@ class Option extends bbn\Models\Cls\Db
    * @param string $id
    * @param string $mode
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function export(string $id, string $mode = 'single'): ?array
   {
     $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];
     if (!in_array($mode, $modes)) {
-      throw new \Exception(X::_("The given mode is forbidden"));
+      throw new Exception(X::_("The given mode is forbidden"));
     }
 
     $simple = false;
@@ -3911,7 +3914,7 @@ class Option extends bbn\Models\Cls\Db
         }
         else {
           X::log($o);
-          throw new \Exception(X::_("Error while importing: impossible to add"));
+          throw new Exception(X::_("Error while importing: impossible to add"));
         }
       }
 
@@ -3922,13 +3925,13 @@ class Option extends bbn\Models\Cls\Db
               try {
                 $this->setAlias($id, $id_alias);
               }
-              catch (\Exception $e) {
-                throw new \Exception($e->getMessage());
+              catch (Exception $e) {
+                throw new Exception($e->getMessage());
               }
             }
             else {
               X::log($td['id_alias']);
-              throw new \Exception(
+              throw new Exception(
                 X::_(
                   "Error while importing: impossible to set the alias %s",
                   json_encode($td['id_alias'], JSON_PRETTY_PRINT)
@@ -3969,7 +3972,7 @@ class Option extends bbn\Models\Cls\Db
   {
     $res    = null;
     $target = $this->fromCode($target);
-    if (bbn\Str::isUid($target)) {
+    if (Str::isUid($target)) {
       if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {
         $res = $this->import($opt, $target);
         $this->deleteCache($target);
@@ -4197,7 +4200,7 @@ class Option extends bbn\Models\Cls\Db
    */
   public function hasPermission($code = null)
   {
-    if (bbn\Str::isUid($p = $this->getIdParent(\func_get_args()))) {
+    if (Str::isUid($p = $this->getIdParent(\func_get_args()))) {
       $cfg = $this->getCfg($p);
       return !empty($cfg['permissions']);
     }
@@ -4386,7 +4389,7 @@ class Option extends bbn\Models\Cls\Db
         'operator' => '!=',
         'value' => ''
       ]];
-      if (bbn\Str::isUid($startFromID)) {
+      if (Str::isUid($startFromID)) {
         $where = [[
           'field' => $this->fields['id'],
           'value' => $startFromID
@@ -4407,7 +4410,7 @@ class Option extends bbn\Models\Cls\Db
       if ($opts) {
         foreach ($opts as $opt){
           if (!empty($opt[$this->fields['code']])
-            && bbn\Str::isInteger($opt[$this->fields['code']])
+            && Str::isInteger($opt[$this->fields['code']])
           ) {
             $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];
           }
@@ -4545,7 +4548,7 @@ class Option extends bbn\Models\Cls\Db
       if ($opts) {
         foreach ($opts as $opt){
           if (!empty($opt[$this->fields['code']])
-            && bbn\Str::isInteger($opt[$this->fields['code']])
+            && Str::isInteger($opt[$this->fields['code']])
           ) {
             $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];
           }
@@ -4576,7 +4579,7 @@ class Option extends bbn\Models\Cls\Db
 
   public function findI18nById(string $id): ?string
   {
-    if (bbn\Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
       if ($c = $this->cacheGet($id, __FUNCTION__)) {
         return $c['i18n'];
       }
@@ -4623,15 +4626,15 @@ class Option extends bbn\Models\Cls\Db
 
   public function getTranslation(string $id, string $locale = ''): ?string
   {
-    if (bbn\Str::isUid($id)
+    if (Str::isUid($id)
       && ($originalLocale = $this->findI18nById($id))
       && ($text = $this->text($id))
     ) {
       if (empty($locale)) {
         $locale = $this->getTranslatingLocale($id);
       }
-      if (!empty($locale) && \class_exists('\bbn\Appui\I18n')) {
-        $i18nCls = new \bbn\Appui\I18n($this->db);
+      if (!empty($locale)) {
+        $i18nCls = new I18n($this->db);
         return  $i18nCls->getTranslation($text, $originalLocale, $locale);
       }
     }
@@ -4680,10 +4683,10 @@ class Option extends bbn\Models\Cls\Db
     $cols['num_children'] = 'COUNT('.$db->escape($db->cfn($c['id'], $tab.'2', true)).')';
     $todo                 = [$c['id'], $c['id_parent'], $c['id_alias']];
     foreach ($todo as $to){
-      if (!empty($where[$to]) && !\bbn\Str::isBuid($where[$to])) {
+      if (!empty($where[$to]) && !Str::isBuid($where[$to])) {
         $where[$to] = $where[$to];
       }
-      elseif (!empty($where[$this->db->cfn($to, $tab)]) && !\bbn\Str::isBuid($where[$this->db->cfn($to, $tab)])) {
+      elseif (!empty($where[$this->db->cfn($to, $tab)]) && !Str::isBuid($where[$this->db->cfn($to, $tab)])) {
         $where[$this->db->cfn($to, $tab)] = $where[$this->db->cfn($to, $tab)];
       }
     }
@@ -4721,7 +4724,7 @@ class Option extends bbn\Models\Cls\Db
     if (!empty($res)) {
       foreach ($res as $i => $r) {
         if (!empty($r[$this->fields['code']])
-          && bbn\Str::isInteger($r[$this->fields['code']])
+          && Str::isInteger($r[$this->fields['code']])
         ) {
           $res[$i][$this->fields['code']] = (int)$r[$this->fields['code']];
         }
@@ -4755,7 +4758,7 @@ class Option extends bbn\Models\Cls\Db
    * Transforms an array of parameters into valid option array
    * @param array $it
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   private function _prepare(array &$it): bool
   {
@@ -4771,11 +4774,11 @@ class Option extends bbn\Models\Cls\Db
         $it[$c['id_parent']] = $id_parent;
       }
       else {
-        throw new \Exception(X::_("Impossible to find the parent"));
+        throw new Exception(X::_("Impossible to find the parent"));
       }
     }
     elseif (!$this->exists($it[$c['id_parent']])) {
-      throw new \Exception(X::_("Impossible to find the parent"));
+      throw new Exception(X::_("Impossible to find the parent"));
     }
 
     if (empty($it[$c['id_alias']])) {
@@ -4786,11 +4789,11 @@ class Option extends bbn\Models\Cls\Db
         $it[$c['id_alias']] = $id_alias;
       }
       else {
-        throw new \Exception(X::_("Impossible to find the alias"));
+        throw new Exception(X::_("Impossible to find the alias"));
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
-      throw new \Exception(X::_("Impossible to find the alias"));
+      throw new Exception(X::_("Impossible to find the alias"));
     }
 
     if (array_key_exists($c['id'], $it) && empty($it[$c['id']])) {
@@ -4798,7 +4801,7 @@ class Option extends bbn\Models\Cls\Db
     }
 
     if (isset($it[$c['cfg']])) {
-      if (!is_array($it[$c['cfg']]) && bbn\Str::isJson($it[$c['cfg']])) {
+      if (!is_array($it[$c['cfg']]) && Str::isJson($it[$c['cfg']])) {
         $it[$c['cfg']] = json_decode($it[$c['cfg']], true);
       }
 
@@ -4809,11 +4812,11 @@ class Option extends bbn\Models\Cls\Db
             $cfg['id_root_alias'] = $id_root_alias;
           }
           else {
-            throw new \Exception(X::_("Impossible to find the root alias"));
+            throw new Exception(X::_("Impossible to find the root alias"));
           }
         }
         elseif (!$this->exists($cfg['id_root_alias'])) {
-          throw new \Exception(X::_("Impossible to find the root alias"));
+          throw new Exception(X::_("Impossible to find the root alias"));
         }
       }
     }
@@ -4837,7 +4840,7 @@ class Option extends bbn\Models\Cls\Db
       }
 
       // Unsetting computed values
-      if (isset($it[$c['value']]) && bbn\Str::isJson($it[$c['value']])) {
+      if (isset($it[$c['value']]) && Str::isJson($it[$c['value']])) {
         $this->_set_value($it);
       }
 
@@ -4882,7 +4885,7 @@ class Option extends bbn\Models\Cls\Db
           $it[$c['cfg']] = json_encode($it[$c['cfg']]);
         }
 
-        if (!bbn\Str::isJson($it[$c['cfg']]) || in_array($it[$c['cfg']], ['{}', '[]'], true)) {
+        if (!Str::isJson($it[$c['cfg']]) || in_array($it[$c['cfg']], ['{}', '[]'], true)) {
           $it[$c['cfg']] = null;
         }
       }
@@ -4899,7 +4902,7 @@ class Option extends bbn\Models\Cls\Db
       return true;
     }
 
-    throw new \Exception(
+    throw new Exception(
       X::_("Impossible to make an option out of it...")
       .PHP_EOL.json_encode($it, JSON_PRETTY_PRINT)
     );
@@ -4914,7 +4917,7 @@ class Option extends bbn\Models\Cls\Db
    */
   private function _set_value(array &$opt): ?array
   {
-    if (!empty($opt[$this->fields['value']]) && bbn\Str::isJson($opt[$this->fields['value']])) {
+    if (!empty($opt[$this->fields['value']]) && Str::isJson($opt[$this->fields['value']])) {
       $val = json_decode($opt[$this->fields['value']], true);
       if (X::isAssoc($val)) {
         foreach ($val as $k => $v){

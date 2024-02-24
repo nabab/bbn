@@ -2,15 +2,59 @@
 
 namespace bbn\Entities;
 
-class Link
+use Exception;
+use bbn\Db;
+use bbn\X;
+use bbn\Entities;
+use bbn\Entities\AbstractEntityTable;
+use bbn\Entities\LinkTrait;
+use bbn\Models\Cls\Nullall;
+use bbn\Models\Tts\DbActions;
+
+class Link extends AbstractEntityTable
 {
-  public ?\stdClass $link;
+  use DbActions;
 
-  public ?\stdClass $people;
+  private $type;
+  private $cfg;
 
-  public ?\stdClass $address;
+  protected static $default_class_cfg = [
+    'table' => 'bbn_entities_links',
+    'tables' => [
+      'links' => 'bbn_entities_links'
+    ],
+    'arch' => [
+      'links' => [
+        'id' => 'id',
+        'link_type' => 'link_type',
+        'id_entity' => 'id_entity',
+        'id_people' => 'id_people',
+        'id_address' => 'id_address',
+        'id_option' => 'id_option',
+        'cfg' => 'cfg',
+      ],
+    ]
+  ];
 
-  public ?\stdClass $option;
+  protected static array $linkCfg = [
+    "single" => false,
+    "required" => false,
+    "people" => false,
+    "address" => false,
+    "cfg" => false
+  ];
+
+
+  protected $people = null;
+  protected $address = null;
+  private $id_parent = null;
+  
+  private $code;
+  private $text;
+  
+  protected $where = [];
+
+  protected static array $codes = [];
 
   /**
    * @param array $link
@@ -18,39 +62,105 @@ class Link
    * @param array|null $address
    * @param array|null $option
    */
-  public function __construct(array $link, ?array $people, ?array $address, ?array $option)
+  public function __construct(
+    Db $db, 
+    protected Entities $entities,
+    protected Entity|Nullall $entity = new Nullall()
+  )
   {
-    $this->link    = (object)$this->parseCfg($link);
-    $this->people  = $people ? (object)$this->parseCfg($people) : null;
-    $this->address = $address ? (object)$this->parseCfg($address) : null;
-    $this->option  = $option ? (object)$this->parseCfg($option) : null;
-  }
-
-  /**
-   * @param array $item
-   *
-   * @return array
-   */
-  private function parseCfg(array $item): array
-  {
-    if (!array_key_exists('cfg', $item)) {
-      return $item;
+    parent::__construct($db, $entities, $entity);
+    if (!empty($this::$linkCfg['cfg'])) {
+      $this->class_cfg['cfg'] = $this::$linkCfg['cfg'];
     }
 
-    $cfg = json_decode($item['cfg'], true);
+    $o = $this->options();
+    $codes = self::getCodes($this);
+    if (!empty($codes) && ($this->type = $o->fromCode($codes))) {
+      $this->cfg =& $this::$linkCfg;
+      $option = $o->option($this->type);
+      $this->code = $option['code'];
+      $this->text = $option['text'];
+      $this->rootFilterCfg = [
+        $this->fields['link_type'] => $this->type
+      ];
 
-    if (!is_array($cfg)) {
-      $cfg = [];
-    }
+      if (!empty($this->cfg['people'])) {
+        $this->people = $this->entities->people();
+      }
 
-    unset($item['cfg']);
+      if (!empty($this->cfg['address'])) {
+        $this->address = $this->entities->address();
+      }
 
-    foreach ($cfg as $k => $v) {
-      if (!array_key_exists($k, $item)) {
-        $item[$k] = $v;
+      if (!empty($this->cfg['option'])) {
+        if (!empty($this->cfg['option']['id_parent'])) {
+          $this->id_parent = $this->options()->fromCode(...$this->cfg['option']['id_parent']);
+          if (!$this->id_parent) {
+            throw new Exception(X::_("The parent for %s is not defined", $this->text)); 
+          }
+        }
       }
     }
-
-    return $item;
   }
+
+
+  public function check() : bool
+  {
+    return (bool)$this->type;
+  }
+
+
+  public function getType()
+  {
+    return $this->type;
+  }
+
+
+  public function getText()
+  {
+    return $this->text;
+  }
+
+
+  public function getCode()
+  {
+    return $this->code;
+  }
+
+
+  public function getCfg()
+  {
+    return $this::$linkCfg;
+  }
+
+  public function getList()
+  {
+    return $this->selectValues($this->fields['id'], []);
+  }
+
+  public function getAll($start = 0, $limit = 0): array
+  {
+    return $this->rselectAll([], [], $start, $limit);
+  }
+
+  public function get($id = null): ?array
+  {
+    if ($this->cfg['single']) {
+      $res = $this->rselectAll([]);
+      return $res ? $res[0] : null;
+    }
+
+    if (!$id) {
+      throw new Exception(X::_("This link is not single, you ust enter an ID for get"));
+    }
+
+    return $this->rselect([$this->fields['id'] => $id]);
+  }
+
+  public static function getCodes(Link $link): array
+  {
+    return $link::$codes;
+  }
+  
 }
+

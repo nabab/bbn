@@ -4,13 +4,13 @@ namespace bbn\Entities;
 
 use bbn\Appui\Option;
 use bbn\Db;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Str;
 use bbn\X;
 
 abstract class AbstractLinkType
 {
-  use Dbconfig;
+  use DbActions;
 
   /**
    * @var Db

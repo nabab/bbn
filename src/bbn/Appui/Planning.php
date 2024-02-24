@@ -5,7 +5,7 @@ use bbn;
 class Planning {
 
   use
-    bbn\Models\Tts\Dbconfig;
+    bbn\Models\Tts\DbActions;
 
   protected static
     /** @var array */

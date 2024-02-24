@@ -9,22 +9,30 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use bbn\Db;
 use bbn\Str;
 use bbn\X;
+use bbn\User;
+use bbn\Mvc;
 use Exception;
+use bbn\Models\Tts\References;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Url;
+use bbn\Models\Tts\Tagger;
+use bbn\Models\Cls\Db as DbCls;
 
 if (!\defined('BBN_DATA_PATH')) {
   die('The constant BBN_DATA_PATH must be defined in order to use Note');
 }
 
-class Note extends bbn\Models\Cls\Db
+class Note extends DbCls
 {
-  use bbn\Models\Tts\References;
-  use bbn\Models\Tts\Optional;
-  use bbn\Models\Tts\Dbconfig;
-  use bbn\Models\Tts\Url;
-  use bbn\Models\Tts\Tagger;
+  use References;
+  use Optional;
+  use DbActions;
+  use Url;
+  use Tagger;
 
   private $medias;
 
@@ -125,10 +133,10 @@ class Note extends bbn\Models\Cls\Db
   /**
    * Note constructor.
    *
-   * @param bbn\Db $db
-   * @throws \Exception
+   * @param Db $db
+   * @throws Exception
    */
-  public function __construct(bbn\Db $db, string $lang = null)
+  public function __construct(Db $db, string $lang = null)
   {
     parent::__construct($db);
     $this->_init_class_cfg(self::$default_class_cfg);
@@ -297,7 +305,7 @@ class Note extends bbn\Models\Cls\Db
 
     $id_note = null;
 
-    if (($usr = bbn\User::getInstance())
+    if (($usr = User::getInstance())
       && $this->db->insert(
         $cf['table'],
         [
@@ -334,7 +342,7 @@ class Note extends bbn\Models\Cls\Db
   public function insertVersion(string $id_note, string $title = '', string $content = '', string $excerpt = ''): ?int
   {
     if ($this->check()
-        && ($usr = bbn\User::getInstance())
+        && ($usr = User::getInstance())
         && ($note = $this->get($id_note))
         && ($title || $content)
     ) {
@@ -671,7 +679,7 @@ class Note extends bbn\Models\Cls\Db
   public function insertOrUpdateUrl(string $id_note, string $url)
   {
     if (!$this->exists($id_note)) {
-      throw new \Exception(
+      throw new Exception(
         X::_(
           "Impossible to retrieve the note with ID %s",
           Str::isUid($id_note) ? $id_note : '[String (' . strlen($id_note) . ')]'
@@ -911,7 +919,7 @@ class Note extends bbn\Models\Cls\Db
    * @param string $type
    * @param bool $private
    * @return string|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function addMedia($id_note, string $name, array $content = null, string $title = '', string $type = 'file', bool $private = false): ?string
   {
@@ -944,7 +952,7 @@ class Note extends bbn\Models\Cls\Db
    */
   public function addMediaToNote(string $id_media, string $id_note, int $default = 0): ?int
   {
-    if ($usr = bbn\User::getInstance()) {
+    if ($usr = User::getInstance()) {
       $cf = &$this->class_cfg;
 
       if ($default) {
@@ -977,7 +985,7 @@ class Note extends bbn\Models\Cls\Db
    * @param string $id_media
    * @param string $id_note
    * @return int|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function removeMedia(string $id_media, string $id_note): ?int
   {
@@ -1001,7 +1009,7 @@ class Note extends bbn\Models\Cls\Db
    * 
    * @param string $id_note
    * @return int|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function removeAllMedias(string $id_note): ?int
   {
@@ -1021,7 +1029,7 @@ class Note extends bbn\Models\Cls\Db
    * @param false $version
    * @param false $type
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getMedias(string $id_note, $version = false, $type = false): array
   {
@@ -1051,7 +1059,7 @@ class Note extends bbn\Models\Cls\Db
    * @param false $version
    * @param string $id_media
    * @return bool|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function hasMedias(string $id_note, $version = false, string $id_media = ''): ?bool
   {
@@ -1075,7 +1083,7 @@ class Note extends bbn\Models\Cls\Db
    * @param array $cfg
    * @param bool $with_content
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function browse(array $cfg, bool $with_content = false, bool $private = false, string $id_type = null, bool $pinned = null): ?array
   {
@@ -1210,7 +1218,7 @@ class Note extends bbn\Models\Cls\Db
    */
   public function count()
   {
-    if ($user = bbn\User::getInstance()) {
+    if ($user = User::getInstance()) {
       $cf  = &$this->class_cfg;
       $db  = &$this->db;
       $sql = "
@@ -1353,9 +1361,9 @@ class Note extends bbn\Models\Cls\Db
       ]
     );
     if (!empty($all)) {
-      $root = \bbn\Mvc::getDataPath('appui-note') . 'media/';
+      $root = Mvc::getDataPath('appui-note') . 'media/';
       foreach ($all as $i => $a) {
-        if (bbn\Str::isJson($a['content']) && ($media_obj = $this->getMediaInstance())) {
+        if (Str::isJson($a['content']) && ($media_obj = $this->getMediaInstance())) {
           $content   = json_decode($a['content'], true);
           $path      = $root . $content['path'] . '/';
           $full_path = $path . $a['id'] . '/' . $a['name'];
@@ -1385,7 +1393,7 @@ class Note extends bbn\Models\Cls\Db
   public function getMediaNotes(string $id_media)
   {
     $notes = [];
-    $cms   = new \bbn\Appui\Cms($this->db);
+    $cms   = new Cms($this->db);
     $ids   = $this->db->rselectAll(
       $this->class_cfg['tables']['notes_medias']
       [
@@ -1646,7 +1654,7 @@ class Note extends bbn\Models\Cls\Db
       }
 
       if ($full) {
-        $cms = new bbn\Appui\Cms($this->db);
+        $cms = new Cms($this->db);
         $res = X::mergeArrays($cms->get($res['id_note'], false, false), $res);
       }
 

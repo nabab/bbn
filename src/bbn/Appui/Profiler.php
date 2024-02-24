@@ -8,7 +8,7 @@ use bbn\X;
 use bbn\Mvc;
 use bbn\Db;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Util\Timer;
 use bbn\Appui\Grid;
 
@@ -19,7 +19,7 @@ use bbn\Appui\Grid;
  */
 class Profiler extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
 
   protected $is_started = false;
 

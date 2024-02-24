@@ -36,7 +36,7 @@ class Option extends bbn\Models\Cls\Db
 {
   use bbn\Models\Tts\Retriever;
   use bbn\Models\Tts\Cache;
-  use bbn\Models\Tts\Dbconfig;
+  use bbn\Models\Tts\DbActions;
 
   //protected const root_hex = '962d50c3e07211e781c6000c29703ca2';
   protected const root_hex = 'c88846c3bff511e7b7d5000c29703ca2';

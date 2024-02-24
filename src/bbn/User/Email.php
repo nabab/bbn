@@ -11,12 +11,12 @@ use bbn\User\Preferences;
 use bbn\Appui\Mailbox;
 use bbn\Appui\Passwords;
 use bbn\Models\Cls\Basic;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 
 class Email extends Basic
 {
-  use Dbconfig;
+  use DbActions;
   use Optional;
 
   /** @var array */

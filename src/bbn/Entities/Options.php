@@ -2,7 +2,7 @@
 
 namespace bbn\Entities;
 
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Db;
@@ -10,7 +10,7 @@ use bbn\X;
 
 class Options extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
   use Optional;
 
   protected static $default_class_cfg = [

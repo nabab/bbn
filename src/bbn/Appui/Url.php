@@ -2,14 +2,15 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use bbn\Db;
 use bbn\X;
-use bbn\Str;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
 use Exception;
 
-class Url extends bbn\Models\Cls\Db
+class Url extends DbCls
 {
-  use bbn\Models\Tts\Dbconfig;
+  use DbActions;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -29,7 +30,7 @@ class Url extends bbn\Models\Cls\Db
   ];
 
 
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     $this->_init_class_cfg();

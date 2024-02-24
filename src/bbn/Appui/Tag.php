@@ -8,15 +8,16 @@
 
 namespace bbn\Appui;
 
-use bbn;
-use bbn\X;
-use Exception;
+use bbn\Db;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Cache;
+use bbn\Models\Cls\Db as DbCls;
 
-class Tag extends bbn\Models\Cls\Db
+class Tag extends DbCls
 {
-
-  use bbn\Models\Tts\Dbconfig;
-  use bbn\Models\Tts\Cache;
+  use DbActions;
+  use Cache;
+  
 
   /**
    * @var array Db configuration
@@ -46,7 +47,7 @@ class Tag extends bbn\Models\Cls\Db
 
   protected $lang;
 
-  public function __construct(bbn\Db $db, string $lang = null)
+  public function __construct(Db $db, string $lang = null)
   {
     $this->lang = $lang ?: 'en';
     parent::__construct($db);

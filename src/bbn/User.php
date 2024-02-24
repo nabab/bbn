@@ -10,7 +10,7 @@ use Exception;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Tts\Retriever;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Basic;
 use bbn\User\Common;
 use bbn\User\Implementor;
@@ -32,7 +32,7 @@ use bbn\User\Manager;
 class User extends Basic implements Implementor
 {
   use Retriever;
-  use Dbconfig;
+  use DbActions;
   use Common;
 
   /** @var array */
@@ -73,7 +73,7 @@ class User extends Basic implements Implementor
       'passwords' => 'bbn_users_passwords',
       'sessions' => 'bbn_users_sessions',
       'tokens' => 'bbn_users_tokens',
-      'api_tokens' => 'bbn_users_api_tokens', // String because array_flip() in Dbconfig only works with integers and string
+      'api_tokens' => 'bbn_users_api_tokens', // String because array_flip() in DbActions only works with integers and string
       'access_tokens' => 'bbn_users_access_tokens',
       'users' => 'bbn_users',
       'permission_accounts' => 'bbn_users_permission_accounts',
