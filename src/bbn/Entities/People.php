@@ -9,6 +9,8 @@ use bbn\Db;
 use bbn\Appui\History;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
+use bbn\Entities\Models\Entities;
+use bbn\Models\Cls\Nullall;
 
 /**
  * The People class represents entities in a 'bbn_people' table
@@ -68,10 +70,14 @@ class People extends DbCls
   /**
    * A mapping of alternate civility representations to standard forms.
    */
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(
+    Db $db, 
+    protected Entities $entities,
+    protected Entity|Nullall $entity = new Nullall()
+  )
   {
     parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->_init_class_cfg();
   }
 
 
@@ -152,6 +158,7 @@ class People extends DbCls
   public function set_info(array $fn): ?array
   {
     $fn = $this->prepare($fn);
+    $arc = &$this->class_cfg['arch']['people'];
     if (!empty($fn)) {
       if (!isset($fn[$arc['fname']])) {
         $fn[$arc['fname']] = '';
@@ -203,7 +210,7 @@ class People extends DbCls
    * @param mixed $id The ID of the person.
    * @return array|null Detailed information about the person.
    */
-  public function get_info($id): array
+  public function getInfo($id): array
   {
     return $this->rselect($id);
   }

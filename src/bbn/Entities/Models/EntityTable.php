@@ -1,5 +1,5 @@
 <?php
-namespace bbn\Entities;
+namespace bbn\Entities\Models;
 
 
 use bbn\Models\Cls\Nullall;
@@ -10,9 +10,12 @@ use Exception;
 use bbn\Db;
 use bbn\X;
 use bbn\Appui\Option;
-use bbn\Entities;
+use bbn\Entities\Models\Entities;
+use bbn\Entities\Entity;
+use bbn\Entities\People;
+use bbn\Entities\Address;
 
-abstract class AbstractEntityTable extends DbCls
+abstract class EntityTable extends DbCls
 {
   use DbActions;
   use Cache;
@@ -55,7 +58,7 @@ abstract class AbstractEntityTable extends DbCls
   public function check(): bool
   {
     if ($this->id_entity) {
-      return $this->entities->check($this->id_entity);
+      return $this->entities->exists($this->id_entity);
     }
 
     return $this->entities->check();

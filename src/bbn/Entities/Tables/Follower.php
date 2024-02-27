@@ -1,14 +1,14 @@
 <?php
 
-namespace bbn\Entities;
+namespace bbn\Entities\Tables;
 
 use bbn\Db;
 use bbn\X;
-use bbn\Entities;
+use bbn\Entities\Models\Entities;
 use bbn\Models\Tts\DbActions;
-use bbn\Entities\AbstractEntityTable;
+use bbn\Entities\Models\EntityTable;
 
-class Follower extends AbstractEntityTable
+class Follower extends EntityTable
 {
   use DbActions;
 

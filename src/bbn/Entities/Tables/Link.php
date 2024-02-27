@@ -1,17 +1,18 @@
 <?php
 
-namespace bbn\Entities;
+namespace bbn\Entities\Tables;
 
 use Exception;
 use bbn\Db;
 use bbn\X;
-use bbn\Entities;
-use bbn\Entities\AbstractEntityTable;
+use bbn\Entities\Models\Entities;
+use bbn\Entities\Models\EntityTable;
+use bbn\Entities\Entity;
 use bbn\Entities\LinkTrait;
 use bbn\Models\Cls\Nullall;
 use bbn\Models\Tts\DbActions;
 
-class Link extends AbstractEntityTable
+class Link extends EntityTable
 {
   use DbActions;
 
@@ -101,6 +102,10 @@ class Link extends AbstractEntityTable
         }
       }
     }
+    else {
+      $this->people = $this->entities->people();
+      $this->address = $this->entities->address();
+    }
   }
 
 
@@ -133,14 +138,14 @@ class Link extends AbstractEntityTable
     return $this::$linkCfg;
   }
 
-  public function getList()
+  public function getList(array $filter = [])
   {
-    return $this->selectValues($this->fields['id'], []);
+    return $this->selectValues($this->fields['id'], $filter);
   }
 
-  public function getAll($start = 0, $limit = 0): array
+  public function getAll(int $start = 0, int $limit = 0, array $filter = []): array
   {
-    return $this->rselectAll([], [], $start, $limit);
+    return $this->rselectAll([], $filter, $start, $limit);
   }
 
   public function get($id = null): ?array

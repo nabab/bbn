@@ -13,40 +13,33 @@ use bbn\Str;
 use stdClass;
 use Exception;
 
-trait DbActions
+trait DbJunction
 {
   use DbConfig;
 
-  protected $DbActionsFilterCfg = [];
+  protected $DbJunctionFilterCfg = [];
 
   protected $rootFilterCfg = [];
 
-  private $DbActionsStructure = [];
+  private $DbJunctionStructure = [];
 
-  private $DbActionsRelations = [];
+  private $DbJunctionRelations = [];
 
 
   /**
    * @param array|string $id
    * @return bool
    */
-  public function exists($filter): bool
+  public function exists(array $filter): bool
   {
     if (!$this->class_table_index) {
       throw new Exception(X::_("The table index parameter should be defined"));
     }
 
     $f = $this->class_cfg['arch'][$this->class_table_index];
-    if (is_string($filter)) {
-      $cfg = [$f['id'] => $filter];
-    }
-    elseif (is_array($filter)) {
-      $cfg = $filter;
-    }
-
-    if (!empty($cfg) && $this->db->count(
+    if (!empty($filter) && $this->db->count(
       $this->class_table,
-      $this->DbActionsFilterCfg($cfg)
+      $this->DbJunctionFilterCfg($filter)
     )) {
       return true;
     }
@@ -73,7 +66,7 @@ trait DbActions
       }
 
       if ($this->db->{$ignore ? 'insertIgnore' : 'insert'}($ccfg['table'], $data)) {
-        return $this->db->lastId();
+        return $this->rselect($data);
       }
     }
 
@@ -88,17 +81,13 @@ trait DbActions
    *
    * @return bool
    */
-  public function delete(string|array $filter, bool $cascade = false): bool
+  public function delete(array $filter, bool $cascade = false): bool
   {
     if ($this->exists($filter)) {
       $cfg = $this->getClassCfg();
       $f = $cfg['arch'][$this->class_table_index];
 
-      if (!is_array($filter) && !empty($f['id'])) {
-        $filter = [$f['id'] => $filter];
-      }
-
-      return (bool)$this->db->delete($cfg['table'], $this->DbActionsFilterCfg($filter));
+      return (bool)$this->db->delete($cfg['table'], $this->DbJunctionFilterCfg($filter));
     }
 
     return false;
@@ -113,7 +102,7 @@ trait DbActions
    *
    * @return bool
    */
-  public function update(string|array $filter, array $data, bool $addCfg = false): bool
+  public function update(array $filter, array $data, bool $addCfg = false): bool
   {
     if (!$this->exists($filter)) {
       throw new Exception(X::_("Impossible to find the given row"));
@@ -121,10 +110,6 @@ trait DbActions
 
     $ccfg = $this->getClassCfg();
     $f = $ccfg['arch'][$this->class_table_index];
-    if (!is_array($filter)) {
-      $filter = [$f['id'] => $filter];
-    }
-
     if ($data = $this->prepare($data)) {
       if (!empty($f['cfg'])) {
         $col = $f['cfg'];
@@ -139,7 +124,7 @@ trait DbActions
         }
       }
       
-      return (bool)$this->db->update($ccfg['table'], $data, $this->DbActionsFilterCfg($filter));
+      return (bool)$this->db->update($ccfg['table'], $data, $this->DbJunctionFilterCfg($filter));
     }
 
     return false;
@@ -154,9 +139,9 @@ trait DbActions
    *
    * @return mixed
    */
-  public function selectOne(string $field, $filter = [], array $order = [])
+  public function selectOne(string $field, array $filter = [], array $order = [])
   {
-    if ($res = $this->DbActionsSingleSelection($filter, $order, 'array', [$field])) {
+    if ($res = $this->DbJunctionSingleSelection($filter, $order, 'array', [$field])) {
       return $res[$field] ?? null;
     }
 
@@ -172,9 +157,9 @@ trait DbActions
    *
    * @return stdClass|null
    */
-  public function select($filter = [], array $order = [], array $fields = []): ?stdClass
+  public function select(array $filter = [], array $order = [], array $fields = []): ?stdClass
   {
-    return $this->DbActionsSingleSelection($filter, $order, 'object', $fields);
+    return $this->DbJunctionSingleSelection($filter, $order, 'object', $fields);
   }
 
 
@@ -186,14 +171,14 @@ trait DbActions
    *
    * @return array|null
    */
-  public function rselect($filter = [], array $order = [], array $fields = []): ?array
+  public function rselect(array $filter = [], array $order = [], array $fields = []): ?array
   {
-    return $this->DbActionsSingleSelection($filter, $order, 'array', $fields);
+    return $this->DbJunctionSingleSelection($filter, $order, 'array', $fields);
   }
 
   public function selectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
   {
-    return $this->DbActionsSelection($filter, $order, $limit, $start, 'value', [$field]);
+    return $this->DbJunctionSelection($filter, $order, $limit, $start, 'value', [$field]);
   }
 
 
@@ -210,7 +195,7 @@ trait DbActions
       throw new Exception(X::_("The table index parameter should be defined"));
     }
 
-    $req = $this->DbActionsGetRequestCfg($filter, [], 1, 0, [$this->fields['id']]);
+    $req = $this->DbJunctionGetRequestCfg($filter, [], 1, 0, [$this->fields['id']]);
     return $this->db->count($req);
   }
 
@@ -227,7 +212,7 @@ trait DbActions
    */
   public function selectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
   {
-    return $this->DbActionsSelection($filter, $order, $limit, $start, 'object', $fields);
+    return $this->DbJunctionSelection($filter, $order, $limit, $start, 'object', $fields);
   }
 
 
@@ -243,33 +228,13 @@ trait DbActions
    */
   public function rselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
   {
-    return $this->DbActionsSelection($filter, $order, $limit, $start, 'array', $fields);
+    return $this->DbJunctionSelection($filter, $order, $limit, $start, 'array', $fields);
   }
-
-  public function getRelations(string $id, string $table = null): ?array
-  {
-    if ($this->exists($id)) {
-      $db =& $this->db;
-      $res = [];
-      foreach ($this->DbActionsGetRelations($table) as $rel) {
-        if ($all = $db->getColumnValues($rel['table'], $rel['primary'], [$rel['col'] => $id])) {
-          $res[$rel['table']] = $all;
-        }
-      }
-
-      return $res;
-    }
-
-    return null;
-  }
-
 
   protected function isInitClassCfg(): bool
   {
     return $this->_is_init_class_cfg;
   }
-
-
 
   protected function prepare(array $data)
   {
@@ -284,14 +249,6 @@ trait DbActions
     }
 
     $f = $ccfg['arch'][$table_index];
-    if (!$f['id']) {
-      throw new Exception(X::_("The class config is not correct as the main table doesn't have an id column"));
-    }
-
-    if (isset($data[$f['id']])) {
-      unset($data[$f['id']]);
-    }
-
     $res = [];
     if (!empty($f['cfg'])) {
       if (array_key_exists($f['cfg'], $data)) {
@@ -312,7 +269,7 @@ trait DbActions
       }
     }
     
-    $structure = $this->DbActionsGetStructure();
+    $structure = $this->DbJunctionGetStructure();
     foreach ($data as $k => $v) {
       if (in_array($k, $f)) {
         if (empty($v) && $structure['fields'][$k]['null']) {
@@ -327,25 +284,25 @@ trait DbActions
   }
 
 
-  protected function DbActionsSetFilterCfg(array $cfg): void
+  protected function DbJunctionSetFilterCfg(array $cfg): void
   {
-    $this->DbActionsFilterCfg = $cfg;
+    $this->DbJunctionFilterCfg = $cfg;
   }
 
-  protected function DbActionsResetFilterCfg(): void
+  protected function DbJunctionResetFilterCfg(): void
   {
-    $this->DbActionsFilterCfg = [];
+    $this->DbJunctionFilterCfg = [];
   }
 
-  protected function DbActionsFilterCfg(array $cfg): array
+  protected function DbJunctionFilterCfg(array $cfg): array
   {
     $conditions = [];
     if (!empty($this->rootFilterCfg)) {
       $conditions[] = $this->rootFilterCfg;
     }
 
-    if (!empty($this->DbActionsFilterCfg)) {
-      $conditions[] = $this->DbActionsFilterCfg;
+    if (!empty($this->DbJunctionFilterCfg)) {
+      $conditions[] = $this->DbJunctionFilterCfg;
     }
 
     if (!empty($cfg)) {
@@ -369,36 +326,36 @@ trait DbActions
   }
 
 
-  protected function DbActionsGetStructure(string $table = null): array
+  protected function DbJunctionGetStructure(string $table = null): array
   {
     $cfg = $this->getClassCfg();
     if (!$table) {
       $table = $cfg['table'];
     }
 
-    if (!$this->DbActionsStructure[$table]) {
-      $this->DbActionsStructure[$table] = $this->db->modelize($table);
+    if (!$this->DbJunctionStructure[$table]) {
+      $this->DbJunctionStructure[$table] = $this->db->modelize($table);
     }
 
-    return $this->DbActionsStructure[$table];
+    return $this->DbJunctionStructure[$table];
   }
 
 
-  protected function DbActionsGetRelations(string $table = null): array
+  protected function DbJunctionGetRelations(string $table = null): array
   {
     $cfg = $this->getClassCfg();
     if (!$table) {
       $table = $cfg['table'];
     }
     $idx = array_flip($cfg['tables'])[$table];
-    if ($idx && !isset($this->DbActionsRelations[$table])) {
+    if ($idx && !isset($this->DbJunctionRelations[$table])) {
       $arc = &$cfg['arch'][$idx];
-      $this->DbActionsRelations[$table] = [];
+      $this->DbJunctionRelations[$table] = [];
       $refs = $this->db->findReferences($this->db->cfn($arc['id'], $table));
       foreach ($refs as $ref) {
         [$db, $table, $col] = X::split($ref, '.');
         $model = $this->db->modelize($table);
-        $this->DbActionsRelations[$table][] = [
+        $this->DbJunctionRelations[$table][] = [
           'db' => $db,
           'table' => $table,
           'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,
@@ -408,7 +365,7 @@ trait DbActions
       }
     }
 
-    return $this->DbActionsRelations[$table];
+    return $this->DbJunctionRelations[$table];
   }
 
   /**
@@ -421,7 +378,7 @@ trait DbActions
    *
    * @return array
    */
-  private function DbActionsSelection(
+  private function DbJunctionSelection(
     array $filter,
     array $order,
     int $limit,
@@ -432,7 +389,7 @@ trait DbActions
   ): array
   {
     $returnObject = $mode === 'object';
-    $req = $this->DbActionsGetRequestCfg($filter, $order, $limit, $start, $fields);
+    $req = $this->DbJunctionGetRequestCfg($filter, $order, $limit, $start, $fields);
     $f = $this->class_cfg['arch'][$this->class_table_index];
     $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');
     $res = $this->db->$method($req);
@@ -461,7 +418,7 @@ trait DbActions
   }
 
 
-  private function DbActionsGetRequestCfg(
+  private function DbJunctionGetRequestCfg(
     array $filter,
     array $order,
     int $limit,
@@ -510,7 +467,7 @@ trait DbActions
     $req = [
       'table' => $this->class_table,
       'fields' => $properFields,
-      'where' => $this->DbActionsFilterCfg($filter),
+      'where' => $this->DbJunctionFilterCfg($filter),
       'order' => $order
     ];
 
@@ -531,24 +488,14 @@ trait DbActions
    * @param string $mode
    * @return mixed
    */
-  private function DbActionsSingleSelection(
-    $filter,
+  private function DbJunctionSingleSelection(
+    array $filter,
     array $order,
     string $mode = 'array',
     array $fields = []
   ): mixed
   {
-    $f = $this->class_cfg['arch'][$this->class_table_index];
-    if (is_string($filter)) {
-      $cfg = [$f['id'] => $filter];
-    }
-    elseif (is_array($filter)) {
-      $cfg = $filter;
-    }
-
-    if (isset($cfg)
-        && ($res = $this->DbActionsSelection($cfg, $order, 1, 0, $mode, $fields))
-    ) {
+    if ($res = $this->DbJunctionSelection($filter, $order, 1, 0, $mode, $fields)) {
       return $res[0];
     }
 

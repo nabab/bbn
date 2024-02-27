@@ -1221,15 +1221,34 @@ class Note extends DbCls
     if ($user = User::getInstance()) {
       $cf  = &$this->class_cfg;
       $db  = &$this->db;
-      $sql = "
-      SELECT COUNT(DISTINCT {$db->cfn($cf['arch']['notes']['id'],$cf['tables']['notes'], 1)})
-      FROM {$db->tsn($cf['tables']['notes'], 1)}
-        JOIN {$db->tsn($cf['tables']['versions'], 1)}
-          ON {$db->cfn($cf['arch']['notes']['id'],$cf['tables']['notes'], 1)} = {$db->cfn($cf['arch']['versions']['id_note'],$cf['tables']['versions'], 1)}
-      WHERE {$db->cfn($cf['arch']['notes']['creator'],$cf['tables']['notes'], 1)} = ?
-      OR {$db->cfn($cf['arch']['versions']['id_user'],$cf['tables']['versions'], 1)} = ?";
-
-      return $db->getOne($sql, $user->getId(), $user->getId());
+      return $this->db->count([
+        'tables' => $cf['table'],
+        'join' => [[
+          'table' => $cf['tables']['versions'],
+          'on' => [
+            'conditions' => [[
+              'field' => $db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions']),
+              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
+            ]],
+          ],
+        ]],
+        'where' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'latest',
+            'value' => 1
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
+              'value' => $user->getId()
+            ], [
+              'field' => $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
+              'value' => $user->getId()
+            ]]
+          ]]
+        ]
+      ]);
     }
 
     return null;

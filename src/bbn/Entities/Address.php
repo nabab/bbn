@@ -5,9 +5,12 @@ use Exception;
 use bbn\X;
 use bbn\Str;
 use bbn\Db;
-use bbn\Appui\History;
+use bbn\Appui\Option;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
+use bbn\Entities\Models\Entities;
+use bbn\Models\Cls\Nullall;
+
 
 class Address extends DbCls
 {
@@ -45,14 +48,22 @@ class Address extends DbCls
    * Constructor.
    *
    * @param Db    $db
-   * @param array $cfg
-   * @param array $params
    */
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(
+    Db $db, 
+    protected Entities $entities,
+    protected Entity|Nullall $entity = new Nullall()
+  )
   {
     parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->_init_class_cfg();
 	}
+
+
+  public function options(): Option
+  {
+    return $this->entities->options();
+  }
 
 	public function getInfo($id, $id_entity = null){
 	  $d = $this->db->rselect('bbn_addresses', [], ['id' => $id]);
@@ -411,7 +422,7 @@ class Address extends DbCls
     $id = false;
     $fn = $this->set_address($fn);
     if (!empty($fn['id_country'])) {
-      if (($fn['id_country'] === $this->options->fromCode('FR', 'countries'))
+      if (($fn['id_country'] === $this->options()->fromCode('FR', 'countries'))
         && ($conf_ville = $this->get_ville(empty($fn['cp']) ? '' : $fn['cp'], empty($fn['ville']) ? '' : $fn['ville']))
       ) {
         $fn['cp'] = $conf_ville['cp'];
@@ -532,8 +543,8 @@ class Address extends DbCls
       if ( !$with_br ){
         return str_replace('<br>', ', ', $st);
       }
-      if ( !empty($s['id_country']) && ($s['id_country'] !== $this->options->fromCode('FR', 'countries')) ){
-        $st .= '<br>(' .$this->options->text($s['id_country']). ')' ;
+      if ( !empty($s['id_country']) && ($s['id_country'] !== $this->options()->fromCode('FR', 'countries')) ){
+        $st .= '<br>(' .$this->options()->text($s['id_country']). ')' ;
       }
       
       return $st;

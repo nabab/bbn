@@ -58,9 +58,19 @@ trait DbConfig
    */
   protected function _init_class_cfg(array $cfg = null)
   {
+    $arr = [];
     if (isset(self::$default_class_cfg)) {
-      $cfg = X::mergeArrays(self::$default_class_cfg, $cfg ?: []);
+      $arr[] = self::$default_class_cfg;
     }
+
+    if (isset(static::$default_class_cfg)) {
+      $arr[] = static::$default_class_cfg;
+    }
+    
+    if ($cfg) {
+      $arr[] = $cfg;
+    }
+    $cfg = X::mergeArrays(...$arr);
 
     $table_index = array_flip($cfg['tables'])[$cfg['table']];
     if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {

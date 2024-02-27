@@ -1,18 +1,14 @@
 <?php
 
-namespace bbn\Entities;
+namespace bbn\Entities\Tables;
 
 use bbn\X;
 use bbn\Db;
 use bbn\User;
-use bbn\Entities\AbstractEntityTable;
-use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\DbConfig;
+use bbn\Entities\Models\EntityTable;
 
-abstract class Document extends AbstractEntityTable
+abstract class Document extends EntityTable
 {
-  use DbConfig;
-
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_documents',
     'tables' => [

@@ -1010,7 +1010,7 @@ MYSQL
 
       $i = 0;
       foreach ($model['keys'] as $name => $key) {
-        $st .= '  ADD ';
+        $st .= 'ADD ';
         if (!empty($key['unique'])
           && isset($model['fields'][$key['columns'][0]])
           && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')

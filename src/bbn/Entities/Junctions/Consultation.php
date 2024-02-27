@@ -1,15 +1,16 @@
 <?php
 
-namespace bbn\Entities\Document;
+namespace bbn\Entities\Junctions;
 
 use bbn\X;
 use bbn\Db;
 use bbn\User;
-use bbn\Entities;
+use bbn\Entities\Entity;
+use bbn\Entities\Models\Entities;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbConfig;
 
-abstract class Request extends DbCls
+class Consultation extends DbCls
 {
   use DbConfig;
 

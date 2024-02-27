@@ -1,16 +1,19 @@
 <?php
 
-namespace bbn;
+namespace bbn\Entities\Models;
 
-use bbn\Entities\AbstractEntityTable;
+use bbn\Db;
+use bbn\Str;
+use bbn\X;
 use bbn\Entities\Entity;
-use bbn\Entities\Link;
+use bbn\Entities\Tables\Link;
 use bbn\Entities\People;
 use bbn\Entities\Address;
-use bbn\Entities\Consultation;
-use bbn\Entities\Document;
-use bbn\Entities\Options as EntityOptions;
-use bbn\Entities\Document\Request;
+use bbn\Entities\Junctions\Consultation;
+use bbn\Entities\Tables\Document;
+use bbn\Entities\Tables\Options as EntityOptions;
+use bbn\Entities\Tables\DocumentRequest;
+use bbn\Mail;
 use bbn\Appui\Masks;
 use bbn\Appui\Option;
 use bbn\Models\Cls\Db as DbCls;
@@ -89,7 +92,7 @@ abstract class Entities extends DbCls
           'maxlength' => 100
         ],
         'id_parent' => [
-          'name' => 'name',
+          'name' => 'id_parent',
           'type' => 'string',
           'maxlength' => 100,
           'alias' => 'parent'
@@ -130,7 +133,7 @@ abstract class Entities extends DbCls
     private Address|null $address = null,
     private Consultation|null $consultation = null,
     private Document|null $document = null,
-    private Request|null $request = null,
+    private DocumentRequest|null $request = null,
     private EntityOptions|null $entityOptions = null,
     private Masks|null $masks = null,
   )
@@ -165,7 +168,7 @@ abstract class Entities extends DbCls
   {
     $cls = $this->class_cfg['classes'];
     if (!$this->people && $cls['people']) {
-      $this->people = new $cls['people']($this->db);
+      $this->people = new $cls['people']($this->db, $this);
     }
 
     return $this->people;
@@ -176,7 +179,7 @@ abstract class Entities extends DbCls
   {
     $cls = $this->class_cfg['classes'];
     if (!$this->address && $cls['address']) {
-      $this->address = new $cls['address']($this->db);
+      $this->address = new $cls['address']($this->db, $this);
     }
 
     return $this->address;
@@ -233,7 +236,7 @@ abstract class Entities extends DbCls
   }
 
 
-  public function request(Entity|null $entity = null): ?Request
+  public function request(Entity|null $entity = null): ?DocumentRequest
   {
     $cls = $this->class_cfg['classes'];
     if (!empty($cls['request'])) {
@@ -271,28 +274,7 @@ abstract class Entities extends DbCls
   }
 
 
-  public function getBasicInfo($id): ?array
-  {
-    if ($this->exists($id)) {
-      $cfg = $this->getClassCfg();
-      $arc = $cfg['arch']['entities'];
-      $fields = [$arc['id'], $arc['name']];
-      if (!empty($arc['easy_id'])) {
-        $fields[] = $arc['easy_id'];
-      }
-
-      return $this->db->rselect(
-        $this->class_cfg['table'],
-        $fields,
-        [$arc['id'] => $id]
-      );
-    }
-
-    return null;
-  }
-
-
-  protected function getLink(string $linkCls, Entity|null $entity = null): ?Link
+  public function getLink(string $linkCls, Entity|null $entity = null): ?Link
   {
     $id = $this->options()->fromCode($linkCls::$codes);
     if (!$entity) {
@@ -308,7 +290,21 @@ abstract class Entities extends DbCls
   }
 
 
-  protected function getClass(string $clsName, string $index, Entity|null $entity = null): AbstractEntityTable
+  public function getGlobalLink(Entity|null $entity = null): ?Link
+  {
+    if (!$entity) {
+      if (!isset($this->links)) {
+        $this->links = new Link($this->db, $this);
+      }
+
+      return $this->links;
+    }
+
+    return new Link($this->db, $this, $entity);
+  }
+
+
+  protected function getClass(string $clsName, string $index, Entity|null $entity = null): EntityTable
   {
     if (!$entity) {
       if (!isset(self::$classes[$index])) {
@@ -329,7 +325,7 @@ abstract class Entities extends DbCls
   }
 
 
-  private static function setClass(string $index, AbstractEntityTable $cls): void
+  private static function setClass(string $index, EntityTable $cls): void
   {
     self::$classes[$index] = $cls;
   }
