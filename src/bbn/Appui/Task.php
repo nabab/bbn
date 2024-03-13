@@ -16,7 +16,9 @@ class Task extends bbn\Models\Cls\Db
   use bbn\Models\Tts\References,
       bbn\Models\Tts\Optional;
 
-  private $columns;
+  private
+    $columns,
+    $tokensConfig;
 
   protected
     $noteCls,
@@ -1657,17 +1659,57 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function startTrack($id_task, $id_user = false){
-    if (
-      !$this->getActiveTrack($id_user) &&
-      ($ongoing = $this->idState('ongoing')) &&
-      ($ongoing === $this->getState($id_task)) &&
-      ($role = $this->hasRole($id_task, $id_user ?: $this->id_user)) &&
-      (($role === 'managers') || ($role === 'workers'))
+    if (!$this->getActiveTrack($id_user)
+      && ($ongoing = $this->idState('ongoing'))
+      && ($ongoing === $this->getState($id_task))
+      && ($role = $this->hasRole($id_task, $id_user ?: $this->id_user))
+      && (($role === 'managers') || ($role === 'workers'))
     ){
+      $start = date('Y-m-d H:i:s');
+      if (($tokesCfg = $this->getTokensCfg())
+        && !empty($tokesCfg['step'])
+      ) {
+        $lastTask = $this->db->select([
+          'table' => 'bbn_tasks_sessions',
+          'fields' => [
+            'bbn_tasks_sessions.end',
+            'bbn_tasks_sessions.length',
+            'bbn_tasks_sessions.tokens'
+          ],
+          'join' => [[
+            'table' => 'bbn_tasks',
+            'on' => [[
+              'field' => 'bbn_tasks.id',
+              'exp' => 'bbn_tasks_sessions.id_task'
+            ]]
+          ]],
+          'where' => [
+            'bbn_tasks_sessions.id_user' => $id_user ?: $this->id_user,
+            'bbn_tasks.active' => 1
+          ],
+          'order' => [
+            'bbn_tasks_sessions.end' => 'DESC'
+          ],
+        ]);
+        if (!empty($lastTask)
+          && ((strtotime($start) - strtotime($lastTask->end)) < $tokesCfg['step'])
+          && ($dt = floor($lastTask->tokens) - $lastTask->tokens)
+          && ($ds = $dt * $tokesCfg['step'])
+        ) {
+          $start = strtotime('-'.$ds.' second', $start);
+          $length = $lastTask->length - $ds;
+          $this->db->update('bbn_tasks_sessions', [
+            'length' => $length,
+            'tokens' => $lastTask->tokens - $dt
+          ], [
+            'id' => $lastTask->id
+          ]);
+        }
+      }
       return $this->db->insert('bbn_tasks_sessions', [
         'id_task' => $id_task,
         'id_user' => $id_user ?: $this->id_user,
-        'start' => date('Y-m-d H:i:s')
+        'start' => $start
       ]);
     }
     return false;
@@ -1684,23 +1726,29 @@ class Task extends bbn\Models\Cls\Db
   public function stopTrack($id_task, $message = false, $id_user = false){
     $ok = false;
     $now = time();
-    if (
-      ($active_track = $this->getActiveTrack($id_user)) &&
-      ($active_track['id_task'] === $id_task)
+    if (($active_track = $this->getActiveTrack($id_user))
+      && ($active_track['id_task'] === $id_task)
     ){
       $ok = true;
-      if (
-        !empty($message) &&
-        !($id_note = $this->comment($id_task, [
+      if (!empty($message)
+        && !($id_note = $this->comment($id_task, [
           'title' => X::_('Report tracker').' '.date('d M Y H:i', strtotime($active_track['start'])).' - '.date('d M Y H:i', $now),
           'text' => $message
         ]))
       ){
         $ok = false;
       }
-      if ( $ok ){
+      if ($ok) {
+        $length = $now - strtotime($active_track['start']);
+        $tokens = null;
+        if (($tokensCfg = $this->getTokensCfg())
+          && !empty($tokensCfg['step'])
+        ) {
+          $tokens = $length / $tokensCfg['step'];
+        }
         $ok = $this->db->update('bbn_tasks_sessions', [
-          'length' => $now - strtotime($active_track['start']),
+          'length' => $length,
+          'tokens' => $tokens,
           'id_note' => !empty($id_note) ? $id_note : NULL
         ], [
           'id' => $active_track['id']
@@ -1807,6 +1855,134 @@ class Task extends bbn\Models\Cls\Db
   public function setCfg(string $id, array $cfg): bool
   {
     return (bool)$this->db->update('bbn_tasks', ['cfg' => \json_encode($cfg)], ['id' => $id]);
+  }
+
+  public function getTokensCfg(): ?array
+  {
+    if (empty($this->tokensConfig)) {
+      $this->tokensConfig = self::getOptions('config', 'tokens');
+    }
+
+    return $this->tokensConfig;
+  }
+
+  public function getTokensBillingPeriod(): ?array
+  {
+    if ($cfg = $this->getTokensCfg()) {
+      return $cfg['billing'];
+    }
+
+    return null;
+  }
+
+  public function getTokensCurrentBillingPeriod(): ?array
+  {
+    if (($billingPeriod = $this->getTokensBillingPeriod())
+      && !empty($billingPeriod['day'])
+      && !empty($billingPeriod['month'])
+      && !empty($billingPeriod['months'])
+    ) {
+      $currentDate = time();
+      $startPeriod = strtotime(date('Y-').$billingPeriod['month'].'-'.$billingPeriod['day']);
+      $n = 12 / $billingPeriod['months'];
+      $start = $startPeriod;
+      for ($i = 1; $i <= $n; $i++) {
+        $end = strtotime(date('Y-m-d', $startPeriod).' +'.$i.' month');
+        if ((date('Y-m-d H:i:s', $currentDate) >= date('Y-m-d 00:00:00', $start))
+          && (date('Y-m-d H:i:s', $currentDate) <= date('Y-m-d 23:59:59', $end))
+        ) {
+          return [
+            'start' => date('Y-m-d 00:00:00', $start),
+            'end' => date('Y-m-d 23:59:59', $end)
+          ];
+        }
+
+        $start = $end;
+      }
+    }
+
+    return null;
+  }
+
+  public function getTokensCurrent(?string $idUser = null): ?array
+  {
+    if (($tokenYear = $this->getTokensYear())
+      && ($currentBillingPeriod = $this->getTokensCurrentBillingPeriod())
+      && ($billingPeriod = $this->getTokensBillingPeriod())
+    ) {
+      $ret = [];
+      $where = [[
+        'field' => 'bbn_tasks_sessions.start',
+        'operator' => '>=',
+        'value' => $currentBillingPeriod['start']
+      ], [
+        'field' => 'bbn_tasks_sessions.start',
+        'operator' => '<=',
+        'value' => $currentBillingPeriod['end']
+      ]];
+      if (!empty($idUser)) {
+        $where[] = [
+          'field' => 'bbn_tasks_sessions.id_user',
+          'value' => $idUser
+        ];
+      }
+
+      foreach ($tokenYear as $code => $tokens) {
+        $idOption = self::getOptionId($code, 'cats', 'tokens');
+        $used = $this->db->selectOne([
+          'table' => 'bbn_tasks_sessions',
+          'fields' => 'SUM(bbn_tasks_sessions.tokens)',
+          'join' => [[
+            'table' => 'bbn_tasks',
+            'on' => [
+              'conditions' => [[
+                'field' => 'bbn_tasks_sessions.id_task',
+                'exp' => 'bbn_tasks.id'
+              ]]
+            ]
+          ], [
+            'table' => 'bbn_options',
+            'on' => [
+              'conditions' => [[
+                'field' => 'bbn_tasks.type',
+                'exp' => 'bbn_options.id'
+              ]]
+            ]
+          ]],
+          'where' => [
+            'conditions' => X::mergeArrays($where, [[
+              'field' => 'bbn_options.id_alias',
+              'value' => $idOption
+            ]])
+          ]
+        ]) ?: 0;
+        $total = $tokens / (!empty($billingPeriod['months']) ? 12 / $billingPeriod['months'] : 1);
+        $ret[$code] = [
+          'total' => $total,
+          'used' => $used,
+          'available' => $total - $used,
+          'totalYear' => $tokens
+        ];
+      }
+
+      return $ret ?: null;
+    }
+
+    return null;
+  }
+
+  public function getTokensYear(): ?array
+  {
+    if ($cats = self::getOptions('cats', 'tokens')) {
+      $ret = [];
+      foreach ($cats as $c) {
+        $ret[$c['code']] = !empty($c['tokensYear']) ? $c['tokensYear'] : 0;
+      }
+
+      return $ret;
+    }
+
+    return null;
   }
 
   private function getIdNote(string $id): ?string
