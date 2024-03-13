@@ -154,7 +154,7 @@ class Medias extends DbCls
 
   public function getImageUrl(string $id = null): string
   {
-    if ($this->exists($id)) {
+    if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
         return $url;
       }
@@ -170,7 +170,7 @@ class Medias extends DbCls
 
   public function getFileUrl(string $id = null): string
   {
-    if ($this->exists($id)) {
+    if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
         return $url;
       }

@@ -123,6 +123,11 @@ class Option extends DbCls
     return $this->init() && $this->db->check();
   }
 
+  public function exists()
+  {
+    return $this->dbTraitExists(...func_get_args());
+  }
+
 
   public function init(): bool
   {
@@ -438,7 +443,7 @@ class Option extends DbCls
    */
   public function setValue(array $value, $id): ?int
   {
-    if ($this->check() && $this->exists($id)) {
+    if ($this->check() && $this->dbTraitExists($id)) {
       $c =& $this->class_cfg;
       $f =& $this->fields;
       $this->cacheDelete($id);
@@ -529,7 +534,7 @@ class Option extends DbCls
    */
   public function setDefault($uid): self
   {
-    if ($this->check() && $this->exists($uid)) {
+    if ($this->check() && $this->dbTraitExists($uid)) {
       $this->default = $uid;
     }
 
@@ -556,7 +561,7 @@ class Option extends DbCls
       }
 
       $cfg = $this->getCfg($id) ?: [];
-      if ($cfg || $this->exists($id)) {
+      if ($cfg || $this->dbTraitExists($id)) {
         // If not sortable returning an array ordered by text
         $order = empty($cfg['sortable']) ? [
             $this->fields['text'] => 'ASC',
@@ -1741,7 +1746,7 @@ class Option extends DbCls
    */
   public function treeIds($id, &$res = []): ?array
   {
-    if ($this->check() && $this->exists($id)) {
+    if ($this->check() && $this->dbTraitExists($id)) {
       $res[] = $id;
       if ($its = $this->items($id)) {
         foreach ($its as $it){
@@ -2181,7 +2186,7 @@ class Option extends DbCls
       $id_root = self::root_hex;
     }
 
-    if ($this->exists($id_root) && ($parents = $this->parents($id_option))) {
+    if ($this->dbTraitExists($id_root) && ($parents = $this->parents($id_option))) {
       $res = [$id_option];
       foreach ($parents as $p){
         array_unshift($res, $p);
@@ -2732,7 +2737,7 @@ class Option extends DbCls
           $c['num'] => $it[$c['num']] ?? null,
           $c['cfg'] => $it[$c['cfg']] ?? null
         ];
-        if (isset($it[$c['id']]) && !$this->exists($it[$c['id']])) {
+        if (isset($it[$c['id']]) && !$this->dbTraitExists($it[$c['id']])) {
           $values[$c['id']] = $it[$c['id']];
         }
 
@@ -3326,7 +3331,7 @@ class Option extends DbCls
    */
   public function setCfg($id, array $cfg, bool $merge = false): ?int
   {
-    if ($this->check() && $this->exists($id)) {
+    if ($this->check() && $this->dbTraitExists($id)) {
       if (isset($cfg['inherited_from'])) {
         unset($cfg['inherited_from']);
       }
@@ -3387,7 +3392,7 @@ class Option extends DbCls
   public function unsetCfg($id)
   {
     $res = false;
-    if ($this->check() && $this->exists($id)) {
+    if ($this->check() && $this->dbTraitExists($id)) {
       $res = $this->db->update(
         $this->class_cfg['table'], [
         $this->fields['cfg'] => null
@@ -3856,7 +3861,7 @@ class Option extends DbCls
       $id_parent = $this->default;
     }
 
-    if (!empty($options) && $this->check() && $this->exists($id_parent)) {
+    if (!empty($options) && $this->check() && $this->dbTraitExists($id_parent)) {
       $c       =& $this->fields;
       $num     = 0;
       $is_root = false;
@@ -3881,7 +3886,7 @@ class Option extends DbCls
           continue;
         }
         if (isset($o[$c['id']])) {
-          if ($this->exists($o[$c['id']])) {
+          if ($this->dbTraitExists($o[$c['id']])) {
             unset($o[$c['id']]);
           }
         }
@@ -4331,7 +4336,7 @@ class Option extends DbCls
    */
   public function updateTemplate(string $id = null): ?int
   {
-    if (defined('BBN_APPUI') && $this->exists($id)) {
+    if (defined('BBN_APPUI') && $this->dbTraitExists($id)) {
       $res = 0;
       // All the options referring to this template
       $all = $this->getAliases($id);
@@ -4777,7 +4782,7 @@ class Option extends DbCls
         throw new Exception(X::_("Impossible to find the parent"));
       }
     }
-    elseif (!$this->exists($it[$c['id_parent']])) {
+    elseif (!$this->dbTraitExists($it[$c['id_parent']])) {
       throw new Exception(X::_("Impossible to find the parent"));
     }
 
@@ -4792,7 +4797,7 @@ class Option extends DbCls
         throw new Exception(X::_("Impossible to find the alias"));
       }
     }
-    elseif (!$this->exists($it[$c['id_alias']])) {
+    elseif (!$this->dbTraitExists($it[$c['id_alias']])) {
       throw new Exception(X::_("Impossible to find the alias"));
     }
 
@@ -4815,7 +4820,7 @@ class Option extends DbCls
             throw new Exception(X::_("Impossible to find the root alias"));
           }
         }
-        elseif (!$this->exists($cfg['id_root_alias'])) {
+        elseif (!$this->dbTraitExists($cfg['id_root_alias'])) {
           throw new Exception(X::_("Impossible to find the root alias"));
         }
       }

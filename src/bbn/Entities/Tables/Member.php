@@ -6,6 +6,8 @@ use bbn\Db;
 use bbn\X;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Models\EntityTable;
+use bbn\Models\Cls\Nullall;
+use bbn\Entities\Entity;
 
 class Member extends EntityTable
 {
@@ -25,5 +27,25 @@ class Member extends EntityTable
       ]
     ]
   ];
+
+
+  public function __construct(
+    Db $db,
+    protected Entities $entities,
+    protected Entity|Nullall $entity = new Nullall()
+  )
+  {
+    parent::__construct($db, $entities, $entity);
+  }
+
+
+  public function getContact($id): ?array
+  {
+    if ($this->people()->exists($id)) {
+
+    }
+
+    return null;
+  }
 
 }

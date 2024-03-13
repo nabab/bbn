@@ -699,7 +699,7 @@ class User extends Basic implements Implementor
       }
 
       if (\count($update) > 0) {
-        $r = (bool)$this->update($this->getId(), $update, true);
+        $r = (bool)$this->dbTraitUpdate($update, $this->getId(), true);
         /** @todo Why did I do this?? */
         if ($r) {
           /** @todo WTF?? */

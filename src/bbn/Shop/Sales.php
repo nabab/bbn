@@ -83,7 +83,7 @@ class Sales extends DbCls
     if (!empty($errorCode)) {
       $data[$this->fields['error_code']] = $errorCode;
     }
-    return (bool)$this->update($idTransaction, $data);
+    return (bool)$this->dbTraitUpdate($data, $idTransaction);
   }
 
   public function setStatusPaid(string $idTransaction, $errorMessage = null, $errorCode = null): bool
@@ -210,38 +210,39 @@ class Sales extends DbCls
    */
   public function add(array $transaction): ?string
   {
-    if (empty($transaction[$this->fields['id_cart']])) {
+    $f =& $this->fields;
+    if (empty($transaction[$f['id_cart']])) {
       throw new \Exception(X::_('No id_cart found on the given transaction: %s', \json_encode($transaction)));
     }
-    if (empty($transaction[$this->fields['id_client']])) {
+    if (empty($transaction[$f['id_client']])) {
       throw new \Exception(X::_('No id_client found on the given transaction: %s', \json_encode($transaction)));
     }
-    if (empty($transaction[$this->fields['id_shipping_address']])) {
+    if (empty($transaction[$f['id_shipping_address']])) {
       throw new \Exception(X::_('No id_shipping_address found on the given transaction: %s', \json_encode($transaction)));
     }
-    if (empty($transaction[$this->fields['id_billing_address']])) {
+    if (empty($transaction[$f['id_billing_address']])) {
       throw new \Exception(X::_('No id_billing_address found on the given transaction: %s', \json_encode($transaction)));
     }
-    if (empty($transaction[$this->fields['payment_type']])) {
+    if (empty($transaction[$f['payment_type']])) {
       throw new \Exception(X::_('No payment_type found on the given transaction: %s', \json_encode($transaction)));
     }
-    if (empty($transaction[$this->fields['moment']])) {
-      $transaction[$this->fields['moment']] = date('Y-m-d H:i:s');
+    if (empty($transaction[$f['moment']])) {
+      $transaction[$f['moment']] = date('Y-m-d H:i:s');
     }
-    if (empty($transaction[$this->fields['total']])) {
-      $transaction[$this->fields['total']] = 0;
+    if (empty($transaction[$f['total']])) {
+      $transaction[$f['total']] = 0;
     }
-    if (empty($transaction[$this->fields['shipping_cost']])) {
-      $transaction[$this->fields['shipping_cost']] = 0;
+    if (empty($transaction[$f['shipping_cost']])) {
+      $transaction[$f['shipping_cost']] = 0;
     }
-    $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
-    while ($this->select([$this->fields['number'] => $transaction[$this->fields['number']]])) {
-      $transaction[$this->fields['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
+    $transaction[$f['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
+    while ($this->dbTraitSelect([$f['number'] => $transaction[$f['number']]])) {
+      $transaction[$f['number']] = date('Y') . '-' .rand(1000000000, 9999999999);
     }
-    $transaction[$this->fields['test']] = !empty($transaction[$this->fields['test']]) ? 1 : 0;
-    $this->client->setLastUsedAddress($transaction[$this->fields['id_shipping_address']], $transaction[$this->fields['moment']]);
-    $this->client->setLastUsedAddress($transaction[$this->fields['id_billing_address']], $transaction[$this->fields['moment']]);
-    return $this->insert($transaction);
+    $transaction[$f['test']] = !empty($transaction[$f['test']]) ? 1 : 0;
+    $this->client->setLastUsedAddress($transaction[$f['id_shipping_address']], $transaction[$f['moment']]);
+    $this->client->setLastUsedAddress($transaction[$f['id_billing_address']], $transaction[$f['moment']]);
+    return $this->dbTraitInsert($transaction);
   }
 
   /**
@@ -251,7 +252,7 @@ class Sales extends DbCls
    */
   public function get(string $idTransaction): ?array
   {
-    return $this->rselect([$this->fields['id'] => $idTransaction]);
+    return $this->dbTraitRselect([$this->fields['id'] => $idTransaction]);
   }
 
   /**
@@ -261,7 +262,7 @@ class Sales extends DbCls
    */
   public function getIdClient(string $idTransaction): ?string
   {
-    return $this->selectOne($this->fields['id_client'], [$this->fields['id'] => $idTransaction]);
+    return $this->dbTraitSelectOne($this->fields['id_client'], [$this->fields['id'] => $idTransaction]);
   }
 
   /**
@@ -271,7 +272,7 @@ class Sales extends DbCls
    */
   public function getIdCart(string $idTransaction): ?string
   {
-    return $this->selectOne($this->fields['id_cart'], [$this->fields['id'] => $idTransaction]);
+    return $this->dbTraitSelectOne($this->fields['id_cart'], [$this->fields['id'] => $idTransaction]);
   }
 
   /**
@@ -281,7 +282,7 @@ class Sales extends DbCls
    */
   public function getIdShippingAddress(string $idTransaction): ?string
   {
-    return $this->selectOne($this->fields['id_shipping_address'], [$this->fields['id'] => $idTransaction]);
+    return $this->dbTraitSelectOne($this->fields['id_shipping_address'], [$this->fields['id'] => $idTransaction]);
   }
 
   /**
@@ -291,7 +292,7 @@ class Sales extends DbCls
    */
   public function getIdBillingAddress(string $idTransaction): ?string
   {
-    return $this->selectOne($this->fields['id_billing_address'], [$this->fields['id'] => $idTransaction]);
+    return $this->dbTraitSelectOne($this->fields['id_billing_address'], [$this->fields['id'] => $idTransaction]);
   }
 
   /**

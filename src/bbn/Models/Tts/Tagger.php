@@ -72,7 +72,7 @@ trait Tagger
   {
     $this->taggerInit();
     $lang = $this->taggerGetLang($lang);
-    if (!$this->exists($id_element)) {
+    if (!method_exists($this, 'dbTraitExists') || !$this->dbTraitExists($id_element)) {
       throw new Exception(X::_("Impossible to find the element in %s", __CLASS__));
     }
 

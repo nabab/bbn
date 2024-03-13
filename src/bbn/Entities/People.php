@@ -19,11 +19,7 @@ use bbn\Models\Cls\Nullall;
  */
 class People extends DbCls
 {
-  use DbActions {
-    delete as private DbActionsDelete;
-    update as private DbActionsUpdate;
-  }
-
+  use DbActions;
   /**
    * The default configuration for database interaction, specifying the table and fields.
    */
@@ -212,7 +208,7 @@ class People extends DbCls
    */
   public function getInfo($id): array
   {
-    return $this->rselect($id);
+    return $this->dbTraitRselect($id);
   }
 
 
@@ -291,7 +287,7 @@ class People extends DbCls
         $conditions = $tmp;
       }
   
-      return $this->selectOne($arc['id'], $conditions);
+      return $this->dbTraitSelectOne($arc['id'], $conditions);
     }
 
     return null;
@@ -318,7 +314,7 @@ class People extends DbCls
         }
       }
 
-      return $this->selectValues($arc['id'], $cond, [$arc['fullname']], $limit, $start);
+      return $this->dbTraitSelectValues($arc['id'], $cond, [$arc['fullname']], $limit, $start);
     }
 
     return false;
@@ -372,14 +368,14 @@ class People extends DbCls
     $arc = &$this->class_cfg['arch']['people'];
     $id = null;
     if ($fn = $this->set_info($fn)) {
-      if (!empty($fn[$arc['email']]) && $this->count([$arc['email'] => $fn[$arc['email']]])) {
+      if (!empty($fn[$arc['email']]) && $this->dbTraitCount([$arc['email'] => $fn[$arc['email']]])) {
         throw new Exception(X::_("The email is already in use"));
       }
 
       if ($force || !$this->search($fn)) {
         $fn = $this->prepareData($fn);
         if (!empty($fn[$arc['name']])) {
-          $id = $this->insert($fn);
+          $id = $this->dbTraitInsert($fn);
         }
       }
     }
@@ -404,7 +400,7 @@ class People extends DbCls
 
       if (!empty($fn)) {
         $fn[$arc['cfg']] = empty($fn[$arc['cfg']]) ? null : json_encode($fn[$arc['cfg']]);
-        $ok = $this->DbActionsUpdate($id, $fn);
+        $ok = $this->dbTraitUpdate($id, $fn);
       }
 
     }

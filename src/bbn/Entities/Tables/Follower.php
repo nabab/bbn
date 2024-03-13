@@ -34,7 +34,7 @@ class Follower extends EntityTable
   public function followedBy(): ?array
   {
     if ($this->check()) {
-      return $this->selectValues(
+      return $this->dbTraitSelectValues(
         $this->fields['id_user'],
         []
       );

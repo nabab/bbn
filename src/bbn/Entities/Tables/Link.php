@@ -70,14 +70,14 @@ class Link extends EntityTable
   )
   {
     parent::__construct($db, $entities, $entity);
-    if (!empty($this::$linkCfg['cfg'])) {
-      $this->class_cfg['cfg'] = $this::$linkCfg['cfg'];
+    if (!empty(static::$linkCfg['cfg'])) {
+      $this->class_cfg['cfg'] = static::$linkCfg['cfg'];
     }
 
     $o = $this->options();
     $codes = self::getCodes($this);
     if (!empty($codes) && ($this->type = $o->fromCode($codes))) {
-      $this->cfg =& $this::$linkCfg;
+      $this->cfg =& static::$linkCfg;
       $option = $o->option($this->type);
       $this->code = $option['code'];
       $this->text = $option['text'];
@@ -135,23 +135,18 @@ class Link extends EntityTable
 
   public function getCfg()
   {
-    return $this::$linkCfg;
+    return static::$linkCfg;
   }
 
   public function getList(array $filter = [])
   {
-    return $this->selectValues($this->fields['id'], $filter);
-  }
-
-  public function getAll(int $start = 0, int $limit = 0, array $filter = []): array
-  {
-    return $this->rselectAll([], $filter, $start, $limit);
+    return $this->dbTraitSelectValues($this->fields['id'], $filter);
   }
 
   public function get($id = null): ?array
   {
     if ($this->cfg['single']) {
-      $res = $this->rselectAll([]);
+      $res = $this->dbTraitRselectAll([]);
       return $res ? $res[0] : null;
     }
 
@@ -159,7 +154,7 @@ class Link extends EntityTable
       throw new Exception(X::_("This link is not single, you ust enter an ID for get"));
     }
 
-    return $this->rselect([$this->fields['id'] => $id]);
+    return $this->dbTraitRselect([$this->fields['id'] => $id]);
   }
 
   public static function getCodes(Link $link): array

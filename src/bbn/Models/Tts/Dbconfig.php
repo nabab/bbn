@@ -70,7 +70,12 @@ trait DbConfig
     if ($cfg) {
       $arr[] = $cfg;
     }
-    $cfg = X::mergeArrays(...$arr);
+
+    if (!count($arr)) {
+      throw new Exception(X::_("The class %s is not configured properly to work with trait DbActions", get_class($this)));
+    }
+
+    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];
 
     $table_index = array_flip($cfg['tables'])[$cfg['table']];
     if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {

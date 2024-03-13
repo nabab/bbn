@@ -10,18 +10,16 @@ namespace bbn\Entities\Junctions;
 
 use bbn\Db;
 use bbn\X;
-use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Cls\Nullall;
-use bbn\Models\Tts\DbConfig;
+use bbn\Models\Tts\DbJunction;
 use bbn\Entities\Models\Entities;
+use bbn\Entities\Models\EntityJunction;
 use bbn\Entities\Entity;
 use bbn\Appui\Note;
 
 
-class NoteLink extends DbCls
+class NoteLink extends EntityJunction
 {
-  use DbConfig;
-
 
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_notes',
@@ -42,8 +40,6 @@ class NoteLink extends DbCls
 
   private static Note $_note;
 
-  protected $id_entity;
-
   protected Note $note;
 
   public function __construct(
@@ -52,9 +48,9 @@ class NoteLink extends DbCls
     protected Entity|Nullall $entity = new Nullall()
   )
   {
-    parent::__construct($db);
-    $this->_init_class_cfg($this::$default_class_cfg);
-    if (!self::$_note) {
+    parent::__construct($db, $entities, $entity);
+    $this->_init_class_cfg(static::$default_class_cfg);
+    if (!isset(self::$_note)) {
       $this->note = new Note($db);
       self::noteLinkSetNote($this->note);
     }
@@ -64,20 +60,10 @@ class NoteLink extends DbCls
 
     if ($entity) {
       $this->id_entity = $entity->getId();
-      $this->DbActionsSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
+      $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
     }
   }
 
-  public function getEntities() {
-    return $this->entities;
-  }
-
-  public function getId()
-  {
-    return $this->id_entity;
-  }
-
-  
   private static function noteLinkSetNote(Note $note)
   {
     self::$_note = $note;

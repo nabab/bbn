@@ -14,11 +14,7 @@ use bbn\Models\Cls\Nullall;
 
 class Address extends DbCls
 {
-
-  use DbActions {
-    delete as private DbActionsDelete;
-    update as private DbActionsUpdate;
-  }
+  use DbActions;
 
   /** @var array */
   protected static $default_class_cfg = [

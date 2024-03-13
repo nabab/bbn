@@ -2,6 +2,8 @@
 
 namespace bbn\Entities\Models;
 
+use Exception;
+use stdClass;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
@@ -9,6 +11,8 @@ use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\People;
 use bbn\Entities\Address;
+use bbn\Entities\Models\EntityJunction;
+use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Junctions\Consultation;
 use bbn\Entities\Tables\Document;
 use bbn\Entities\Tables\Options as EntityOptions;
@@ -21,11 +25,7 @@ use bbn\Models\Tts\DbActions;
 
 abstract class Entities extends DbCls
 {
-  use DbActions {
-    delete as private DbActionsDelete;
-    update as private DbActionsUpdate;
-    exists as private DbActionsExists;
-  }
+  use DbActions;
 
   protected function treatWhere(string|array $where): string|array
   {
@@ -40,20 +40,124 @@ abstract class Entities extends DbCls
 
   public function delete(string|array $where)
   {
-    return $this->DbActionsDelete($this->treatWhere($where));
+    return $this->dbTraitDelete($this->treatWhere($where));
   }
 
 
   public function update(string|array $where, array $data)
   {
-    return $this->DbActionsUpdate($this->treatWhere($where), $data);
+    return $this->dbTraitUpdate($this->treatWhere($where), $data);
   }
 
 
   public function exists(string|array $where)
   {
-    return $this->DbActionsExists($this->treatWhere($where));
+    return $this->dbTraitExists($this->treatWhere($where));
   }
+
+  /**
+   * Retrieves a row as an object from the table through its id.
+   *
+   * @param string|array $filter
+   * @param array $order
+   *
+   * @return mixed
+   */
+  public function selectOne(string $field, $filter = [], array $order = [])
+  {
+    return $this->dbTraitSelectOne($field, $filter, $order);
+  }
+
+
+  /**
+   * Retrieves a row as an object from the table through its id.
+   *
+   * @param string|array $filter
+   * @param array $order
+   *
+   * @return stdClass|null
+   */
+  public function select($filter = [], array $order = [], array $fields = []): ?stdClass
+  {
+    return $this->dbTraitSelect($filter, $order, $fields);
+  }
+
+
+  /**
+   * Retrieves a row as an array from the table through its id.
+   *
+   * @param string|array $filter
+   * @param array $order
+   *
+   * @return array|null
+   */
+  public function rselect($filter = [], array $order = [], array $fields = []): ?array
+  {
+    return $this->dbTraitRselect($filter, $order, $fields);
+  }
+
+  public function selectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
+  {
+    return $this->dbTraitSelectValues($field, $filter, $order, $limit, $start);
+  }
+
+
+  /**
+   * Returns the number of rows from the table for the given conditions.
+   *
+   * @param array $filter
+   *
+   * @return int
+   */
+  public function count(array $filter = []): int
+  {
+    return $this->dbTraitCount($filter);
+  }
+
+
+  /**
+   * Returns an array of rows as objects from the table for the given conditions.
+   *
+   * @param array $filter
+   * @param array $order
+   * @param array $limit
+   * @param array $start
+   *
+   * @return array
+   */
+  public function selectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  {
+    return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
+  }
+
+
+  /**
+   * Returns an array of rows as arrays from the table for the given conditions.
+   *
+   * @param array $filter
+   * @param array $order
+   * @param array $limit
+   * @param array $start
+   *
+   * @return array
+   */
+  public function rselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
+  {
+    return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
+  }
+
+  public function getRelations(string $id, string $table = null): ?array
+  {
+    return $this->dbTraitGetRelations($id, $table);
+  }
+
+
+
+
+
+
+
+
 
   protected static $default_class_cfg = [
     'classes' => [
@@ -304,7 +408,7 @@ abstract class Entities extends DbCls
   }
 
 
-  protected function getClass(string $clsName, string $index, Entity|null $entity = null): EntityTable
+  protected function getClass(string $clsName, string $index, Entity|null $entity = null): EntityJunction|EntityTable
   {
     if (!$entity) {
       if (!isset(self::$classes[$index])) {
@@ -325,7 +429,7 @@ abstract class Entities extends DbCls
   }
 
 
-  private static function setClass(string $index, EntityTable $cls): void
+  private static function setClass(string $index, EntityJunction|EntityTable $cls): void
   {
     self::$classes[$index] = $cls;
   }

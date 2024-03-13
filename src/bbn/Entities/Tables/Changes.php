@@ -9,17 +9,39 @@
 namespace bbn\Entities\Tables;
 
 use bbn\Db;
+use bbn\Entities\Address;
 use bbn\X;
 use bbn\Str;
 use bbn\User;
 use bbn\Entities\Options as EntityOptions;
 use bbn\Entities\Models\EntityTable;
+use bbn\Entities\Models\Entities;
+use bbn\Entities\Entity;
 
 
 class Changes extends EntityTable
 {
+  protected static $default_class_cfg = [
+    'table' => 'bbn_entities_changes',
+    'tables' => [
+      'entities_changes' => 'bbn_entities_changes'
+    ],
+    'arch' => [
+      'entities_changes' => [
+        'id' => 'id',
+        'id_entity' => 'id_entity',
+        'moment' => 'moment',
+        'state' => 'state',
+        'notified' => 'notified',
+        'id_member_auth' => 'id_member_auth',
+        'cfg' => 'cfg'
+      ]
+    ]
+  ];
 
-  protected static $table = 'bbn_changes';
+  protected static $eaFields = [];
+
+  protected static $table = 'bbn_entities_changes';
 
   protected static $table_files = 'bbn_tmp_files';
 
@@ -47,22 +69,31 @@ class Changes extends EntityTable
   ];
 
 
+  public function __construct(Db &$db, Entities $entities, Entity $entity)
+  {
+    parent::__construct($db, $entities, $entity);
+    $this->getTables();
+  }
+
+
   public static function requiredFiles()
   {
     $res = [];
-    $fields = self::getFieldsList();
+    $fields = static::getFieldsList();
     foreach ($fields as $fieldName => $field) {
-      if (!empty($field['changes']['docs'])) {
-        if (!isset($res[$field['changes']['table']])) {
-          $res[$field['changes']['table']] = [];
+      $cn =& $field['changes'];
+      if (!empty($cn['docs'])) {
+        if (!isset($res[$cn['table']])) {
+          $res[$cn['table']] = [];
         }
-        if (!empty($field['changes']['fields'])) {
-          foreach ($field['changes']['fields'] as $fn => $fv) {
-            $res[$field['changes']['table']][$fn] = $field['changes']['docs'];
+
+        if (!empty($cn['fields'])) {
+          foreach ($cn['fields'] as $fn => $fv) {
+            $res[$cn['table']][$fn] = $cn['docs'];
           }
         }
         else {
-          $res[$field['changes']['table']][$fieldName] = $field['changes']['docs'];
+          $res[$cn['table']][$fieldName] = $cn['docs'];
         }
       }
     }
@@ -74,21 +105,22 @@ class Changes extends EntityTable
   public static function emailVerification()
   {
     $res = [];
-    $fields = self::getFieldsList();
+    $fields = static::getFieldsList();
     foreach ($fields as $fieldName => $field) {
-      if (!empty($field['changes']['emailVerification'])) {
-        if (!isset($res[$field['changes']['table']])) {
-          $res[$field['changes']['table']] = [];
+      $cn =& $field['changes'];
+      if (!empty($cn['emailVerification'])) {
+        if (!isset($res[$cn['table']])) {
+          $res[$cn['table']] = [];
         }
-        $res[$field['changes']['table']][] = $fieldName;
+        $res[$cn['table']][] = $fieldName;
       }
-      else if (!empty($field['changes']['fields'])) {
-        foreach ($field['changes']['fields'] as $fName => $f) {
+      else if (!empty($cn['fields'])) {
+        foreach ($cn['fields'] as $fName => $f) {
           if (!empty($f['emailVerification'])) {
-            if (!isset($res[$field['changes']['table']])) {
-              $res[$field['changes']['table']] = [];
+            if (!isset($res[$cn['table']])) {
+              $res[$cn['table']] = [];
             }
-            $res[$field['changes']['table']][] = $fName;
+            $res[$cn['table']][] = $fName;
           }
         }
       }
@@ -118,13 +150,6 @@ class Changes extends EntityTable
   }
 
 
-  public function __construct(Adherent $adh, Db &$db)
-  {
-    parent::__construct($adh, $db);
-    $this->getTables();
-  }
-
-
   /**
    * @param string $id
    * @param string $code
@@ -136,7 +161,7 @@ class Changes extends EntityTable
     if (Str::isUid($id)) {
       $filesLinked = $this->get_files_link($id);
       foreach ($filesLinked as $fl) {
-        if (($f = $this->_get_file([$this->db->cfn('id', self::$table_files) => $fl['id_file']]))
+        if (($f = $this->_get_file([$this->db->cfn('id', static::$table_files) => $fl['id_file']]))
           && ((string)$f['code'] === $code)
         ) {
           $data = [
@@ -333,10 +358,10 @@ class Changes extends EntityTable
    * @param string $id
    * @return null|int
    */
-  public function remove(string $id): ?int
+  public function delete(string $id): ?int
   {
     if (Str::isUid($id) && $this->delete_file_and_link($id)) {
-      return $this->db->delete(self::$table, ['id' => $id]);
+      return $this->dbTraitDelete($id);
     }
 
     return null;
@@ -352,9 +377,9 @@ class Changes extends EntityTable
     if (Str::isUid($id)
       && $this->check()
       && ($change = $this->db->rselect(
-        self::$table, [], [
+        static::$table, [], [
           'id' => $id,
-          'state' => self::$states['untreated']
+          'state' => static::$states['untreated']
         ]
       ))
       && ($change['id_entity'] == $this->getId())
@@ -761,8 +786,8 @@ class Changes extends EntityTable
       }
 
       return empty($error) && $this->delete_file_and_link($id) && $this->db->update(
-          self::$table, [
-          'state' => self::$states['accepted'],
+          static::$table, [
+          'state' => static::$states['accepted'],
           'cfg' => json_encode($cfg)
         ], ['id' => $id]
         );
@@ -780,10 +805,10 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)
       && $this->check()
-      && ($this->db->selectOne(self::$table, ['id_entity'], ['id' => $id]) == $this->getId())
+      && ($this->db->selectOne(static::$table, ['id_entity'], ['id' => $id]) == $this->getId())
       && $this->delete_file_and_link($id)
     ) {
-      return $this->db->update(self::$table, ['state' => self::$states['refused']], ['id' => $id]);
+      return $this->db->update(static::$table, ['state' => static::$states['refused']], ['id' => $id]);
     }
 
     return null;
@@ -792,8 +817,8 @@ class Changes extends EntityTable
 
   public function force_state(string $id, $state): bool
   {
-    if (\in_array($state, array_values(self::$states), true)) {
-      return !!$this->db->update(self::$table, ['state' => $state], ['id' => $id]);
+    if (\in_array($state, array_values(static::$states), true)) {
+      return !!$this->db->update(static::$table, ['state' => $state], ['id' => $id]);
     }
 
     return false;
@@ -806,7 +831,7 @@ class Changes extends EntityTable
    */
   public function getState(string $id)
   {
-    return Str::isUid($id) ? $this->db->selectOne(self::$table, 'state', ['id' => $id]) : false;
+    return Str::isUid($id) ? $this->db->selectOne(static::$table, 'state', ['id' => $id]) : false;
   }
 
 
@@ -817,7 +842,7 @@ class Changes extends EntityTable
    */
   public function get_current_state(string $id, array $cfg): ?int
   {
-    $state = self::$states['untreated'];
+    $state = static::$states['untreated'];
     if (!empty($cfg['subdata'])
       && !empty($cfg['subdata']['data'])
       && ($cfg['type'] !== 'delete')
@@ -826,7 +851,7 @@ class Changes extends EntityTable
         if (\array_key_exists('email', $data)
           && ($data['email'] !== true)
         ) {
-          return self::$states['email'];
+          return static::$states['email'];
         }
       }
     }
@@ -834,7 +859,7 @@ class Changes extends EntityTable
     if (!empty($cfg['data'])) {
       foreach ($cfg['data'] as $data){
         if (\array_key_exists('email', $data) && ($data['email'] !== true)) {
-          $state = self::$states['email'];
+          $state = static::$states['email'];
           break;
         }
       }
@@ -846,7 +871,7 @@ class Changes extends EntityTable
       }
       )
     ) {
-      $state = self::$states['unready'];
+      $state = static::$states['unready'];
     } */
 
     return $state;
@@ -865,7 +890,7 @@ class Changes extends EntityTable
           'value' => $this->getId()
         ], [
           'field' => 'state',
-          'value' => self::$states['untreated']
+          'value' => static::$states['untreated']
         ]]
       ]
     );
@@ -903,7 +928,7 @@ class Changes extends EntityTable
             $cfg['data'] = array_map(
               function ($d) {
                 if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = self::crypt_code($d['email']);
+                  $d['email'] = static::crypt_code($d['email']);
                 }
 
                 return $d;
@@ -915,7 +940,7 @@ class Changes extends EntityTable
             $cfg['subdata']['data'] = array_map(
               function ($d) {
                 if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = self::crypt_code($d['email']);
+                  $d['email'] = static::crypt_code($d['email']);
                 }
 
                 return $d;
@@ -938,10 +963,10 @@ class Changes extends EntityTable
             'operator' => 'isnull'
           ], [
             'field' => 'state',
-            'value' => self::$states['untreated']
+            'value' => static::$states['untreated']
           ], [
             'field' => 'state',
-            'value' => self::$states['email']
+            'value' => static::$states['email']
           ]]
         ]]
       ])
@@ -968,11 +993,11 @@ class Changes extends EntityTable
             'conditions' => [[
               'field' => 'state',
               'operator' => '!=',
-              'value' => self::$states['accepted']
+              'value' => static::$states['accepted']
             ], [
               'field' => 'state',
               'operator' => '!=',
-              'value' => self::$states['refused']
+              'value' => static::$states['refused']
             ]]
           ]]
         ]]
@@ -993,7 +1018,7 @@ class Changes extends EntityTable
           'value' => $this->getId()
         ], [
           'field' => 'state',
-          'value' => self::$states['accepted']
+          'value' => static::$states['accepted']
         ]]
       ]
     );
@@ -1012,7 +1037,7 @@ class Changes extends EntityTable
           'value' => $this->getId()
         ], [
           'field' => 'state',
-          'value' => self::$states['refused']
+          'value' => static::$states['refused']
         ]]
       ]
     );
@@ -1022,8 +1047,9 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function getAll(): ?array
+  public function getAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array
   {
+    $all = parent::getAll(...func_get_args());
     return array_map(
       function ($change) {
         if (!empty($change['cfg']) && ($cfg = json_decode($change['cfg'], true))) {
@@ -1055,27 +1081,20 @@ class Changes extends EntityTable
         }
 
         return $change;
-      }, $this->_get(
-      [
-        'conditions' => [[
-          'field' => 'id_entity',
-          'value' => $this->getId()
-        ]]
-      ]
-    )
+      }, $all
     );
   }
 
 
   public function setAuth(string $id, string $idAuth): bool
   {
-    return (bool)$this->db->update(self::$table, ['id_member_auth' => $idAuth], ['id' => $id]);
+    return (bool)$this->db->update(static::$table, ['id_member_auth' => $idAuth], ['id' => $id]);
   }
 
 
   private static function getFieldsList()
   {
-    return fields::getEA();
+    return static::getEAFields();
   }
 
 
@@ -1107,7 +1126,7 @@ class Changes extends EntityTable
 
           return $e;
         }, $this->db->rselectAll([
-          'table' => self::$table,
+          'table' => static::$table,
           'fields' => [],
           'where' => $where,
           'order' => ['moment' => 'DESC']
@@ -1128,7 +1147,7 @@ class Changes extends EntityTable
   {
     if ($id_adh = $this->getId()) {
       if ($this->db->insert(
-          self::$table, [
+          static::$table, [
             'id_entity' => $id_adh,
             'moment' => $moment,
             'state' => null,
@@ -1168,7 +1187,7 @@ class Changes extends EntityTable
         }
       }
 
-      return !!$this->db->update(self::$table, ['state' => $state], ['id' => $id]);
+      return !!$this->db->update(static::$table, ['state' => $state], ['id' => $id]);
     }
 
     return false;
@@ -1183,7 +1202,7 @@ class Changes extends EntityTable
   private function _set_moment(string $id, string $moment = ''): bool
   {
     if (Str::isUid($id)) {
-      return !!$this->db->update(self::$table, ['moment' => $moment ?: date('Y-m-d H:i:s')], ['id' => $id]);
+      return !!$this->db->update(static::$table, ['moment' => $moment ?: date('Y-m-d H:i:s')], ['id' => $id]);
     }
 
     return false;
@@ -1200,17 +1219,17 @@ class Changes extends EntityTable
   private function _update(string $id, array $todata, string $moment = '', array $subdata = []): ?int
   {
     if (Str::isUid($id)
-      && ($old = $this->db->rselect(self::$table, [], ['id' => $id]))
-      && (    ($old['state'] === self::$states['unready'])
-        || ($old['state'] === self::$states['untreated'])
-        || ($old['state'] === self::$states['email']))
+      && ($old = $this->db->rselect(static::$table, [], ['id' => $id]))
+      && (    ($old['state'] === static::$states['unready'])
+        || ($old['state'] === static::$states['untreated'])
+        || ($old['state'] === static::$states['email']))
       && ($cfg = \json_decode($old['cfg'], true))
     ) {
       if (($idx = X::find($cfg['data'], ['field' => $todata['field']])) !== null) {
         $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->check_email_required($cfg['table'], $todata));
         $cfg['subdata']    = $subdata;
         if ($this->db->update(
-          self::$table, [
+          static::$table, [
           'moment' => $moment ?: date('Y-m-d H:i:s'),
           'cfg' => \json_encode($cfg)
         ], ['id' => $id]
@@ -1237,7 +1256,7 @@ class Changes extends EntityTable
    */
   private function field_requires_file(string $type, string $table, $field = null): ?array
   {
-    if (($arr = self::requiredFiles())
+    if (($arr = static::requiredFiles())
       && !empty($arr[$table])
     ) {
       if (empty($field)) {
@@ -1266,7 +1285,7 @@ class Changes extends EntityTable
   {
     return $this->_get_file_by_type(
       $id_type, $files, [[
-        'field' => $this->db->colFullName('id_entity', self::$table),
+        'field' => $this->db->colFullName('id_entity', static::$table),
         'value' => $this->getId()
       ]]
     );
@@ -1291,21 +1310,21 @@ class Changes extends EntityTable
 
           return $f;
       }, $this->db->rselectAll([
-          'table' => self::$table_files,
+          'table' => static::$table_files,
           'fields' => [
-            $this->db->colFullName('id', self::$table_files),
-            $this->db->colFullName('files', self::$table_files),
-            $this->db->colFullName('type_doc', self::$table_files),
-            $this->db->colFullName('date_added', self::$table_files),
-            $this->db->colFullName('mandatory', self::$table_links),
+            $this->db->colFullName('id', static::$table_files),
+            $this->db->colFullName('files', static::$table_files),
+            $this->db->colFullName('type_doc', static::$table_files),
+            $this->db->colFullName('date_added', static::$table_files),
+            $this->db->colFullName('mandatory', static::$table_links),
             $this->db->colFullName('code', 'bbn_options'),
           ],
           'join' => [[
-            'table' => self::$table_links,
+            'table' => static::$table_links,
             'on' => [
               'conditions' => [[
-                'field' => $this->db->colFullName('id_file', self::$table_links),
-                'exp' => $this->db->colFullName('id', self::$table_files),
+                'field' => $this->db->colFullName('id_file', static::$table_links),
+                'exp' => $this->db->colFullName('id', static::$table_files),
               ]]
             ]
           ], [
@@ -1313,16 +1332,16 @@ class Changes extends EntityTable
             'on' => [
               'conditions' => [[
                 'field' => $this->db->colFullName('id', 'bbn_options'),
-                'exp' => $this->db->colFullName('type_doc', self::$table_files)
+                'exp' => $this->db->colFullName('type_doc', static::$table_files)
               ]]
             ]
           ]],
           'where' => [
             'conditions' => [[
-              'field' => $this->db->colFullName('id_change', self::$table_links),
+              'field' => $this->db->colFullName('id_change', static::$table_links),
               'value' => $id_change
             ], [
-              'field' => $this->db->colFullName('files', self::$table_files),
+              'field' => $this->db->colFullName('files', static::$table_files),
               'operator' => 'isnotnull'
             ]]
           ]
@@ -1483,8 +1502,8 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)) {
       return $this->db->getColumnValues(
-        self::$table_links, $this->db->colFullName('id_change', self::$table_links), [
-          $this->db->colFullName('id_file', self::$table_links) => $id
+        static::$table_links, $this->db->colFullName('id_change', static::$table_links), [
+          $this->db->colFullName('id_file', static::$table_links) => $id
         ]
       );
     }
@@ -1523,10 +1542,10 @@ class Changes extends EntityTable
           'logic' => 'OR',
           'conditions' => [[
             'field' => 'state',
-            'value' => self::$states['untreated']
+            'value' => static::$states['untreated']
           ], [
             'field' => 'state',
-            'value' => self::$states['email']
+            'value' => static::$states['email']
           ], [
             'field' => 'state',
             'operator' => 'isnull'
@@ -1552,10 +1571,10 @@ class Changes extends EntityTable
           'logic' => 'OR',
           'conditions' => [[
             'field' => 'state',
-            'value' => self::$states['untreated']
+            'value' => static::$states['untreated']
           ], [
             'field' => 'state',
-            'value' => self::$states['email']
+            'value' => static::$states['email']
           ], [
             'field' => 'state',
             'operator' => 'isnull'
@@ -1566,7 +1585,7 @@ class Changes extends EntityTable
 
     return isset($conditions) ? $this->db->selectOne(
       [
-        'table' => self::$table,
+        'table' => static::$table,
         'fields' => ['id'],
         'where' => [
           'conditions' => $conditions
@@ -1583,7 +1602,7 @@ class Changes extends EntityTable
    */
   private function email_required(string $table, string $field): bool
   {
-    return ($em = self::emailVerification())
+    return ($em = static::emailVerification())
       && !empty($em[$table])
       && \in_array($field, $em[$table], true);
   }
@@ -1600,7 +1619,7 @@ class Changes extends EntityTable
       && $this->email_required($table, $data['field'])
     ) {
       $data['email'] = Str::genpwd();
-      $this->send_conf_email($data['value'], self::crypt_code($data['email']));
+      $this->send_conf_email($data['value'], static::crypt_code($data['email']));
     }
 
     return $data;
@@ -1745,13 +1764,14 @@ class Changes extends EntityTable
   private function getTables()
   {
     if (empty($this->tables)) {
-      $fields = self::getFieldsList();
+      $fields = static::getFieldsList();
       foreach ($fields as $field) {
+        $cn =& $field['changes'];
         if (!empty($field['table'])
-          && !empty($field['changes']['table'])
-          && empty($this->tables[$field['changes']['table']])
+          && !empty($cn['table'])
+          && empty($this->tables[$cn['table']])
         ) {
-          $this->tables[$field['changes']['table']] = $field['table'];
+          $this->tables[$cn['table']] = $field['table'];
         }
       }
     }

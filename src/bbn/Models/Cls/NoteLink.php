@@ -20,11 +20,11 @@ class NoteLink extends DbCls
   )
   {
     parent::__construct($db);
-    $this->_init_class_cfg($this::$default_class_cfg);
+    $this->_init_class_cfg(static::$default_class_cfg);
     $this->cacheInit();
     if ($entity) {
       $this->id_entity = $entity->getId();
-      $this->DbActionsSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
+      $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
     }
   }
 

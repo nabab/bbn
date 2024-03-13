@@ -24,6 +24,7 @@ abstract class Document extends EntityTable
         "date_added" => "date_added",
         "comment" => "comment",
         "treatment" => "treatment",
+        "content" => "content",
         "date_doc" => "date_doc",
         "date_ref" => "date_ref",
         "id_option" => "id_option",

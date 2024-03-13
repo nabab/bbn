@@ -60,7 +60,7 @@ class Options extends EntityTable
   {
     if ($this->check()) {
       $f = $this->class_cfg['arch']['entities_options'];
-      if ($this->count(
+      if ($this->dbTraitCount(
         [
           $f['id_type'] => $id_type,
           $f['id_option'] => $id_option
@@ -69,7 +69,7 @@ class Options extends EntityTable
         throw new Exception(X::_("The option already exists for this entity"));
       }
 
-      if ($this->insert([
+      if ($this->dbTraitInsert([
           $f['id_entity'] => $id_entity,
           $f['id_type'] => $id_type,
           $f['id_option'] => $id_option
@@ -87,7 +87,7 @@ class Options extends EntityTable
   {
     if ($this->check()) {
       $f = $this->class_cfg['arch']['entities_options'];
-      return $this->delete(
+      return $this->dbTraitDelete(
         [
           $f['id_entity'] => $id_entity,
           $f['id_type'] => $id_type,
@@ -136,7 +136,6 @@ class Options extends EntityTable
         $this->class_cfg['table'],
         [],
         [
-          $f['id_entity'] => $id_entity,
           $f['id_type'] => $id_type
         ]
       );
@@ -150,10 +149,9 @@ class Options extends EntityTable
   {
     if ($this->check()) {
       $f = $this->class_cfg['arch']['entities_options'];
-      return $this->selectValues(
+      return $this->dbTraitSelectValues(
         $f['id_option'],
         [
-          $f['id_entity'] => $id_entity,
           $f['id_type'] => $id_type
         ]
       );
@@ -163,11 +161,11 @@ class Options extends EntityTable
   }
 
 
-  public function getAll($id_entity)
+  public function getAllByType($id_entity = null)
   {
     $res = [];
     foreach ($this->getTypes() as $k => $id) {
-      $res[$k] = $this->get($id_entity, $id);
+      $res[$k] = $this->get($id_entity ?: $this->getId(), $id);
     }
 
     return $res;

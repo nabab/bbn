@@ -678,7 +678,7 @@ class Note extends DbCls
    */
   public function insertOrUpdateUrl(string $id_note, string $url)
   {
-    if (!$this->exists($id_note)) {
+    if (!$this->dbTraitExists($id_note)) {
       throw new Exception(
         X::_(
           "Impossible to retrieve the note with ID %s",
@@ -933,7 +933,7 @@ class Note extends DbCls
     }
 
     if (
-      $this->exists($id_note)
+      $this->dbTraitExists($id_note)
       && ($id_media = $media->insert($name, $content, $title, $type, $private))
       && $this->addMediaToNote($id_media, $id_note, $version)
     ) {
@@ -992,7 +992,7 @@ class Note extends DbCls
     $cf = &$this->class_cfg;
     if (
       $this->db->selectOne($cf['tables']['medias'], $cf['arch']['medias']['id'], [$cf['arch']['medias']['id'] => $id_media])
-      && $this->exists($id_note)
+      && $this->dbTraitExists($id_note)
     ) {
       return $this->db->delete($cf['tables']['notes_medias'], [
         $cf['arch']['notes_medias']['id_note'] => $id_note,
@@ -1014,7 +1014,7 @@ class Note extends DbCls
   public function removeAllMedias(string $id_note): ?int
   {
     $cf = &$this->class_cfg;
-    if ($this->exists($id_note)) {
+    if ($this->dbTraitExists($id_note)) {
       return $this->db->delete($cf['tables']['notes_medias'], [
         $cf['arch']['notes_medias']['id_note'] => $id_note
       ]);
@@ -1036,7 +1036,7 @@ class Note extends DbCls
     $ret   = [];
     $media = $this->getMediaInstance();
     $cf    = &$this->class_cfg;
-    if ($this->exists($id_note)) {
+    if ($this->dbTraitExists($id_note)) {
       $medias = $this->db->getColumnValues(
         $cf['tables']['notes_medias'],
         $cf['arch']['notes_medias']['id_media'],
@@ -1064,7 +1064,7 @@ class Note extends DbCls
   public function hasMedias(string $id_note, $version = false, string $id_media = ''): ?bool
   {
     $cf = &$this->class_cfg;
-    if ($this->exists($id_note)) {
+    if ($this->dbTraitExists($id_note)) {
       $where = [
         $cf['arch']['notes_medias']['id_note'] => $id_note
       ];
@@ -1263,7 +1263,7 @@ class Note extends DbCls
    */
   public function getAliases(string $id_note): array
   {
-    if (!$this->exists($id_note)) {
+    if (!$this->dbTraitExists($id_note)) {
       throw new Exception(_("Impossible to retrieve the note"));
     }
 
@@ -1282,7 +1282,7 @@ class Note extends DbCls
    */
   public function getChildren(string $id_note): array
   {
-    if (!$this->exists($id_note)) {
+    if (!$this->dbTraitExists($id_note)) {
       throw new Exception(_("Impossible to retrieve the note"));
     }
 

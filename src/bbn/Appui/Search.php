@@ -638,7 +638,7 @@ class Search extends Basic
    */
   protected function getPreviousSearchResults(string $id_search, string $signature = '')
   {
-    if (!$this->exists($id_search)) {
+    if (!$this->dbTraitExists($id_search)) {
       throw new Exception(X::_("The search ID $id_search with signature $signature does not exist"));
     }
 

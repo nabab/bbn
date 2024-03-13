@@ -24,7 +24,7 @@ use bbn\Shop\Provider;
 use bbn\Shop\Sales;
 use bbn\Shop\Cart;
 use bbn\Shop\Client;
-use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbConfig;
 use bbn\Models\Cls\Db as DbCls;
 
 
@@ -69,7 +69,7 @@ use bbn\Models\Cls\Db as DbCls;
  */
 class Shop extends DbCls
 {
-  use DbActions;
+  use DbConfig;
 
   /**
    * @var Medias

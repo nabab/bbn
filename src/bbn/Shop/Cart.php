@@ -120,7 +120,7 @@ class Cart extends DbCls
         ]);
       }
     }
-    if ($idCart = $this->selectOne($this->fields['id'], $where, [$this->fields['creation'] => 'DESC'])) {
+    if ($idCart = $this->dbTraitSelectOne($this->fields['id'], $where, [$this->fields['creation'] => 'DESC'])) {
       if ($this->db->selectOne([
         'table' => $salesCfg['table'],
         'fields' => $salesFields['id'],
@@ -346,7 +346,7 @@ class Cart extends DbCls
   {
     $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
     if (!empty($idCart)) {
-      return $this->selectOne($this->fields['id_client'], $idCart);
+      return $this->dbTraitSelectOne($this->fields['id_client'], $idCart);
     }
     return null;
   }
@@ -364,7 +364,7 @@ class Cart extends DbCls
     }
     $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
     if (!empty($idCart)) {
-      return $this->update($idCart, [$this->fields['id_client'] => $idClient]);
+      return $this->dbTraitUpdate([$this->fields['id_client'] => $idClient], $idCart);
     }
     return false;
   }
@@ -643,7 +643,7 @@ class Cart extends DbCls
       $clientCls = new Client($this->db);
       $idClient = $clientCls->getIdByUser($this->idUser);
     }
-    return $this->insert([
+    return $this->dbTraitInsert([
       $this->fields['id_session'] => $this->idSession,
       $this->fields['id_client'] => $idClient,
       $this->fields['creation'] => date('Y-m-d H:i:s')
