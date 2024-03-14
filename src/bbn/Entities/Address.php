@@ -168,7 +168,7 @@ class Address extends DbCls
    * @return bool Succès ou pas de la suppression
    */
   public function delete($id, $with_links = false){
-    if ( $this->get_info($id) ){
+    if ( $this->getInfo($id) ){
       $rels = $this->relations($id);
       if ( $with_links || empty($rels) ){
         foreach ( $rels as $k => $r ){
@@ -207,14 +207,14 @@ class Address extends DbCls
         ]
       ]);
       
-      $r[$i] = $this->get_info($id);
+      $r[$i] = $this->getInfo($id);
       $r[$i]['relations'] = X::join($relations, ', ');
     }
     return $r;
   }
 
   public function relations($id){
-    if ( $this->get_info($id) ){
+    if ( $this->getInfo($id) ){
       return $this->db->selectAllByKeys([
         'tables' => ['bbn_entities_links'],
         'fields' => ['bbn_addresses.id', 'id_entity'],
@@ -436,7 +436,7 @@ class Address extends DbCls
 	public function update($id, $fn)
 	{
     
-    if ( $info = $this->get_info($id) ){
+    if ( $info = $this->getInfo($id) ){
       $fields = array_keys($this->db->getColumns('bbn_addresses'));
       foreach ( $fn as $k => $v ){
         if ( !in_array($k, $fields) ){
@@ -523,7 +523,7 @@ class Address extends DbCls
 
   public function fadresse($s, $with_br = 1){
     if (Str::isUid($s) ){
-      $s = $this->get_info($s);
+      $s = $this->getInfo($s);
     }
     if ( is_array($s) ){
       $st = '';
@@ -563,7 +563,7 @@ class Address extends DbCls
         'opr' => 'INSERT'
       ])];
       foreach ( $args as $a ){
-        if ( $fn = $this->get_info($a) ){
+        if ( $fn = $this->getInfo($a) ){
           $creation[] = $this->db->selectOne('bbn_history', 'tst', [
             'uid' => $a
           ]);

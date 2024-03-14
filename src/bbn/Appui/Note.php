@@ -693,78 +693,6 @@ class Note extends DbCls
 
 
   /**
-   * Returns the configuration to have the last version for each note
-   *
-   * @param boolean $with_content
-   * @return array
-   */
-  public function getLastVersionCfg($with_content = false): array
-  {
-    $cf  = &$this->class_cfg;
-    $res = [
-      'tables' => [$cf['table']],
-      'fields' => [
-        'versions.' . $cf['arch']['versions']['id_note'],
-        $cf['arch']['notes']['id_type'],
-        $cf['arch']['notes']['id_option'],
-        'versions.' . $cf['arch']['versions']['version'],
-        'versions.' . $cf['arch']['versions']['excerpt'],
-        'versions.' . $cf['arch']['versions']['title'],
-        'versions.' . $cf['arch']['versions']['id_user'],
-        'versions.' . $cf['arch']['versions']['creation'],
-        'num_translations' => "COUNT(aliases.id)",
-        'num_variants' => "COUNT(parents.id)",
-        'versions.' . $cf['arch']['versions']['content']
-      ],
-      'join' => [[
-        'table' => $cf['tables']['versions'],
-        'alias' => 'versions',
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            'exp' => 'versions.' . $cf['arch']['versions']['id_note'],
-          ], [
-            'field' => 'versions.' . $cf['arch']['versions']['latest'],
-            'value' => 1
-          ]],
-        ],
-      ], [
-        'table' => $cf['tables']['notes'],
-        'alias' => 'parents',
-        'type'  => 'left',
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            'exp' => 'parents.' . $cf['arch']['notes']['id_parent'],
-          ]],
-        ],
-      ], [
-        'table' => $cf['tables']['notes'],
-        'alias' => 'aliases',
-        'type'  => 'left',
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            'exp' => 'aliases.' . $cf['arch']['notes']['id_alias'],
-          ]],
-        ],
-      ]],
-      'where' => [
-        'logic' => 'AND',
-        'conditions' => [
-        ]
-      ],
-      'group_by' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table'])
-    ];
-
-    if (!$with_content) {
-      array_pop($res['fields']);
-    }
-
-    return $res;
-  }
-
-  /**
    * @param null $type
    * @param mixed|false $id_user
    * @param int $limit
@@ -1080,6 +1008,153 @@ class Note extends DbCls
 
 
   /**
+   * Returns the configuration to have the last version for each note
+   *
+   * @param boolean $with_content
+   * @return array
+   */
+  public function getLastVersionCfg($with_content = false): array
+  {
+
+    $db       = &$this->db;
+    $cf       = &$this->class_cfg;
+    $opt      = Option::getInstance();
+    $cfo      = $opt->getClassCfg();
+    $grid_cfg = [
+      'table' => $cf['table'],
+      'fields' => [
+        $db->cfn($this->fields['id'], $cf['table']),
+        $db->cfn($this->fields['id_parent'], $cf['table']),
+        $db->cfn($this->fields['id_alias'], $cf['table']),
+        $db->cfn($this->fields['id_type'], $cf['table']),
+        $db->cfn($this->fields['id_option'], $cf['table']),
+        $db->cfn($this->fields['mime'], $cf['table']),
+        $db->cfn($this->fields['lang'], $cf['table']),
+        $db->cfn($this->fields['private'], $cf['table']),
+        $db->cfn($this->fields['locked'], $cf['table']),
+        $db->cfn($this->fields['pinned'], $cf['table']),
+        $db->cfn($this->fields['important'], $cf['table']),
+        $db->cfn($this->fields['creator'], $cf['table']),
+        $db->cfn($this->fields['active'], $cf['table']),
+        $db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions']),
+        $db->cfn($cf['arch']['versions']['version'], $cf['tables']['versions']),
+        $db->cfn($cf['arch']['versions']['title'], $cf['tables']['versions']),
+        $db->cfn($cf['arch']['versions']['excerpt'], $cf['tables']['versions']),
+        $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
+        'num_translations' => "COUNT(aliases.id)",
+        'num_variants' => "COUNT(parents.id)",
+        'num_aliases' => "COUNT(aliases.id)",
+        'num_parents' => "COUNT(parents.id)",
+        'num_replies' => "COUNT(replies.id)",
+        'creation' => 'first_version.' . $cf['arch']['versions']['creation'],
+        'last_edit' => $db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions']),
+        'last_reply' => 'IFNULL(MAX(replies_versions.' . $cf['arch']['versions']['creation'] . '), ' . $db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions']) . ')',
+        'option_name' => $db->cfn($cfo['arch']['options']['text'], $cfo['table']),
+        'users' => 'GROUP_CONCAT(DISTINCT LOWER(HEX(' . $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']) . ')) SEPARATOR ",")'
+      ],
+      'join' => [[
+        'table' => $cf['tables']['versions'],
+        'on' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => $db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions']),
+            'operator' => '=',
+            'exp' => $db->cfn($this->fields['id'], $cf['table'])
+          ], [
+            'field' => $db->cfn($cf['arch']['versions']['latest'], $cf['tables']['versions']),
+            'operator' => '=',
+            'value' => 1
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['versions'],
+        'alias' => 'first_version',
+        'on' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'first_version.' . $cf['arch']['versions']['id_note'],
+            'operator' => '=',
+            'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
+          ], [
+            'field' => 'first_version.' . $cf['arch']['versions']['version'],
+            'operator' => '=',
+            'value' => 1,
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['notes'],
+        'alias' => 'parents',
+        'type'  => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => 'parents.' . $cf['arch']['notes']['id_parent'],
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['notes'],
+        'alias' => 'aliases',
+        'type'  => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => 'aliases.' . $cf['arch']['notes']['id_alias'],
+          ]],
+        ],
+      ], [
+        'table' => $cf['tables']['notes'],
+        'alias' => 'replies',
+        'type' => 'left',
+        'on' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'replies.' . $cf['arch']['notes']['id_alias'],
+            'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+          ], [
+            'field' => 'replies.' . $cf['arch']['notes']['active'],
+            'value' => 1
+          ]]
+        ]
+      ], [
+        'table' => $cf['tables']['versions'],
+        'alias' => 'replies_versions',
+        'type' => 'left',
+        'on' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => 'replies_versions.' . $cf['arch']['versions']['id_note'],
+            'operator' => '=',
+            'exp' => 'replies.' . $cf['arch']['notes']['id']
+          ]]
+        ]
+    ], [
+        'table' => $cfo['tables']['options'],
+        'type' => 'left',
+        'on' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => $db->cfn($cf['arch']['notes']['id_option'], $cf['table']),
+            'operator' => '=',
+            'exp' => $db->cfn($cfo['arch']['options']['id'], $cfo['tables']['options'], true),
+          ]],
+        ],
+      ]],
+      'where' => [
+        'logic' => 'AND',
+        'conditions' => [
+        ]
+      ],
+      'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
+    ];
+    if ($with_content) {
+      $grid_cfg['fields']['content'] = $db->cfn($cf['arch']['versions']['content'], $cf['tables']['versions']);
+    }
+    
+    return $grid_cfg;
+  }
+
+
+  /**
    * @param array $cfg
    * @param bool $with_content
    * @return array|null
@@ -1087,83 +1162,17 @@ class Note extends DbCls
    */
   public function browse(array $cfg, bool $with_content = false, bool $private = false, string $id_type = null, bool $pinned = null): ?array
   {
-    if (isset($cfg['limit']) && ($user = bbn\User::getInstance())) {
-      /** @var bbn\Db $db */
+    if (isset($cfg['limit']) && ($user = User::getInstance())) {
+      /** @var Db $db */
       $db       = &$this->db;
       $cf       = &$this->class_cfg;
-      $opt      = Option::getInstance();
-      $cfo      = $opt->getClassCfg();
-      $grid_cfg = [
-        'table' => $cf['table'],
-        'fields' => [
-          $db->cfn($this->fields['id'], $cf['table']),
-          $db->cfn($this->fields['id_parent'], $cf['table']),
-          $db->cfn($this->fields['id_alias'], $cf['table']),
-          $db->cfn($this->fields['id_type'], $cf['table']),
-          $db->cfn($this->fields['id_option'], $cf['table']),
-          $db->cfn($this->fields['mime'], $cf['table']),
-          $db->cfn($this->fields['lang'], $cf['table']),
-          $db->cfn($this->fields['private'], $cf['table']),
-          $db->cfn($this->fields['locked'], $cf['table']),
-          $db->cfn($this->fields['pinned'], $cf['table']),
-          $db->cfn($this->fields['important'], $cf['table']),
-          $db->cfn($this->fields['creator'], $cf['table']),
-          $db->cfn($this->fields['active'], $cf['table']),
-          $db->cfn($cf['arch']['versions']['version'], $cf['tables']['versions']),
-          $db->cfn($cf['arch']['versions']['title'], $cf['tables']['versions']),
-          $db->cfn($cf['arch']['versions']['excerpt'], $cf['tables']['versions']),
-          $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
-          'creation' => 'first_version.' . $cf['arch']['versions']['creation'],
-          'last_edit' => $db->cfn($cf['arch']['versions']['creation'], $cf['tables']['versions']),
-          'option_name' => $db->cfn($cfo['arch']['options']['text'], $cfo['table'])
-        ],
-        'join' => [[
-          'table' => $cf['tables']['versions'],
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => $db->cfn($cf['arch']['versions']['id_note'], $cf['tables']['versions']),
-              'operator' => '=',
-              'exp' => $db->cfn($this->fields['id'], $cf['table'])
-            ], [
-              'field' => $db->cfn($cf['arch']['versions']['latest'], $cf['tables']['versions']),
-              'operator' => '=',
-              'value' => 1
-            ]],
-          ],
-        ], [
-          'table' => $cf['tables']['versions'],
-          'alias' => 'first_version',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'first_version.' . $cf['arch']['versions']['id_note'],
-              'operator' => '=',
-              'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
-            ], [
-              'field' => 'first_version.' . $cf['arch']['versions']['version'],
-              'operator' => '=',
-              'value' => 1,
-            ]],
-          ],
-        ], [
-          'table' => $cfo['tables']['options'],
-          'type' => 'left',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => $db->cfn($cf['arch']['notes']['id_option'], $cf['table']),
-              'operator' => '=',
-              'exp' => $db->cfn($cfo['arch']['options']['id'], $cfo['tables']['options'], true),
-            ]],
-          ],
-        ]],
-        'filters' => [[
-          'field' => $db->cfn($cf['arch']['notes']['active'], $cf['table']),
-          'value' => 1,
-        ]],
-        'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
-      ];
+      $grid_cfg = $this->getLastVersionCfg($with_content);
+      unset($grid_cfg['where']);
+      $grid_cfg['filters'] = [[
+        'field' => $db->cfn($cf['arch']['notes']['active'], $cf['table']),
+        'value' => 1,
+      ]];
+
       if ($private) {
         $grid_cfg['filters'][] = [
           'field' => $db->cfn($cf['arch']['notes']['private'], $cf['table']),
@@ -1193,18 +1202,15 @@ class Note extends DbCls
         ];
       }
       if (!empty($cfg['fields'])) {
-        $grid_cfg['fields'] = bbn\X::mergeArrays($grid_cfg['fields'], $cfg['fields']);
+        $grid_cfg['fields'] = X::mergeArrays($grid_cfg['fields'], $cfg['fields']);
         unset($cfg['fields']);
       }
 
       if (!empty($cfg['join'])) {
-        $grid_cfg['join'] = bbn\X::mergeArrays($grid_cfg['join'], $cfg['join']);
+        $grid_cfg['join'] = X::mergeArrays($grid_cfg['join'], $cfg['join']);
         unset($cfg['join']);
       }
 
-      if ($with_content) {
-        $grid_cfg['fields']['content'] = $db->cfn($cf['arch']['versions']['content'], $cf['tables']['versions']);
-      }
 
       $grid = new Grid($this->db, $cfg, $grid_cfg);
 

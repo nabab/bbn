@@ -25,15 +25,9 @@ trait DbTrait
 
   private $DbTraitRelations = [];
 
-
-  protected function isInitClassCfg(): bool
+  protected function dbTraitPrepare(array $data): array
   {
-    return $this->_is_init_class_cfg;
-  }
-
-  protected function prepare(array $data)
-  {
-    if (!$this->isInitClassCfg($data)) {
+    if (!$this->isInitClassCfg()) {
       throw new Exception(X::_("Impossible to prepare an item if the class config has not been initialized"));
     }
 

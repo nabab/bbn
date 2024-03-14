@@ -175,176 +175,77 @@ class NoteLink extends EntityJunction
   }
 
 
-  public function note_sup($id){
+  public function note_sup($id): int
+  {
     if ( $this->check() &&
       !empty($id)
     ){
-      $note = new \bbn\Appui\Note($this->db);
-      if ( $note->remove($id) ){
-        return $id;
+      $note = new Note($this->db);
+      if ($note->remove($id)) {
+        return 1;
       }
     }
     return false;
   }
 
-  public function notes_importantes(): ?array
+  protected function NoteLinkGetRequestCfg(string $id_parent = null, string $id_alias = null): array
   {
-    if ( $type = $this->options()->fromCode('IMP', 'types_notes') ){
-      return $this->db->rselectAll([
-        'table' => 'bbn_notes',
-        'fields' => [
-          'bbn_notes.id',
-          'bbn_notes.id_parent',
-          'bbn_notes.id_alias',
-          'bbn_notes.id_type',
-          'bbn_notes.private',
-          'bbn_notes.locked',
-          'bbn_notes.pinned',
-          'bbn_notes.creator',
-          'bbn_notes.active',
-          'first_version.creation',
-          'last_version.title',
-          'last_version.content',
-          'last_edit' => 'last_version.creation',
-          'num_replies' => 'COUNT(DISTINCT replies.id)',
-          'last_reply' => 'IFNULL(MAX(replies_versions.creation), last_version.creation)',
-          'users' => 'GROUP_CONCAT(DISTINCT LOWER(HEX(versions.id_user)) SEPARATOR ",")'
-        ],
-        'join' => [[
-          'table' => 'bbn_notes_versions',
-          'alias' => 'versions',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'versions.id_note',
-              'operator' => '=',
-              'exp' => 'bbn_notes.id'
-            ]]
-          ]
-        ], [
-          'table' => 'bbn_notes_versions',
-          'alias' => 'last_version',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'last_version.id_note',
-              'operator' => '=',
-              'exp' => 'bbn_notes.id'
-            ]]
-          ]
-        ], [
-          'table' => 'bbn_notes_versions',
-          'alias' => 'test_version',
-          'type' => 'left',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'test_version.id_note',
-              'operator' => '=',
-              'exp' => 'bbn_notes.id'
-            ], [
-              'field' => 'last_version.version',
-              'operator' => '<',
-              'exp' => 'test_version.version'
-            ]]
-          ]
-        ], [
-          'table' => 'bbn_notes_versions',
-          'alias' => 'first_version',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'first_version.id_note',
-              'operator' => '=',
-              'exp' => 'bbn_notes.id'
-            ], [
-              'field' => 'first_version.version',
-              'operator' => '=',
-              'value' => 1
-            ]]
-          ]
-        ], [
-          'table' => 'bbn_notes',
-          'alias' => 'replies',
-          'type' => 'left',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'replies.id_alias',
-              'operator' => '=',
-              'exp' => 'bbn_notes.id'
-            ], [
-              'field' => 'replies.active',
-              'value' => 1
-            ]]
-          ]
-        ], [
-          'table' => 'bbn_notes_versions',
-          'alias' => 'replies_versions',
-          'type' => 'left',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'replies_versions.id_note',
-              'operator' => '=',
-              'exp' => 'replies.id'
-            ]]
-          ]
-        ], [
-          'table' => 'apst_adherents_notes',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'apst_adherents_notes.id_note',
-              'operator' => '=',
-              'exp' => 'bbn_notes.id'
-            ]]
-          ]
-        ], [
-          'table' => 'apst_adherents',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => 'apst_adherents.id',
-              'operator' => '=',
-              'exp' => 'apst_adherents_notes.id_entity'
-            ]]
-          ]
-        ]],
-        'where' => [[
-          'field' => 'apst_adherents.id',
-          'value' => $this->getId()
-        ], [
-          'field' => 'bbn_notes.active',
-          'value' => 1
-        ], [
-          'field' => 'bbn_notes.id_parent',
-          'operator' => 'isnull'
-        ], [
-          'field' => 'test_version.version',
-          'operator' => 'isnull'
-        ], [
-          'field' => 'bbn_notes.id_alias',
-          'operator' => 'isnull'
-        ], [
-          'field' => 'apst_adherents_notes.type',
-          'value' => $type
-        ]],
-        'group_by' => 'bbn_notes.id',
-        'order' => [[
-          'field' => 'last_reply',
-          'dir' => 'DESC'
-        ], [
-          'field' => 'last_edit',
-          'dir' => 'DESC'
-        ]]
-      ]);
+    $dbCfg = $this->note->getLastVersionCfg(false);
+    $linkCfg = $this->getClassCfg();
+    $noteCfg = $this->note->getClassCfg();
+    $entityCfg = $this->entities->getClassCfg();
+    $dbCfg['join'][] = [
+      'table' => $linkCfg['table'],
+      'on' => [
+        [
+          'field' => $this->db->cfn($linkCfg['arch']['entities_notes']['id_note'], $linkCfg['tables']['entities_notes']),
+          'exp' => $this->db->cfn($noteCfg['arch']['notes']['id'], $noteCfg['table']),
+        ]
+      ]
+    ];
+    $dbCfg['join'][] = [
+      'table' => $entityCfg['table'],
+      'on' => [
+        [
+          'field' => $this->db->cfn($entityCfg['arch']['entities']['id'], $entityCfg['table']),
+          'exp' => $this->db->cfn($linkCfg['arch']['entities_notes']['id_entity'], $linkCfg['tables']['entities_notes'])
+        ]
+      ]
+    ];
+
+    $dbCfg['where'] = [];
+
+    if ($this->id_entity) {
+      $dbCfg['where'][] = [
+        'field' => $this->db->cfn($linkCfg['arch']['entities_notes']['id_entity'], $linkCfg['tables']['entities_notes']),
+        'value' => $this->id_entity
+      ];
     }
-    return null;
+
+    $dbCfg['where'][] = [
+      'field' => $this->db->cfn($noteCfg['arch']['notes']['active'], $noteCfg['table']),
+      'value' => 1
+    ];
+
+    $parent = ['field' => $this->db->cfn($noteCfg['arch']['notes']['id_parent'], $noteCfg['table'])];
+    if ($id_parent) {
+      $parent['value'] = $id_parent;
+    }
+    else {
+      $parent['operator'] = 'isnull';
+    }
+    $dbCfg['where'][] = $parent;
+
+    $alias = ['field' => $this->db->cfn($noteCfg['arch']['notes']['id_alias'], $noteCfg['table'])];
+    if ($id_alias) {
+      $alias['value'] = $id_alias;
+    }
+    else {
+      $alias['operator'] = 'isnull';
+    }
+    $dbCfg['where'][] = $alias;
+
+    return $dbCfg;
   }
 
-
-
-
-
-} 
+}

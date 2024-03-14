@@ -1403,7 +1403,7 @@ class Database extends bbn\Models\Cls\Cache
             if (bbn\Str::isUid($id)) {
               $children = $this->o->items($id);
               foreach ($children as $cid) {
-                $num_keys_rem += (int)$this->o->removeFull($cid);
+                $num_keys_rem += (int)$this->o->remove($cid);
               }
 
               $num_keys_rem += (int)$this->o->remove($id);

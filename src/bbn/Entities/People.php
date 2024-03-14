@@ -335,7 +335,7 @@ class People extends DbCls
     $res = Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);
     if ($res) {
       foreach ($res as $i => $id) {
-        $r[$i] = $this->get_info($id);
+        $r[$i] = $this->getInfo($id);
       }
     }
 
@@ -395,7 +395,7 @@ class People extends DbCls
   {
     $arc = &$this->class_cfg['arch']['people'];
     $ok = null;
-    if ($this->get_info($id)) {
+    if ($this->getInfo($id)) {
       $fn = $this->prepareData($fn);
 
       if (!empty($fn)) {

@@ -112,5 +112,12 @@ trait DbConfig
 
     return $this;
   }
+
+
+  protected function isInitClassCfg(): bool
+  {
+    return $this->_is_init_class_cfg;
+  }
+
 }
 
