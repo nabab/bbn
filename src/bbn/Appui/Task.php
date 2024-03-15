@@ -1678,17 +1678,20 @@ class Task extends bbn\Models\Cls\Db
         $type = !empty($tokensCfg['checkType']) ? $this->getType($idTask) : null;
         $lastTrack = $this->getLastStoppedTrack($idUser, $type);
         if (!empty($lastTrack)
-          && ((strtotime($start) - strtotime($lastTrack['end'])) < $tokensCfg['step'])
+          && ($d = strtotime($start) - strtotime($lastTrack['end']))
+        //DA CAMBIAREEEE
+          && ($d < $tokensCfg['step'])
         ) {
-          $lastTokens = $lastTrack['length'] / $tokensCfg['step'];
-          if (floor($lastTokens) - $lastTokens) {
+
+          $lastTokens = ($lastTrack['length'] + $d) / $tokensCfg['step'];
+          if ($lastTokens - floor($lastTokens)) {
             $this->db->update('bbn_tasks_sessions', [
-              'tokens' => $lastTrack['tokens'] - 1
+              'end' => $start,
+              'tokens' => $lastTokens - 1
             ], [
               'id' => $lastTrack['id']
             ]);
             $tokens = 1;
-            $start = $lastTrack['end'];
           }
         }
       }
@@ -1778,9 +1781,10 @@ class Task extends bbn\Models\Cls\Db
 
   public function getLastStoppedTrack(?string $idUser = null, ?string $taskType = null): ?array
   {
-    return $this->db->select([
+    return $this->db->rselect([
       'table' => 'bbn_tasks_sessions',
       'fields' => [
+        'bbn_tasks_sessions.id',
         'bbn_tasks_sessions.end',
         'bbn_tasks_sessions.length',
         'bbn_tasks_sessions.tokens',
@@ -2044,14 +2048,30 @@ class Task extends bbn\Models\Cls\Db
       && ($tokensCfg = $this->getTokensCfg())
     ) {
       while (!empty($start)
-        && ($track = $this->db->select('bbn_tasks_sessions', ['start', 'end', 'length'], [
-          'end' => $start,
-          'id_user' => $idUser ?: $this->id_user,
+        && ($track = $this->db->select([
+          'table' => 'bbn_tasks_sessions',
+          'fields' => [
+            'bbn_tasks_sessions.start',
+            'bbn_tasks_sessions.end',
+            'bbn_tasks_sessions.length'
+          ],
+          'join' => [[
+            'table' => 'bbn_tasks',
+            'on' => [[
+              'field' => 'bbn_tasks_sessions.id_task',
+              'exp' => 'bbn_tasks.id'
+            ]]
+          ]],
+          'where' => [
+            'bbn_tasks_sessions.end' => $start,
+            'bbn_tasks_sessions.id_user' => $idUser ?: $this->id_user,
+            'bbn_tasks.active' => 1
+          ]
         ]))
       ) {
-        $start = $track->end;
+        $start = $track->start;
         $t = $track->length / $tokensCfg['step'];
-        if ($tt = floor($t) - $t) {
+        if ($tt = $t - floor($t)) {
           $tokens += $tt;
         }
       }
