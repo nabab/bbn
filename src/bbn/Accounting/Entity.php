@@ -5,13 +5,13 @@ namespace bbn\Accounting;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Db;
 
 
 class Entity extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
   use Common;
 
   protected static $default_class_cfg = [

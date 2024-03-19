@@ -2,13 +2,22 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use bbn\Db;
+use bbn\X;
+use bbn\Str;
+use bbn\User;
+use bbn\Mvc;
+use bbn\File\Dir;
+use bbn\User\Preferences;
+use bbn\User\Permissions;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
 
-class Notification extends bbn\Models\Cls\Db
+class Notification extends DbCls
 {
-  use
-    bbn\Models\Tts\Optional,
-    bbn\Models\Tts\Dbconfig;
+  use Optional;
+  use DbActions;
 
   protected static /** @var array */
     $default_class_cfg = [
@@ -53,15 +62,15 @@ class Notification extends bbn\Models\Cls\Db
     $lastId;
 
 
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     $this->_init_class_cfg(self::$default_class_cfg);
     self::optionalInit();
-    $this->opt   = bbn\Appui\Option::getInstance();
-    $this->user  = bbn\User::getInstance();
-    $this->pref  = new bbn\User\Preferences($this->db);
-    $this->perms = new bbn\User\Permissions();
+    $this->opt   = Option::getInstance();
+    $this->user  = User::getInstance();
+    $this->pref  = new Preferences($this->db);
+    $this->perms = new Permissions();
   }
 
 
@@ -129,7 +138,7 @@ class Notification extends bbn\Models\Cls\Db
         }
       }
 
-      if (bbn\Str::isUid($id_opt)) {
+      if (Str::isUid($id_opt)) {
         if ($perms) {
           return $perms ? $this->insertByOption($title, $content, $id_opt, $user_excluded) : $this->insert($title, $content, $id_opt, $users, $user_excluded);
         }
@@ -142,7 +151,7 @@ class Notification extends bbn\Models\Cls\Db
 
   public function insert(string $title, string $content, string $id_option = null, array $users = [], bool $user_excluded = false): bool
   {
-    if (\is_string($id_option) && !bbn\Str::isUid($id_option)) {
+    if (\is_string($id_option) && !Str::isUid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
       $id_option[] = 'list';
       $id_option = self::getOptionId(...$id_option);
@@ -151,7 +160,7 @@ class Notification extends bbn\Models\Cls\Db
     if (!empty($title)
         && !empty($content)
         && (\is_null($id_option)
-        || bbn\Str::isUid($id_option))
+        || Str::isUid($id_option))
     ) {
       $notification = [
         $this->class_cfg['arch']['content']['id_option'] => $id_option,
@@ -192,7 +201,7 @@ class Notification extends bbn\Models\Cls\Db
 
   public function insertByOption(string $title, string $content, string $id_option, bool $user_excluded = false): bool
   {
-    if (!bbn\Str::isUid($id_option)) {
+    if (!Str::isUid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
       if (\count($id_option) === 2) {
         $id_option[] = 'list';
@@ -201,7 +210,7 @@ class Notification extends bbn\Models\Cls\Db
       $id_option = self::getOptionId(...$id_option);
     }
 
-    if (bbn\Str::isUid($id_option)
+    if (Str::isUid($id_option)
         && ($ucfg = $this->user->getClassCfg())
         && ($ocfg = $this->opt->getClassCfg())
         && ($groups = $this->db->getColumnValues($ucfg['tables']['groups'], $ucfg['arch']['groups']['id'], [$ucfg['arch']['groups']['type'] => 'real']))
@@ -245,7 +254,7 @@ class Notification extends bbn\Models\Cls\Db
 
   public function delete(string $id): ?bool
   {
-    if (bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       return (bool)$this->db->delete($this->class_table, [$this->fields['id'] => $id]);
     }
 
@@ -259,7 +268,7 @@ class Notification extends bbn\Models\Cls\Db
       $id_user = $this->user->getId();
     }
 
-    if (bbn\Str::isUid($id_user)) {
+    if (Str::isUid($id_user)) {
       if (\is_array($id)) {
         $todo = count($id);
         $did  = 0;
@@ -271,12 +280,12 @@ class Notification extends bbn\Models\Cls\Db
 
         return $todo === $did;
       }
-      elseif (bbn\Str::isUid($id)
+      elseif (Str::isUid($id)
           && !$this->db->selectOne($this->class_table, $this->fields['read'], [$this->fields['id'] => $id])
       ) {
         return (bool)$this->db->update(
           $this->class_table, [
-          $this->fields['read'] => $moment ? \round((float)$moment, 4) : bbn\X::microtime()
+          $this->fields['read'] => $moment ? \round((float)$moment, 4) : X::microtime()
           ], [
           $this->fields['id'] => $id
           ]
@@ -294,7 +303,7 @@ class Notification extends bbn\Models\Cls\Db
       $id_user = $this->user->getId();
     }
 
-    if (bbn\Str::isUid($id_user)
+    if (Str::isUid($id_user)
         && ($unreads = $this->getUnreadIds($id_user))
     ) {
       $todo = count($unreads);
@@ -302,7 +311,7 @@ class Notification extends bbn\Models\Cls\Db
       foreach ($unreads as $id){
         $did += $this->db->update(
           $this->class_table, [
-          $this->fields['read'] => $moment ? \round((float)$moment, 4) : bbn\X::microtime()
+          $this->fields['read'] => $moment ? \round((float)$moment, 4) : X::microtime()
           ], [
           $this->fields['id'] => $id
           ]
@@ -318,7 +327,7 @@ class Notification extends bbn\Models\Cls\Db
 
   public function get(string $id): array
   {
-    if (bbn\Str::isUid($id) && ($ucfg = $this->user->getClassCfg())) {
+    if (Str::isUid($id) && ($ucfg = $this->user->getClassCfg())) {
       return $this->db->rselect(
         [
         'table' => $this->class_table,
@@ -366,7 +375,7 @@ class Notification extends bbn\Models\Cls\Db
 
   public function getIdContent(string $id): ?string
   {
-    if (bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       return $this->db->selectOne([
         'table' => $this->class_table,
         'fields' => [$this->fields['id_content']],
@@ -391,7 +400,7 @@ class Notification extends bbn\Models\Cls\Db
         'operator' => 'isnull'
       ]]
     ];
-    if (bbn\Str::isUid($id_user)) {
+    if (Str::isUid($id_user)) {
       $where['conditions'][] = [
         'field' => $this->db->colFullName($this->fields['id_user'], $this->class_table),
         'value' => $id_user
@@ -452,7 +461,7 @@ class Notification extends bbn\Models\Cls\Db
         'operator' => 'isnull'
       ]]
     ];
-    if (bbn\Str::isUid($id_user)) {
+    if (Str::isUid($id_user)) {
       $where['conditions'][] = [
         'field' => $this->db->colFullName($this->fields['id_user'], $this->class_table),
         'value' => $id_user
@@ -460,7 +469,7 @@ class Notification extends bbn\Models\Cls\Db
     }
 
     if (!empty($filters)) {
-      $where['conditions'] = bbn\X::mergeArrays($where['conditions'], $filters);
+      $where['conditions'] = X::mergeArrays($where['conditions'], $filters);
     }
 
     return $this->db->getColumnValues(
@@ -499,9 +508,9 @@ class Notification extends bbn\Models\Cls\Db
 
   public function getListByUser(string $id_user, array $data): ?array
   {
-    if (bbn\Str::isUid($id_user)) {
+    if (Str::isUid($id_user)) {
       $ucfg = $this->user->getClassCfg();
-      $grid = new bbn\Appui\Grid(
+      $grid = new Grid(
         $this->db, $data, [
         'table' => $this->class_table,
         'fields' => array_merge(
@@ -564,22 +573,22 @@ class Notification extends bbn\Models\Cls\Db
 
   public function notify($notification): ?bool
   {
-    if (bbn\Str::isUid($notification)) {
+    if (Str::isUid($notification)) {
       $notification = $this->get($notification);
     }
 
     if (\is_array($notification)
-        && bbn\Str::isUid($notification[$this->fields['id']])
-        && bbn\Str::isUid($notification[$this->fields['id_content']])
-        && bbn\Str::isUid($notification[$this->fields['id_user']])
+        && Str::isUid($notification[$this->fields['id']])
+        && Str::isUid($notification[$this->fields['id_content']])
+        && Str::isUid($notification[$this->fields['id_user']])
         && ($id_user = $notification[$this->fields['id_user']])
         && !empty($notification[$this->class_cfg['arch']['content']['title']])
         && !empty($notification[$this->class_cfg['arch']['content']['content']])
         && empty($notification[$this->fields['read']])
         && ($cfg = $this->getCfg($id_user, $notification[$this->class_cfg['arch']['content']['id_option']]))
     ) {
-      $mtime    = bbn\X::microtime();
-      $dpath    = bbn\Mvc::getUserDataPath($id_user, 'appui-notification');
+      $mtime    = X::microtime();
+      $dpath    = Mvc::getUserDataPath($id_user, 'appui-notification');
       $ucfg     = $this->user->getClassCfg();
       $sessions = $this->db->selectAll(
         $ucfg['tables']['sessions'], [
@@ -598,7 +607,7 @@ class Notification extends bbn\Models\Cls\Db
       ) {
         foreach ($sessions as $sess) {
           $path = $dpath . "web/{$sess->id}/";
-          if (bbn\File\Dir::createPath($path) && !\is_file($path . "$mtime.json")) {
+          if (Dir::createPath($path) && !\is_file($path . "$mtime.json")) {
             $notification[$this->fields['web']]    = $mtime;
             $notification[$this->fields['dt_web']] = date('Y-m-d H:i:s', $mtime);
             file_put_contents($path . "$mtime.json", \json_encode($notification));
@@ -613,7 +622,7 @@ class Notification extends bbn\Models\Cls\Db
       ) {
         foreach ($sessions as $sess) {
           $path = $dpath . "browser/{$sess->id}/";
-          if (bbn\File\Dir::createPath($path) && !\is_file($path . "$mtime.json")) {
+          if (Dir::createPath($path) && !\is_file($path . "$mtime.json")) {
             $notification[$this->fields['browser']]    = $mtime;
             $notification[$this->fields['dt_browser']] = date('Y-m-d H:i:s', $mtime);
             file_put_contents($path . "$mtime.json", \json_encode($notification));
@@ -653,9 +662,9 @@ class Notification extends bbn\Models\Cls\Db
 
   public function getCfg(string $id_user, string $id_option = null): ?array
   {
-    if (bbn\Str::isUid($id_user)
+    if (Str::isUid($id_user)
         && ($cfg_opt_id = self::getOptionId('cfg'))
-        && bbn\Str::isUid($cfg_opt_id)
+        && Str::isUid($cfg_opt_id)
     ) {
       // Glogal cfg
       if (empty($this->cfg)) {
@@ -669,16 +678,16 @@ class Notification extends bbn\Models\Cls\Db
       }
 
       // Get users's preferences of the notification's category
-      if (bbn\Str::isUid($id_option)
+      if (Str::isUid($id_option)
           && ($id_option_parent = $this->opt->getIdParent($id_option))
-          && bbn\Str::isUid($id_option_parent)
+          && Str::isUid($id_option_parent)
           && ($not_parent_pref = $this->pref->getCfgByOption($id_option_parent, $id_user))
       ) {
         $cfg = \array_merge($cfg, $not_parent_pref);
       }
 
       // Get user's preferences of this notification
-      if (bbn\Str::isUid($id_option)
+      if (Str::isUid($id_option)
           && ($not_pref = $this->pref->getCfgByOption($id_option, $id_user))
       ) {
         $cfg = \array_merge($cfg, $not_pref);
@@ -712,7 +721,7 @@ class Notification extends bbn\Models\Cls\Db
 
   private function _update(string $id, array $notification): ?bool
   {
-    if (bbn\Str::isUid($id) && !empty($notification)) {
+    if (Str::isUid($id) && !empty($notification)) {
       if (isset($notification[$this->fields['id']])) {
         unset($notification[$this->fields['id']]);
       }
@@ -747,19 +756,19 @@ class Notification extends bbn\Models\Cls\Db
   {
     if (($masks = new Masks($this->db))
         && ($templ = $masks->getDefault('notifications'))
-        && bbn\Str::isUid($id_user)
+        && Str::isUid($id_user)
         && !empty($notifications)
         && ($mgr = $this->user->getManager())
         && ($usr = $mgr->getUser($id_user))
         && ($ucfg = $this->user->getClassCfg())
-        && ($rendered = bbn\Tpl::render(
+        && ($rendered = Tpl::render(
           $templ['content'], [
           'user' => $usr[$ucfg['show']] ?? '',
           'notifications' => $notifications
           ]
         ))
         && ($email = $usr[$ucfg['arch']['users']['email']])
-        && bbn\Str::isEmail($email)
+        && Str::isEmail($email)
     ) {
       $templ['title'] = str_replace('{{app_name}}', defined('BBN_SITE_TITLE') ? BBN_SITE_TITLE : BBN_CLIENT_NAME, $templ['title']);
       $this->lastDbId = $this->db->lastId();
@@ -781,7 +790,7 @@ class Notification extends bbn\Models\Cls\Db
   private function _send_grouped_mail(array $notification, string $mail_cfg)
   {
     if (($id_user = $notification[$this->fields['id_user']])
-        && bbn\Str::isUid($id_user)
+        && Str::isUid($id_user)
         && ($mail = $notification[$this->fields['mail']])
         && ($id_not = $notification[$this->fields['id']])
     ) {
@@ -836,14 +845,14 @@ class Notification extends bbn\Models\Cls\Db
   {
     if (!\is_array($notification)
         && \is_string($notification)
-        && bbn\Str::isUid($notification)
+        && Str::isUid($notification)
     ) {
       $notification = $this->get($notification);
     }
 
     if (\is_array($notification)
         && ($id_user = $id_user ?: ($notification[$this->fields['id_user']] ?? $this->user->getId()))
-        && bbn\Str::isUid($id_user)
+        && Str::isUid($id_user)
         && ($ucfg = $this->user->getClassCfg())
         && ($pcfg = $this->pref->getClassCfg())
         && ($user = $this->db->select(

@@ -10,14 +10,14 @@ use bbn\User\Permissions;
 use bbn\Tpl;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\Cache;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Mvc\Model;
 use bbn\Util\Timer;
 use Opis\Closure\SerializableClosure;
 
 class Search extends Basic
 {
-  use Dbconfig, Cache;
+  use DbActions, Cache;
   use \bbn\Models\Tts\Optional;
 
   /**
@@ -638,7 +638,7 @@ class Search extends Basic
    */
   protected function getPreviousSearchResults(string $id_search, string $signature = '')
   {
-    if (!$this->exists($id_search)) {
+    if (!$this->dbTraitExists($id_search)) {
       throw new Exception(X::_("The search ID $id_search with signature $signature does not exist"));
     }
 

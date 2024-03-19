@@ -2,8 +2,10 @@
 
 namespace bbn\Appui;
 
-use bbn\Models\Cls\Db as DbCls;
 use bbn\Db;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Optional;
 
 /**
  * HR class
@@ -15,8 +17,8 @@ use bbn\Db;
  */
 class Hr extends DbCls
 {
-  use \bbn\Models\Tts\Dbconfig;
-  use \bbn\Models\Tts\Optional;
+  use DbActions;
+  use Optional;
 
   protected static $default_class_cfg = [
     'errors' => [],

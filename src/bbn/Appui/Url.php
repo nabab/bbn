@@ -2,14 +2,15 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use bbn\Db;
 use bbn\X;
-use bbn\Str;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
 use Exception;
 
-class Url extends bbn\Models\Cls\Db
+class Url extends DbCls
 {
-  use bbn\Models\Tts\Dbconfig;
+  use DbActions;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -29,10 +30,15 @@ class Url extends bbn\Models\Cls\Db
   ];
 
 
-  public function __construct(bbn\Db $db)
+  public function __construct(Db $db)
   {
     parent::__construct($db);
     $this->_init_class_cfg();
+  }
+
+
+  public function select() {
+    return $this->dbTraitSelect(...func_get_args());
   }
 
 
@@ -51,9 +57,7 @@ class Url extends bbn\Models\Cls\Db
   public function set(string $url, string $type_url, string $id_url = null): bool
   {
     if ($id_url && ($url = $this->sanitize($url))) {
-      return (bool)$this->update($id_url, [
-        'url' => $url
-      ]);
+      return (bool)$this->dbTraitUpdate(['url' => $url], $id_url);
     }
 
     return (bool)$this->add($url, $type_url);
@@ -62,7 +66,7 @@ class Url extends bbn\Models\Cls\Db
   public function add(string $url, string $type_url, string $prefix = ''): ?string
   {
     if ($url = $this->sanitize($url, $prefix)) {
-      return $this->insert([
+      return $this->dbTraitInsert([
         $this->fields['url'] => $url,
         $this->fields['type_url'] => $type_url
       ]);
@@ -76,10 +80,10 @@ class Url extends bbn\Models\Cls\Db
   {
     if (
         $url = $this->sanitize($url)
-        && !$this->rselect([$this->fields['url'] => $url])
-        && ($cfg = $this->rselect($id_url))
+        && !$this->dbTraitRselect([$this->fields['url'] => $url])
+        && ($cfg = $this->dbTraitRselect($id_url))
     ) {
-      return $this->insert([
+      return $this->dbTraitInsert([
         $this->fields['url'] => $url,
         $this->fields['type_url'] => $cfg['type_url'],
         $this->fields['redirect'] => $cfg['redirect'] ?: $id_url
@@ -94,12 +98,12 @@ class Url extends bbn\Models\Cls\Db
   {
     if (
         ($url = $this->sanitize($url))
-        && ($redirect = $this->selectOne($this->fields['redirect'], [$this->fields['url'] => $url]))
+        && ($redirect = $this->dbTraitSelectOne($this->fields['redirect'], [$this->fields['url'] => $url]))
     ) {
-      if ($this->selectOne($this->fields['redirect'], [$this->fields['id'] => $redirect])) {
+      if ($this->dbTraitSelectOne($this->fields['redirect'], [$this->fields['id'] => $redirect])) {
         throw new Exception(X::_("You can't redirect a redirected URL (%s)", $url));
       }
-      return $this->selectOne($this->fields['url'], $redirect);
+      return $this->dbTraitSelectOne($this->fields['url'], $redirect);
     }
 
     return null;
@@ -108,8 +112,8 @@ class Url extends bbn\Models\Cls\Db
 
   public function getRedirectById(string $id): ?string
   {
-    if ($redirect = $this->selectOne($this->fields['redirect'], $id)) {
-      if ($this->selectOne($this->fields['redirect'], $redirect)) {
+    if ($redirect = $this->dbTraitSelectOne($this->fields['redirect'], $id)) {
+      if ($this->dbTraitSelectOne($this->fields['redirect'], $redirect)) {
         throw new Exception(X::_("You can't redirect a redirected URL (ID %s)", $id));
       }
 
@@ -123,7 +127,7 @@ class Url extends bbn\Models\Cls\Db
   public function urlExists(string $url): bool
   {
     if ($url = $this->sanitize($url)) {
-      return $this->exists([$this->fields['url'] => $url]);
+      return $this->dbTraitExists([$this->fields['url'] => $url]);
     }
 
     return false;
@@ -151,7 +155,7 @@ class Url extends bbn\Models\Cls\Db
         return $this->urlToId($url);
       }
 
-      if ($data = $this->rselect([$this->fields['url'] => $url])) {
+      if ($data = $this->dbTraitRselect([$this->fields['url'] => $url])) {
         if ($followRedirect) {
           return array_merge($data, ['original' => $original]);
         }
@@ -167,7 +171,7 @@ class Url extends bbn\Models\Cls\Db
   public function urlToId(string $url): ?string
   {
     if ($url = $this->sanitize($url)) {
-      return $this->selectOne($this->fields['id'], [$this->fields['url'] => $url]);
+      return $this->dbTraitSelectOne($this->fields['id'], [$this->fields['url'] => $url]);
     }
 
     return null;
@@ -186,7 +190,7 @@ class Url extends bbn\Models\Cls\Db
       $id_url = $tmp;
     }
 
-    if ($id_url && ($data = $this->rselect($id_url))) {
+    if ($id_url && ($data = $this->dbTraitRselect($id_url))) {
       return $data;
     }
 
@@ -207,7 +211,7 @@ class Url extends bbn\Models\Cls\Db
     }
 
     if ($id_url) {
-      return $this->selectOne($this->fields['url'], $id_url);
+      return $this->dbTraitSelectOne($this->fields['url'], $id_url);
     }
 
     return null;

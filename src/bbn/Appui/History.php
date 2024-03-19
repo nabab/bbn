@@ -47,114 +47,6 @@ class History
   public static $is_used = false;
 
   /**
-   * Returns the database connection object.
-   *
-   * @return Db
-   */
-  private static function _get_db(): ?Db
-  {
-    if ( self::$db && self::$db->check() ){
-      return self::$db;
-    }
-    return null;
-  }
-
-  /**
-   * Returns an instance of the Appui\Database class.
-   *
-   * @return Database
-   */
-  private static function _get_database(): ?Database
-  {
-    if ( self::check() ){
-      if ( !self::$database_obj && ($db = self::_get_db()) ){
-        self::$database_obj = new Database($db);
-      }
-      return self::$database_obj;
-    }
-    return null;
-  }
-
-  /**
-   * Adds a row in the history table
-   * 
-   * @param array $cfg
-   * @return int
-   */
-  private static function _insert(array $cfg): int
-  {
-    if (
-      isset($cfg['column'], $cfg['line'], $cfg['chrono']) &&
-      self::check() &&
-      ($db = self::_get_db())
-    ){
-      // Recording the last ID
-      $id = $db->lastId();
-      $db->disableLast();
-      self::disable();
-      if ( !array_key_exists('old', $cfg) ){
-        $cfg['ref'] = null;
-        $cfg['val'] = null;
-      }
-      else if (
-        Str::isUid($cfg['old']) &&
-        self::$db->count(self::$table_uids, ['bbn_uid' => $cfg['old']])
-      ){
-        $cfg['ref'] = $cfg['old'];
-        $cfg['val'] = null;
-      }
-      else{
-        $cfg['ref'] = null;
-        $cfg['val'] = $cfg['old'];
-      }
-      // New row in the history table
-      if ( $res = $db->insert(self::$table, [
-        'opr' => $cfg['operation'],
-        'uid' => $cfg['line'],
-        'col' => $cfg['column'],
-        'val' => $cfg['val'],
-        'ref' => $cfg['ref'],
-        'tst' => self::$date ?: $cfg['chrono'],
-        'usr' => self::$user
-      ]) ){
-        // Set back the original last ID
-        $db->setLastInsertId($id);
-      }
-      $db->enableLast();
-      self::enable();
-      return $res;
-    }
-    return 0;
-  }
-
-  /**
-   * Get a string for the WHERE in the query with all the columns selection
-   * @param string $table
-   * @return string|null
-   */
-  private static function _get_table_where(string $table): ?string
-  {
-    if (
-      Str::checkName($table) &&
-      ($db = self::_get_db()) &&
-      ($database_obj = self::_get_database()) &&
-      ($model = $database_obj->modelize($table))
-    ){
-      $col = $db->escape('col');
-      $where_ar = [];
-      foreach ( $model['fields'] as $k => $f ){
-        if ( !empty($f['id_option']) ){
-          $where_ar[] = $col.' = UNHEX("'.$db->escapeValue($f['id_option']).'")';
-        }
-      }
-      if ( \count($where_ar) ){
-        return implode(' OR ', $where_ar);
-      }
-    }
-    return null;
-  }
-
-  /**
    * Returns the column's corresponding option's ID
    * @param $column string
    * @param $table string
@@ -168,7 +60,7 @@ class History
       ($database_obj = self::_get_database())
     ){
       [$database, $table] = explode('.', $full_table);
-      return $database_obj->columnId($column, $table, $database, self::$db->getHost());
+      return $database_obj->columnId($column, $table, $database);
     }
     return false;
   }
@@ -439,7 +331,7 @@ MYSQL;
       $uid = $db->cfn('bbn_uid', self::$table_uids, true);
       $active = $db->cfn(self::$column, self::$table_uids, true);
       $id_tab = $db->cfn('bbn_table', self::$table_uids, true);
-      $line = $db->escape('uid', self::$table);
+      $line = $db->cfn('uid', self::$table, true);
       $chrono = $db->escape('tst');
       $sql = <<< MYSQL
 SELECT DISTINCT($line)
@@ -458,12 +350,12 @@ MYSQL;
 
   /**
    * @param string $table
-   * @param $from_when
-   * @param $id
-   * @param null $column
+   * @param string $id
+   * @param string|int $from_when
+   * @param string|null $column
    * @return null|array
    */
-  public static function getNextUpdate(string $table, string $id, $from_when, $column = null)
+  public static function getNextUpdate(string $table, string $id, string|int $from_when, string $column = null)
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
@@ -525,12 +417,12 @@ MYSQL;
 
   /**
    * @param string $table
-   * @param $from_when
-   * @param $id
-   * @param null $column
+   * @param string $id
+   * @param string|int $from_when
+   * @param string|null $column
    * @return null|array
    */
-  public static function getPrevUpdate(string $table, string $id, $from_when, $column = null): ?array
+  public static function getPrevUpdate(string $table, string $id, string|int $from_when, string $column = null): ?array
   {
     if (
       Str::checkName($table) &&
@@ -749,9 +641,11 @@ MYSQL;
    * @param string $col
    * @return array
    */
-  public static function getHistory(string $table, string $id, string $col = ''){
+  public static function getHistory(string $table, string $id, string $col = ''): ?array
+  {
     if ( 
-      self::check($table) && 
+      self::check() && 
+      self::isLinked($table) && 
       ($modelize = self::getTableCfg($table))
     ){
       $pat = [
@@ -805,6 +699,8 @@ MYSQL;
       }
       return $r;
     }
+
+    return null;
   }
 
   /**
@@ -910,6 +806,7 @@ MYSQL;
             'primary_length' => 0,
             'auto_increment' => false,
             'id' => null,
+            'unique' => [],
             'fields' => []
           ];
           if (
@@ -918,7 +815,7 @@ MYSQL;
             (\count($model['keys']['PRIMARY']['columns']) === 1) &&
             ($primary = $model['keys']['PRIMARY']['columns'][0]) &&
             !empty($model['fields'][$primary])
-          ){
+          ) {
             // Looking for the config of the table
             self::$structures[$table]['history'] = 1;
             self::$structures[$table]['primary'] = $primary;
@@ -926,6 +823,19 @@ MYSQL;
             self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
             self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
             self::$structures[$table]['id'] = $dbc->tableId($db->tsn($table), $db->getCurrent());
+            foreach ($model['keys'] as $key) {
+              if (!empty($key['unique'])) {
+                foreach ($key['columns'] as $col) {
+                  if (($col !== $primary)
+                      && !in_array($col, self::$structures[$table]['unique'], true)
+                      && !empty($model['fields'][$col]['null'])
+                  ) {
+                    array_push(self::$structures[$table]['unique'], $col);
+                  }
+                }
+              }
+            }
+
             self::$structures[$table]['fields'] = array_filter($model['fields'], function($a){
               return isset($a['id_option']);
             });
@@ -969,28 +879,62 @@ MYSQL;
   }
 
 
-  public static function fusion(Db $db, $ids) 
+  public static function fusion(array $ids, string $table, Db $db, $main = null): bool 
   {
-    if (!is_array($ids)) {
-      $ids = func_get_args();
+    if (!self::check()) {
+      return false;
     }
 
-    $source = $db->getColumnValues(
-      self::$table_uids,
+    if ($main && !in_array($main, $ids, true)) {
+      $ids[] = $main;
+    }
+
+    $oldest = null;
+    $oldestId = null;
+    foreach ($ids as $a) {
+      $tmp = History::getCreationDate($table, $a);
+      if (!$oldest || ($tmp < $oldest)) {
+        $oldest = $tmp;
+        $oldestId = $a;
+      }
+}
+
+    if (!$main) {
+      $main = $oldestId;
+    }
+
+    if (!$main) {
+      throw new Exception(X::_("Impossible to find the main record"));
+    }
+
+    $idx = array_search($main, $ids);
+    if ($idx !== false) {
+      array_splice($ids, $idx, 1);
+    }
+
+    array_unshift($ids, $main);
+
+    $tables = $db->rselectAll(
+      [self::$table_uids],
       'bbn_table',
       ['bbn_uid' => $ids]
     );
-    $unique = array_unique($source);
+    
+    $unique = array_unique(array_map(function($a) {
+      return $a['bbn_table'];
+    }, $tables));
+
     if (count($unique) > 1) {
       X::log($unique);
       throw new Exception(X::_("The fusion you wanna do seems to go on different tables"));
     }
 
-    if (count($source) !== count($ids)) {
+    if (count($tables) !== count($ids)) {
       throw new Exception(X::_("They are not all in the history table"));
     }
 
     $source = array_shift($ids);
+
     $isActive = $db->selectOne(
       self::$table_uids,
       'bbn_active',
@@ -998,52 +942,60 @@ MYSQL;
         'uid' => $source
       ]
     );
+
     if (!$isActive) {
       throw new Exception(X::_("Main record is deleted"));
     }
 
-    $creation = $db->selectOne(
+    $db->update(
       self::$table,
-      'MIN(tst)',
+      ['tst' => $oldest],
       [
         'uid' => $ids,
         'opr' => 'INSERT'
+      ]
+    
+    );
+
+    $model = $db->modelize($table);
+    $primary = $model['keys']['PRIMARY']['columns'][0];
+    $refs = $db->findReferences($db->cfn($primary, $table));
+    $relations = [];
+    foreach ($refs as $ref) {
+      [$d, $t, $c] = X::split($ref, '.');
+      $relations[] = [
+        'table' => $t,
+        'column' => $c
+      ];
+    }
+
+    self::disable();
+    $num = 0;
+    foreach ($ids as $id) {
+      foreach ($relations as $ref) {
+        $num += (int)$db->update(
+          $ref['table'],
+          [$ref['column'] => $source],
+          [$ref['column'] => $id]
+        );
+    }
+    
+      $num += (int)$db->update(
+      self::$table,
+      ['uid' => $source],
+        [
+        'uid' => $id,
+        'opr' => ['UPDATE', 'RESTORE', 'DELETE']
       ]
     );
-    if (!$creation) {
-      throw new Exception(X::_("No creation date"));
+    $num += (int)$db->delete(
+      self::$table_uids,
+      ['bbn_uid' => $id]
+      );
     }
-    $db->delete([
-      self::$table,
-      [
-        'uid' => $ids,
-        'opr' => 'INSERT',
-        ['tst', '>', $creation]
-      ]
-    ]);
-    $db->update([
-      self::$table,
-      ['uid' => $ids[0]],
-      [
-        'uid' => $ids,
-        'opr' => 'INSERT'
-      ]
-    ]);
-    $db->update([
-      self::$table,
-      ['uid' => $ids[0]],
-      [
-        'uid' => $ids,
-        'opr' => 'UPDATE'
-      ]
-    ]);
-    $db->delete([
-      self::$table,
-      [
-        'uid' => $ids,
-        'opr' => ['DELETE', 'RESTORE']
-      ]
-    ]);
+
+    self::enable();
+    return (bool)$num;
   }
 
 
@@ -1330,8 +1282,7 @@ MYSQL;
                 $cfg['history'][] = [
                   'operation' => 'RESTORE',
                   'column' => $s['fields'][$s['primary']]['id_option'],
-                  'line' => $primary_value,
-                  'chrono' => microtime(true)
+                  'line' => $primary_value
                 ];
                 self::$db->setLastInsertId($primary_value);
               }
@@ -1349,8 +1300,7 @@ MYSQL;
                 $cfg['history'][] = [
                   'operation' => 'INSERT',
                   'column' => isset($s['fields'][$s['primary']]) ? $s['fields'][$s['primary']]['id_option'] : null,
-                  'line' => $primary_value,
-                  'chrono' => microtime(true)
+                  'line' => $primary_value
                 ];
                 self::$db->setLastInsertId($primary_value);
               }
@@ -1385,8 +1335,7 @@ MYSQL;
               $primary_where &&
               ($row = self::$db->rselect($table, $cfg['fields'], [$s['primary'] => $primary_where]))
             ){
-              $time = microtime(true);
-              foreach ( $cfg['fields'] as $i => $idx ){
+                            foreach ( $cfg['fields'] as $i => $idx ){
                 $csn = self::$db->csn($idx);
                 if (
                   array_key_exists($csn, $s['fields']) &&
@@ -1396,8 +1345,7 @@ MYSQL;
                     'operation' => 'UPDATE',
                     'column' => $s['fields'][$csn]['id_option'],
                     'line' => $primary_where,
-                    'old' => $row[$csn],
-                    'chrono' => $time
+                    'old' => $row[$csn]
                   ];
                 }
               }
@@ -1439,6 +1387,17 @@ MYSQL;
             }
             else {
               self::disable();
+foreach ($s['unique'] as $un) {
+                $old = self::$db->selectOne($table, $un, [$s['primary'] => $primary_where]);
+                self::$db->update($table, [$un => null], [$s['primary'] => $primary_where]);
+                $cfg['history'][] = [
+                  'operation' => 'UPDATE',
+                  'column' => $s['fields'][$un]['id_option'],
+                  'line' => $primary_where,
+                  'old' => $old
+                ];
+              }
+
               $cfg['value'] = self::$db->update(self::$table_uids, [
                 'bbn_active' => 0
               ], [
@@ -1453,8 +1412,7 @@ MYSQL;
                   'operation' => 'DELETE',
                   'column' => $s['fields'][$s['primary']]['id_option'],
                   'line' => $primary_where,
-                  'old' => NULL,
-                  'chrono' => microtime(true)
+                  'old' => NULL
                 ];
               }
             }
@@ -1465,7 +1423,9 @@ MYSQL;
         ($cfg['moment'] === 'after') &&
         isset($cfg['history'])
       ){
+$time = microtime(true);
         foreach ($cfg['history'] as $h){
+$h['chrono'] = $time;
           self::_insert($h);
         }
         unset($cfg['history']);
@@ -1473,4 +1433,114 @@ MYSQL;
     }
     return $cfg;
   }
+
+  /**
+   * Returns the database connection object.
+   *
+   * @return Db
+   */
+  private static function _get_db(): ?Db
+  {
+    if ( self::$db && self::$db->check() ){
+      return self::$db;
+    }
+    return null;
+  }
+
+  /**
+   * Returns an instance of the Appui\Database class.
+   *
+   * @return Database
+   */
+  private static function _get_database(): ?Database
+  {
+    if ( self::check() ){
+      if ( !self::$database_obj && ($db = self::_get_db()) ){
+        self::$database_obj = new Database($db);
+      }
+      return self::$database_obj;
+    }
+    return null;
+  }
+
+  /**
+   * Adds a row in the history table
+   * 
+   * @param array $cfg
+   * @return int
+   */
+  private static function _insert(array $cfg): int
+  {
+    if (
+      isset($cfg['column'], $cfg['line'], $cfg['chrono']) &&
+      self::check() &&
+      ($db = self::_get_db())
+    ){
+      // Recording the last ID
+      $id = $db->lastId();
+      $db->disableLast();
+      self::disable();
+      if ( !array_key_exists('old', $cfg) ){
+        $cfg['ref'] = null;
+        $cfg['val'] = null;
+      }
+      else if (
+        Str::isUid($cfg['old']) &&
+        self::$db->count(self::$table_uids, ['bbn_uid' => $cfg['old']])
+      ){
+        $cfg['ref'] = $cfg['old'];
+        $cfg['val'] = null;
+      }
+      else{
+        $cfg['ref'] = null;
+        $cfg['val'] = $cfg['old'];
+      }
+      // New row in the history table
+      if ( $res = $db->insert(self::$table, [
+        'opr' => $cfg['operation'],
+        'uid' => $cfg['line'],
+        'col' => $cfg['column'],
+        'val' => $cfg['val'],
+        'ref' => $cfg['ref'],
+        'tst' => self::$date ?: $cfg['chrono'],
+        'usr' => self::$user
+      ]) ){
+        // Set back the original last ID
+        $db->setLastInsertId($id);
+      }
+      $db->enableLast();
+      self::enable();
+      return $res;
+    }
+    return 0;
+  }
+
+  /**
+   * Get a string for the WHERE in the query with all the columns selection
+   * @param string $table
+   * @return string|null
+   */
+  private static function _get_table_where(string $table): ?string
+  {
+    if (
+      Str::checkName($table) &&
+      ($db = self::_get_db()) &&
+      ($database_obj = self::_get_database()) &&
+      ($model = $database_obj->modelize($table))
+    ){
+      $col = $db->escape('col');
+      $where_ar = [];
+      foreach ( $model['fields'] as $k => $f ){
+        if ( !empty($f['id_option']) ){
+          $where_ar[] = $col.' = UNHEX("'.$db->escapeValue($f['id_option']).'")';
+        }
+      }
+      if ( \count($where_ar) ){
+        return implode(' OR ', $where_ar);
+      }
+    }
+    return null;
+  }
+
+
 }

@@ -106,7 +106,7 @@ class Sync
   }
 
   /**
-   * @param bbn\Db $db
+   * @param Db $db
    * @param array $sync_cfg
    * @param array  $tables
    * @param string  $sync_table

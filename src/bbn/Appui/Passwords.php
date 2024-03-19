@@ -9,7 +9,7 @@ use bbn\X;
  */
 class Passwords extends bbn\Models\Cls\Db
 {
-  use bbn\Models\Tts\Dbconfig;
+  use bbn\Models\Tts\DbActions;
 
   /** @var bbn\Appui\Option An options object */
   private $_o;

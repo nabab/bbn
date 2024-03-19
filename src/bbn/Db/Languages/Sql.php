@@ -2,16 +2,16 @@
 
 namespace bbn\Db\Languages;
 
+use Exception;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Exception;
+use bbn\Str;
+use bbn\X;
 use bbn\Db\Engines;
 use bbn\Db\EnginesApi;
 use bbn\Db\SqlEngines;
 use bbn\Db\SqlFormatters;
-use bbn\Str;
-use bbn\X;
 use PHPSQLParser\PHPSQLParser;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
@@ -967,11 +967,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
           switch (strtolower($f['operator'])) {
             case '=':
-              if ($is_uid && $is_bool) {
-                $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
+              if ($is_uid || $is_bool || $is_number|| $is_date) {
+                $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
               }
               else {
-                $res .= isset($f['exp']) ? '= ' . $f['exp'] : '= ?';
+                $res .= isset($f['exp']) ? 'LIKE ' . $f['exp'] : 'LIKE ?';
               }
               break;
             case '!=':
@@ -1133,7 +1133,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               break;
 
             default:
-              $res .= $is_uid && $is_bool ? 'LIKE ?' : '= ?';
+              $res .= $is_uid || $is_bool || $is_number|| $is_date ? '= ?' : 'LIKE ?';
               break;
           }
         }
@@ -1732,7 +1732,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               else{
                 $f = [
                   'field' => $key,
-                  'operator' => is_string($f) && !Str::isUid($f) ? 'LIKE' : '=',
+                  'operator' => is_string($f) && !Str::isUid($f) && !Str::isNumber($f) ? 'LIKE' : '=',
                   'value' => $f
                 ];
               }
@@ -2160,12 +2160,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           }
         }
         // This is a reading statement, it will prepare the statement and return a query object
-        else{
+        else {
           if (!$q['prepared']) {
             // Native PDO function which will use Db\Query as base class
             $q['prepared'] = $this->pdo->prepare($q['sql'], $driver_options);
           }
-          else{
+          else {
             // Returns the same Db\Query object
             $q['prepared']->init($params['values']);
           }

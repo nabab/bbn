@@ -4,7 +4,7 @@ namespace bbn\Db;
 
 use bbn\Appui\Database;
 use bbn\Db;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Report;
 use bbn\Str;
 use bbn\X;
@@ -14,7 +14,7 @@ class History
 
   use Report;
 
-  use Dbconfig;
+  use DbActions;
 
   /** @var array */
   protected static $default_class_cfg = [

@@ -1,16 +1,18 @@
 <?php
 
-namespace bbn\Entities;
+namespace bbn\Entities\Tables;
 
-use bbn\Models\Tts\Dbconfig;
+use Exception;
+use bbn\Entities\Models\Entities;
+use bbn\Entities\Models\EntityTable;
+use bbn\Entities\Entity;
+use bbn\Models\Cls\Nullall;
 use bbn\Models\Tts\Optional;
-use bbn\Models\Cls\Db as DbCls;
 use bbn\Db;
 use bbn\X;
 
-class Options extends DbCls
+class Options extends EntityTable
 {
-  use Dbconfig;
   use Optional;
 
   protected static $default_class_cfg = [
@@ -28,10 +30,14 @@ class Options extends DbCls
     ]
   ];
   
-  public function __construct(Db $db, array $cfg = [])
+  public function __construct(
+    Db $db, 
+    protected Entities $entities,
+    protected Entity|Nullall $entity = new Nullall()
+  )
   {
-    parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    parent::__construct($db, $entities, $entity);
+    $this->_init_class_cfg(self::$default_class_cfg);
     self::optionalInit(['options', 'entity', 'appui']);
   }
 
@@ -53,24 +59,21 @@ class Options extends DbCls
   public function add($id_entity, $id_type, $id_option): ?string
   {
     if ($this->check()) {
-      if ($this->db->count(
-        $this->class_cfg['table'],
+      $f = $this->class_cfg['arch']['entities_options'];
+      if ($this->dbTraitCount(
         [
-          $this->class_cfg['arch']['entities_options']['id_entity'] => $id_entity,
-          $this->class_cfg['arch']['entities_options']['id_type'] => $id_type,
-          $this->class_cfg['arch']['entities_options']['id_option'] => $id_option
+          $f['id_type'] => $id_type,
+          $f['id_option'] => $id_option
         ])
       ) {
-        throw new \Exception(X::_("The option already exists for this entity"));
+        throw new Exception(X::_("The option already exists for this entity"));
       }
 
-      if ($this->db->insertIgnore(
-        $this->class_cfg['table'],
-        [
-          $this->class_cfg['arch']['entities_options']['id_entity'] => $id_entity,
-          $this->class_cfg['arch']['entities_options']['id_type'] => $id_type,
-          $this->class_cfg['arch']['entities_options']['id_option'] => $id_option
-        ]
+      if ($this->dbTraitInsert([
+          $f['id_entity'] => $id_entity,
+          $f['id_type'] => $id_type,
+          $f['id_option'] => $id_option
+        ], true
       )) {
         return $this->db->lastId();
       }
@@ -83,12 +86,12 @@ class Options extends DbCls
   public function remove($id_entity, $id_type, $id_option): ?int
   {
     if ($this->check()) {
-      return $this->db->delete(
-        $this->class_cfg['table'],
+      $f = $this->class_cfg['arch']['entities_options'];
+      return $this->dbTraitDelete(
         [
-          $this->class_cfg['arch']['entities_options']['id_entity'] => $id_entity,
-          $this->class_cfg['arch']['entities_options']['id_type'] => $id_type,
-          $this->class_cfg['arch']['entities_options']['id_option'] => $id_option
+          $f['id_entity'] => $id_entity,
+          $f['id_type'] => $id_type,
+          $f['id_option'] => $id_option
         ]
       );
     }
@@ -104,7 +107,7 @@ class Options extends DbCls
       $all = $this->get($id_entity, $id_type);
       foreach ($options as $o) {
         if (!\is_string($o)) {
-          throw new \Exception(X::_("The options must be an array of strings"));
+          throw new Exception(X::_("The options must be an array of strings"));
         }
 
         if (!in_array($o, $all) && $this->add($id_entity, $id_type, $o)) {
@@ -128,12 +131,12 @@ class Options extends DbCls
   public function getRows($id_entity, $id_type): ?array
   {
     if ($this->check()) {
+      $f = $this->class_cfg['arch']['entities_options'];
       return $this->db->rselectAll(
         $this->class_cfg['table'],
         [],
         [
-          $this->class_cfg['arch']['entities_options']['id_entity'] => $id_entity,
-          $this->class_cfg['arch']['entities_options']['id_type'] => $id_type
+          $f['id_type'] => $id_type
         ]
       );
     }
@@ -145,12 +148,11 @@ class Options extends DbCls
   public function get($id_entity, $id_type): ?array
   {
     if ($this->check()) {
-      return $this->db->getFieldValues(
-        $this->class_cfg['table'],
-        $this->class_cfg['arch']['entities_options']['id_option'],
+      $f = $this->class_cfg['arch']['entities_options'];
+      return $this->dbTraitSelectValues(
+        $f['id_option'],
         [
-          $this->class_cfg['arch']['entities_options']['id_entity'] => $id_entity,
-          $this->class_cfg['arch']['entities_options']['id_type'] => $id_type
+          $f['id_type'] => $id_type
         ]
       );
     }
@@ -159,11 +161,11 @@ class Options extends DbCls
   }
 
 
-  public function getAll($id_entity)
+  public function getAllByType($id_entity = null)
   {
     $res = [];
     foreach ($this->getTypes() as $k => $id) {
-      $res[$k] = $this->get($id_entity, $id);
+      $res[$k] = $this->get($id_entity ?: $this->getId(), $id);
     }
 
     return $res;

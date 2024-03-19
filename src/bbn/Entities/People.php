@@ -1,744 +1,452 @@
 <?php
+
 namespace bbn\Entities;
 
-use PHPSQLParser\Test\Parser\variablesTest;
+use Exception;
+use bbn\X;
+use bbn\Str;
+use bbn\Db;
+use bbn\Appui\History;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Entities\Models\Entities;
+use bbn\Models\Cls\Nullall;
 
-class People
+/**
+ * The People class represents entities in a 'bbn_people' table
+ * and provides methods to manipulate these entities, including
+ * CRUD operations, search, and relation management, tailored for French civilities.
+ */
+class People extends DbCls
 {
-
-  private
-    $db,
-    $options;
-
-  static private $civs = [
-    'M/MME' => 'M/MME',
-    'M' => 'M',
-    'MR' => 'M',
-    'ML' => 'MLLE',
-    'MME' => 'MME',
-    'ME' => 'ME',
-    'MONSIEUR' => 'M',
-    'MLLE' => 'MLLE',
-    'MR/ME' => 'M/MME',
-    'M.' => 'M',
-    'MLE' => 'MLLE',
-    'MMES' => 'MMES',
-    'M/MES' => 'M/MME',
-    'MM' => 'MM',
-    'MLL' => 'MLLE',
-    'MMME' => 'MME',
-    'MES' => 'MM',
-    'M/ME' => 'M/MME',
-    'MRME' => 'M',
-    'ME/MR' => 'ME',
-    'MME/M' => 'M/MME',
-    'MLLES' => 'MMES',
-    'MADAME' => 'MME',
-    'MADEMOISELLE' => 'MLLE',
-    'MM/ME' => 'M/MME',
-    'MRR' => 'M',
-    '*M/MME' => 'M/MME',
-    'FAMILLE' => 'M/MME',
-    'MS/MME' => 'M/MME',
-    'MR/' => 'M',
-    'MRS' => 'MM',
-    'M.MME' => 'M/MME',
-    'MRS/MMES' => 'MM',
-    '**MME' => 'MME'
+  use DbActions;
+  /**
+   * The default configuration for database interaction, specifying the table and fields.
+   */
+  protected static $default_class_cfg = [
+    'table' => 'bbn_people',
+    'tables' => [
+      'people' => 'bbn_people'
     ],
-    $civilites         = [
-      'M' => 'Monsieur',
-      'MME' => 'Madame',
-      'MLLE' => 'Mademoiselle',
-      'M/MME' => 'Madame/Monsieur',
-      'ME' => 'Maître',
-      'MMES' => 'Mesdames',
-      'MM' => 'Messieurs'
-    ],
-    $stes              = ['STE', 'CIE', 'SAS', 'SCI', 'SC', 'SA', 'SARL', 'EURL'];
+    'arch' => [
+      'people' => [
+        'id' => 'id',
+        'civility' => 'civility',
+        'name' => 'name',
+        'fname' => 'fname',
+        'fullname' => 'fullname',
+        'email' => 'email',
+        'mobile' => 'mobile',
+        'cfg' => 'cfg',
+      ]
+    ]
+  ];
+
+  private $tableRelations;
+
+  /**
+   * A mapping of alternate civility representations to standard forms.
+   */
+  protected static $civs = [
+  ];
+  /**
+   * A list of formal civility titles in French.
+   */
+  protected static $civilities = [
+    'M' => 'Mister',
+    'Mrs' => 'Madamn',
+    'Miss' => 'Miss'
+  ];
+  /**
+   * An array of company types, useful for parsing names.
+   */
+  protected static $stes = [];
 
 
-  public function __construct(\bbn\Db $db)
+  /**
+   * A mapping of alternate civility representations to standard forms.
+   */
+  public function __construct(
+    Db $db, 
+    protected Entities $entities,
+    protected Entity|Nullall $entity = new Nullall()
+  )
   {
-      $this->db      = $db;
-      $this->options = \bbn\Appui\Option::getInstance();
-
+    parent::__construct($db);
+    $this->_init_class_cfg();
   }
 
 
-  public function fnom($s, $full = false)
+  /**
+   * Processes information for a person based on input.
+   *
+   * @param mixed $st Input data.
+   * @param bool $email Optional email for the person.
+   * @param bool $mobile Optional mobile number for the person.
+   * @return mixed Processed person data.
+   */
+  public function parse(string $st, $email = false, $mobile = false): ?array
   {
-    if (\bbn\Str::isUid($s)) {
-      $s = $this->get_info($s);
+    if (!empty($st)) {
+      $arc = &$this->class_cfg['arch']['people'];
+      $fn = [];
+      $fn[$arc['fname']] = '';
+
+      // array_values reinitializes the keys after array_filter
+      $nameParts = array_values(X::removeEmpty(explode(" ", $st), true));
+      if (isset($nameParts[0])) {
+        if (isset(self::$civs[Str::changeCase($nameParts[0], 'upper')])) {
+          $fn[$arc['civility']] = self::$civs[Str::changeCase($nameParts[0], 'upper')];
+          array_shift($nameParts);
+          if (!isset($nameParts[0])) {
+            return null;
+          }
+        }
+
+        // Cas STE
+        if (isset($nameParts[0]) && in_array($nameParts[0], self::$stes)) {
+          $fn[$arc['name']] = implode(" ", $nameParts);
+        }
+        elseif ((count($nameParts) === 3) && strlen($nameParts[0]) <= 3) {
+          $fn[$arc['name']]    = Str::changeCase(Str::changeCase($nameParts[0] . ' ' . $nameParts[1], 'lower'));
+          $fn[$arc['fname']] = Str::changeCase(Str::changeCase($nameParts[2], 'lower'));
+        }
+        elseif (count($nameParts) > 2) {
+          if (isset($fn[$arc['civility']])) {
+            $fn[$arc['fname']] = Str::changeCase(Str::changeCase(array_pop($nameParts), 'lower'));
+            $fn[$arc['name']]    = Str::changeCase(Str::changeCase(implode(" ", $nameParts), 'lower'));
+          }
+          else {
+            $fn[$arc['name']] = Str::changeCase(Str::changeCase(implode(" ", $nameParts), 'lower'));
+          }
+        }
+        elseif (count($nameParts) < 2 || !isset($nameParts[1])) {
+          $fn[$arc['name']] = $nameParts[0];
+        }
+        else {
+          $fn[$arc['fname']] = Str::changeCase(Str::changeCase($nameParts[1], 'lower'));
+          $fn[$arc['name']]    = Str::changeCase(Str::changeCase($nameParts[0], 'lower'));
+        }
+      }
+
+      if ($email) {
+        $fn[$arc['email']] = $email;
+      }
+
+      if ($mobile) {
+        $fn[$arc['mobile']] = $mobile;
+      }
+
+      return $fn;
     }
 
-    if (is_array($s) && isset($s['nom'])) {
-      $st = '';
-      if (!empty($s['civilite'])) {
-        if ($full && isset(self::$civilites[$s['civilite']])) {
-          $st .= self::$civilites[$s['civilite']].' ';
+    return null;
+  }
+
+  /**
+   * Processes and sets information for a person based on input.
+   *
+   * @param array $fn Input data.
+   * @param bool $email Optional email for the person.
+   * @param bool $mobile Optional mobile number for the person.
+   * @return mixed Processed person data.
+   */
+  public function set_info(array $fn): ?array
+  {
+    $fn = $this->prepare($fn);
+    $arc = &$this->class_cfg['arch']['people'];
+    if (!empty($fn)) {
+      if (!isset($fn[$arc['fname']])) {
+        $fn[$arc['fname']] = '';
+      }
+
+      if (!isset($fn[$arc['civility']])) {
+        $fn[$arc['civility']] = empty($fn[$arc['fname']]) ? null : 'M';
+      }
+
+      if (isset($fn[$arc['email']]) && !Str::isEmail($fn[$arc['email']])) {
+        unset($fn[$arc['email']]);
+      }
+
+      if (isset($fn['tel'])) {
+        $fn[$arc['mobile']] = $fn['tel'];
+        unset($fn['tel']);
+      }
+
+      if (isset($fn[$arc['mobile']])) {
+        $fn[$arc['mobile']] = Str::getNumbers($fn[$arc['mobile']]);
+        if (strlen($fn[$arc['mobile']]) > 10 && strpos($fn[$arc['mobile']], '33') === 0) {
+          $fn[$arc['mobile']] = substr($fn[$arc['mobile']], 2);
         }
-        else{
-          $st .= $s['civilite'].' ';
+
+        /** @todo A proper phone number check system */
+        if (strlen($fn[$arc['mobile']]) === 9 && strpos($fn[$arc['mobile']], '0') !== 0) {
+          $fn[$arc['mobile']] = '0' . $fn[$arc['mobile']];
+        }
+
+        if (strlen($fn[$arc['mobile']]) !== 10) {
+          unset($fn[$arc['mobile']]);
         }
       }
 
-            $st .= $s['nom'];
-      if (!empty($s['prenom'])) {
-        $st .= ' '.$s['prenom'];
+      if (!isset($fn[$arc['name']])) {
+        $fn = [];
       }
 
-      return $st;
+      return $fn;
     }
 
     return null;
   }
 
 
-  public function get_info($id, $id_adherent=0)
+  /**
+   * Retrieves detailed information about a person by ID.
+   *
+   * @param mixed $id The ID of the person.
+   * @return array|null Detailed information about the person.
+   */
+  public function getInfo($id): array
   {
-    $d = $this->db->rselect("bbn_people", [], ['id' => $id]);
-    if ($d) {
-      if (!empty($d['portable'])) {
-        $d['portable'] = (string)$d['portable'];
-      }
+    return $this->dbTraitRselect($id);
+  }
 
-      if (isset($d['cfg'])) {
-        $d['cfg'] = json_decode($d['cfg'], true);
-        if (is_array($d['cfg'])) {
-          foreach ($d['cfg'] as $i => $val){
-            $d[$i] = $val;
-          }
-        }
 
-        unset($d['cfg']);
-      }
-
-      $d['fnom']  = $this->fnom($d);
-      $d['ffnom'] = $this->fnom($d, 1);
-      if (!isset($d['inscriptions'])) {
-        $d['inscriptions'] = [];
-      }
-
-      if ($id_adherent) {
-        $d['roles'] = $this->db->getColumnValues(
+  /**
+   * Performs a search based on a given full name.
+   *
+   * @param array|string $fn The full name to search for.
+   * @return string|null The ID of the person found.
+   */
+  public function search(array|string $fn): ?string
+  {
+    $arc = &$this->class_cfg['arch']['people'];
+    $fn = $this->set_info(is_string($fn) ? $this->parse($fn) : $fn);
+    if (!empty($fn[$arc['fullname']])) {
+      $conditions = [
+        'logic' => 'OR',
+        'conditions' => [
           [
-          'tables' => ['apst_liens'],
-          'fields' => ['bbn_options.text'],
-          'join' => [
-            [
-              'table' => 'bbn_people',
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => 'bbn_people.id',
-                    'operator' => 'eq',
-                    'exp' => 'apst_liens.id_tiers'
-                  ]
-                ],
-                'logic' => 'AND'
-              ]
-            ],
-            [
-              'table' => 'bbn_options',
-              'on' => [
-                'conditions' => [
-                  [
-                    'field' => 'bbn_options.id',
-                    'operator' => 'eq',
-                    'exp' => 'apst_liens.link_type'
-                  ]
-                ],
-                'logic' => 'AND'
+            'field' => $arc['fullname'],
+            'operator' => 'contains',
+            'value' => $fn[$arc['fullname']]
+          ], [
+            'logic' => 'AND',
+            'conditions' => [
+              [
+                'field' => $arc[$arc['name']],
+                'operator' => 'LIKE',
+                'value' => $fn[$arc['name']]
               ]
             ]
-          ],
-          'where' => [
-            'apst_liens.id_adherent' => $id_adherent,
-            'apst_liens.id_lieu' => $id
           ]
-          ]
-        );
-      }
-    }
-
-        return $d;
-  }
-
-
-  public function search($fn)
-  {
-    $fn = $this->set_info($fn);
-    if (!empty($fn['fnom'])) {
-      return $this->db->selectOne(
-        'bbn_addresses', 'id', [
-        'cp' => $fn['cp'],
-        'adresse' => $fn['adresse']
         ]
-      );
-        $h = $this->db->getOne(
-          "
-				SELECT id
-				FROM bbn_people
-        WHERE TRIM(
-          IF ( civilite IS NULL, nom, CONCAT(civilite, ' ', prenom, ' ',nom) )
-        ) LIKE ?
-        OR ( nom LIKE ? AND prenom LIKE ? )
-				LIMIT 1",
-          $fn['fnom'],
-          $fn['nom'],
-          $fn['prenom']
-        );
-        return $h;
+      ];
+      if (!empty($fn[$arc['fname']])) {
+        $conditions['conditions'][1]['conditions'][] = [
+          'field' => $arc['fname'],
+          'operator' => 'LIKE',
+          'value' => $fn[$arc['fname']]
+        ];
+      }
+
+      if (!empty($fn[$arc['email']]) || !empty($fn[$arc['mobile']])) {
+        $tmp = [
+          'logic' => 'AND',
+          'conditions' => []
+        ];
+        if (!empty($fn[$arc['email']])) {
+          $tmp['conditions'][] = [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $arc['email'],
+              'operator' => 'LIKE',
+              'value' => $fn[$arc['email']]
+            ], [
+              'field' => $arc['email'],
+              'operator' => 'isempty'
+            ]]
+          ];
+        }
+
+        if (!empty($fn[$arc['mobile']])) {
+          $tmp['conditions'][] = [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $arc['mobile'],
+              'operator' => 'LIKE',
+              'value' => $fn[$arc['mobile']]
+            ], [
+              'field' => $arc['mobile'],
+              'operator' => 'isempty'
+            ]]
+          ];
+        }
+
+        $tmp['conditions'][] = $conditions;
+        $conditions = $tmp;
+      }
+  
+      return $this->dbTraitSelectOne($arc['id'], $conditions);
     }
 
-      return false;
+    return null;
   }
 
+	public function seek($p, int $start = 0, int $limit = 100){
+    $arc = &$this->class_cfg['arch']['people'];
+    if (!is_array($p)) {
+      $p = $this->parse($p);
+    }
 
-  public function seek($p, int $start = 0, int $limit = 100)
-  {
-    if (is_array($p) && ( !empty($p['nom'])
-        || !empty($p['email'])
-        || !empty($p['portable']) )
-    ) {
+    if (is_array($p) && (
+        !empty($p[$arc['fullname']])
+        || !empty($p[$arc['email']])
+        || !empty($p[$arc['mobile']])
+        || !empty($p[$arc['name']])
+    )
+    ){
       $cond = [];
-      if (!empty($p['email']) && \bbn\Str::isEmail($p['email'])) {
-        array_push($cond, ['email', 'LIKE', $p['email']]);
-      }
 
-      if (!empty($p['nom'])) {
-        array_push($cond, ['nom', 'LIKE', $p['nom']]);
-      }
-
-      if (!empty($p['portable']) && (strlen($p['portable']) >= 6)) {
-        if (strlen($p['portable']) !== 10) {
-          array_push($cond, ['portable', 'LIKE', $p['portable'].'%']);
-        }
-        else{
-          array_push($cond, ['portable', 'LIKE', $p['portable']]);
+      foreach ($arc as $v) {
+        if ( !empty($p[$v]) ){
+          array_push($cond, [$v, 'contains', $p[$v]]);
         }
       }
 
-      if (!empty($p['prenom'])) {
-        array_push($cond, ['prenom', 'LIKE', $p['prenom']]);
-      }
-
-      return $this->db->getColumnValues("bbn_people", 'id', $cond, ['nom', 'prenom'], $limit, $start);
+      return $this->dbTraitSelectValues($arc['id'], $cond, [$arc['fullname']], $limit, $start);
     }
 
-      return false;
-  }
+    return false;
+	}
 
-
+  /**
+   * Conducts a full search for people records.
+   *
+   * @param mixed $p Search parameters or a single UID.
+   * @param int $start Pagination start.
+   * @param int $limit Pagination limit.
+   * @return array The full search results.
+   */
   public function full_search($p, int $start = 0, int $limit = 0)
   {
+    $arc = &$this->class_cfg['arch']['people'];
     $r   = [];
-    $res = \bbn\Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);
+    $res = Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);
     if ($res) {
-    }
-
-    foreach ($res as $i => $id){
-        $relations        = $this->db->getColumnValues(
-          [
-          'tables' => ['apst_liens'],
-          'fields' => ['apst_adherents.nom'],
-          'join' => [[
-            'table' => 'bbn_people',
-            'on' => [[
-              'field' => 'apst_liens.id_tiers',
-              'exp' => 'bbn_people.id'
-            ]]
-          ], [
-            'table' => 'apst_adherents',
-            'on' => [[
-              'field' => 'apst_liens.id_adherent',
-              'exp' => 'apst_adherents.id'
-            ]]
-          ]],
-          'where' => [
-            'id_tiers' => $id
-          ]
-          ]
-        );
-      $r[$i]              = $this->get_info($id);
-      $r[$i]['relations'] = implode($relations, ', ');
+      foreach ($res as $i => $id) {
+        $r[$i] = $this->getInfo($id);
+      }
     }
 
     return $r;
   }
 
 
-  public function relations($id)
+  /**
+   * Retrieves relations of a person based on their ID.
+   *
+   * @param mixed $id The ID of the person.
+   * @return mixed The relations of the person.
+   */
+  public function relations($id): ?array
   {
-    if ($this->get_info($id)) {
-      return $this->db->selectAllByKeys(
-        [
-        'tables' => ['apst_liens'],
-        'fields' => ['bbn_people.id', 'id_adherent'],
-        'join' => [[
-          'table' => 'bbn_people',
-          'on' => [
-            'conditions' => [[
-              'field' => 'apst_liens.id_tiers',
-              'exp' => 'bbn_people.id'
-            ]]
-          ]]
-        ],
-        'where' => ['id_tiers' => $id]
-        ]
-      );
-    }
-
-    return false;
+    return $this->getRelations($id);
   }
 
 
-  /*
-   * Crée un tiers ou retourne l'ID du tiers si il existe déjà
+
+  /**
+   * Adds or updates a person record in the database.
    *
-   * si $date a la valeur 1, le tiers sera ajouté même si il trouve un tiers identique
+   * @param mixed $fn The person data to add.
+   * @param bool $force Whether to forcefully add the person.
+   * @return string|null The ID of the added or updated person.
    */
-  public function add($fn, $force=false)
+  public function add($fn, $force = false): ?string
   {
-    //$id = false;
-    $fields       = array_keys($this->db->getColumns('bbn_people'));
-    $extra_fields = [];
-    $not_cfg      = ['id_lieu', 'roles', 'id_adherent', 'fnom', 'fonctions', 'licence', 'montant', 'parts', 'effet', 'adherents', 'types_liens', 'id_option', 'suggestions', 'relations', 'ffnom', 'id_tier_ext', 'wp_group', 'is_admin'];
-    $wp_group     = false;
-    $id_adh       = false;
+    $arc = &$this->class_cfg['arch']['people'];
+    $id = null;
     if ($fn = $this->set_info($fn)) {
-      if ($force) {
-        foreach ($fn as $k => $v) {
-          if (!in_array($k, $fields)) {
-            //properties arriving in $fn but not to insert in cfg column of bbn_people
-            if ($fn[$k] && !in_array($k, $not_cfg)) {
-              if (($k !== 'inscriptions') || (!empty($v) && \bbn\Str::isEmail($fn['email']))) {
-                $fn['cfg'][$k] = $fn[$k];
-              }
-            }
-
-            if ($k === 'wp_group') {
-              $wp_group = $v;
-            }
-
-            if ($k === 'id_adherent') {
-              $id_adh = $v;
-            }
-
-            unset($fn[$k]);
-          }
-        }
-
-        $fn['cfg'] = !empty($fn['cfg']) ? json_encode($fn['cfg']) : null;
-        if (isset($fn['id']) && ($fn['id'] === '')) {
-                    unset($fn['id']);
-        }
-
-        if ($this->db->insert("bbn_people", $fn)) {
-          $id = $this->db->lastId();
-          if (!empty($wp_group) && !empty($id_adh)) {
-            $adh = new \apst\adherent($this->db, $id_adh);
-            if ($adh->check()) {
-              $adh->wps_add_contact(
-                [
-                'id' => $id,
-                'group' => $wp_group,
-                'email' => $fn['email'],
-                'nom' => $this->db->selectOne('bbn_people', 'fullname', ['id' => $id])
-                ]
-              );
-            }
-          }
-        }
+      if (!empty($fn[$arc['email']]) && $this->dbTraitCount([$arc['email'] => $fn[$arc['email']]])) {
+        throw new Exception(X::_("The email is already in use"));
       }
 
-            return $id;
-    }
-
-    return false;
-  }
-
-
-  public function update($id, $fn)
-  {
-    if ($this->get_info($id)) {
-      $fields   = array_keys($this->db->getColumns('bbn_people'));
-      $not_cfg  = ['id_lieu', 'roles', 'id_adherent', 'fnom', 'fonctions', 'licence', 'montant', 'parts', 'effet', 'adherents', 'types_liens', 'id_option', 'suggestions', 'relations', 'ffnom', 'id_tier_ext', 'wp_group', 'is_admin'];
-      $wp_group = false;
-      $id_adh   = false;
-      $wp       = false;
-      foreach ($fn as $k => $v){
-        if (!in_array($k, $fields) || ($k === 'id')) {
-          if(!in_array($k, $not_cfg) && ($k !== 'id')) {
-            if ($k === 'inscriptions') {
-              if (!empty($v) && \bbn\Str::isEmail($fn['email'])) {
-                $fn['cfg'][$k] = $v;
-              }
-            }
-            else {
-              $fn['cfg'][$k] = (string)$fn[$k];
-            }
-          }
-
-          if ($k === 'wp_group') {
-            $wp_group = $v;
-          }
-
-          if ($k === 'id_adherent') {
-            $id_adh = $v;
-          }
-
-          unset($fn[$k]);
-        }
-      }
-
-      $fn['cfg'] = !empty($fn['cfg']) ? json_encode($fn['cfg']) : null;
-      if (!empty($wp_group) && !empty($id_adh)) {
-        $adh = new \apst\adherent($this->db, $id_adh);
-        if ($adh->check()) {
-          $people = $this->db->rselect('bbn_people', ['email', 'fullname'], ['id' => $id]);
-          if (!empty($fn['email']) || !empty($people['email'])) {
-            if ($adh->wps_has_contact($id)) {
-              $wp = $adh->wps_update_contact(
-                [
-                'id' => $id,
-                'group' => $wp_group,
-                'email' => $fn['email'] ?? $people['email'],
-                'nom' => $people['fullname']
-                ]
-              );
-            }
-            else {
-              $wp = $adh->wps_add_contact(
-                [
-                'id' => $id,
-                'group' => $wp_group,
-                'email' => $fn['email'] ?? $people['email'],
-                'nom' => $people['fullname']
-                ]
-              );
-            }
-          }
-
-          $adh->update_full();
-        }
-      }
-
-      if (((count($fn) > 0) && $this->db->update('bbn_people', $fn, ['id' => $id]))
-          || !empty($wp)
-      ) {
-        return $id;
-      }
-    }
-
-    return false;
-  }
-
-
-  public function set_info($st, $email=false, $portable=false)
-  {
-    if (is_array($st)) {
-            $fn = $st;
-      if (!isset($fn['prenom']) && !isset($fn['civilite'])) {
-          $st = $fn['nom'];
-      }
-    }
-    else{
-        $fn = [];
-      if ($email) {
-        $fn['email'] = $email;
-      }
-
-      if ($portable) {
-        $fn['portable'] = $portable;
-      }
-    }
-
-    if (is_string($st) && !empty($st)) {
-        $fn['prenom'] = '';
-        // Import: recherche, suppression et retour de commentaires entre parentheses
-        preg_match('/\(([^\)]+)/', $st, $m);
-      if (count($m) === 2) {
-          $st            = substr($st, 0, strpos($st, $m[0]));
-          $fn['comment'] = $m[1];
-      }
-
-
-      // array_values reinitializes the keys after array_filter
-      $fullname = array_values(\bbn\X::removeEmpty(explode(" ",$st), 1));
-      if (isset($fullname[0])) {
-        if (isset(self::$civs[\bbn\Str::changeCase($fullname[0], 'upper')])) {
-          $fn['civilite'] = self::$civs[\bbn\Str::changeCase($fullname[0], 'upper')];
-          array_shift($fullname);
-          // Cas M MME
-          if (isset($fullname[0], self::$civs[\bbn\Str::changeCase($fullname[0], 'upper')])) {
-                  $fn['civilite'] = 'M/MME';
-                  array_shift($fullname);
-          }
-
-          if (!isset($fullname[0])) {
-                return false;
-          }
-        }
-
-          // Cas STE
-        if (isset($fullname[0]) && in_array($fullname[0], self::$stes)) {
-            $fn['nom'] = implode(" ", $fullname);
-        }
-        elseif (( count($fullname) === 3 ) && strlen($fullname[0]) <= 3) {
-            $fn['nom']    = \bbn\Str::changeCase(\bbn\Str::changeCase($fullname[0].' '.$fullname[1], 'lower'));
-            $fn['prenom'] = \bbn\Str::changeCase(\bbn\Str::changeCase($fullname[2], 'lower'));
-        }
-        elseif (count($fullname) > 2) {
-          if (isset($fn['civilite'])) {
-              $fn['prenom'] = \bbn\Str::changeCase(\bbn\Str::changeCase(array_pop($fullname), 'lower'));
-              $fn['nom']    = \bbn\Str::changeCase(\bbn\Str::changeCase(implode(" ", $fullname), 'lower'));
-          }
-          else{
-              $fn['nom'] = \bbn\Str::changeCase(\bbn\Str::changeCase(implode(" ", $fullname), 'lower'));
-          }
-        }
-        elseif (count($fullname) < 2 || !isset($fullname[1])) {
-            $fn['nom'] = $fullname[0];
-        }
-        else{
-            $fn['prenom'] = \bbn\Str::changeCase(\bbn\Str::changeCase($fullname[1], 'lower'));
-            $fn['nom']    = \bbn\Str::changeCase(\bbn\Str::changeCase($fullname[0], 'lower'));
+      if ($force || !$this->search($fn)) {
+        $fn = $this->prepareData($fn);
+        if (!empty($fn[$arc['name']])) {
+          $id = $this->dbTraitInsert($fn);
         }
       }
     }
 
-    if (is_array($fn)) {
-      if (!isset($fn['prenom'])) {
-          $fn['prenom'] = '';
-      }
-
-      if (!isset($fn['civilite'])) {
-          $fn['civilite'] = empty($fn['prenom']) ? null : 'M';
-      }
-
-        $fn['fnom'] = $this->fnom($fn);
-      if (isset($fn['email']) && !\bbn\Str::isEmail($fn['email'])) {
-          unset($fn['email']);
-      }
-
-      if (isset($fn['tel'])) {
-          $fn['portable'] = $fn['tel'];
-          unset($fn['tel']);
-      }
-
-      if (isset($fn['portable'])) {
-          $fn['portable'] = \bbn\Str::getNumbers($fn['portable']);
-        if (strlen($fn['portable']) > 10 && strpos($fn['portable'], '33') === 0) {
-            $fn['portable'] = substr($fn['portable'], 2);
-        }
-
-        if (strlen($fn['portable']) === 9 && strpos($fn['portable'], '0') !== 0) {
-            $fn['portable'] = '0'.$fn['portable'];
-        }
-
-        if (strlen($fn['portable']) !== 10) {
-            unset($fn['portable']);
-        }
-      }
-
-      if (!isset($fn['nom'])) {
-          $fn = [];
-      }
-
-      return $fn;
-    }
-
-      return false;
-  }
-
-
-  /*
-   * Fusionne l'historique de différents tiers et les supprime tous sauf le premier
-   *
-   * @var mixed $ids Un tableau d'IDs ou une liste d'arguments
-   */
-  public function fusion($ids)
-  {
-    $args          = is_array($ids) ? $ids : func_get_args();
-    $fonction_lien = $this->options->fromCode('fonction', 'LIENS');
-    if (count($args) > 1) {
-      $id       = array_shift($args);
-      $creation = [$this->db->selectOne(
-        'bbn_history', 'tst', [
-        'uid' => $id,
-        'opr' => 'INSERT'
-        ]
-      )];
-      foreach ($args as $a){
-        if ($fn = $this->get_info($a)) {
-          $creation[]       = $this->db->getOne(
-            "
-            SELECT tst
-            FROM bbn_history
-            WHERE uid = ?
-            AND opr LIKE 'INSERT'",
-            hex2bin($a)
-          );
-          $cols             = $this->db->getFieldsList('apst_liens');
-          $cols['creation'] = 'tst';
-          $links            = $this->db->rselectAll(
-            [
-            'tables' => ['apst_liens'],
-            'fields' => $cols,
-            'join' => [
-              [
-                'table' => 'bbn_history',
-                'on' => [
-                  'conditions' => [
-                    [
-                      'field' => 'bbn_history.uid',
-                      'operator' => 'eq',
-                      'exp' => 'apst_liens.id'
-                    ]
-                  ],
-                  'logic' => 'AND'
-                ]
-              ]
-            ],
-            'where' => [
-              'id_tiers' => $a
-            ]
-            ]
-          );
-          foreach ($links as $link){
-                        $link_update = ['id_tiers' => $id];
-                        // Si les liens sont de type `Fonction` on les fusionne aussi de la même manière que les tiers
-            if (($link['link_type'] === $fonction_lien)
-                && ($autre = $this->db->getRow(
-                  "
-								SELECT apst_liens.id, apst_liens.id_adherent, apst_liens.cfg, h.tst AS creation
-								FROM apst_liens
-									JOIN bbn_history AS h
-										ON h.uid = apst_liens.id
-										AND h.opr LIKE 'INSERT'
-									JOIN bbn_history_uids
-									  ON bbn_history_uids.bbn_uid = apst_liens.id
-									  AND bbn_history_uids.bbn_active = 1
-								WHERE apst_liens.id_tiers = ?
-                  AND apst_liens.id_adherent = ?
-                  AND apst_liens.link_type = ?",
-                  hex2bin($a),
-                  $link['id_adherent'],
-                  hex2bin($fonction_lien)
-                )                )
-            ) {
-                $link_cfg = json_decode($link['cfg'], 1);
-                // On met la date de création la plus ancienne
-              if (strtotime($autre['creation']) < strtotime($link['creation'])) {
-                            $this->db->query(
-                              "
-									UPDATE bbn_history
-									SET tst = ?
-									WHERE uid = ?
-									AND opr LIKE 'INSERT'",
-                              $autre['creation'],
-                              hex2bin($link['id'])
-                            );
-              }
-
-                            $this->db->query(
-                              "
-								UPDATE bbn_history
-								SET uid = ?
-								WHERE uid = ?
-								AND opr LIKE 'UPDATE'",
-                              hex2bin($link['id']),
-                              hex2bin($autre['id'])
-                            );
-                            $this->db->query(
-                              "
-								DELETE FROM bbn_history
-								WHERE uid = ?",
-                              hex2bin($autre['id'])
-                            );
-                            $autre_cfg = json_decode($autre['cfg'], 1);
-              if ($autre_cfg && $link_cfg && isset($autre_cfg['fonctions'], $link_cfg['fonctions'])) {
-                  $link_update['cfg'] = json_encode(
-                    [
-                      'fonctions' => array_unique(\bbn\X::mergeArrays($autre_cfg['fonctions'], $link_cfg['fonctions']))
-                    ]
-                  );
-              }
-
-                            $this->db->query("DELETE FROM bbn_history_uids WHERE uid = ?", hex2bin($autre['id']));
-            }
-
-                        $this->db->update('apst_liens', $link_update, ['id' => $link['id']]);
-          }
-
-          $this->db->query(
-            "
-            UPDATE bbn_history
-            SET uid = ?
-            WHERE uid = ?
-            AND opr LIKE 'UPDATE'",
-            hex2bin($id),
-            hex2bin($a)
-          );
-          $this->db->query(
-            "
-            DELETE FROM bbn_history
-            WHERE uid = ?",
-            hex2bin($a)
-          );
-          $this->db->query(
-            "
-            DELETE FROM bbn_people
-            WHERE id = ?",
-            hex2bin($a)
-          );
-        }
-      }
-
-      $this->db->query(
-        "
-        UPDATE bbn_history
-        SET tst = ?
-        WHERE uid = ?
-        AND opr LIKE 'INSERT'",
-        min($creation),
-        hex2bin($id)
-      );
-    }
-
-        return 1;
+    return $id;
   }
 
 
   /**
-   * Supprime un lieu et tous ses liens si précisé
-   * Si non précisé et que le lieu a des liens, il n'est pas supprimé
+   * Updates a person record in the database.
    *
-   * @var int $id l'ID du lieu
-   * @var bool $with_links si précisé tous ses liens sont également précisés
-   *
-   * @return bool Succès ou pas de la suppression
+   * @param mixed $id The ID of the person to update.
+   * @param mixed $fn The new data for the person.
+   * @return string|null The ID of the updated person.
    */
-  public function delete($id, $with_links = false)
+  public function update($id, $fn): ?int
   {
-    if ($this->get_info($id)) {
-      $rels = $this->relations($id);
+    $arc = &$this->class_cfg['arch']['people'];
+    $ok = null;
+    if ($this->getInfo($id)) {
+      $fn = $this->prepareData($fn);
 
-      if ($with_links || empty($rels)) {
-        foreach ($rels as $k => $r){
-          $this->db->delete('apst_liens', ['id' => $k]);
-          $adh = new \apst\adherent($this->db, $r);
-          $adh->wps_delete_contact($id);
-        }
-
-        return $this->db->delete('bbn_people', ['id' => $id]);
+      if (!empty($fn)) {
+        $fn[$arc['cfg']] = empty($fn[$arc['cfg']]) ? null : json_encode($fn[$arc['cfg']]);
+        $ok = $this->dbTraitUpdate($id, $fn);
       }
+
     }
 
-      return false;
+
+    return $ok;
   }
 
 
+  /**
+   * Merges the history of multiple person records.
+   *
+   * @param mixed $ids IDs of the person records to merge.
+   * @return int Result of the merge operation.
+   */
+  public function fusion($ids, $main = null)
+  {
+    return History::fusion($ids, $this->class_cfg['table'], $this->db, $main);
+  }
+
+
+  protected function prepareData(array $fn): array
+  {
+    $arc = &$this->class_cfg['arch']['people'];
+
+    foreach ($fn as $k => $v) {
+      if (!in_array($k, $arc)) {
+        $fn[$arc['cfg']][$k] = is_array($fn[$k]) ? $fn[$k] : (string)$fn[$k];
+        unset($fn[$k]);
+      }
+
+      if ($k === $arc['email']) {
+        if (empty($v)) {
+          $fn[$k] = null;
+        }
+        elseif (!Str::isEmail($v)) {
+          throw new Exception(X::_("The email is not valid"));
+        }
+      }
+    }
+
+    $fn[$arc['cfg']] = !empty($fn[$arc['cfg']]) ? json_encode($fn[$arc['cfg']]) : null;
+    if (isset($fn['id']) && ($fn['id'] === '')) {
+      unset($fn['id']);
+    }
+
+    return $fn;
+  }
 }

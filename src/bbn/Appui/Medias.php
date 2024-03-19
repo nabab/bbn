@@ -11,14 +11,18 @@ use bbn\User;
 use bbn\File\System;
 use bbn\File\Image;
 use bbn\Appui\Option;
+use bbn\Models\Tts\References;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Url;
+use bbn\Models\Tts\Tagger;
+use bbn\Models\Cls\Db as DbCls;
 
-
-class Medias extends bbn\Models\Cls\Db
+class Medias extends DbCls
 {
-  use bbn\Models\Tts\References;
-  use bbn\Models\Tts\Dbconfig;
-  use bbn\Models\Tts\Url;
-  use bbn\Models\Tts\Tagger;
+  use References;
+  use DbActions;
+  use Url;
+  use Tagger;
 
     /** @var array */
     protected static $default_class_cfg = [
@@ -87,16 +91,22 @@ class Medias extends bbn\Models\Cls\Db
     [48, false]
   ];
 
+  protected $defaultUrlType;
+
   /** @var array $class_cfg */
   protected $class_cfg;
 
   /** @var string $imageRoot */
   protected $imageRoot;
 
-  public function __construct(Db $db)
+  /** @var string $fileRoot */
+  protected $fileRoot;
+
+
+  public function __construct(Db $db, array $cfg = null)
   {
     parent::__construct($db);
-    $this->_init_class_cfg();
+    $this->_init_class_cfg($cfg);
     $this->opt    = Option::getInstance();
     $this->usr    = User::getInstance();
     $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
@@ -123,23 +133,55 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     return false;
-    
   }
+
+
+  public function setFileRoot(string $root): bool
+  {
+    if ($root) {
+      if (substr($root, -1) !== '/') {
+        $root .= '/';
+      }
+
+      $this->fileRoot = $root;
+      return true;
+    }
+
+    return false;
+  }
+
 
   public function getImageUrl(string $id = null): string
   {
-    if ($this->exists($id)) {
+    if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
         return $url;
       }
 
       if (!$this->imageRoot) {
-        $this->imageRoot = Mvc::getPluginUrl('appui-note').'/media/image/';
+        $this->setImageRoot(Mvc::getPluginUrl('appui-note').'/media/image/');
       }
 
       return $this->imageRoot . (string)$id;
     }
   }
+
+
+  public function getFileUrl(string $id = null): string
+  {
+    if ($this->dbTraitExists($id)) {
+      if ($url = $this->getUrl($id)) {
+        return $url;
+      }
+
+      if (!$this->fileRoot) {
+        $this->setFileRoot(Mvc::getPluginUrl('appui-note').'/media/download/');
+      }
+
+      return $this->fileRoot . (string)$id;
+    }
+  }
+
 
   /**
    * @param string|array|null $media
@@ -872,11 +914,12 @@ class Medias extends bbn\Models\Cls\Db
     $old  = $this->getMedia($id_media, true);
     if ($old && (($old['name'] !== $name) || ($old['title'] !== $title))) {
       $content = $old['content'];
-      if (\bbn\Str::isJson($content)) {
+      if (Str::isJson($content)) {
         $content = \json_decode($content, true);
       }
 
       if ($this->fs->exists($old['file'])) {
+        $path = dirname($old['file']).'/';
         if ($old['name'] !== $name) {
           //if the media is an image has to update also the thumbs names
           if ($this->isImage($old['file'])) {
@@ -893,11 +936,11 @@ class Medias extends bbn\Models\Cls\Db
               ]
             ];
             foreach ($thumbs_names as $t){
-              $this->fs->rename($path.$id_media.'/'.$t['old'], $t['new'], true);
+              $this->fs->rename($path . $t['old'], $t['new'], true);
             }
           }
 
-          $this->fs->rename($path.$id_media.'/'.$old['name'], $name, true);
+          $this->fs->rename($path . $old['name'], $name, true);
         }
 
         if ($this->updateDb($id_media, $name, $title)) {
@@ -1122,7 +1165,9 @@ class Medias extends bbn\Models\Cls\Db
     }
 
     if (!empty($media['content'])) {
-      $path    = bbn\Mvc::getDataPath('appui-note').'media/'.$media['content']['path'].$id_media.'/'.($name ? $name : $media['name']);
+      $path = Mvc::getDataPath('appui-note').'media/'.$media['content']['path']
+          . $media['id'] . '/' . ($name ? $name : $media['name']);
+
       return $path;
     }
 
@@ -1216,10 +1261,10 @@ class Medias extends bbn\Models\Cls\Db
       $file = $this->getPath($data);
       $data['file']      = $file;
       $data['full_path'] = $file;
-      $data['path']      = $this->getImageUrl($data['id']);
       $data['is_image']  = $this->isImage($file);
+      $data['path']      = empty($data['is_image']) ? $this->getFileUrl($data['id']) : $this->getImageUrl($data['id']);
       if ($data['is_image'] && is_file($file)) {
-        $img                = new \bbn\File\Image($file);
+        $img                = new Image($file);
         $data['is_thumb']   = false;
         $data['thumbs']     = $this->getThumbsSizes($data, false);
         $data['dimensions'] = [

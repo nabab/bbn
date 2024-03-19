@@ -8,14 +8,14 @@ use bbn\Str;
 use bbn\Db;
 use bbn\User;
 use bbn\Date;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Cls\Db as modelDb;
 use bbn\Appui\Option;
 class Event extends modelDb
 {
 
-  use Dbconfig;
+  use DbActions;
   use Optional;
 
   /** @var array $default_class_cfg */

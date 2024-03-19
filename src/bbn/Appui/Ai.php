@@ -2,14 +2,13 @@
 
 namespace bbn\Appui;
 
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Db;
 use Orhanerday\OpenAi\OpenAi;
 use Exception;
 use bbn\X;
 use bbn\User;
-use bbn\Str;
 use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 use bbn\File\System;
@@ -19,7 +18,7 @@ use DOMDocument;
 class Ai extends DbCls
 {
   
-  use Dbconfig;
+  use DbActions;
   
   /**
    * Default Dbconfig configuration for the class
@@ -183,7 +182,7 @@ class Ai extends DbCls
       ];
     }
     
-    $prompt = $this->rselect($id_prompt);
+    $prompt = $this->dbTraitRselect($id_prompt);
     
     if (empty($prompt)) {
       return [
@@ -403,8 +402,11 @@ class Ai extends DbCls
    */
   public function getPromptByShortcode(string $shortcode)
   {
-    $prompt = $this->rselect([
-      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
+    $prompt = $this->dbTraitRselect([
+      'tables' => [$this->default_class_cfg['tables']['ai_prompt']],
+      'where' => [
+        $this->default_class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode
+]
     ]);
     
     if (!empty($prompt)) {
@@ -426,7 +428,7 @@ class Ai extends DbCls
   public function getPromptById(string $id)
   {
     
-    $prompt = $this->rselect($id);
+    $prompt = $this->dbTraitRselect($id);
     
     if (!empty($prompt)) {
       $note = $this->note->get($prompt['id_note']);
@@ -460,7 +462,7 @@ class Ai extends DbCls
     $id_note = $this->note->insert($title, $content, $id_option, true, false, NULL, NULL, 'text/plain', $lang);
     
     // Insert the prompt into the database with the note ID, input, output, and shortcode
-    return $this->insert([
+    return $this->dbTraitInsert([
       $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,
       $this->class_cfg['arch']['ai_prompt']['input'] => $input,
       $this->class_cfg['arch']['ai_prompt']['output'] => $output,
@@ -498,7 +500,7 @@ class Ai extends DbCls
     $this->note->update($note['id'], $title, $content);
     
     // Update the prompt with the provided ID, input, and output values
-    $this->update($id, [
+    $this->dbTraitUpdate([
       $this->class_cfg['arch']['ai_prompt']['input'] => $input,
       $this->class_cfg['arch']['ai_prompt']['output'] => $output,
       $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
@@ -526,7 +528,7 @@ class Ai extends DbCls
       $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
     ]);
   
-    $this->delete($id);
+    $this->dbTraitDelete($id);
     
     return true;
   }

@@ -7,13 +7,20 @@
  */
 
 namespace bbn\Appui;
+use bbn\Db;
+use bbn\X;
+use bbn\Appui\Note;
+use bbn\Appui\Option;
+use bbn\Models\Tts\References;
+  use bbn\Models\Tts\DbActions;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\User\Permissions;
 
-use bbn;
 
-class Imessages extends \bbn\Models\Cls\Db
+class Imessages extends DbCls
 {
-  use bbn\Models\Tts\References;
-  use bbn\Models\Tts\Dbconfig;
+  use References;
+  use DbActions;
 
   const BBN_APPUI = 'appui';
   const BBN_NOTES = 'note';
@@ -99,7 +106,7 @@ class Imessages extends \bbn\Models\Cls\Db
           $messages[$idx] = $note;
         }
         else {
-          $messages[$idx] = \bbn\X::mergeArrays($messages[$idx], $note);
+          $messages[$idx] = X::mergeArrays($messages[$idx], $note);
         }
       }
     }
@@ -108,14 +115,14 @@ class Imessages extends \bbn\Models\Cls\Db
 
   /**
    * imessages constructor.
-   * @param \bbn\Db $db
+   * @param Db $db
    */
-  public function __construct(bbn\Db $db, $cfg = [])
+  public function __construct(Db $db, $cfg = [])
   {
     parent::__construct($db);
     $this->_init_class_cfg($cfg);
-    $this->notes = new \bbn\Appui\Note($this->db);
-    $this->options = \bbn\Appui\Option::getInstance();
+    $this->notes = new Note($this->db);
+    $this->options = Option::getInstance();
   }
 
   /**
@@ -130,7 +137,7 @@ class Imessages extends \bbn\Models\Cls\Db
     $cfg =& $this->class_cfg;
     // Get default page if it isn't set
     if (empty($imess['id_option'])) {
-      $perm = new \bbn\User\Permissions();
+      $perm = new Permissions();
       $imess['id_option'] = $perm->is(self::BBN_DEFAULT_PERM);
     }
     if (!empty($imess['id_option']) 
