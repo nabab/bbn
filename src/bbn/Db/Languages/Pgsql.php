@@ -4,7 +4,8 @@
  */
 namespace bbn\Db\Languages;
 
-use bbn;
+use PDO;
+use PDOException;
 use bbn\Str;
 use bbn\X;
 
@@ -167,8 +168,8 @@ class Pgsql extends Sql
       $this->username = $cfg['user'] ?? null;
       $this->connection_code = $cfg['code_host'];
 
-      $this->pdo = new \PDO(...$cfg['args']);
-      $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+      $this->pdo = new PDO(...$cfg['args']);
+      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
       $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
       $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
       $this->cfg = $cfg;
@@ -184,7 +185,7 @@ class Pgsql extends Sql
 
       unset($cfg['pass']);
     }
-    catch (\PDOException $e){
+    catch (PDOException $e){
       $err = X::_("Impossible to create the connection").
         " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
         .X::_("with the following error").$e->getMessage();
@@ -251,7 +252,7 @@ class Pgsql extends Sql
       . (empty($cfg['db']) ? '' : ';dbname=' . $cfg['db']),
       $cfg['user'],
       $cfg['pass'],
-      [\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
+      [PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8'],
     ];
 
     return $cfg;
@@ -344,7 +345,7 @@ class Pgsql extends Sql
    */
   private function createPgsqlDatabase(string $database, string $enc = 'UTF8'): bool
   {
-    if (bbn\Str::checkName($database, $enc)) {
+    if (Str::checkName($database, $enc)) {
       return (bool)$this->rawQuery("CREATE DATABASE $database ENCODING '$enc'");
     }
 
@@ -416,7 +417,7 @@ class Pgsql extends Sql
    */
   public function createUser(string $user, string $pass, string $db = null): bool
   {
-    if (bbn\Str::checkName($user)
+    if (Str::checkName($user)
       && (strpos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
@@ -445,7 +446,7 @@ PGSQL
    */
   public function deleteUser(string $user): bool
   {
-    if (bbn\Str::checkName($user)) {
+    if (Str::checkName($user)) {
       $this->rawQuery("REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA \"public\" FROM $user");
       return (bool)$this->rawQuery("DROP USER $user");
     }
@@ -466,7 +467,7 @@ PGSQL
   {
     if ($this->check()) {
       $cond = '';
-      if (!empty($user) && bbn\Str::checkName($user)) {
+      if (!empty($user) && Str::checkName($user)) {
         $cond .= " AND user LIKE '$user' ";
       }
 
@@ -589,7 +590,7 @@ PSQL
   public function tableSize(string $table, string $type = ''): int
   {
     $size = 0;
-    if (bbn\Str::checkName($table)) {
+    if (Str::checkName($table)) {
 
       if ($type === 'data') {
         $function = "pg_relation_size";
@@ -671,7 +672,7 @@ PSQL
     $sql   = '';
     foreach ($columns as $n => $c) {
       $name = $c['name'] ?? $n;
-      if (isset($c['type']) && bbn\Str::checkName($name)) {
+      if (isset($c['type']) && Str::checkName($name)) {
         $st = $this->colSimpleName($name, true) . ' ' . $c['type'];
         if (!empty($c['maxlength'])) {
           $st .= '(' . $c['maxlength'] . ')';
@@ -679,10 +680,10 @@ PSQL
           $st .= '(';
           foreach ($c['values'] as $i => $v) {
             if (Str::isInteger($v)) {
-              $st .= bbn\Str::escapeSquotes($v);
+              $st .= Str::escapeSquotes($v);
             }
             else {
-              $st .= "'" . bbn\Str::escapeSquotes($v) . "'";
+              $st .= "'" . Str::escapeSquotes($v) . "'";
             }
             if ($i < count($c['values']) - 1) {
               $st .= ',';
@@ -697,7 +698,7 @@ PSQL
         }
 
         if (isset($c['default'])) {
-          $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . bbn\Str::escapeSquotes($c['default']) . "'");
+          $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . Str::escapeSquotes($c['default']) . "'");
         }
 
         $lines[] = $st;
@@ -749,7 +750,7 @@ PSQL
       $x = array_map(
         function ($a) {
           return $a['datname'];
-        }, $this->fetchAllResults($r, \PDO::FETCH_ASSOC)
+        }, $this->fetchAllResults($r, PDO::FETCH_ASSOC)
       );
       sort($x);
     }
@@ -791,7 +792,7 @@ PSQL
       return null;
     }
 
-    if (empty($database) || !bbn\Str::checkName($database)) {
+    if (empty($database) || !Str::checkName($database)) {
       $database = $this->getCurrent();
     }
 
@@ -809,7 +810,7 @@ PSQL
               AND table_type = 'BASE TABLE'";
 
     if (($r = $this->rawQuery($query))
-      && ($t1 = $this->fetchAllResults($r, \PDO::FETCH_NUM))
+      && ($t1 = $this->fetchAllResults($r, PDO::FETCH_NUM))
     ) {
       foreach ($t1 as $t) {
         $t2[] = $t[0];
@@ -1113,7 +1114,7 @@ FROM (
 PGSQL
       )
     ) {
-        return $r->fetch(\PDO::FETCH_ASSOC)['create_table'] ?? '';
+        return $r->fetch(PDO::FETCH_ASSOC)['create_table'] ?? '';
       }
     }
 

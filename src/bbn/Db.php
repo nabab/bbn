@@ -3,6 +3,7 @@ namespace bbn;
 
 use Exception;
 use bbn\Db\Engines;
+use bbn\Db\Languages\Sql;
 
 /**
  * Half ORM half DB management, the simplest class for data queries.
@@ -24,9 +25,9 @@ class Db implements Db\Actions
   use Models\Tts\Retriever;
 
   /**
-   * @var Db\Languages\Sql Can be other driver
+   * @var Sql Can be other driver
    */
-  protected $language;
+  protected Sql $language;
 
   /**
    * The ODBC engine of this connection
@@ -2026,6 +2027,27 @@ class Db implements Db\Actions
     }
   }
 
+
+  public function executeStatement(string $statement)
+  {
+    if ($this->check()) {
+      return $this->language->executeStatement($statement);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @param string $st
+   * @return string
+   * @throws Exception
+   */
+  public function rawQuery(string $st)
+  {
+    return $this->language->rawQuery($st);
+  }
+  
 
   /****************************************************************
    *                                                              *

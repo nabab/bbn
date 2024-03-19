@@ -6,7 +6,7 @@ namespace bbn\Db\Languages;
 
 use Exception;
 use PDO;
-use bbn;
+use PDOException;
 use bbn\Str;
 use bbn\X;
 
@@ -207,7 +207,7 @@ class Mysql extends Sql
    */
   private function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
   {
-    if (bbn\Str::checkName($database, $enc, $collation)) {
+    if (Str::checkName($database, $enc, $collation)) {
       return (bool)$this->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
     }
 
@@ -268,7 +268,7 @@ class Mysql extends Sql
     }
 
     if (($db = $this->escape($db))
-      && bbn\Str::checkName($user, $db)
+      && Str::checkName($user, $db)
       && (strpos($pass, "'") === false)
     ) {
       return (bool)$this->rawQuery(
@@ -294,7 +294,7 @@ MYSQL
    */
   public function deleteUser(string $user): bool
   {
-    if (bbn\Str::checkName($user)) {
+    if (Str::checkName($user)) {
       $host = $this->getHost();
       $this->rawQuery("REVOKE ALL PRIVILEGES ON *.* FROM '$user'@'$host'");
       return (bool)$this->rawQuery("DROP USER '$user'@'$host'");
@@ -314,11 +314,11 @@ MYSQL
   {
     if ($this->check()) {
       $cond = '';
-      if (!empty($user) && bbn\Str::checkName($user)) {
+      if (!empty($user) && Str::checkName($user)) {
         $cond .= " AND  user LIKE '$user' ";
       }
 
-      if (!empty($host) && bbn\Str::checkName($host)) {
+      if (!empty($host) && Str::checkName($host)) {
         $cond .= " AND  host LIKE '$host' ";
       }
 
@@ -487,7 +487,7 @@ MYSQL
   public function tableSize(string $table, string $type = ''): int
   {
     $size = 0;
-    if (bbn\Str::checkName($table)) {
+    if (Str::checkName($table)) {
       $row = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
 
       if (!$row) {
@@ -558,14 +558,14 @@ MYSQL
     $sql = '';
     foreach ($columns as $n => $c) {
       $name = $c['name'] ?? $n;
-      if (isset($c['type']) && bbn\Str::checkName($name)) {
+      if (isset($c['type']) && Str::checkName($name)) {
         $st = $this->colSimpleName($name, true) . ' ' . $c['type'];
         if (!empty($c['maxlength'])) {
           $st .= '(' . $c['maxlength'] . ')';
         } elseif (!empty($c['values']) && \is_array($c['values'])) {
           $st .= '(';
           foreach ($c['values'] as $i => $v) {
-            $st .= "'" . bbn\Str::escapeSquotes($v) . "'";
+            $st .= "'" . Str::escapeSquotes($v) . "'";
             if ($i < count($c['values']) - 1) {
               $st .= ',';
             }
@@ -583,7 +583,7 @@ MYSQL
         }
 
         if (array_key_exists('default', $c)) {
-          $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . bbn\Str::escapeSquotes($c['default']) . "'");
+          $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . Str::escapeSquotes($c['default']) . "'");
         }
 
         $lines[] = $st;
@@ -691,7 +691,7 @@ MYSQL
       return null;
     }
 
-    if (empty($database) || !bbn\Str::checkName($database)) {
+    if (empty($database) || !Str::checkName($database)) {
       $database = $this->getCurrent();
     }
 
