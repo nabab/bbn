@@ -293,7 +293,7 @@ class Cache implements CacheInterface
           return $this->obj->delete($item);
         case 'files':
           $file = self::_file($item, $this->path);
-          if (is_file($file)) {
+          if ($this->fs->isFile($file)) {
             return (bool)$this->fs->delete($file);
           }
           return false;

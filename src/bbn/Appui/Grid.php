@@ -189,6 +189,7 @@ class Grid extends bbn\Models\Cls\Cache
       if ( !empty($cfg['query']) ){
         $this->query = $cfg['query'];
       }
+
       // A query must exist, custom or generated
       if ( $this->check() ){
         if ( array_key_exists('observer', $cfg) && isset($cfg['observer']['request']) ){
@@ -420,7 +421,7 @@ class Grid extends bbn\Models\Cls\Cache
     }
     if ( !$this->db->check() ){
       $r['success'] = false;
-      $r['error'] = $this->db->last_error;
+      $r['error'] = $this->db->getLastError();
     }
     return $r;
   }
@@ -430,31 +431,37 @@ class Grid extends bbn\Models\Cls\Cache
    * @param array $data
    * @return array
    */
-  public function toExcel(array $data = []): array
+  public function toExcel(array $data = null, array $options = null): array
   {
     $path = X::makeStoragePath(\bbn\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
     $cfg = $this->getExcel();
     $dates = array_values(array_filter($cfg['fields'], function($c){
       return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));
     }));
-    $data = array_map(function($row) use($cfg, $dates){
-      foreach ( $row as $i => $r ){
+    $hidden = array_map(function($a) {
+      return $a['field'];
+    }, X::filter($cfg['fields'], ['hidden' => true]));
+    $data = array_map(function($row) use($cfg, $dates, $hidden, $options){
+      foreach ( $row as $i => &$r ){
+if ($options && isset($options[$i])) {
+          $r = X::getField($options[$i], ['value' => $row[$i]], 'text');
+        }
+
         if ( \is_string($r) ){
-          $row[$i] = strpos($r, '=') === 0 ? ' '.$r : $r;
+          $r = strpos($r, '=') === 0 ? ' '.$r : $r;
         }
         if ( (($k = X::find($dates, ['field' => $i])) !== null ) ){
           if ( !empty($dates[$k]['format']) && !empty($r) ){
             $r = date($dates[$k]['format'], strtotime($r));
           }
-          $row[$i] = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
+          $r = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
         }
-        if (
-          (($idx = X::find($cfg['fields'], ['field' => $i])) === null ) ||
-          (bool)$cfg['fields'][$idx]['hidden']
-        ){
+        if (in_array($i, $hidden)) {
           unset($row[$i]);
         }
       }
+      unset($r);
+
       return $row;
     }, $data ?: ($this->getData() ?: []));
     $cfg['fields'] = array_values(array_filter($cfg['fields'], function($c){

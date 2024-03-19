@@ -638,6 +638,10 @@ class Search extends Basic
    */
   protected function getPreviousSearchResults(string $id_search, string $signature = '')
   {
+    if (!$this->exists($id_search)) {
+      throw new Exception(X::_("The search ID $id_search with signature $signature does not exist"));
+    }
+
     $col = $this->class_cfg['arch']['search_results']['id_search'];
     $table = $this->class_cfg['tables']['search_results'];
     $filter = [$col => $id_search];
