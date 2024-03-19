@@ -1679,10 +1679,13 @@ class Task extends bbn\Models\Cls\Db
         $lastTrack = $this->getLastStoppedTrack($idUser, $type);
         if (!empty($lastTrack)
           && ($d = strtotime($start) - strtotime($lastTrack['end']))
-        //DA CAMBIAREEEE
           && ($d < $tokensCfg['step'])
         ) {
-
+          $cTokens = $this->calcTokens($lastTrack['id'], $idUser);
+          if ($cTokens = $cTokens - floor($cTokens)) {
+            $dt = $d / $tokensCfg['step'];
+            
+          }
           $lastTokens = ($lastTrack['length'] + $d) / $tokensCfg['step'];
           if ($lastTokens - floor($lastTokens)) {
             $this->db->update('bbn_tasks_sessions', [
