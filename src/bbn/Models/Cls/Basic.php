@@ -7,6 +7,8 @@ namespace bbn\Models\Cls;
 
 use bbn;
 use bbn\X;
+use bbn\Str;
+use Exception;
 
 /**
  * Basic object Class
@@ -90,15 +92,15 @@ abstract class Basic
 
   public function getErrors()
   {
-
+    return $this->errors;
   }
 
 
   public function log()
   {
     if ($this->isDebug()) {
-        $ar = \func_get_args();
-        $cn = bbn\Str::encodeFilename(str_replace('\\', '_', \get_class($this)));
+        $ar = func_get_args();
+        $cn = Str::encodeFilename(str_replace('\\', '_', get_class($this)));
       foreach ($ar as $a){
             X::log($a, $cn);
       }
@@ -113,15 +115,13 @@ abstract class Basic
    */
   public function __call($name, $arguments)
   {
-    $class = \get_class($this);
-    throw new \Exception(
-      sprintf(
-        X::_("Wrong method used for the class %s: %s with the following arguments:"),
-        $class,
-        $name,
-        implode(', ', $arguments)
-      )
-    );
+    $class = get_class($this);
+    $st = X::_("Wrong method used for the class %s: %s", $class, $name);
+    if (count($arguments)) {
+      $st .= " " . X::_("with the following arguments") . ": " . implode(', ', $arguments);
+    }
+
+    throw new Exception($st);
   }
 
 
@@ -130,7 +130,7 @@ abstract class Basic
    */
   public function isDebug()
   {
-    return $this->debug || (defined("BBN_IS_DEV") && BBN_IS_DEV);
+    return $this->debug || constant("BBN_IS_DEV");
   }
 
 

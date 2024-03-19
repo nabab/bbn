@@ -1446,7 +1446,7 @@ class System extends bbn\Models\Cls\Basic
    * @param bool   $full
    * @return bool
    */
-  private function _delete(string $path, bool $full = true): bool
+  private function _delete(string $path, bool $full = true, $attempts = 0): bool
   {
     $res = false;
     if ($this->mode === 'nextcloud') {
@@ -1461,29 +1461,36 @@ class System extends bbn\Models\Cls\Basic
         }
 
         if ($full) {
+$obj =& $this;
+          set_error_handler(
+            function (int $errno, string $errstr, string $errfile = null, int $errline = null)
+            use ($attempts, $path, &$obj) {
+              if ($attempts >= 3) {
+                X::logError($errno, $errstr, $errfile, $errline);
+              }
+              else {
+                $obj->_delete($path, true, ++$attempts);
+              }
+            },
+            E_WARNING
+          );
           if ($this->mode === 'ssh') {
-            try {
-              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-            } catch (\Exception $e) {
-              $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
-            }
-          } elseif ($this->mode === 'ftp') {
-            try {
-              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-            } catch (\Exception $e) {
-              $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
-            }
-          } else {
-            try {
-              $res = rmdir($path);
-            } catch (\Exception $e) {
-              $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
-            }
+                          $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+                        }
+          elseif ($this->mode === 'ftp') {
+                          $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+                        }
+          else {
+                          $res = rmdir($path);
+                        }
+
+          restore_error_handler();          
           }
-        } else {
+        else {
           $res = true;
         }
-      } elseif ($this->_is_file($path)) {
+      }
+      elseif ($this->_is_file($path)) {
         if ($this->mode === 'ssh') {
           try {
             $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
