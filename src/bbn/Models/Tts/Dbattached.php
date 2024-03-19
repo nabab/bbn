@@ -8,10 +8,9 @@
 
 namespace bbn\Models\Tts;
 
-use bbn;
 
 
-trait Dbattached
+trait DbAttached
 {
 
   public function exists($id){

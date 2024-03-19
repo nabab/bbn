@@ -24,7 +24,8 @@ use bbn\Shop\Provider;
 use bbn\Shop\Sales;
 use bbn\Shop\Cart;
 use bbn\Shop\Client;
-
+use bbn\Models\Tts\DbConfig;
+use bbn\Models\Cls\Db as DbCls;
 
 
 /**
@@ -66,9 +67,9 @@ use bbn\Shop\Client;
  * @license  https://opensource.org/licenses/mit-license.php MIT
  * @link     https://bbnio2.thomas.lan/bbn-php/doc/class/cdn
  */
-class Shop extends Models\Cls\Db
+class Shop extends DbCls
 {
-  use Models\Tts\Dbconfig;
+  use DbConfig;
 
   /**
    * @var Medias

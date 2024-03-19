@@ -2,12 +2,12 @@
 
 namespace bbn\Mvc;
 
-use bbn;
-use bbn\X;
-use bbn\Mvc;
-use bbn\Db;
 use Exception;
 use stdClass;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\X;
+use bbn\Tpl;
 
 class Controller implements Api
 {
@@ -176,7 +176,7 @@ class Controller implements Api
       $this->data         = \is_array($data) ? $data : [];
       // When using CLI a first parameter can be used as route,
       // a second JSON encoded can be used as $this->post
-      /** @var bbn\Db db */
+      /** @var Db db */
       $this->db     = $this->_mvc->getDb();
       $this->inc    = &$this->_mvc->inc;
       $this->post   = $this->_mvc->getPost();
@@ -398,7 +398,7 @@ class Controller implements Api
       $model = $this->data;
     }
 
-    return \is_array($model) ? bbn\Tpl::render($view, $model) : $view;
+    return \is_array($model) ? Tpl::render($view, $model) : $view;
   }
 
 

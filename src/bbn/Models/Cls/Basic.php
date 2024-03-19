@@ -5,7 +5,6 @@
 namespace bbn\Models\Cls;
 
 
-use bbn;
 use bbn\X;
 use bbn\Str;
 use Exception;
