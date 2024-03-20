@@ -5,14 +5,14 @@ namespace bbn\Shop;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Appui\Option;
 use bbn\Db;
 
 
 class Client extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
 
   /**
    * @var Option
@@ -104,7 +104,7 @@ class Client extends DbCls
    */
   public function get(string $id): ?array
   {
-    return $this->rselect([
+    return $this->dbTraitRselect([
       $this->fields['id'] => $id,
       $this->fields['active'] => 1
     ]);
@@ -120,8 +120,8 @@ class Client extends DbCls
    */
   public function add(string $firstName, string $lastName, string $email, bool $newsletter = false, $idUser = null): ?string
   {
-		if (!$this->selectOne($this->fields['id'], [$this->fields['email'] => $email])
-      && $this->insert([
+		if (!$this->dbTraitSelectOne($this->fields['id'], [$this->fields['email'] => $email])
+      && $this->dbTraitInsert([
         $this->fields['id_user'] => $idUser,
         $this->fields['first_name'] => $firstName,
         $this->fields['last_name'] => $lastName ?: '',
@@ -135,8 +135,8 @@ class Client extends DbCls
 	}
 
 	public function addClientName(string $idClient, string $name, string $lastName){
-		if ($this->rselect([$this->fields['id'] => $idClient])) {
-			if ($this->update($idClient, [
+		if ($this->dbTraitRselect([$this->fields['id'] => $idClient])) {
+			if ($this->dbTraitUpdate([
         $this->fields['first_name'] => $name,
         $this->fields['last_name'] => $lastName
       ])) {
@@ -218,7 +218,7 @@ class Client extends DbCls
    */
 	public function getEmail(string $idClient): ?string
 	{
-		return $this->selectOne($this->fields['email'], [$this->fields['id'] => $idClient]);
+		return $this->dbTraitSelectOne($this->fields['email'], [$this->fields['id'] => $idClient]);
 	}
 
   /**

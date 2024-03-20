@@ -5,7 +5,7 @@ namespace bbn\Shop;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Appui\Grid;
 use bbn\Appui\Medias;
 use bbn\Appui\Note;
@@ -19,7 +19,7 @@ use bbn\Tpl;
 
 class Provider extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
 
   /**
    * @var Medias
@@ -96,10 +96,9 @@ class Provider extends DbCls
   public function addProviderEmail(string $id_provider, string $email) 
   { 
     $cfg = $this->getClassCfg();
-    $chars = ' \n\r\t\v\x00';
-    if (!$this::providerEmailExists($id_provider, $email)) {
+    if (!static::providerEmailExists($id_provider, $email)) {
       return $this->db->insert($cfg['tables']['emails'], [
-        $cfg['arch']['emails']['email'] => trim($email, $chars),
+        $cfg['arch']['emails']['email'] => $email,
         $cfg['arch']['emails']['id_provider'] => $id_provider
       ]);
     }
@@ -108,7 +107,7 @@ class Provider extends DbCls
   public function deleteProviderEmail(string $id_provider, string $email) 
   { 
     $cfg = $this->getClassCfg();
-    if ($this::providerEmailExists($id_provider, $email)) {
+    if (static::providerEmailExists($id_provider, $email)) {
       
       return $this->db->delete($cfg['tables']['emails'], [
         $cfg['arch']['emails']['email'] => $email,
@@ -151,7 +150,7 @@ class Provider extends DbCls
   public function add($name, array $cfg = null): ?string
   {
     $dbcfg = $this->getClassCfg();
-    if ($this->insert([
+    if ($this->dbTraitInsert([
       $dbcfg['arch']['providers']['name'] => $name,
       $dbcfg['arch']['providers']['cfg']  => $cfg ? json_encode($cfg) : null
     ])) {
@@ -166,11 +165,10 @@ class Provider extends DbCls
   {
     $dbcfg = $this->getClassCfg();
     if (X::hasProp($data, 'name', true)) { 
-      if (X::hasProp($data, 'email', true) && !$this::providerEmailExists($id, $data['email'])) {
+      if (X::hasProp($data, 'email', true) && !static::providerEmailExists($id, $data['email'])) {
         $this->addProviderEmail($id, $data['email']);
       }
-      return $this->db->update(
-        $dbcfg['table'],
+      return $this->dbTraitUpdate(
         [
           $dbcfg['arch']['providers']['name'] => $data['name'],
           $dbcfg['arch']['providers']['cfg']  => $data['cfg'] ? json_encode($data['cfg']) : null
@@ -185,7 +183,7 @@ class Provider extends DbCls
 
   public function get(string $id): ?array
   {
-    if ($res = $this->rselect($id)) {
+    if ($res = $this->dbTraitRselect($id)) {
       $dbcfg = $this->getClassCfg();
       $res['emails'] = $this->db->rselectAll($dbcfg['tables']['emails'], 'email', [
         $dbcfg['arch']['emails']['id_provider'] => $id
@@ -206,7 +204,7 @@ class Provider extends DbCls
    */
   public function getShippingCosts(string $id, string $territory): ?array
   {
-    if (($cfg = $this->selectOne($this->fields['cfg'], [$this->fields['id'] => $id]))
+    if (($cfg = $this->dbTraitSelectOne($this->fields['cfg'], [$this->fields['id'] => $id]))
       && ($cfg = json_decode($cfg, true))
     ) {
       return X::getRow($cfg, ['territory' => $territory]);

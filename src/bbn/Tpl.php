@@ -3,6 +3,7 @@ namespace bbn;
 
 use Exception;
 use LightnCandy\LightnCandy;
+use bbn\File\Dir;
 
 class Tpl {
 
@@ -19,10 +20,10 @@ class Tpl {
   static public function renderer(string $st): callable
   {
     if (\defined('BBN_DATA_PATH')) {
-      $dir = File\Dir::createPath(Mvc::getTmpPath() . '/bbn-templates');
+      $dir = Dir::createPath(Mvc::getTmpPath() . '/bbn-templates');
     }
     else {
-      $dir = File\Dir::createPath(sys_get_temp_dir().'/bbn-templates');
+      $dir = Dir::createPath(sys_get_temp_dir().'/bbn-templates');
     }
 
     if (!$dir) {

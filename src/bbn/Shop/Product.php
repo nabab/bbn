@@ -5,7 +5,7 @@ namespace bbn\Shop;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Appui\Grid;
 use bbn\Appui\Medias;
 use bbn\Appui\Note;
@@ -16,7 +16,7 @@ use bbn\Db;
 
 class Product extends DbCls
 {
-  use Dbconfig;
+  use DbActions;
 
   /**
    * @var Medias
@@ -143,7 +143,7 @@ class Product extends DbCls
 
   public function get(string $id): ?array
   {
-    if ($this->exists($id)) {
+    if ($this->dbTraitExists($id)) {
       $cfg  = $this->getClassCfg();
       $res  = $this->db->rselect($cfg['table'], [], [$cfg['arch']['products']['id'] => $id]);
       $note = $this->cms->get($res['id_note'], true);
@@ -319,7 +319,7 @@ class Product extends DbCls
    */
   public function getStock(string $id): int
   {
-    return $this->selectOne($this->fields['stock'], $id);
+    return $this->dbTraitSelectOne($this->fields['stock'], $id);
   }
 
 
@@ -331,7 +331,7 @@ class Product extends DbCls
    */
   public function setStock(string $id, int $quantity): bool
   {
-    return (bool)$this->update($id, [$this->fields['stock'] => $quantity]);
+    return (bool)$this->dbTraitUpdate([$this->fields['stock'] => $quantity], $id);
   }
 
 

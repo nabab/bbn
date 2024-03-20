@@ -234,29 +234,39 @@ You can click the following link to access directly your account:<br>
       $sort = $arch['users']['email'];
     }
 
-    $sql  = "SELECT ";
-    $done = [];
-    foreach ($arch['users'] as $n => $f){
-      if (!\in_array($f, $done)) {
-        $sql .= $db->cfn($f, $tables['users'], 1).', ';
-        array_push($done, $f);
-      }
-    }
-
-    $gr   = !empty($group_id) && \bbn\Str::isUid($group_id) ? "AND " . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . " = UNHEX('$group_id')" : '';
-    $sql .= "
-      MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},
-      COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}
-      FROM {$db->escape($tables['users'])}
-        JOIN {$db->tsn($tables['groups'], 1)}
-          ON {$db->cfn($arch['users']['id_group'], $tables['users'], 1)} = {$db->cfn($arch['groups']['id'], $tables['groups'], 1)}
-          $gr
-        LEFT JOIN {$db->tsn($tables['sessions'])}
-          ON {$db->cfn($s['id_user'], $tables['sessions'], 1)} = {$db->cfn($arch['users']['id'], $tables['users'], 1)}
-      WHERE {$db->cfn($arch['users']['active'], $tables['users'], 1)} = 1
-      GROUP BY {$db->cfn($arch['users']['id'], $tables['users'], 1)}
-      ORDER BY {$db->cfn($sort, $tables['users'], 1)}";
-    return $db->getRows($sql);
+    $fields = array_map(function($a) use($db) {
+      return $db->cfn($a, $this->class_cfg['tables']['users']);
+    }, array_values($arch['users']));
+    $fields[$s['last_activity']] = "MAX($s[last_activity])";
+    $fields[$s['sess_id']] = "COUNT($s[sess_id])";
+    return $this->db->rselectAll([
+      'tables' => [$tables['users']],
+      'fields' => $fields,
+      'join' => [[
+        'table' => $tables['sessions'],
+        'type' => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $db->cfn($s['id_user'], $tables['sessions']),
+            'exp' => $db->cfn($arch['users']['id'], $tables['users'])
+          ]]
+        ]
+      ], [
+        'table' => $tables['groups'],
+        'on' => [
+          'conditions' => [[
+            'field' => $db->cfn($arch['users']['id_group'], $tables['users']),
+            'exp' => $db->cfn($arch['groups']['id'], $tables['groups'])
+          ]]
+        ]
+      ]],
+      'where' => [$arch['users']['active'] => 1],
+      'group_by' => [$db->cfn($arch['users']['id'], $tables['users'])],
+      'order' => [[
+        'field' => $db->cfn($sort, $tables['users']),
+        'dir' => 'ASC'
+      ]]
+    ]);
   }
 
 
@@ -350,13 +360,16 @@ You can click the following link to access directly your account:<br>
   public function fullList(): array
   {
     $r = [];
-    $u = $this->class_cfg['arch']['users'];
-    foreach ($this->db->rselectAll($this->class_cfg['tables']['users'], $u) as $a){
+    $all = $this->db->rselectAll(
+      $this->class_cfg['tables']['users'],
+      $this->class_cfg['arch']['users']
+    );
+    foreach ($all as $a){
       $r[] = [
         'value' => $a['id'],
         'text' => $this->getName($a, false),
-        'id_group' => $a[$u['id_group']],
-        'active' => $a[$u['active']] ? true : false
+        'id_group' => $a['id_group'],
+        'active' => $a['active'] ? true : false
       ];
     }
 

@@ -7,9 +7,17 @@
 
 namespace bbn\User;
 
-use bbn;
+use bbn\Db;
 use bbn\X;
+use bbn\Str;
 use Exception;
+use bbn\User;
+use bbn\Appui\Option;
+use bbn\Models\Tts\Retriever;
+use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\Current;
+use bbn\Models\Cls\Db as DbCls;
 
 /**
  * A user's preference system linked to options and user classes
@@ -32,12 +40,12 @@ use Exception;
  * @todo Groups and hotlinks features
  */
 
-class Preferences extends bbn\Models\Cls\Db
+class Preferences extends DbCls
 {
-  use bbn\Models\Tts\Retriever;
-  use bbn\Models\Tts\Dbconfig;
-  use bbn\Models\Tts\Optional;
-  use bbn\Models\Tts\Current;
+  use Retriever;
+  use DbActions;
+  use Optional;
+  use Current;
 
   /** @var array */
   protected static $default_class_cfg = [
@@ -71,10 +79,10 @@ class Preferences extends bbn\Models\Cls\Db
     ]
   ];
 
-  /** @var bbn\Appui\Option */
+  /** @var Option */
   protected $opt;
 
-  /** @var bbn\User */
+  /** @var User */
   protected $user;
 
   /** @var int */
@@ -96,19 +104,19 @@ class Preferences extends bbn\Models\Cls\Db
   /**
    * Preferences constructor.
    *
-   * @param bbn\Db $db The database connection object
+   * @param Db $db The database connection object
    * @param array $cfg A configuration array for tha tables' structure
    * @throws Exception
    */
-  public function __construct(bbn\Db $db, array $cfg = [])
+  public function __construct(Db $db, array $cfg = [])
   {
       parent::__construct($db);
     $this->_init_class_cfg($cfg);
-    if ($user = bbn\User::getInstance()) {
+    if ($user = User::getInstance()) {
       $this->_initUser($user);
     }
 
-    $this->opt = bbn\Appui\Option::getInstance();
+    $this->opt = Option::getInstance();
     if ($this->user && $this->opt) {
       self::retrieverInit($this);
     }
@@ -384,10 +392,10 @@ class Preferences extends bbn\Models\Cls\Db
    *
    * ```
    *
-   * @param bbn\User $user
+   * @param User $user
    * @return preferences
    */
-  public function setUser(bbn\User $user): preferences
+  public function setUser(User $user): preferences
   {
     $this->_initUser($user);
     return $this;
@@ -408,7 +416,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function setGroup(string $id_group): preferences
   {
-    if (\bbn\Str::isUid($id_group)) {
+    if (Str::isUid($id_group)) {
       $this->id_group = $id_group;
     }
 
@@ -433,7 +441,7 @@ class Preferences extends bbn\Models\Cls\Db
             [$this->fields['id'] => $id ]
         ))
     ) {
-      if (bbn\Str::isJson($cfg)) {
+      if (Str::isJson($cfg)) {
         $cfg = json_decode($cfg, 1);
       }
 
@@ -478,7 +486,7 @@ class Preferences extends bbn\Models\Cls\Db
             ]
         ))
     ) {
-      if (bbn\Str::isJson($cfg)) {
+      if (Str::isJson($cfg)) {
         $cfg = json_decode($cfg, 1);
       }
 
@@ -518,7 +526,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function get(string $id, bool $with_config = true): ?array
   {
-    if (bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       $table    = $this->db->tsn($this->class_cfg['table'], true);
       $uid      = $this->db->csn($this->fields['id'], true);
       $id_user  = $this->db->csn($this->fields['id_user'], true);
@@ -572,7 +580,7 @@ class Preferences extends bbn\Models\Cls\Db
           $cfg = $row[$this->fields['cfg']];
           unset($row[$this->fields['cfg']]);
           if ($cfg = json_decode($cfg, true)) {
-            $row = bbn\X::mergeArrays($cfg, $row);
+            $row = X::mergeArrays($cfg, $row);
           }
         }
 
@@ -656,7 +664,7 @@ class Preferences extends bbn\Models\Cls\Db
               $cfg = $a[$farch['cfg']];
               unset($a[$farch['cfg']]);
               if ($cfg = json_decode($cfg, true)) {
-                $a = bbn\X::mergeArrays($cfg, $a);
+                $a = X::mergeArrays($cfg, $a);
               }
 
               return $a;
@@ -747,7 +755,7 @@ class Preferences extends bbn\Models\Cls\Db
               $cfg = $a['cfg'];
               unset($a['cfg']);
               if (($cfg = json_decode($cfg, true))) {
-                $a = bbn\X::mergeArrays($cfg, $a);
+                $a = X::mergeArrays($cfg, $a);
               }
 
               return $a;
@@ -823,7 +831,7 @@ class Preferences extends bbn\Models\Cls\Db
   {
     if ($o = $this->opt->option(\func_get_args())) {
       if (($ids = $this->retrieveIds($o['id'])) && ($cfg = $this->get($ids[0]))) {
-        $o = bbn\X::mergeArrays($o, $cfg);
+        $o = X::mergeArrays($o, $cfg);
       }
 
       return $o;
@@ -1151,7 +1159,7 @@ class Preferences extends bbn\Models\Cls\Db
       }
 
       if ($o_index === false) {
-        throw new \Exception(X::_('Impossible to find this option'));
+        throw new Exception(X::_('Impossible to find this option'));
       }
       // Changing the position of all the affected options
       if ($o_index > $index) {
@@ -1558,7 +1566,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function getShared(string $id): ?array
   {
-    if (bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       return $this->db->rselectAll(
           $this->class_table,
           [
@@ -1704,7 +1712,7 @@ class Preferences extends bbn\Models\Cls\Db
 
       if (!empty($to_cfg)) {
         if (!empty($cfg[$c['cfg']])) {
-          if (\bbn\Str::isJson($cfg[$c['cfg']])) {
+          if (Str::isJson($cfg[$c['cfg']])) {
             $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
           }
 
@@ -1751,7 +1759,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function deleteBit(string $id): ?int
   {
-    if (\bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       return $this->db->deleteIgnore(
           $this->class_cfg['tables']['user_options_bits'],
           [$this->class_cfg['arch']['user_options_bits']['id'] => $id]
@@ -1764,7 +1772,7 @@ class Preferences extends bbn\Models\Cls\Db
 
   protected function deleteSubBits(array $bits, string $id_user_option): int
   {
-    if (\bbn\Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
+    if (Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
       $i = 0;
       foreach ($bits as $b) {
         if ($b['items']) {
@@ -1789,7 +1797,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function deleteBits(string $id_user_option): ?int
   {
-    if (\bbn\Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
+    if (Str::isUid($id_user_option) && $this->isAuthorized($id_user_option)) {
       $tree = $this->getTree($id_user_option);
       $i = 0;
       if ($tree && !empty($tree['items'])) {
@@ -1814,13 +1822,13 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function updateBit(string $id, array $cfg, bool $merge_config = true): ?int
   {
-    if (\bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       $c = $this->class_cfg['arch']['user_options_bits'];
       if (\array_key_exists($c['id'], $cfg)) {
         unset($cfg[$c['id']]);
       }
 
-      if (!empty($cfg[$c['cfg']]) && \bbn\Str::isJson($cfg[$c['cfg']])) {
+      if (!empty($cfg[$c['cfg']]) && Str::isJson($cfg[$c['cfg']])) {
         $cfg[$c['cfg']] = json_decode($cfg[$c['cfg']], true);
       }
 
@@ -1878,7 +1886,7 @@ class Preferences extends bbn\Models\Cls\Db
   public function getBit(string $id, bool $with_config = true): array
   {
     if (
-        \bbn\Str::isUid($id)
+        Str::isUid($id)
         && ($bit = $this->db->rselect(
             $this->class_cfg['tables']['user_options_bits'],
             [],
@@ -1918,7 +1926,7 @@ class Preferences extends bbn\Models\Cls\Db
         'field' => $c['id_user_option'],
         'value' => $id_user_option
       ]];
-      if (\is_null($id_parent) || \bbn\Str::isUid($id_parent)) {
+      if (\is_null($id_parent) || Str::isUid($id_parent)) {
         $where[] = [
           'field' => $c['id_parent'],
           empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
@@ -1926,7 +1934,7 @@ class Preferences extends bbn\Models\Cls\Db
       }
 
       if (
-          \bbn\Str::isUid($id_user_option)
+          Str::isUid($id_user_option)
           && ($bits = $this->db->rselectAll(
               [
               'table' => $this->class_cfg['tables']['user_options_bits'],
@@ -1974,7 +1982,7 @@ class Preferences extends bbn\Models\Cls\Db
       'field' => $c['id_user_option'],
       'value' => $id_opt
     ]];
-    if (\is_null($id_parent) || \bbn\Str::isUid($id_parent)) {
+    if (\is_null($id_parent) || Str::isUid($id_parent)) {
       $where[] = [
         'field' => $c['id_parent'],
         empty($id_parent) ? 'operator' : 'value' => $id_parent ?: 'isnull'
@@ -1982,7 +1990,7 @@ class Preferences extends bbn\Models\Cls\Db
     }
 
     if (
-        \bbn\Str::isUid($id_opt)
+        Str::isUid($id_opt)
         && ($bits = $this->db->rselectAll(
             [
             'table' => $this->class_cfg['tables']['user_options_bits'],
@@ -2086,7 +2094,7 @@ class Preferences extends bbn\Models\Cls\Db
   public function getTree(string $id, bool $with_config = true): array
   {
     if (
-        \bbn\Str::isUid($id)
+        Str::isUid($id)
         && ($p = $this->get($id, $with_config))
     ) {
       $p['items'] = $this->getFullBits($id, null, $with_config);
@@ -2127,7 +2135,7 @@ class Preferences extends bbn\Models\Cls\Db
   public function nextBitNum(string $id): ?int
   {
     if (
-        \bbn\Str::isUid($id)
+        Str::isUid($id)
         && ($max = $this->db->selectOne(
             $this->class_cfg['tables']['user_options_bits'],
             'MAX(num)',
@@ -2159,7 +2167,7 @@ class Preferences extends bbn\Models\Cls\Db
         ))
     ) {
       $fields = array_values($this->class_cfg['arch']['user_options_bits']);
-      if (bbn\Str::isJson($cfg)) {
+      if (Str::isJson($cfg)) {
         $cfg = json_decode($cfg, 1);
       }
 
@@ -2190,7 +2198,7 @@ class Preferences extends bbn\Models\Cls\Db
   public function orderBit(string $id, int $pos): ?bool
   {
     if (
-        \bbn\Str::isUid($id)
+        Str::isUid($id)
         && ($cf = $this->getClassCfg())
         && ($cfg = $cf['arch']['user_options_bits'])
         && ($bit = $this->getBit($id))
@@ -2249,8 +2257,8 @@ class Preferences extends bbn\Models\Cls\Db
   public function fixBitsOrder(string $id_user_option, string $id_parent = null, $deep = false): ?int
   {
     if (
-        \bbn\Str::isUid($id_user_option)
-        && (\bbn\Str::isUid($id_parent) || \is_null($id_parent))
+        Str::isUid($id_user_option)
+        && (Str::isUid($id_parent) || \is_null($id_parent))
     ) {
       $cfg   = $this->class_cfg['arch']['user_options_bits'];
       $fixed = 0;
@@ -2282,8 +2290,8 @@ class Preferences extends bbn\Models\Cls\Db
   public function moveBit(string $id, string $id_parent = null): ?bool
   {
     if (
-        \bbn\Str::isUid($id)
-        && ((\bbn\Str::isUid($id_parent) && $this->getBit($id_parent))
+        Str::isUid($id)
+        && ((Str::isUid($id_parent) && $this->getBit($id_parent))
         || \is_null($id_parent)        )
         && ($bit = $this->getBit($id))
         && ($cf = $this->getClassCfg())
@@ -2311,8 +2319,8 @@ class Preferences extends bbn\Models\Cls\Db
   public function getMaxBitNum(string $id_user_option, string $id_parent = null, bool $incr = false): int
   {
     if (
-        \bbn\Str::isUid($id_user_option)
-        && (\bbn\Str::isUid($id_parent) || is_null($id_parent))
+        Str::isUid($id_user_option)
+        && (Str::isUid($id_parent) || is_null($id_parent))
         && ($cf = $this->getClassCfg())
         && ($cfg = $cf['arch']['user_options_bits'])
     ) {
@@ -2351,7 +2359,7 @@ class Preferences extends bbn\Models\Cls\Db
   public function getByBit(string $id): ?array
   {
     $t =& $this;
-    if (\bbn\Str::isUid($id)) {
+    if (Str::isUid($id)) {
       return $this->db->rselect(
           [
           'table' => $this->class_cfg['table'],
@@ -2388,7 +2396,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function getIdByBit(string $id): ?string
   {
-    if (\bbn\Str::isUid($id) && ($p = $this->getByBit($id))) {
+    if (Str::isUid($id) && ($p = $this->getByBit($id))) {
       return $this->db->selectOne(
           [
           'table' => $this->class_cfg['table'],
@@ -2422,7 +2430,7 @@ class Preferences extends bbn\Models\Cls\Db
    */
   public function textValue(string $id_option, $id_user = null, $id_group = null): ?array
   {
-    if (\bbn\Str::isUid($id_option)) {
+    if (Str::isUid($id_option)) {
       $res = [];
       if ($ids = $this->_retrieveIds($id_option, $id_user, $id_group)) {
         foreach ($ids as $id) {
@@ -2448,7 +2456,7 @@ class Preferences extends bbn\Models\Cls\Db
    * Returns the bbn\Db instance
    * @return bbn\DB
    */
-  public function getDb(): bbn\Db
+  public function getDb(): Db
   {
     return $this->db;
   }
@@ -2460,7 +2468,7 @@ class Preferences extends bbn\Models\Cls\Db
    * @param bbn\User $user
    * @return preferences
    */
-  private function _initUser(bbn\User $user): preferences
+  private function _initUser(User $user): preferences
   {
     $this->user     = $user;
     $this->id_user  = $this->user->getId();
@@ -2482,11 +2490,11 @@ class Preferences extends bbn\Models\Cls\Db
       return null;
     }
 
-    if ($id_option && !bbn\Str::isUid($id_option)) {
+    if ($id_option && !Str::isUid($id_option)) {
       $id_option = $this->opt->fromPath(...\func_get_args());
     }
 
-    if ($id_option && bbn\Str::isUid($id_option)) {
+    if ($id_option && Str::isUid($id_option)) {
       return $id_option;
     }
 

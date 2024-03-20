@@ -12,7 +12,7 @@ use bbn\Str;
 use bbn\User;
 use bbn\User\Common;
 use bbn\User\Implementor;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 
 
 /**
@@ -31,7 +31,7 @@ use bbn\Models\Tts\Dbconfig;
 final class Fake extends Basic implements Implementor
 {
   use Common;
-  //use Dbconfig;
+  //use DbActions;
 
   /** @var User $realUser */
   protected $realUser;

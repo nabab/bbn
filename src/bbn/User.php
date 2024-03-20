@@ -10,7 +10,7 @@ use Exception;
 use bbn\X;
 use bbn\Str;
 use bbn\Models\Tts\Retriever;
-use bbn\Models\Tts\Dbconfig;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Basic;
 use bbn\User\Common;
 use bbn\User\Implementor;
@@ -32,7 +32,7 @@ use bbn\User\Manager;
 class User extends Basic implements Implementor
 {
   use Retriever;
-  use Dbconfig;
+  use DbActions;
   use Common;
 
   /** @var array */
@@ -73,7 +73,8 @@ class User extends Basic implements Implementor
       'passwords' => 'bbn_users_passwords',
       'sessions' => 'bbn_users_sessions',
       'tokens' => 'bbn_users_tokens',
-      'api_tokens' => 'bbn_users_api_tokens', // String because array_flip() in Dbconfig only works with integers and string
+      'api_tokens' => 'bbn_users_api_tokens', // String because array_flip() in DbActions only works with integers and string
+      'access_tokens' => 'bbn_users_access_tokens',
       'users' => 'bbn_users',
       'permission_accounts' => 'bbn_users_permission_accounts',
       'permission_tokens' => 'bbn_users_permission_account_tokens'
@@ -128,6 +129,12 @@ class User extends Basic implements Implementor
         'device_lang' => 'device_lang',
         'notifications_token' => 'notifications_token'
       ],
+      'access_tokens' => [
+        'id_user' => 'id_user',
+        'token' => 'token',
+        'pass' => 'pass',
+        'validity' => 'validity'
+      ],
       'users' => [
         'id' => 'id',
         'id_group' => 'id_group',
@@ -166,6 +173,8 @@ class User extends Basic implements Implementor
       'pass2' => 'pass2',
       'action' => 'action',
       'token'  => 'appui_token',
+      'access_token' => 'appui_access_token',
+      'access_token_pass' => 'appui_access_token_pass',
       'device_uid'  => 'device_uid',
       'device_lang' => 'device_lang',
       'phone_number' => 'phone_number',
@@ -458,7 +467,8 @@ class User extends Basic implements Implementor
           'success' => true
         ];
       }
-    } else {
+    }
+    else {
       // The client environment variables
       $this->user_agent  = $_SERVER['HTTP_USER_AGENT'] ?? '';
       $this->ip_address  = $this->class_cfg['ip_address'] && isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '';
@@ -506,6 +516,38 @@ class User extends Basic implements Implementor
         } elseif ($this->check()) {
           $this->setError(18);
         }
+      }
+      elseif (!empty($params[$f['access_token']])
+        && !empty($params[$f['access_token_pass']])
+        && ($idUser = $this->db->selectOne([
+          'table' => $this->class_cfg['tables']['access_tokens'],
+          'fields' => $this->class_cfg['arch']['access_tokens']['id_user'],
+          'where' => [[
+            'field' => $this->class_cfg['arch']['access_tokens']['token'],
+            'value' => $params[$f['access_token']]
+          ], [
+            'field' => $this->class_cfg['arch']['access_tokens']['pass'],
+            'value' => \bbn\Util\Enc::decrypt64($params[$f['access_token_pass']])
+          ], [
+            'logic' => 'OR',
+            'conditions' => [[
+              'field' => $this->class_cfg['arch']['access_tokens']['validity'],
+              'operator' => 'isnull'
+            ], [
+              'field' => $this->class_cfg['arch']['access_tokens']['validity'],
+              'operator' => '<=',
+              'value' => date('Y-m-d H:i:s')
+            ]]
+          ]]
+        ]))
+      ) {
+        $this->id = $idUser;
+        $this->id_group = $this->db->selectOne(
+          $this->class_cfg['tables']['users'],
+          $this->class_cfg['arch']['users']['id_group'],
+          [$this->class_cfg['arch']['users']['id'] => $idUser]
+        );
+        $this->auth = true;
       }
       else {
         $this->checkSession();
@@ -795,16 +837,12 @@ class User extends Basic implements Implementor
    */
   public function updateActivity(): self
   {
-    if ($id_session = $this->getIdSession() && $this->check()) {
+    if (($id_session = $this->getIdSession()) && $this->check()) {
       $p = &$this->class_cfg['arch']['sessions'];
       $this->db->update(
         $this->class_cfg['tables']['sessions'],
-        [
-          $p['last_activity'] => date('Y-m-d H:i:s')
-        ],
-        [
-          $p['id'] => $id_session
-        ]
+        [$p['last_activity'] => date('Y-m-d H:i:s')],
+        [$p['id'] => $id_session]
       );
     } else {
       $this->setError(13);
