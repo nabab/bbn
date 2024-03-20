@@ -1677,27 +1677,27 @@ class Task extends bbn\Models\Cls\Db
       ) {
         $type = !empty($tokensCfg['checkType']) ? $this->getType($idTask) : null;
         $lastTrack = $this->getLastStoppedTrack($idUser, $type);
-        if (!empty($lastTrack)
-          && ($d = strtotime($start) - strtotime($lastTrack['end']))
-          && ($d < $tokensCfg['step'])
-        ) {
-          $cTokens = $this->calcTokens($lastTrack['id'], $idUser);
-          if ($cTokens = $cTokens - floor($cTokens)) {
-            $dt = $d / $tokensCfg['step'];
-            
-          }
-          $lastTokens = ($lastTrack['length'] + $d) / $tokensCfg['step'];
-          if ($lastTokens - floor($lastTokens)) {
+        if (!empty($lastTrack)) {
+          $d = strtotime($start) - strtotime($lastTrack['end']);
+          if ($d < $tokensCfg['step']) {
             $this->db->update('bbn_tasks_sessions', [
-              'end' => $start,
-              'tokens' => $lastTokens - 1
+              'length' => $lastTrack['length'] + $d
             ], [
               'id' => $lastTrack['id']
             ]);
-            $tokens = 1;
+            $lastTokens = (($lastTrack['length'] + $d) / $tokensCfg['step']) + $this->calcTokens($lastTrack['id'], $idUser);
+            $this->db->update('bbn_tasks_sessions', [
+              'tokens' => floor($lastTokens)
+            ], [
+              'id' => $lastTrack['id']
+            ]);
+            if ($lastTokens - floor($lastTokens)) {
+              $tokens = 1;
+            }
           }
         }
       }
+
       return $this->db->insert('bbn_tasks_sessions', [
         'id_task' => $idTask,
         'id_user' => $idUser ?: $this->id_user,
@@ -1705,6 +1705,7 @@ class Task extends bbn\Models\Cls\Db
         'tokens' => $tokens
       ]);
     }
+
     return false;
   }
 
@@ -1721,16 +1722,17 @@ class Task extends bbn\Models\Cls\Db
     $now = time();
     if (($activeTrack = $this->getActiveTrack($idUser))
       && ($activeTrack['id_task'] === $idTask)
-    ){
+    ) {
       $ok = true;
       if (!empty($message)
         && !($idNote = $this->comment($idTask, [
           'title' => X::_('Report tracker').' '.date('d M Y H:i', strtotime($activeTrack['start'])).' - '.date('d M Y H:i', $now),
           'text' => $message
         ]))
-      ){
+      ) {
         $ok = false;
       }
+
       if ($ok) {
         $length = $now - strtotime($activeTrack['start']);
         $tokens = null;
@@ -1743,6 +1745,7 @@ class Task extends bbn\Models\Cls\Db
           }
           $tokens = ceil($tokens);
         }
+
         $ok = $this->db->update('bbn_tasks_sessions', [
           'length' => $length,
           'tokens' => $tokens,
@@ -1752,6 +1755,7 @@ class Task extends bbn\Models\Cls\Db
         ]);
       }
     }
+
     return (bool)$ok;
   }
 
@@ -1770,6 +1774,24 @@ class Task extends bbn\Models\Cls\Db
         AND `length` IS NULL",
       hex2bin($id)
     ) === 0;
+  }
+
+  /**
+   * Switch the tracker from a task to another.
+   *
+   * @param  string  $idTask The current task's ID
+   * @param  string  $idNewTask The new task's ID
+   * @param  boolean|string $message The message to attach to track (optional)
+   * @param  boolean|string $idUser The track's user. If you give 'false', it will use the current user
+   * @return boolean
+   */
+  public function switchTracker($idTask, $idNewTask, $message = false, $idUser = false): bool
+  {
+    if ($this->stopTrack($idTask, $message, $idUser)) {
+      return $this->startTrack($idNewTask, $idUser);
+    }
+
+    return false;
   }
 
   public function getActiveTrack($id_user = false){
