@@ -9,6 +9,7 @@
 namespace bbn\Appui;
 use bbn;
 use bbn\X;
+use bbn\Str;
 
 class Task extends bbn\Models\Cls\Db
 {
@@ -1794,14 +1795,12 @@ class Task extends bbn\Models\Cls\Db
     return false;
   }
 
-  public function getActiveTrack($id_user = false){
-    return $this->db->getRow("
-      SELECT *
-      FROM bbn_tasks_sessions
-      WHERE id_user = ?
-        AND length IS NULL",
-      $id_user ? hex2bin($id_user) : hex2bin($this->id_user)
-    );
+  public function getActiveTrack($id_user = false): ?array
+  {
+    return $this->db->rselect('bbn_tasks_sessions', [], [
+      'id_user' => $id_user ?: $this->id_user,
+      'length' => null
+    ]);
   }
 
   public function getLastStoppedTrack(?string $idUser = null, ?string $taskType = null): ?array
@@ -1878,7 +1877,7 @@ class Task extends bbn\Models\Cls\Db
     return $this->db->selectOne('bbn_tasks_sessions', 'length', ['id' => $idTrack]);
   }
 
-  public function getTasksTracks($id_user){
+  public function getTasksTracks(?string $idUser = null){
     if (
       ($manager = $this->idRole('managers')) &&
       ($worker = $this->idRole('workers')) &&
@@ -1900,7 +1899,7 @@ class Task extends bbn\Models\Cls\Db
         WHERE bbn_tasks.active = 1
           AND bbn_tasks.state = ?
         GROUP BY bbn_tasks.id",
-        hex2bin($id_user),
+        hex2bin($idUser ?: $this->id_user),
         hex2bin($manager),
         hex2bin($worker),
         hex2bin($ongoing)
@@ -1975,9 +1974,9 @@ class Task extends bbn\Models\Cls\Db
     return null;
   }
 
-  public function getTokensCurrent(?string $idUser = null): ?array
+  public function getTokensCurrent(?string $type = null, ?string $idUser = null): ?array
   {
-    if (($tokenYear = $this->getTokensYear())
+    if (($tokenYear = $this->getTokensYear($type))
       && ($currentBillingPeriod = $this->getTokensCurrentBillingPeriod())
       && ($billingPeriod = $this->getTokensBillingPeriod())
     ) {
@@ -1990,6 +1989,9 @@ class Task extends bbn\Models\Cls\Db
         'field' => 'bbn_tasks_sessions.start',
         'operator' => '<=',
         'value' => $currentBillingPeriod['end']
+      ], [
+        'field' => 'bbn_tasks_sessions.length',
+        'operator' => 'isnotnull'
       ]];
       if (!empty($idUser)) {
         $where[] = [
@@ -2027,7 +2029,7 @@ class Task extends bbn\Models\Cls\Db
             ]])
           ]
         ]) ?: 0;
-        $total = $tokens / (!empty($billingPeriod['months']) ? 12 / $billingPeriod['months'] : 1);
+        $total = floor($tokens / (!empty($billingPeriod['months']) ? 12 / $billingPeriod['months'] : 1));
         $ret[$code] = [
           'total' => $total,
           'used' => $used,
@@ -2036,15 +2038,26 @@ class Task extends bbn\Models\Cls\Db
         ];
       }
 
-      return $ret ?: null;
+      return !empty($ret) ? (!empty($type) ? \array_values($ret)[0] : $ret) : null;
     }
 
     return null;
   }
 
-  public function getTokensYear(): ?array
+  public function getTokensYear(?string $type = null): ?array
   {
-    if ($cats = self::getOptions('cats', 'tokens')) {
+    if (!empty($type)) {
+      if (!Str::isUid($type)) {
+        $type = self::getOption($type, 'cats', 'tokens');
+      }
+
+      if ($opt = self::getOption($type)) {
+        return [
+          $opt['code'] => !empty($opt['tokensYear']) ? $opt['tokensYear'] : 0
+        ];
+      }
+    }
+    elseif ($cats = self::getOptions('cats', 'tokens')) {
       $ret = [];
       foreach ($cats as $c) {
         $ret[$c['code']] = !empty($c['tokensYear']) ? $c['tokensYear'] : 0;
@@ -2058,7 +2071,37 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTokens(string $idTask): ?int
   {
-    return $this->db->selectOne('bbn_tasks_sessions', 'SUM(tokens)', ['id_task' => $idTask]);
+    return $this->db->selectOne([
+      'table' => 'bbn_tasks_sessions',
+      'fields' => ['SUM(tokens)'],
+      'where' => [[
+        'field' => 'id_task',
+        'value' => $idTask
+      ], [
+        'field' => 'length',
+        'operator' => 'isnotnull'
+      ]]
+    ]);
+  }
+
+  public function getTokensType(string $idTask): ?string
+  {
+    return $this->db->selectOne([
+      'table' => 'bbn_tasks',
+      'fields' => ['bbn_options.id_alias'],
+      'join' => [[
+        'table' => 'bbn_options',
+        'on' => [
+          'conditions' => [[
+            'field' => 'bbn_tasks.type',
+            'exp' => 'bbn_options.id'
+          ]]
+        ]
+      ]],
+      'where' => [
+        'bbn_tasks.id' => $idTask
+      ]
+    ]);
   }
 
   public function getTrackTokens(string $idTrack): ?int
