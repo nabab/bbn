@@ -394,12 +394,45 @@ class Option extends DbCls
       $c =& $this->class_cfg;
       $f =& $this->fields;
       /** @var int|false $tmp */
-      if (!$tmp && ($tmp = $this->db->selectOne(
+      if ($tmp = $this->db->selectOne(
         $c['table'], $f['id'], [
           [$f['id_parent'], '=', $id_parent],
           [$f['code'], '=', $true_code]
         ]
-      ))
+      )) {
+        $this->cacheSet($id_parent, $cache_name, $tmp);
+      }
+      // Magic code options can be bypassed
+      elseif (($true_code === 'appui') 
+          && ($tmp2 = $this->db->selectOne(
+            $c['table'], $f['id'], [
+              [$f['id_parent'], '=', $id_parent],
+              [$f['code'], '=', 'plugins']
+            ]
+          ))
+          && ($tmp = $this->db->selectOne(
+            $c['table'], $f['id'], [
+              [$f['id_parent'], '=', $tmp2],
+              [$f['code'], '=', $true_code]
+            ]
+          ))
+      ) {
+        $this->cacheSet($id_parent, $cache_name, $tmp);
+      }
+      // Magic code options can be bypassed
+      elseif (($true_code !== 'options') 
+          && ($tmp2 = $this->db->selectOne(
+            $c['table'], $f['id'], [
+              [$f['id_parent'], '=', $id_parent],
+              [$f['code'], '=', 'options']
+            ]
+          ))
+          && ($tmp = $this->db->selectOne(
+            $c['table'], $f['id'], [
+              [$f['id_parent'], '=', $tmp2],
+              [$f['code'], '=', $true_code]
+            ]
+          ))
       ) {
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
