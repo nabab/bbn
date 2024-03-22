@@ -43,8 +43,8 @@ class I18n extends bbn\Models\Cls\Cache
     $this->user    = \bbn\User::getInstance();
     $this->options = new \bbn\Appui\Option($db);
     if (empty($code)) {
-      if (\defined('BBN_APP_NAME')) {
-        $code = BBN_APP_NAME;
+      if (\defined('BBN_APP_PREFIX')) {
+        $code = BBN_APP_PREFIX;
       }
       else {
         throw new \Exception(X::_("The project's ID/Code is mandatory"));
