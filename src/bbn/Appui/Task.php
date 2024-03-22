@@ -1760,6 +1760,76 @@ class Task extends bbn\Models\Cls\Db
     return (bool)$ok;
   }
 
+  public function editTrack(string $id, string $start, string $end, ?string $message = null): bool
+  {
+    if (strtotime($end) < strtotime($start)) {
+      throw new \Exception(X::_('The end date must be greater than the start date'));
+    }
+
+    $currentData = $this->getTrack($id);
+    $idNote = $currentData['id_note'];
+    $ok = true;
+    // Message
+    if (empty($message) && !empty($idNote)) {
+      $this->noteCls->remove($idNote, true);
+      $idNote = null;
+    }
+    else if (!empty($message)) {
+      $title = X::_(
+        'Report tracker %s - %s',
+        date('d M Y H:i', strtotime($start)),
+        date('d M Y H:i', strtotime($end))
+      );
+      if (!empty($idNote)) {
+        $oldMessage = $this->noteCls->get($idNote);
+        if (($oldMessage['content'] !== $message)
+          || ($oldMessage['title'] !== $title)
+        ) {
+          $ok = $this->noteCls->update($idNote, $title, $message);
+        }
+      }
+      else {
+        $idNote = $this->comment($currentData['id_task'], [
+          'title' => $title,
+          'text' => $message
+        ]);
+        $ok = !empty($idNote);
+      }
+    }
+
+    if ($ok
+      && (($currentData['start'] !== $start)
+        || ($currentData['end'] !== $end)
+        || ($currentData['id_note'] !== $idNote))
+    ) {
+      $ok = (bool)$this->db->update('bbn_tasks_sessions', [
+        'id_note' => !empty($idNote) ? $idNote : null,
+        'start' => $start,
+        'length' => strtotime($end) - strtotime($start)
+      ], [
+        'id' => $id
+      ]);
+
+      // Tokens
+      $this->checkTokens($id, $currentData['start'], $currentData['end']);
+    }
+
+    return $ok;
+  }
+
+  public function deleteTrack(string $id): bool
+  {
+    // Message
+    if ($idNote = $this->getTrackIdNote($id)) {
+      $this->noteCls->remove($idNote, true);
+    }
+
+    // Tokens
+    $this->checkTokens($id);
+
+    return (bool)$this->db->delete('bbn_tasks_sessions', ['id' => $id]);
+  }
+
   public function stopAllTracks($id){
     $this->db->query("
       UPDATE bbn_tasks_sessions
@@ -1789,18 +1859,24 @@ class Task extends bbn\Models\Cls\Db
   public function switchTracker($idTask, $idNewTask, $message = false, $idUser = false): bool
   {
     if ($this->stopTrack($idTask, $message, $idUser)) {
+      sleep(1);
       return $this->startTrack($idNewTask, $idUser);
     }
 
     return false;
   }
 
-  public function getActiveTrack($id_user = false): ?array
+  public function getActiveTrack($id_user = false, ?string $idTask = null): ?array
   {
-    return $this->db->rselect('bbn_tasks_sessions', [], [
+    $where = [
       'id_user' => $id_user ?: $this->id_user,
       'length' => null
-    ]);
+    ];
+    if (!empty($idTask)) {
+      $where['id_task'] = $idTask;
+    }
+
+    return $this->db->rselect('bbn_tasks_sessions', [], $where);
   }
 
   public function getLastStoppedTrack(?string $idUser = null, ?string $taskType = null): ?array
@@ -1840,16 +1916,9 @@ class Task extends bbn\Models\Cls\Db
     ]);
   }
 
-  public function getTrack($id_task){
-    return $this->db->getRow("
-      SELECT *
-      FROM bbn_tasks_sessions
-      WHERE id_user = ?
-        AND id_task = ?
-        AND length IS NULL",
-      hex2bin($this->id_user),
-      hex2bin($id_task)
-    );
+  public function getTrack(string $id): ?array
+  {
+    return $this->db->rselect('bbn_tasks_sessions', [], ['id' => $id]);
   }
 
   public function getTracks($id_task){
@@ -1875,6 +1944,20 @@ class Task extends bbn\Models\Cls\Db
   public function getTrackLength(string $idTrack): ?string
   {
     return $this->db->selectOne('bbn_tasks_sessions', 'length', ['id' => $idTrack]);
+  }
+
+  public function getTrackIdNote(string $idTrack): ?string
+  {
+    return $this->db->selectOne('bbn_tasks_sessions', 'id_note', ['id' => $idTrack]);
+  }
+
+  public function getTrackNote(string $idTrack): ?array
+  {
+    if ($idNote = $this->getTrackIdNote($idTrack)) {
+      return $this->noteCls->get($idNote);
+    }
+
+    return null;
   }
 
   public function getTasksTracks(?string $idUser = null){
@@ -2146,6 +2229,106 @@ class Task extends bbn\Models\Cls\Db
     }
 
     return $tokens;
+  }
+
+  private function checkTokens(string $idTrack, ?string $start = null, ?string $end = null): bool
+  {
+    return true;
+    if ($tokensCfg = $this->tokensConfig()) {
+      $current = $this->getTrack($idTrack);
+      // Delete
+      if (empty($start)) {
+        $prev = $this->db->select([
+          'table' => 'bbn_tasks_sessions',
+          'fields' => [],
+          'where' => [[
+            'field' => 'end',
+            'value' => $current['start']
+          ], [
+            'field' => 'id',
+            'operator' => '!=',
+            'value' => $idTrack
+          ]]
+        ]);
+        $after = [];
+        
+      }
+      // Update
+      else if (!empty($start) && !empty($end)) {
+
+      }
+    }
+
+    return true;
+  }
+
+  public function getContinuousTracks(string $idTrack): array
+  {
+    $ret = [];
+    if ($tokensCfg = $this->getTokensCfg()) {
+      $current = $this->getTrack($idTrack);
+      $end = $current['end'];
+      if ($prev = $this->db->select([
+        'table' => 'bbn_tasks_sessions',
+        'fields' => $this->db->getFieldsList('bbn_tasks_sessions'),
+        'join' => [[
+          'table' => 'bbn_tasks',
+          'on' => [[
+            'field' => 'bbn_tasks_sessions.id_task',
+            'exp' => 'bbn_tasks.id'
+          ]]
+        ]],
+        'where' => [[
+          'field' => 'bbn_tasks_sessions.end',
+          'value' => $current['start']
+        ], [
+          'field' => 'bbn_tasks_sessions.id_user',
+          'value' => $current['id_user']
+        ], [
+          'field' => 'bbn_tasks_sessions.id',
+          'operator' => '!=',
+          'value' => $idTrack
+        ], [
+          'field' => 'bbn_tasks.active',
+          'value' => 1
+        ]]
+      ])) {
+        $ret[] = $prev;
+      }
+
+      while (!empty($end)
+        && ($track = $this->db->select([
+          'table' => 'bbn_tasks_sessions',
+          'fields' => $this->db->getFieldsList('bbn_tasks_sessions'),
+          'join' => [[
+            'table' => 'bbn_tasks',
+            'on' => [[
+              'field' => 'bbn_tasks_sessions.id_task',
+              'exp' => 'bbn_tasks.id'
+            ]]
+          ]],
+          'where' => [[
+            'field' => 'bbn_tasks_sessions.start',
+            'value' => $end
+          ], [
+            'field' => 'bbn_tasks_sessions.id_user',
+            'value' => $current['id_user']
+          ], [
+            'field' => 'bbn_tasks_sessions.id',
+            'operator' => '!=',
+            'value' => $idTrack
+          ], [
+            'field' => 'bbn_tasks.active',
+            'value' => 1
+          ]]
+        ]))
+      ) {
+        $ret[] = $track;
+        $end = $track->end;
+      }
+    }
+
+    return $ret;
   }
 
   private function getIdNote(string $id): ?string
