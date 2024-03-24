@@ -88,7 +88,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path)\n  {\n    $id = null;\n    if (!Str::isUid($path)) {\n      \/\/$path = $this->options->fromCode($path, self::$option_root_id);\n      if (!($id = self::getAppuiOptionId($path))) {\n        $id = $this->perm->fromPath($path);\n      }\n    }\n\n    return Str::isUid($id) ? $id : null;\n  }",
+            "code": "function(string $path)\n  {\n    $id = null;\n    if (!Str::isUid($path)) {\n      \/\/$path = $this->options->fromCode($path, self::$option_root_id);\n      if (!($id = self::getOptionId($path))) {\n        $id = $this->perm->fromPath($path);\n      }\n    }\n\n    return Str::isUid($id) ? $id : null;\n  }",
             "startLine": 47,
             "endLine": 58,
             "isDeprecated": false,
@@ -675,7 +675,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($k_text = 'text', $k_value = 'value')\n  {\n    $c    = $this->pref->getClassCfg();\n    $pref =& $this->pref;\n    if (!($id_menus = self::getAppuiOptionId('menus'))) {\n      throw new \\Exception(\"Impossible to find the option for menus\");\n    }\n\n    if (!($menus = $this->pref->getAll($id_menus))) {\n      return [];\n      throw new \\Exception(\"Impossible to get the  menus items\");\n    }\n\n    return array_map(\n      function ($e) use ($c, $k_text, $k_value, $pref) {\n        return [\n          $k_text => $e[$c['arch']['user_options']['text']],\n          $k_value => $e[$c['arch']['user_options']['id']],\n          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],\n          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],\n          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],\n          'hasItems' => (bool)count($pref->getBits($e[$c['arch']['user_options']['id']]))\n          ];\n      },\n      $menus\n    );\n  }",
+            "code": "function($k_text = 'text', $k_value = 'value')\n  {\n    $c    = $this->pref->getClassCfg();\n    $pref =& $this->pref;\n    if (!($id_menus = self::getOptionId('menus'))) {\n      throw new \\Exception(\"Impossible to find the option for menus\");\n    }\n\n    if (!($menus = $this->pref->getAll($id_menus))) {\n      return [];\n      throw new \\Exception(\"Impossible to get the  menus items\");\n    }\n\n    return array_map(\n      function ($e) use ($c, $k_text, $k_value, $pref) {\n        return [\n          $k_text => $e[$c['arch']['user_options']['text']],\n          $k_value => $e[$c['arch']['user_options']['id']],\n          $c['arch']['user_options']['public'] => $e[$c['arch']['user_options']['public']],\n          $c['arch']['user_options']['id_user'] => $e[$c['arch']['user_options']['id_user']],\n          $c['arch']['user_options']['id_group'] => $e[$c['arch']['user_options']['id_group']],\n          'hasItems' => (bool)count($pref->getBits($e[$c['arch']['user_options']['id']]))\n          ];\n      },\n      $menus\n    );\n  }",
             "startLine": 445,
             "endLine": 471,
             "isDeprecated": false,
@@ -1080,7 +1080,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    \/\/$items = $this->options->fullOptions('menus', self::$option_root_id);\n    $items = self::getAppuiOption('menu');\n    $res   = [];\n    foreach ($items as $it){\n      $res[] = [\n        'text' => $it['text'],\n        'value' => $it['id']\n      ];\n    }\n\n    return $res;\n  }",
+            "code": "function()\n  {\n    \/\/$items = $this->options->fullOptions('menus', self::$option_root_id);\n    $items = self::getOption('menu');\n    $res   = [];\n    foreach ($items as $it){\n      $res[] = [\n        'text' => $it['text'],\n        'value' => $it['id']\n      ];\n    }\n\n    return $res;\n  }",
             "startLine": 655,
             "endLine": 668,
             "isDeprecated": false,
@@ -1889,8 +1889,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionId": {
-            "name": "getAppuiOptionId",
+        "getOptionId": {
+            "name": "getOptionId",
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
@@ -1916,8 +1916,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsIds": {
-            "name": "getAppuiOptionsIds",
+        "getOptionsIds": {
+            "name": "getOptionsIds",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -1942,8 +1942,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsTree": {
-            "name": "getAppuiOptionsTree",
+        "getOptionsTree": {
+            "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -1968,8 +1968,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptions": {
-            "name": "getAppuiOptions",
+        "getOptions": {
+            "name": "getOptions",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -1995,8 +1995,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOption": {
-            "name": "getAppuiOption",
+        "getOption": {
+            "name": "getOption",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -2022,8 +2022,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsTextValue": {
-            "name": "getAppuiOptionsTextValue",
+        "getOptionsTextValue": {
+            "name": "getOptionsTextValue",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -2031,7 +2031,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getAppuiOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
             "startLine": 293,
             "endLine": 296,
             "isDeprecated": false,

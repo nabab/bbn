@@ -41,10 +41,14 @@ class Option extends DbCls
   use Cache;
   use DbActions;
 
-  //protected const root_hex = '962d50c3e07211e781c6000c29703ca2';
-  protected const root_hex = 'c88846c3bff511e7b7d5000c29703ca2';
+  protected $templateIds = [];
+  protected $magicOptionsTemplateId;
 
-  protected static $default_class_cfg = [
+  protected $magicAppuiTemplateId;
+
+
+  protected static /** @var array */
+    $default_class_cfg = [
       'errors' => [
       ],
       'table' => 'bbn_options',
@@ -147,7 +151,7 @@ class Option extends DbCls
         return false;
       }
 
-      if (\defined('BBN_APP_NAME')) {
+      if (\defined('BBN_APP_PREFIX')) {
         $this->default = $this->cacheGetSet(
           function () use (&$t) {
             $res = $t->db->selectOne(
@@ -155,7 +159,7 @@ class Option extends DbCls
               $t->fields['id'],
               [
                 $t->fields['id_parent'] => $this->root,
-                $t->fields['code'] => BBN_APP_NAME
+                $t->fields['code'] => BBN_APP_PREFIX
               ]
             );
             if (!$res) {
@@ -164,8 +168,8 @@ class Option extends DbCls
 
             return $res;
           },
-          BBN_APP_NAME,
-          BBN_APP_NAME,
+          BBN_APP_PREFIX,
+          BBN_APP_PREFIX,
           60
         );
       }
@@ -402,29 +406,29 @@ class Option extends DbCls
       )) {
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
-      // Magic code options can be bypassed
+      // Magic code appui can be bypassed
       elseif (($true_code === 'appui') 
           && ($tmp2 = $this->db->selectOne(
             $c['table'], $f['id'], [
-              [$f['id_parent'], '=', $id_parent],
-              [$f['code'], '=', 'plugins']
+              $f['id_parent'] => $id_parent,
+              $f['code'] => 'plugins'
             ]
           ))
           && ($tmp = $this->db->selectOne(
             $c['table'], $f['id'], [
-              [$f['id_parent'], '=', $tmp2],
-              [$f['code'], '=', $true_code]
+              $f['id_parent'] => $tmp2,
+              $f['code'] => $true_code,
+              $f['id_alias'] => $this->getMagicAppuiTemplateId()
             ]
           ))
       ) {
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
       // Magic code options can be bypassed
-      elseif (($true_code !== 'options') 
-          && ($tmp2 = $this->db->selectOne(
+      elseif (($tmp2 = $this->db->selectOne(
             $c['table'], $f['id'], [
-              [$f['id_parent'], '=', $id_parent],
-              [$f['code'], '=', 'options']
+              $f['id_parent'] => $id_parent,
+              $f['id_alias'] => $this->getMagicOptionsTemplateId()
             ]
           ))
           && ($tmp = $this->db->selectOne(
@@ -1475,6 +1479,16 @@ class Option extends DbCls
     return null;
   }
 
+public function getIdAlias($code = null): ?string
+  {
+    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
+      $cf = $this->getClassCfg();
+      return $this->db->selectOne($cf['table'], $this->fields['id_alias'], [$this->fields['id'] => $id]);
+    }
+
+    return null;
+  }
+
 
   /**
    * @param null $code
@@ -2215,16 +2229,18 @@ class Option extends DbCls
    */
   public function sequence(string $id_option, string $id_root = null): ?array
   {
-    if (null === $id_root) {
-      $id_root = self::root_hex;
-    }
+    if ($this->check()) {
+      if (null === $id_root) {
+        $id_root = $this->getRoot();
+      }
 
-    if ($this->exists($id_root) && ($parents = $this->parents($id_option))) {
-      $res = [$id_option];
-      foreach ($parents as $p){
-        array_unshift($res, $p);
-        if ($p === $id_root) {
-          return $res;
+      if ($this->exists($id_root) && ($parents = $this->parents($id_option))) {
+        $res = [$id_option];
+        foreach ($parents as $p){
+          array_unshift($res, $p);
+          if ($p === $id_root) {
+            return $res;
+          }
         }
       }
     }
@@ -4221,7 +4237,7 @@ class Option extends DbCls
   public function jsCategories($id = null)
   {
     if (!$id) {
-      $id = $this->default;
+      $id = $this->fromCode('options', $this->default);
     }
 
     if ($tmp = $this->getCache($id, __FUNCTION__)) {
@@ -4709,6 +4725,34 @@ class Option extends DbCls
   }
 
 
+  public function getTemplateId($code)
+  {
+    if (!isset($this->templateIds[$code]) && $this->check()) {
+      $this->templateIds[$code] = $this->fromCode($code, 'templates', $this->getRoot());
+    }
+
+    return $this->templateIds[$code];
+  }
+
+  public function getMagicOptionsTemplateId()
+  {
+    if (!$this->magicOptionsTemplateId && $this->check()) {
+      $this->magicOptionsTemplateId = $this->fromCode('options', 'plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicOptionsTemplateId;
+  }
+
+  public function getMagicAppuiTemplateId()
+  {
+    if (!$this->magicAppuiTemplateId && $this->check()) {
+      $this->magicAppuiTemplateId = $this->fromCode('appui', 'plugins', 'plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicAppuiTemplateId;
+  }
+
+
   /**
    * Gets the first row from a result
    *
@@ -4798,6 +4842,16 @@ class Option extends DbCls
       }
     }
     return $res;
+  }
+
+
+  public function getPermissionsTemplateId()
+  {
+    if (!$this->magicOptionsTemplateId && $this->check()) {
+      $this->magicOptionsTemplateId = $this->fromCode('permissions', 'plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicOptionsTemplateId;
   }
 
 

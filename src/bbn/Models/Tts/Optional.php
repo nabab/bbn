@@ -28,11 +28,6 @@ trait Optional
   protected static $option_root_id;
 
   /**
-   * @var string The ID of the appui option
-   */
-  protected static $option_appui_id;
-
-  /**
    * @var Option The Option object
    */
   protected $options;
@@ -52,30 +47,21 @@ trait Optional
       }
 
       if (!\defined("BBN_APPUI")) {
-        \define('BBN_APPUI', $opt->fromCode('appui'));
-      }
-
-      if (!\defined("BBN_APPUI_ROOT")) {
-        \define('BBN_APPUI_ROOT', $opt->fromRootCode('appui'));
+        \define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));
       }
 
       if (!$path) {
-        if (!BBN_APPUI || !BBN_APPUI_ROOT) {
+        if (!BBN_APPUI) {
           X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
           return;
         }
 
         $tmp                   = explode('\\', __CLASS__);
         $cls                   = strtolower(end($tmp));
-        $path                  = [$cls, BBN_APPUI];
-        self::$option_appui_id = $opt->fromCode($cls, BBN_APPUI_ROOT);
-      }
-      else{
-        self::$option_appui_id = null;
+        $path                  = [$cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
-      //if ( !self::$option_appui_id || !self::$option_root_id ){
       if (!self::$option_root_id) {
         throw new Exception("Impossible to find the option $cls for ".__CLASS__);
       }
@@ -96,31 +82,22 @@ trait Optional
   {
     if (!self::$optional_is_init) {
       if (!\defined("BBN_APPUI")) {
-        \define('BBN_APPUI', $opt->fromCode('appui'));
-      }
-
-      if (!\defined("BBN_APPUI_ROOT")) {
-        \define('BBN_APPUI_ROOT', $opt->fromRootCode('appui'));
+        \define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));
       }
 
       if (!$path) {
-        if (!BBN_APPUI || !BBN_APPUI_ROOT) {
+        if (!BBN_APPUI) {
           X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
           return;
         }
 
         $tmp                   = explode('\\', __CLASS__);
         $cls                   = end($tmp);
-        $path                  = [$cls, BBN_APPUI];
-        self::$option_appui_id = $opt->fromCode($cls, BBN_APPUI_ROOT);
-      }
-      else{
-        self::$option_appui_id = null;
+        $path                  = [$cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
-      //if ( !self::$option_appui_id || !self::$option_root_id ){
-      if (!self::$option_root_id) {
+            if (!self::$option_root_id) {
         X::log("Impossible to find the option $cls for ".__CLASS__, 'errors');
         return;
       }
@@ -151,13 +128,6 @@ trait Optional
   {
     self::optionalInit();
     return self::$option_root_id;
-  }
-
-
-  public static function getAppuiRoot()
-  {
-    self::optionalInit();
-    return self::$option_appui_id;
   }
 
 
@@ -245,62 +215,19 @@ trait Optional
   }
 
 
-  /**
-   * Returns The option's ID of a category, i.e. direct children of option's root
-   *
-   * @param string $code
-   * @return int|false
-   */
-  public static function getAppuiOptionId(): ?string
-  {
-    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));
-  }
-
-
-  public static function getAppuiOptionsIds(): array
-  {
-    return array_flip(
-      array_filter(
-        self::getOptionsObject()->getCodes(
-          ...self::_treat_args(func_get_args(), true)
-        ),
-        function ($a) {
-          return $a !== null;
-        }
-      )
-    );
-  }
-
-
-  public static function getAppuiOptionsTree(): array
-  {
-    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];
-  }
-
-
-  public static function getAppuiOptions(): ?array
-  {
-    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));
-  }
-
-
-  public static function getAppuiOption(): ?array
-  {
-    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));
-  }
-
-
-  public static function getAppuiOptionsTextValue()
-  {
-    return ($id = self::getAppuiOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];
-  }
-
 
   protected static function _treat_args(array $args, $appui = false): array
   {
-    if ((count($args) > 1) || !Str::isUid($args[0] ?? null)) {
+    $hasUid = Str::isUid(end($args));
+    if (count($args) && !$hasUid) {
       self::optionalInit();
-      $args[] = $appui ? self::$option_appui_id : self::$option_root_id;
+      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {
+        $args[] = 'options';
+      }
+    }
+
+    if (!$hasUid) {
+      $args[] = self::$option_root_id;
     }
 
     return $args;

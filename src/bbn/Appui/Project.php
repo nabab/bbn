@@ -383,15 +383,18 @@ class Project extends bbn\Models\Cls\Db
 
   public function getDbs(): array
   {
-    $res = $this->getFullTree()['db'];
-    $o = self::getOptionsObject();
-    foreach ($res['db']['items'] as $i => $db) {
-      foreach ($db['items'] as $j => $conn) {
-        $res['db']['items'][$i]['items'][$j]['engine'] = $o->code($o->getIdParent($conn['alias']['id_parent']));
+    $res = $this->getFullTree();
+    if (isset($res['db'])) {
+      $o = self::getOptionsObject();
+      foreach ($res['db']['items'] as $i => $db) {
+        foreach ($db['items'] as $j => $conn) {
+          $res['db']['items'][$i]['items'][$j]['engine'] = $o->code($o->getIdParent($conn['alias']['id_parent']));
+        }
       }
+      return $res['db'];
     }
 
-    return $res;
+    return [];
   }
 
 
@@ -981,6 +984,12 @@ class Project extends bbn\Models\Cls\Db
         if (defined("BBN_".strtoupper($root['code'])."_PATH")) {
           $path = constant("BBN_".strtoupper($root['code'])."_PATH");
           foreach($root['items'] as $option) {
+            if (!isset($option['path'])) {
+              continue;
+              X::log(["Project no path", $option]);
+              throw new Exception(X::_("No path in option for project for %s", $option['code']));
+            }
+
             $tmp = [
               'id' => $option['id'],
               'id_alias' => $option['id_alias'],

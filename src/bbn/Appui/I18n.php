@@ -8,15 +8,21 @@
 
 namespace bbn\Appui;
 
-use bbn;
+use Exception;
+use bbn\User;
+use bbn\Db;
+use bbn\Str;
 use bbn\X;
 use bbn\File\Dir;
-use bbn\Str;
+use bbn\Appui\Option;
+use bbn\Appui\Project;
+use bbn\Models\Tts\Optional;
+use bbn\Models\Cls\Cache as cacheCls;
+use Gettext\Translations;
 
-class I18n extends bbn\Models\Cls\Cache
+class I18n extends cacheCls
 {
-  use
-    bbn\Models\Tts\Optional;
+  use Optional;
 
   protected static $extensions = ['js', 'json', 'php', 'html'];
 
@@ -36,24 +42,24 @@ class I18n extends bbn\Models\Cls\Cache
    *
    * @param db
    */
-  public function __construct(bbn\Db $db, string $code = null)
+  public function __construct(Db $db, string $code = null)
   {
     parent::__construct($db);
-    $this->parser  = new \Gettext\Translations();
-    $this->user    = \bbn\User::getInstance();
-    $this->options = new \bbn\Appui\Option($db);
+    $this->parser  = new Translations();
+    $this->user    = User::getInstance();
+    $this->options = new Option($db);
     if (empty($code)) {
-      if (\defined('BBN_APP_NAME')) {
-        $code = BBN_APP_NAME;
+      if (\defined('BBN_APP_PREFIX')) {
+        $code = CONSTANT('BBN_APP_PREFIX');
       }
       else {
-        throw new \Exception(X::_("The project's ID/Code is mandatory"));
+        throw new Exception(X::_("The project's ID/Code is mandatory"));
       }
     }
 
-    $this->id_project = \bbn\Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
+    $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
     if (empty($this->id_project)) {
-      throw new \Exception(X::_("Project's ID not found"));
+      throw new Exception(X::_("Project's ID not found"));
     }
   }
 
@@ -68,7 +74,7 @@ class I18n extends bbn\Models\Cls\Cache
   {
     $res = [];
     $php = file_get_contents($file);
-    if ($tmp = \Gettext\Translations::fromPhpCodeString(
+    if ($tmp = Translations::fromPhpCodeString(
       $php, [
       'functions' => [
         '_' => 'gettext'
@@ -98,7 +104,7 @@ class I18n extends bbn\Models\Cls\Cache
   {
     $res = [];
     $js  = file_get_contents($file);
-    if ($tmp = \Gettext\Translations::fromJsCodeString(
+    if ($tmp = Translations::fromJsCodeString(
       $js, [
       'functions' => [
         '_' => 'gettext',
@@ -117,7 +123,7 @@ class I18n extends bbn\Models\Cls\Cache
 
     if (preg_match_all('/`([^`]*)`/', $js, $matches)) {
       foreach ($matches[0] as $st){
-        if ($tmp = \Gettext\Translations::fromVueJsString(
+        if ($tmp = Translations::fromVueJsString(
           '<template>'.$st.'</template>', [
           'functions' => [
             '_' => 'gettext',
@@ -137,7 +143,7 @@ class I18n extends bbn\Models\Cls\Cache
     }
 
     /*if($file === '/home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/appui-task/src/components/tab/tracker/tracker.js'){
-      die(\bbn\X::hdump($res, $js));
+      die(X::hdump($res, $js));
     }*/
 
     return array_unique($res);
@@ -148,7 +154,7 @@ class I18n extends bbn\Models\Cls\Cache
   {
     $res = [];
     $js  = file_get_contents($file);
-    if ($tmp = \Gettext\Translations::fromJsCodeString(
+    if ($tmp = Translations::fromJsCodeString(
       $js, [
       'functions' => [
         '_' => 'gettext',
@@ -179,12 +185,12 @@ class I18n extends bbn\Models\Cls\Cache
   {
     $res = [];
     $js  = file_get_contents($file);
-    if (bbn\Str::fileExt($file) === 'php') {
+    if (Str::fileExt($file) === 'php') {
       $re = '/\<{1}\?{1}(php){0,1}.*\?{1}\>{1}/m';
       $js = preg_replace($re, '', $js);
     }
-    $js = \bbn\Str::removeComments($js);
-    if ($tmp = \Gettext\Translations::fromVueJsString(
+    $js = Str::removeComments($js);
+    if ($tmp = Translations::fromVueJsString(
       '<template>'.$js.'</template>', [
       'functions' => [
         '_' => 'gettext',
@@ -214,7 +220,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function analyzeFile(string $file): array
   {
     $res = [];
-    $ext = bbn\Str::fileExt($file);
+    $ext = Str::fileExt($file);
     if (\in_array($ext, self::$extensions, true) && is_file($file)) {
       switch ($ext){
         case 'html':
@@ -247,7 +253,7 @@ class I18n extends bbn\Models\Cls\Cache
   {
     $res = [];
     if (\is_dir($folder)) {
-      $files = $deep ? bbn\File\Dir::scan($folder, 'file') : bbn\File\Dir::getFiles($folder);
+      $files = $deep ? Dir::scan($folder, 'file') : Dir::getFiles($folder);
       foreach ($files as $f){
         $words = $this->analyzeFile($f);
         foreach ($words as $word){
@@ -566,7 +572,7 @@ class I18n extends bbn\Models\Cls\Cache
         // @var $dirs scans dirs existing in locale folder for this path
       if (is_dir($locale_dir)) {
         // @var array $languages dirs in locale folder
-        $dirs = \bbn\File\Dir::getDirs($locale_dir) ?: [];
+        $dirs = Dir::getDirs($locale_dir) ?: [];
         if (!empty($dirs)) {
           foreach ($dirs as $l){
             $languages[] = X::basename($l);
@@ -701,7 +707,7 @@ class I18n extends bbn\Models\Cls\Cache
       $tmp = [];
       // @var  $locale_dir locale dir in the path
       $locale_dir = $this->getLocaleDirPath($id_option);
-      $dirs       = \bbn\File\Dir::getDirs($locale_dir) ?: [];
+      $dirs       = Dir::getDirs($locale_dir) ?: [];
       $languages  = array_map(
         function ($a) {
           return X::basename($a);
@@ -838,7 +844,7 @@ class I18n extends bbn\Models\Cls\Cache
         && ($locale_dir = $this->getLocaleDirPath($id_option))
     ) {
       //creates the array $to_explore_dirs containing mvc, plugins e components
-      if ($to_explore_dirs = bbn\File\Dir::getDirs($to_explore)) {
+      if ($to_explore_dirs = Dir::getDirs($to_explore)) {
         $current_dirs = array_values(
           array_filter(
             $to_explore_dirs, function ($a) {
@@ -862,7 +868,7 @@ class I18n extends bbn\Models\Cls\Cache
         $languages = array_map(
           function ($a) {
             return X::basename($a);
-          }, \bbn\File\Dir::getDirs($locale_dir)
+          }, Dir::getDirs($locale_dir)
         ) ?: [];
       }
 
@@ -973,12 +979,12 @@ class I18n extends bbn\Models\Cls\Cache
       $languages = array_map(
         function ($a) {
           return X::basename($a);
-        }, \bbn\File\Dir::getDirs($locale_dir)
+        }, Dir::getDirs($locale_dir)
       ) ?: [];
 
       $i       = 0;
       $res     = [];
-      $project = new bbn\Appui\Project($this->db, $id_project);
+      $project = new Project($this->db, $id_project);
       if (!empty($languages)) {
         $po_file = [];
         $success = false;
@@ -1077,7 +1083,7 @@ class I18n extends bbn\Models\Cls\Cache
               // @var  $original the original expression
               $id = null;
               if ($original = stripslashes($t->getMsgId())) {
-                $idx = \bbn\X::find($res, ['exp' => $original]);
+                $idx = X::find($res, ['exp' => $original]);
                 if ($idx !== null) {
                   $todo = false;
                   $row  =& $res[$idx];
@@ -1103,7 +1109,7 @@ class I18n extends bbn\Models\Cls\Cache
                     'exp' => $this->normlizeText($original),
                     'lang' => $path_source_lang
                   ])) {
-                    throw new \Exception(
+                    throw new Exception(
                       sprintf(
                         _("Impossible to insert the original string %s in the original language %s"),
                         $this->normlizeText($original),
@@ -1136,7 +1142,7 @@ class I18n extends bbn\Models\Cls\Cache
                       $row[$lng.'_db'] = $row[$lng.'_po'];
                     }
                     else{
-                      throw new \Exception(
+                      throw new Exception(
                         sprintf(
                           _("Impossible to insert or update the expression \"%s\" in %s"),
                           $row[$lng.'_po'],
@@ -1220,7 +1226,7 @@ class I18n extends bbn\Models\Cls\Cache
                 }
                 else {
                   $langText = X::getField($primaryLanguages, ['code' => $lang], 'text');
-                  throw new \Exception(X::_('Impossible to insert the original string %s in the original language %s', $this->normlizeText($exp), $langText));
+                  throw new Exception(X::_('Impossible to insert the original string %s in the original language %s', $this->normlizeText($exp), $langText));
                 }
               }
               if (!empty($idExp)) {
@@ -1303,7 +1309,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function getPathToExplore(string $id_option) :? String
   {
     if ($this->id_project) {
-      /** @var bbn\Appui\Project */
+      /** @var Project */
       $project = new Project($this->db, $this->id_project);
       //the repository
       $rep = $project->repositoryById($id_option);
@@ -1406,7 +1412,7 @@ class I18n extends bbn\Models\Cls\Cache
   public function generateFiles(string $idPath, array $languages = [], string $mode = 'files')
   {
     if (!\in_array($mode, ['files', 'options'], true)) {
-      throw new \Exception(X::_("No valid mode %s", $mode));
+      throw new Exception(X::_("No valid mode %s", $mode));
     }
     // The position of locale directory
     $localeDir = $this->getLocaleDirPath($idPath);
@@ -1531,7 +1537,7 @@ class I18n extends bbn\Models\Cls\Cache
         $constroot = 'BBN_'.strtoupper($parent['code']).'_PATH';
         if (!defined($constroot)) {
           X::log($this->options->option($idPath));
-          throw new \Exception("Impossible to find the root for option, see Misc log");
+          throw new Exception("Impossible to find the root for option, see Misc log");
         }
         $root = constant($constroot);
         foreach ($data['res'] as $index => $r) {
@@ -1757,7 +1763,7 @@ class I18n extends bbn\Models\Cls\Cache
           \unlink($file.'mo');
         }
         if (\is_file($file.'po')
-          && ($translations = \Gettext\Translations::fromPoFile($file.'po'))
+          && ($translations = Translations::fromPoFile($file.'po'))
           && !$translations->toMoFile($file.'mo')
         ) {
           $success = false;

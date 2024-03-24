@@ -92,8 +92,8 @@ class Task extends bbn\Models\Cls\Db
 
   public static function getTasksOptions(){
     if (
-      ($states = self::getAppuiOptionsIds('states')) &&
-      ($roles = self::getAppuiOptionsIds('roles')) &&
+      ($states = self::getOptionsIds('states')) &&
+      ($roles = self::getOptionsIds('roles')) &&
       ($cats = self::catCorrespondances())
     ){
       return [
@@ -189,15 +189,15 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function actions(){
-    return self::getAppuiOptionsIds('actions');
+    return self::getOptionsIds('actions');
   }
 
   public function states(){
-    return self::getAppuiOptionsIds('states');
+    return self::getOptionsIds('states');
   }
 
   public function roles(){
-    return self::getAppuiOptionsIds('roles');
+    return self::getOptionsIds('roles');
   }
 
   public function idCat($code){
@@ -205,19 +205,19 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function idAction($code){
-    return self::getAppuiOptionId($code, 'actions');
+    return self::getOptionId($code, 'actions');
   }
 
   public function idState($code){
-    return self::getAppuiOptionId($code, 'states');
+    return self::getOptionId($code, 'states');
   }
 
   public function idRole($code){
-    return self::getAppuiOptionId($code, 'roles');
+    return self::getOptionId($code, 'roles');
   }
 
   public function idPrivilege($code){
-    return self::getAppuiOptionId($code, 'privileges');
+    return self::getOptionId($code, 'privileges');
   }
 
   public function getMine($parent = null, $order = 'priority', $dir = 'ASC', $limit = 50, $start = 0){
@@ -1101,7 +1101,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function infoRoles($id){
     $r = [];
-    if ($roles = self::getAppuiOptions('roles')) {
+    if ($roles = self::getOptions('roles')) {
       $userCfg = bbn\User::getInstance()->getClassCfg();
       $optCfg = bbn\Appui\Option::getInstance()->getClassCfg();
       $all = $this->db->rselectAll([
@@ -1199,7 +1199,7 @@ class Task extends bbn\Models\Cls\Db
       $r = $note->insert(
         (empty($cfg['title']) ? '' : $cfg['title']),
         (empty($cfg['text']) ? '' : $cfg['text']),
-        \bbn\Appui\Note::getAppuiOptionId('tasks', 'types')
+        \bbn\Appui\Note::getOptionId('tasks', 'types')
       );
       if ( $r ){
         $this->db->insert('bbn_tasks_notes', [

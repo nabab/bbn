@@ -7448,37 +7448,37 @@
                 ]
             },
             {
-                "name": "getAppuiOption",
+                "name": "getOption",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionId",
+                "name": "getOptionId",
                 "type": "fn",
                 "desc": "Returns The option's ID of a category, i.e. direct children of option's root",
                 "args": []
             },
             {
-                "name": "getAppuiOptions",
+                "name": "getOptions",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionsIds",
+                "name": "getOptionsIds",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionsTextValue",
+                "name": "getOptionsTextValue",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionsTree",
+                "name": "getOptionsTree",
                 "type": "fn",
                 "desc": "",
                 "args": []
@@ -8215,37 +8215,37 @@
                 ]
             },
             {
-                "name": "getAppuiOption",
+                "name": "getOption",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionId",
+                "name": "getOptionId",
                 "type": "fn",
                 "desc": "Returns The option's ID of a category, i.e. direct children of option's root",
                 "args": []
             },
             {
-                "name": "getAppuiOptions",
+                "name": "getOptions",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionsIds",
+                "name": "getOptionsIds",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionsTextValue",
+                "name": "getOptionsTextValue",
                 "type": "fn",
                 "desc": "",
                 "args": []
             },
             {
-                "name": "getAppuiOptionsTree",
+                "name": "getOptionsTree",
                 "type": "fn",
                 "desc": "",
                 "args": []

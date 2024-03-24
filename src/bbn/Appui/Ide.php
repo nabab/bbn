@@ -1130,7 +1130,7 @@ class Ide
             'access',
             'permissions',
             strpos($plugin, 'appui-') === 0 ? substr($plugin, 6) : $plugin,
-            strpos($plugin, 'appui-') === 0 ? 'appui' : null
+            strpos($plugin, 'appui-') === 0 ? 'appui' : 'plugins'
           );
         } else {
           array_push($bits, $this->_permissions());
@@ -2104,7 +2104,7 @@ class Ide
   public function getType(string $type)
   {
     if (!empty($type)) {
-      return self::getAppuiOption($type, self::PATH_TYPE);
+      return self::getOption($type, self::PATH_TYPE);
     }
   }
 
@@ -2116,7 +2116,7 @@ class Ide
    */
   public function getTypes()
   {
-    return self::getAppuiOption(self::PATH_TYPE);
+    return self::getOption(self::PATH_TYPE);
   }
 
 
@@ -2621,7 +2621,7 @@ class Ide
   private function _permissions()
   {
     if (!self::$permissions) {
-      if ($id = $this->options->fromCode(self::BBN_ACCESS, self::BBN_PERMISSIONS, self::BBN_APPUI)) {
+      if ($id = $this->options->fromCode(self::BBN_ACCESS, self::BBN_PERMISSIONS)) {
         self::_set_permissions($id);
       }
     }

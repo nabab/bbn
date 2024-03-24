@@ -3127,8 +3127,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionId": {
-            "name": "getAppuiOptionId",
+        "getOptionId": {
+            "name": "getOptionId",
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
@@ -3154,8 +3154,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsIds": {
-            "name": "getAppuiOptionsIds",
+        "getOptionsIds": {
+            "name": "getOptionsIds",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3180,8 +3180,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsTree": {
-            "name": "getAppuiOptionsTree",
+        "getOptionsTree": {
+            "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3206,8 +3206,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptions": {
-            "name": "getAppuiOptions",
+        "getOptions": {
+            "name": "getOptions",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3233,8 +3233,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOption": {
-            "name": "getAppuiOption",
+        "getOption": {
+            "name": "getOption",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3260,8 +3260,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsTextValue": {
-            "name": "getAppuiOptionsTextValue",
+        "getOptionsTextValue": {
+            "name": "getOptionsTextValue",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3269,7 +3269,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getAppuiOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
             "startLine": 293,
             "endLine": 296,
             "isDeprecated": false,

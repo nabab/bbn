@@ -146,12 +146,12 @@ class Link extends EntityTable
   public function get($id = null): ?array
   {
     if ($this->cfg['single']) {
-      $res = $this->dbTraitRselectAll([]);
+      $res = $this->dbTraitRselectAll([]); 
       return $res ? $res[0] : null;
     }
 
     if (!$id) {
-      throw new Exception(X::_("This link is not single, you ust enter an ID for get"));
+      throw new Exception(X::_("This link is not single, you must enter an ID for get"));
     }
 
     return $this->dbTraitRselect([$this->fields['id'] => $id]);

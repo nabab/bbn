@@ -95,7 +95,7 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     self::retrieverInit($this);
-    self::optionalInit();
+    self::optionalInit(['permissions']);
     $this->db = Db::getInstance();
   }
 
@@ -180,7 +180,8 @@ class Permissions extends bbn\Models\Cls\Basic
               'access',
               'permissions',
               substr($plugin['name'], 6),
-              BBN_APPUI
+              'appui',
+              'plugins'
             );
             $path = substr($path, strlen($plugin['url']) + 1);
           }
@@ -249,40 +250,28 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function toPath(string $id_option): ?string
   {
-    $bits = $this->opt->getCodePath($id_option);
-    // Minimum: appui, plugin, permissions, path
-    if (empty($bits) || (count($bits) < 4)) {
-      return null;
-    }
+    if ($parents = $this->opt->parents($id_option)) {
+      $idPlugin = $this->opt->getTemplateId('plugin');
+      $prefix = '';
+      foreach ($parents as $i => $p) {
+        if ($this->opt->getIdAlias($p) === $idPlugin) {
+          $path = array_slice($this->opt->getCodePath($id_option), 0, $i - 1);
+          if ($p !== $this->opt->getDefault()) {
+            $isOk = true;
+            while ($isOk) {
+              $prefix = $this->opt->code($p) . ($prefix ? '-' . $prefix : '');
+              $i++;
+              $p = $parents[$i];
+              $isOk = ($code = $this->opt->code($p)) && ($code !== 'plugins');
+            }
 
-    $bits = array_reverse($bits);
-    if (array_shift($bits) !== 'appui') {
-      return null;
-    }
+            $plugin = X::getRow($this->plugins, ['name' => $prefix]);
+            $prefix = $plugin['url'] . '/';
+          }
 
-    $root   = array_shift($bits);
-    $ok     = false;
-    $prefix = '';
-    // Main application
-    if ($root === 'permissions') {
-      if (array_shift($bits) !== 'access') {
-        throw new Exception("The permission should be under access");
+          return $prefix.X::join(array_reverse($path), '');
+        }
       }
-
-      $ok = true;
-    }
-    // Plugins
-    elseif ($plugin = X::getRow($this->plugins, ['name' => 'appui-'.$root])) {
-      if ((array_shift($bits) !== 'permissions') || (array_shift($bits) !== 'access')) {
-        throw new Exception("The permission should be under permissions/access of the plugin");
-      }
-
-      $prefix = $plugin['url'].'/';
-      $ok     = true;
-    }
-
-    if ($ok) {
-      return $prefix.X::join($bits, '');
     }
 
     return null;
@@ -469,7 +458,7 @@ class Permissions extends bbn\Models\Cls\Basic
 
 
   /**
-   * Alias of fromPath without exception.
+   * Alias of fromPath.
    *
    * @param string|null $id_option The option's UID
    * @param string      $type      The type: access or option
@@ -477,14 +466,7 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function is(string $path, string $type = 'access'): ?string
   {
-    $res = null;
-    try {
-      $res = $this->fromPath($path, $type);
-    }
-    catch (\Exception $e) {
-    }
-
-    return $res;
+    return $this->fromPath($path, $type);
   }
 
 
@@ -723,29 +705,42 @@ class Permissions extends bbn\Models\Cls\Basic
    */
   public function accessExists(string $id_perm): bool
   {
-    $real    = false;
-    $parents = array_reverse($this->opt->parents($id_perm));
-    $access  = $this->opt->fromCode('access', 'permissions', 'appui');
-    if (in_array($access, $parents, true)) {
+    $idPlugin = $this->opt->getTemplateId('plugin');
+    $parents = $this->opt->parents($id_perm);
+    $pluginName = '';
+    foreach ($parents as $i => $p) {
+      if ($this->opt->getIdAlias($p) === $idPlugin) {
+        $access = $parents[$i-2];
+        if ($idPlugin === $this->opt->getDefault()) {
+          $isOk = true;
+          $current = $p;
+          while ($isOk) {
+            $pluginName = $this->opt->code($p) . ($pluginName ? '-' : '') . $pluginName;
+            $i++;
+            $current = $parents[$i];
+            $isOk = $this->parent($current)['code'] === 'plugins';
+          }
+        }
+        break;
+      }
+    }
+
+    if (!empty($access)) {
       $path_to_file = $this->opt->toPath($id_perm, '', $access);
-      if (substr($path_to_file, -1) === '/') {
+      if ($pluginName) {
+        if (substr($path_to_file, -1) === '/') {
+          return is_dir(Mvc::getPluginPath($pluginName).'mvc/public/'.substr($path_to_file, 0, -1));
+        }
+
+        return file_exists(Mvc::getPluginPath($pluginName).'mvc/public/'.$path_to_file.'.php');
+      }
+      else {
+            if (substr($path_to_file, -1) === '/') {
         return is_dir(Mvc::getAppPath().'mvc/public/'.substr($path_to_file, 0, -1));
       }
 
       return file_exists(Mvc::getAppPath().'mvc/public/'.$path_to_file.'.php');
-    }
-    else {
-      $plugin_name = $this->opt->code($parents[2]);
-      if ($this->opt->code($parents[1]) === 'appui') {
-        $plugin_name = 'appui-'.$plugin_name;
-      }
-
-      $path_to_file = $this->opt->toPath($id_perm, '', $parents[4]);
-      if (substr($path_to_file, -1) === '/') {
-        return is_dir(Mvc::getPluginPath($plugin_name).'mvc/public/'.substr($path_to_file, 0, -1));
-      }
-
-      return file_exists(Mvc::getPluginPath($plugin_name).'mvc/public/'.$path_to_file.'.php');
+}
     }
 
     return false;
@@ -763,7 +758,7 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     $args = ['access', 'permissions'];
     if (strpos($name, 'appui-') === 0) {
-      array_push($args, substr($name, 6), 'appui');
+      array_push($args, substr($name, 6), 'appui', 'plugins');
     }
     else {
       array_push($args, $name, 'plugins');
@@ -783,53 +778,24 @@ class Permissions extends bbn\Models\Cls\Basic
   public function optionPermissionRoot(string $id, $create = false): ?string
   {
     /** @var string The option's ID for appui */
-    $appui   = $this->opt->fromCode('appui');
+    $root   = $this->opt->fromCode('permissions');
 
     /** @var string The option's ID for plugins */
     $plugins = $this->opt->fromCode('plugins');
 
-    /** @var array The parents, the first being root */
-    $parents = array_reverse($this->opt->parents($id));
+    /** @var string The option's ID for plugins */
+    $appui = $this->opt->fromCode('appui', $plugins);
 
-    $num     = count($parents);
-
-    // Looking for the root of the options' permissions
-    if (($num > 2) && \in_array($parents[1], [$appui, $plugins])) {
-
-      if (($num > 4) && ($this->opt->code($parents[3]) === 'plugins')) {
-
-        /** @var string  */
-        $root_parent = $this->opt->fromCode('plugins', 'permissions', $parents[2]);
-        if (!$root_parent) {
-          throw new Exception("Impossible to find a parent for plugin's permission ".$parents[2]);
-        }
-
-        $plugin  = $this->opt->code($parents[4]);
-        if ($parents[1] === $appui) {
-          $alias = $this->opt->fromCode('options', 'permissions', $plugin, 'appui');
-        }
-        else {
-          $alias = $this->opt->fromCode('options', 'permissions', $plugin, 'plugins');
-        }
-
-        $id_root = $this->opt->fromCode($plugin, $root_parent);
-        if (!$id_root && $create) {
-          $id_root = $this->opt->add([
-            'id_parent' => $root_parent,
-            'code' => $plugin,
-            'text' => $plugin,
-            'id_alias' => $alias
-          ]);
-        }
-
-        return $id_root;
+    /** @var array The parents, the first being root, the second the project */
+    $parents = $this->opt->parents($id);
+    $idPlugin = $this->opt->getTemplateId('plugin');
+    foreach ($parents as $p) {
+      if ($this->opt->option($p)['id_alias'] === $idPlugin) {
+        return $this->opt->fromCode('options', 'permissions', $p);
       }
-
-      return $this->opt->fromCode('options', 'permissions', $parents[2]);
     }
 
-    /** @var string The option's ID of the permissions on options $id_option */
-    return $this->getOptionId('options');
+    return null;
   }
 
 
@@ -1184,7 +1150,7 @@ class Permissions extends bbn\Models\Cls\Basic
       }
     }
     else {
-      $id_root = $this->opt->fromCode('options', 'permissions', $appui);
+      $id_root = $this->opt->fromCode('options', 'permissions');
     }
 
     if (!$id_root) {

@@ -162,7 +162,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      ($states = self::getAppuiOptionsIds('states')) &&\n      ($roles = self::getAppuiOptionsIds('roles')) &&\n      ($cats = self::catCorrespondances())\n    ){\n      return [\n        'states' => $states,\n        'roles' => $roles,\n        'cats' => $cats\n      ];\n    }\n  }",
+            "code": "function()\n  {\n      ($states = self::getOptionsIds('states')) &&\n      ($roles = self::getOptionsIds('roles')) &&\n      ($cats = self::catCorrespondances())\n    ){\n      return [\n        'states' => $states,\n        'roles' => $roles,\n        'cats' => $cats\n      ];\n    }\n  }",
             "startLine": 93,
             "endLine": 105,
             "isDeprecated": false,
@@ -1829,7 +1829,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ($roles = self::getAppuiOptions('roles')) {\n      $userCfg = bbn\\User::getInstance()->getClassCfg();\n      $optCfg = bbn\\Appui\\Option::getInstance()->getClassCfg();\n      $all = $this->db->rselectAll([\n        'table' => 'bbn_tasks_roles',\n        'fields' => [],\n        'join' => [[\n          'table' => $optCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($optCfg['arch']['options']['id'], $optCfg['table']),\n              'exp' => 'bbn_tasks_roles.role'\n            ]]\n          ]\n        ], [\n          'table' => $userCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($userCfg['arch']['users']['id'], $userCfg['table']),\n              'exp' => 'bbn_tasks_roles.id_user'\n            ], [\n              'field' => $this->db->cfn($userCfg['arch']['users']['active'], $userCfg['table']),\n              'value' => 1\n            ]]\n          ]\n        ]],\n        'where' => ['id_task' => $id],\n        'order' => [$this->db->cfn($userCfg['arch']['users']['username'], $userCfg['table']) => 'asc']\n      ]);\n      foreach ( $all as $a ){\n        $code = X::getField($roles, ['id' => $a['role']], 'code');\n        if (!isset($r[$code])) {\n          $r[$code] = [];\n        }\n        $r[$code][] = $a['id_user'];;\n      }\n    }\n    return $r;\n  }",
+            "code": "function($id)\n  {\n    if ($roles = self::getOptions('roles')) {\n      $userCfg = bbn\\User::getInstance()->getClassCfg();\n      $optCfg = bbn\\Appui\\Option::getInstance()->getClassCfg();\n      $all = $this->db->rselectAll([\n        'table' => 'bbn_tasks_roles',\n        'fields' => [],\n        'join' => [[\n          'table' => $optCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($optCfg['arch']['options']['id'], $optCfg['table']),\n              'exp' => 'bbn_tasks_roles.role'\n            ]]\n          ]\n        ], [\n          'table' => $userCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($userCfg['arch']['users']['id'], $userCfg['table']),\n              'exp' => 'bbn_tasks_roles.id_user'\n            ], [\n              'field' => $this->db->cfn($userCfg['arch']['users']['active'], $userCfg['table']),\n              'value' => 1\n            ]]\n          ]\n        ]],\n        'where' => ['id_task' => $id],\n        'order' => [$this->db->cfn($userCfg['arch']['users']['username'], $userCfg['table']) => 'asc']\n      ]);\n      foreach ( $all as $a ){\n        $code = X::getField($roles, ['id' => $a['role']], 'code');\n        if (!isset($r[$code])) {\n          $r[$code] = [];\n        }\n        $r[$code][] = $a['id_user'];;\n      }\n    }\n    return $r;\n  }",
             "startLine": 1092,
             "endLine": 1132,
             "isDeprecated": false,
@@ -2062,7 +2062,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id_task, array $cfg)\n  {\n      $note = new \\bbn\\Appui\\Note($this->db);\n      $r = $note->insert(\n        (empty($cfg['title']) ? '' : $cfg['title']),\n        (empty($cfg['text']) ? '' : $cfg['text']),\n        \\bbn\\Appui\\Note::getAppuiOptionId('tasks', 'types')\n      );\n      if ( $r ){\n        $this->db->insert('bbn_tasks_notes', [\n          'id_note' => $r,\n          'id_task' => $id_task\n        ]);\n        if ( !empty($cfg['files']) ){\n          $filename = '';\n          $extension = '';\n          $length = 0;\n          foreach ( $cfg['files'] as $f ){\n            $ext = \\bbn\\Str::fileExt($f, true);\n            if (\n              (\\strlen($ext[0]) < $length) ||\n              ($ext[1] !== $extension) ||\n              (strpos($ext[0], $filename) !== 0) ||\n              !preg_match('\/_h[\\d]+\/i', substr($ext[0], $length))\n            ){\n              $filename = $ext[0];\n              $extension = $ext[1];\n              $length = \\strlen($filename);\n              $note->addMedia($r, $f);\n            }\n          }\n        }\n        if ( !empty($cfg['links']) ){\n          foreach ( $cfg['links'] as $f ){\n            $ext = \\bbn\\Str::fileExt($f['image'], true);\n            if ( !preg_match('\/_h[\\d]+\/i', substr($ext[0], 0)) ){\n              $note->addMedia(\n                $r,\n                $f['image'],\n                ['url' => $f['url'], 'description' => $f['desc']],\n                $f['title'],\n                'link'\n              );\n            }\n          }\n        }\n        $this->addLog($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);\n      }\n      return $r;\n    }\n    return false;\n  }",
+            "code": "function($id_task, array $cfg)\n  {\n      $note = new \\bbn\\Appui\\Note($this->db);\n      $r = $note->insert(\n        (empty($cfg['title']) ? '' : $cfg['title']),\n        (empty($cfg['text']) ? '' : $cfg['text']),\n        \\bbn\\Appui\\Note::getOptionId('tasks', 'types')\n      );\n      if ( $r ){\n        $this->db->insert('bbn_tasks_notes', [\n          'id_note' => $r,\n          'id_task' => $id_task\n        ]);\n        if ( !empty($cfg['files']) ){\n          $filename = '';\n          $extension = '';\n          $length = 0;\n          foreach ( $cfg['files'] as $f ){\n            $ext = \\bbn\\Str::fileExt($f, true);\n            if (\n              (\\strlen($ext[0]) < $length) ||\n              ($ext[1] !== $extension) ||\n              (strpos($ext[0], $filename) !== 0) ||\n              !preg_match('\/_h[\\d]+\/i', substr($ext[0], $length))\n            ){\n              $filename = $ext[0];\n              $extension = $ext[1];\n              $length = \\strlen($filename);\n              $note->addMedia($r, $f);\n            }\n          }\n        }\n        if ( !empty($cfg['links']) ){\n          foreach ( $cfg['links'] as $f ){\n            $ext = \\bbn\\Str::fileExt($f['image'], true);\n            if ( !preg_match('\/_h[\\d]+\/i', substr($ext[0], 0)) ){\n              $note->addMedia(\n                $r,\n                $f['image'],\n                ['url' => $f['url'], 'description' => $f['desc']],\n                $f['title'],\n                'link'\n              );\n            }\n          }\n        }\n        $this->addLog($id_task, 'comment_insert', [$this->id_user, empty($cfg['title']) ? $cfg['text'] : $cfg['title']]);\n      }\n      return $r;\n    }\n    return false;\n  }",
             "startLine": 1186,
             "endLine": 1237,
             "isDeprecated": false,
@@ -3864,8 +3864,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionId": {
-            "name": "getAppuiOptionId",
+        "getOptionId": {
+            "name": "getOptionId",
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
@@ -3891,8 +3891,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsIds": {
-            "name": "getAppuiOptionsIds",
+        "getOptionsIds": {
+            "name": "getOptionsIds",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3917,8 +3917,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsTree": {
-            "name": "getAppuiOptionsTree",
+        "getOptionsTree": {
+            "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3943,8 +3943,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptions": {
-            "name": "getAppuiOptions",
+        "getOptions": {
+            "name": "getOptions",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3970,8 +3970,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOption": {
-            "name": "getAppuiOption",
+        "getOption": {
+            "name": "getOption",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -3997,8 +3997,8 @@
             "parent": false,
             "arguments": []
         },
-        "getAppuiOptionsTextValue": {
-            "name": "getAppuiOptionsTextValue",
+        "getOptionsTextValue": {
+            "name": "getOptionsTextValue",
             "summary": "",
             "description": "",
             "description_parts": [],
@@ -4006,7 +4006,7 @@
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getAppuiOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
             "startLine": 293,
             "endLine": 296,
             "isDeprecated": false,

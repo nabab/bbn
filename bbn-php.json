@@ -19258,55 +19258,55 @@
                             {
                                 "type": "method",
                                 "class": "Models\/Tts\/Optional",
-                                "text": "getAppuiOption",
-                                "value": "getAppuiOption",
+                                "text": "getOption",
+                                "value": "getOption",
                                 "lastmod": 1665094806,
-                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getAppuiOption",
+                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getOption",
                                 "desc": ""
                             },
                             {
                                 "type": "method",
                                 "class": "Models\/Tts\/Optional",
-                                "text": "getAppuiOptionId",
-                                "value": "getAppuiOptionId",
+                                "text": "getOptionId",
+                                "value": "getOptionId",
                                 "lastmod": 1665094806,
-                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getAppuiOptionId",
+                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getOptionId",
                                 "desc": "Returns The option's ID of a category, i.e. direct children of option's root"
                             },
                             {
                                 "type": "method",
                                 "class": "Models\/Tts\/Optional",
-                                "text": "getAppuiOptions",
-                                "value": "getAppuiOptions",
+                                "text": "getOptions",
+                                "value": "getOptions",
                                 "lastmod": 1665094806,
-                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getAppuiOptions",
+                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getOptions",
                                 "desc": ""
                             },
                             {
                                 "type": "method",
                                 "class": "Models\/Tts\/Optional",
-                                "text": "getAppuiOptionsIds",
-                                "value": "getAppuiOptionsIds",
+                                "text": "getOptionsIds",
+                                "value": "getOptionsIds",
                                 "lastmod": 1665094806,
-                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getAppuiOptionsIds",
+                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getOptionsIds",
                                 "desc": ""
                             },
                             {
                                 "type": "method",
                                 "class": "Models\/Tts\/Optional",
-                                "text": "getAppuiOptionsTextValue",
-                                "value": "getAppuiOptionsTextValue",
+                                "text": "getOptionsTextValue",
+                                "value": "getOptionsTextValue",
                                 "lastmod": 1665094806,
-                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getAppuiOptionsTextValue",
+                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getOptionsTextValue",
                                 "desc": ""
                             },
                             {
                                 "type": "method",
                                 "class": "Models\/Tts\/Optional",
-                                "text": "getAppuiOptionsTree",
-                                "value": "getAppuiOptionsTree",
+                                "text": "getOptionsTree",
+                                "value": "getOptionsTree",
                                 "lastmod": 1665094806,
-                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getAppuiOptionsTree",
+                                "url": "bbn-php\/doc\/method\/Models\/Tts\/Optional\/getOptionsTree",
                                 "desc": ""
                             },
                             {

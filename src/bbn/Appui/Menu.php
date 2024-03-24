@@ -49,7 +49,7 @@ class Menu extends bbn\Models\Cls\Basic
     $id = null;
     if (!Str::isUid($path)) {
       //$path = $this->options->fromCode($path, self::$option_root_id);
-      if (!($id = self::getAppuiOptionId($path))) {
+      if (!($id = self::getOptionId($path))) {
         $id = $this->perm->fromPath($path);
       }
     }
@@ -68,10 +68,7 @@ class Menu extends bbn\Models\Cls\Basic
   {
     $path = null;
     if (Str::isUid($id)) {
-      if (!($path = $this->options->toPath($id, '', $this->_get_public_root()))) {
-        $path = $this->perm->toPath($id);
-      }
-
+      $path = $this->perm->toPath($id);
     }
 
     return \is_string($path) ? $path : null;
@@ -446,7 +443,7 @@ class Menu extends bbn\Models\Cls\Basic
   {
     $c    = $this->pref->getClassCfg();
     $pref =& $this->pref;
-    if (!($id_menus = self::getAppuiOptionId('menus'))) {
+    if (!($id_menus = self::getOptionId('menus'))) {
       throw new \Exception("Impossible to find the option for menus");
     }
 
@@ -655,7 +652,7 @@ class Menu extends bbn\Models\Cls\Basic
   public function getOptionsMenus()
   {
     //$items = $this->options->fullOptions('menus', self::$option_root_id);
-    $items = self::getAppuiOption('menu');
+    $items = self::getOption('menu');
     $res   = [];
     foreach ($items as $it){
       $res[] = [
