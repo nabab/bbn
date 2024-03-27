@@ -137,7 +137,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db)\n  {\n    $this->_init_class_cfg();\n    $this->opt = Option::getInstance();\n    $this->usr = User::getInstance();\n    \/\/$this->opt_id = $this->opt->fromRootCode('event', 'appui');\n  }",
+            "code": "function(bbn\\Db $db)\n  {\n    $this->_init_class_cfg();\n    $this->opt = Option::getInstance();\n    $this->usr = User::getInstance();\n    \/\/$this->opt_id = $this->opt->fromCode('event', 'appui');\n  }",
             "startLine": 152,
             "endLine": 158,
             "isDeprecated": false,

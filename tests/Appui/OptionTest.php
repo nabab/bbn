@@ -1037,7 +1037,7 @@ class OptionTest extends TestCase
 
     $this->assertSame(
       $this->item2,
-      $this->option->fromRootCode($this->item)
+      $this->option->fromCode($this->item)
     );
   }
 
@@ -1051,7 +1051,7 @@ class OptionTest extends TestCase
       ->andReturnFalse();
 
     $this->assertNull(
-      $this->option->fromRootCode($this->item)
+      $this->option->fromCode($this->item)
     );
   }
 

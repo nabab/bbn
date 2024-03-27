@@ -261,8 +261,8 @@ class Permissions extends bbn\Models\Cls\Basic
             while ($isOk) {
               $prefix = $this->opt->code($p) . ($prefix ? '-' . $prefix : '');
               $i++;
-              $p = $parents[$i];
-              $isOk = ($code = $this->opt->code($p)) && ($code !== 'plugins');
+              $p = $parents[$i] ?? null;
+              $isOk = $p && ($code = $this->opt->code($p)) && ($code !== 'plugins');
             }
 
             $plugin = X::getRow($this->plugins, ['name' => $prefix]);

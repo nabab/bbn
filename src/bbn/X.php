@@ -1275,24 +1275,41 @@ class X
   public static function pathinfo(string $path, $options = null)
   {
     $ret = ['dirname' => '', 'basename' => '', 'extension' => '', 'filename' => ''];
-    $pathinfo = [];
-    if (preg_match('#^(.*?)[\\\\/]*(([^/\\\\]*?)(\.([^.\\\\/]+?)|))[\\\\/.]*$#m', $path, $pathinfo)) {
-      if (array_key_exists(1, $pathinfo)) {
-        $ret['dirname'] = $pathinfo[1];
-      }
+    if (strpos($path, '://')) {
+      $isAbsolute = true;
+      [$protocol, $remain] = X::split($path, '://');
+      $bits = X::split($remain, '/');
+      array_shift($bits);
+    }
+    else {
+      $bits = self::split($path, '/');
+      $isAbsolute = substr($path, 0, 1) === '/';
+    }
 
-      if (array_key_exists(2, $pathinfo)) {
-        $ret['basename'] = $pathinfo[2];
-      }
-
-      if (array_key_exists(5, $pathinfo)) {
-        $ret['extension'] = $pathinfo[5];
-      }
-
-      if (array_key_exists(3, $pathinfo)) {
-        $ret['filename'] = $pathinfo[3];
+    $pbits = [];
+    foreach ($bits as $b) {
+      if (!empty($b)) {
+        $pbits[] = $b;
       }
     }
+
+    if (!empty($pbits)) {
+      $ret['filename'] = array_pop($pbits);
+      $ret['dirname'] = X::join($pbits, '/');
+      if ($isAbsolute) {
+        $ret['dirname'] = '/' . $ret['dirname'];
+      }
+
+      $fbits = X::split($ret['filename'], '.');
+      if (count($fbits) > 1) {
+        $ret['extension'] = array_pop($fbits);
+        $ret['basename'] = X::join($fbits, '/');
+      }
+      else {
+        $ret['basename'] = $ret['filename'];
+      }
+    }
+    
     switch ($options) {
       case PATHINFO_DIRNAME:
       case 'dirname':
@@ -1321,15 +1338,7 @@ class X
    */
   public static function basename(string $path, string $suffix = ''): string
   {
-    $res = '';
-    // works both in windows and unix
-    if (preg_match('@^.*[\\\\/]([^\\\\/]+)$@s', $path, $matches)) {
-      $res = $matches[1];
-    }
-    else if (preg_match('@^([^\\\\/]+)$@s', $path, $matches)) {
-      $res = $matches[1];
-    }
-
+    $res = self::pathinfo($path, 'filename');
     if ($res && $suffix && (substr($res, - strlen($suffix)) === $suffix)) {
       return substr($res, 0, - strlen($suffix));
     }

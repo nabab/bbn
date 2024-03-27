@@ -133,7 +133,7 @@ class NoteLink extends EntityJunction
       }
       if ( !empty($cfg['texte']) ){
         $note = new \bbn\Appui\Note($this->db);
-        $id_type = $this->options()->fromRootCode('adh', 'types', 'note', 'appui');
+        $id_type = $this->options()->fromCode('adh', 'types', 'note', 'appui');
         $type = $cfg['id_type_note'] ?: $this->options()->fromCode('OBS', 'types_notes');
         $confidentiel = empty($cfg['confidentiel']) ? 0 : 1;
         $locked = empty($cfg['locked']) ? 0 : 1;

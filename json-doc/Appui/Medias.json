@@ -160,7 +160,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db)\n  {\n    parent::__construct($db);\n    $this->_init_class_cfg();\n    $this->opt    = Option::getInstance();\n    $this->usr    = User::getInstance();\n    $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');\n    $this->fs     = new System();\n    $this->defaultUrlType = 'media';\n    $this->taggerInit(\n      $this->class_cfg['tables']['medias_tags'],\n      [\n        'id_tag' => $this->class_cfg['arch']['medias_tags']['id_tag'],\n        'id_element' => $this->class_cfg['arch']['medias_tags']['id_media']\n      ]\n    );\n  }",
+            "code": "function(bbn\\Db $db)\n  {\n    parent::__construct($db);\n    $this->_init_class_cfg();\n    $this->opt    = Option::getInstance();\n    $this->usr    = User::getInstance();\n    $this->opt_id = $this->opt->fromCode('media', 'note', 'appui');\n    $this->fs     = new System();\n    $this->defaultUrlType = 'media';\n    $this->taggerInit(\n      $this->class_cfg['tables']['medias_tags'],\n      [\n        'id_tag' => $this->class_cfg['arch']['medias_tags']['id_tag'],\n        'id_element' => $this->class_cfg['arch']['medias_tags']['id_media']\n      ]\n    );\n  }",
             "startLine": 96,
             "endLine": 112,
             "isDeprecated": false,

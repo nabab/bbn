@@ -154,7 +154,7 @@ class Event extends modelDb
     $this->_init_class_cfg();
     $this->opt = Option::getInstance();
     $this->usr = User::getInstance();
-    //$this->opt_id = $this->opt->fromRootCode('event', 'appui');
+    //$this->opt_id = $this->opt->fromCode('event', 'appui');
   }
 
   /**

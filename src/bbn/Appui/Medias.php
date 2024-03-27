@@ -109,7 +109,7 @@ class Medias extends DbCls
     $this->_init_class_cfg($cfg);
     $this->opt    = Option::getInstance();
     $this->usr    = User::getInstance();
-    $this->opt_id = $this->opt->fromRootCode('media', 'note', 'appui');
+    $this->opt_id = $this->opt->fromCode('media', 'note', 'appui');
     $this->fs     = new System();
     $this->defaultUrlType = 'media';
     $this->taggerInit(

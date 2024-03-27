@@ -82,7 +82,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db)\n  {\n    self::_init_class_cfg(self::$default_class_cfg);\n    $this->opt = bbn\\Appui\\Option::getInstance();\n    $this->opt_id = $this->opt->fromRootCode('pages', 'types', 'note', 'appui');\n    $this->notes = new bbn\\Appui\\Note($this->db);\n  }",
+            "code": "function(bbn\\Db $db)\n  {\n    self::_init_class_cfg(self::$default_class_cfg);\n    $this->opt = bbn\\Appui\\Option::getInstance();\n    $this->opt_id = $this->opt->fromCode('pages', 'types', 'note', 'appui');\n    $this->notes = new bbn\\Appui\\Note($this->db);\n  }",
             "startLine": 48,
             "endLine": 54,
             "isDeprecated": false,
