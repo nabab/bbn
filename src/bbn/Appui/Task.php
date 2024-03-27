@@ -1931,6 +1931,45 @@ class Task extends bbn\Models\Cls\Db
     );
   }
 
+  public function getTracksByDates(string $start, string $end, ?string $idUser = null): ?array
+  {
+    return $this->db->rselectAll([
+      'table' => 'bbn_tasks_sessions',
+      'fields' => $this->db->getFieldsList('bbn_tasks_sessions'),
+      'join' => [[
+        'table' => 'bbn_tasks',
+        'on' => [[
+          'field' => 'bbn_tasks.id',
+          'exp' => 'bbn_tasks_sessions.id_task'
+        ]]
+      ]],
+      'where' => [
+        'conditions' => [[
+          'field' => 'bbn_tasks_sessions.start',
+          'operator' => '<',
+          'value' => $end
+        ], [
+          'field' => 'bbn_tasks_sessions.id_user',
+          'value' => $idUser ?: $this->id_user
+        ], [
+          'field' => 'bbn_tasks_sessions.length',
+          'operator' => 'isnotnull'
+        ], [
+          'logic' => 'OR',
+          'conditions' => [[
+            'field' => 'bbn_tasks_sessions.start',
+            'operator' => '>=',
+            'value' => $start
+          ], [
+            'field' => 'bbn_tasks_sessions.end',
+            'operator' => '<=',
+            'value' => $end
+          ]]
+        ]]
+      ],
+    ]);
+  }
+
   public function getTrackStart(string $idTrack): ?string
   {
     return $this->db->selectOne('bbn_tasks_sessions', 'start', ['id' => $idTrack]);
