@@ -1949,6 +1949,10 @@ class Task extends bbn\Models\Cls\Db
           'operator' => '<',
           'value' => $end
         ], [
+          'field' => 'bbn_tasks_sessions.end',
+          'operator' => '>',
+          'value' => $start
+        ], [
           'field' => 'bbn_tasks_sessions.id_user',
           'value' => $idUser ?: $this->id_user
         ], [
@@ -1967,6 +1971,9 @@ class Task extends bbn\Models\Cls\Db
           ]]
         ]]
       ],
+      'order' => [
+        'bbn_tasks_sessions.start' => 'ASC'
+      ]
     ]);
   }
 
