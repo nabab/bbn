@@ -2130,7 +2130,7 @@ class Task extends bbn\Models\Cls\Db
       }
 
       foreach ($tokenYear as $code => $tokens) {
-        $idOption = self::getOptionId($code, 'cats', 'tokens');
+        $idOptionCat = self::getOptionId($code, self::getTokensCategoriesId());
         $used = $this->db->selectOne([
           'table' => 'bbn_tasks_sessions',
           'fields' => 'SUM(bbn_tasks_sessions.tokens)',
@@ -2154,7 +2154,7 @@ class Task extends bbn\Models\Cls\Db
           'where' => [
             'conditions' => X::mergeArrays($where, [[
               'field' => 'bbn_options.id_alias',
-              'value' => $idOption
+              'value' => $idOptionCat
             ]])
           ]
         ]) ?: 0;
@@ -2177,7 +2177,7 @@ class Task extends bbn\Models\Cls\Db
   {
     if (!empty($type)) {
       if (!Str::isUid($type)) {
-        $type = self::getOption($type, 'cats', 'tokens');
+        $type = self::getOption($type, self::getTokensCategoriesId());
       }
 
       if ($opt = self::getOption($type)) {
@@ -2186,7 +2186,7 @@ class Task extends bbn\Models\Cls\Db
         ];
       }
     }
-    elseif ($cats = self::getOptions('cats', 'tokens')) {
+    elseif ($cats = $this->getTokensCategories()) {
       $ret = [];
       foreach ($cats as $c) {
         $ret[$c['code']] = !empty($c['tokensYear']) ? $c['tokensYear'] : 0;
@@ -2213,7 +2213,7 @@ class Task extends bbn\Models\Cls\Db
     ]);
   }
 
-  public function getTokensType(string $idTask): ?string
+  public function getTokensCategory(string $idTask): ?string
   {
     return $this->db->selectOne([
       'table' => 'bbn_tasks',
@@ -2231,6 +2231,11 @@ class Task extends bbn\Models\Cls\Db
         'bbn_tasks.id' => $idTask
       ]
     ]);
+  }
+
+  public function getTokensCategories(): ?array
+  {
+    return self::getOptions(self::getTokensCategoriesId());
   }
 
   public function getTrackTokens(string $idTrack): ?int
@@ -2380,6 +2385,11 @@ class Task extends bbn\Models\Cls\Db
   private function getIdNote(string $id): ?string
   {
     return $this->db->selectOne('bbn_tasks', 'id_note', ['id' => $id]);
+  }
+
+  private static function getTokensCategoriesId(): ?string
+  {
+    return self::getOptionId('cats', 'tokens');
   }
 
 }
