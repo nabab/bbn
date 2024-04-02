@@ -36,11 +36,11 @@ class Webmin
   public function __construct(array $cfg)
   {
     if (empty($cfg['user'])) {
-      throw new Error(_('The username is mandatory'));
+      throw Error(_('The username is mandatory'));
     }
 
     if (empty($cfg['pass'])) {
-      throw new Error(_('The password is mandatory'));
+      throw Error(_('The password is mandatory'));
     }
 
     $this->cacheInit();
