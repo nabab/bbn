@@ -1686,7 +1686,7 @@ class Task extends bbn\Models\Cls\Db
             ], [
               'id' => $lastTrack['id']
             ]);
-            $lastTokens = (($lastTrack['length'] + $d) / $tokensCfg['step']) + $this->calcTokens($lastTrack['id'], $idUser);
+            $lastTokens = $this->calcTokensRaw($lastTrack['id'], true);
             $this->db->update('bbn_tasks_sessions', [
               'tokens' => floor($lastTokens)
             ], [
@@ -1737,14 +1737,13 @@ class Task extends bbn\Models\Cls\Db
       if ($ok) {
         $length = $now - strtotime($activeTrack['start']);
         $tokens = null;
-        if (($tokensCfg = $this->getTokensCfg())
-          && !empty($tokensCfg['step'])
-        ) {
-          $tokens = $length / $tokensCfg['step'];
-          if ($activeTrack['tokens'] === 1) {
-            $tokens += $this->calcTokens($activeTrack['id'], $idUser);
-          }
-          $tokens = ceil($tokens);
+        if ($this->getTokensCfg()) {
+          $tokens = ceil($this->calcTokens(
+            $activeTrack['id'],
+            $activeTrack['tokens'] === 1,
+            $activeTrack['start'],
+            date('Y-m-d H:i:s', $now)
+          ));
         }
 
         $ok = $this->db->update('bbn_tasks_sessions', [
@@ -1810,8 +1809,22 @@ class Task extends bbn\Models\Cls\Db
         'id' => $id
       ]);
 
+      if (!empty($ok)
+        && $this->getTokensCfg()
+      ) {
+        $tokens = $this->calcTokens($id, true, $start, $end);
+        if ($tokens !== $currentData['tokens']) {
+          $ok = (bool)$this->db->update('bbn_tasks_sessions', [
+            'tokens' => $tokens
+          ], [
+            'id' => $id
+          ]);
+        }
+      }
+
       // Tokens
       $this->checkTokens($id, $currentData['start'], $currentData['end']);
+      $this->checkTokens($id, $start, $end);
     }
 
     return $ok;
@@ -1819,15 +1832,19 @@ class Task extends bbn\Models\Cls\Db
 
   public function deleteTrack(string $id): bool
   {
-    // Message
-    if ($idNote = $this->getTrackIdNote($id)) {
-      $this->noteCls->remove($idNote, true);
+    if ($track = $this->getTrack($id)) {
+      // Message
+      if ($idNote = $this->getTrackIdNote($id)) {
+        $this->noteCls->remove($idNote, true);
+      }
+
+      // Tokens
+      $this->checkTokens($id, $track['start'], $track['end']);
+
+      return (bool)$this->db->delete('bbn_tasks_sessions', ['id' => $id]);
     }
 
-    // Tokens
-    $this->checkTokens($id);
-
-    return (bool)$this->db->delete('bbn_tasks_sessions', ['id' => $id]);
+    return true;
   }
 
   public function stopAllTracks($id){
@@ -2243,14 +2260,93 @@ class Task extends bbn\Models\Cls\Db
     return $this->db->selectOne('bbn_tasks_sessions', 'tokens', ['id' => $idTrack]);
   }
 
-  public function calcTokens(string $idTrack, ?string $idUser = null): int
+  public function hasTrackNextLink(string $idTrack): bool
+  {
+    if ($this->getTokensCfg()
+      && ($track = $this->getTrack($idTrack))
+    ) {
+      return (bool)$this->db->selectOne([
+        'table' => 'bbn_tasks_sessions',
+        'fields' => ['bbn_tasks_sessions.id'],
+        'join' => [[
+          'table' => 'bbn_tasks',
+          'on' => [[
+            'field' => 'bbn_tasks_sessions.id_task',
+            'exp' => 'bbn_tasks.id'
+          ]]
+        ]],
+        'where' => [
+          'bbn_tasks_sessions.start' => $track['end'],
+          'bbn_tasks_sessions.id_user' => $track['id_user'],
+          'bbn_tasks.active' => 1
+        ]
+      ]);
+    }
+
+    return false;
+  }
+
+  public function hasTrackPrevLink(string $idTrack): bool
+  {
+    if ($this->getTokensCfg()
+      && ($track = $this->getTrack($idTrack))
+    ) {
+      return (bool)$this->db->selectOne([
+        'table' => 'bbn_tasks_sessions',
+        'fields' => ['bbn_tasks_sessions.id'],
+        'join' => [[
+          'table' => 'bbn_tasks',
+          'on' => [[
+            'field' => 'bbn_tasks_sessions.id_task',
+            'exp' => 'bbn_tasks.id'
+          ]]
+        ]],
+        'where' => [
+          'bbn_tasks_sessions.end' => $track['start'],
+          'bbn_tasks_sessions.id_user' => $track['id_user'],
+          'bbn_tasks.active' => 1
+        ]
+      ]);
+    }
+
+    return false;
+  }
+
+  public function calcTokens(string $idTrack, bool $includeLinked = false, ?string $start = null, ?string $end = null): ?int
+  {
+    $tokens = $this->calcTokensRaw($idTrack, $includeLinked, $start, $end);
+    return \is_null($tokens) ? null : (int)($this->hasTrackNextLink($idTrack) ? floor($tokens) : ceil($tokens));
+  }
+
+  public function calcTokensRaw(string $idTrack, bool $includeLinked = false, ?string $start = null, ?string $end = null): ?float
+  {
+    $tokens = null;
+    if (($tokensCfg = $this->getTokensCfg())
+      && !empty($tokensCfg['step'])
+      && (($track = $this->getTrack($idTrack))
+        || (!empty($start) && !empty($end)))
+    ) {
+      $start = $start ?: $track['start'];
+      $end = $end ?: $track['end'];
+      $length = strtotime($end) - strtotime($start);
+      $tokens = $length / $tokensCfg['step'];
+      if (!empty($includeLinked)) {
+        $tokens += $this->calcLinkedTokens($idTrack, $start);
+      }
+    }
+
+    return $tokens;
+  }
+
+  public function calcLinkedTokens(string $idTrack, ?string $start = null): float
   {
     $tokens = 0;
-    if (($start = $this->getTrackStart($idTrack))
-      && ($tokensCfg = $this->getTokensCfg())
+    if (($tokensCfg = $this->getTokensCfg())
+      && ($track = $this->getTrack($idTrack))
     ) {
+      $start = $start ?: $track['start'];
       while (!empty($start)
-        && ($track = $this->db->select([
+        && ($t = $this->db->select([
           'table' => 'bbn_tasks_sessions',
           'fields' => [
             'bbn_tasks_sessions.start',
@@ -2266,60 +2362,50 @@ class Task extends bbn\Models\Cls\Db
           ]],
           'where' => [
             'bbn_tasks_sessions.end' => $start,
-            'bbn_tasks_sessions.id_user' => $idUser ?: $this->id_user,
+            'bbn_tasks_sessions.id_user' => $track['id_user'],
             'bbn_tasks.active' => 1
           ]
         ]))
       ) {
-        $start = $track->start;
-        $t = $track->length / $tokensCfg['step'];
-        if ($tt = $t - floor($t)) {
+        $start = $t->start;
+        $tok = $t->length / $tokensCfg['step'];
+        if ($tt = $tok - floor($tok)) {
           $tokens += $tt;
         }
       }
     }
 
-    return $tokens;
+    return $tokens - floor($tokens);
   }
 
-  private function checkTokens(string $idTrack, ?string $start = null, ?string $end = null): bool
+  private function checkTokens(string $idTrack, ?string $start = null, ?string $end = null)
   {
-    return true;
-    if ($tokensCfg = $this->tokensConfig()) {
-      $current = $this->getTrack($idTrack);
-      // Delete
-      if (empty($start)) {
-        $prev = $this->db->select([
-          'table' => 'bbn_tasks_sessions',
-          'fields' => [],
-          'where' => [[
-            'field' => 'end',
-            'value' => $current['start']
+    if ($this->getTokensCfg()
+      && ($linkedTracks = $this->getLinkedTracks($idTrack, $start, $end))
+    ) {
+      foreach( $linkedTracks as $lt) {
+        $tokens = $this->calcTokens($lt['id'], true);
+        if (($tokens !== $lt['tokens'])
+          && !$this->db->update('bbn_tasks_sessions', [
+            'tokens' => $tokens
           ], [
-            'field' => 'id',
-            'operator' => '!=',
-            'value' => $idTrack
-          ]]
-        ]);
-        $after = [];
-        
-      }
-      // Update
-      else if (!empty($start) && !empty($end)) {
-
+            'id' => $lt['id']
+          ])
+        ) {
+          throw new \Exception(X::_('Error while updating tokens, trackID: %s, oldTokens: %s, newTokens: %s', $lt['id'], (string)$lt['tokens'], (string)$tokens));
+        }
       }
     }
-
-    return true;
   }
 
-  public function getContinuousTracks(string $idTrack): array
+  public function getLinkedTracks(string $idTrack, ?string $start = null, ?string $end = null): array
   {
     $ret = [];
-    if ($tokensCfg = $this->getTokensCfg()) {
+    if ($this->getTokensCfg()) {
       $current = $this->getTrack($idTrack);
-      $end = $current['end'];
-      if ($prev = $this->db->select([
+      $end = $end ?: $current['end'];
+      $start = $start ?: $current['start'];
+      if ($prev = $this->db->rselect([
         'table' => 'bbn_tasks_sessions',
         'fields' => $this->db->getFieldsList('bbn_tasks_sessions'),
         'join' => [[
@@ -2331,7 +2417,7 @@ class Task extends bbn\Models\Cls\Db
         ]],
         'where' => [[
           'field' => 'bbn_tasks_sessions.end',
-          'value' => $current['start']
+          'value' => $start
         ], [
           'field' => 'bbn_tasks_sessions.id_user',
           'value' => $current['id_user']
@@ -2348,7 +2434,7 @@ class Task extends bbn\Models\Cls\Db
       }
 
       while (!empty($end)
-        && ($track = $this->db->select([
+        && ($track = $this->db->rselect([
           'table' => 'bbn_tasks_sessions',
           'fields' => $this->db->getFieldsList('bbn_tasks_sessions'),
           'join' => [[
@@ -2375,21 +2461,21 @@ class Task extends bbn\Models\Cls\Db
         ]))
       ) {
         $ret[] = $track;
-        $end = $track->end;
+        $end = $track['end'];
       }
     }
 
     return $ret;
   }
 
-  private function getIdNote(string $id): ?string
-  {
-    return $this->db->selectOne('bbn_tasks', 'id_note', ['id' => $id]);
-  }
-
   private static function getTokensCategoriesId(): ?string
   {
     return self::getOptionId('cats', 'tokens');
+  }
+
+  private function getIdNote(string $id): ?string
+  {
+    return $this->db->selectOne('bbn_tasks', 'id_note', ['id' => $id]);
   }
 
 }
