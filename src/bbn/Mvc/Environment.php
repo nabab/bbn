@@ -82,7 +82,7 @@ class Environment
    * Determines if it is sent through the command line
    * @var boolean
    */
-  private $cli;
+  private $_cli;
 
   private $new_url;
 

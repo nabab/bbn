@@ -2305,6 +2305,19 @@ class Less_parser {
 	protected $blockDirectives = array("font-face", "keyframes", "page", "-moz-document", "viewport", "-moz-viewport", "-o-viewport", "-ms-viewport");
 	protected $lineDirectives = array("charset");
 
+	public $eatWhiteDefault;
+	public $Less;
+	public $sourceName;
+	public $writeComments;
+	public $parser;
+	public $count;
+	public $line;
+	public $env;
+	public $buffer;
+	public $seenComments;
+
+	
+
 	/**
 	 * if we are in parens we can be more liberal with whitespace around
 	 * operators because it must evaluate to a single value and thus is less
@@ -3450,7 +3463,7 @@ class Less_parser {
 
 	protected function genericList(&$out, $parseItem, $delim="", $flatten=true) {
 		$s = $this->seek();
-		$items = array();
+		$items = [];
 		while ($this->$parseItem($value)) {
 			$items[] = $value;
 			if ($delim) {
@@ -3482,7 +3495,6 @@ class Less_parser {
 		} else {
 			$validChars = $allowNewline ? "." : "[^\n]";
 		}
-		if (!$this->match('('.$validChars.'*?)'.Less::preg_quote($what), $m, !$until)) return false;
 		if ($until) $this->count -= strlen($what); // give back $what
 		$out = $m[1];
 		return true;
