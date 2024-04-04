@@ -18,7 +18,7 @@
     "ext-json": "*",
     "composer/composer": "2.7.*",
     "zordius/lightncandy": "1.2.*",
-    "greenlion/php-sql-parser": "4.6sunra/php-simple-html-dom-parser.*",
+    "greenlion/php-sql-parser": "4.6.*"
     "mpdf/mpdf": "8.2.*",
     "natxet/cssmin": "3.0.*",
     "sunra/php-simple-html-dom-parser": "1.5.*",
