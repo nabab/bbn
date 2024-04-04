@@ -49,11 +49,12 @@
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "3.6.*",
-    "phpunit/phpunit": "10.1.1",
+    "phpunit/phpunit": "11.*.*",
     "pdepend/pdepend": "2.10.*",
     "phpmd/phpmd": "2.10.*",
+    "sebastian/phpcpd": "7.0.*",
     "friendsofphp/php-cs-fixer": "3.3.*",
-    "phpunitgen/core": "3.0.*",
+    "phpunitgen/core": "4.1.*",
     "mockery/mockery": "1.4.*"
   },
   "autoload": {
