@@ -1833,10 +1833,21 @@ class Task extends bbn\Models\Cls\Db
   public function deleteTrack(string $id): bool
   {
     if ($track = $this->getTrack($id)) {
+      if ($track['id_user'] !== $this->id_user) {
+        return false;
+      }
+
       // Message
       if ($idNote = $this->getTrackIdNote($id)) {
         $this->noteCls->remove($idNote, true);
       }
+
+      $this->db->update('bbn_tasks_sessions', [
+        'start' => '0000-00-00 00:00:00',
+        'length' => null,
+      ], [
+        'id' => $id
+      ]);
 
       // Tokens
       $this->checkTokens($id, $track['start'], $track['end']);
@@ -2051,6 +2062,23 @@ class Task extends bbn\Models\Cls\Db
         hex2bin($ongoing)
       );
     }
+  }
+
+  public function moveTrack(string $idTrack, string $idTask): bool
+  {
+    if ($track = $this->getTrack($idTrack)) {
+      if ($track['id_user'] !== $this->id_user) {
+        return false;
+      }
+
+      return (bool)$this->db->update('bbn_tasks_sessions', [
+        'id_task' => $idTask
+      ], [
+        'id' => $idTrack
+      ]);
+    }
+
+    return false;
   }
 
   public function getInvoice($id_task){
