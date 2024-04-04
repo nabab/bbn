@@ -2207,7 +2207,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
   public function executeStatement($statement)
   {
-    return $this->pdo->exec($statement);
+    try {
+      $res = $this->pdo->exec($statement);
+    }
+    catch (Exception $e) {
+      X::logError($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+      throw $e;
+    }
+
+    return $res ?? null;
   }
 
   public function correctTypes($st)

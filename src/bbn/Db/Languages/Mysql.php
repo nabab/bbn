@@ -1005,12 +1005,12 @@ MYSQL
     }
 
     if ($model && !empty($model['keys'])) {
-      $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $st .= 'ALTER TABLE ' . $this->escape($table);
       $last = count($model['keys']) - 1;
 
       $i = 0;
       foreach ($model['keys'] as $name => $key) {
-        $st .= '  ADD ';
+        $st .= ($i ? '' : ' ') .'ADD ';
         if (!empty($key['unique'])
           && isset($model['fields'][$key['columns'][0]])
           && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
