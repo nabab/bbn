@@ -55,7 +55,11 @@ class Date
     
   }
   
-  public static function validate($date, $format = 'Y-m-d H:i:s'){
+  public static function validate($date, string $format = 'Y-m-d H:i:s'){
+    if (!is_string($date)) {
+      return false;
+    }
+
     $d = DateTime::createFromFormat($format, $date);
     return $d && $d->format($format) == $date;
   }

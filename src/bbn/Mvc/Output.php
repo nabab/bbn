@@ -17,8 +17,7 @@ use Exception;
 use bbn\File;
 use bbn\File\Image;
 use Parsedown;
-class Output extends Basic {
-
+final class Output extends Basic {
   /**
    * Returns an array with the status and the code for the given code, and sends the corresponding header if not disabled
    *
@@ -89,7 +88,10 @@ class Output extends Basic {
   }
 
 
-  public function __construct(stdClass $obj, $mode){
+  public function __construct(
+    private stdClass $obj,
+    private string $mode
+  ) {
     $this->obj = $obj;
     $this->mode = $mode;
   }

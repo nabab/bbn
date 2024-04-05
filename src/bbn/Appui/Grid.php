@@ -81,6 +81,8 @@ class Grid extends bbn\Models\Cls\Cache
    */
   private $excel = [];
 
+  public string $sql;
+
   /**
    * Grid constructor.
    *

@@ -17,13 +17,11 @@ trait DbTrait
 {
   use DbConfig;
 
-  protected $DbTraitFilterCfg = [];
+  protected $dbTraitFilterCfg = [];
 
   protected $rootFilterCfg = [];
 
-  private $DbJunctionStructure = [];
-
-  private $DbTraitRelations = [];
+  private $dbTraitRelations = [];
 
   protected function dbTraitPrepare(array $data): array
   {

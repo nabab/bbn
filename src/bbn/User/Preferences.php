@@ -579,9 +579,10 @@ class Preferences extends DbCls
 
           $cfg = $row[$this->fields['cfg']];
           unset($row[$this->fields['cfg']]);
-          if ($cfg = json_decode($cfg, true)) {
+          if ($cfg && ($cfg = json_decode($cfg, true))) {
             $row = X::mergeArrays($cfg, $row);
           }
+
         }
 
         return $row;
@@ -663,9 +664,10 @@ class Preferences extends DbCls
             function ($a) use ($farch) {
               $cfg = $a[$farch['cfg']];
               unset($a[$farch['cfg']]);
-              if ($cfg = json_decode($cfg, true)) {
+              if ($cfg && ($cfg = json_decode($cfg, true))) {
                 $a = X::mergeArrays($cfg, $a);
               }
+
 
               return $a;
             },

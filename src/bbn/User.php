@@ -238,6 +238,9 @@ class User extends Basic implements Implementor
   protected $ip_address;
 
   /** @var string */
+  protected $email;
+
+  /** @var string */
   protected $accept_lang;
 
   /** @var string */
@@ -510,10 +513,12 @@ class User extends Basic implements Implementor
             $this->id = $id;
             $this->forcePassword($params[$f['pass2']]);
             $this->session->set([]);
-          } else {
+          }
+          else {
             $this->setError(7);
           }
-        } elseif ($this->check()) {
+        }
+        elseif ($this->check()) {
           $this->setError(18);
         }
       }
