@@ -9,11 +9,14 @@
 
 namespace bbn\Appui;
 
-use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
+use bbn\User\Preferences;
+use bbn\User\Permissions;
 use bbn\Mvc\Common;
 use bbn\Models\Tts\Optional;
+use bbn\File\System;
 
 
 class Ide
@@ -66,7 +69,7 @@ class Ide
   /** @var bool|string $current_id */
   protected static $current_id = false;
 
-  /** @var bbn\Db $db */
+  /** @var Db $db */
   protected $db;
 
   /** @var Option $options */
@@ -78,13 +81,16 @@ class Ide
   /** @var array MVC routes for linking with repositories */
   protected $routes = [];
 
-  /** @var \bbn\User\Preferences $pref */
+  /** @var Preferences $pref */
   protected $pref;
 
   /** @var Project $projects */
   protected $projects;
 
   protected $repositories_list = [];
+
+  protected System $fs;
+  protected array $repositories;
 
 
   /**
@@ -95,7 +101,7 @@ class Ide
    */
   protected function error(string $st)
   {
-    \bbn\X::log($st, "ide");
+    X::log($st, "ide");
     $this->last_error = $st;
     return $this->last_error;
   }
@@ -106,15 +112,15 @@ class Ide
    *
    * @param Option    $options
    * @param $routes
-   * @param \bbn\User\Preferences $pref
+   * @param Preferences $pref
    */
-  public function __construct(\bbn\Db $db,  Option $options, $routes, \bbn\User\Preferences $pref, string $project = '', string $plugin = 'appui-ide')
+  public function __construct(Db $db,  Option $options, $routes, Preferences $pref, string $project = '', string $plugin = 'appui-ide')
   {
     $this->db      = $db;
     $this->options = $options;
     $this->routes  = $routes;
     $this->pref    = $pref;
-    $this->fs      = new \bbn\File\System();
+    $this->fs      = new System();
     $this->origin  = $plugin;
     $this->setProject($project);
   }
@@ -603,7 +609,7 @@ class Ide
         }
       } elseif (
         !empty($real['tab'])
-        && (($i = \bbn\X::find($real['repository']['tabs'], ['url' => $real['tab']])) !== null)
+        && (($i = X::find($real['repository']['tabs'], ['url' => $real['tab']])) !== null)
       ) {
         if (!empty($real['repository']['tabs'][$i]['extensions'][0]['default'])) {
           $f['value'] = $real['repository']['tabs'][$i]['extensions'][0]['default'];
@@ -950,7 +956,7 @@ class Ide
       !empty($file)
       // It must be a controller
       && (strpos($file, '/src/mvc/public/') !== false)
-      && ($perm = bbn\User\Permissions::getInstance())
+      && ($perm = Permissions::getInstance())
     ) {
       $is_file = $type === 'file';
       // Check if it's an external route
@@ -1115,7 +1121,7 @@ class Ide
       }
 
       if (!empty($f)) {
-        $bits = \bbn\X::removeEmpty(explode('/', $f));
+        $bits = X::removeEmpty(explode('/', $f));
         $code = $is_file ? X::basename(array_pop($bits), '.php') : array_pop($bits) . '/';
         $bits = array_map(
           function ($b) {
@@ -1830,7 +1836,7 @@ class Ide
               $dir       = date('Y/m/d', $moment);
               $time      = date('H:i:s', $moment);
 
-              if (($i = \bbn\X::find($history_ctrl['items'], ['text' => $date])) === null) {
+              if (($i = X::find($history_ctrl['items'], ['text' => $date])) === null) {
                 array_push(
                   $history_ctrl['items'],
                   [
@@ -1842,7 +1848,7 @@ class Ide
                 );
 
                 $i = \count($history_ctrl['items']) - 1;
-                if (($idx = \bbn\X::find($history_ctrl['items'][$i]['items'], ['text' => $time])) === null) {
+                if (($idx = X::find($history_ctrl['items'][$i]['items'], ['text' => $time])) === null) {
                   array_push(
                     $history_ctrl['items'][$i]['items'],
                     [
@@ -1856,8 +1862,8 @@ class Ide
                   );
                 }
               } else {
-                $j = \bbn\X::find($history_ctrl['items'], ['text' => $date]);
-                if (($idx = \bbn\X::find($history_ctrl['items'][$j]['items'], ['text' => $time])) === null) {
+                $j = X::find($history_ctrl['items'], ['text' => $date]);
+                if (($idx = X::find($history_ctrl['items'][$j]['items'], ['text' => $time])) === null) {
                   array_push(
                     $history_ctrl['items'][$j]['items'],
                     [
@@ -1896,7 +1902,7 @@ class Ide
                     $moment   = strtotime(str_replace('_', ' ', $filename));
                     $date     = date('d/m/Y', $moment);
                     $time     = date('H:i:s', $moment);
-                    if (($i = \bbn\X::find($backups, ['text' => $date])) === null) {
+                    if (($i = X::find($backups, ['text' => $date])) === null) {
                       array_push(
                         $backups,
                         [
@@ -1909,7 +1915,7 @@ class Ide
                       $i = \count($backups) - 1;
                     }
 
-                    if (($idx = \bbn\X::find($backups[$i]['items'], ['title' => $d])) === null) {
+                    if (($idx = X::find($backups[$i]['items'], ['title' => $d])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
@@ -1949,7 +1955,7 @@ class Ide
                   $date      = date('d/m/Y', $moment);
                   $time      = date('H:i:s', $moment);
 
-                  if (($i = \bbn\X::find($backups, ['text' => $date])) === null) {
+                  if (($i = X::find($backups, ['text' => $date])) === null) {
                     array_push(
                       $backups,
                       [
@@ -1961,7 +1967,7 @@ class Ide
                     );
 
                     $i = \count($backups) - 1;
-                    if (($idx = \bbn\X::find($backups[$i]['items'], ['text' => $time])) === null) {
+                    if (($idx = X::find($backups[$i]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
@@ -1973,8 +1979,8 @@ class Ide
                       );
                     }
                   } else {
-                    $j = \bbn\X::find($backups, ['text' => $date]);
-                    if (($idx = \bbn\X::find($backups[$j]['items'], ['text' => $time])) === null) {
+                    $j = X::find($backups, ['text' => $date]);
+                    if (($idx = X::find($backups[$j]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$j]['items'],
                         [
@@ -2034,7 +2040,7 @@ class Ide
                   $date      = date('d/m/Y', $moment);
                   $time      = date('H:i:s', $moment);
 
-                  if (($i = \bbn\X::find($backups, ['text' => $date])) === null) {
+                  if (($i = X::find($backups, ['text' => $date])) === null) {
                     array_push(
                       $backups,
                       [
@@ -2046,7 +2052,7 @@ class Ide
                     );
 
                     $i = \count($backups) - 1;
-                    if (($idx = \bbn\X::find($backups[$i]['items'], ['text' => $time])) === null) {
+                    if (($idx = X::find($backups[$i]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
@@ -2060,8 +2066,8 @@ class Ide
                       );
                     }
                   } else {
-                    $j = \bbn\X::find($backups, ['text' => $date]);
-                    if (($idx = \bbn\X::find($backups[$j]['items'], ['text' => $time])) === null) {
+                    $j = X::find($backups, ['text' => $date]);
+                    if (($idx = X::find($backups[$j]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$j]['items'],
                         [
@@ -2777,8 +2783,8 @@ class Ide
 
       if (
         !empty($cfg['is_file'])
-        && ((!empty($cfg['ext']) && (\bbn\X::find($rep['extensions'], ['ext' => $cfg['ext']]) === null))
-          || (!empty($cfg['new_ext']) && (\bbn\X::find($rep['extensions'], ['ext' => $cfg['new_ext']]) === null)))
+        && ((!empty($cfg['ext']) && (X::find($rep['extensions'], ['ext' => $cfg['ext']]) === null))
+          || (!empty($cfg['new_ext']) && (X::find($rep['extensions'], ['ext' => $cfg['new_ext']]) === null)))
       ) {
         return false;
       }
@@ -3220,7 +3226,7 @@ class Ide
     $backup_path = $this->_get_path_backup($file);
 
     $backup = $backup_path['path_preference'] . $file['filename'] . '.json';
-    \bbn\X::log([$backup, $this->getDataPath('appui-ide')], 'pref');
+    X::log([$backup, $this->getDataPath('appui-ide')], 'pref');
     if (!empty($backup_path)) {
       if (($type === 'create')) {
         if (

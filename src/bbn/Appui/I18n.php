@@ -45,7 +45,6 @@ class I18n extends cacheCls
   public function __construct(Db $db, string $code = null)
   {
     parent::__construct($db);
-    $this->parser  = new Translations();
     $this->user    = User::getInstance();
     $this->options = new Option($db);
     if (empty($code)) {
@@ -56,6 +55,8 @@ class I18n extends cacheCls
         throw new Exception(X::_("The project's ID/Code is mandatory"));
       }
     }
+
+    $this->parser  = Translations::create($code);
 
     $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
     if (empty($this->id_project)) {
