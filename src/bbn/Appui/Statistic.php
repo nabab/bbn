@@ -400,8 +400,12 @@ class Statistic extends bbn\Models\Cls\Db
   }
 
 
-  public function serieByDate($unit = 'd', string $end, string $start): ?array
+  public function serieByDate($unit, string $end, string $start): ?array
   {
+    if (empty($unit)) {
+      $unit = $d;
+    }
+
     if (Str::isDateSql($start, $end)) {
       $tsStart = mktime(12, 0, 0, substr($start, 5, 2), substr($start, 8, 2), substr($start, 0, 4));
       $res = [];

@@ -1,8 +1,8 @@
 <?php
-namespace bbn\Parsers;
+namespace bbn\Compilers;
 
 use Exception;
-use Less_Parser;
+use Michelf\Markdown as MD;
 use bbn\Models\Cls\Basic;
 use bbn\X;
 
@@ -17,7 +17,8 @@ class Markdown extends Basic
 	{
 		$res = '';
 		try {
-			$less = new Less_Parser();
+      
+			$parser = new Mardown();
 			$less->parse($str);
 			$res = $less->getCss();
 		}
@@ -26,6 +27,12 @@ class Markdown extends Basic
 		}
 
 		return $res;
+	}
+
+
+	public function compile(string $str): string
+	{
+		return MD::defaultTransform($str);
 	}
 
 

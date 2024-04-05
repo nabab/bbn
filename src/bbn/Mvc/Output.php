@@ -16,7 +16,7 @@ use RuntimeException;
 use Exception;
 use bbn\File;
 use bbn\File\Image;
-use Parsedown;
+use bbn\Compilers\Markdown;
 final class Output extends Basic {
   /**
    * Returns an array with the status and the code for the given code, and sends the corresponding header if not disabled
@@ -215,8 +215,8 @@ final class Output extends Basic {
       $this->mode = '';
     }
     else if ( !empty($this->obj->content) && !empty($this->obj->help) ){
-      $mdParser = new Parsedown();
-      $this->obj->help = $mdParser->text($this->obj->help);
+      $mdParser = new Markdown();
+      $this->obj->help = $mdParser->compile($this->obj->help);
     }
     switch ( $this->mode ){
 

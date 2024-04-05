@@ -1,5 +1,5 @@
 <?php
-namespace bbn\Parsers;
+namespace bbn\Compilers;
 
 use Exception;
 use Less_Parser;

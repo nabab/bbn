@@ -18,21 +18,25 @@ namespace bbn;
  *
  */
 
+use bbn\Compilers\Markdown;
+use HTMLPurifier;
+use HTMLPurifier_Config;
+
 class Str
 {
 
   /**
    * Markdown parser if needed only one instance is created.
    *
-   * @var ?\Parsedown
+   * @var Markdown
    */
-  private static $_markdownParser = null;
+  private static $_markdownParser;
 
 
   /**
    * HTML purifier if needed only one instance is created.
    *
-   * @var ?\HTMLPurifier
+   * @var ?HTMLPurifier
    */
   private static $_htmlSanitizer = null;
 
@@ -1753,10 +1757,12 @@ class Str
   public static function markdown2html(string $st, bool $single_line = false): string
   {
     if (!self::$_markdownParser) {
-      self::$_markdownParser = new \Parsedown();
+      self::$_markdownParser = new Markdown();
     }
 
-    return $single_line ? self::$_markdownParser->line($st) : self::$_markdownParser->text($st);
+
+    return self::$_markdownParser->compile($st);
+    //return $single_line ? self::$_markdownParser->line($st) : self::$_markdownParser->text($st);
   }
 
 
@@ -1895,7 +1901,7 @@ class Str
   public static function sanitizeHtml(string $html, array $allowed_tags = [], array $allowed_attr = []): string
   {
     if (!self::$_htmlSanitizer) {
-      $config = \HTMLPurifier_Config::createDefault();
+      $config = HTMLPurifier_Config::createDefault();
       $config->set('Core.Encoding', 'UTF-8');
       //$config->set('HTML', 'Doctype', 'HTML 4.01 Transitional');
       if (defined('PURIFIER_CACHE')) {
@@ -1906,7 +1912,7 @@ class Str
         $config->set('Cache.DefinitionImpl', null);
       }
 
-      self::$_htmlSanitizer = new \HTMLPurifier($config);
+      self::$_htmlSanitizer = new HTMLPurifier($config);
     }
 
     return self::$_htmlSanitizer->purify($html);
