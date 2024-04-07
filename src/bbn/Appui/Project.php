@@ -9,21 +9,23 @@
 
 namespace bbn\Appui;
 
-use bbn;
-use bbn\X;
 use Exception;
+use bbn\X;
 use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
 use bbn\Models\Tts\Optional;
+use bbn\Models\Cls\Db as DbCls;
 use bbn\Appui\Url;
+use bbn\Appui\Option;
 use bbn\File\System;
+use bbn\File\Dir;
 use bbn\User\Preferences;
 use bbn\Api\Git;
 
 use function yaml_parse;
 
-class Project extends bbn\Models\Cls\Db
+class Project extends DbCls
 {
 
   use Optional;
@@ -64,16 +66,16 @@ class Project extends bbn\Models\Cls\Db
   /**
    * Construct the class Project
    *
-   * @param bbn\Db $db
+   * @param Db $db
    * @param string $id
    */
-  public function __construct(bbn\Db $db, string $id = null)
+  public function __construct(Db $db, string $id = null)
   {
     parent::__construct($db);
     self::optionalInit();
-    $this->options = bbn\Appui\Option::getInstance();
-    $this->fs      = new \bbn\File\System();
-    if (\bbn\Str::isUid($id)) {
+    $this->options = Option::getInstance();
+    $this->fs      = new System();
+    if (Str::isUid($id)) {
       $this->id = $id;
     } elseif (\is_string($id)) {
       $this->id = $this->options->fromCode($id, 'list', 'project', 'appui');
@@ -141,7 +143,7 @@ class Project extends bbn\Models\Cls\Db
     try {
       $difference_git = $git->diff();
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       $difference_git = false;
     }
   
@@ -411,7 +413,7 @@ class Project extends bbn\Models\Cls\Db
     }
 
     if (!$appPath) {
-      throw new \Exception(X::_("No application path given"));
+      throw new Exception(X::_("No application path given"));
     }
 
     $file_environment = $appPath . 'cfg/environment';
@@ -421,14 +423,14 @@ class Project extends bbn\Models\Cls\Db
     elseif ($this->fs->isFile($file_environment . '.yml')) {
       try {
         $envs = yaml_parse($this->fs->getContents($file_environment . '.yml'));
-      } catch (\Exception $e) {
-        throw new \Exception(
+      } catch (Exception $e) {
+        throw new Exception(
           "Impossible to parse the file $file_environment.yaml"
             . PHP_EOL . $e->getMessage()
         );
       }
       if ($envs === false) {
-        throw new \Exception(X::_("Impossible to parse the file $file_environment.yaml"));
+        throw new Exception(X::_("Impossible to parse the file $file_environment.yaml"));
       }
     }
 
@@ -614,14 +616,14 @@ class Project extends bbn\Models\Cls\Db
     
     if (is_array($todo)) {
       //we browse the element
-      $fs = new \bbn\File\System();
+      $fs = new System();
       $files = [];
       $filtered = array_values(array_filter(
         $todo,
         function($a) use (&$files, &$fs, $check_git){
           // get name and extension of each files
-          $ext  = \bbn\Str::fileExt($a['name']);
-          $name = \bbn\Str::fileExt($a['name'], 1)[0];
+          $ext  = Str::fileExt($a['name']);
+          $name = Str::fileExt($a['name'], 1)[0];
           if ($fs->isDir($a['name'])) {
             $name = '0' . $name;
           } else {
@@ -687,7 +689,7 @@ class Project extends bbn\Models\Cls\Db
           foreach($cnt as $f){
             $item = explode(".", basename($f))[0];
             if ($item === basename($t['name'])) {
-              $arr[]  = \bbn\Str::fileExt($f);
+              $arr[]  = Str::fileExt($f);
               $is_vue = true;
             }
           }
@@ -718,7 +720,7 @@ class Project extends bbn\Models\Cls\Db
             //if is folder and component
             if ($item === basename($t['name'])) {
               $folder    = false;
-              $arr[]     = \bbn\Str::fileExt($f);
+              $arr[]     = Str::fileExt($f);
               $is_vue    = true;
               $component = true;
               if (!empty($ext) && (in_array($ext, $excludeds) === false)) {
@@ -817,7 +819,7 @@ class Project extends bbn\Models\Cls\Db
       /** @todo check that it is working for directories */
       // uid of the file depends to his type
       'uid' => $component === true ? $public_path.$name.'/'.$name : $public_path.$name,
-      'has_index' => !$t['file'] && \bbn\File\Dir::hasFile($t['name'], 'index.php', 'index.html', 'index.htm'),
+      'has_index' => !$t['file'] && Dir::hasFile($t['name'], 'index.php', 'index.html', 'index.htm'),
       'is_svg' => $t['file'] && ($t['ext'] === 'svg'),
       // $is_vue not use
       'is_vue' => $is_vue,
@@ -825,8 +827,8 @@ class Project extends bbn\Models\Cls\Db
       'bcolor' => $cfg['bcolor'],
       'folder' => $t['dir'],
       'lazy' => $t['dir'] && ((empty($onlydirs) && $t['num']) || (!empty($onlydirs) && $this->fs->getDirs($t['name']))),
-      'numChildren' => $num ?? $t['num'],
-      'tab' => $t['tab'],
+      'numChildren' => $num ?? ($t['num'] ?? 0),
+      'tab' => $t['tab'] ?? null,
       'ext' => $t['file'] ? $t['ext'] : false
     ];
 
@@ -985,7 +987,7 @@ class Project extends bbn\Models\Cls\Db
           $path = constant("BBN_".strtoupper($root['code'])."_PATH");
           foreach($root['items'] as $option) {
             if (!isset($option['path'])) {
-              continue;
+              //continue;
               X::log(["Project no path", $option]);
               throw new Exception(X::_("No path in option for project for %s", $option['code']));
             }
@@ -1154,7 +1156,7 @@ class Project extends bbn\Models\Cls\Db
               throw new Exception(X::_("BBN_HOME_PATH is not defined"));
             }
 
-            $path  = BBN_HOME_PATH;
+            $path  = constant('BBN_HOME_PATH');
             $path .= $repository['path'];
             if ($repository['alias_code'] === 'bbn-project') {
               $path .= '/src/';
@@ -1173,7 +1175,7 @@ class Project extends bbn\Models\Cls\Db
     }
 
     if (!is_string($path)) {
-      throw new \Exception(X::_("Impossible to determine the path for %s", $rep));
+      throw new Exception(X::_("Impossible to determine the path for %s", $rep));
     }
 
     if ($path && substr($path, -1) !== '/') {
@@ -1193,15 +1195,15 @@ class Project extends bbn\Models\Cls\Db
   {
     if (!$this->appPath) {
       // Current project
-      if ($this->name === BBN_APP_NAME) {
-        $this->appPath = bbn\Mvc::getAppPath();
+      if ($this->name === constant('BBN_APP_NAME')) {
+        $this->appPath = Mvc::getAppPath();
       } else {
         $envs = $this->options->fullOptions('env', $this->id);
         if (empty($envs)) {
-          throw new \Exception(X::_("Impossible to find environments for option %s", $this->id));
+          throw new Exception(X::_("Impossible to find environments for option %s", $this->id));
         }
 
-        if ($env = X::getRow($envs, ['type' => BBN_ENV])) {
+        if ($env = X::getRow($envs, ['type' => constant('BBN_ENV')])) {
           $this->appPath = $env['text'];
           if (substr($this->appPath, -4) !== 'src/') {
             $this->appPath .= 'src/';
@@ -1223,7 +1225,7 @@ class Project extends bbn\Models\Cls\Db
   {
     if ($this->name === BBN_APP_NAME) {
       if (defined('BBN_CDN_PATH')) {
-        return BBN_CDN_PATH;
+        return constant('BBN_CDN_PATH');
       }
     } elseif ($content = $this->getEnvironment()) {
       return $content['app_path'] . 'src/';
@@ -1241,12 +1243,12 @@ class Project extends bbn\Models\Cls\Db
   public function getLibPath(): string
   {
     if ($this->name === BBN_APP_NAME) {
-      return \bbn\Mvc::getLibPath();
+      return Mvc::getLibPath();
     } elseif ($content = $this->getEnvironment()) {
       return $content['lib_path'] . 'bbn\/';
     }
 
-    throw new \Exception(X::_("Impossible to find the libraries path for %s", $this->name));
+    throw new Exception(X::_("Impossible to find the libraries path for %s", $this->name));
   }
 
 
@@ -1258,7 +1260,7 @@ class Project extends bbn\Models\Cls\Db
   public function getDataPath(string $plugin = null): string
   {
     if ($this->name === BBN_APP_NAME) {
-      return \bbn\Mvc::getDataPath($plugin);
+      return Mvc::getDataPath($plugin);
     } elseif ($content = $this->getEnvironment()) {
       $path = $content['data_path'];
       if ($plugin) {
@@ -1279,7 +1281,7 @@ class Project extends bbn\Models\Cls\Db
   public function getUserDataPath(string $plugin = null): string
   {
     if ($this->name === BBN_APP_NAME) {
-      return \bbn\Mvc::getUserDataPath($plugin);
+      return Mvc::getUserDataPath($plugin);
     } elseif ($content = $this->getEnvironment()) {
       $path = $content['data_path'];
       if ($plugin) {
@@ -1359,7 +1361,7 @@ class Project extends bbn\Models\Cls\Db
    */
   public function repositoryById(string $id)
   {
-    $idx = \bbn\X::find($this->repositories, ['id' => $id]) ?: null;
+    $idx = X::find($this->repositories, ['id' => $id]) ?: null;
     if ($idx !== null) {
       return $this->repositories[$idx];
     }
@@ -1412,8 +1414,8 @@ class Project extends bbn\Models\Cls\Db
       $res = $rep . '/';
       $bits = explode('/', substr($file, \strlen($root)));
       $filename  = array_pop($bits);
-      $extension = \bbn\Str::fileExt($filename);
-      $basename  = \bbn\Str::fileExt($filename, 1)[0];
+      $extension = Str::fileExt($filename);
+      $basename  = Str::fileExt($filename, 1)[0];
       // MVC
       if (!empty($d['tabs'])) {
         // URL is interverted
@@ -1451,7 +1453,7 @@ class Project extends bbn\Models\Cls\Db
         $res .= implode('/', $bits) . '/' . $basename . '.' . $extension;
       }
 
-      return \bbn\Str::parsePath($res);
+      return Str::parsePath($res);
     }
 
     return false;

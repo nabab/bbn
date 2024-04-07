@@ -24,6 +24,8 @@ use bbn\Appui\Database;
 class Appui
 {
 
+  private const LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAADTAAAA0wB/Z14fgAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKXSURBVFiF5ZcxT+pQFIC/FgUWTTSuJLA41sGFhQSMkKjAr1CCJsbJTU0b2N35HWjiRFzVSHRwMBEqMJG2JjoRE+rgow+wLQUxJu+dsb33fF/PPbe9FW5ubkx+McTfhP8fAoZhcHl5+TsChmGwu7vL4eEh5+fntmNmfhKez+ep1WoAyLIMwObm5sC4H6nAMByg2+0iy/KXSkxdwA7uJuEoMD8/z8zMeCvkBh+WODs7Axx6YGFhgUgkQqfT4fHxkff396nA+yUURQFsKtCDC4JAMBhkeXmZ2dlZ14SappHL5TzB+yWur68HBfrhvRglYRgGe3t7qKrqGQ6QSqU4Pj7+K2AHHyUxTtmH4YVCAZ/P9yngBneSmAYcQPQCH5Z4fX2dGF4sFi04gKDrurm4uOg5SavVIh6P8/T0NBFcFAf7XlRVlZeXF09JGo0GsVjMgvv9fk/z0um0LRxANE2Ter2OYRiuSZrNJmtra1a37+zscHV1xdLSkuu8TCbDycmJLRz+vAdM02RUJfL5vPXkuVyOUqnEysoKFxcXOC1hJpP53GoOcACh/0gmCALhcNg2oa7rJBIJotEopVJp4N7d3R3r6+tommZdy2azHB0ducK/CIySeHt7Y25uzjbR7e0tqVQKXdc9w20FnCQ6nQ6BQMA1WbVa5fT0lP39fU9wcPga9nqi15iKorC6ukq73XZNFgqFODg48AwHhwpYNwWBarXK9vY2AJIkUalUbJdH0zSen589g3vhqmqaJpIkWceo+/t7YrHYl0pMCh8pACCKIrIsWxIPDw8kEglL4jtwTwL9EhsbG5ZEMpmkXq9/C+5ZoCehKApbW1sAhMPhgX0/abg2oV10u13K5TLpdHqsbp+awLTj3/83HBUfhqFVwjxEB4YAAAAASUVORK5CYII=";
+
   /** @var array List of the variables transformed in BBN_ constants */
   protected static $vars = [
     "env",
@@ -123,6 +125,11 @@ class Appui
 
   /** @var array */
   private $_info;
+
+  public static function getLogo()
+  {
+    return self::LOGO;
+  }
 
 
   /**

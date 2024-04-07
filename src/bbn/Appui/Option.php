@@ -381,7 +381,7 @@ class Option extends DbCls
       // Using the code(s) as argument(s) from now
       $id_parent = array_pop($args);
       $true_code = array_pop($args);
-      $enc_code  = base64_encode($true_code);
+      $enc_code  = $true_code ? base64_encode($true_code) : 'null';
       // This is the cache name
       // get_codeX::_(base64(first_code))
       $cache_name = 'get_code_'.$enc_code;
