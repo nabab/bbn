@@ -2151,7 +2151,7 @@ class Task extends bbn\Models\Cls\Db
   public function isTokensActive(): bool
   {
     if ($cfg = $this->getTokensCfg()) {
-      return !empty($cfg['active']);
+      return !empty($cfg['enabled']);
     }
 
     return false;
