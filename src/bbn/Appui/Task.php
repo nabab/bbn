@@ -663,6 +663,8 @@ class Task extends bbn\Models\Cls\Db
       if (!empty($info['id_parent'])) {
         $info['parent'] = $this->info($info['id_parent'], $withComments, false);
       }
+
+      $info['tokens_category'] = $this->getTokensCategory($id);
       return $info;
     }
     return null;
@@ -1674,6 +1676,7 @@ class Task extends bbn\Models\Cls\Db
       $start = date('Y-m-d H:i:s');
       $tokens = null;
       if ($this->isTokensActive()
+        && $this->getTokensCategory($idTask)
         && ($tokensCfg = $this->getTokensCfg())
         && !empty($tokensCfg['step'])
       ) {
@@ -1738,7 +1741,9 @@ class Task extends bbn\Models\Cls\Db
       if ($ok) {
         $length = $now - strtotime($activeTrack['start']);
         $tokens = null;
-        if ($this->isTokensActive()) {
+        if ($this->isTokensActive()
+          && $this->getTokensCategory($idTask)
+        ) {
           $tokens = ceil($this->calcTokens(
             $activeTrack['id'],
             $activeTrack['tokens'] === 1,
@@ -1812,6 +1817,7 @@ class Task extends bbn\Models\Cls\Db
 
       if (!empty($ok)
         && $this->isTokensActive()
+        && $this->getTokensCategory($currentData['id_task'])
       ) {
         $tokens = $this->calcTokens($id, true, $start, $end);
         if ($tokens !== $currentData['tokens']) {
@@ -1821,11 +1827,12 @@ class Task extends bbn\Models\Cls\Db
             'id' => $id
           ]);
         }
+
+        // Tokens
+        $this->checkTokens($id, $currentData['start'], $currentData['end']);
+        $this->checkTokens($id, $start, $end);
       }
 
-      // Tokens
-      $this->checkTokens($id, $currentData['start'], $currentData['end']);
-      $this->checkTokens($id, $start, $end);
     }
 
     return $ok;
@@ -1844,15 +1851,18 @@ class Task extends bbn\Models\Cls\Db
         $this->addLog($track['id_task'], 'comment_delete');
       }
 
-      $this->db->update('bbn_tasks_sessions', [
-        'start' => '0000-00-00 00:00:00',
-        'length' => null,
-      ], [
-        'id' => $id
-      ]);
-
       // Tokens
-      $this->checkTokens($id, $track['start'], $track['end']);
+      if ($this->isTokensActive()
+        && $this->getTokensCategory($track['id_task'])
+      ) {
+        $this->db->update('bbn_tasks_sessions', [
+          'start' => '0000-00-00 00:00:00',
+          'length' => null,
+        ], [
+          'id' => $id
+        ]);
+        $this->checkTokens($id, $track['start'], $track['end']);
+      }
 
       return (bool)$this->db->delete('bbn_tasks_sessions', ['id' => $id]);
     }
@@ -1861,13 +1871,40 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function stopAllTracks($id){
-    $this->db->query("
-      UPDATE bbn_tasks_sessions
-      SET `length` = TO_SECONDS(NOW())-TO_SECONDS(start)
-      WHERE id_task = ?
-        AND `length` IS NULL",
-      hex2bin($id)
-    );
+    if ($this->isTokensActive()
+      && $this->getTokensCategory($id)
+    ) {
+      if ($tracks = $this->db->getRows("
+        SELECT id, start
+        FROM bbn_tasks_sessions
+        WHERE id_task = ?
+          AND `length` IS NULL",
+        hex2bin($id)
+      )) {
+        $now = time();
+        foreach ($tracks as $track) {
+          $this->db->query("
+            UPDATE bbn_tasks_sessions
+            SET `length` = ?
+            WHERE id = ?
+              AND `length` IS NULL",
+            hex2bin($track['id']),
+            $now - strtotime($track['start'])
+          );
+          $this->checkTokens($track['id']);
+        }
+      }
+    }
+    else {
+      $this->db->query("
+        UPDATE bbn_tasks_sessions
+        SET `length` = TO_SECONDS(NOW())-TO_SECONDS(start)
+        WHERE id_task = ?
+          AND `length` IS NULL",
+        hex2bin($id)
+      );
+    }
+
     return $this->db->getOne("
       SELECT COUNT(*)
       FROM bbn_tasks_sessions
@@ -1953,7 +1990,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTracks($id_task){
     return $this->db->getRows("
-      SELECT id_user, SUM(length) AS total_time, COUNT(id_note) as num_notes
+      SELECT id_user, SUM(length) AS total_time, COUNT(id_note) as num_notes, SUM(tokens) as total_tokens
       FROM bbn_tasks_sessions
       WHERE id_task = ?
       GROUP BY id_user",
@@ -2279,22 +2316,39 @@ class Task extends bbn\Models\Cls\Db
 
   public function getTokensCategory(string $idTask): ?string
   {
-    return $this->db->selectOne([
-      'table' => 'bbn_tasks',
-      'fields' => ['bbn_options.id_alias'],
-      'join' => [[
-        'table' => 'bbn_options',
-        'on' => [
+    if ($cats = $this->getTokensCategories()) {
+      $w = [];
+      foreach ($cats as $c) {
+        $w[] = [
+          'field' => 'bbn_options.id_alias',
+          'value' => $c['id']
+        ];
+      }
+      return $this->db->selectOne([
+        'table' => 'bbn_tasks',
+        'fields' => ['bbn_options.id_alias'],
+        'join' => [[
+          'table' => 'bbn_options',
+          'on' => [
+            'conditions' => [[
+              'field' => 'bbn_tasks.type',
+              'exp' => 'bbn_options.id'
+            ]]
+          ]
+        ]],
+        'where' => [
           'conditions' => [[
-            'field' => 'bbn_tasks.type',
-            'exp' => 'bbn_options.id'
+            'field' => 'bbn_tasks.id',
+            'value' => $idTask
+          ], [
+            'logic' => 'OR',
+            'conditions' => $w
           ]]
         ]
-      ]],
-      'where' => [
-        'bbn_tasks.id' => $idTask
-      ]
-    ]);
+      ]);
+    }
+
+    return null;
   }
 
   public function getTokensCategories(): ?array
@@ -2367,7 +2421,8 @@ class Task extends bbn\Models\Cls\Db
     if ($this->isTokensActive()
       && ($tokensCfg = $this->getTokensCfg())
       && !empty($tokensCfg['step'])
-      && (($track = $this->getTrack($idTrack))
+      && ((($track = $this->getTrack($idTrack))
+          && $this->getTokensCategory($track['id_task']))
         || (!empty($start) && !empty($end)))
     ) {
       $start = $start ?: $track['start'];
@@ -2388,6 +2443,7 @@ class Task extends bbn\Models\Cls\Db
     if ($this->isTokensActive()
       && ($tokensCfg = $this->getTokensCfg())
       && ($track = $this->getTrack($idTrack))
+      && $this->getTokensCategory($track['id_task'])
     ) {
       $start = $start ?: $track['start'];
       while (!empty($start)
