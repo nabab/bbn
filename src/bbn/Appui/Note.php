@@ -1087,7 +1087,7 @@ class Note extends DbCls
         'type'  => 'left',
         'on' => [
           'conditions' => [[
-            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'field' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
             'exp' => 'parents.' . $cf['arch']['notes']['id_parent'],
           ]],
         ],
@@ -1097,7 +1097,7 @@ class Note extends DbCls
         'type'  => 'left',
         'on' => [
           'conditions' => [[
-            'field' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'field' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
             'exp' => 'aliases.' . $cf['arch']['notes']['id_alias'],
           ]],
         ],
@@ -1109,7 +1109,7 @@ class Note extends DbCls
           'logic' => 'AND',
           'conditions' => [[
             'field' => 'replies.' . $cf['arch']['notes']['id_alias'],
-            'exp' => $this->db->cfn($cf['arch']['notes']['id'], $cf['table']),
+            'exp' => $db->cfn($cf['arch']['notes']['id'], $cf['table']),
           ], [
             'field' => 'replies.' . $cf['arch']['notes']['active'],
             'value' => 1
@@ -1127,29 +1127,28 @@ class Note extends DbCls
             'exp' => 'replies.' . $cf['arch']['notes']['id']
           ]]
         ]
-    ], [
-          'table' => $cfo['tables']['options'],
-          'type' => 'left',
-          'on' => [
-            'logic' => 'AND',
-            'conditions' => [[
-              'field' => $db->cfn($cf['arch']['notes']['id_option'], $cf['table']),
-              'operator' => '=',
-              'exp' => $db->cfn($cfo['arch']['options']['id'], $cfo['tables']['options'], true),
-            ]],
-          ],
-        ]],
-        'where' => [
+      ], [
+        'table' => $cfo['tables']['options'],
+        'type' => 'left',
+        'on' => [
+          'logic' => 'AND',
+          'conditions' => [[
+            'field' => $db->cfn($cf['arch']['notes']['id_option'], $cf['table']),
+            'operator' => '=',
+            'exp' => $db->cfn($cfo['arch']['options']['id'], $cfo['tables']['options'], true),
+          ]],
+        ],
+      ]],
+      'where' => [
         'logic' => 'AND',
-        'conditions' => [
-        ]
+        'conditions' => []
       ],
       'group_by' => $db->cfn($cf['arch']['notes']['id'], $cf['table'])
     ];
     if ($with_content) {
       $grid_cfg['fields']['content'] = $db->cfn($cf['arch']['versions']['content'], $cf['tables']['versions']);
     }
-    
+
     return $grid_cfg;
   }
 

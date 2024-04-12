@@ -551,7 +551,6 @@ class Cms extends DbCls
     $data  = $this->db->rselectAll($cfg);
     foreach ($data as &$d) {
       $d['front_img'] = $d['id_media'] ? $this->media->getMedia($d['id_media'], true) : null;
-
     }
 
     return [
