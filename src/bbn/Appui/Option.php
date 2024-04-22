@@ -44,6 +44,10 @@ class Option extends DbCls
   protected $templateIds = [];
   protected $magicOptionsTemplateId;
 
+  protected $magicPluginTemplateId;
+
+  protected $magicTemplateTemplateId;
+
   protected $magicAppuiTemplateId;
 
 
@@ -151,7 +155,7 @@ class Option extends DbCls
         return false;
       }
 
-      if (\defined('BBN_APP_PREFIX')) {
+      if (\defined('BBN_APP_NAME')) {
         $this->default = $this->cacheGetSet(
           function () use (&$t) {
             $res = $t->db->selectOne(
@@ -159,7 +163,7 @@ class Option extends DbCls
               $t->fields['id'],
               [
                 $t->fields['id_parent'] => $this->root,
-                $t->fields['code'] => BBN_APP_PREFIX
+                $t->fields['code'] => BBN_APP_NAME
               ]
             );
             if (!$res) {
@@ -168,8 +172,8 @@ class Option extends DbCls
 
             return $res;
           },
-          BBN_APP_PREFIX,
-          BBN_APP_PREFIX,
+          BBN_APP_NAME,
+          BBN_APP_NAME,
           60
         );
       }
@@ -4335,7 +4339,7 @@ public function getIdAlias($code = null): ?string
    */
   public function updatePlugins(): ?int
   {
-    if (($pluginAlias = $this->fromCode('plugin', 'list', 'templates', 'option', 'appui'))
+    if (($pluginAlias = $this->getMagicPluginTemplateId())
         && ($export = $this->export($pluginAlias, 'sfull'))) {
       $idPlugins = $this->getAliasItems($pluginAlias);
       $res = 0;
@@ -4357,7 +4361,7 @@ public function getIdAlias($code = null): ?string
    */
   public function getParentPlugin($code = null): ?string
   {
-    if ($pluginAlias = $this->fromCode('plugin', 'list', 'templates', 'option', 'appui')) {
+    if ($pluginAlias = $this->getMagicPluginTemplateId()) {
       $ids = array_reverse($this->parents(...\func_get_args()));
       foreach ($ids as $id) {
         if ($this->alias($id) === $pluginAlias) {
@@ -4394,8 +4398,13 @@ public function getIdAlias($code = null): ?string
     }
 
     if (($export = $this->export($idAlias, 'sfull')) && !empty($export['items'])) {
+      $items = X::map(function($a) {
+        $a['id_alias'] = $a['id'];
+        unset($a['id']);
+        return $a;
+      }, $export['items'], 'items');
       $res = 0;
-      foreach ($this->import($export['items'], $id) as $num) {
+      foreach ($this->import($items, $id) as $num) {
         $res += $num;
       }
 
@@ -4403,6 +4412,18 @@ public function getIdAlias($code = null): ?string
     }
 
     return null;
+  }
+
+  public function applyAllTemplates(): ?int
+  {
+    $tot = 0;
+    $ids = $this->optionsRef($this->getMagicTemplateTemplateId());
+    X::ddump($ids);
+    foreach ($ids as $id) {
+      $tot += $this->applyTemplate($id);
+    }
+
+    return $tot;
   }
 
 
@@ -4725,22 +4746,52 @@ public function getIdAlias($code = null): ?string
   }
 
 
-  public function getTemplateId($code)
+  public function getTemplateId($code): ?string
   {
-    if (!isset($this->templateIds[$code]) && $this->check()) {
-      $this->templateIds[$code] = $this->fromCode($code, 'templates', $this->getRoot());
-    }
+    if ($this->check()) {
+      if (!isset($this->templateIds[$code])) {
+        $this->templateIds[$code] = $this->fromCode($code, 'templates', $this->getRoot());
+      }
 
-    return $this->templateIds[$code];
+      if (!isset($this->templateIds[$code])) {
+        foreach ($this->getAliasItems($this->getMagicTemplateTemplateId()) as $it) {
+          if ($this->templateIds[$code] = $this->fromCode($code, 'templates', $this->getRoot())) {
+            break;
+          }
+        }
+      }
+
+      return $this->templateIds[$code] ?? null;
+    }
+    return null;
+
   }
 
   public function getMagicOptionsTemplateId()
   {
     if (!$this->magicOptionsTemplateId && $this->check()) {
-      $this->magicOptionsTemplateId = $this->fromCode('options', 'plugin', 'templates', $this->getRoot());
+      $this->magicOptionsTemplateId = $this->fromCode('options', $this->getMagicPluginTemplateId());
     }
 
     return $this->magicOptionsTemplateId;
+  }
+
+  public function getMagicPluginTemplateId()
+  {
+    if (!$this->magicPluginTemplateId && $this->check()) {
+      $this->magicPluginTemplateId = $this->fromCode('plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicPluginTemplateId;
+  }
+
+  public function getMagicTemplateTemplateId()
+  {
+    if (!$this->magicTemplateTemplateId && $this->check()) {
+      $this->magicTemplateTemplateId = $this->fromCode('templates', 'plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicTemplateTemplateId;
   }
 
   public function getMagicAppuiTemplateId()

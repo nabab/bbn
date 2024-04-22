@@ -160,6 +160,7 @@ class Ai extends DbCls
       throw new Exception("The OpenAI key is not defined");
     }
     $this->ai = new OpenAi(BBN_OPENAI_KEY);
+    $this->ai->setBaseURL('http://192.168.1.115:1234');
     
     $this->note = new Note($this->db);
   }

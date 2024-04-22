@@ -413,7 +413,7 @@ class Project extends DbCls
     }
 
     if (!$appPath) {
-      throw new Exception(X::_("No application path given"));
+      throw new Exception(X::_("No application path given for app %s", $this->name));
     }
 
     $file_environment = $appPath . 'cfg/environment';
@@ -1175,7 +1175,7 @@ class Project extends DbCls
     }
 
     if (!is_string($path)) {
-      throw new Exception(X::_("Impossible to determine the path for %s", $rep));
+      throw new Exception(X::_("Impossible to determine the path for %s (root: %s -> %s)", $rep, $repository['root'] ?? X::_('Unknown'), $this->getAppPath()));
     }
 
     if ($path && substr($path, -1) !== '/') {

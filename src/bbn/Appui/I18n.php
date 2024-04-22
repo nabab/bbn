@@ -48,8 +48,8 @@ class I18n extends cacheCls
     $this->user    = User::getInstance();
     $this->options = new Option($db);
     if (empty($code)) {
-      if (\defined('BBN_APP_PREFIX')) {
-        $code = CONSTANT('BBN_APP_PREFIX');
+      if (\defined('BBN_APP_NAME')) {
+        $code = CONSTANT('BBN_APP_NAME');
       }
       else {
         throw new Exception(X::_("The project's ID/Code is mandatory"));
@@ -60,7 +60,7 @@ class I18n extends cacheCls
 
     $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
     if (empty($this->id_project)) {
-      throw new Exception(X::_("Project's ID not found"));
+      throw new Exception(X::_("Project's ID not found for code %s", $this->options->fromCode('project', 'appui')));
     }
   }
 
