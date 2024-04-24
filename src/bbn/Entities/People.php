@@ -153,7 +153,7 @@ class People extends DbCls
    */
   public function set_info(array $fn): ?array
   {
-    $fn = $this->prepare($fn);
+    $fn = $this->prepareData($fn);
     $arc = &$this->class_cfg['arch']['people'];
     if (!empty($fn)) {
       if (!isset($fn[$arc['fname']])) {
