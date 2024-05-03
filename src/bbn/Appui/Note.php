@@ -35,6 +35,7 @@ class Note extends DbCls
   use Tagger;
 
   private $medias;
+  private $idUser;
 
   /** @var string The default language used */
   protected $lang;
@@ -150,6 +151,28 @@ class Note extends DbCls
       ]
     );
     $this->lang = $lang ?: (defined('BBN_LANG') ? BBN_LANG : 'en');
+    $this->setUser();
+  }
+
+
+  public function setUser(?string $idUser = null)
+  {
+    if (!empty($idUser) && Str::isUid($idUser)) {
+      $this->idUser = $idUser;
+    }
+    elseif ($usr = User::getInstance()) {
+      $this->idUser = $usr->getId();
+    }
+  }
+
+
+  public function getUser(): ?string
+  {
+    if (empty($this->idUser)) {
+      $this->setUser();
+    }
+
+    return $this->idUser;
   }
 
 
@@ -305,7 +328,7 @@ class Note extends DbCls
 
     $id_note = null;
 
-    if (($usr = User::getInstance())
+    if ($this->getUser()
       && $this->db->insert(
         $cf['table'],
         [
@@ -315,7 +338,7 @@ class Note extends DbCls
           $cf['arch']['notes']['id_option'] => $cfg['id_option'],
           $cf['arch']['notes']['private'] => !empty($cfg['private']) ? 1 : 0,
           $cf['arch']['notes']['locked'] => !empty($cfg['locked']) ? 1 : 0,
-          $cf['arch']['notes']['creator'] => $usr->getId(),
+          $cf['arch']['notes']['creator'] => $this->getUser(),
           $cf['arch']['notes']['mime'] => $cfg['mime'],
           $cf['arch']['notes']['lang'] => $cfg['lang'],
           $cf['arch']['notes']['pinned'] => !empty($cfg['pinned']) ? 1 : 0,
@@ -342,7 +365,7 @@ class Note extends DbCls
   public function insertVersion(string $id_note, string $title = '', string $content = '', string $excerpt = ''): ?int
   {
     if ($this->check()
-        && ($usr = User::getInstance())
+        && $this->getUser()
         && ($note = $this->get($id_note))
         && ($title || $content)
     ) {
@@ -366,7 +389,7 @@ class Note extends DbCls
             $cf['arch']['versions']['title'] => $title,
             $cf['arch']['versions']['content'] => $content,
             $cf['arch']['versions']['excerpt'] => $excerpt ?: '',
-            $cf['arch']['versions']['id_user'] => $usr->getId(),
+            $cf['arch']['versions']['id_user'] => $this->getUser(),
             $cf['arch']['versions']['creation'] => date('Y-m-d H:i:s'),
           ]
         )
@@ -880,7 +903,7 @@ class Note extends DbCls
    */
   public function addMediaToNote(string $id_media, string $id_note, int $default = 0): ?int
   {
-    if ($usr = User::getInstance()) {
+    if ($this->getUser()) {
       $cf = &$this->class_cfg;
 
       if ($default) {
@@ -896,7 +919,7 @@ class Note extends DbCls
         [
           $cf['arch']['notes_medias']['id_note'] => $id_note,
           $cf['arch']['notes_medias']['id_media'] => $id_media,
-          $cf['arch']['notes_medias']['id_user'] => $usr->getId(),
+          $cf['arch']['notes_medias']['id_user'] => $this->getUser(),
           $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
           $cf['arch']['notes_medias']['default_media'] => $default
         ]
@@ -1161,7 +1184,7 @@ class Note extends DbCls
    */
   public function browse(array $cfg, bool $with_content = false, bool $private = false, string $id_type = null, bool $pinned = null): ?array
   {
-    if (isset($cfg['limit']) && ($user = User::getInstance())) {
+    if (isset($cfg['limit']) && $this->getUser()) {
       /** @var Db $db */
       $db       = &$this->db;
       $cf       = &$this->class_cfg;
@@ -1179,7 +1202,7 @@ class Note extends DbCls
         ];
         $grid_cfg['filters'][] = [
           'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
-          'value' => $user->getId()
+          'value' => $this->getUser()
         ];
       }
       else {
@@ -1223,7 +1246,7 @@ class Note extends DbCls
    */
   public function count()
   {
-    if ($user = User::getInstance()) {
+    if ($this->getUser()) {
       $cf  = &$this->class_cfg;
       $db  = &$this->db;
       return $this->db->count([
@@ -1246,10 +1269,10 @@ class Note extends DbCls
             'logic' => 'OR',
             'conditions' => [[
               'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
-              'value' => $user->getId()
+              'value' => $this->getUser()
             ], [
               'field' => $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
-              'value' => $user->getId()
+              'value' => $this->getUser()
             ]]
           ]]
         ]
