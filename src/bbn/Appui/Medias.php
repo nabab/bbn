@@ -76,6 +76,7 @@ class Medias extends DbCls
 
   private $opt;
   private $usr;
+  private $userId;
   private $opt_id;
   /** @var array $thumbsSizes Keeping the thumbs sizes in memory by type */
   private $thumbsSizes;
@@ -119,7 +120,22 @@ class Medias extends DbCls
         'id_element' => $this->class_cfg['arch']['medias_tags']['id_media']
       ]
     );
+    $this->userId = $this->usr->getId() ?: $this->setExternalUser();
   }
+
+
+  public function setExternalUser()
+  {
+    $this->userId = defined('BBN_EXTERNAL_USER_ID') ? BBN_EXTERNAL_USER_ID : null;
+    return $this->userId;
+  }
+
+
+  public function getUserId(): ?string
+  {
+    return $this->userId;
+  }
+
 
   public function setImageRoot(string $root): bool
   {
@@ -282,7 +298,7 @@ class Medias extends DbCls
    */
   public function browse(array $cfg, int $limit = 20, int $start = 0): ?array
   {
-    if ($user = User::getInstance()) {
+    if ($this->usr) {
       $cf = $this->getClassCfg();
       $ct = $cf['arch']['medias'];
       $filters = [];
@@ -301,7 +317,7 @@ class Medias extends DbCls
       }
       else {
         $userIdx = X::find($filters, ['field' => $ct['id_user']]);
-        $id_user = $user->getId();
+        $id_user = $this->userId;
         if (!empty($filters[$pvtIdx]['value'])) {
           if ($userIdx === null) {
             $filters[] = [
@@ -462,14 +478,14 @@ class Medias extends DbCls
    */
   public function count(array $filter = []): ?int
   {
-    if ($user = User::getInstance()) {
+    if ($this->usr) {
       $cf = $this->getClassCfg();
       $ct = $cf['arch']['medias'];
       if (!isset($filter[$ct['private']])) {
         $filter[$ct['private']] = 0;
       }
       elseif ($filter[$ct['private']]) {
-        $filter[$ct['id_user']] = $user->getId();
+        $filter[$ct['id_user']] = $this->userId;
       }
 
       return $this->db->count($cf['table'], $filter);
@@ -517,7 +533,7 @@ class Medias extends DbCls
           return null;
         }
 
-        $root = Mvc::getUserDataPath($this->usr->getId(), 'appui-note');
+        $root = Mvc::getUserDataPath($this->userId, 'appui-note');
       }
       else {
         $root = Mvc::getDataPath('appui-note');
@@ -540,7 +556,7 @@ class Medias extends DbCls
       if (!$this->db->insert(
         $cf['table'],
         [
-          $cf['arch']['medias']['id_user'] => $this->usr->getId() ?: BBN_EXTERNAL_USER_ID,
+          $cf['arch']['medias']['id_user'] => $this->userId,
           $cf['arch']['medias']['type'] => $id_type,
           $cf['arch']['medias']['mimetype'] => $mime,
           $cf['arch']['medias']['title'] => normalizer_normalize($title),

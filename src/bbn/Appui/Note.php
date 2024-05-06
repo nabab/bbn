@@ -35,7 +35,8 @@ class Note extends DbCls
   use Tagger;
 
   private $medias;
-  private $idUser;
+  private $usr;
+  private $userId;
 
   /** @var string The default language used */
   protected $lang;
@@ -151,28 +152,21 @@ class Note extends DbCls
       ]
     );
     $this->lang = $lang ?: (defined('BBN_LANG') ? BBN_LANG : 'en');
-    $this->setUser();
+    $this->usr    = User::getInstance();
+    $this->userId = $this->usr->getId() ?: $this->setExternalUser();
   }
 
 
-  public function setUser(?string $idUser = null)
+  public function setExternalUser()
   {
-    if (!empty($idUser) && Str::isUid($idUser)) {
-      $this->idUser = $idUser;
-    }
-    elseif ($usr = User::getInstance()) {
-      $this->idUser = $usr->getId();
-    }
+    $this->userId = defined('BBN_EXTERNAL_USER_ID') ? BBN_EXTERNAL_USER_ID : null;
+    return $this->userId;
   }
 
 
-  public function getUser(): ?string
+  public function getUserId(): ?string
   {
-    if (empty($this->idUser)) {
-      $this->setUser();
-    }
-
-    return $this->idUser;
+    return $this->userId;
   }
 
 
@@ -196,6 +190,10 @@ class Note extends DbCls
   {
     if (!$this->medias) {
       $this->medias = new Medias($this->db);
+    }
+
+    if ($this->medias->getUserId() !== $this->userId) {
+      $this->medias->setExternalUser();
     }
 
     return $this->medias;
@@ -328,7 +326,7 @@ class Note extends DbCls
 
     $id_note = null;
 
-    if ($this->getUser()
+    if ($this->userId
       && $this->db->insert(
         $cf['table'],
         [
@@ -338,7 +336,7 @@ class Note extends DbCls
           $cf['arch']['notes']['id_option'] => $cfg['id_option'],
           $cf['arch']['notes']['private'] => !empty($cfg['private']) ? 1 : 0,
           $cf['arch']['notes']['locked'] => !empty($cfg['locked']) ? 1 : 0,
-          $cf['arch']['notes']['creator'] => $this->getUser(),
+          $cf['arch']['notes']['creator'] => $this->userId,
           $cf['arch']['notes']['mime'] => $cfg['mime'],
           $cf['arch']['notes']['lang'] => $cfg['lang'],
           $cf['arch']['notes']['pinned'] => !empty($cfg['pinned']) ? 1 : 0,
@@ -365,7 +363,7 @@ class Note extends DbCls
   public function insertVersion(string $id_note, string $title = '', string $content = '', string $excerpt = ''): ?int
   {
     if ($this->check()
-        && $this->getUser()
+        && $this->userId
         && ($note = $this->get($id_note))
         && ($title || $content)
     ) {
@@ -389,7 +387,7 @@ class Note extends DbCls
             $cf['arch']['versions']['title'] => $title,
             $cf['arch']['versions']['content'] => $content,
             $cf['arch']['versions']['excerpt'] => $excerpt ?: '',
-            $cf['arch']['versions']['id_user'] => $this->getUser(),
+            $cf['arch']['versions']['id_user'] => $this->userId,
             $cf['arch']['versions']['creation'] => date('Y-m-d H:i:s'),
           ]
         )
@@ -875,6 +873,7 @@ class Note extends DbCls
   public function addMedia($id_note, string $name, array $content = null, string $title = '', string $type = 'file', bool $private = false): ?string
   {
     $media = $this->getMediaInstance();
+
     // Case where we give also the version (i.e. not the latest)
     if (\is_array($id_note) && (count($id_note) === 2)) {
       $version = $id_note[1];
@@ -903,7 +902,7 @@ class Note extends DbCls
    */
   public function addMediaToNote(string $id_media, string $id_note, int $default = 0): ?int
   {
-    if ($this->getUser()) {
+    if ($this->userId) {
       $cf = &$this->class_cfg;
 
       if ($default) {
@@ -919,7 +918,7 @@ class Note extends DbCls
         [
           $cf['arch']['notes_medias']['id_note'] => $id_note,
           $cf['arch']['notes_medias']['id_media'] => $id_media,
-          $cf['arch']['notes_medias']['id_user'] => $this->getUser(),
+          $cf['arch']['notes_medias']['id_user'] => $this->userId,
           $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
           $cf['arch']['notes_medias']['default_media'] => $default
         ]
@@ -1184,7 +1183,7 @@ class Note extends DbCls
    */
   public function browse(array $cfg, bool $with_content = false, bool $private = false, string $id_type = null, bool $pinned = null): ?array
   {
-    if (isset($cfg['limit']) && $this->getUser()) {
+    if (isset($cfg['limit']) && $this->userId) {
       /** @var Db $db */
       $db       = &$this->db;
       $cf       = &$this->class_cfg;
@@ -1202,7 +1201,7 @@ class Note extends DbCls
         ];
         $grid_cfg['filters'][] = [
           'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
-          'value' => $this->getUser()
+          'value' => $this->userId
         ];
       }
       else {
@@ -1246,7 +1245,7 @@ class Note extends DbCls
    */
   public function count()
   {
-    if ($this->getUser()) {
+    if ($this->userId) {
       $cf  = &$this->class_cfg;
       $db  = &$this->db;
       return $this->db->count([
@@ -1269,10 +1268,10 @@ class Note extends DbCls
             'logic' => 'OR',
             'conditions' => [[
               'field' => $db->cfn($cf['arch']['notes']['creator'], $cf['table']),
-              'value' => $this->getUser()
+              'value' => $this->userId
             ], [
               'field' => $db->cfn($cf['arch']['versions']['id_user'], $cf['tables']['versions']),
-              'value' => $this->getUser()
+              'value' => $this->userId
             ]]
           ]]
         ]
