@@ -52,8 +52,7 @@ trait Optional
 
       if (!$path) {
         if (!BBN_APPUI) {
-          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
-          return;
+          throw new Exception('Impossible to find the option appui for '.__CLASS__, 'errors');
         }
 
         $tmp                   = explode('\\', __CLASS__);
@@ -63,6 +62,9 @@ trait Optional
 
       self::$option_root_id = $opt->fromCode(...$path);
       if (!self::$option_root_id) {
+        if (!$cls) {
+          throw new Exception("Impossible to find the option ".json_encode($path)." !!! for ".__CLASS__);
+        }
         throw new Exception("Impossible to find the option $cls for ".__CLASS__);
       }
 

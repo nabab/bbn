@@ -50,6 +50,7 @@ class Menu extends bbn\Models\Cls\Basic
     if (!Str::isUid($path)) {
       //$path = $this->options->fromCode($path, self::$option_root_id);
       if (!($id = self::getOptionId($path))) {
+        //X::hddump(self::getOptionId($path), self::getOptionId($path, 'options'), self::getOptionRoot());
         $id = $this->perm->fromPath($path);
       }
     }

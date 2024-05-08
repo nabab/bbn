@@ -95,7 +95,6 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     self::retrieverInit($this);
-    self::optionalInit(['permissions']);
     $this->db = Db::getInstance();
   }
 
@@ -172,12 +171,13 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     $parent = null;
     $root   = false;
+    $old_path = $path;
     if (($type === 'access') && $this->plugins && !empty($path)) {
       foreach ($this->plugins as $plugin) {
         if (strpos($path, $plugin['url'].'/') === 0) {
           if (strpos($plugin['name'], 'appui-') === 0) {
             $root = $this->opt->fromCode(
-              'access',
+              $type,
               'permissions',
               substr($plugin['name'], 6),
               'appui',
@@ -187,7 +187,7 @@ class Permissions extends bbn\Models\Cls\Basic
           }
           elseif ($plugin['name']) {
             $root = $this->opt->fromCode(
-              'access',
+              $type,
               'permissions',
               $plugin['name'],
               'plugins',
@@ -201,11 +201,11 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     if (!$root) {
-      $root = $this->opt->fromCode($type, self::$option_root_id);
+      $root = $this->opt->fromCode($type, 'permissions');
     }
 
     if (!$root) {
-      throw new Exception(X::_("Impossible to find the permission code for $path"));
+      throw new Exception(X::_("Impossible to find the permission code for %s as %s", $path, $type));
     }
 
     $parts  = explode('/', trim($path, '/'));

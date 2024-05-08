@@ -3,6 +3,7 @@ namespace bbn;
 
 use Closure;
 use Exception;
+use Traversable;
 use Opis\Closure\SerializableClosure;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
@@ -102,13 +103,13 @@ class Cache implements CacheInterface
 
 
   /**
-   * @param string $item
+   * @param string $key
    * @param string $path
    * @return string
    */
-  private static function _file(string $item, string $path): string
+  private static function _file(string $key, string $path): string
   {
-    return self::_dir($item, $path).'/'.self::_sanitize(X::basename($item)).'.bbn.cache';
+    return self::_dir($key, $path).'/'.self::_sanitize(X::basename($key)).'.bbn.cache';
   }
 
 
@@ -246,20 +247,20 @@ class Cache implements CacheInterface
   /**
    * Checks whether a valid cache exists for the given item.
    *
-   * @param string     $item The name of the item
+   * @param string     $key The name of the item
    * @param string|int $ttl  The time-to-live value
    * @return bool
    */
-  public function has($item, $ttl = null): bool
+  public function has($key, $ttl = null): bool
   {
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apc_exists($item);
+          return apc_exists($key);
         case 'memcache':
-          return $this->obj->get($item) !== $item;
+          return $this->obj->get($key) !== $key;
         case 'files':
-          $file = self::_file($item, $this->path);
+          $file = self::_file($key, $this->path);
           if (($content = $this->fs->getContents($file))
               && ($t = json_decode($content, true))
           ) {
@@ -280,19 +281,19 @@ class Cache implements CacheInterface
   /**
    * Removes the given item from the cache.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @return bool
    */
-  public function delete($item): bool
+  public function delete($key): bool
   {
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apc_delete($item);
+          return apc_delete($key);
         case 'memcache':
-          return $this->obj->delete($item);
+          return $this->obj->delete($key);
         case 'files':
-          $file = self::_file($item, $this->path);
+          $file = self::_file($key, $this->path);
           if ($this->fs->isFile($file)) {
             return (bool)$this->fs->delete($file);
           }
@@ -359,22 +360,21 @@ class Cache implements CacheInterface
    *
    * @return self
    */
-  public function clear(): self
+  public function clear(): bool
   {
-    $this->deleteAll();
-    return $this;
+    return (bool)$this->deleteAll();
   }
 
 
   /**
    * Returns the timestamp of the given item.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @return null|int
    */
-  public function timestamp(string $item): ?int
+  public function timestamp(string $key): ?int
   {
-    if ($r = $this->getRaw($item)) {
+    if ($r = $this->getRaw($key)) {
       return $r['timestamp'];
     }
 
@@ -385,12 +385,12 @@ class Cache implements CacheInterface
   /**
    * Returns the hash of the given item.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @return null|string
    */
-  public function hash(string $item): ?string
+  public function hash(string $key): ?string
   {
-    if ($r = $this->getRaw($item)) {
+    if ($r = $this->getRaw($key)) {
       return $r['hash'];
     }
 
@@ -401,17 +401,17 @@ class Cache implements CacheInterface
   /**
    * Checks whether or not the given item is more recent than the given timestamp.
    *
-   * @param string   $item The name of the item
+   * @param string   $key The name of the item
    * @param null|int $time The timestamp to which the item's timestamp will be compared
    * @return bool
    */
-  public function isNew(string $item, int $time = null): bool
+  public function isNew(string $key, int $time = null): bool
   {
     if (!$time) {
       return false;
     }
 
-    if ($r = $this->getRaw($item)) {
+    if ($r = $this->getRaw($key)) {
       return $r['timestamp'] > $time;
     }
 
@@ -422,12 +422,12 @@ class Cache implements CacheInterface
   /**
    * Stores the given value in the cache for as long as says the TTL.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @param mixed  $val  The value to be stored in the cache
    * @param int    $ttl  The length in seconds during which the value will be considered as valid
    * @return bool Returns true in case of success false otherwise
    */
-  public function set($item, $val, $ttl = null, float $exec = null): bool
+  public function set($key, $val, $ttl = null, float $exec = null): bool
   {
     if (self::$type) {
       $ttl  = self::ttl($ttl);
@@ -435,7 +435,7 @@ class Cache implements CacheInterface
       switch (self::$type){
         case 'apc':
           return \apc_store(
-            $item, [
+            $key, [
             'timestamp' => microtime(1),
             'hash' => $hash,
             'ttl' => $ttl,
@@ -444,7 +444,7 @@ class Cache implements CacheInterface
           );
         case 'memcache':
           return $this->obj->set(
-            $item, [
+            $key, [
             'timestamp' => microtime(1),
             'hash' => $hash,
             'ttl' => $ttl,
@@ -452,7 +452,7 @@ class Cache implements CacheInterface
             ], false, $ttl
           );
         case 'files':
-          $file = self::_file($item, $this->path);
+          $file = self::_file($key, $this->path);
           if ($this->fs->createPath(X::dirname($file))) {
             $value = [
               'timestamp' => microtime(1),
@@ -476,49 +476,49 @@ class Cache implements CacheInterface
   /**
    * Checks if the value of the item corresponds to the given hash.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @param string $hash A MD5 hash to compare with
    * @return bool Returns true if the hashes are different, false otherwise
    */
-  public function isChanged(string $item, $hash): bool
+  public function isChanged(string $key, $hash): bool
   {
-    return $hash !== $this->hash($item);
+    return $hash !== $this->hash($key);
   }
 
 
   /**
    * Returns the cache object (array) as stored.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @param int    $ttl  The cache length
    * @return null|array
    */
-  private function getRaw(string $item, int $ttl = null, bool $force = false): ?array
+  private function getRaw(string $key, int $ttl = null, bool $force = false): ?array
   {
     switch (self::$type) {
       case 'apc':
         /*
-        if (\apc_exists($item)) {
-          return \apc_fetch($item);
+        if (\apc_exists($key)) {
+          return \apc_fetch($key);
         }
         break;
         */
       case 'memcache':
         /*
-        $tmp = $this->obj->get($item);
-        if ($tmp !== $item) {
+        $tmp = $this->obj->get($key);
+        if ($tmp !== $key) {
           return $tmp;
         }
         break;
         */
       case 'files':
-        $file = self::_file($item, $this->path);
+        $file = self::_file($key, $this->path);
         if (!$this->fs->isFile($file)) {
           $tmp_file = X::dirname($file).'/_'.X::basename($file);
           if ($this->fs->isFile($tmp_file)) {
             $num = 0;
             while (!$this->fs->isFile($file) && ($num < self::$max_wait)) {
-              X::log([$item, $file, $tmp_file, date('Y-m-d H:i:s')], 'wait_for_cache');
+              X::log([$key, $file, $tmp_file, date('Y-m-d H:i:s')], 'wait_for_cache');
               sleep(1);
               $num++;
             }
@@ -545,13 +545,13 @@ class Cache implements CacheInterface
   /**
    * Returns the cache value, false otherwise.
    *
-   * @param string $item The name of the item
+   * @param string $key The name of the item
    * @param int    $ttl  The cache length
    * @return mixed
    */
-  public function get($item, $ttl = null)
+  public function get(string $key, mixed $ttl = null): mixed
   {
-    if ($r = $this->getRaw($item, $ttl)) {
+    if ($r = $this->getRaw($key, $ttl)) {
       return $r['value'];
     }
 
@@ -563,13 +563,13 @@ class Cache implements CacheInterface
      * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.
      *
      * @param callable $fn   The function which returns the value for the cache
-     * @param string   $item The name of the item
+     * @param string   $key The name of the item
      * @param int      $ttl  The cache length
      *
      * @return mixed
      * @throws Exception
      */
-  public function getSet(callable $fn, string $item, int $ttl = null)
+  public function getSet(callable $fn, string $key, int $ttl = null)
   {
     switch (self::$type) {
       case 'apc':
@@ -578,11 +578,11 @@ class Cache implements CacheInterface
         break;
       case 'files':
         // Getting the data
-        $tmp  = $this->getRaw($item, $ttl);
+        $tmp  = $this->getRaw($key, $ttl);
         $data = null;
         // Can't get the data
         if (!$tmp) {
-          $file = self::_file($item, $this->path);
+          $file = self::_file($key, $this->path);
           // Temporary file will be created to tell other processes the cache is being created
           $tmp_file = X::dirname($file).'/_'.X::basename($file);
           // Will become true if the cache should be created
@@ -607,12 +607,12 @@ class Cache implements CacheInterface
             }
 
             $exec = $timer->stop();
-            $this->set($item, $data, $ttl, $exec);
+            $this->set($key, $data, $ttl, $exec);
             $this->fs->delete($tmp_file);
           }
           // Otherwise another process is certainly creating the cache, so wait for it
           else {
-            return $this->get($item);
+            return $this->get($key);
           }
 
           // Creating the cache
@@ -731,7 +731,7 @@ class Cache implements CacheInterface
   }
 
 
-  public function getMultiple($keys, $default = null)
+  public function getMultiple($keys, $default = null): Traversable|array
   {
     if (!is_iterable($keys)) {
       throw new InvalidArgumentException("Keys must be iterable");
@@ -746,7 +746,7 @@ class Cache implements CacheInterface
   }
 
 
-  public function setMultiple($values, $ttl = null)
+  public function setMultiple($values, $ttl = null): bool
   {
     foreach ($values as $k => $v) {
       if (!$this->set($k, $v, $ttl)) {
@@ -758,7 +758,7 @@ class Cache implements CacheInterface
   }
 
 
-  public function deleteMultiple($keys)
+  public function deleteMultiple($keys): bool
   {
     if (!is_iterable($keys)) {
       throw new InvalidArgumentException("Keys must be iterable");
