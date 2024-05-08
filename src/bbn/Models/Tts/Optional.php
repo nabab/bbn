@@ -52,7 +52,7 @@ trait Optional
 
       if (!$path) {
         if (!BBN_APPUI) {
-          throw new Exception('Impossible to find the option appui for '.__CLASS__, 'errors');
+          throw new Exception('Impossible to find the option appui for '.__CLASS__);
         }
 
         $tmp                   = explode('\\', __CLASS__);
