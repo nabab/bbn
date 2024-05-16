@@ -1018,7 +1018,7 @@ class Dashboard extends Basic
                 $plugin_name = 'appui-' . $plugin_name;
               }
 
-              if (!$mvc->hasPlugin($plugin_name)) {
+              if (($plugin_name !== constant('BBN_APP_NAME')) && !$mvc->hasPlugin($plugin_name)) {
                 continue;
               }
             }
