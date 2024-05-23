@@ -77,7 +77,7 @@ trait EntityTrait
     return $this->entities->options();
   }
 
-  public function entity(): ?Entity
+  public function entity(): Entity|Nullall
   {
     return $this->entity;
   }
