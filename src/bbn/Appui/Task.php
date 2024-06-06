@@ -986,7 +986,7 @@ class Task extends bbn\Models\Cls\Db
         }
       }
       else if ( isset($fields['refs'][$w[0]]) ){
-        if ( \is_int($w[2]) ){
+        if (\is_int($w[2]) || Str::isUid($w[2])) {
           $having .= " AND ".$fields['refs'][$w[0]]." $w[1] ? ";
           array_push($args1, $w[2]);
         }
