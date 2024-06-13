@@ -1789,6 +1789,31 @@ class Task extends bbn\Models\Cls\Db
     }
   }
 
+  public function moveTrack(string $idTrack, string $idTask): bool
+  {
+    if ($track = $this->db->rselect('bbn_tasks_sessions', [], ['id' => $idTrack])) {
+      if ($track['id_user'] !== $this->id_user) {
+        return false;
+      }
+
+      if ($this->db->update('bbn_tasks_sessions', ['id_task' => $idTask], ['id' => $idTrack])) {
+        if (!empty($track['id_note'])) {
+          if ($this->db->update('bbn_tasks_notes', ['id_task' => $idTask], [
+            'id_note' => $track['id_note'],
+            'id_task' => $track['id_task']
+          ])) {
+            $this->addLog($track['id_task'], 'comment_delete');
+            $this->addLog($idTask, 'comment_insert');
+          }
+        }
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public function getInvoice($id_task){
     if ( $id_invoice = $this->db->selectOne('bbn_tasks_invoices', 'id_invoice', ['id_task' => $id_task]) ){
       return $this->db->rselect('bbn_invoices', [], ['id' => $id_invoice]);
