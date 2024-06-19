@@ -501,6 +501,7 @@ TEMPLATE;
       }
       catch (\Exception $e) {
         $this->log($e->getMessage());
+        $this->log(\imap_last_error());
       }
 
       if ($r && !empty($this->imap_string)) {
@@ -517,12 +518,6 @@ TEMPLATE;
         ) {
           $this->log(\imap_errors());
         }
-      }
-
-      if (!$r) {
-        $err = \imap_last_error();
-        $this->log($err);
-        X::log($err);
       }
     }
 

@@ -859,7 +859,7 @@ class Appui
         $id_plugin = $id;
       }
       else {
-        $pluginTemplate = $o->fromCode('plugin', 'list', 'templates', 'optiopns', 'appui');
+        $pluginTemplate = $o->fromCode('plugin', 'list', 'templates', 'options', 'appui');
         $id_plugin = $o->add(
           [
             'code' => $name,

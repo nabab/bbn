@@ -228,7 +228,7 @@ class Ai extends DbCls
       $tf['id_prompt'] => $id_prompt,
       $tf['text'] => $text,
       $tf['author'] => $user->getId(),
-      $tf['ai'] => $ai,
+      $tf['ai'] => $ai ? 1 : 0,
     ]);
   }
   

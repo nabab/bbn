@@ -1,11 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: BBN
- * Date: 29/11/2014
- * Time: 02:45
+ * Masks class, handling masks for notes.
+ *
+ * @namespace bbn\Appui
+ * @author BBN
+ * @since 29/11/2014
  */
-
 namespace bbn\Appui;
 
 use bbn;
@@ -13,11 +13,20 @@ use bbn\X;
 
 class Masks extends bbn\Models\Cls\Db
 {
-
   use bbn\Models\Tts\Optional;
 
+  /**
+   * Notes object.
+   *
+   * @var Note
+   */
   protected $notes;
 
+  /**
+   * Constructor.
+   *
+   * @param bbn\Db $db Database object.
+   */
   public function __construct(bbn\Db $db)
   {
     parent::__construct($db);
@@ -25,6 +34,12 @@ class Masks extends bbn\Models\Cls\Db
     $this->notes = new Note($this->db);
   }
 
+  /**
+   * Count masks.
+   *
+   * @param int|null $id_type Type ID.
+   * @return int Count of masks.
+   */
   public function count($id_type = null)
   {
     if ($id_type) {
@@ -35,9 +50,11 @@ class Masks extends bbn\Models\Cls\Db
   }
 
   /**
-   * Gets the content of a mask based on the provided ID
-   * @param string $id
-   * @return array|null
+   * Get a mask by ID.
+   *
+   * @param string $id Mask ID.
+   * @param bool $simple Return simple data.
+   * @return array|null Mask data.
    */
   public function get(string $id, bool $simple = false): ?array
   {
@@ -53,18 +70,21 @@ class Masks extends bbn\Models\Cls\Db
     return null;
   }
 
+  /**
+   * Get all masks.
+   *
+   * @param int|null $id_type Type ID.
+   * @param bool $simple Return simple data.
+   * @return array Masks data.
+   */
   public function getAll($id_type = null, $simple = true)
   {
     if (!empty($id_type) && !bbn\Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
     $r = [];
-    $all = $this->db->getColumnValues(
-      'bbn_notes_masks', 'id_note', $id_type ? [
-      'id_type' => $id_type
-      ] : []
-    );
-    foreach ($all as $a){
+    $all = $this->db->getColumnValues('bbn_notes_masks', 'id_note', $id_type ? ['id_type' => $id_type] : []);
+    foreach ($all as $a) {
       if ($tmp = $this->get($a, $simple)) {
         $r[] = $tmp;
       }
@@ -72,6 +92,13 @@ class Masks extends bbn\Models\Cls\Db
     return $r;
   }
 
+  /**
+   * Get text value for a type.
+   *
+   * @param int $id_type Type ID.
+   * @param bool $fulltext Return full text.
+   * @return array|null Text value.
+   */
   public function getTextValue($id_type, $fulltext = false)
   {
     if (!bbn\Str::isUid($id_type)) {
@@ -88,10 +115,10 @@ class Masks extends bbn\Models\Cls\Db
             'value' => $a['id_note']
           ];
           if ($fulltext) {
-            $tmp['fulltext'] = $a['title'].
-              ($a['default'] ? ' ('.X::_('default').')' : '').
-              ' - v'.$a['version'].' '.
-              \bbn\Date::format($a['creation']).' '.X::_('by').' '.
+            $tmp['fulltext'] = $a['title'] .
+              ($a['default'] ? ' (' . X::_('default') . ')' : '') .
+              ' - v' . $a['version'] . ' ' .
+              \bbn\Date::format($a['creation']) . ' ' . X::_('by') . ' ' .
               $admin->getName($a['id_user']);
           }
           $res[] = $tmp;
@@ -102,23 +129,32 @@ class Masks extends bbn\Models\Cls\Db
     return null;
   }
 
+  /**
+   * Get default mask for a type.
+   *
+   * @param int $id_type Type ID.
+   * @return array|null Default mask data.
+   */
   public function getDefault($id_type)
   {
     if (!bbn\Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
-    if ($id_note = $this->db->selectOne(
-      'bbn_notes_masks', 'id_note', [
+    if ($id_note = $this->db->selectOne('bbn_notes_masks', 'id_note', [
       'id_type' => $id_type,
       'def' => 1
-      ]
-    ) 
-    ) {
+    ])) {
       return $this->get($id_note);
     }
     return null;
   }
 
+  /**
+   * Set default mask for a type.
+   *
+   * @param int $id_note Mask ID.
+   * @return int|bool Result of update operation.
+   */
   public function setDefault($id_note)
   {
     $current = $this->get($id_note);
@@ -127,31 +163,32 @@ class Masks extends bbn\Models\Cls\Db
         if ($old['id_note'] === $id_note) {
           return 1;
         }
-        $this->db->update(
-          'bbn_notes_masks', [
-          'def' => 0
-          ], [
-          'id_note' => $old['id_note']
-          ]
-        );
+        $this->db->update('bbn_notes_masks', ['def' => 0], ['id_note' => $old['id_note']]);
       }
-      return $this->db->update(
-        'bbn_notes_masks', [
-        'def' => 1
-        ], [
-        'id_note' => $id_note
-        ]
-      );
+      return $this->db->update('bbn_notes_masks', ['def' => 1], ['id_note' => $id_note]);
     }
   }
 
+  /**
+   * Insert a new mask.
+   *
+   * @param string $name Mask name.
+   * @param int $id_type Type ID.
+   * @param string $title Mask title.
+   * @param string $content Mask content.
+   * @return string|null ID of the inserted mask.
+   */
   public function insert($name, $id_type, $title, $content): ?string
   {
     if (!bbn\Str::isUid($id_type)) {
       $id_type = self::getOptionId($id_type);
     }
-    if ($this->options->exists($id_type) 
-        && ($id_note = $this->notes->insert($title, $content, $this->options->fromCode('masks', 'types', 'note', 'appui')))
+    if ($this->options->exists($id_type)
+        && ($id_note = $this->notes->insert(
+          $title,
+          $content,
+          $this->options->fromCode('masks', 'types', 'note', 'appui')
+        ))
     ) {
       $data = [
         'id_note' => $id_note,
@@ -168,20 +205,22 @@ class Masks extends bbn\Models\Cls\Db
     return null;
   }
 
+  /**
+   * Update a mask.
+   *
+   * @param array $cfg Mask data.
+   * @return bool Result of update operation.
+   */
   public function update(array $cfg)
   {
-    if (!empty($cfg['id_note'])  
-        && !empty($cfg['title']) 
-        && !empty($cfg['content']) 
-        && !empty($cfg['name'])
-    ) {
+    if (!empty($cfg['id_note']) && !empty($cfg['title']) && !empty($cfg['content']) && !empty($cfg['name'])) {
       $data = [
         'name' => $cfg['name'],
         'def' => !empty($cfg['def']) || !empty($cfg['default']) ? 1 : 0
       ];
       if (!empty($cfg['id_type'])) {
         $data['id_type'] = $cfg['id_type'];
-      }      
+      }
       $update_mask = $this->db->update('bbn_notes_masks', $data, ['id_note' => $cfg['id_note']]);
       $update_notes = $this->notes->update($cfg['id_note'], $cfg['title'], $cfg['content']);
       if ($update_mask || $update_notes) {
@@ -191,6 +230,12 @@ class Masks extends bbn\Models\Cls\Db
     return false;
   }
 
+  /**
+   * Delete a mask.
+   *
+   * @param int $id_note Mask ID.
+   * @return bool Result of delete operation.
+   */
   public function delete($id_note)
   {
     if ($this->db->delete('bbn_notes_masks', ['id_note' => $id_note])) {
@@ -198,6 +243,13 @@ class Masks extends bbn\Models\Cls\Db
     }
   }
 
+  /**
+   * Render a mask.
+   *
+   * @param string $note Mask ID or data.
+   * @param array $data Data to render with.
+   * @return string|null Rendered mask content.
+   */
   public function render($note, $data)
   {
     if (bbn\Str::isUid($note)) {
@@ -209,14 +261,17 @@ class Masks extends bbn\Models\Cls\Db
     return null;
   }
 
+  /**
+   * Get categories.
+   *
+   * @return array Categories.
+   */
   public function getCategories()
   {
     return self::getOptions();
   }
 
-
-
-  /*
+ /*
 
 
 
@@ -251,4 +306,5 @@ class Masks extends bbn\Models\Cls\Db
     return $this->get_st($id);
   }
   */
+
 }
