@@ -125,7 +125,19 @@ class Ai extends DbCls
     [
       'value' => 'json-editor',
       'text' => 'JSON',
-      'prompt' => 'Your response needs to be a valid JSON string',
+      'prompt' => 'Your response needs to use this grammar : root   ::= object
+
+object ::= "{" ws ( string ":" ws value ("," ws string ":" ws value)* )? "}"
+
+value  ::= object | array | string | number | ("true" | "false" | "null") ws
+
+array  ::= "[" ws ( value ("," ws value)* )? "]" ws
+
+string ::= "\"" ( [a-zA-Z0-9] )* "\"" ws
+
+number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
+
+ws ::= ([ \t\n] ws)?',
       'component' => 'bbn-json-editor',
     ]
   ];
@@ -505,7 +517,7 @@ class Ai extends DbCls
       $this->class_cfg['arch']['ai_prompt']['input'] => $input,
       $this->class_cfg['arch']['ai_prompt']['output'] => $output,
       $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
-    ]);
+    ], $id);
     
     return true;
   }
