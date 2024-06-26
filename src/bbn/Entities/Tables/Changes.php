@@ -17,10 +17,13 @@ use bbn\Entities\Options as EntityOptions;
 use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Entity;
+use bbn\Models\Tts\TmpFiles;
 
 
 class Changes extends EntityTable
 {
+  use TmpFiles;
+
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_changes',
     'tables' => [
@@ -455,19 +458,19 @@ class Changes extends EntityTable
         case 'adherents':
         case 'finances':
         case 'formation':
-          if (!$this->adh->update($data)) {
+          if (!$this->entity->update($data)) {
             $error = _('Error during the adherent updating.');
           }
           break;
 
         case 'clotures':
-          $nextCloture = $this->adh->getNextCloture();
+          $nextCloture = $this->entity->getNextCloture();
           if ($nextCloture !== $data['next_cloture']) {
             $y = substr($data['next_cloture'], 0, 4);
             $m = substr($data['next_cloture'], 5, 2);
-            if (!($idCloture = $this->adh->getNextClotureId())
+            if (!($idCloture = $this->entity->getNextClotureId())
                 || ($nextCloture <= date('Y-m-d'))
-                || !($this->adh->updateCloture($idCloture, $y, $m))
+                || !($this->entity->updateCloture($idCloture, $y, $m))
             ) {
               $error = _("Impossible de mettre à jour la clôture");
             }
@@ -477,7 +480,7 @@ class Changes extends EntityTable
         case 'marques':
           switch ($cfg['type']){
             case 'insert':
-              if (!$this->adh->marque()->update($data)) {
+              if (!$this->entity->marques()->update($data)) {
                 $error = _('Error during the marque inserting.');
               }
               break;
@@ -487,7 +490,7 @@ class Changes extends EntityTable
               }
               break;
             case 'delete':
-              if (!$this->adh->marque()->delete($cfg['id'])) {
+              if (!$this->entity->marques()->delete($cfg['id'])) {
                 $error = _('Error during the marque deleting.');
               }
               break;
@@ -505,7 +508,7 @@ class Changes extends EntityTable
               if (!empty($data['id_people'])
                 && !empty($data['parts'])
               ) {
-                if (!$this->adh->actionnaire()->insert($data)) {
+                if (!$this->entity->actionnaire()->insert($data)) {
                   $error = _('Error during the actionnaire inserting.');
                 }
               }
@@ -525,7 +528,7 @@ class Changes extends EntityTable
                     ['id' => $cfg['id']]
                   );
                 }
-                if (!$this->adh->actionnaire()->update($toUpd)) {
+                if (!$this->entity->actionnaire()->update($toUpd)) {
                   $error = _('Error during the representant updating.');
                 }
               }
@@ -535,7 +538,7 @@ class Changes extends EntityTable
               break;
             case 'delete':
               if (!empty($data['id_people'])
-                && !$this->adh->links()->actionnaireDelete($data['id_people'])
+                && !$this->entity->links()->actionnaireDelete($data['id_people'])
               ) {
                 $error = _('Error during the actionnaire deleting.');
               }
@@ -555,7 +558,7 @@ class Changes extends EntityTable
                   $toIns['representant'] = $data['representant'];
                 }
 
-                if (!$this->adh->representant()->insert($toIns)) {
+                if (!$this->entity->representant()->insert($toIns)) {
                   $error = _('Error during the representant inserting.');
                 }
               }
@@ -569,7 +572,7 @@ class Changes extends EntityTable
                   'id' => $cfg['id'],
                   'id_people' => $id_sub
                 ], $data);
-                if (!$this->adh->representant()->update($toUpd)) {
+                if (!$this->entity->representant()->update($toUpd)) {
                   $error = _('Error during the representant updating.');
                 }
               }
@@ -579,7 +582,7 @@ class Changes extends EntityTable
               break;
             case 'delete':
               if (!empty($cfg['id'])
-                && !$this->adh->representant()->delete($cfg['id'])
+                && !$this->entity->representant()->delete($cfg['id'])
               ) {
                 $error = _('Error during the representant deleting.');
               }
@@ -589,15 +592,15 @@ class Changes extends EntityTable
         case 'succursales':
           switch ($cfg['type']){
             case 'insert':
-              if (!$this->adh->links()->succursaleUpdateOrInsert($data)) {
+              if (!$this->entity->links()->succursaleUpdateOrInsert($data)) {
                 $error = _('Error during the succursale inserting.');
               }
               break;
             case 'update':
               if (!empty($cfg['id'])
-                && ($old = $this->adh->succursale()->get($cfg['id']))
+                && ($old = $this->entity->succursale()->get($cfg['id']))
                 && ($data = X::mergeArrays((array)$old->link, $data))
-                && !$this->adh->links()->succursaleUpdateOrInsert($data)
+                && !$this->entity->links()->succursaleUpdateOrInsert($data)
               ) {
                 $error = _('Error during the succursale updating.');
               }
@@ -606,7 +609,7 @@ class Changes extends EntityTable
               if (!empty($cfg['id'])
                 && !empty($data['date_radiation'])
                 && ($data['id_address'] = $this->db->selectOne('bbn_entities_links', 'id_address', ['id' => $cfg['id']]))
-                && !$this->adh->links()->succursaleDelete($data['id_address'], $data['date_radiation'])
+                && !$this->entity->links()->succursaleDelete($data['id_address'], $data['date_radiation'])
               ) {
                 $error = _('Error during the succursale deleting.');
               }
@@ -619,13 +622,13 @@ class Changes extends EntityTable
             case 'insert':
             case 'update':
               if (!empty($data['id_address'])
-                && !$this->adh->links()->setSiege($data['id_address'])
+                && !$this->entity->links()->setSiege($data['id_address'])
               ) {
                 $error = _('Error during the siege') . ' ' . $cfg['type'] === 'insert' ? _('inserting.') : _('updating.');
               }
               break;
             case 'delete':
-              if (!$this->adh->links()->unsetSiege()) {
+              if (!$this->entity->links()->unsetSiege()) {
                 $error = _('Error during the siege deleting.');
               }
           }
@@ -636,13 +639,13 @@ class Changes extends EntityTable
             case 'insert':
             case 'update':
               if (!empty($data['id_address'])
-                && !$this->adh->links()->setCourrier($data['id_address'])
+                && !$this->entity->links()->setCourrier($data['id_address'])
               ) {
                 $error = _('Error during the courrier') . ' ' . $cfg['type'] === 'insert' ? _('inserting.') : _('updating.');
               }
               break;
             case 'delete':
-              if (!$this->adh->links()->unsetCourrier()) {
+              if (!$this->entity->links()->unsetCourrier()) {
                 $error = _('Error during the courrier deleting.');
               }
           }
@@ -708,7 +711,7 @@ class Changes extends EntityTable
           $id_opt = array_keys($data)[0];
           if (Str::isUid($id_opt)
             && ($code = $this->options()->code($id_opt))
-            && !$this->adh->updateAdditionalInfo([$code => $data[$id_opt]], true)
+            && !$this->entity->updateAdditionalInfo([$code => $data[$id_opt]], true)
           ) {
             $error = _('Error during the infos complementaires') . ' ';
             switch ($cfg['type']){
@@ -726,7 +729,7 @@ class Changes extends EntityTable
           $eo = new EntityOptions($this->db);
           $eoTypes = $eo->getTypes();
           if (!empty($eoTypes['mandataires'])) {
-            $currentMandataires = $eo->get($this->adh->getId(), $eoTypes['mandataires']);
+            $currentMandataires = $eo->get($this->entity->getId(), $eoTypes['mandataires']);
             $newMandataires = $currentMandataires;
             switch ($cfg['type']) {
               case 'insert':
@@ -743,7 +746,7 @@ class Changes extends EntityTable
                 break;
             }
             if (($currentMandataires === $newMandataires)
-              || !$this->adh->update(['mandataires' => $newMandataires])
+              || !$this->entity->update(['mandataires' => $newMandataires])
             ) {
               $error = _('Error during the mandataire') . ' ' . $e2;
             }
@@ -754,7 +757,7 @@ class Changes extends EntityTable
           $eo = new EntityOptions($this->db);
           $eoTypes = $eo->getTypes();
           if (!empty($eoTypes['reseaux'])) {
-            $currentReseaux = $eo->get($this->adh->getId(), $eoTypes['reseaux']);
+            $currentReseaux = $eo->get($this->entity->getId(), $eoTypes['reseaux']);
             $newReseaux = $currentReseaux;
             switch ($cfg['type']) {
               case 'insert':
@@ -771,7 +774,7 @@ class Changes extends EntityTable
                 break;
             }
             if (($currentReseaux === $newReseaux)
-              || !$this->adh->update(['reseaux' => $newReseaux])
+              || !$this->entity->update(['reseaux' => $newReseaux])
             ) {
               $error = _('Error during the reseau') . ' ' . $e2;
             }
@@ -779,7 +782,7 @@ class Changes extends EntityTable
           break;
           case 'admin':
             $idAdmin = !empty($data['id_admin']) ? $data['id_admin'] : (!empty($data['id_people']) ? $data['id_people'] : false);
-            if (empty($idAdmin) || !$this->adh->update(['id_admin' => $idAdmin])) {
+            if (empty($idAdmin) || !$this->entity->update(['id_admin' => $idAdmin])) {
               $error = _('Error during the admin updating.');
             }
             break;
@@ -1656,7 +1659,7 @@ class Changes extends EntityTable
         if ($id = $tiers->add($data, true)) {
           // Fonctions
           if (!empty($fonction)) {
-            $this->adh->fonction()->insert(
+            $this->entity->fonction()->insert(
               [
                 'id_people' => $id,
                 'id_option' => $fonction
@@ -1672,9 +1675,9 @@ class Changes extends EntityTable
         $ok2 = false;
         // Fonctions
         if (!empty($fonction)) {
-          $id_lien = $this->adh->fonction()->_id_by_tiers($id);
+          $id_lien = $this->entity->fonction()->_id_by_tiers($id);
           if (empty($id_lien)) {
-            $ok1 = $this->adh->fonction()->insert(
+            $ok1 = $this->entity->fonction()->insert(
               [
                 'id_people' => $id,
                 'id_option' => $fonction
@@ -1682,7 +1685,7 @@ class Changes extends EntityTable
             );
           }
           else {
-            $ok1 = $this->adh->fonction()->update(
+            $ok1 = $this->entity->fonction()->update(
               [
                 'id' => $id_lien,
                 'id_people' => $id,
@@ -1709,8 +1712,8 @@ class Changes extends EntityTable
       case 'delete':
         if (!$is_sub) {
           // Fonctions
-          if ($id_lien = $this->adh->fonction()->_id_by_tiers($id)) {
-            $this->adh->fonction()->delete($id_lien);
+          if ($id_lien = $this->entity->fonction()->_id_by_tiers($id)) {
+            $this->entity->fonction()->delete($id_lien);
           }
 
           $ret = !!$tiers->delete($id);
