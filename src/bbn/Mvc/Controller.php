@@ -1904,7 +1904,7 @@ class Controller implements Api
     if ($route = $this->_mvc->getRoute($path, $private ? 'private' : 'public')) {
       $o = new Controller($this->_mvc, $route, $data);
       $o->process();
-      $this->obj = X::mergeObjects($this->obj, $o->obj);
+      $this->obj = X::mergeObjects($this->obj ?: new stdClass(), $o->obj ?: new stdClass());
     }
     else {
       throw new \Error(X::_("Impossible to route the following request") . ': ' . $path);

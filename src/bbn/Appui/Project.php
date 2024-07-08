@@ -980,7 +980,7 @@ class Project extends DbCls
   {
     if ($force || !$this->pathInfo) {
       $tree = $this->getFullTree();
-      $roots = $tree['path']['items'];
+      $roots = $tree['path']['items'] ?: [];
       $res = [];
       foreach($roots as $root) {
         if (defined("BBN_".strtoupper($root['code'])."_PATH")) {

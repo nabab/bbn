@@ -18,6 +18,7 @@ use bbn\Entities\Tables\Document;
 use bbn\Entities\Tables\Options as EntityOptions;
 use bbn\Entities\Tables\DocumentRequest;
 use bbn\Mail;
+use bbn\Appui\Database;
 use bbn\Appui\Masks;
 use bbn\Appui\Option;
 use bbn\Models\Cls\Db as DbCls;
@@ -27,14 +28,97 @@ abstract class Entities extends DbCls
 {
   use DbActions;
 
-  protected function treatWhere(string|array $where): string|array
-  {
-    $cfg = $this->getClassCfg();
-    if (!empty($cfg['arch'][$this->class_table_index]['easy_id']) && Str::isNumber($where)) {
-      $where = [$cfg['arch'][$this->class_table_index]['easy_id'] => $where];
-    }
+  protected static $default_class_cfg = [
+    'classes' => [
+      'link' => false,
+      'people' => false,
+      'address' => false,
+      'entity' => false,
+      'consultation' => false,
+      'mail' => false,
+      'document' => false,
+      'document_request' => false,
+      'note' => false,
+      'entity_options' => false,
+    ],
+    'table' => 'bbn_entities',
+    'tables' => [
+      'entities' => 'bbn_entities',
+      'people' => 'bbn_people',
+      'address' => 'bbn_addresses',
+      'links' => 'bbn_entities_links',
+    ],
+    'arch' => [
+      'entities' => [
+        'id' => [
+          'name' => 'id',
+          'type' => 'primary',
+        ],
+        'easy_id' => [
+          'name' => 'easy_id',
+          'type' => 'primary',
+          'maxlength' => 5
+        ],
+        'name' => [
+          'name' => 'name',
+          'type' => 'string',
+          'maxlength' => 100
+        ],
+        'id_parent' => [
+          'name' => 'id_parent',
+          'type' => 'string',
+          'maxlength' => 100,
+          'alias' => 'parent'
+        ],
+        "cached" =>  [
+          "name" => "cached",
+          "nullable" => true,
+          "type" => "datetime",
+        ],
+        "change" => [
+          "name" => "change",
+          "nullable" => true,
+          "type" => "datetime",
+        ],
+        "full" => [
+          "name" => "full",
+          "nullable" => true,
+          "type" => "int",
+        ],
+      ]
+    ],
+  ];
 
-    return $where;
+  private static $links = [];
+
+  private static $classes = [];
+
+
+  private $linkCls;
+
+
+  public function __construct(
+    Db $db,
+    array $cfg = null,
+    protected Option|null $options = null,
+    protected Mail|null $mail = null,
+    private People|null $people = null,
+    private Address|null $address = null,
+    private Consultation|null $consultation = null,
+    private Document|null $document = null,
+    private DocumentRequest|null $request = null,
+    private EntityOptions|null $entityOptions = null,
+    private Masks|null $masks = null,
+  )
+  {
+    parent::__construct($db);
+    // Setting up the class configuration
+    $this->_init_class_cfg($cfg);
+    $cls = $this->class_cfg['classes'];
+    if ($cls['link']) {
+      $this->linkCls = $cls['mail'];
+    }
+    
   }
 
 
@@ -151,106 +235,17 @@ abstract class Entities extends DbCls
     return $this->dbTraitGetRelations($id, $table);
   }
 
-
-
-
-
-
-
-
-
-  protected static $default_class_cfg = [
-    'classes' => [
-      'link' => false,
-      'people' => false,
-      'address' => false,
-      'entity' => false,
-      'consultation' => false,
-      'mail' => false,
-      'document' => false,
-      'document_request' => false,
-      'note' => false,
-      'entity_options' => false,
-    ],
-    'table' => 'bbn_entities',
-    'tables' => [
-      'entities' => 'bbn_entities',
-      'people' => 'bbn_people',
-      'address' => 'bbn_addresses',
-      'links' => 'bbn_entities_links',
-    ],
-    'arch' => [
-      'entities' => [
-        'id' => [
-          'name' => 'id',
-          'type' => 'primary',
-        ],
-        'easy_id' => [
-          'name' => 'easy_id',
-          'type' => 'primary',
-          'maxlength' => 5
-        ],
-        'name' => [
-          'name' => 'name',
-          'type' => 'string',
-          'maxlength' => 100
-        ],
-        'id_parent' => [
-          'name' => 'id_parent',
-          'type' => 'string',
-          'maxlength' => 100,
-          'alias' => 'parent'
-        ],
-        "cached" =>  [
-          "name" => "cached",
-          "nullable" => true,
-          "type" => "datetime",
-        ],
-        "change" => [
-          "name" => "change",
-          "nullable" => true,
-          "type" => "datetime",
-        ],
-        "full" => [
-          "name" => "full",
-          "nullable" => true,
-          "type" => "int",
-        ],
-      ]
-    ],
-  ];
-
-  private static $links = [];
-
-  private static $classes = [];
-
-
-  private $linkCls;
-
-
-  public function __construct(
-    Db $db,
-    array $cfg = null,
-    protected Option|null $options = null,
-    protected Mail|null $mail = null,
-    private People|null $people = null,
-    private Address|null $address = null,
-    private Consultation|null $consultation = null,
-    private Document|null $document = null,
-    private DocumentRequest|null $request = null,
-    private EntityOptions|null $entityOptions = null,
-    private Masks|null $masks = null,
-  )
+  public function getColTitle(string $col): ?string
   {
-    parent::__construct($db);
-    // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
-    $cls = $this->class_cfg['classes'];
-    if ($cls['link']) {
-      $this->linkCls = $cls['mail'];
+    $db = new Database($this->db);
+    $cid = $db->columnId($col, $this->class_table);
+    if (!$cid) {
+      return null;
     }
-    
+
+    return $this->options()->text($cid);
   }
+
 
   public function get($id): Entity
   {
@@ -420,6 +415,17 @@ abstract class Entities extends DbCls
     }
 
     return new $clsName($this->db, $this, $entity);
+  }
+
+
+  protected function treatWhere(string|array $where): string|array
+  {
+    $cfg = $this->getClassCfg();
+    if (!empty($cfg['arch'][$this->class_table_index]['easy_id']) && Str::isNumber($where)) {
+      $where = [$cfg['arch'][$this->class_table_index]['easy_id'] => $where];
+    }
+
+    return $where;
   }
 
 

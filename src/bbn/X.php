@@ -790,7 +790,7 @@ class X
   public static function toArray($obj): ?array
   {
     $obj = \is_string($obj) ? $obj : json_encode($obj);
-    return json_decode($obj, true);
+    return json_decode($obj, true) ?: [];
   }
 
 
