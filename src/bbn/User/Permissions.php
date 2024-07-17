@@ -27,7 +27,6 @@ use Exception, bbn, bbn\X, bbn\Str, bbn\User, bbn\Db, bbn\Appui\Option, bbn\Mvc,
 class Permissions extends bbn\Models\Cls\Basic
 {
   use bbn\Models\Tts\Retriever;
-  use bbn\Models\Tts\Optional;
   use bbn\Models\Tts\Current;
 
   /** @var bbn\Appui\Option */
@@ -1025,7 +1024,7 @@ class Permissions extends bbn\Models\Cls\Basic
       $plugins = $this->opt->fromCode('plugins');
 
       /** @var string The option's ID of the permissions on pages (controllers) $id_page */
-      $id_page = $this->getOptionId('access');
+      $id_page = $this->opt->fromCode('access', 'permissions');
 
       /** @var string The option's ID of the permissions on pages (controllers) $id_page */
       $id_plugins = $this->getOptionId('plugins');
