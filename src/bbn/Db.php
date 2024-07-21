@@ -2,7 +2,9 @@
 namespace bbn;
 
 use Exception;
+
 use bbn\Db\Engines;
+use bbn\Db\Query;
 use bbn\Db\Languages\Sql;
 
 /**
@@ -2018,7 +2020,7 @@ class Db implements Db\Actions
    * ```
    *
    * @param array|string $statement
-   * @return false|int
+   * @return false|int|Query
    */
   public function query($statement)
   {

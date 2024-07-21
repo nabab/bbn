@@ -42,6 +42,9 @@ class Option extends DbCls
   use DbActions;
 
   protected $templateIds = [];
+
+  protected $magicTemplateId;
+
   protected $magicOptionsTemplateId;
 
   protected $magicPluginTemplateId;
@@ -3613,14 +3616,14 @@ public function getIdAlias($code = null): ?string
    * @param $id
    * @return array|null
    */
-  public function getCodePath($id)
+  public function getCodePath($id, $fromRoot = false)
   {
     $args = func_get_args();
     $res  = [];
     while ($o = $this->nativeOption(...$args)) {
       if ($o[$this->fields['code']]) {
         $res[] = $o[$this->fields['code']];
-        if ($o[$this->fields['id_parent']] === $this->default) {
+        if ($o[$this->fields['id_parent']] === $fromRoot ? $this->root : $this->default) {
           break;
         }
 
@@ -3918,15 +3921,15 @@ public function getIdAlias($code = null): ?string
   public function import(array $options, $id_parent = null, array &$todo = null)
   {
     if (is_array($id_parent)) {
+      array_push($id_parent, $this->getRoot());
       $id_parent = $this->fromCode($id_parent);
     }
     elseif (null === $id_parent) {
-      $id_parent = $this->default;
+      $id_parent = $this->getDefault();
     }
 
     if (!empty($options) && $this->check() && $this->exists($id_parent)) {
       $c       =& $this->fields;
-      $num     = 0;
       $is_root = false;
       if ($todo === null) {
         $is_root = true;
@@ -3996,6 +3999,7 @@ public function getIdAlias($code = null): ?string
       if ($is_root && !empty($todo)) {
         foreach ($todo as $id => $td) {
           if (!empty($td['id_alias'])) {
+            array_push($td['id_alias'], $this->getRoot());
             if ($id_alias = $this->fromCode(...$td['id_alias'])) {
               try {
                 $this->setAlias($id, $id_alias);
@@ -4009,7 +4013,7 @@ public function getIdAlias($code = null): ?string
             }
             else {
               X::log($td['id_alias']);
-              throw new \Exception(
+              throw new Exception(
                 X::_(
                   "Error while importing: impossible to set the alias %s",
                   json_encode($td, JSON_PRETTY_PRINT)
@@ -4341,10 +4345,14 @@ public function getIdAlias($code = null): ?string
   {
     if (($pluginAlias = $this->getMagicPluginTemplateId())
         && ($export = $this->export($pluginAlias, 'sfull'))) {
+      $items = X::map(function($a) {
+        $a['id_alias'] = $this->getCodePath($a['id']);
+        return $a;
+      }, $export['items'], 'items');
       $idPlugins = $this->getAliasItems($pluginAlias);
       $res = 0;
       foreach ($idPlugins as $idPlugin) {
-        foreach ($this->import($export['items'], $idPlugin) as $num) {
+        foreach ($this->import($items, $idPlugin) as $num) {
           $res += $num;
         }
       }
@@ -4399,7 +4407,7 @@ public function getIdAlias($code = null): ?string
 
     if (($export = $this->export($idAlias, 'sfull')) && !empty($export['items'])) {
       $items = X::map(function($a) {
-        $a['id_alias'] = $a['id'];
+        $a['id_alias'] = $this->getCodePath($a['id']);
         unset($a['id']);
         return $a;
       }, $export['items'], 'items');
@@ -4750,12 +4758,12 @@ public function getIdAlias($code = null): ?string
   {
     if ($this->check()) {
       if (!isset($this->templateIds[$code])) {
-        $this->templateIds[$code] = $this->fromCode($code, 'templates', $this->getRoot());
+        $this->templateIds[$code] = $this->fromCode($code, $this->getMagicTemplateId());
       }
 
       if (!isset($this->templateIds[$code])) {
         foreach ($this->getAliasItems($this->getMagicTemplateTemplateId()) as $it) {
-          if ($this->templateIds[$code] = $this->fromCode($code, 'templates', $this->getRoot())) {
+          if ($this->templateIds[$code] = $this->fromCode($code, $it['id'])) {
             break;
           }
         }
@@ -4765,6 +4773,15 @@ public function getIdAlias($code = null): ?string
     }
     return null;
 
+  }
+
+  public function getMagicTemplateId() : string
+  {
+    if (!$this->magicTemplateId && $this->check()) {
+      $this->magicTemplateId = $this->fromCode('templates', $this->getRoot());
+    }
+
+    return $this->magicTemplateId;
   }
 
   public function getMagicOptionsTemplateId()
@@ -4965,7 +4982,7 @@ public function getIdAlias($code = null): ?string
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
-      throw new \Exception(X::_("Impossible to find the alias"));
+      throw new Exception(X::_("Impossible to find the alias"));
     }
 
     if (array_key_exists($c['id'], $it) && empty($it[$c['id']])) {
@@ -4984,11 +5001,11 @@ public function getIdAlias($code = null): ?string
             $cfg['id_root_alias'] = $id_root_alias;
           }
           else {
-            throw new \Exception(X::_("Impossible to find the root alias"));
+            throw new Exception(X::_("Impossible to find the root alias"));
           }
         }
         elseif (!$this->exists($cfg['id_root_alias'])) {
-          throw new \Exception(X::_("Impossible to find the root alias"));
+          throw new Exception(X::_("Impossible to find the root alias"));
         }
       }
     }
