@@ -282,7 +282,7 @@ class Address extends DbCls
         FROM `apst_cp`
           LEFT OUTER JOIN `bbn_addresses`
             ON `bbn_addresses`.`cp` = `apst_cp`.`cp`
-        WHERE ".$this->get_ville_condition($ville)."
+        WHERE ".$this->getCityCondition($ville)."
         GROUP BY `apst_cp`.`cp`
         ORDER BY COUNT(`bbn_addresses`.`id`) DESC
         LIMIT 1");
@@ -300,7 +300,7 @@ class Address extends DbCls
           $cp);
     }
     $cdx = $this->get_cedex($ville);
-    $ville_cond = $this->get_ville_condition($ville);
+    $ville_cond = $this->getCityCondition($ville);
 
     if ( $tmp = $this->db->getRow("
       SELECT cp, ville
@@ -380,7 +380,7 @@ class Address extends DbCls
     }
     
     if ( $dpt ){
-      $ville_cond = $this->get_ville_condition($ville, 1);
+      $ville_cond = $this->getCityCondition($ville, 1);
       // Sinon on la rajoute
       if ( $inf = $this->db->getRow("
         SELECT *

@@ -409,7 +409,7 @@ class Changes extends EntityTable
           case 'tiers':
             $field_sub = 'id_people';
             if (!$id_sub) {
-              $id_sub = $this->tiersMgr()->add($subdata, true);
+              $id_sub = $this->people()->add($subdata, true);
               $cfg['data'][] = [
                 'field' => 'id_people',
                 'value' => $id_sub
@@ -420,7 +420,7 @@ class Changes extends EntityTable
           case 'lieux':
             $field_sub = 'id_address';
             if (!$id_sub) {
-              $id_sub = $this->lieuxMgr()->add($subdata, true);
+              $id_sub = $this->address()->add($subdata, true);
               $cfg['data'][] = [
                 'field' => 'id_address',
                 'value' => $id_sub
@@ -1734,7 +1734,7 @@ class Changes extends EntityTable
    */
   private function lieu(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $lieux  = new Address($this->db);
+    $lieux  = $this->address();
     $exists = $this->db->rselect($this->tables['lieux'], [], ['id' => $id]);
     if (($action === 'update') && empty($exists)) {
       $action = 'insert';
