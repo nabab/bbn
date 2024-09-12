@@ -3703,6 +3703,9 @@ public function getIdAlias($code = null): ?string
    */
   public function export(string $id, string $mode = 'single'): ?array
   {
+    $default = $this->getDefault();
+    $this->setDefault($this->root);
+    $o = null;
     $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];
     if (!in_array($mode, $modes)) {
       throw new Exception(X::_("The given mode is forbidden"));
@@ -3818,10 +3821,10 @@ public function getIdAlias($code = null): ?string
         }
       }
 
-      return $o;
     }
-
-    return null;
+    
+    $this->setDefault($default);
+    return $o;
   }
 
 
@@ -3920,6 +3923,8 @@ public function getIdAlias($code = null): ?string
    */
   public function import(array $options, $id_parent = null, array &$todo = null)
   {
+    $default = $this->getDefault();
+    $this->setDefault($this->root);
     if (is_array($id_parent)) {
       array_push($id_parent, $this->getRoot());
       $id_parent = $this->fromCode($id_parent);
@@ -4031,6 +4036,8 @@ public function getIdAlias($code = null): ?string
       }
 
     }
+
+    $this->setDefault($default);
 
   }
 
@@ -4345,17 +4352,20 @@ public function getIdAlias($code = null): ?string
   {
     if (($pluginAlias = $this->getMagicPluginTemplateId())
         && ($export = $this->export($pluginAlias, 'sfull'))) {
-      $items = X::map(function($a) {
-        $a['id_alias'] = $this->getCodePath($a['id']);
+      $res = 0;
+      /*
+      $codePath = $this->getCodePath($pluginAlias);
+      $items = X::map(function($a) use ($pluginAlias) {
+        $a['id_alias'] = $pluginAlias;
         return $a;
       }, $export['items'], 'items');
       $idPlugins = $this->getAliasItems($pluginAlias);
-      $res = 0;
       foreach ($idPlugins as $idPlugin) {
         foreach ($this->import($items, $idPlugin) as $num) {
           $res += $num;
         }
       }
+      */
 
       return $res;
     }
@@ -4388,10 +4398,6 @@ public function getIdAlias($code = null): ?string
    */
   public function applyTemplate(string $id = null): ?int
   {
-    if (!defined('BBN_APPUI')) {
-      throw new Exception(X::_("Impossible to apply a template without appui defined"));
-    }
-
     if (!($idAlias = $this->alias($id))) {
       throw new Exception(X::_("Impossible to apply a template, the option must be aliased"));
     }
@@ -4401,7 +4407,7 @@ public function getIdAlias($code = null): ?string
       throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
     }
 
-    if ($templateParent['id_alias'] !== $this->fromCode('list', 'templates', 'option', 'appui')) {
+    if ($templateParent['id_alias'] !== $this->getMagicTemplateTemplateId()) {
       throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
     }
 
@@ -4412,6 +4418,7 @@ public function getIdAlias($code = null): ?string
         return $a;
       }, $export['items'], 'items');
       $res = 0;
+      X::ddump($items);
       foreach ($this->import($items, $id) as $num) {
         $res += $num;
       }
@@ -4425,10 +4432,11 @@ public function getIdAlias($code = null): ?string
   public function applyAllTemplates(): ?int
   {
     $tot = 0;
-    $ids = $this->optionsRef($this->getMagicTemplateTemplateId());
-    X::ddump($ids);
-    foreach ($ids as $id) {
-      $tot += $this->applyTemplate($id);
+    $tids = $this->optionsRef($this->getMagicTemplateTemplateId());
+    foreach (array_keys($tids) as $tid) {
+      foreach ($this->getAliasItems($tid) as $id) {
+        $tot += $this->applyTemplate($id);
+      }
     }
 
     return $tot;
@@ -4441,7 +4449,7 @@ public function getIdAlias($code = null): ?string
    */
   public function updateTemplate(string $id = null): ?int
   {
-    if (defined('BBN_APPUI') && $this->exists($id)) {
+    if ($this->exists($id)) {
       $res = 0;
       // All the options referring to this template
       $all = $this->getAliases($id);
@@ -4468,9 +4476,7 @@ public function getIdAlias($code = null): ?string
    */
   public function updateAllTemplates(): ?int
   {
-    if (defined('BBN_APPUI')
-        && ($id = $this->fromCode('list', 'templates', 'option', 'appui'))
-    ) {
+    if ($id = $this->fromCode('list', 'templates', 'option', 'appui')) {
       $res = 0;
       foreach ($this->itemsRef($id) ?? [] as $a) {
         $res += (int)$this->updateTemplate($a);

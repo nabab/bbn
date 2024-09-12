@@ -70,6 +70,11 @@ class Query extends PDOStatement implements Actions
     }
   }
 
+  public function isWrite(): bool
+  {
+    return $this->write;
+  }
+
 
   /**
    * @param array $values

@@ -15,6 +15,7 @@ use bbn\Str;
 use bbn\Mvc;
 use bbn\Db;
 use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\Cache;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Appui\Url;
 use bbn\Appui\Option;
@@ -29,6 +30,7 @@ class Project extends DbCls
 {
 
   use Optional;
+  use Cache;
 
   private $fullTree;
 
@@ -73,6 +75,7 @@ class Project extends DbCls
   {
     parent::__construct($db);
     self::optionalInit();
+    self::cacheInit();
     $this->options = Option::getInstance();
     $this->fs      = new System();
     if (Str::isUid($id)) {
@@ -107,6 +110,7 @@ class Project extends DbCls
       'root' => $cfg['info']['parent_code'],
       'path' => $cfg['path']
     ];
+
     if (!empty($cfg['typology']['tabs'])) {
       $files = [];
       foreach($cfg['typology']['tabs'] as $tab) {
@@ -374,12 +378,19 @@ class Project extends DbCls
       return $this->fullTree;
     }
 
+    if (!$force && $this->cacheHas($this->id, 'full_tree')) {
+      $this->fullTree = $this->cacheGet($this->id, 'full_tree');
+      return $this->fullTree;
+    }
+
     $res = self::getOptionsObject()->fullTree($this->id);
     foreach($res['items'] as $t) {
       $res[$t['code']] = $t;
     }
+
     unset($res['items']);
     $this->fullTree = $res;
+    $this->cacheSet($this->id, 'full_tree', $res, 3600);
     return $res;
   }
 
@@ -474,10 +485,19 @@ class Project extends DbCls
    *
    *
    */
-  public function getProjectInfo()
+  public function getProjectInfo(bool $force = false)
   {
     if ($this->id) {
-      return [
+      if (!$force && $this->projectInfo) {
+        return $this->projectInfo;
+      }
+
+      if (!$force && $this->cacheHas($this->id, 'project_info')) {
+        $this->projectInfo = $this->cacheGet($this->id, 'project_info');
+        return $this->projectInfo;
+      }
+
+      $info = [
         'id' => $this->id,
         'code' => $this->getCode(),
         'name' => $this->getName(),
@@ -486,6 +506,10 @@ class Project extends DbCls
         'lang' => $this->getLang(),
         'db' => $this->getDbs(),
       ];
+
+      $this->cacheSet($this->id, 'project_info', $info, 3600);
+      $this->projectInfo = $info;
+      return $info;
     }
 
     return [];
@@ -564,7 +588,7 @@ class Project extends DbCls
     // finalPath is the parameter for the getFiles function
     $finalPath = $currentPathArray['parent'].$currentPathArray['path'].($typePath['code'] === 'bbn-project' ? '/src' : '');
     $isBbnProject = false;
-    $difference_git = $this->getGitDiff($currentPathArray['parent'].$currentPathArray['path']);
+    $difference_git = [];//$this->getGitDiff($currentPathArray['parent'].$currentPathArray['path']);
   
     $todo = [];
     if (!empty($typePath['types'])) {
@@ -583,6 +607,7 @@ class Project extends DbCls
       $currentType = $typePath;
       $finalPath .= '/';
     }
+    $currentPathArray['id_path'] = $id_path;
     $currentPathArray['type'] = $currentType;
     $currentPathArray['publicPath'] = $path.'/';
 
@@ -828,7 +853,9 @@ class Project extends DbCls
       'folder' => $t['dir'],
       'lazy' => $t['dir'] && ((empty($onlydirs) && $t['num']) || (!empty($onlydirs) && $this->fs->getDirs($t['name']))),
       'numChildren' => $num ?? ($t['num'] ?? 0),
-      'tab' => $t['tab'] ?? null,
+      'type' => $cfg['type']['type'],
+      'id_path' => $cfg['id_path'],
+      'tab' => $tab ?? ($t['tab'] ?? null),
       'ext' => $t['file'] ? $t['ext'] : false
     ];
 

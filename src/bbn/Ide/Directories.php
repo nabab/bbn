@@ -204,7 +204,20 @@ class Directories {
    *
    * @param bbn\Appui\Option $options
    */
-  public function __construct(bbn\Appui\Option $options, $routes){
+  public function __construct(bbn\Appui\Option $options = null, array $routes = null) {
+    if ($options === null) {
+      $options = bbn\Appui\Option::getInstance();
+    }
+
+    if ($routes === null) {
+      $mvc = bbn\Mvc::getInstance();
+      if (!$mvc) {
+        throw new \Exception("No MVC instance found");
+      }
+
+      $routes = $mvc->getRoutes();
+    }
+
     $this->options = $options;
     $this->routes = $routes;
     $this->_ide_path();

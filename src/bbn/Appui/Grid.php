@@ -297,7 +297,7 @@ class Grid extends bbn\Models\Cls\Cache
           )
         );
 
-        $rows = $q?->getRows() || null;
+        $rows = $q ? $q->getRows() : null;
       } else {
         $rows = $this->db->rselectAll($this->cfg);
         $this->sql = $this->cfg['sql'];
