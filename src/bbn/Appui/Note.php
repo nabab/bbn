@@ -93,8 +93,9 @@ class Note extends DbCls
       ],
       'notes_medias' => [
         'id' => 'id',
-        'id_media' => 'id_media',
         'id_note' => 'id_note',
+        'version' => 'version',
+        'id_media' => 'id_media',
         'id_user' => 'id_user',
         'comment' => 'comment',
         'creation' => 'creation',
@@ -917,6 +918,7 @@ class Note extends DbCls
         $cf['tables']['notes_medias'],
         [
           $cf['arch']['notes_medias']['id_note'] => $id_note,
+          $cf['arch']['notes_medias']['version'] => $this->latest($id_note),
           $cf['arch']['notes_medias']['id_media'] => $id_media,
           $cf['arch']['notes_medias']['id_user'] => $this->userId,
           $cf['arch']['notes_medias']['creation'] => date('Y-m-d H:i:s'),
