@@ -513,6 +513,13 @@ class People extends DbCls
 
     foreach ($fn as $k => $v) {
       if (!in_array($k, $arc)) {
+        if (empty($fn[$arc['cfg']])) {
+          $fn[$arc['cfg']] = [];
+        }
+        else if (is_string($fn[$arc['cfg']])) {
+          $fn[$arc['cfg']] = json_decode($fn[$arc['cfg']], true);
+        }
+
         $fn[$arc['cfg']][$k] = is_array($fn[$k]) ? $fn[$k] : (string)$fn[$k];
         unset($fn[$k]);
       }
