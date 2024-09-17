@@ -52,7 +52,7 @@ class Address extends DbCls
   )
   {
     parent::__construct($db);
-    $this->_initClassCfg();
+    $this->initClassCfg();
 	}
 
 
