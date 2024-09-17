@@ -161,7 +161,7 @@ class People extends DbCls
    * @param bool $phone Optional phone number for the person.
    * @return mixed Processed person data.
    */
-  public function set_info(array $fn): ?array
+  public function setInfo(array $fn): ?array
   {
     $fn = $this->prepareData($fn);
     $arc = &$this->class_cfg['arch']['people'];
@@ -250,7 +250,7 @@ class People extends DbCls
   public function search(array|string $fn): ?string
   {
     $arc = &$this->class_cfg['arch']['people'];
-    $fn = $this->set_info(is_string($fn) ? $this->parse($fn) : $fn);
+    $fn = $this->setInfo(is_string($fn) ? $this->parse($fn) : $fn);
     if (!empty($fn[$arc['fullname']])) {
       $conditions = [
         'logic' => 'OR',
@@ -401,7 +401,7 @@ class People extends DbCls
   {
     $arc = &$this->class_cfg['arch']['people'];
     $id = null;
-    if ($fn = $this->set_info($fn)) {
+    if ($fn = $this->setInfo($fn)) {
       $fn = $this->prepareData($fn);
       $uauth = [];
       foreach ($this->class_cfg['uauth_modes'] as $mode) {

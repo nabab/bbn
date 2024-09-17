@@ -241,7 +241,6 @@ trait DbUauth
     ]);
 
     if (in_array($this->dbUauthSystem, ['one-to-one', 'many-to-one'])) {
-      return $res;
       if (count($res) > 1) {
         throw new Exception(X::_("The record is associated to more than one uauth"));
       }
