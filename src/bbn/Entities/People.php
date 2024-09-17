@@ -402,7 +402,6 @@ class People extends DbCls
     $arc = &$this->class_cfg['arch']['people'];
     $id = null;
     if ($fn = $this->setInfo($fn)) {
-      $fn = $this->prepareData($fn);
       $uauth = [];
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
         if (!empty($fn[$mode])) {
@@ -410,6 +409,7 @@ class People extends DbCls
           unset($fn[$mode]);
         }
       }
+      $fn = $this->prepareData($fn);
 
       if (!empty($fn[$arc['name']]) && ($id = $this->dbTraitInsert($fn))) {
         foreach ($this->class_cfg['uauth_modes'] as $mode) {
