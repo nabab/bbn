@@ -47,12 +47,12 @@ class Address extends DbCls
    */
   public function __construct(
     Db $db, 
-    protected Entities $entities,
+    protected ?Entities $entities = null,
     protected Entity|Nullall $entity = new Nullall()
   )
   {
     parent::__construct($db);
-    $this->initClassCfg();
+    $this->_initClassCfg();
 	}
 
 

@@ -15,6 +15,7 @@ use bbn\Models\Cls\Basic;
 use bbn\User\Common;
 use bbn\User\Implementor;
 use bbn\User\Manager;
+use bbn\Models\Tts\DbUauth;
 
 /**
  * A user authentication Class

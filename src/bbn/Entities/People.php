@@ -77,7 +77,7 @@ class People extends DbCls
    */
   public function __construct(
     Db $db, 
-    protected Entities $entities,
+    protected ?Entities $entities = null,
     protected Entity|Nullall $entity = new Nullall()
   )
   {
