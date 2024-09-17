@@ -111,7 +111,7 @@ class Preferences extends DbCls
   public function __construct(Db $db, array $cfg = [])
   {
       parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     if ($user = User::getInstance()) {
       $this->_initUser($user);
     }

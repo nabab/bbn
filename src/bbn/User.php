@@ -289,7 +289,7 @@ class User extends Basic implements Implementor
     $this->db = $db;
 
     // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
 
     $f = &$this->class_cfg['fields'];
     self::retrieverInit($this);

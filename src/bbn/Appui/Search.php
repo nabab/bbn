@@ -117,7 +117,7 @@ class Search extends Basic
       throw new Exception(X::_('User is not logged in!'));
     }
 
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     $this->cacheInit();
     self::optionalInit();
     $this->timer      = new Timer();

@@ -1201,6 +1201,28 @@ class X
   }
 
 
+  public static function dumpDetector(): void
+  {
+    $arr = ['hddump', 'ddump', 'hdump', 'adump', 'dump'];
+    $res = null;
+    foreach ($arr as $fn) {
+      $backtrace = array_filter(
+        debug_backtrace(), function ($a) use ($fn) {
+          return $a['function'] === $fn;
+        }
+      );
+      if (count($backtrace)) {
+        $res = end($backtrace);
+        break;
+      }
+    }
+
+    if ($res) {
+      self::log($res['file'] . ' (' . $res['line'] . ')', 'dumpDetector');
+    }
+  }
+
+
   /**
    * Dumps the given variable.
    *
@@ -1210,6 +1232,7 @@ class X
    */
   public static function dump(...$args): void
   {
+    self::dumpDetector();
     echo self::getDump(...$args);
   }
 
@@ -1221,9 +1244,10 @@ class X
    * @return void
    *
    */
-  public static function ddump(): void
+  public static function ddump(...$args): void
   {
-    self::dump(...\func_get_args());
+    self::dumpDetector();
+    echo self::getDump(...$args);
     die();
   }
 
@@ -1234,9 +1258,10 @@ class X
    * @param mixed
    * @return void
    */
-  public static function hdump(): void
+  public static function hdump(...$args): void
   {
-    echo self::getHdump(...\func_get_args());
+    self::dumpDetector();
+    echo self::getHdump(...$args);
   }
 
 
@@ -1246,9 +1271,10 @@ class X
    * @param mixed
    * @return void
    */
-  public static function hddump(): void
+  public static function hddump(...$args): void
   {
-    self::hdump(...\func_get_args());
+    self::dumpDetector();
+    echo self::getHdump(...$args);
     die();
   }
 
@@ -1259,9 +1285,10 @@ class X
    * @param mixed
    * @return void
    */
-  public static function adump(): void
+  public static function adump(...$args): void
   {
-    self::isCli() ? self::dump(...\func_get_args()) : self::hdump(...\func_get_args());
+    self::dumpDetector();
+    self::isCli() ? self::dump(...$args) : self::hdump(...$args);
   }
 
 

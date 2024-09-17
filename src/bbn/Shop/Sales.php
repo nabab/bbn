@@ -69,7 +69,7 @@ class Sales extends DbCls
     $this->client = new Client($this->db);
     $this->provider = new Provider($this->db);
     // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
   }
 
   public function changeStatus(string $idTransaction, string $status, $errorMessage = null, $errorCode = null): ?bool

@@ -142,7 +142,7 @@ class Note extends DbCls
   public function __construct(Db $db, string $lang = null)
   {
     parent::__construct($db);
-    $this->_init_class_cfg(self::$default_class_cfg);
+    $this->initClassCfg(self::$default_class_cfg);
     self::optionalInit();
     $this->urlType = 'note';
     $this->taggerInit(

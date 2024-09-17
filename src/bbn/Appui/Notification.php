@@ -65,7 +65,7 @@ class Notification extends DbCls
   public function __construct(Db $db)
   {
     parent::__construct($db);
-    $this->_init_class_cfg(self::$default_class_cfg);
+    $this->initClassCfg(self::$default_class_cfg);
     self::optionalInit();
     $this->opt   = Option::getInstance();
     $this->user  = User::getInstance();

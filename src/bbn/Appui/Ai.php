@@ -167,7 +167,7 @@ ws ::= ([ \t\n] ws)?',
   public function __construct(Db $db, array $cfg = [])
   {
     parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     if (!defined("BBN_OPENAI_KEY")) {
       throw new Exception("The OpenAI key is not defined");
     }

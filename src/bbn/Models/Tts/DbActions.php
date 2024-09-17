@@ -244,7 +244,7 @@ trait DbActions
     if ($this->dbTraitExists($id)) {
       $db =& $this->db;
       $res = [];
-      foreach ($this->dbTraitGetRelations($table) as $rel) {
+      foreach ($this->dbTraitGetTableRelations($table) as $rel) {
         if ($all = $db->getColumnValues($rel['table'], $rel['primary'], [$rel['col'] => $id])) {
           $res[$rel['table']] = $all;
         }

@@ -71,7 +71,7 @@ class Mailing extends ClassDb
   {
     if ($db->check()) {
       self::optionalInit();
-      $this->_init_class_cfg($cfg);
+      $this->initClassCfg($cfg);
       $this->getOptionsTextValue('text');
       $this->db = $db;
     }

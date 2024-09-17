@@ -59,7 +59,7 @@ class Profiler extends DbCls
   {
     parent::__construct($db);
     $this->chrono = new Timer();
-    $this->_init_class_cfg(self::$default_class_cfg);
+    $this->initClassCfg(self::$default_class_cfg);
   }
 
 

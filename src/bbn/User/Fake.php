@@ -44,7 +44,7 @@ final class Fake extends Basic implements Implementor
    */
   public function __construct($id, User $usr)
   {
-    //$this->_init_class_cfg([]);
+    //$this->initClassCfg([]);
     $this->realUser = $usr;
     $this->class_cfg = $this->realUser->getClassConfig();
     $f = $this->class_cfg['arch']['users'];

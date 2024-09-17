@@ -11,6 +11,9 @@ use bbn\File\Dir;
 use bbn\File\System;
 use bbn\User\Manager;
 use bbn\Util\Enc;
+use Brick\PhoneNumber\PhoneNumber;
+use Brick\PhoneNumber\PhoneNumberParseException;
+use Brick\PhoneNumber\PhoneNumberFormat;
 
 trait Common
 {
@@ -415,7 +418,7 @@ trait Common
    * @param int $err error code
    * @return self
    */
-  protected function setError($err): self
+  protected function setError(string $err, $code = null): self
   {
     $this->log([$err, $this->class_cfg['errors'][$err] ?? null]);
     if (!$this->error) {
@@ -620,12 +623,12 @@ trait Common
   protected function findByPhoneNumber(string $phone_number)
   {
     try {
-      $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
+      $phone = PhoneNumber::parse($phone_number);
     }
-    catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+    catch (PhoneNumberParseException $e) {
       return false;
     }
-    $phone_number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
+    $phone_number = $phone->format(PhoneNumberFormat::E164);
     $user = $this->db->rselect(
       $this->class_cfg['tables']['users'],
       $this->class_cfg['arch']['users'],
@@ -673,9 +676,9 @@ trait Common
     }
     $cfg = json_encode(\array_merge($oldCfg, ['phone_verification_code' => $code]));
     try {
-      $phone = \Brick\PhoneNumber\PhoneNumber::parse($phone_number);
+      $phone = PhoneNumber::parse($phone_number);
     }
-    catch (\Brick\PhoneNumber\PhoneNumberParseException $e) {
+    catch (PhoneNumberParseException $e) {
       return false;
     }
     
@@ -684,7 +687,7 @@ trait Common
     }
 
 
-    $number = $phone->format(\Brick\PhoneNumber\PhoneNumberFormat::E164);
+    $number = $phone->format(PhoneNumberFormat::E164);
 
     return (bool)$this->db->update(
       $this->class_cfg['tables']['users'],

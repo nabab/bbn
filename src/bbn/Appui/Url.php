@@ -33,7 +33,7 @@ class Url extends DbCls
   public function __construct(Db $db)
   {
     parent::__construct($db);
-    $this->_init_class_cfg();
+    $this->initClassCfg();
   }
 
 

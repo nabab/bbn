@@ -107,7 +107,7 @@ class Medias extends DbCls
   public function __construct(Db $db, array $cfg = null)
   {
     parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     $this->opt    = Option::getInstance();
     $this->usr    = User::getInstance();
     $this->opt_id = $this->opt->fromCode('media', 'note', 'appui');

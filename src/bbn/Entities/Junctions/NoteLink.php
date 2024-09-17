@@ -49,7 +49,7 @@ class NoteLink extends EntityJunction
   )
   {
     parent::__construct($db, $entities, $entity);
-    $this->_init_class_cfg(static::$default_class_cfg);
+    $this->initClassCfg(static::$default_class_cfg);
     if (!isset(self::$_note)) {
       $this->note = new Note($db);
       self::noteLinkSetNote($this->note);

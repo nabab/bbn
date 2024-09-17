@@ -47,7 +47,7 @@ class Pages extends bbn\Models\Cls\Db
 
   public function __construct(bbn\Db $db){
     parent::__construct($db);
-    self::_init_class_cfg(self::$default_class_cfg);
+    self::initClassCfg(self::$default_class_cfg);
     $this->opt = bbn\Appui\Option::getInstance();
     $this->opt_id = $this->opt->fromCode('pages', 'types', 'note', 'appui');
     $this->notes = new bbn\Appui\Note($this->db);

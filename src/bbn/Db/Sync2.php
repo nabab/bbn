@@ -97,7 +97,7 @@ class Sync2 extends bbn\Models\Cls\Db
   {
     parent::__construct($db);
     Singleton::init($this);
-    $this->_init_class_cfg($arch);
+    $this->initClassCfg($arch);
     $this->opt = bbn\Appui\Option::getInstance();
     if ($this->opt) {
       self::retrieverInit($this);

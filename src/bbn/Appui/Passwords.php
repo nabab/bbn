@@ -39,7 +39,7 @@ class Passwords extends bbn\Models\Cls\Db
   public function __construct(\bbn\Db $db) 
   {
     parent::__construct($db);
-    $this->_init_class_cfg();
+    $this->initClassCfg();
     $this->_o = Option::getInstance();
   }
 

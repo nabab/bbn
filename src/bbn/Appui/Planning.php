@@ -50,7 +50,7 @@ class Planning {
   public function __construct(\bbn\Db $db)
   {
     $this->db = $db;
-    $this->_init_class_cfg();
+    $this->initClassCfg();
     $this->events = new \bbn\Appui\Event($this->db);
     $this->ecfg = $this->events->getClassCfg();
     $this->options = new \bbn\Appui\Option($this->db);

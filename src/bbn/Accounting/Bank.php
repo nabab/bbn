@@ -34,6 +34,6 @@ class Bank extends DbCls
     // The database connection
     $this->db = $db;
     // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
   }
 }

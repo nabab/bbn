@@ -501,7 +501,7 @@ class Project extends DbCls
         'id' => $this->id,
         'code' => $this->getCode(),
         'name' => $this->getName(),
-        'path' => $this->getPaths(),
+        'path' => $this->getPaths(true),
         'langs' => $this->getLangsIds(),
         'lang' => $this->getLang(),
         'db' => $this->getDbs(),
@@ -575,7 +575,7 @@ class Project extends DbCls
   private function _getTree(string $path, string $id_path, string $type = null, bool $onlydirs = false): array
   {
     // get info of the current path selected in first dropdown
-    $currentPathArray = $this->getPath($id_path);
+    $currentPathArray = $this->getPath($id_path, true);
     if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {
       throw new Exception('Invalid Path');
     }
@@ -1010,7 +1010,7 @@ class Project extends DbCls
       $roots = $tree['path']['items'] ?: [];
       $res = [];
       foreach($roots as $root) {
-        if (defined("BBN_".strtoupper($root['code'])."_PATH")) {
+        if (!empty($root['items']) && defined("BBN_".strtoupper($root['code'])."_PATH")) {
           $path = constant("BBN_".strtoupper($root['code'])."_PATH");
           foreach($root['items'] as $option) {
             if (!isset($option['path'])) {
@@ -1033,22 +1033,26 @@ class Project extends DbCls
               'path' => $option['path'] === '/' ? '/' : $option['path'],
               'id_option' => $option['id']
             ];
+
             $res[] = $tmp;
           }
         }
       }
+
       $this->pathInfo = $res;
     }
+
     if (!$withPath) {
-      foreach($roots as $root) {
-        if (defined("BBN_".strtoupper($root['code'])."_PATH")) {
-          foreach($root['items'] as &$option) {
-            unset($option['parent']);
-            unset($option['path']);
-          }
-        }
+      $res = $this->pathInfo;
+      foreach($res as &$option) {
+        unset($option['parent']);
+        unset($option['path']);
       }
+
+      unset($option);
+      return $res;
     }
+
     return $this->pathInfo;
   }
 

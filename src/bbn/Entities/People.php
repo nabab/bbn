@@ -8,6 +8,7 @@ use bbn\Str;
 use bbn\Db;
 use bbn\Appui\History;
 use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\DbUauth;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Entities\Models\Entities;
 use bbn\Models\Cls\Nullall;
@@ -20,13 +21,15 @@ use bbn\Models\Cls\Nullall;
 class People extends DbCls
 {
   use DbActions;
+  use DbUauth;
   /**
    * The default configuration for database interaction, specifying the table and fields.
    */
   protected static $default_class_cfg = [
     'table' => 'bbn_people',
     'tables' => [
-      'people' => 'bbn_people'
+      'people' => 'bbn_people',
+      'uauth' => 'bbn_people_uauth'
     ],
     'arch' => [
       'people' => [
@@ -35,11 +38,17 @@ class People extends DbCls
         'name' => 'name',
         'fname' => 'fname',
         'fullname' => 'fullname',
-        'email' => 'email',
-        'mobile' => 'mobile',
         'cfg' => 'cfg',
+      ],
+      'uauth' => [
+        'id' => 'id',
+        'id_associate' => 'id_people',
+        'id_uauth' => 'id_uauth',
+        'cfg' => 'cfg'
       ]
-    ]
+    ],
+    'uauth_system' => 'many-to-one',
+    'uauth_modes' => ['email', 'phone'],
   ];
 
   private $tableRelations;
@@ -62,7 +71,7 @@ class People extends DbCls
    */
   protected static $stes = [];
 
-
+ 
   /**
    * A mapping of alternate civility representations to standard forms.
    */
@@ -73,7 +82,8 @@ class People extends DbCls
   )
   {
     parent::__construct($db);
-    $this->_init_class_cfg();
+    $this->initClassCfg();
+    $this->dbUauthInit();
   }
 
 
@@ -82,10 +92,10 @@ class People extends DbCls
    *
    * @param mixed $st Input data.
    * @param bool $email Optional email for the person.
-   * @param bool $mobile Optional mobile number for the person.
+   * @param bool $phone Optional phone number for the person.
    * @return mixed Processed person data.
    */
-  public function parse(string $st, $email = false, $mobile = false): ?array
+  public function parse(string $st, $email = false, $phone = false): ?array
   {
     if (!empty($st)) {
       $arc = &$this->class_cfg['arch']['people'];
@@ -130,11 +140,11 @@ class People extends DbCls
       }
 
       if ($email) {
-        $fn[$arc['email']] = $email;
+        $fn['email'] = $email;
       }
 
-      if ($mobile) {
-        $fn[$arc['mobile']] = $mobile;
+      if ($phone) {
+        $fn['phone'] = $phone;
       }
 
       return $fn;
@@ -148,7 +158,7 @@ class People extends DbCls
    *
    * @param array $fn Input data.
    * @param bool $email Optional email for the person.
-   * @param bool $mobile Optional mobile number for the person.
+   * @param bool $phone Optional phone number for the person.
    * @return mixed Processed person data.
    */
   public function set_info(array $fn): ?array
@@ -164,28 +174,28 @@ class People extends DbCls
         $fn[$arc['civility']] = empty($fn[$arc['fname']]) ? null : 'M';
       }
 
-      if (isset($fn[$arc['email']]) && !Str::isEmail($fn[$arc['email']])) {
-        unset($fn[$arc['email']]);
+      if (isset($fn['email']) && !Str::isEmail($fn['email'])) {
+        unset($fn['email']);
       }
 
       if (isset($fn['tel'])) {
-        $fn[$arc['mobile']] = $fn['tel'];
+        $fn['phone'] = $fn['tel'];
         unset($fn['tel']);
       }
 
-      if (isset($fn[$arc['mobile']])) {
-        $fn[$arc['mobile']] = Str::getNumbers($fn[$arc['mobile']]);
-        if (strlen($fn[$arc['mobile']]) > 10 && strpos($fn[$arc['mobile']], '33') === 0) {
-          $fn[$arc['mobile']] = substr($fn[$arc['mobile']], 2);
+      if (isset($fn['phone'])) {
+        $fn['phone'] = Str::getNumbers($fn['phone']);
+        if (strlen($fn['phone']) > 10 && strpos($fn['phone'], '33') === 0) {
+          $fn['phone'] = substr($fn['phone'], 2);
         }
 
         /** @todo A proper phone number check system */
-        if (strlen($fn[$arc['mobile']]) === 9 && strpos($fn[$arc['mobile']], '0') !== 0) {
-          $fn[$arc['mobile']] = '0' . $fn[$arc['mobile']];
+        if (strlen($fn['phone']) === 9 && strpos($fn['phone'], '0') !== 0) {
+          $fn['phone'] = '0' . $fn['phone'];
         }
 
-        if (strlen($fn[$arc['mobile']]) !== 10) {
-          unset($fn[$arc['mobile']]);
+        if (strlen($fn['phone']) !== 10) {
+          unset($fn['phone']);
         }
       }
 
@@ -208,7 +218,25 @@ class People extends DbCls
    */
   public function getInfo($id): array
   {
-    return $this->dbTraitRselect($id);
+    $res = $this->dbTraitRselect($id);
+    if (!empty($res)) {
+      $arc = &$this->class_cfg['arch']['people'];
+      foreach ($this->class_cfg['uauth_modes'] as $mode) {
+        $arr = $this->dbUauthRetrieve($id, $mode);
+        if (in_array($this->class_cfg['uauth_system'], ['one-to-many', 'many-to-many'])) {
+          $res[$mode] = $arr ? array_map(function($a) use ($mode) {
+            return $a[$mode];
+          }, $arr) : [];
+        }
+        else {
+          $res[$mode] = $arr[$mode] ?? null;
+        }
+      }
+
+      $res[$arc['cfg']] = empty($res[$arc['cfg']]) ? [] : json_decode($res[$arc['cfg']], true);
+    }
+
+    return $res;
   }
 
 
@@ -218,6 +246,7 @@ class People extends DbCls
    * @param array|string $fn The full name to search for.
    * @return string|null The ID of the person found.
    */
+  /*
   public function search(array|string $fn): ?string
   {
     $arc = &$this->class_cfg['arch']['people'];
@@ -250,34 +279,34 @@ class People extends DbCls
         ];
       }
 
-      if (!empty($fn[$arc['email']]) || !empty($fn[$arc['mobile']])) {
+      if (!empty($fn['email']) || !empty($fn['phone'])) {
         $tmp = [
           'logic' => 'AND',
           'conditions' => []
         ];
-        if (!empty($fn[$arc['email']])) {
+        if (!empty($fn['email'])) {
           $tmp['conditions'][] = [
             'logic' => 'OR',
             'conditions' => [[
-              'field' => $arc['email'],
+              'field' => 'email',
               'operator' => 'LIKE',
-              'value' => $fn[$arc['email']]
+              'value' => $fn['email']
             ], [
-              'field' => $arc['email'],
+              'field' => 'email',
               'operator' => 'isempty'
             ]]
           ];
         }
 
-        if (!empty($fn[$arc['mobile']])) {
+        if (!empty($fn['phone'])) {
           $tmp['conditions'][] = [
             'logic' => 'OR',
             'conditions' => [[
-              'field' => $arc['mobile'],
+              'field' => 'phone',
               'operator' => 'LIKE',
-              'value' => $fn[$arc['mobile']]
+              'value' => $fn['phone']
             ], [
-              'field' => $arc['mobile'],
+              'field' => 'phone',
               'operator' => 'isempty'
             ]]
           ];
@@ -292,7 +321,9 @@ class People extends DbCls
 
     return null;
   }
+    */
 
+    /*
 	public function seek($p, int $start = 0, int $limit = 100){
     $arc = &$this->class_cfg['arch']['people'];
     if (!is_array($p)) {
@@ -301,8 +332,8 @@ class People extends DbCls
 
     if (is_array($p) && (
         !empty($p[$arc['fullname']])
-        || !empty($p[$arc['email']])
-        || !empty($p[$arc['mobile']])
+        || !empty($p['email'])
+        || !empty($p['phone'])
         || !empty($p[$arc['name']])
     )
     ){
@@ -319,6 +350,7 @@ class People extends DbCls
 
     return false;
 	}
+    */
 
   /**
    * Conducts a full search for people records.
@@ -328,6 +360,7 @@ class People extends DbCls
    * @param int $limit Pagination limit.
    * @return array The full search results.
    */
+  /*
   public function full_search($p, int $start = 0, int $limit = 0)
   {
     $arc = &$this->class_cfg['arch']['people'];
@@ -341,6 +374,7 @@ class People extends DbCls
 
     return $r;
   }
+    */
 
 
   /**
@@ -351,7 +385,7 @@ class People extends DbCls
    */
   public function relations($id): ?array
   {
-    return $this->getRelations($id);
+    return $this->dbTraitGetRelations($id);
   }
 
 
@@ -368,14 +402,26 @@ class People extends DbCls
     $arc = &$this->class_cfg['arch']['people'];
     $id = null;
     if ($fn = $this->set_info($fn)) {
-      if (!empty($fn[$arc['email']]) && $this->dbTraitCount([$arc['email'] => $fn[$arc['email']]])) {
-        throw new Exception(X::_("The email is already in use"));
+      $fn = $this->prepareData($fn);
+      $uauth = [];
+      foreach ($this->class_cfg['uauth_modes'] as $mode) {
+        if (!empty($fn[$mode])) {
+          $uauth[$mode] = $fn[$mode];
+          unset($fn[$mode]);
+        }
       }
 
-      if ($force || !$this->search($fn)) {
-        $fn = $this->prepareData($fn);
-        if (!empty($fn[$arc['name']])) {
-          $id = $this->dbTraitInsert($fn);
+      if (!empty($fn[$arc['name']]) && ($id = $this->dbTraitInsert($fn))) {
+        foreach ($this->class_cfg['uauth_modes'] as $mode) {
+          if (!empty($uauth[$mode])) {
+            try {
+              $this->dbUauthAdd($id, $uauth[$mode], $mode);
+            }
+            catch (Exception $e) {
+              History::delete($id);
+              throw $e;
+            }
+          }
         }
       }
     }
@@ -391,22 +437,61 @@ class People extends DbCls
    * @param mixed $fn The new data for the person.
    * @return string|null The ID of the updated person.
    */
-  public function update($id, $fn): ?int
+  public function update($id, $fn): int
   {
     $arc = &$this->class_cfg['arch']['people'];
-    $ok = null;
-    if ($this->getInfo($id)) {
-      $fn = $this->prepareData($fn);
+    $ok = 0;
+    if ($info = $this->getInfo($id)) {
+      foreach ($this->class_cfg['uauth_modes'] as $mode) {
+        if (($info[$mode] ?? '') !== ($fn[$mode] ?? '')) {
+          if (!empty($info[$mode])) {
+            $ok += (int)$this->dbUauthRemove($id, $info[$mode], $mode);
+          }
 
+          if (!empty($fn[$mode])) {
+            $ok += (int)$this->dbUauthAdd($id, $fn[$mode], $mode);
+          }
+        }
+      }
+
+      $fn = $this->prepareData($fn);
       if (!empty($fn)) {
         $fn[$arc['cfg']] = empty($fn[$arc['cfg']]) ? null : json_encode($fn[$arc['cfg']]);
-        $ok = $this->dbTraitUpdate($id, $fn);
+        $ok += (int)$this->dbTraitUpdate($id, $fn);
       }
 
     }
 
-
     return $ok;
+  }
+
+  public function setEmail($id, $email): ?string
+  {
+    $info = $this->getInfo($id);
+    if ($info['email'] === $email) {
+      return null;
+    }
+
+    if (!empty($info['email'])) {
+      $this->dbUauthRemove($id, $info['email'], 'email');
+    }
+
+    return $this->dbUauthAdd($id, $email, 'email');
+  }
+
+
+  public function setPhone($id, $phone): ?string
+  {
+    $info = $this->getInfo($id);
+    if ($info['phone'] === $phone) {
+      return null;
+    }
+
+    if (!empty($info['phone'])) {
+      $this->dbUauthRemove($id, $info['phone'], 'phone');
+    }
+
+    return $this->dbUauthAdd($id, $phone, 'phone');
   }
 
 
@@ -432,7 +517,7 @@ class People extends DbCls
         unset($fn[$k]);
       }
 
-      if ($k === $arc['email']) {
+      if ($k === 'email') {
         if (empty($v)) {
           $fn[$k] = null;
         }

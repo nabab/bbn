@@ -220,7 +220,7 @@ class OptionTest extends TestCase
     );
 
     $this->assertTrue(
-      $this->getNonPublicProperty('_is_init_class_cfg', $option)
+      $this->getNonPublicProperty('isInitClassCfg', $option)
     );
   }
 

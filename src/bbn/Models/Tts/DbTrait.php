@@ -1,35 +1,55 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: BBN
- * Date: 05/11/2016
- * Time: 02:47
- */
 
 namespace bbn\Models\Tts;
 
 use bbn\X;
-use bbn\Str;
-use stdClass;
 use Exception;
 
+/**
+ * Trait DbTrait
+ * Provides common database-related methods and properties for handling class configurations, data preparation, filtering, and relations.
+ */
 trait DbTrait
 {
   use DbConfig;
 
+  /**
+   * @var array Configuration for filters applied to database queries.
+   */
   protected $dbTraitFilterCfg = [];
 
+  /**
+   * @var array Configuration for the root filter.
+   */
   protected $rootFilterCfg = [];
 
+  /**
+   * @var array Cached relations for the current table.
+   */
   private $dbTraitRelations = [];
 
+  /**
+   * @var array Cached relations for the current table.
+   */
+  private $dbTraitStructure = [];
+
+  /**
+   * Prepares data before inserting or updating in the database.
+   *
+   * @param array $data The data to be prepared.
+   *
+   * @return array The prepared data.
+   * @throws Exception If the class config has not been initialized or is incorrect.
+   */
   protected function dbTraitPrepare(array $data): array
   {
+    // Ensure that the class configuration is initialized
     if (!$this->isInitClassCfg()) {
       throw new Exception(X::_("Impossible to prepare an item if the class config has not been initialized"));
     }
 
     $ccfg = $this->getClassCfg();
+    // Get the table index from the class configuration
     $table_index = array_flip($ccfg['tables'])[$ccfg['table']];
     if (!$table_index) {
       throw new Exception(X::_("The class config is not correct as the main table doesn't have an arch"));
@@ -37,6 +57,8 @@ trait DbTrait
 
     $f = $ccfg['arch'][$table_index];
     $res = [];
+    
+    // Handle 'cfg' field if present in the table configuration
     if (!empty($f['cfg'])) {
       if (array_key_exists($f['cfg'], $data)) {
         $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
@@ -59,10 +81,10 @@ trait DbTrait
     $structure = $this->dbTraitGetStructure();
     foreach ($data as $k => $v) {
       if (in_array($k, $f)) {
+        // Set the value to null if it's empty and the field allows null
         if (empty($v) && $structure['fields'][$k]['null']) {
           $v = null;
         }
-
         $res[$k] = $v;
       }
     }
@@ -70,17 +92,31 @@ trait DbTrait
     return $res;
   }
 
-
+  /**
+   * Sets the filter configuration for database queries.
+   *
+   * @param array $cfg The filter configuration.
+   */
   protected function dbTraitSetFilterCfg(array $cfg): void
   {
     $this->dbTraitFilterCfg = $cfg;
   }
 
+  /**
+   * Resets the filter configuration for database queries.
+   */
   protected function dbTraitResetFilterCfg(): void
   {
     $this->dbTraitFilterCfg = [];
   }
 
+  /**
+   * Combines multiple filter configurations into a single array.
+   *
+   * @param array $cfg Additional filter configuration.
+   *
+   * @return array The combined filter configuration.
+   */
   protected function dbTraitFilterCfg(array $cfg): array
   {
     $conditions = [];
@@ -96,14 +132,17 @@ trait DbTrait
       $conditions[] = $cfg;
     }
 
+    // Return empty array if no conditions exist
     if (empty($conditions)) {
       return [];
     }
 
+    // Return single condition if only one exists
     if (count($conditions) === 1) {
       return $conditions[0];
     }
 
+    // Combine all conditions with 'AND' logic
     return array_map(function ($a) {
       return [
         'logic' => 'AND',
@@ -112,11 +151,17 @@ trait DbTrait
     }, $conditions);
   }
 
-
+  /**
+   * Gets the structure of the specified table.
+   *
+   * @param string|null $table The table name (optional).
+   *
+   * @return array The structure of the table.
+   */
   protected function dbTraitGetStructure(string $table = null): array
   {
-    $cfg = $this->getClassCfg();
     if (!$table) {
+      $cfg = $this->getClassCfg();
       $table = $cfg['table'];
     }
 
@@ -127,8 +172,14 @@ trait DbTrait
     return $this->dbTraitStructure[$table];
   }
 
-
-  protected function dbTraitGetRelations(string $table = null): array
+  /**
+   * Retrieves the relations for a given table.
+   *
+   * @param string|null $table The table name (optional).
+   *
+   * @return array An array of relations.
+   */
+  protected function dbTraitGetTableRelations(string $table = null): array
   {
     $cfg = $this->getClassCfg();
     if (!$table) {
@@ -160,12 +211,14 @@ trait DbTrait
   /**
    * Returns an array of rows from the table for the given conditions.
    *
-   * @param array $filter
-   * @param array $order
-   * @param int $limit
-   * @param int $start
+   * @param array $filter Filter conditions.
+   * @param array $order Order by conditions.
+   * @param int $limit Maximum number of rows to return.
+   * @param int $start Offset of the first row to return.
+   * @param string $mode The mode of result ('array', 'object', 'value').
+   * @param array $fields Fields to select.
    *
-   * @return array
+   * @return array The result set.
    */
   private function dbTraitSelection(
     array $filter,
@@ -173,8 +226,7 @@ trait DbTrait
     int $limit,
     int $start,
     string $mode = 'array',
-    array $fields = [],
-
+    array $fields = []
   ): array
   {
     $returnObject = $mode === 'object';
@@ -206,20 +258,32 @@ trait DbTrait
     return [];
   }
 
-
+  /**
+   * Prepares the request configuration for a database query.
+   *
+   * @param array $filter Filter conditions.
+   * @param array $order Order by conditions.
+   * @param int $limit Maximum number of rows to return.
+   * @param int $start Offset of the first row to return.
+   * @param array $fields Fields to select.
+   *
+   * @return array The request configuration.
+   * @throws Exception If the table index is not defined or a field does not exist.
+   */
   private function dbTraitGetRequestCfg(
     array $filter,
     array $order,
     int $limit,
     int $start,
-    array $fields = [],
-
+    array $fields = []
   ): array
   {
+    // Ensure table index is defined
     if (!$this->class_table_index) {
       throw new Exception(X::_("The table index parameter should be defined"));
     }
 
+    // Validate fields
     if (!empty($fields)) {
       foreach (array_values($fields) as $f) {
         if (!in_array($f, $this->class_cfg['arch'][$this->class_table_index])) {
@@ -255,6 +319,7 @@ trait DbTrait
       $properFields = array_values($fields);
     }
 
+    // Build the request configuration
     $req = [
       'table' => $this->class_table,
       'fields' => $properFields,
@@ -269,7 +334,4 @@ trait DbTrait
 
     return $req;
   }
-
-
 }
-

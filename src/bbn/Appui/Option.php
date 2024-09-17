@@ -124,7 +124,7 @@ class Option extends DbCls
   public function __construct(Db $db, array $cfg = [])
   {
     parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     self::retrieverInit($this);
   }
 
@@ -4988,7 +4988,7 @@ public function getIdAlias($code = null): ?string
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
-      throw new Exception(X::_("Impossible to find the alias"));
+      throw new Exception(X::_("Impossible to find the alias %s", $it[$c['id_alias']]));
     }
 
     if (array_key_exists($c['id'], $it) && empty($it[$c['id']])) {

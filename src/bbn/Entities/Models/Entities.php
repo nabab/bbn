@@ -113,13 +113,37 @@ abstract class Entities extends DbCls
   {
     parent::__construct($db);
     // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     $cls = $this->class_cfg['classes'];
     if ($cls['link']) {
       $this->linkCls = $cls['mail'];
     }
     
   }
+
+  public function __call($method, $args)
+  {
+    $path = '\\' . get_class($this) . '\\';
+    $cls = ucfirst($method);
+    $entity = $args[0] ?? null;
+
+    if (class_exists($path . 'Tables\\' . $cls)) {
+      return $this->getClass($path . 'Tables\\' . $cls, $method, $entity);
+    }
+    else if (class_exists($path . 'Junctions\\' . $cls)) {
+      return $this->getClass($path . 'Junctions\\' . $cls, $method, $entity);
+    }
+    else if (class_exists($path . 'Links\\' . $cls)) {
+      return $this->getLink($path . 'Links\\' . $cls, $entity);
+    }
+    else if (class_exists($path . 'Documents\\' . $cls)) {
+      return $this->getClass($path . 'Documents\\' . $cls, $method, $entity);
+    }
+
+    throw new Exception(X::_("The method %s does not exist", $method));
+  }
+
+
 
 
   public function delete(string|array $where)

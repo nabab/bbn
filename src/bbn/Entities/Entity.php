@@ -279,7 +279,7 @@ class Entity
     $res = [];
     foreach ($tmp as $e) {
       if ($e !== $this->id) {
-        $ent = $this->entities->get($e['id']);
+        $ent = $this->entities->get($e);
         $res[] = $ent->getMinimalInfo();
       }
     }

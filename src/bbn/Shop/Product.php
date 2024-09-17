@@ -81,7 +81,7 @@ class Product extends DbCls
     // The database connection
     $this->db = $db;
     // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     $this->opt   = Option::getInstance();
     $this->note  = new Note($this->db);
     $this->cms   = new Cms($this->db, $this->note);

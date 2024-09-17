@@ -120,7 +120,7 @@ class Imessages extends DbCls
   public function __construct(Db $db, $cfg = [])
   {
     parent::__construct($db);
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
     $this->notes = new Note($this->db);
     $this->options = Option::getInstance();
   }

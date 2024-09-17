@@ -103,7 +103,7 @@ class History
     $this->user         = $user;
 
     // Setting up the class configuration
-    $this->_init_class_cfg($cfg);
+    $this->initClassCfg($cfg);
 
     $this->admin_db = $this->db->getCurrent();
 

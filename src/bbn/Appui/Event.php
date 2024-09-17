@@ -151,7 +151,7 @@ class Event extends modelDb
 
   public function __construct(Db $db){
     parent::__construct($db);
-    $this->_init_class_cfg();
+    $this->initClassCfg();
     $this->opt = Option::getInstance();
     $this->usr = User::getInstance();
     //$this->opt_id = $this->opt->fromCode('event', 'appui');

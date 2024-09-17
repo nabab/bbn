@@ -118,7 +118,7 @@ class Email extends Basic
   )
   {
     self::optionalInit();
-    $this->_init_class_cfg();
+    $this->initClassCfg();
     if (!$this->user) {
       $this->user = User::getInstance();
     }

@@ -15,7 +15,7 @@ trait DbConfig
 {
 
   /** @var bool */
-  private $_is_init_class_cfg = false;
+  private $_isInitClassCfg = false;
 
   /** @var array */
   protected $fields;
@@ -56,7 +56,7 @@ trait DbConfig
    * @param array $cfg
    * @return $this
    */
-  protected function _init_class_cfg(array $cfg = null)
+  protected function initClassCfg(array $cfg = null)
   {
 $arr = [];
     if (isset(self::$default_class_cfg)) {
@@ -108,7 +108,7 @@ $arr = [];
     $this->fields = $cfg['arch'][$this->class_table_index];
 
     $this->class_cfg = $cfg;
-    $this->_is_init_class_cfg = true;
+    $this->_isInitClassCfg = true;
 
     return $this;
   }
@@ -116,7 +116,7 @@ $arr = [];
 
   protected function isInitClassCfg(): bool
   {
-    return $this->_is_init_class_cfg;
+    return $this->_isInitClassCfg;
   }
 
 }

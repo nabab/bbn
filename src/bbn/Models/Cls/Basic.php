@@ -35,6 +35,12 @@ abstract class Basic
    */
   protected $error = false;
   /**
+   * @var false|int
+   */
+  protected $errorCode = false;
+
+  protected $errorCodes = [];
+  /**
    * @var boolean
    */
   protected $debug = false;
@@ -72,13 +78,19 @@ abstract class Basic
   }
 
 
-  protected function setError($err)
+  protected function setError(string $err, $code = null)
   {
     $this->error    = $err;
-    $this->errors[] = [
+    $this->errorCode = $code;
+    $err = [
       'time' => time(),
       'msg' => $err
     ];
+    if ($code) {
+      $err['code'] = $code;
+    }
+
+    $this->errors[] = $err;
     return $this;
   }
 
@@ -86,6 +98,12 @@ abstract class Basic
   public function getError()
   {
     return $this->error;
+  }
+
+
+  public function getErrorCode()
+  {
+    return $this->errorCode;
   }
 
 
@@ -108,23 +126,6 @@ abstract class Basic
 
 
   /**
-   * @param string $name
-   * @param array  $arguments
-   * @return void
-   */
-  public function __call($name, $arguments)
-  {
-    $class = get_class($this);
-    $st = X::_("Wrong method used for the class %s: %s", $class, $name);
-    if (count($arguments)) {
-      $st .= " " . X::_("with the following arguments") . ": " . implode(', ', $arguments);
-    }
-
-    throw new Exception($st);
-  }
-
-
-  /**
    * @return boolean
    */
   public function isDebug()
@@ -141,43 +142,4 @@ abstract class Basic
   {
     $this->debug = $debug;
   }
-
-
-  /*
-   * @param string $name
-   * @param array $arguments
-   * @return void
-  public static function __callStatic($name, $arguments)
-  {
-    $this->log(["Wrong static method used: $name with arguments:", $arguments]);
-    return false;
-  }
-   */
-
-    /*
-     * get property from delegate link.
-     *
-     * @param string $name
-     * @return void
-    public function __get($name)
-    {
-      return ($name === 'error') && isset($this->error) ? $this->error : false;
-    }
-    */
-
-    /*
-     * set property from delegate link.
-     *
-     * @param string $name
-     * @param mixed $value
-     * @return void
-    public function __set($name, $value)
-    {
-        if ( $name === 'error' ){
-          $this->error = $value;
-        }
-        else if ( $name === 'log' )
-          array_push(X::log, $value);
-    }
-     */
 }
