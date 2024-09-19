@@ -41,7 +41,7 @@ class Member extends EntityTable
 
   public function getContact($id): ?array
   {
-    if ($this->people()->exists($id)) {
+    if ($this->identities()->exists($id)) {
 
     }
 

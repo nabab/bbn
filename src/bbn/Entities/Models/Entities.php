@@ -9,7 +9,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
-use bbn\Entities\People;
+use bbn\Entities\Identities;
 use bbn\Entities\Address;
 use bbn\Entities\Models\EntityJunction;
 use bbn\Entities\Models\EntityTable;
@@ -31,7 +31,7 @@ abstract class Entities extends DbCls
   protected static $default_class_cfg = [
     'classes' => [
       'link' => false,
-      'people' => false,
+      'identities' => false,
       'address' => false,
       'entity' => false,
       'consultation' => false,
@@ -44,7 +44,7 @@ abstract class Entities extends DbCls
     'table' => 'bbn_entities',
     'tables' => [
       'entities' => 'bbn_entities',
-      'people' => 'bbn_people',
+      'identities' => 'bbn_identities',
       'address' => 'bbn_addresses',
       'links' => 'bbn_entities_links',
     ],
@@ -102,7 +102,7 @@ abstract class Entities extends DbCls
     array $cfg = null,
     protected Option|null $options = null,
     protected Mail|null $mail = null,
-    private People|null $people = null,
+    private Identities|null $identities = null,
     private Address|null $address = null,
     private Consultation|null $consultation = null,
     private Document|null $document = null,
@@ -287,14 +287,14 @@ abstract class Entities extends DbCls
     return $this->masks;
   }
 
-  public function people(): ?People
+  public function identities(): ?Identities
   {
     $cls = $this->class_cfg['classes'];
-    if (!$this->people && $cls['people']) {
-      $this->people = new $cls['people']($this->db, $this);
+    if (!$this->identities && $cls['identities']) {
+      $this->identities = new $cls['identities']($this->db, $this);
     }
 
-    return $this->people;
+    return $this->identities;
   }
 
 

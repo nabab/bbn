@@ -65,11 +65,11 @@ class Hr extends DbCls
   public function getStaff(bool $onlyActive = false): ?array
   {
     $join =[[
-      'table' => 'bbn_people',
+      'table' => 'bbn_identities',
       'on' => [
         'conditions' => [[
           'field' => $this->db->cfn($this->fields['id'], $this->class_table),
-          'exp' => 'bbn_people.id'
+          'exp' => 'bbn_identities.id'
         ]]
       ]
     ]];
@@ -79,7 +79,7 @@ class Hr extends DbCls
         'table' => 'bbn_history_uids',
         'on' => [
           'conditions' => [[
-            'field' => 'bbn_people.id',
+            'field' => 'bbn_identities.id',
             'exp' => 'bbn_history_uids.bbn_uid'
           ]]
         ]
@@ -89,8 +89,8 @@ class Hr extends DbCls
     return $this->db->rselectAll([
       'table' => $this->class_table,
       'fields' => [
-        'value' => 'bbn_people.id',
-        'text' => 'bbn_people.fullname',
+        'value' => 'bbn_identities.id',
+        'text' => 'bbn_identities.fullname',
         $this->fields['id_user']
       ],
       'join' => $join,

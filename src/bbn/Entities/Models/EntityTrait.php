@@ -10,7 +10,7 @@ use bbn\X;
 use bbn\Appui\Option;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Entity;
-use bbn\Entities\People;
+use bbn\Entities\Identities;
 use bbn\Entities\Address;
 
 trait EntityTrait
@@ -62,9 +62,9 @@ trait EntityTrait
   }
   
 
-  public function people(): ?People
+  public function identities(): ?Identities
   {
-    return $this->entities->people();
+    return $this->entities->identities();
   }
 
   public function address(): ?Address

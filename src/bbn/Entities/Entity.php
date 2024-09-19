@@ -181,15 +181,19 @@ class Entity
 
   }
 
+  public function getEntities(): Entities
+  {
+    return $this->entities;
+  }
 
   protected function getLink(string $linkCls): ?Link
   {
     return $this->entities->getLink($linkCls, $this);
   }
 
-  public function people(): ?People
+  public function identities(): ?Identities
   {
-    return $this->entities->people();
+    return $this->entities->identities();
   }
 
   public function address(): ?Address
