@@ -59,10 +59,10 @@ abstract class Entities extends DbCls
           'type' => 'primary',
           'maxlength' => 5
         ],
-        'name' => [
-          'name' => 'name',
+        'identity' => [
+          'name' => 'identity',
           'type' => 'string',
-          'maxlength' => 100
+          'maxlength' => 32
         ],
         'id_parent' => [
           'name' => 'id_parent',

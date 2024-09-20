@@ -68,7 +68,7 @@ class Entity
 
 
     $this->where = [
-      $this->fields['id'] => $this->id
+      $this->db->cfn($this->fields['id'], $this->table) => $this->id
     ];
 
     $this->cacheInit();
@@ -89,10 +89,24 @@ class Entity
     return $this->id;
   }
 
+  public function getWhere(): array
+  {
+    return $this->where;
+  }
+
 
   public function getField(string $field, bool $force = false): ?string
   {
     if (!in_array($field, $this->fields)) {
+      $identityCfg = $this->identities()->getClassCfg()['arch']['identities'];
+      if (isset($identityCfg[$field])) {
+        $field = $identityCfg[$field];
+        $row = $this->entities->getEntity([$this->fields['id'] => $this->id]);
+        if (isset($row[$field])) {
+          return $row[$field];
+        }
+      }
+
       throw new Exception(X::_("The field %s does not exist", $field));
     }
 
@@ -121,8 +135,8 @@ class Entity
 
   public function getFromTable()
   {
-    $fields = $this->fields;
     $table = $this->class_cfg['tables']['entities'];
+
     $cfg = [
       'tables' => [$table],
       'fields' => array_values($this->getFieldsList()),
