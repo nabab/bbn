@@ -1045,7 +1045,12 @@ class Task extends bbn\Models\Cls\Db
     if ( !isset($args) ){
       $args = array_merge($args0, $args1, $args2);
     }
-    $data = $this->db->getRows($sql." LIMIT $start, $num", $args);
+
+    if (!empty($num)) {
+      $sql .= " LIMIT $start, $num";
+    }
+
+    $data = $this->db->getRows($sql, $args);
     /** @var bbn\User $user */
     $user = bbn\User::getInstance();
     foreach ( $data as $i => $d ){
@@ -1058,7 +1063,7 @@ class Task extends bbn\Models\Cls\Db
     }
     return [
       'data' => $data,
-      'total' => $this->db->getOne("SELECT COUNT(*) FROM ($sql) AS t", $args),
+      'total' => !empty($num) ? $this->db->getOne("SELECT COUNT(*) FROM ($sql) AS t", $args) : count($data),
       'start' => $start,
       'limit' => $num
     ];
