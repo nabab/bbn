@@ -755,13 +755,17 @@ class Database extends bbn\Models\Cls\Cache
   public function keyId(string $key, string $table, string $db = ''): ?string
   {
     $res = null;
-    if (bbn\Str::isUid($key)) {
-      $res = $this->o->fromCode($key, $table);
+    if (Str::isUid($table)) {
+      $res = $this->o->fromCode($key, 'keys', $table);
+      return $res;
     }
-    elseif (Str::isUid($table) && ($tmp = $this->o->fromCode($key, 'keys', $table))) {
-      $res = $tmp;
+
+    $t = $this->db->tsn($table);
+    if (!Str::isUid($db)) {
+      $db = $this->dbId($db);
     }
-    elseif (Str::isUid($db) && ($tmp = $this->o->fromCode($key, 'keys', $table, 'tables', $db))) {
+
+    if (Str::isUid($db) && ($tmp = $this->o->fromCode($key, 'keys', $t, 'tables', $db))) {
       $res = $tmp;
     }
 
