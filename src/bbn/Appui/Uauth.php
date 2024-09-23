@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\User;
+namespace bbn\Appui;
 
 use Exception;
 use bbn\Db;

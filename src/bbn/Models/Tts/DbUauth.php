@@ -11,7 +11,7 @@ namespace bbn\Models\Tts;
 use Exception;
 use bbn\X;
 use bbn\Db;
-use bbn\User\Uauth;
+use bbn\Appui\Uauth;
 
 trait DbUauth
 {
