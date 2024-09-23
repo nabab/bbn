@@ -174,31 +174,6 @@ class People extends DbCls
         $fn[$arc['civility']] = empty($fn[$arc['fname']]) ? null : 'M';
       }
 
-      if (isset($fn['email']) && !Str::isEmail($fn['email'])) {
-        unset($fn['email']);
-      }
-
-      if (isset($fn['tel'])) {
-        $fn['phone'] = $fn['tel'];
-        unset($fn['tel']);
-      }
-
-      if (isset($fn['phone'])) {
-        $fn['phone'] = Str::getNumbers($fn['phone']);
-        if (strlen($fn['phone']) > 10 && strpos($fn['phone'], '33') === 0) {
-          $fn['phone'] = substr($fn['phone'], 2);
-        }
-
-        /** @todo A proper phone number check system */
-        if (strlen($fn['phone']) === 9 && strpos($fn['phone'], '0') !== 0) {
-          $fn['phone'] = '0' . $fn['phone'];
-        }
-
-        if (strlen($fn['phone']) !== 10) {
-          unset($fn['phone']);
-        }
-      }
-
       if (!isset($fn[$arc['name']])) {
         $fn = [];
       }
@@ -401,16 +376,15 @@ class People extends DbCls
   {
     $arc = &$this->class_cfg['arch']['people'];
     $id = null;
-    if ($fn = $this->setInfo($fn)) {
-      $uauth = [];
-      foreach ($this->class_cfg['uauth_modes'] as $mode) {
-        if (!empty($fn[$mode])) {
-          $uauth[$mode] = $fn[$mode];
-          unset($fn[$mode]);
-        }
+    $uauth = [];
+    foreach ($this->class_cfg['uauth_modes'] as $mode) {
+      if (!empty($fn[$mode])) {
+        $uauth[$mode] = $fn[$mode];
+        unset($fn[$mode]);
       }
-      $fn = $this->prepareData($fn);
+    }
 
+    if ($fn = $this->setInfo($fn)) {
       if (!empty($fn[$arc['name']]) && ($id = $this->dbTraitInsert($fn))) {
         foreach ($this->class_cfg['uauth_modes'] as $mode) {
           if (!empty($uauth[$mode])) {
