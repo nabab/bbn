@@ -84,16 +84,29 @@ class Uauth extends DbCls
         throw new Exception(X::_("The value is not a valid email"));
       }
     }
-    elseif ($type === 'phone') {
-      try {
-        $ph = PhoneNumber::parse($value);
-        if ($ph) {
-          $value = $ph->format(PhoneNumberFormat::E164);
+    elseif (in_array($type, ['phone', 'portable', 'mobile'])) {
+      $ph = false;
+      if (defined('BBN_LOCALE')) {
+        $st = explode('.', BBN_LOCALE)[0];
+        try {
+          $ph = PhoneNumber::parse($value, substr($st, -2));
+        }
+        catch (PhoneNumberParseException $e) {
         }
       }
-      catch (PhoneNumberParseException $e) {
+      if (!$ph) {
+        try {
+          $ph = PhoneNumber::parse($value);
+        }
+        catch (PhoneNumberParseException $e) {
+        }
+      }
+
+      if (!$ph) {
         throw new Exception(X::_("The value is not a valid phone number"));
       }
+
+      $value = $ph->format(PhoneNumberFormat::E164);
     }
     else {
       throw new Exception(X::_("The type is not valid"));
