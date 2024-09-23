@@ -484,6 +484,7 @@ class Db implements Db\Actions
   public function clearAllCache(): self
   {
     $this->cacheDeleteAll();
+    $this->language->initCache();
     return $this;
   }
 
