@@ -401,26 +401,26 @@ class Identities extends DbCls
   {
     $arc = &$this->class_cfg['arch']['identities'];
     $id = null;
-    if ($fn = $this->setInfo($fn)) {
-      $uauth = [];
-      foreach ($this->class_cfg['uauth_modes'] as $mode) {
-        if (!empty($fn[$mode])) {
-          $uauth[$mode] = $fn[$mode];
-          unset($fn[$mode]);
-        }
+    $uauth = [];
+    foreach ($this->class_cfg['uauth_modes'] as $mode) {
+      if (!empty($fn[$mode])) {
+        $uauth[$mode] = $fn[$mode];
+        unset($fn[$mode]);
       }
-      $fn = $this->prepareData($fn);
+    }
 
-      if (!empty($fn[$arc['name']]) && ($id = $this->dbTraitInsert($fn))) {
-        foreach ($this->class_cfg['uauth_modes'] as $mode) {
-          if (!empty($uauth[$mode])) {
-            try {
-              $this->dbUauthAdd($id, $uauth[$mode], $mode);
-            }
-            catch (Exception $e) {
-              History::delete($id);
-              throw $e;
-            }
+    if (($fn = $this->setInfo($fn))
+      && !empty($fn[$arc['name']])
+      && ($id = $this->dbTraitInsert($fn))
+    ) {
+      foreach ($this->class_cfg['uauth_modes'] as $mode) {
+        if (!empty($uauth[$mode])) {
+          try {
+            $this->dbUauthAdd($id, $uauth[$mode], $mode);
+          }
+          catch (Exception $e) {
+            History::delete($id);
+            throw $e;
           }
         }
       }
