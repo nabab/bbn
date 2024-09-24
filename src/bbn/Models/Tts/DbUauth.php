@@ -67,6 +67,40 @@ trait DbUauth
     return $this->_dbUauthIsInit;
   }
 
+  public function dbUauthHas(string $id, string $value, string $type): bool
+  {
+    if (!$this->dbUauthIsInit()) {
+      throw new Exception(X::_("The uauth system is not initialized"));
+    }
+
+    $arch = $this->class_cfg['arch']['uauth'];
+    $uauthCfg = self::$dbUauth->getClassCfg();
+    $uauthArch = $uauthCfg['arch']['uauth'];
+    if ($existing = self::$dbUauth->find($value, $type)) {
+      $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $type);
+      if ($this->db->count([
+        'tables' => [$this->class_cfg['tables']['uauth']],
+        'join' => [[
+          'table' => $uauthCfg['table'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),
+              'exp' => $arch['id_uauth']
+            ]]
+          ]
+        ]],
+        'where' => [
+          $arch['id_uauth'] => $idUauth,
+          $uauthArch['typology'] => $type
+        ]
+      ])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   public function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
   {
     if (!$this->dbUauthIsInit()) {

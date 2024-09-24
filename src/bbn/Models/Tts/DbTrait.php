@@ -165,7 +165,7 @@ trait DbTrait
       $table = $cfg['table'];
     }
 
-    if (!$this->dbTraitStructure[$table]) {
+    if (!isset($this->dbTraitStructure[$table])) {
       $this->dbTraitStructure[$table] = $this->db->modelize($table);
     }
 

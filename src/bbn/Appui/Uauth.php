@@ -8,6 +8,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Optional;
 use Brick\PhoneNumber\PhoneNumber;
 use Brick\PhoneNumber\PhoneNumberParseException;
 use Brick\PhoneNumber\PhoneNumberFormat;
@@ -16,6 +17,7 @@ use Brick\PhoneNumber\PhoneNumberFormat;
 class Uauth extends DbCls
 {
   use DbActions;
+  use Optional;
 
   protected static $default_class_cfg = [
     'table' => 'bbn_uauth',
@@ -37,6 +39,7 @@ class Uauth extends DbCls
     $this->db = $db;
     // Setting up the class configuration
     $this->initClassCfg($cfg);
+    self::optionalInit();
   }
 
 
@@ -84,7 +87,7 @@ class Uauth extends DbCls
         throw new Exception(X::_("The value is not a valid email"));
       }
     }
-    elseif ($type === 'phone') {
+    elseif (in_array($type, ['portable', 'mobile', 'phone'])) {
       try {
         $ph = PhoneNumber::parse($value);
         if ($ph) {
@@ -96,13 +99,20 @@ class Uauth extends DbCls
       }
     }
     else {
+      throw new Exception(X::_("The type %s is not valid", $type));
+    }
+
+    if (Str::isUid($type)) {
+      $id_type = $type;
+    }
+    elseif (!($id_type = self::getOptionId($type, 'typologies'))) {
       throw new Exception(X::_("The type is not valid"));
     }
 
     $arc = &$this->class_cfg['arch']['uauth'];
     $data = [
       $arc['value'] => $value,
-      $arc['typology'] => $type
+      $arc['typology'] => $id_type
     ];
 
     return $this->dbTraitInsert($data);
