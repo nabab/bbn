@@ -275,7 +275,7 @@ trait DbUauth
       ]],
       'where' => [
         $arch['id_associate'] => $id_associate,
-        $uauthCfg['arch']['uauth']['typology'] => $type
+        $uauthCfg['arch']['uauth']['typology'] => self::$dbUauth->getIdTypology($type)
       ]
     ]);
 
