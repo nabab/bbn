@@ -190,7 +190,7 @@ class Environment
     }
 
     if (!$this->_locale) {
-      $this->setLocale();
+      $this->setLocale(defined('BBN_LOCALE') ? BBN_LOCALE : null);
     }
     return $this;
   }
