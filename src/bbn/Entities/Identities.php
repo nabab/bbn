@@ -484,15 +484,24 @@ class Identities extends DbCls
   public function setPhone($id, $phone): ?string
   {
     $info = $this->getInfo($id);
-    if ($info['phone'] === $phone) {
-      return null;
+    $type = array_values(
+      array_filter(
+        $this->class_cfg['uauth_modes'], fn($m) => in_array($m, ['phone', 'mobile', 'portable'])
+      )
+    )[0] ?? false;
+    if ($type) {
+      if ($info[$type] === $phone) {
+        return null;
+      }
+
+      if (!empty($info[$type])) {
+        $this->dbUauthRemove($id, $info[$type], $type);
+      }
+
+      return $this->dbUauthAdd($id, $phone, $type);
     }
 
-    if (!empty($info['phone'])) {
-      $this->dbUauthRemove($id, $info['phone'], 'phone');
-    }
-
-    return $this->dbUauthAdd($id, $phone, 'phone');
+    return null;
   }
 
 

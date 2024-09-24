@@ -57,6 +57,10 @@ class Uauth extends DbCls
   public function find(string $value, ?string $type = null): ?array
   {
     $arc = &$this->class_cfg['arch']['uauth'];
+    if (in_array($type, ['portable', 'mobile', 'phone'])) {
+      $value = $this->checkPhone($value);
+    }
+
     $filter = [$arc['value'] => $value];
     if ($type) {
       $filter[$arc['typology']] = $this->getIdTypology($type);
@@ -100,19 +104,7 @@ class Uauth extends DbCls
       }
     }
     elseif (in_array($type, ['portable', 'mobile', 'phone'])) {
-      try {
-        $ph = PhoneNumber::parse($value, $this->class_cfg['uauth_phone_region']);
-        if ($ph) {
-          if (!$ph->isValidNumber()) {
-            throw new Exception(X::_("The value is not a valid phone number"));
-          }
-
-          $value = $ph->format(PhoneNumberFormat::E164);
-        }
-      }
-      catch (PhoneNumberParseException $e) {
-        throw new Exception(X::_("The value is not a valid phone number: %s", $e->getMessage()));
-      }
+      $value = $this->checkPhone($value);
     }
     else {
       throw new Exception(X::_("The type %s is not valid", $type));
@@ -151,6 +143,26 @@ class Uauth extends DbCls
     }
 
     return $idType;
+  }
+
+
+  public function checkPhone(string $phone)
+  {
+    try {
+      $ph = PhoneNumber::parse($phone, $this->class_cfg['uauth_phone_region']);
+      if ($ph) {
+        if (!$ph->isPossibleNumber()) {
+          throw new Exception(X::_("The value (%s) is not a valid phone number", $phone));
+        }
+
+        $phone = $ph->format(PhoneNumberFormat::E164);
+      }
+    }
+    catch (PhoneNumberParseException $e) {
+      throw new Exception(X::_("The value (%s) is not a valid phone number: %s", $e->getMessage(), $phone));
+    }
+
+    return $phone;
   }
 
 
