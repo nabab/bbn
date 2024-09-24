@@ -30,7 +30,8 @@ class Uauth extends DbCls
         'typology' => 'typology',
         'value' => 'value'
       ]
-    ]
+    ],
+    'uauth_phone_region' => null
   ];
 
 
@@ -38,6 +39,15 @@ class Uauth extends DbCls
   {
     // The database connection
     $this->db = $db;
+    // Force the phone format to uppercase
+    if (!empty($cfg['uauth_phone_region'])) {
+      $cfg['uauth_phone_region'] = strtoupper($cfg['uauth_phone_region']);
+    }
+    else if (defined(BBN_LOCALE)) {
+      $st = explode('.', BBN_LOCALE)[0];
+      $cfg['uauth_phone_region'] = strtoupper(substr($st, -2));
+    }
+
     // Setting up the class configuration
     $this->initClassCfg($cfg);
     self::optionalInit();
@@ -91,13 +101,17 @@ class Uauth extends DbCls
     }
     elseif (in_array($type, ['portable', 'mobile', 'phone'])) {
       try {
-        $ph = PhoneNumber::parse($value);
+        $ph = PhoneNumber::parse($value, $this->class_cfg['uauth_phone_region']);
         if ($ph) {
+          if (!$ph->isValidNumber()) {
+            throw new Exception(X::_("The value is not a valid phone number"));
+          }
+
           $value = $ph->format(PhoneNumberFormat::E164);
         }
       }
       catch (PhoneNumberParseException $e) {
-        throw new Exception(X::_("The value is not a valid phone number"));
+        throw new Exception(X::_("The value is not a valid phone number: %s", $e->getMessage()));
       }
     }
     else {

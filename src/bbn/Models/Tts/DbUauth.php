@@ -38,10 +38,10 @@ trait DbUauth
 
   protected static $dbUauth;
 
-  private static function dbUauthSetup(Db $db) : void
+  private static function dbUauthSetup(Db $db, array $cfg = []) : void
   {
     if (!self::$dbUauth) {
-      self::$dbUauth = new Uauth($db);
+      self::$dbUauth = new Uauth($db, $cfg);
     }
   }
 
@@ -58,7 +58,12 @@ trait DbUauth
       }
 
       $this->dbUauthSystem = $this->class_cfg['uauth_system'];
-      self::dbUauthSetup($this->db);
+      $cfg = [];
+      if (!empty($this->class_cfg['uauth_phone_region'])) {
+        $cfg['uauth_phone_region'] = $this->class_cfg['uauth_phone_region'];
+      }
+
+      self::dbUauthSetup($this->db, $cfg);
     }
   }
 

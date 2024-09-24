@@ -49,6 +49,7 @@ class Identities extends DbCls
     ],
     'uauth_system' => 'many-to-one',
     'uauth_modes' => ['email', 'phone'],
+    'uauth_phone_region' => null
   ];
 
   private $tableRelations;
