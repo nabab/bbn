@@ -190,7 +190,7 @@ class Environment
     }
 
     if (!$this->_locale) {
-      $this->setLocale();
+      $this->setLocale(defined('BBN_LOCALE') ? BBN_LOCALE : null);
     }
     return $this;
   }
@@ -219,7 +219,7 @@ class Environment
    *
    * @return void
    */
-  public function setLocale(string $locale = null)
+  public function setLocale(?string $locale = null)
   {
     $locales = [];
     if (empty($locale)) {
