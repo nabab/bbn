@@ -96,7 +96,7 @@ trait DbUauth
         ]],
         'where' => [
           $arch['id_uauth'] => $idUauth,
-          $uauthArch['typology'] => $type
+          $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)
         ]
       ])) {
         return true;
@@ -139,7 +139,7 @@ trait DbUauth
         ]],
         'where' => [
           $arch['id_uauth'] => $idUauth,
-          $uauthArch['typology'] => $type
+          $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)
         ]
       ])) {
         throw new Exception(X::_("%s is already used", $value));
@@ -159,7 +159,7 @@ trait DbUauth
         ]],
         'where' => [
           $arch['id_associate'] => $id,
-          $uauthArch['typology'] => $type
+          $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)
         ]
       ])) {
         throw new Exception(X::_("%s is already used", $value));
