@@ -33,6 +33,7 @@ class Uauth extends DbCls
     ]
   ];
 
+
   public function __construct(Db $db, array $cfg = null)
   {
     // The database connection
@@ -43,12 +44,12 @@ class Uauth extends DbCls
   }
 
 
-  public function find(string $value, string $type = null): ?array
+  public function find(string $value, ?string $type = null): ?array
   {
     $arc = &$this->class_cfg['arch']['uauth'];
     $filter = [$arc['value'] => $value];
     if ($type) {
-      $filter[$arc['typology']] = $type;
+      $filter[$arc['typology']] = $this->getIdTypology($type);
     }
 
     return $this->dbTraitRselect($filter);
@@ -80,6 +81,7 @@ class Uauth extends DbCls
     return $this->dbTraitSelectOne($arc['value'], $id);
   }
 
+
   public function insert(string $value, string $type): ?string
   {
     if ($type === 'email') {
@@ -102,21 +104,16 @@ class Uauth extends DbCls
       throw new Exception(X::_("The type %s is not valid", $type));
     }
 
-    if (Str::isUid($type)) {
-      $id_type = $type;
-    }
-    elseif (!($id_type = self::getOptionId($type, 'typologies'))) {
-      throw new Exception(X::_("The type is not valid"));
-    }
-
+    $idType = $this->getIdTypology($type);
     $arc = &$this->class_cfg['arch']['uauth'];
     $data = [
       $arc['value'] => $value,
-      $arc['typology'] => $id_type
+      $arc['typology'] => $idType
     ];
 
     return $this->dbTraitInsert($data);
   }
+
 
   public function delete(string $id): bool
   {
@@ -129,6 +126,18 @@ class Uauth extends DbCls
     return $this->dbTraitGetTableRelations();
   }
 
+
+  public function getIdTypology(string $type): ?string
+  {
+    if (Str::isUid($type)) {
+      $idType = $type;
+    }
+    elseif (!($idType = self::getOptionId($type, 'typologies'))) {
+      throw new Exception(X::_("The type is not valid"));
+    }
+
+    return $idType;
+  }
 
 
 }
