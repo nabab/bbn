@@ -327,6 +327,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
 
+  public function initCache()
+  {
+    $this->cache = [];
+  }
+
+
   /**
    * Returns the engine class that extends the base Sql class.
    *
