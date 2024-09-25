@@ -504,6 +504,16 @@ class Identities extends DbCls
     return null;
   }
 
+  public function get(string $id): array
+  {
+    $arc = &$this->class_cfg['arch']['identities'];
+    return $this->db->rselect(
+      $this->class_cfg['table'],
+      [$arc['id'], $arc['name'], $arc['fname'], $arc['civility'], $arc['fullname']],
+      [$arc['id'] => $id]
+    );
+  }
+
 
   /**
    * Merges the history of multiple person records.

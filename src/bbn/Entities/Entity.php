@@ -9,6 +9,7 @@ use bbn\Entities\Models\Entities;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\Tables\Options as EntityOptions;
 use bbn\Appui\Option;
+use bbn\Appui\Uauth;
 use bbn\Models\Tts\Cache;
 
 
@@ -98,12 +99,21 @@ class Entity
   public function getField(string $field, bool $force = false): ?string
   {
     if (!in_array($field, $this->fields)) {
-      $identityCfg = $this->identities()->getClassCfg()['arch']['identities'];
-      if (isset($identityCfg[$field])) {
-        $field = $identityCfg[$field];
-        $row = $this->entities->getEntity([$this->fields['id'] => $this->id]);
-        if (isset($row[$field])) {
-          return $row[$field];
+      if (isset($this->fields['identity'])) {
+        $identityCfg = array_flip($this->identities()->getClassCfg()['arch']['identities']);
+        if (isset($identityCfg[$field])) {
+          $identity = $this->identities()->get($this->getField($this->fields['identity']));
+          if (isset($identity[$field])) {
+            return $identity[$field];
+          }
+        }
+        else if ($this->entities->getClassCfg()['classes']['uauth']) {
+          if ($this->uauth()->dbUauthRetrieve($field)) {
+            $uauth = $this->uauth()->get($this->getField($this->fields['id']));
+            if ($uauth) {
+              return $uauth[$field];
+            }
+          }
         }
       }
 
@@ -150,16 +160,22 @@ class Entity
   public function getBasicInfo(): array
   {
     $arc = $this->class_cfg['arch']['entities'];
-    $fields = [$arc['id'], $arc['name']];
+    $fields = [$arc['id'], $arc['identity']];
     if (!empty($arc['easy_id'])) {
       $fields[] = $arc['easy_id'];
     }
 
-    return $this->db->rselect(
+    $res = $this->db->rselect(
       $this->class_cfg['table'],
       $fields,
       $this->where
     );
+
+    if (!empty($res[$arc['identity']])) {
+      $res = X::mergeArrays($this->identities()->get($res[$arc['identity']]), $res);
+    }
+
+    return $res;
   }
 
 
@@ -167,17 +183,23 @@ class Entity
   {
     $arc = $this->class_cfg['arch']['entities'];
     if (!$fields) {
-      $fields = [$arc['id'], $arc['name']];
+      $fields = [$arc['id'], $arc['identity']];
       if (!empty($arc['easy_id'])) {
         $fields[] = $arc['easy_id'];
       }
     }
 
-    return $this->db->rselect(
+    $res = $this->db->rselect(
       $this->class_cfg['table'],
       $fields,
       $this->where
     );
+
+    if (!empty($res[$arc['identity']])) {
+      $res = X::mergeArrays($this->identities()->get($res[$arc['identity']]), $res);
+    }
+
+    return $res;
   }
 
 
@@ -208,6 +230,11 @@ class Entity
   public function identities(): ?Identities
   {
     return $this->entities->identities();
+  }
+
+  public function uauth(): ?Uauth
+  {
+    return $this->entities->uauth();
   }
 
   public function address(): ?Address

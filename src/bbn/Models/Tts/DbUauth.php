@@ -72,12 +72,16 @@ trait DbUauth
     return $this->_dbUauthIsInit;
   }
 
-  public function dbUauthHas(string $id, string $value, string $type): bool
+  protected function dbUauthInitCheck(): void
   {
-    if (!$this->dbUauthIsInit()) {
+    if (!$this->_dbUauthIsInit) {
       throw new Exception(X::_("The uauth system is not initialized"));
     }
+  }
 
+  protected function dbUauthHas(string $id, string $value, string $type): bool
+  {
+    $this->dbUauthInitCheck();
     $arch = $this->class_cfg['arch']['uauth'];
     $uauthCfg = self::$dbUauth->getClassCfg();
     $uauthArch = $uauthCfg['arch']['uauth'];
@@ -95,6 +99,7 @@ trait DbUauth
           ]
         ]],
         'where' => [
+          $arch['id_associate'] => $id,
           $arch['id_uauth'] => $idUauth,
           $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)
         ]
@@ -106,21 +111,101 @@ trait DbUauth
     return false;
   }
 
-  public function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
+  protected function dbUauthSet(string $id, string $value, string $type, array $cfg = null): bool
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
-
+    $this->dbUauthInitCheck();
     $arch = $this->class_cfg['arch']['uauth'];
     $uauthCfg = self::$dbUauth->getClassCfg();
     $uauthArch = $uauthCfg['arch']['uauth'];
-    $existing = self::$dbUauth->find($value, $type);
-    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $type);
+    if (!($id_type = self::$dbUauth->getIdTypology($type))) {
+      throw new Exception(X::_("The typology is not valid"));
+    }
+
+    $existing = self::$dbUauth->find($value, $id_type);
+    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $id_type);
+    if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [
+        $arch['id_associate'] => $id,
+        $arch['id_uauth'] => $idUauth,
+        $arch['typology'] => $id_type
+    ])) {
+      return false;
+    }
+
+    if (in_array($this->dbUauthSystem, ['one-to-one', 'one-to-many'])) {
+      if ($this->db->getOne([
+        'tables' => [$this->class_cfg['tables']['uauth']],
+        'join' => [[
+          'table' => $uauthCfg['table'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),
+              'exp' => $arch['id_uauth']
+            ]]
+          ]
+        ]],
+        'where' => [
+          $arch['id_uauth'] => $idUauth,
+          $uauthArch['typology'] => $id_type
+        ]
+      ])) {
+        $this->dbUauthRemoveAll($id, $type);
+      }
+    }
+
+    if (in_array($this->dbUauthSystem, ['one-to-one', 'many-to-one'])) {
+      if ($this->db->count([
+        'tables' => [$this->class_cfg['tables']['uauth']],
+        'join' => [[
+          'table' => $uauthCfg['table'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),
+              'exp' => $arch['id_uauth']
+            ]]
+          ]
+        ]],
+        'where' => [
+          $arch['id_associate'] => $id,
+          $uauthArch['typology'] => $id_type
+        ]
+      ])) {
+        $this->dbUauthRemoveAll($id, $id_type);
+      }
+    }
+
+    $data = [
+      $arch['id_associate'] => $id,
+      $arch['id_uauth'] => $idUauth
+    ];
+    if ($cfg) {
+      $data[$arch['cfg']] = json_encode($cfg);
+    }
+
+    if ($this->db->insert($this->class_cfg['tables']['uauth'], $data)) {
+      return true;
+    }
+
+    return false;
+
+  }
+
+  protected function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
+  {
+    $this->dbUauthInitCheck();
+    $arch = $this->class_cfg['arch']['uauth'];
+    $uauthCfg = self::$dbUauth->getClassCfg();
+    $uauthArch = $uauthCfg['arch']['uauth'];
+    if (!($id_type = self::$dbUauth->getIdTypology($type))) {
+      throw new Exception(X::_("The typology is not valid"));
+    }
+
+    $existing = self::$dbUauth->find($value, $id_type);
+    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $id_type);
     
     if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [
         $arch['id_associate'] => $id,
-        $arch['id_uauth'] => $idUauth
+        $arch['id_uauth'] => $idUauth,
+        $arch['typology'] => $id_type
     ])) {
       throw new Exception(X::_("The association already exists"));
     }
@@ -139,7 +224,7 @@ trait DbUauth
         ]],
         'where' => [
           $arch['id_uauth'] => $idUauth,
-          $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)
+          $uauthArch['typology'] => $id_type
         ]
       ])) {
         throw new Exception(X::_("%s is already used", $value));
@@ -159,7 +244,7 @@ trait DbUauth
         ]],
         'where' => [
           $arch['id_associate'] => $id,
-          $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)
+          $uauthArch['typology'] => $id_type
         ]
       ])) {
         throw new Exception(X::_("%s is already used", $value));
@@ -183,10 +268,7 @@ trait DbUauth
 
   protected function dbUauthRemove(string $id, string $value, string $type): ?string
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
-
+    $this->dbUauthInitCheck();
     $existing = self::$dbUauth->find($value, $type);
     if (!$existing) {
       throw new Exception(X::_("The uauth does not exist"));
@@ -199,14 +281,48 @@ trait DbUauth
     ]);
   }
 
+  protected function dbUauthRemoveAll(string $id, string $type): int
+  {
+    $this->dbUauthInitCheck();
+    $id_type = self::$dbUauth->getIdTypology($type);
+    $arch = $this->class_cfg['arch']['uauth'];
+    $uauthCfg = self::$dbUauth->getClassCfg();
+    $uauthArch = $uauthCfg['arch']['uauth'];
+    $all = $this->db->getColumnValues([
+      'table' => $this->class_cfg['tables']['uauth'],
+      'fields' => $arch['id'],
+      'join' => [
+        [
+          'table' => $uauthCfg['table'],
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),
+              'exp' => $arch['id_uauth']
+            ]]
+          ]
+        ]
+      ],
+      'where' => [
+        $arch['id_associate'] => $id,
+        $uauthArch['typology'] => $id_type
+      ]
+    ]);
+
+    $res = 0;
+    foreach ($all as $id_uauth) {
+      $res += $this->db->delete($this->class_cfg['tables']['uauth'], [
+        $arch['id'] => $id_uauth
+      ]);
+    }
+
+    return $res;
+  }
+
 
   /*
   protected function dbUauthUpdate(string $id, string $value, string $type, string $prev, array $cfg = []): ?string
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
-
+    $this->dbUauthInitCheck();
     $uauthCfg = $this->class_cfg['arch']['uauth'];
     $existing = self::$dbUauth->find($value, $type);
     if (!$existing) {
@@ -254,10 +370,7 @@ trait DbUauth
 
   protected function dbUauthRetrieve(string $id_associate, string $type): ?array
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
-
+    $this->dbUauthInitCheck();
     $arch = $this->class_cfg['arch']['uauth'];
     $uauthCfg = self::$dbUauth->getClassCfg();
 
@@ -293,19 +406,14 @@ trait DbUauth
 
   protected function dbUauthGet(string $id_auth): ?array
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
-
+    $this->dbUauthInitCheck();
     return self::$dbUauth->get($id_auth);
   }
 
 
   protected function dbUauthGetValue($id_auth): ?string
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
+    $this->dbUauthInitCheck();
     
     return self::$dbUauth->getValue($id_auth);
   }
@@ -313,10 +421,7 @@ trait DbUauth
 
   protected function dbUauthFind(string $value, string $type = null): ?array
   {
-    if (!$this->dbUauthIsInit()) {
-      throw new Exception(X::_("The uauth system is not initialized"));
-    }
-
+    $this->dbUauthInitCheck();
     return self::$dbUauth->find($value, $type);
   }
 

@@ -136,9 +136,10 @@ class Uauth extends DbCls
   public function getIdTypology(string $type): ?string
   {
     if (Str::isUid($type)) {
-      $idType = $type;
+      return $type;
     }
-    elseif (!($idType = self::getOptionId($type, 'typologies'))) {
+    
+    if (!($idType = self::getOptionId($type, 'typologies'))) {
       throw new Exception(X::_("The type is not valid"));
     }
 
