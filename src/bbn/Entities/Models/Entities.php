@@ -149,7 +149,9 @@ abstract class Entities extends DbCls
     private Consultation|null $consultation = null,
     private Document|null $document = null,
     private DocumentRequest|null $request = null,
-    private EntityOptions|null $entityOptions = null
+    private EntityOptions|null $entityOptions = null,
+    private Masks|null $masks = null,
+    private Uauth|null $uauth = null,
   ) {
     parent::__construct($db);
     // Setting up the class configuration
