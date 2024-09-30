@@ -388,26 +388,34 @@ class Product extends DbCls
         $this->remove($v);
       }
 
-      if ($toDelete) {
-        $cart = new Cart($this->db);
-        $cartCfg = $cart->getClassCfg();
-        $carts = $this->db->rselectAll([
-          'table' => $cartCfg['tables']['cart_products'],
-          'fields' => [$cartCfg['arch']['cart_products']['id']],
-          'join' => [[
-            'table' => 'bbn_history_uids',
-            'on' => [[
-              'field' => 'id',
-              'exp' => $cartCfg['arch']['cart_products']['id']
-            ]]
-          ]],
-          'where' => [
-            $cartCfg['arch']['cart_products']['id_product'] => $id
-          ],
-          'group_by' => $cartCfg['arch']['cart_products']['id']
-        ]) ?: [];
-        foreach ($carts as $c) {
+      $cart = new Cart($this->db);
+      $cartCfg = $cart->getClassCfg();
+      $carts = $this->db->rselectAll([
+        'table' => $cartCfg['tables']['cart_products'],
+        'fields' => [$cartCfg['arch']['cart_products']['id']],
+        'join' => [[
+          'table' => 'bbn_history_uids',
+          'on' => [[
+            'field' => 'id',
+            'exp' => $cartCfg['arch']['cart_products']['id']
+          ]]
+        ]],
+        'where' => [
+          $cartCfg['arch']['cart_products']['id_product'] => $id
+        ],
+        'group_by' => $cartCfg['arch']['cart_products']['id']
+      ]) ?: [];
+      foreach ($carts as $c) {
+        if ($toDelete) {
           $this->db->delete('bbn_history_uids', ['bbn_uid' => $c[$cartCfg['arch']['cart_products']['id']]]);
+        }
+        else {
+          $this->db->delete(
+            $cartCfg['tables']['cart_products'],
+            [
+              $cartCfg['arch']['cart_products']['id'] => $c[$cartCfg['arch']['cart_products']['id']]
+            ]
+          );
         }
       }
 
