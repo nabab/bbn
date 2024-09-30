@@ -12,6 +12,8 @@ use bbn\Appui\Note;
 use bbn\Appui\Cms;
 use bbn\Appui\Option;
 use bbn\Db;
+use bbn\Shop\Sales;
+use bbn\Shop\Cart;
 
 
 class Product extends DbCls
@@ -375,21 +377,73 @@ class Product extends DbCls
   {
     $sales = new Sales($this->db);
     $total = $sales->getByProduct($id);
+    $toDelete = true;
     if ($total['num']) {
-      throw new Exception(_("Impossible to delete a product which has already been sold"));
+      //throw new Exception(_("Impossible to delete a product which has already been sold"));
+      $toDelete = false;
     }
 
-    $cfg  = $this->getClassCfg();
-    $a = $cfg['arch']['products'];
-    if ($id_note = $this->db->selectOne($cfg['table'], $a['id_note'], [$a['id'] => $id])) {
-      foreach ($this->getVariants($id) as $v) {
-        $this->remove($id);
+    if ($id_note = $this->db->selectOne($this->class_table, $this->fields['id_note'], [$this->fields['id'] => $id])) {
+      foreach ($this->getVariants($id) as $v) {;
+        $this->remove($v);
       }
 
-      return $this->db->delete('bbn_shop_products', ['id' => $id]) && $this->cms->delete($id_note);
+      if ($toDelete) {
+        $cart = new Cart($this->db);
+        $cartCfg = $cart->getClassCfg();
+        $carts = $this->db->rselectAll([
+          'table' => $cartCfg['tables']['cart_products'],
+          'fields' => [$cartCfg['arch']['cart_products']['id']],
+          'join' => [[
+            'table' => 'bbn_history_uids',
+            'on' => [[
+              'field' => 'id',
+              'exp' => $cartCfg['arch']['cart_products']['id']
+            ]]
+          ]],
+          'where' => [
+            $cartCfg['arch']['cart_products']['id_product'] => $id
+          ],
+          'group_by' => $cartCfg['arch']['cart_products']['id']
+        ]) ?: [];
+        foreach ($carts as $c) {
+          $this->db->delete('bbn_history_uids', ['bbn_uid' => $c[$cartCfg['arch']['cart_products']['id']]]);
+        }
+      }
+
+      return ($toDelete ? $this->db->delete($this->class_table, [$this->fields['id'] => $id]) : $this->deactivate($id))
+        && $this->cms->delete($id_note);
     }
 
     return 0;
+  }
+
+
+  public function activate(string $id): bool
+  {
+    return $this->isActive($id) ?: (bool)$this->db->update(
+      $this->class_table,
+      [
+        $this->fields['active'] => 1
+      ],
+      [
+        $this->fields['id'] => $id
+      ]
+    );
+  }
+
+
+  public function deactivate(string $id): bool
+  {
+    return !$this->isActive($id) ?: (bool)$this->db->update(
+      $this->class_table,
+      [
+        $this->fields['active'] => 0
+      ],
+      [
+        $this->fields['id'] => $id
+      ]
+    );
   }
 
 }
