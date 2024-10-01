@@ -200,12 +200,11 @@ trait DbUauth
     }
 
     $existing = self::$dbUauth->find($value, $id_type);
-    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $id_type);
+    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $type);
     
     if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [
         $arch['id_associate'] => $id,
-        $arch['id_uauth'] => $idUauth,
-        $arch['typology'] => $id_type
+        $arch['id_uauth'] => $idUauth
     ])) {
       throw new Exception(X::_("The association already exists"));
     }

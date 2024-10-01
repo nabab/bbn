@@ -106,9 +106,6 @@ class Uauth extends DbCls
     elseif (in_array($type, ['portable', 'mobile', 'phone'])) {
       $value = $this->checkPhone($value);
     }
-    else {
-      throw new Exception(X::_("The type %s is not valid", $type));
-    }
 
     $idType = $this->getIdTypology($type);
     $arc = &$this->class_cfg['arch']['uauth'];
