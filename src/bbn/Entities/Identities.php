@@ -561,4 +561,19 @@ class Identities extends DbCls
 
     return $fn;
   }
+
+  public function retrieveUauth(string $identity, string $type): ?array
+  {
+    return $this->dbUauthRetrieve($identity, $type);
+  }
+
+  public function addUauth(string $identity, string $value, string $type): ?string
+  {
+    return $this->dbUauthAdd($identity, $value, $type);
+  }
+  public function removeUauth(string $identity, string $value, string $type): ?string
+  {
+    return $this->dbUauthRemove($identity, $value, $type);
+  }
+
 }

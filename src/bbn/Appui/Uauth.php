@@ -137,7 +137,7 @@ class Uauth extends DbCls
     }
     
     if (!($idType = self::getOptionId($type, 'typologies'))) {
-      throw new Exception(X::_("The type is not valid"));
+      throw new Exception(X::_("The type %s is not valid", $type));
     }
 
     return $idType;

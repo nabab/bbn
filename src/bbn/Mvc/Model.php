@@ -446,16 +446,23 @@ class Model extends DbClass
    *
    * @return self
    */
-    public function addData(array $data): self
+    public function addData(array ...$data): self
     {
-        $ar = \func_get_args();
-      foreach ($ar as $d){
+      $ar = \func_get_args();
+      foreach ($data as $d){
         if (\is_array($d)) {
           $this->data = $this->hasData() ? array_merge($this->data, $d) : $d;
         }
       }
 
         return $this;
+    }
+
+
+    public function setDefaultData(array $data): self
+    {
+      X::extendOut($this->data, $data);
+      return $this;
     }
 
 
