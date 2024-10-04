@@ -221,8 +221,8 @@ class Changes extends EntityTable
       && ($user = User::getUser())
       && $this->db->insert(
         'apst_emails4app', [
-          'id_people' => $this->db->selectOne(
-            'bbn_members', 'id_people', [
+          'id_identity' => $this->db->selectOne(
+            'bbn_members', 'id_identity', [
               'id' => $user->getId(),
               'active' => 1
             ]
@@ -407,11 +407,11 @@ class Changes extends EntityTable
         $id_sub = !empty($cfg['subdata']['id']) ? $cfg['subdata']['id'] : (!empty($subdata['id']) ? $subdata['id'] : false );
         switch ($cfg['subdata']['table']){
           case 'tiers':
-            $field_sub = 'id_people';
+            $field_sub = 'id_identity';
             if (!$id_sub) {
-              $id_sub = $this->people()->add($subdata, true);
+              $id_sub = $this->identities()->add($subdata, true);
               $cfg['data'][] = [
-                'field' => 'id_people',
+                'field' => 'id_identity',
                 'value' => $id_sub
               ];
             }
@@ -499,13 +499,13 @@ class Changes extends EntityTable
           break;
 
         case 'actionnaires':
-          if (empty($data['id_people']) && !empty($cfg['id'])) {
-            $data['id_people'] = $this->db->selectOne('bbn_entities_links', 'id_people', ['id' => $cfg['id']]);
+          if (empty($data['id_identity']) && !empty($cfg['id'])) {
+            $data['id_identity'] = $this->db->selectOne('bbn_entities_links', 'id_identity', ['id' => $cfg['id']]);
           }
 
           switch ($cfg['type']){
             case 'insert':
-              if (!empty($data['id_people'])
+              if (!empty($data['id_identity'])
                 && !empty($data['parts'])
               ) {
                 if (!$this->entity->actionnaire()->insert($data)) {
@@ -517,7 +517,7 @@ class Changes extends EntityTable
               }
               break;
             case 'update':
-              if (!empty($cfg['id']) && !empty($data['id_people'])) {
+              if (!empty($cfg['id']) && !empty($data['id_identity'])) {
                 $toUpd = X::mergeArrays([
                   'id' => $cfg['id']
                 ], $data);
@@ -537,8 +537,8 @@ class Changes extends EntityTable
               }
               break;
             case 'delete':
-              if (!empty($data['id_people'])
-                && !$this->entity->links()->actionnaireDelete($data['id_people'])
+              if (!empty($data['id_identity'])
+                && !$this->entity->links()->actionnaireDelete($data['id_identity'])
               ) {
                 $error = _('Error during the actionnaire deleting.');
               }
@@ -550,9 +550,9 @@ class Changes extends EntityTable
         case 'representants':
           switch ($cfg['type']){
             case 'insert':
-              if (!empty($data['id_people'])) {
+              if (!empty($data['id_identity'])) {
                 $toIns = [
-                  'id_people' => $data['id_people']
+                  'id_identity' => $data['id_identity']
                 ];
                 if (!empty($data['representant'])) {
                   $toIns['representant'] = $data['representant'];
@@ -570,7 +570,7 @@ class Changes extends EntityTable
               if (!empty($cfg['id']) && !empty($id_sub)) {
                 $toUpd = X::mergeArrays([
                   'id' => $cfg['id'],
-                  'id_people' => $id_sub
+                  'id_identity' => $id_sub
                 ], $data);
                 if (!$this->entity->representant()->update($toUpd)) {
                   $error = _('Error during the representant updating.');
@@ -781,7 +781,7 @@ class Changes extends EntityTable
           }
           break;
           case 'admin':
-            $idAdmin = !empty($data['id_admin']) ? $data['id_admin'] : (!empty($data['id_people']) ? $data['id_people'] : false);
+            $idAdmin = !empty($data['id_admin']) ? $data['id_admin'] : (!empty($data['id_identity']) ? $data['id_identity'] : false);
             if (empty($idAdmin) || !$this->entity->update(['id_admin' => $idAdmin])) {
               $error = _('Error during the admin updating.');
             }
@@ -1661,7 +1661,7 @@ class Changes extends EntityTable
           if (!empty($fonction)) {
             $this->entity->fonction()->insert(
               [
-                'id_people' => $id,
+                'id_identity' => $id,
                 'id_option' => $fonction
               ]
             );
@@ -1679,7 +1679,7 @@ class Changes extends EntityTable
           if (empty($id_lien)) {
             $ok1 = $this->entity->fonction()->insert(
               [
-                'id_people' => $id,
+                'id_identity' => $id,
                 'id_option' => $fonction
               ]
             );
@@ -1688,7 +1688,7 @@ class Changes extends EntityTable
             $ok1 = $this->entity->fonction()->update(
               [
                 'id' => $id_lien,
-                'id_people' => $id,
+                'id_identity' => $id,
                 'id_option' => $fonction
               ]
             );

@@ -3618,16 +3618,15 @@ public function getIdAlias($code = null): ?string
    */
   public function getCodePath($id, $fromRoot = false)
   {
-    $args = func_get_args();
     $res  = [];
-    while ($o = $this->nativeOption(...$args)) {
+    while ($o = $this->nativeOption($id)) {
       if ($o[$this->fields['code']]) {
         $res[] = $o[$this->fields['code']];
-        if ($o[$this->fields['id_parent']] === $fromRoot ? $this->root : $this->default) {
+        if ($o[$this->fields['id_parent']] === ($fromRoot ? $this->root : $this->default)) {
           break;
         }
 
-        $args = [$o[$this->fields['id_parent']]];
+        $id = $o[$this->fields['id_parent']];
       }
       else {
         return null;

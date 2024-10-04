@@ -29,7 +29,7 @@ class Link extends EntityTable
         'id' => 'id',
         'link_type' => 'link_type',
         'id_entity' => 'id_entity',
-        'id_people' => 'id_people',
+        'id_identity' => 'id_identity',
         'id_address' => 'id_address',
         'id_option' => 'id_option',
         'cfg' => 'cfg',
@@ -40,13 +40,13 @@ class Link extends EntityTable
   protected static array $linkCfg = [
     "single" => false,
     "required" => false,
-    "people" => false,
+    "identities" => false,
     "address" => false,
     "cfg" => false
   ];
 
 
-  protected $people = null;
+  protected $identities = null;
   protected $address = null;
   private $id_parent = null;
   
@@ -59,7 +59,7 @@ class Link extends EntityTable
 
   /**
    * @param array $link
-   * @param array|null $people
+   * @param array|null $identities
    * @param array|null $address
    * @param array|null $option
    */
@@ -85,8 +85,8 @@ class Link extends EntityTable
         $this->fields['link_type'] => $this->type
       ];
 
-      if (!empty($this->cfg['people'])) {
-        $this->people = $this->entities->people();
+      if (!empty($this->cfg['identities'])) {
+        $this->identities = $this->entities->identities();
       }
 
       if (!empty($this->cfg['address'])) {
@@ -103,7 +103,7 @@ class Link extends EntityTable
       }
     }
     else {
-      $this->people = $this->entities->people();
+      $this->identities = $this->entities->identities();
       $this->address = $this->entities->address();
     }
   }

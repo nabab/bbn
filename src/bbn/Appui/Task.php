@@ -1237,6 +1237,174 @@ class Task extends bbn\Models\Cls\Db
     ];
   }
 
+  public function searchLite(array $where = [], $sort = [], $start = 0, $num = 25){
+    $where = $this->_format_where($where);
+    $fields = [
+      'ids' => [
+        'state' => 'bbn_tasks.state'
+      ],
+      'nums' => [],
+      'dates' => [],
+      'texts' => [
+        'title' => 'bbn_notes_versions.title'
+      ],
+      'users' => [],
+      'refs' => [
+        'reference' => 'reference'
+      ]
+    ];
+    $query = '';
+    $join = '';
+    $having = '';
+    $order = '';
+    $args1 = [];
+    $args2 = [];
+    foreach ( $where as $i => $w ){
+      if ( isset($fields['ids'][$w[0]]) ){
+        // For id_parent, no other search for now
+        if ( $w[0] === 'id_parent' ){
+          $query = "AND ".$fields['ids'][$w[0]]." = ? ";
+          $args = [$w[2]];
+          break;
+        }
+        else if ( \is_array($w[2]) ){
+          $query .= "AND ( ";
+          foreach ( $w[2] as $j => $v ){
+            if ( $j ){
+              $query .= " OR ";
+            }
+            $query .= $fields['ids'][$w[0]]." = ? ";
+            array_push($args1, $v);
+          }
+          $query .= ") ";
+        }
+        else{
+          $query .= " AND ".$fields['ids'][$w[0]]." $w[1] ? ";
+          array_push($args1, $w[2]);
+        }
+      }
+      else if ( isset($fields['dates'][$w[0]]) ){
+        if ( strpos($w[1], 'IS ') === 0 ){
+          $query .= " AND ".$fields['dates'][$w[0]]." $w[1] ";
+        }
+        else if ( bbn\Date::validateSQL($w[2]) ){
+          if ( $w[0] !== 'deadline' ){
+            $having .= " AND DATE(".$fields['dates'][$w[0]].") $w[1] ? ";
+            array_push($args2, $w[2]);
+          }
+          else{
+            $query .= " AND DATE(".$fields['dates'][$w[0]].") $w[1] ? ";
+            array_push($args1, $w[2]);
+          }
+        }
+      }
+      else if ( isset($fields['nums'][$w[0]]) ){
+        if ( \is_int($w[2]) ){
+          $query .= " AND ".$fields['nums'][$w[0]]." $w[1] ? ";
+          array_push($args1, $w[2]);
+        }
+      }
+      else if ( isset($fields['texts'][$w[0]]) ){
+        if ( !empty($w[2]) ){
+          if ( $w[0] === 'title' ){
+            $query .= " AND bbn_notes_versions.title LIKE ? AND bbn_notes_versions.latest = 1 ";
+            array_push($args1, "%$w[2]%");
+          }
+          else if ( $w[0] === 'content' ){
+            $query .= " AND bbn_notes_versions.content LIKE ? AND bbn_notes_versions.latest = 1 ";
+            array_push($args1, "%$w[2]%");
+          }
+          else if ( $w[0] === 'text' ){
+            $query .= " AND ((bbn_notes_versions.title LIKE ? OR bbn_notes_versions.content LIKE ?) AND bbn_notes_versions.latest = 1 ";
+            array_push($args1, "%$w[2]%", "%$w[2]%");
+            $join .= "
+        LEFT JOIN bbn_tasks_notes
+          ON bbn_tasks_notes.id_task = bbn_tasks.id";
+          }
+        }
+      }
+      else if ( isset($fields['users'][$w[0]]) ){
+        if ( !empty($w[2]) ){
+          if ( $w[0] === 'my_user' ){
+            $query .= " AND user_role.id_user = ?";
+            array_push($args1, hex2bin($w[2]));
+            $join .= "
+        JOIN bbn_tasks_roles AS user_role
+          ON user_role.id_task = bbn_tasks.id";
+          }
+          else if ( ($w[0] === 'my_group') && ($usr = bbn\User::getInstance()) ){
+            $usr_table = $usr->getTables()['users'];
+            $usr_fields = $usr->getFields('users');
+            $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
+            array_push($args1, hex2bin($w[2]));
+            $join .= "
+        JOIN bbn_tasks_roles AS group_role
+          ON group_role.id_task = bbn_tasks.id
+        JOIN `".$usr_table."`
+          ON bbn_tasks_roles.id_user = `".$usr_table."`.`".$usr_fields['id']."`";
+          }
+        }
+      }
+      else if ( isset($fields['refs'][$w[0]]) ){
+        if ( \is_int($w[2]) ){
+          $having .= " AND ".$fields['refs'][$w[0]]." $w[1] ? ";
+          array_push($args1, $w[2]);
+        }
+      }
+    }
+    foreach ( $fields as $i => $f ){
+      foreach ( $f as $n => $g ){
+        if ( isset($sort[$n]) ){
+          $order = '`'.$n.'`'.( strtolower($sort[$n]) === 'desc' ? ' DESC' : ' ASC').', ';
+        }
+      }
+    }
+    if ( !empty($order) ){
+      $order = "ORDER BY ".substr($order, 0, -2);
+    }
+    $sql = "
+      SELECT bbn_notes_versions.title,
+      {$this->references_select}
+      bbn_tasks.*
+      FROM bbn_tasks
+        JOIN bbn_notes_versions
+          ON bbn_notes_versions.id_note = bbn_tasks.id_note
+          AND bbn_notes_versions.latest = 1
+        {$this->references_join}
+      WHERE bbn_tasks.active = 1
+      $query
+      GROUP BY bbn_tasks.id
+      HAVING 1
+      $having
+      $order";
+    //die(X::dump($sql));
+    if ( !isset($args) ){
+      $args = array_merge($args1, $args2);
+    }
+
+    if (!empty($num)) {
+      $sql .= " LIMIT $start, $num";
+    }
+
+    $data = $this->db->getRows($sql, $args);
+    /** @var bbn\User $user */
+    $user = bbn\User::getInstance();
+    foreach ( $data as $i => $d ){
+      if ( $this->template ){
+        if ( $d['reference'] ){
+          /** @todo How do I get the t1able with the way I made the request??! */
+          $data[$i]['reference'] = \call_user_func($this->template, $this->db, $d['reference'], '');
+        }
+      }
+    }
+    return [
+      'data' => $data,
+      'total' => !empty($num) ? $this->db->getOne("SELECT COUNT(*) FROM ($sql) AS t", $args) : count($data),
+      'start' => $start,
+      'limit' => $num
+    ];
+  }
+
   public function searchInTask($st){
     return $this->db->rselectAll([
       'table' => 'bbn_tasks',

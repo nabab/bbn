@@ -616,6 +616,42 @@ class X
   }
 
 
+  public static function extendOut(&$obj, ...$others)
+  {
+    if (is_object($obj)) {
+      foreach ($others as $o) {
+        if (!is_object($o)) {
+          throw new Exception('The provided argument must be an object, ' . gettype($o) . ' given.');
+        }
+
+        foreach ($o as $k => $v) {
+          if (!property_exists($obj, $k)) {
+            $obj->$k = $v;
+          }
+        }
+      }
+    }
+    else if (is_array($obj)) {
+      foreach ($others as $o) {
+        if (!is_array($o)) {
+          throw new Exception('The provided argument must be an array, ' . gettype($o) . ' given.');
+        }
+
+        foreach ($o as $k => $v) {
+          if (!array_key_exists($k, $obj)) {
+            $obj[$k] = $v;
+          }
+        }
+      }
+    }
+    else {
+      throw new Exception('The provided argument must be an object or an array, ' . gettype($obj) . ' given.');
+    }
+
+    return $obj;
+  }
+
+
   /**
    * Flattens a multi-dimensional array for the given children index name.
    *

@@ -9,7 +9,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
-use bbn\Entities\People;
+use bbn\Entities\Identities;
 use bbn\Entities\Address;
 use bbn\Entities\Models\EntityJunction;
 use bbn\Entities\Models\EntityTable;
@@ -21,17 +21,28 @@ use bbn\Mail;
 use bbn\Appui\Database;
 use bbn\Appui\Masks;
 use bbn\Appui\Option;
+use bbn\Appui\Uauth;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbActions;
 
+/**
+ * Class Entities
+ * Abstract base class for entity-related operations.
+ * Provides methods for interacting with database entities, including CRUD operations.
+ */
 abstract class Entities extends DbCls
 {
   use DbActions;
 
+  /**
+   * Default class configuration.
+   * 
+   * @var array
+   */
   protected static $default_class_cfg = [
     'classes' => [
       'link' => false,
-      'people' => false,
+      'identities' => false,
       'address' => false,
       'entity' => false,
       'consultation' => false,
@@ -40,11 +51,13 @@ abstract class Entities extends DbCls
       'document_request' => false,
       'note' => false,
       'entity_options' => false,
+      'masks' => false,
+      'uauth' => false,
     ],
     'table' => 'bbn_entities',
     'tables' => [
       'entities' => 'bbn_entities',
-      'people' => 'bbn_people',
+      'identities' => 'bbn_identities',
       'address' => 'bbn_addresses',
       'links' => 'bbn_entities_links',
     ],
@@ -59,10 +72,10 @@ abstract class Entities extends DbCls
           'type' => 'primary',
           'maxlength' => 5
         ],
-        'name' => [
-          'name' => 'name',
+        'identity' => [
+          'name' => 'identity',
           'type' => 'string',
-          'maxlength' => 100
+          'maxlength' => 32
         ],
         'id_parent' => [
           'name' => 'id_parent',
@@ -89,28 +102,57 @@ abstract class Entities extends DbCls
     ],
   ];
 
+  /**
+   * Links cache.
+   *
+   * @var array
+   */
   private static $links = [];
 
+  /**
+   * Class cache.
+   *
+   * @var array
+   */
   private static $classes = [];
 
-
+  /**
+   * Link class instance.
+   *
+   * @var mixed
+   */
   private $linkCls;
 
-
+  /**
+   * Entities constructor.
+   *
+   * @param Db $db The database instance.
+   * @param array|null $cfg Configuration options.
+   * @param Option|null $options Option object.
+   * @param Mail|null $mail Mail object.
+   * @param Identities|null $identities Identities object.
+   * @param Address|null $address Address object.
+   * @param Consultation|null $consultation Consultation object.
+   * @param Document|null $document Document object.
+   * @param DocumentRequest|null $request DocumentRequest object.
+   * @param EntityOptions|null $entityOptions EntityOptions object.
+   * @param Masks|null $masks Masks object.
+   * @param Uauth|null $uauth Uauth object.
+   */
   public function __construct(
     Db $db,
     array $cfg = null,
     protected Option|null $options = null,
     protected Mail|null $mail = null,
-    private People|null $people = null,
+    private Identities|null $identities = null,
     private Address|null $address = null,
     private Consultation|null $consultation = null,
     private Document|null $document = null,
     private DocumentRequest|null $request = null,
     private EntityOptions|null $entityOptions = null,
     private Masks|null $masks = null,
-  )
-  {
+    private Uauth|null $uauth = null,
+  ) {
     parent::__construct($db);
     // Setting up the class configuration
     $this->initClassCfg($cfg);
@@ -118,9 +160,17 @@ abstract class Entities extends DbCls
     if ($cls['link']) {
       $this->linkCls = $cls['mail'];
     }
-    
   }
 
+  /**
+   * Magic method to handle dynamic method calls.
+   * 
+   * @param string $method Method name.
+   * @param array $args Arguments for the method.
+   * 
+   * @return mixed
+   * @throws Exception If the method does not exist.
+   */
   public function __call($method, $args)
   {
     $path = '\\' . get_class($this) . '\\';
@@ -129,46 +179,61 @@ abstract class Entities extends DbCls
 
     if (class_exists($path . 'Tables\\' . $cls)) {
       return $this->getClass($path . 'Tables\\' . $cls, $method, $entity);
-    }
-    else if (class_exists($path . 'Junctions\\' . $cls)) {
+    } else if (class_exists($path . 'Junctions\\' . $cls)) {
       return $this->getClass($path . 'Junctions\\' . $cls, $method, $entity);
-    }
-    else if (class_exists($path . 'Links\\' . $cls)) {
+    } else if (class_exists($path . 'Links\\' . $cls)) {
       return $this->getLink($path . 'Links\\' . $cls, $entity);
-    }
-    else if (class_exists($path . 'Documents\\' . $cls)) {
+    } else if (class_exists($path . 'Documents\\' . $cls)) {
       return $this->getClass($path . 'Documents\\' . $cls, $method, $entity);
     }
 
     throw new Exception(X::_("The method %s does not exist", $method));
   }
 
-
-
-
+  /**
+   * Deletes records based on the given condition.
+   *
+   * @param string|array $where Condition for deletion.
+   * 
+   * @return bool
+   */
   public function delete(string|array $where)
   {
     return $this->dbTraitDelete($this->treatWhere($where));
   }
 
-
+  /**
+   * Updates records based on the given condition and data.
+   *
+   * @param string|array $where Condition for update.
+   * @param array $data Data to update.
+   * 
+   * @return bool
+   */
   public function update(string|array $where, array $data)
   {
     return $this->dbTraitUpdate($this->treatWhere($where), $data);
   }
 
-
+  /**
+   * Checks if a record exists based on the given condition.
+   *
+   * @param string|array $where Condition for existence check.
+   * 
+   * @return bool
+   */
   public function exists(string|array $where)
   {
     return $this->dbTraitExists($this->treatWhere($where));
   }
 
   /**
-   * Retrieves a row as an object from the table through its id.
+   * Retrieves a single value based on the field and condition.
    *
-   * @param string|array $filter
-   * @param array $order
-   *
+   * @param string $field The field to select.
+   * @param string|array $filter Condition for selection.
+   * @param array $order Order for sorting results.
+   * 
    * @return mixed
    */
   public function selectOne(string $field, $filter = [], array $order = [])
@@ -176,12 +241,12 @@ abstract class Entities extends DbCls
     return $this->dbTraitSelectOne($field, $filter, $order);
   }
 
-
   /**
-   * Retrieves a row as an object from the table through its id.
+   * Selects a row as an object from the table through its condition.
    *
-   * @param string|array $filter
-   * @param array $order
+   * @param string|array $filter Condition for selection.
+   * @param array $order Order for sorting results.
+   * @param array $fields Fields to select.
    *
    * @return stdClass|null
    */
@@ -190,12 +255,12 @@ abstract class Entities extends DbCls
     return $this->dbTraitSelect($filter, $order, $fields);
   }
 
-
   /**
-   * Retrieves a row as an array from the table through its id.
+   * Selects a row as an array from the table through its condition.
    *
-   * @param string|array $filter
-   * @param array $order
+   * @param string|array $filter Condition for selection.
+   * @param array $order Order for sorting results.
+   * @param array $fields Fields to select.
    *
    * @return array|null
    */
@@ -204,11 +269,21 @@ abstract class Entities extends DbCls
     return $this->dbTraitRselect($filter, $order, $fields);
   }
 
+  /**
+   * Selects multiple values based on a field and condition.
+   *
+   * @param string $field The field to select.
+   * @param array $filter Condition for selection.
+   * @param array $order Order for sorting results.
+   * @param int $limit Maximum number of results.
+   * @param int $start Starting point for results.
+   * 
+   * @return array
+   */
   public function selectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
   {
     return $this->dbTraitSelectValues($field, $filter, $order, $limit, $start);
   }
-
 
   /**
    * Returns the number of rows from the table for the given conditions.
@@ -287,16 +362,26 @@ abstract class Entities extends DbCls
     return $this->masks;
   }
 
-  public function people(): ?People
+  public function identities(): ?Identities
   {
     $cls = $this->class_cfg['classes'];
-    if (!$this->people && $cls['people']) {
-      $this->people = new $cls['people']($this->db, $this);
+    if (!$this->identities && $cls['identities']) {
+      $this->identities = new $cls['identities']($this->db, $this);
     }
 
-    return $this->people;
+    return $this->identities;
   }
 
+
+  public function uauth(): ?Uauth
+  {
+    $cls = $this->class_cfg['classes'];
+    if (!$this->uauth && $cls['uauth']) {
+      $this->uauth = new $cls['uauth']($this->db);
+    }
+
+    return $this->uauth;
+  }
 
   public function address(): ?Address
   {

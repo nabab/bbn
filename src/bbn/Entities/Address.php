@@ -630,7 +630,7 @@ class Address extends DbCls
   private function getTableRelations(): array
   {
     if (!isset($this->tableRelations)) {
-      $arc = &$this->class_cfg['arch']['people'];
+      $arc = &$this->class_cfg['arch']['identities'];
       $this->tableRelations = [];
       $refs = $this->db->findReferences($this->db->cfn($arc['id'], $this->class_cfg['table']));
       foreach ($refs as $ref) {

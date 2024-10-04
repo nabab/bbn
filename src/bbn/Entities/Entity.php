@@ -9,6 +9,7 @@ use bbn\Entities\Models\Entities;
 use bbn\Entities\Tables\Link;
 use bbn\Entities\Tables\Options as EntityOptions;
 use bbn\Appui\Option;
+use bbn\Appui\Uauth;
 use bbn\Models\Tts\Cache;
 
 
@@ -68,7 +69,7 @@ class Entity
 
 
     $this->where = [
-      $this->fields['id'] => $this->id
+      $this->db->cfn($this->fields['id'], $this->table) => $this->id
     ];
 
     $this->cacheInit();
@@ -89,14 +90,39 @@ class Entity
     return $this->id;
   }
 
+  public function getWhere(): array
+  {
+    return $this->where;
+  }
+
 
   public function getField(string $field, bool $force = false): ?string
   {
-    if (!in_array($field, $this->fields)) {
-      throw new Exception(X::_("The field %s does not exist", $field));
-    }
-
     if ($force || !array_key_exists($field, $this->info)) {
+      if (!in_array($field, $this->fields)) {
+        if (isset($this->fields['identity'])) {
+          $identityCfg = array_flip($this->identities()->getClassCfg()['arch']['identities']);
+          if (isset($identityCfg[$field])) {
+            $identity = $this->identities()->get($this->getField($this->fields['identity']));
+            X::extendOut($this->info, $identity);
+            if (isset($identity[$field])) {
+              return $identity[$field];
+            }
+          }
+          else if ($this->entities->getClassCfg()['classes']['uauth']) {
+            try {
+              $uauth = $this->identities()->retrieveUauth($this->getField($this->fields['identity']), $field);
+              return $uauth[$field];
+            }
+            catch (Exception $e) {
+              throw new Exception(X::_("The field %s does not exist", $field));
+            }
+          }
+        }
+
+        throw new Exception(X::_("The field %s does not exist", $field));
+      }
+
       $this->info[$field] = $this->db->selectOne(
         $this->class_cfg['table'],
         $field,
@@ -121,8 +147,8 @@ class Entity
 
   public function getFromTable()
   {
-    $fields = $this->fields;
     $table = $this->class_cfg['tables']['entities'];
+
     $cfg = [
       'tables' => [$table],
       'fields' => array_values($this->getFieldsList()),
@@ -136,16 +162,22 @@ class Entity
   public function getBasicInfo(): array
   {
     $arc = $this->class_cfg['arch']['entities'];
-    $fields = [$arc['id'], $arc['name']];
+    $fields = [$arc['id'], $arc['identity']];
     if (!empty($arc['easy_id'])) {
       $fields[] = $arc['easy_id'];
     }
 
-    return $this->db->rselect(
+    $res = $this->db->rselect(
       $this->class_cfg['table'],
       $fields,
       $this->where
     );
+
+    if (!empty($res[$arc['identity']])) {
+      $res = X::mergeArrays($this->identities()->get($res[$arc['identity']]), $res);
+    }
+
+    return $res;
   }
 
 
@@ -153,17 +185,23 @@ class Entity
   {
     $arc = $this->class_cfg['arch']['entities'];
     if (!$fields) {
-      $fields = [$arc['id'], $arc['name']];
+      $fields = [$arc['id'], $arc['identity']];
       if (!empty($arc['easy_id'])) {
         $fields[] = $arc['easy_id'];
       }
     }
 
-    return $this->db->rselect(
+    $res = $this->db->rselect(
       $this->class_cfg['table'],
       $fields,
       $this->where
     );
+
+    if (!empty($res[$arc['identity']])) {
+      $res = X::mergeArrays($this->identities()->get($res[$arc['identity']]), $res);
+    }
+
+    return $res;
   }
 
 
@@ -181,15 +219,24 @@ class Entity
 
   }
 
+  public function getEntities(): Entities
+  {
+    return $this->entities;
+  }
 
   protected function getLink(string $linkCls): ?Link
   {
     return $this->entities->getLink($linkCls, $this);
   }
 
-  public function people(): ?People
+  public function identities(): ?Identities
   {
-    return $this->entities->people();
+    return $this->entities->identities();
+  }
+
+  public function uauth(): ?Uauth
+  {
+    return $this->entities->uauth();
   }
 
   public function address(): ?Address

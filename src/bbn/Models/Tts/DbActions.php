@@ -213,8 +213,8 @@ trait DbActions
    *
    * @param array $filter
    * @param array $order
-   * @param array $limit
-   * @param array $start
+   * @param int $limit
+   * @param int $start
    *
    * @return array
    */
@@ -229,8 +229,8 @@ trait DbActions
    *
    * @param array $filter
    * @param array $order
-   * @param array $limit
-   * @param array $start
+   * @param int $limit
+   * @param int $start
    *
    * @return array
    */
