@@ -98,29 +98,31 @@ class Entity
 
   public function getField(string $field, bool $force = false): ?string
   {
-    if (!in_array($field, $this->fields)) {
-      if (isset($this->fields['identity'])) {
-        $identityCfg = array_flip($this->identities()->getClassCfg()['arch']['identities']);
-        if (isset($identityCfg[$field])) {
-          $identity = $this->identities()->get($this->getField($this->fields['identity']));
-          if (isset($identity[$field])) {
-            return $identity[$field];
+    if ($force || !array_key_exists($field, $this->info)) {
+      if (!in_array($field, $this->fields)) {
+        if (isset($this->fields['identity'])) {
+          $identityCfg = array_flip($this->identities()->getClassCfg()['arch']['identities']);
+          if (isset($identityCfg[$field])) {
+            $identity = $this->identities()->get($this->getField($this->fields['identity']));
+            X::extendOut($this->info, $identity);
+            if (isset($identity[$field])) {
+              return $identity[$field];
+            }
           }
-        }
-        else if ($this->entities->getClassCfg()['classes']['uauth']) {
-          if ($this->uauth()->dbUauthRetrieve($field)) {
-            $uauth = $this->uauth()->get($this->getField($this->fields['id']));
-            if ($uauth) {
+          else if ($this->entities->getClassCfg()['classes']['uauth']) {
+            try {
+              $uauth = $this->identities()->retrieveUauth($this->getField($this->fields['identity']), $field);
               return $uauth[$field];
+            }
+            catch (Exception $e) {
+              throw new Exception(X::_("The field %s does not exist", $field));
             }
           }
         }
+
+        throw new Exception(X::_("The field %s does not exist", $field));
       }
 
-      throw new Exception(X::_("The field %s does not exist", $field));
-    }
-
-    if ($force || !array_key_exists($field, $this->info)) {
       $this->info[$field] = $this->db->selectOne(
         $this->class_cfg['table'],
         $field,
