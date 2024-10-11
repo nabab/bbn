@@ -727,7 +727,7 @@ class Project extends DbCls
       //else is folder
       elseif (($cnt = $this->fs->getFiles($t['name'], true, true))) {
         $excludeds = [
-          'public' => ['_ctrl.php']
+          'public' => ['_super.php']
         ];
         $num       = \count($cnt);
         $folder    = true;

@@ -18,7 +18,7 @@ class Ide2 extends modelDb {
   public $id;
   public $fs;
   private static $excluded = [
-    'public' => ['_ctrl.php']
+    'public' => ['_super.php']
   ];
   protected $projectInfo;
   protected $pathInfo;

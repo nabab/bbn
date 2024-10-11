@@ -647,7 +647,7 @@ class Ide
       }*/
 
       // Delete the file if code is empty and if it isn't a super controller
-      if (empty($file['code']) && ($file['tab'] !== '_ctrl')) {
+      if (empty($file['code']) && ($file['tab'] !== '_super')) {
         if (@unlink(self::$current_file)) {
           if ($file['extension'] === 'ts') {
             @unlink(substr(self::$current_file, 0, -2) . 'js');
@@ -1778,10 +1778,10 @@ class Ide
    */
   public function history(string $url, array $repository = [], bool $all = false)
   {
-    $check_ctrl   = false;
+    $check_super   = false;
     $copy_url     = explode("/", $url);
     $backups      = [];
-    $history_ctrl = [];
+    $history_super = [];
     if (!empty($repository) && !empty($repository['name'])) {
       $path = self::$backup_path . $repository['root'] . '/' . substr($url, Strpos($url, $repository['code'], 1));
     } else {
@@ -1795,40 +1795,40 @@ class Ide
         array_pop($ctrl_path);
       }
 
-      //check if there is "_ctrl" in the url as the last step of the "$url"; in that case we tart $url to give the right path to get it to take its own backup files.
-      if (end($copy_url) === "_ctrl") {
+      //check if there is "_super" in the url as the last step of the "$url"; in that case we tart $url to give the right path to get it to take its own backup files.
+      if (end($copy_url) === "_super") {
         $url = explode("/", $url);
         array_pop($url);
         $url              = implode("/", $url);
-        $check_ctrl_files = true;
+        $check_super_files = true;
         $copy_url         = explode("/", $url);
         for ($y = 0; $y < 2; $y++) {
           array_pop($copy_url);
         }
 
-        $copy_url = implode("/", $copy_url) . "/" . "_ctrl";
+        $copy_url = implode("/", $copy_url) . "/" . "_super";
       }
 
-      //First, check the presence of _ctrl backups.
-      $ctrl_path = implode("/", $ctrl_path) . "/" . "_ctrl";
-      // read _ctrl if exsist
+      //First, check the presence of _super backups.
+      $ctrl_path = implode("/", $ctrl_path) . "/" . "_super";
+      // read _super if exsist
       if ($this->fs->isDir($ctrl_path)) {
-        //If there is a "_ctrl" backup, insert it into the array that will be merged with the remaining backup at the end of the function.
-        if ($files_ctrl = $this->fs->getFiles($ctrl_path)) {
+        //If there is a "_super" backup, insert it into the array that will be merged with the remaining backup at the end of the function.
+        if ($files_super = $this->fs->getFiles($ctrl_path)) {
           $mode = X::basename($ctrl_path);
 
-          $history_ctrl = [
+          $history_super = [
             'text' => X::basename($ctrl_path),
             'icon' => 'folder-icon',
             'folder' => true,
             'items' => [],
             'num_items' => \count($this->fs->getFiles($ctrl_path))
-            //'num_items' => \count(\bbn\File\Dir::getFiles($files_ctrl))
+            //'num_items' => \count(\bbn\File\Dir::getFiles($files_super))
           ];
 
-          //If we are requesting all files with their contents, this block returns to the "_ctrl" block.
+          //If we are requesting all files with their contents, this block returns to the "_super" block.
           if ($all === true) {
-            foreach ($files_ctrl as $file) {
+            foreach ($files_super as $file) {
               $filename  = Str::fileExt($file, true)[0];
               $file_name = $filename;
               $moment    = strtotime(str_replace('_', ' ', $filename));
@@ -1836,9 +1836,9 @@ class Ide
               $dir       = date('Y/m/d', $moment);
               $time      = date('H:i:s', $moment);
 
-              if (($i = X::find($history_ctrl['items'], ['text' => $date])) === null) {
+              if (($i = X::find($history_super['items'], ['text' => $date])) === null) {
                 array_push(
-                  $history_ctrl['items'],
+                  $history_super['items'],
                   [
                     'text' => $date,
                     'items' => [],
@@ -1847,10 +1847,10 @@ class Ide
                   ]
                 );
 
-                $i = \count($history_ctrl['items']) - 1;
-                if (($idx = X::find($history_ctrl['items'][$i]['items'], ['text' => $time])) === null) {
+                $i = \count($history_super['items']) - 1;
+                if (($idx = X::find($history_super['items'][$i]['items'], ['text' => $time])) === null) {
                   array_push(
-                    $history_ctrl['items'][$i]['items'],
+                    $history_super['items'][$i]['items'],
                     [
                       'text' => $time,
                       'mode' => X::basename($ctrl_path),
@@ -1862,10 +1862,10 @@ class Ide
                   );
                 }
               } else {
-                $j = X::find($history_ctrl['items'], ['text' => $date]);
-                if (($idx = X::find($history_ctrl['items'][$j]['items'], ['text' => $time])) === null) {
+                $j = X::find($history_super['items'], ['text' => $date]);
+                if (($idx = X::find($history_super['items'][$j]['items'], ['text' => $time])) === null) {
                   array_push(
-                    $history_ctrl['items'][$j]['items'],
+                    $history_super['items'][$j]['items'],
                     [
                       'text' => $time,
                       'code' => $this->fs->getContents($file),
@@ -1880,12 +1880,12 @@ class Ide
           }
           //otherwise pass some useful parameters to get information with other posts see block in case of "$all" to false.
           else {
-            $check_ctrl = true;
+            $check_super = true;
           }
         }
       }
 
-      //taken or not the backup of the "_ctrl" we move on to acquire the date of the project, if set to true then as done before, we will take into consideration all the date including the contents of the files.
+      //taken or not the backup of the "_super" we move on to acquire the date of the project, if set to true then as done before, we will take into consideration all the date including the contents of the files.
       if ($all === true) {
         //if ( is_dir($path) ){
         if ($this->fs->isDir($path)) {
@@ -1893,7 +1893,7 @@ class Ide
           if ($dirs = $this->fs->getDirs($path)) {
             if (!empty($dirs)) {
               $basepath = X::basename($path);
-              $mode = $basepath === "_ctrl" || ($basepath === "model") ? "php" : $basepath;
+              $mode = $basepath === "_super" || ($basepath === "model") ? "php" : $basepath;
               foreach ($dirs as $dir) {
                 //if ( $files = \bbn\File\Dir::getFiles($dir) ){
                 if ($files = $this->fs->getFiles($dir)) {
@@ -1947,7 +1947,7 @@ class Ide
             if ($files = $this->fs->getFiles($path)) {
               if (!empty($files)) {
                 $basepath = X::basename($path);
-                $mode = ($basepath === "_ctrl") || ($basepath === "model") ? "php" : $basepath;
+                $mode = ($basepath === "_super") || ($basepath === "model") ? "php" : $basepath;
                 foreach ($files as $file) {
                   $filename  = Str::fileExt($file, true)[0];
                   $file_name = $filename;
@@ -2001,7 +2001,7 @@ class Ide
       else {
         //if we want you to return all the backup information useful to process and make other posts
         $listDir = $this->fs->getDirs($path);
-        if (!empty($listDir) && !isset($check_ctrl_files)) {
+        if (!empty($listDir) && !isset($check_super_files)) {
           foreach ($listDir as $val) {
             array_push(
               $backups,
@@ -2015,14 +2015,14 @@ class Ide
             );
           }
 
-          //If the _ctrl backup folder exists, then it will be added to the list.
-          if ($check_ctrl === true) {
-            array_push($backups, $history_ctrl);
+          //If the _super backup folder exists, then it will be added to the list.
+          if ($check_super === true) {
+            array_push($backups, $history_super);
           }
         } //If we pass a path that contains the specific backups of a type and is not set "$all" then the backup of with useful information for any other posts returns.
         else {
-          //If we are requesting ctrl backup files then we give it the right path and "$check_ctrl_files" is a variable that makes us understand whether or not we ask for backup files of "_ctrl".
-          if (isset($check_ctrl_files) && ($check_ctrl_files === true)) {
+          //If we are requesting ctrl backup files then we give it the right path and "$check_super_files" is a variable that makes us understand whether or not we ask for backup files of "_super".
+          if (isset($check_super_files) && ($check_super_files === true)) {
             $url  = $copy_url;
             $path = self::$backup_path . $url;
           }
@@ -2031,7 +2031,7 @@ class Ide
           if ($files = $this->fs->getFiles($path)) {
             if (!empty($files)) {
               $basepath = X::basename($path);
-              $mode = ($basepath === "_ctrl") || ($basepath === "model") ? "php" : $basepath;
+              $mode = ($basepath === "_super") || ($basepath === "model") ? "php" : $basepath;
               foreach ($files as $file) {
                 if (Str::fileExt($file, true)[1] !== 'json') {
                   $filename  = Str::fileExt($file, true)[0];
@@ -2089,12 +2089,12 @@ class Ide
       }
     }
 
-    //If you add the "_ctrl " backup, enter it to the rest of the date.
-    if (!empty($history_ctrl) && !empty($backups) && ($all === true) && ($check_ctrl === false)) {
-      array_push($backups, $history_ctrl);
-    } //if you have only the backups of the super _ctrl and no other, it has been differentiated because of different paths
-    elseif (!empty($history_ctrl) && empty($backups) && $check_ctrl === true) {
-      array_push($backups, $history_ctrl);
+    //If you add the "_super " backup, enter it to the rest of the date.
+    if (!empty($history_super) && !empty($backups) && ($all === true) && ($check_super === false)) {
+      array_push($backups, $history_super);
+    } //if you have only the backups of the super _super and no other, it has been differentiated because of different paths
+    elseif (!empty($history_super) && empty($backups) && $check_super === true) {
+      array_push($backups, $history_super);
     }
 
     return $backups;
@@ -2739,7 +2739,7 @@ class Ide
    */
   private function _superior_sctrl(string $tab, string $path = '')
   {
-    if (($pos = strpos($tab, '_ctrl')) > -1) {
+    if (($pos = strpos($tab, '_super')) > -1) {
       if (($pos === 0)) {
         $path = '';
       } else {
@@ -2758,7 +2758,7 @@ class Ide
       }
 
       // Fix the tab's name
-      $tab = '_ctrl';
+      $tab = '_super';
     }
 
     return [
@@ -2843,7 +2843,7 @@ class Ide
           $new .= (($cfg['new_path'] === 'mvc/') ? '' : $cfg['new_path']) . (substr($cfg['new_path'], -1) !== '/' ? '/' : '');
         }
 
-        if (($tab['url'] !== '_ctrl') && !empty($tab['extensions'])) {
+        if (($tab['url'] !== '_super') && !empty($tab['extensions'])) {
           $old   .= $cfg['name'];
           $new   .= $cfg['new_name'] ?? '';
           $ext_ok = false;
@@ -3179,8 +3179,8 @@ class Ide
    */
   private function _get_path_backup(array $file)
   {
-    //if in the case of a rescue of _ctrl
-    if ($file['tab'] === "_ctrl") {
+    //if in the case of a rescue of _super
+    if ($file['tab'] === "_super") {
       if (isset($file['ssctrl']) && is_numeric($file['ssctrl'])) {
         $backup_path = self::$backup_path . $file['repository']['path'] . '/' . $file['filePath'] . '/' . $file['tab'] . '/';
       }

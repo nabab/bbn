@@ -1001,6 +1001,10 @@ class Permissions extends bbn\Models\Cls\Basic
     return $num;
   }
 
+  public function getOptionRoot()
+  {
+    return $this->opt->fromCode('access', 'permissions');
+  }
 
   /**
    * update All
@@ -1284,7 +1288,7 @@ class Permissions extends bbn\Models\Cls\Basic
   {
     if (!empty($a['num'])
       || ((substr($a['name'], -4) === '.php')
-          && (X::basename($a['name']) !== '_ctrl.php'))
+          && (X::basename($a['name']) !== '_super.php'))
     ) {
       if (!$this->isAuthorizedRoute($a['path'])) {
         return true;

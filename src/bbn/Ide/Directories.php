@@ -151,7 +151,7 @@ class Directories {
    * @return array
    */
   private function superiorSctrl($tab, $path=''){
-    if ( ($pos = strpos($tab, '_ctrl')) ){
+    if ( ($pos = strpos($tab, '_super')) ){
       // Fix the right path
       $bits = explode('/', $path);
       $count = \strlen(substr($tab, 0, $pos));
@@ -163,7 +163,7 @@ class Directories {
         $path = implode('/', $bits).(!empty($bits) ? '/' : '');
       }
       // Fix the tab's name
-      $tab = '_ctrl';
+      $tab = '_super';
     }
     return [
       'tab' => $tab,
@@ -900,7 +900,7 @@ class Directories {
       if ( $session = bbn\User\Session::getInstance() ){
         $id_user = $session->get('user', 'id');
       }
-      // We delete the file if code is empty and we aren't in a _ctrl file
+      // We delete the file if code is empty and we aren't in a _super file
       if ( empty($code) ){
         $bits = explode('/', $file);
         if ( !empty($dir['tabs']) && !empty($bits) ){
@@ -1082,7 +1082,7 @@ class Directories {
           $dir_perms = function($fd) use(&$dir_perms){
             foreach ( $fd as $f ){
               if ( is_file($f) &&
-                (X::basename($f) !== '_ctrl.php')
+                (X::basename($f) !== '_super.php')
               ){
                 self::createPermByReal($f);
               }

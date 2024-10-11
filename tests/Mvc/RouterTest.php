@@ -968,7 +968,7 @@ class RouterTest extends TestCase
     $method           = $this->getNonPublicMethod('_set_known');
 
     $this->createDir('mvc/public/path');
-    $this->createFile('_ctrl.php', '', 'mvc/public/path');
+    $this->createFile('_super.php', '', 'mvc/public/path');
 
     $result = $method->invoke($this->router, $data = [
       'mode' => 'public',
@@ -978,7 +978,7 @@ class RouterTest extends TestCase
 
     $known = $this->getNonPublicProperty('_known');
 
-    $data = array_merge($data, ['checkers' => ["{$testing_dir_path}mvc/public/path/_ctrl.php"]]);
+    $data = array_merge($data, ['checkers' => ["{$testing_dir_path}mvc/public/path/_super.php"]]);
 
     $this->assertSame($data, $result);
     $this->assertTrue(isset($known['public']['path']));
@@ -999,8 +999,8 @@ class RouterTest extends TestCase
 
     $this->createDir('mvc/public/plugin/path/to');
     $this->createDir('plugin/path/to/src/mvc/public');
-    $this->createFile('_ctrl.php', '', 'mvc/public/plugin/path/to');
-    $this->createFile('_ctrl.php', '', 'plugin/path/to/src/mvc/public');
+    $this->createFile('_super.php', '', 'mvc/public/plugin/path/to');
+    $this->createFile('_super.php', '', 'plugin/path/to/src/mvc/public');
 
     $result = $method->invoke($this->router, $data = [
       'mode' => 'public',
@@ -1013,8 +1013,8 @@ class RouterTest extends TestCase
 
     $expected = array_merge($data, [
       'checkers' => [
-        "{$testing_dir_path}plugin/path/to/src/mvc/public/_ctrl.php",
-        "{$testing_dir_path}mvc/public/plugin/path/to/_ctrl.php",
+        "{$testing_dir_path}plugin/path/to/src/mvc/public/_super.php",
+        "{$testing_dir_path}mvc/public/plugin/path/to/_super.php",
       ]
     ]);
 

@@ -51,9 +51,9 @@ class Actions
           // type of file part of the MVC
           foreach ($dirs['files'] as $f) {
             if ($f['url'] === end($args)) {
-              if ($f['url'] === '_ctrl') {
+              if ($f['url'] === '_super') {
                 $arg = \array_slice($args, 0, \count($args) - 2);
-                $new_path = \count($arg) > 0 ? implode("/", $arg) . '/_ctrl.' . $f['ext'] : '_ctrl.' . $f['ext'];
+                $new_path = \count($arg) > 0 ? implode("/", $arg) . '/_super.' . $f['ext'] : '_super.' . $f['ext'];
               }
               // If MVC file is not controller and no content, we delete the file
               else if (empty($data['code']) && ($f['url'] !== 'php')) {
@@ -177,7 +177,7 @@ class Actions
       if ($type === 'file') {
         if ($this->isMvc($dirs)) {
           $tab_url_mvc = $data['dir'] . '/' . $data['path'];
-          if ($data['name'] != '_ctrl') {
+          if ($data['name'] != '_super') {
             foreach ($cfg[$data['dir']]['files'] as $f) {
               $p = $f['fpath'] . substr($data['path'], 0, -3) . $f['ext'];
               if (file_exists($p) && !\in_array($p, $delete)) {
