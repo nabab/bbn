@@ -291,23 +291,29 @@ class History
       ($dbc = self::_get_database()) &&
       ($id_table = $dbc->tableId($table, self::$db->getCurrent()))
     ){
-      $tab = $db->escape(self::$table);
-      $tab_uids = $db->escape(self::$table_uids);
-      $uid = $db->cfn('bbn_uid', self::$table_uids, true);
-      $id_tab = $db->cfn('bbn_table', self::$table_uids, true);
-      $uid2 = $db->cfn('uid', self::$table, true);
-      $chrono = $db->cfn('tst', self::$table, true);
       $order = $dir && (Str::changeCase($dir, 'lower') === 'asc') ? 'ASC' : 'DESC';
-      $sql = <<< MYSQL
-SELECT DISTINCT($uid)
-FROM $tab_uids
-  JOIN $tab
-    ON $uid = $uid2
-WHERE $id_tab = ? 
-ORDER BY $chrono $order
-LIMIT $start, $limit
-MYSQL;
-      return $db->getColArray($sql, hex2bin($id_table));
+      return $db->getColumnValues([
+        'table' => self::$table_uids,
+        'fields' => ['bbn_uid'],
+        'join' => [
+          [
+            'table' => self::$table,
+            'on' => [
+              'conditions' => [[
+                'field' => 'bbn_uid',
+                'exp' => 'uid'
+              ]]
+            ]
+          ]
+        ],
+        'where' => ['bbn_table' => $id_table],
+        'order' => [[
+          'field' => 'tst',
+          'dir' => $order
+        ]],
+        'start' => $start,
+        'limit' => $limit
+      ]);
     }
     return [];
   }
@@ -458,16 +464,12 @@ MYSQL;
       ($dbc = self::_get_database()) &&
       ($db = self::_get_db())
     ){
-      $tab = $db->escape(self::$table);
-      $line = $db->escape('uid');
-      $operation = $db->escape('opr');
-      $chrono = $db->escape('tst');
       if ($column) {
         $where = [
           'conditions' => [
             [
-              'field' => $id_col,
-              'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $id_table)
+              'field' => 'col',
+              'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $table)
             ]
           ]
         ];
@@ -476,19 +478,19 @@ MYSQL;
         $where = $w;
       }
 
-      return $db->rselectAll($tab, [], [
+      return $db->rselect(self::$table, [], [
         'conditions' => [
           [
-            'field' => $line,
-            'value' => hex2bin($id)
+            'field' => 'uid',
+            'value' => $id
           ],
           $where,
           [
-            'field' => $operation,
+            'field' => 'opr',
             'value' => 'UPDATE'
           ],
           [
-            'field' => $chrono,
+            'field' => 'tst',
             'operator' => '<',
             'value' => $date
           ]
