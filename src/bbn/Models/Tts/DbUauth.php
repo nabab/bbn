@@ -189,7 +189,7 @@ trait DbUauth
 
   }
 
-  protected function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
+  public function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
   {
     $this->dbUauthInitCheck();
     $arch = $this->class_cfg['arch']['uauth'];

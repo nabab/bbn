@@ -286,7 +286,6 @@ class Session
 
         if (defined('BBN_SESS_LIFETIME')) {
           ini_set('session.gc_maxlifetime', BBN_SESS_LIFETIME);
-          ini_set('session.cookie_lifetime', BBN_SESS_LIFETIME);
         }
       }
 

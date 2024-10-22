@@ -192,11 +192,11 @@ trait DbTrait
       if (!empty($arc['id'])) {
         $refs = $this->db->findReferences($this->db->cfn($arc['id'], $table));
         foreach ($refs as $ref) {
-          [$db, $table, $col] = X::split($ref, '.');
-          $model = $this->db->modelize($table);
+          [$db, $tab, $col] = X::split($ref, '.');
+          $model = $this->db->modelize($tab);
           $this->dbTraitRelations[$table][] = [
             'db' => $db,
-            'table' => $table,
+            'table' => $tab,
             'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,
             'col' => $col,
             'model' => $model

@@ -246,7 +246,11 @@ trait DbActions
       $res = [];
       foreach ($this->dbTraitGetTableRelations($table) as $rel) {
         if ($all = $db->getColumnValues($rel['table'], $rel['primary'], [$rel['col'] => $id])) {
-          $res[$rel['table']] = $all;
+          $res[$rel['table']] = [
+            'col' => $rel['col'],
+            'primary' => $rel['primary'],
+            'values' => $all
+          ];
         }
       }
 

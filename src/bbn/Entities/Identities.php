@@ -466,6 +466,22 @@ class Identities extends DbCls
     return $ok;
   }
 
+  public function getTableRelations(string $table = null): array
+  {
+    return $this->dbTraitGetTableRelations($table);
+
+  }
+  public function getRelations($id): ?array
+  {
+    return $this->dbTraitGetRelations($id);
+  }
+
+
+  public function delete($id, $force): bool
+  {
+    return $this->dbTraitDelete($id);
+  }
+
   public function setEmail($id, $email): ?string
   {
     $info = $this->getInfo($id);

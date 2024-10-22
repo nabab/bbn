@@ -224,7 +224,7 @@ class Entity
     return $this->entities;
   }
 
-  protected function getLink(string $linkCls): ?Link
+  public function getLink(string $linkCls): ?Link
   {
     return $this->entities->getLink($linkCls, $this);
   }

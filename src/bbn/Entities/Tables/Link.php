@@ -146,7 +146,7 @@ class Link extends EntityTable
   public function get($id = null): ?array
   {
     if ($this->cfg['single']) {
-      $res = $this->dbTraitRselectAll([]); 
+      $res = $this->dbTraitRselectAll([]);
       return $res ? $res[0] : null;
     }
 

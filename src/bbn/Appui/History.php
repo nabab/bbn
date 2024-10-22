@@ -365,7 +365,11 @@ MYSQL;
       ($dbc = self::_get_database()) &&
       ($id_table = $dbc->tableId($table))
     ){
-      self::disable();
+      $isDisabled = !self::$enabled;
+      if (!$isDisabled) {
+        self::disable();
+      }
+
       $tab = $db->escape(self::$table);
       $tab_uids = $db->escape(self::$table_uids);
       $uid = $db->cfn('bbn_uid', self::$table_uids);
@@ -375,17 +379,36 @@ MYSQL;
       $usr = $db->cfn('usr', self::$table);
       $chrono = $db->cfn('tst', self::$table);
       $where = [
-        $uid => $id,
-        $id_tab => $id_table,
-        [$chrono, '>', $date]
+        'logic' => 'AND',
+        'conditions' => [
+          [
+            'field' => $uid,
+            'operator' => '=',
+            'value' => $line
+          ],
+          [
+            'field' => $id_tab,
+            'operator' => '=',
+            'value' => $id_table
+          ],
+          [
+            'field' => $chrono,
+            'operator' => '>',
+            'value' => $date
+          ]
+        ]
       ];
-      if ( $column ){
-        $where[$id_col] = Str::isUid($column) ? $column : $dbc->columnId($column, $id_table);
+
+      if ($column) {
+        $where['conditions'][] = [
+          'field' => $id_col,
+          'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $id_table)
+        ];
       }
-      else {
-        $w = self::_get_table_where($table);
-        //$where = $id_col." != UNHEX('$id_column') " . ($w ?: '');
+      else if ($w = self::_getTableWhere($table)) {
+        $where['conditions'][] = $w;
       }
+
       $res = $db->rselect([
         'tables' => [$tab_uids],
         'fields' => [
@@ -409,9 +432,14 @@ MYSQL;
         'where' => $where,
         'order' => [$chrono => 'ASC']
       ]);
-      self::enable();
+
+      if (!$isDisabled) {
+        self::enable();
+      }
+
       return $res;
     }
+
     return null;
   }
 
@@ -434,27 +462,40 @@ MYSQL;
       $line = $db->escape('uid');
       $operation = $db->escape('opr');
       $chrono = $db->escape('tst');
-      if ( $column ){
-        $where = $db->escape('col').
-          ' = UNHEX("'.$db->escapeValue(
-            Str::isUid($column) ? $column : $dbc->columnId($column, $table)
-          ).'")';
+      if ($column) {
+        $where = [
+          'conditions' => [
+            [
+              'field' => $id_col,
+              'value' => Str::isUid($column) ? $column : $dbc->columnId($column, $id_table)
+            ]
+          ]
+        ];
       }
-      else{
-        $where = self::_get_table_where($table);
+      else if ($w = self::_getTableWhere($table)) {
+        $where = $w;
       }
-      $sql = <<< MYSQL
-SELECT *
-FROM $tab
-WHERE $line = ?
-AND ($where)
-AND $operation LIKE 'UPDATE'
-AND $chrono < ?
-ORDER BY $chrono DESC
-LIMIT 1
-MYSQL;
-      return $db->getRow($sql, hex2bin($id), $date);
+
+      return $db->rselectAll($tab, [], [
+        'conditions' => [
+          [
+            'field' => $line,
+            'value' => hex2bin($id)
+          ],
+          $where,
+          [
+            'field' => $operation,
+            'value' => 'UPDATE'
+          ],
+          [
+            'field' => $chrono,
+            'operator' => '<',
+            'value' => $date
+          ]
+        ]
+      ]);
     }
+
     return null;
   }
 
@@ -503,7 +544,11 @@ MYSQL;
       ($cfg = self::getTableCfg($table))
     ){
       // Time is after last modification: the current is given
-      self::disable();
+      $isDisabled = !self::$enabled;
+      if (!$isDisabled) {
+        self::disable();
+      }
+
       if ( $when >= time() ){
         $r = $db->rselect($table, $columns, [
           $cfg['primary'] => $id
@@ -541,9 +586,14 @@ MYSQL;
           }
         }
       }
-      self::enable();
+
+      if (!$isDisabled) {
+        self::enable();
+      }
+
       return $r;
     }
+
     return null;
   }
 
@@ -577,25 +627,31 @@ MYSQL;
    */
   public static function getCreation(string $table, string $id): ?array
   {
+    $r = null;
     if (
       ($db = self::_get_db()) &&
       ($cfg = self::getTableCfg($table)) &&
       ($id_col = self::getIdColumn($cfg['primary'], $table))
     ){
-      self::disable();
-      if ( $r = $db->rselect(self::$table, ['date' => 'tst', 'user' => 'usr'], [
+      $isDisabled = !self::$enabled;
+      if (!$isDisabled) {
+        self::disable();
+      }
+
+      $r = $db->rselect(self::$table, ['date' => 'tst', 'user' => 'usr'], [
         'uid' => $id,
         'col' => $id_col,
         'opr' => 'INSERT'
       ], [
         'tst' => 'DESC'
-      ]) ){
+      ]);
+
+      if (!$isDisabled) {
         self::enable();
-        return $r;
       }
-      self::enable();
     }
-    return null;
+
+    return $r;
   }
 
   /**
@@ -618,18 +674,18 @@ MYSQL;
           'tst' => 'DESC'
         ]);
       }
-      else if ( !$column && ($where = self::_get_table_where($table)) ){
-        $tab = $db->escape(self::$table);
-        $chrono = $db->escape('tst');
-        $line = $db->escape('uid');
-        $sql = <<< MYSQL
-SELECT $chrono
-FROM $tab
-WHERE $line = ?
-AND ($where)
-ORDER BY $chrono DESC
-MYSQL;
-        return $db->getOne($sql, hex2bin($id));
+      elseif ( !$column && ($where = self::_getTableWhere($table)) ){
+        return $db->selectOne(self::$table, 'tst', [
+          'conditions' => [
+            [
+              'field' => 'uid',
+              'value' => $id
+            ],
+            $where
+          ]
+        ], [
+          'tst' => 'DESC'
+        ]);
       }
     }
     return null;
@@ -708,80 +764,51 @@ MYSQL;
    * @param string $id
    * @return array
    */
-  public static function getFullHistory(string $table, string $id): array
+  public static function getFullHistory(string $table, string $id, string $column = null): array
   {
-    $r = [];
-    if (
-      ($db = self::_get_db()) &&
-      ($where = self::_get_table_where($table))
-    ){
-      $tab = $db->escape(self::$table);
-      $line = $db->escape('uid');
-      $chrono = $db->escape('tst');
-      $sql = <<< MYSQL
-SELECT *
-FROM $tab
-WHERE $line = ?
-AND ($where)
-ORDER BY $chrono ASC
-MYSQL;
-      $r = $db->getRows($sql, hex2bin($id));
+    $res = [];
+    if ($db = self::_get_db()) {
+      $cfg = self::getTableCfg($table);
+      $fields = [];
+      foreach ($cfg['fields'] as $name => $f) {
+        $fields[$f['id_option']] = $name;
+      }
+
+      $where =  [$cfg['primary'] => $id];
+      if ($column) {
+        $where['col'] = self::$database_obj->columnId($column, $table);
+      }
+
+      $origin = $db->rselect($table, [], $where);
+      $all = $db->rselectAll(self::$table, [], ['uid' => $id], ['tst' => 'ASC']);
+      while (count($all)) {
+        $row = array_shift($all);
+        $ele = [
+          'column' => $fields[$row['col']],
+          'id_column' => $row['col'],
+          'date' => $row['tst'],
+          'user' => $row['usr'],
+          'value' => $row['ref'] ?: $row['val'],
+          'operation' => $row['opr'],
+        ];
+        if ($row['opr'] === 'UPDATE') {
+          $ele['old'] = $ele['value'];
+          $next = X::getRow($all, ['col' => $row['col']]);
+          $ele['new'] = $next ? ($next['ref'] ?: $next['val']) : $origin[$ele['column']];
+        }
+
+        $res[] = $ele;
+      }
     }
-    return $r;
+
+    return $res;
   }
 
   public static function getColumnHistory(string $table, string $id, string $column)
   {
-    if ( 
-      self::check($table) && 
-      ($primary = self::$db->getPrimary($table)) &&
-      ($modelize = self::getTableCfg($table))
-    ){
-      if ( Str::isUid($column) ){
-        $column = X::find($modelize['fields'], ['id_option' => strtolower($column)]);
-      }
-      $current = self::$db->selectOne($table, $column, [
-        $primary[0] => $id
-      ]);
-      $val = $modelize['fields'][$column] === 'binary' ? 'ref' : 'val';
-      $hist = self::getHistory($table, $id, $column);
-      $r = [];
-      if ( $crea = self::getCreation($table, $id) ){
-        if ( !empty($hist['upd']) ){
-          $hist['upd'] = array_reverse($hist['upd']);
-          foreach ( $hist['upd'] as $i => $h ){
-            if ( $i === 0 ){
-              $r[] = [
-                'date' => $crea['date'],
-                $val => $h[$val],
-                'user' => $crea['user']
-              ];
-            }
-            else{
-              $r[] = [
-                'date' => $hist['upd'][$i-1]['date'],
-                $val => $h[$val],
-                'user' => $hist['upd'][$i-1]['user']
-              ];
-            }
-          }
-          $r[] = [
-            'date' => $hist['upd'][$i]['date'],
-            $val => $current,
-            'user' => $hist['upd'][$i]['user']
-          ];
-        }
-        else if (!empty($hist['ins']) ){
-          $r[0] = [
-            'date' => $hist['ins'][0]['date'],
-            $val => $current,
-            'user' => $hist['ins'][0]['user']
-          ];
-        }
-      }
-      return $r;
-    }
+    return self::getFullHistory($table, $id, $column);
   }
+
 
   /**
    * Gets all information about a given table
@@ -969,7 +996,11 @@ MYSQL;
       ];
     }
 
-    self::disable();
+    $isDisabled = !self::$enabled;
+    if (!$isDisabled) {
+      self::disable();
+    }
+
     $num = 0;
     foreach ($ids as $id) {
       foreach ($relations as $ref) {
@@ -978,23 +1009,26 @@ MYSQL;
           [$ref['column'] => $source],
           [$ref['column'] => $id]
         );
-    }
+      }
     
       $num += (int)$db->update(
-      self::$table,
-      ['uid' => $source],
-        [
-        'uid' => $id,
-        'opr' => ['UPDATE', 'RESTORE', 'DELETE']
-      ]
-    );
-    $num += (int)$db->delete(
-      self::$table_uids,
-      ['bbn_uid' => $id]
+        self::$table,
+        ['uid' => $source],
+          [
+          'uid' => $id,
+          'opr' => ['UPDATE', 'RESTORE', 'DELETE']
+        ]
+      );
+      $num += (int)$db->delete(
+        self::$table_uids,
+        ['bbn_uid' => $id]
       );
     }
 
-    self::enable();
+    if (!$isDisabled) {
+      self::enable();
+    }
+
     return (bool)$num;
   }
 
@@ -1192,7 +1226,12 @@ MYSQL;
                   if ( $exit ){
                     continue;
                   }
-                  self::disable();
+
+                  $isDisabled = !self::$enabled;
+                  if (!$isDisabled) {
+                    self::disable();
+                  }
+
                   if ( $tmp = $db->selectOne([
                     'tables' => [$table],
                     'fields' => [$s['primary']],
@@ -1211,10 +1250,16 @@ MYSQL;
                   ]) ){
                     $primary_value = $tmp;
                     $primary_defined = true;
-                    self::enable();
+                    if (!$isDisabled) {
+                      self::enable();
+                    }
+
                     break;
                   }
-                  self::enable();
+
+                  if (!$isDisabled) {
+                    self::enable();
+                  }
                 }
               }
             }
@@ -1266,7 +1311,7 @@ MYSQL;
                   }
                 }
               }
-              self::disable();
+
               if ( $cfg['value'] = self::$db->update(self::$table_uids, ['bbn_active' => 1], [
                 ['bbn_uid', '=', $primary_value]
               ]) ){
@@ -1286,10 +1331,17 @@ MYSQL;
                 ];
                 self::$db->setLastInsertId($primary_value);
               }
-              self::enable();
+
+              if (!$isDisabled) {
+                self::enable();
+              }
             }
             else {
-              self::disable();
+              $isDisabled = !self::$enabled;
+              if (!$isDisabled) {
+                self::disable();
+              }
+
               if ( $primary_defined && !self::$db->count($table, [$s['primary'] => $primary_value]) ){
                 $primary_defined = false;
               }
@@ -1304,7 +1356,10 @@ MYSQL;
                 ];
                 self::$db->setLastInsertId($primary_value);
               }
-              self::enable();
+
+              if (!$isDisabled) {
+                self::enable();
+              }
             }
             break;
           case 'UPDATE':
@@ -1386,8 +1441,12 @@ MYSQL;
               }
             }
             else {
-              self::disable();
-foreach ($s['unique'] as $un) {
+              $isDisabled = !self::$enabled;
+              if (!$isDisabled) {
+                self::disable();
+              }
+
+              foreach ($s['unique'] as $un) {
                 $old = self::$db->selectOne($table, $un, [$s['primary'] => $primary_where]);
                 self::$db->update($table, [$un => null], [$s['primary'] => $primary_where]);
                 $cfg['history'][] = [
@@ -1404,7 +1463,10 @@ foreach ($s['unique'] as $un) {
                 'bbn_uid' => $primary_where
               ]);
               //var_dump("HIST", $primary_where);
-              self::enable();
+              if (!$isDisabled) {
+                self::enable();
+              }
+
               if ( $cfg['value'] ){
                 $cfg['trig'] = 1;
                 // And we insert into the history table
@@ -1479,8 +1541,12 @@ $h['chrono'] = $time;
       // Recording the last ID
       $id = $db->lastId();
       $db->disableLast();
-      self::disable();
-      if ( !array_key_exists('old', $cfg) ){
+      $isDisabled = !self::$enabled;
+      if (!$isDisabled) {
+        self::disable();
+      }
+
+      if (!array_key_exists('old', $cfg)) {
         $cfg['ref'] = null;
         $cfg['val'] = null;
       }
@@ -1495,6 +1561,7 @@ $h['chrono'] = $time;
         $cfg['ref'] = null;
         $cfg['val'] = $cfg['old'];
       }
+
       // New row in the history table
       if ( $res = $db->insert(self::$table, [
         'opr' => $cfg['operation'],
@@ -1508,8 +1575,12 @@ $h['chrono'] = $time;
         // Set back the original last ID
         $db->setLastInsertId($id);
       }
+
       $db->enableLast();
-      self::enable();
+      if (!$isDisabled) {
+        self::enable();
+      }
+
       return $res;
     }
     return 0;
@@ -1520,25 +1591,31 @@ $h['chrono'] = $time;
    * @param string $table
    * @return string|null
    */
-  private static function _get_table_where(string $table): ?string
+  private static function _getTableWhere(string $table): ?array
   {
     if (
       Str::checkName($table) &&
       ($db = self::_get_db()) &&
       ($database_obj = self::_get_database()) &&
       ($model = $database_obj->modelize($table))
-    ){
-      $col = $db->escape('col');
-      $where_ar = [];
+    ) {
+      $where_ar = [
+        'logic' => 'OR',
+        'conditions' => []
+      ];
       foreach ( $model['fields'] as $k => $f ){
         if ( !empty($f['id_option']) ){
-          $where_ar[] = $col.' = UNHEX("'.$db->escapeValue($f['id_option']).'")';
+          $where_ar['conditions'][] = [
+            'field' => 'col',
+            'operator' => '=',
+            'value' => $f['id_option']
+          ];
         }
       }
-      if ( \count($where_ar) ){
-        return implode(' OR ', $where_ar);
-      }
+
+      return $where_ar;
     }
+
     return null;
   }
 
