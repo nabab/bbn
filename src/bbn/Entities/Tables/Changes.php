@@ -27,7 +27,9 @@ class Changes extends EntityTable
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_changes',
     'tables' => [
-      'entities_changes' => 'bbn_entities_changes'
+      'entities_changes' => 'bbn_entities_changes',
+      'files' => 'bbn_tmp_files',
+      'links' => 'bbn_entities_changes_files'
     ],
     'arch' => [
       'entities_changes' => [
@@ -38,6 +40,18 @@ class Changes extends EntityTable
         'notified' => 'notified',
         'id_member_auth' => 'id_member_auth',
         'cfg' => 'cfg'
+      ],
+      'files'  => [
+        'id' => 'id',
+        'files' => 'files',
+        'type_doc' => 'type_doc',
+        'labels' => 'labels',
+        'date_added' => 'date_added'
+      ],
+      'links' => [
+        'id_link' => 'id_link',
+        'id_file' => 'id_file',
+        'mandatory' => 'mandatory'
       ]
     ]
   ];
@@ -163,20 +177,21 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)) {
       $filesLinked = $this->get_files_link($id);
+      $cCfg = $this->getClassCfg();
       foreach ($filesLinked as $fl) {
-        if (($f = $this->_get_file([$this->db->cfn('id', static::$table_files) => $fl['id_file']]))
+        if (($f = $this->_get_file([$this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']) => $fl[$cCfg['arch']['files']['id_file']]]))
           && ((string)$f['code'] === $code)
         ) {
           $data = [
-            'files' => empty($f['files']) ? [] : \json_decode($f['files'], true),
-            'date_added' => $f['date_added'] ?: date('Y-m-d H:i:s')
+            $cCfg['arch']['files']['files'] => empty($f['files']) ? [] : \json_decode($f[$cCfg['arch']['files']['files']], true),
+            $cCfg['arch']['files']['date_added'] => $f[$cCfg['arch']['files']['date_added']] ?: date('Y-m-d H:i:s')
           ];
-          if (!\in_array($file, $data['files'], true)) {
-            $data['files'][] = $file;
+          if (!\in_array($file, $data[$cCfg['arch']['files']['files']], true)) {
+            $data[$cCfg['arch']['files']['files']][] = $file;
           }
 
-          $data['files'] = json_encode($data['files']);
-          return $this->update_file($f['id'], $data);
+          $data[$cCfg['arch']['files']['files']] = json_encode($data[$cCfg['arch']['files']['files']]);
+          return $this->update_file($f[$cCfg['arch']['files']['id']], $data);
         }
       }
     }
@@ -191,15 +206,16 @@ class Changes extends EntityTable
    */
   public function reset_file_by_type(string $id_type): bool
   {
+    $cCfg = $this->getClassCfg();
     if (($file = $this->get_file_by_type($id_type))
       && $this->update_file(
-        $file['id'], [
-          'files' => null,
-          'date_added' => null
+        $file[$cCfg['arch']['files']['id']], [
+          $cCfg['arch']['files']['files'] => null,
+          $cCfg['arch']['files']['date_added'] => null
         ]
       )
     ) {
-      foreach ($this->get_ids_by_file($file['id']) as $id){
+      foreach ($this->get_ids_by_file($file[$cCfg['arch']['files']['id']]) as $id){
         $this->_set_state($id);
       }
 
@@ -379,15 +395,13 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)
       && $this->check()
-      && ($change = $this->db->rselect(
-        static::$table, [], [
-          'id' => $id,
-          'state' => static::$states['untreated']
-        ]
-      ))
-      && ($change['id_entity'] == $this->getId())
-      && !empty($change['cfg'])
-      && ($cfg = json_decode($change['cfg'], true))
+      && ($change = $this->db->rselect($this->class_table, [], [
+        $this->fields['id'] => $id,
+        $this->fields['state'] => static::$states['untreated']
+      ]))
+      && ($change[$this->fields['id_entity']] === $this->getId())
+      && !empty($change[$this->fields['cfg']])
+      && ($cfg = json_decode($change[$this->fields['cfg']], true))
       && !empty($cfg['table'])
       && !empty($cfg['type'])
     ) {
@@ -415,7 +429,7 @@ class Changes extends EntityTable
                 'value' => $id_sub
               ];
             }
-            $id_sub2   = $this->tiers($id_sub, $subdata, $cfg['type'], true);
+            $id_sub2   = $this->_identity($id_sub, $subdata, $cfg['type'], true);
             break;
           case 'lieux':
             $field_sub = 'id_address';
@@ -427,7 +441,7 @@ class Changes extends EntityTable
               ];
             }
 
-            $id_sub2 = $this->lieu($id_sub, $subdata, $cfg['type'], true);
+            $id_sub2 = $this->_address($id_sub, $subdata, $cfg['type'], true);
             break;
         }
 
@@ -455,205 +469,9 @@ class Changes extends EntityTable
       }
 
       switch ($cfg['table']){
-        case 'adherents':
-        case 'finances':
-        case 'formation':
-          if (!$this->entity->update($data)) {
-            $error = _('Error during the adherent updating.');
-          }
-          break;
-
-        case 'clotures':
-          $nextCloture = $this->entity->getNextCloture();
-          if ($nextCloture !== $data['next_cloture']) {
-            $y = substr($data['next_cloture'], 0, 4);
-            $m = substr($data['next_cloture'], 5, 2);
-            if (!($idCloture = $this->entity->getNextClotureId())
-                || ($nextCloture <= date('Y-m-d'))
-                || !($this->entity->updateCloture($idCloture, $y, $m))
-            ) {
-              $error = _("Impossible de mettre à jour la clôture");
-            }
-          }
-          break;
-
-        case 'marques':
-          switch ($cfg['type']){
-            case 'insert':
-              if (!$this->entity->marques()->update($data)) {
-                $error = _('Error during the marque inserting.');
-              }
-              break;
-            case 'update':
-              if (!$this->db->update($table, $data, ['id' => $cfg['id']])) {
-                $error = _('Error during the marque updating.');
-              }
-              break;
-            case 'delete':
-              if (!$this->entity->marques()->delete($cfg['id'])) {
-                $error = _('Error during the marque deleting.');
-              }
-              break;
-          }
-
-          break;
-
-        case 'actionnaires':
-          if (empty($data['id_identity']) && !empty($cfg['id'])) {
-            $data['id_identity'] = $this->db->selectOne('bbn_entities_links', 'id_identity', ['id' => $cfg['id']]);
-          }
-
-          switch ($cfg['type']){
-            case 'insert':
-              if (!empty($data['id_identity'])
-                && !empty($data['parts'])
-              ) {
-                if (!$this->entity->actionnaire()->insert($data)) {
-                  $error = _('Error during the actionnaire inserting.');
-                }
-              }
-              else {
-                $error = _('Error during the actionnaire inserting.');
-              }
-              break;
-            case 'update':
-              if (!empty($cfg['id']) && !empty($data['id_identity'])) {
-                $toUpd = X::mergeArrays([
-                  'id' => $cfg['id']
-                ], $data);
-                if (!isset($toUpd['parts'])) {
-                  $toUpd['parts'] = $this->db->selectOne(
-                    'bbn_entities_links',
-                    'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.parts"))',
-                    ['id' => $cfg['id']]
-                  );
-                }
-                if (!$this->entity->actionnaire()->update($toUpd)) {
-                  $error = _('Error during the representant updating.');
-                }
-              }
-              else {
-                $error = _('Error during the representant updating.');
-              }
-              break;
-            case 'delete':
-              if (!empty($data['id_identity'])
-                && !$this->entity->links()->actionnaireDelete($data['id_identity'])
-              ) {
-                $error = _('Error during the actionnaire deleting.');
-              }
-              break;
-          }
-
-          break;
-
-        case 'representants':
-          switch ($cfg['type']){
-            case 'insert':
-              if (!empty($data['id_identity'])) {
-                $toIns = [
-                  'id_identity' => $data['id_identity']
-                ];
-                if (!empty($data['representant'])) {
-                  $toIns['representant'] = $data['representant'];
-                }
-
-                if (!$this->entity->representant()->insert($toIns)) {
-                  $error = _('Error during the representant inserting.');
-                }
-              }
-              else {
-                $error = _('Error during the representant inserting.');
-              }
-              break;
-            case 'update':
-              if (!empty($cfg['id']) && !empty($id_sub)) {
-                $toUpd = X::mergeArrays([
-                  'id' => $cfg['id'],
-                  'id_identity' => $id_sub
-                ], $data);
-                if (!$this->entity->representant()->update($toUpd)) {
-                  $error = _('Error during the representant updating.');
-                }
-              }
-              else {
-                $error = _('Error during the representant updating.');
-              }
-              break;
-            case 'delete':
-              if (!empty($cfg['id'])
-                && !$this->entity->representant()->delete($cfg['id'])
-              ) {
-                $error = _('Error during the representant deleting.');
-              }
-          }
-          break;
-
-        case 'succursales':
-          switch ($cfg['type']){
-            case 'insert':
-              if (!$this->entity->links()->succursaleUpdateOrInsert($data)) {
-                $error = _('Error during the succursale inserting.');
-              }
-              break;
-            case 'update':
-              if (!empty($cfg['id'])
-                && ($old = $this->entity->succursale()->get($cfg['id']))
-                && ($data = X::mergeArrays((array)$old->link, $data))
-                && !$this->entity->links()->succursaleUpdateOrInsert($data)
-              ) {
-                $error = _('Error during the succursale updating.');
-              }
-              break;
-            case 'delete':
-              if (!empty($cfg['id'])
-                && !empty($data['date_radiation'])
-                && ($data['id_address'] = $this->db->selectOne('bbn_entities_links', 'id_address', ['id' => $cfg['id']]))
-                && !$this->entity->links()->succursaleDelete($data['id_address'], $data['date_radiation'])
-              ) {
-                $error = _('Error during the succursale deleting.');
-              }
-              break;
-          }
-          break;
-
-        case 'siege':
-          switch ($cfg['type']){
-            case 'insert':
-            case 'update':
-              if (!empty($data['id_address'])
-                && !$this->entity->links()->setSiege($data['id_address'])
-              ) {
-                $error = _('Error during the siege') . ' ' . $cfg['type'] === 'insert' ? _('inserting.') : _('updating.');
-              }
-              break;
-            case 'delete':
-              if (!$this->entity->links()->unsetSiege()) {
-                $error = _('Error during the siege deleting.');
-              }
-          }
-          break;
-
-        case 'courrier':
-          switch ($cfg['type']){
-            case 'insert':
-            case 'update':
-              if (!empty($data['id_address'])
-                && !$this->entity->links()->setCourrier($data['id_address'])
-              ) {
-                $error = _('Error during the courrier') . ' ' . $cfg['type'] === 'insert' ? _('inserting.') : _('updating.');
-              }
-              break;
-            case 'delete':
-              if (!$this->entity->links()->unsetCourrier()) {
-                $error = _('Error during the courrier deleting.');
-              }
-          }
-          break;
-
         case 'tiers':
           $id_tier = $cfg['id'] ?? $data['id'];
-          if ($id_new = $this->tiers($id_tier, $data, $cfg['type'])) {
+          if ($id_new = $this->_identity($id_tier, $data, $cfg['type'])) {
             if (Str::isUid($id_new) && ($id_new !== $id_tier)) {
               if (isset($cfg['id'])) {
                 $cfg['id'] = $id_new;
@@ -681,7 +499,7 @@ class Changes extends EntityTable
 
         case 'lieux':
           $id_address = $cfg['id'] ?? $data['id'];
-          if ($id_new = $this->lieu($id_address, $data, $cfg['type'])) {
+          if ($id_new = $this->_address($id_address, $data, $cfg['type'])) {
             if ($id_new !== $id_address) {
               if (isset($cfg['id'])) {
                 $cfg['id'] = $id_new;
@@ -706,54 +524,6 @@ class Changes extends EntityTable
             }
           }
           break;
-
-        case 'infos_complementaires':
-          $id_opt = array_keys($data)[0];
-          if (Str::isUid($id_opt)
-            && ($code = $this->options()->code($id_opt))
-            && !$this->entity->updateAdditionalInfo([$code => $data[$id_opt]], true)
-          ) {
-            $error = _('Error during the infos complementaires') . ' ';
-            switch ($cfg['type']){
-              case 'insert';
-                $error .= _('inserting.');
-                break;
-              case 'update';
-                $error .= _('updating.');
-                break;
-            }
-          }
-          break;
-
-        case 'mandataires':
-          $eo = new EntityOptions($this->db);
-          $eoTypes = $eo->getTypes();
-          if (!empty($eoTypes['mandataires'])) {
-            $currentMandataires = $eo->get($this->entity->getId(), $eoTypes['mandataires']);
-            $newMandataires = $currentMandataires;
-            switch ($cfg['type']) {
-              case 'insert':
-                if (!\in_array($data['id_option'], $newMandataires)) {
-                  $newMandataires[] = $data['id_option'];
-                }
-                $e2 = _('inserting.');
-                break;
-              case 'delete':
-                if (\in_array($data['id_option'], $newMandataires)) {
-                  \array_splice($newMandataires, X::indexOf($newMandataires, $data['id_option']) , 1);
-                }
-                $e2 = _('deleting.');
-                break;
-            }
-            if (($currentMandataires === $newMandataires)
-              || !$this->entity->update(['mandataires' => $newMandataires])
-            ) {
-              $error = _('Error during the mandataire') . ' ' . $e2;
-            }
-          }
-          break;
-
-        case 'reseaux':
           $eo = new EntityOptions($this->db);
           $eoTypes = $eo->getTypes();
           if (!empty($eoTypes['reseaux'])) {
@@ -788,12 +558,14 @@ class Changes extends EntityTable
             break;
       }
 
-      return empty($error) && $this->delete_file_and_link($id) && $this->db->update(
-          static::$table, [
-          'state' => static::$states['accepted'],
-          'cfg' => json_encode($cfg)
-        ], ['id' => $id]
-        );
+      return empty($error)
+        && $this->delete_file_and_link($id)
+        && $this->db->update($this->class_table, [
+          $this->fields['state'] => static::$states['accepted'],
+          $this->fields['cfg'] => json_encode($cfg)
+        ], [
+          $this->fields['id'] => $id
+        ]);
     }
 
     return null;
@@ -808,10 +580,16 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)
       && $this->check()
-      && ($this->db->selectOne(static::$table, ['id_entity'], ['id' => $id]) == $this->getId())
+      && ($this->db->selectOne($this->class_table, $this->fields['id_entity'], [
+        $this->fields['id'] => $id
+      ]) === $this->getId())
       && $this->delete_file_and_link($id)
     ) {
-      return $this->db->update(static::$table, ['state' => static::$states['refused']], ['id' => $id]);
+      return $this->db->update($this->class_table, [
+        $this->fields['state'] => static::$states['refused']
+      ], [
+        $this->fields['id'] => $id
+      ]);
     }
 
     return null;
@@ -821,7 +599,7 @@ class Changes extends EntityTable
   public function force_state(string $id, $state): bool
   {
     if (\in_array($state, array_values(static::$states), true)) {
-      return !!$this->db->update(static::$table, ['state' => $state], ['id' => $id]);
+      return !!$this->db->update($this->class_table, [$this->fields['state'] => $state], [$this->fields['id'] => $id]);
     }
 
     return false;
@@ -834,7 +612,7 @@ class Changes extends EntityTable
    */
   public function getState(string $id)
   {
-    return Str::isUid($id) ? $this->db->selectOne(static::$table, 'state', ['id' => $id]) : false;
+    return Str::isUid($id) ? $this->db->selectOne($this->class_table, $this->fields['state'], [$this->fields['id'] => $id]) : false;
   }
 
 
@@ -889,10 +667,10 @@ class Changes extends EntityTable
     return $this->_get(
       [
         'conditions' => [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
-          'field' => 'state',
+          'field' => $this->fields['state'],
           'value' => static::$states['untreated']
         ]]
       ]
@@ -908,10 +686,10 @@ class Changes extends EntityTable
     return $this->_get(
       [
         'conditions' => [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
-          'field' => 'state',
+          'field' => $this->fields['state'],
           'operator' => 'isnull'
         ]]
       ]
@@ -924,9 +702,10 @@ class Changes extends EntityTable
    */
   public function get_unready_untreated(): ?array
   {
+    $cfgField = $this->fields['cfg'];
     return array_map(
-      function ($change) {
-        if (!empty($change['cfg']) && ($cfg = json_decode($change['cfg'], true))) {
+      function ($change) use($cfgField) {
+        if (!empty($change[$cfgField]) && ($cfg = json_decode($change[$cfgField], true))) {
           if (!empty($cfg['data'])) {
             $cfg['data'] = array_map(
               function ($d) {
@@ -951,24 +730,24 @@ class Changes extends EntityTable
             );
           }
 
-          $change['cfg'] = json_encode($cfg);
+          $change[$cfgField] = json_encode($cfg);
         }
 
         return $change;
       }, $this->_get([
         'conditions' => [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
           'logic' => 'OR',
           'conditions' => [[
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'operator' => 'isnull'
           ], [
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'value' => static::$states['untreated']
           ], [
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'value' => static::$states['email']
           ]]
         ]]
@@ -985,20 +764,20 @@ class Changes extends EntityTable
     return $this->_get(
       [
         'conditions' => [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
           'logic' => 'OR',
           'conditions' => [[
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'operator' => 'isnull'
           ], [
             'conditions' => [[
-              'field' => 'state',
+              'field' => $this->fields['state'],
               'operator' => '!=',
               'value' => static::$states['accepted']
             ], [
-              'field' => 'state',
+              'field' => $this->fields['state'],
               'operator' => '!=',
               'value' => static::$states['refused']
             ]]
@@ -1017,10 +796,10 @@ class Changes extends EntityTable
     return $this->_get(
       [
         'conditions' => [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
-          'field' => 'state',
+          'field' => $this->fields['state'],
           'value' => static::$states['accepted']
         ]]
       ]
@@ -1036,10 +815,10 @@ class Changes extends EntityTable
     return $this->_get(
       [
         'conditions' => [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
-          'field' => 'state',
+          'field' => $this->fields['state'],
           'value' => static::$states['refused']
         ]]
       ]
@@ -1089,12 +868,6 @@ class Changes extends EntityTable
   }
 
 
-  public function setAuth(string $id, string $idAuth): bool
-  {
-    return (bool)$this->db->update(static::$table, ['id_member_auth' => $idAuth], ['id' => $id]);
-  }
-
-
   private static function getFieldsList()
   {
     return static::getEAFields();
@@ -1103,36 +876,26 @@ class Changes extends EntityTable
 
   /**
    * @param array $where
-   * @param bool  $with_files
+   * @param bool  $withFiles
    * @return null|array
    */
-  private function _get(array $where, bool $with_files = true): ?array
+  private function _get(array $where, bool $withFiles = true): ?array
   {
     if ($this->check()) {
       $t =& $this;
-      $a = new \apst\Auth($this->db);
       return array_map(
-        function ($e) use ($t, $a, $with_files) {
-          if ($with_files) {
-            $cfg        = json_decode($e['cfg'], true);
-            $e['files'] = $t->get_required_files($e['id'], $cfg['type']);
-          }
-
-          if (!empty($e['id_member_auth'])) {
-            $auth = $a->get($e['id_member_auth']);
-            if (!empty($auth['info']['declarant'])) {
-              $e['declarant'] = $auth['info']['declarant'];
-              unset($auth['info']);
-              $e['declarant']['verification'] = $auth;
-            }
+        function ($e) use ($t, $withFiles) {
+          if ($withFiles) {
+            $cfg = json_decode($e[$t->fields['cfg']], true);
+            $e['files'] = $t->get_required_files($e[$t->fields['id']], $cfg['type']);
           }
 
           return $e;
         }, $this->db->rselectAll([
-          'table' => static::$table,
+          'table' => $this->class_table,
           'fields' => [],
           'where' => $where,
-          'order' => ['moment' => 'DESC']
+          'order' => [$this->fields['moment'] => 'DESC']
         ])
       );
     }
@@ -1149,14 +912,12 @@ class Changes extends EntityTable
   private function _insert(string $moment, array $cfg): ?string
   {
     if ($id_adh = $this->getId()) {
-      if ($this->db->insert(
-          static::$table, [
-            'id_entity' => $id_adh,
-            'moment' => $moment,
-            'state' => null,
-            'cfg' => \json_encode($cfg)
-          ]
-        )
+      if ($this->db->insert($this->class_table, [
+          $this->fields['id_entity'] => $id_adh,
+          $this->fields['moment'] => $moment,
+          $this->fields['state'] => null,
+          $this->fields['cfg'] => \json_encode($cfg)
+        ])
         && ($id = $this->db->lastId())
       ) {
         $this->set_required_files($id);
@@ -1178,8 +939,8 @@ class Changes extends EntityTable
   {
     if (Str::isUid($id)) {
       if ($state === false) {
-        if ($c = $this->_get(['id' => $id], false)) {
-          $cfg = json_decode($c[0]['cfg'], true);
+        if ($c = $this->_get([$this->fields['id'] => $id], false)) {
+          $cfg = json_decode($c[0][$this->fields['cfg']], true);
         }
 
         if (isset($cfg) && is_array($cfg)) {
@@ -1190,7 +951,7 @@ class Changes extends EntityTable
         }
       }
 
-      return !!$this->db->update(static::$table, ['state' => $state], ['id' => $id]);
+      return !!$this->db->update($this->class_table, [$this->fields['state'] => $state], [$this->fields['id'] => $id]);
     }
 
     return false;
@@ -1205,7 +966,15 @@ class Changes extends EntityTable
   private function _set_moment(string $id, string $moment = ''): bool
   {
     if (Str::isUid($id)) {
-      return !!$this->db->update(static::$table, ['moment' => $moment ?: date('Y-m-d H:i:s')], ['id' => $id]);
+      return !!$this->db->update(
+        $this->class_table,
+        [
+          $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s')
+        ],
+        [
+          $this->fields['id'] => $id
+        ]
+      );
     }
 
     return false;
@@ -1222,22 +991,25 @@ class Changes extends EntityTable
   private function _update(string $id, array $todata, string $moment = '', array $subdata = []): ?int
   {
     if (Str::isUid($id)
-      && ($old = $this->db->rselect(static::$table, [], ['id' => $id]))
-      && (    ($old['state'] === static::$states['unready'])
-        || ($old['state'] === static::$states['untreated'])
-        || ($old['state'] === static::$states['email']))
-      && ($cfg = \json_decode($old['cfg'], true))
+      && ($old = $this->db->rselect($this->class_table, [], [$this->fields['id'] => $id]))
+      && (($old[$this->fields['state']] === static::$states['unready'])
+        || ($old[$this->fields['state']] === static::$states['untreated'])
+        || ($old[$this->fields['state']] === static::$states['email']))
+      && ($cfg = \json_decode($old[$this->fields['cfg']], true))
     ) {
       if (($idx = X::find($cfg['data'], ['field' => $todata['field']])) !== null) {
         $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->check_email_required($cfg['table'], $todata));
         $cfg['subdata']    = $subdata;
         if ($this->db->update(
-          static::$table, [
-          'moment' => $moment ?: date('Y-m-d H:i:s'),
-          'cfg' => \json_encode($cfg)
-        ], ['id' => $id]
-        )
-        ) {
+          $this->class_table,
+          [
+            $this->fields['moment'] => $moment ?: date('Y-m-d H:i:s'),
+            $this->fields['cfg'] => \json_encode($cfg)
+          ],
+          [
+            $this->fields['id'] => $id
+          ]
+        )) {
           $this->set_required_files($id);
           $this->_set_state($id, $this->get_current_state($id, $cfg));
           return 1;
@@ -1287,8 +1059,10 @@ class Changes extends EntityTable
   private function get_file_by_type($id_type, bool $files = true): ?array
   {
     return $this->_get_file_by_type(
-      $id_type, $files, [[
-        'field' => $this->db->colFullName('id_entity', static::$table),
+      $id_type,
+      $files,
+      [[
+        'field' => $this->db->cfn($this->fields['id_entity'], $this->class_table),
         'value' => $this->getId()
       ]]
     );
@@ -1302,7 +1076,9 @@ class Changes extends EntityTable
    */
   private function get_required_files(string $id_change, string $type): ?array
   {
-    if ($change = $this->_get(['id' => $id_change], false)) {
+    if ($change = $this->_get([$this->fields['id'] => $id_change], false)) {
+      $cCfg = $this->getClassCfg();
+      $oCfg = $this->options()->getClassCfg();
       $res = [];
       $change = $change[0];
       $cfg = json_decode($change['cfg'], true);
@@ -1313,38 +1089,38 @@ class Changes extends EntityTable
 
           return $f;
       }, $this->db->rselectAll([
-          'table' => static::$table_files,
+          'table' => $cCfg['tables']['files'],
           'fields' => [
-            $this->db->colFullName('id', static::$table_files),
-            $this->db->colFullName('files', static::$table_files),
-            $this->db->colFullName('type_doc', static::$table_files),
-            $this->db->colFullName('date_added', static::$table_files),
-            $this->db->colFullName('mandatory', static::$table_links),
-            $this->db->colFullName('code', 'bbn_options'),
+            $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']),
+            $this->db->cfn($cCfg['arch']['files']['files'], $cCfg['tables']['files']),
+            $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),
+            $this->db->cfn($cCfg['arch']['files']['date_added'], $cCfg['tables']['files']),
+            $this->db->cfn($cCfg['arch']['links']['mandatory'], $cCfg['tables']['links']),
+            $this->db->cfn($oCfg['arch']['options']['code'], $oCfg['table']),
           ],
           'join' => [[
-            'table' => static::$table_links,
+            'table' => $cCfg['tables']['links'],
             'on' => [
               'conditions' => [[
-                'field' => $this->db->colFullName('id_file', static::$table_links),
-                'exp' => $this->db->colFullName('id', static::$table_files),
+                'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),
+                'exp' => $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']),
               ]]
             ]
           ], [
             'table' => 'bbn_options',
             'on' => [
               'conditions' => [[
-                'field' => $this->db->colFullName('id', 'bbn_options'),
-                'exp' => $this->db->colFullName('type_doc', static::$table_files)
+                'field' => $this->db->cfn($oCfg['arch']['options']['id'], $oCfg['table']),
+                'exp' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files'])
               ]]
             ]
           ]],
           'where' => [
             'conditions' => [[
-              'field' => $this->db->colFullName('id_change', static::$table_links),
+              'field' => $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links']),
               'value' => $id_change
             ], [
-              'field' => $this->db->colFullName('files', static::$table_files),
+              'field' => $this->db->cfn($cCfg['arch']['files']['files'], $cCfg['tables']['files']),
               'operator' => 'isnotnull'
             ]]
           ]
@@ -1378,8 +1154,8 @@ class Changes extends EntityTable
               ) {
                 $res[] = [
                   'code' => (string)$c,
-                  'files' => json_decode($all[$idx]['files']),
-                  'mandatory' => !!$all[$idx]['mandatory']
+                  'files' => json_decode($all[$idx][$cCfg['arch']['files']['files']]),
+                  'mandatory' => !!$all[$idx][$cCfg['arch']['links']['mandatory']]
                 ];
                 $found = true;
                 //break;
@@ -1406,8 +1182,8 @@ class Changes extends EntityTable
               if (($idx = X::find($all, ['code' => (string)$code])) !== null) {
                 $res[] = [
                   'code' => (string)$code,
-                  'files' => json_decode($all[$idx]['files']),
-                  'mandatory' => !!$all[$idx]['mandatory']
+                  'files' => json_decode($all[$idx][$cCfg['arch']['files']['files']]),
+                  'mandatory' => !!$all[$idx][$cCfg['arch']['links']['mandatory']]
                 ];
               }
               else {
@@ -1504,9 +1280,10 @@ class Changes extends EntityTable
   private function get_ids_by_file(string $id): array
   {
     if (Str::isUid($id)) {
+      $cCfg = $this->getClassCfg();
       return $this->db->getColumnValues(
-        static::$table_links, $this->db->colFullName('id_change', static::$table_links), [
-          $this->db->colFullName('id_file', static::$table_links) => $id
+        $cCfg['tables']['links'], $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links']), [
+          $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']) => $id
         ]
       );
     }
@@ -1527,30 +1304,30 @@ class Changes extends EntityTable
       case 'update':
         if (!empty($data['field'])) {
         $conditions = [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.type"))',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.type"))',
           'value' => 'update'
         ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.table"))',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.table"))',
           'value' => $table
         ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.id"))',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.id"))',
           empty($id) ? 'operator' : 'value' => $id ?: 'isnull'
         ], [
-          'field' => "JSON_SEARCH(cfg, 'all', '$data[field]', null, '$.data[*].field')",
+          'field' => "JSON_SEARCH(".$this->fields['cfg'].", 'all', '$data[field]', null, '$.data[*].field')",
           'operator' => 'isnotnull'
         ], [
           'logic' => 'OR',
           'conditions' => [[
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'value' => static::$states['untreated']
           ], [
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'value' => static::$states['email']
           ], [
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'operator' => 'isnull'
           ]]
         ]];
@@ -1559,27 +1336,27 @@ class Changes extends EntityTable
 
       case 'delete':
         $conditions = [[
-          'field' => 'id_entity',
+          'field' => $this->fields['id_entity'],
           'value' => $this->getId()
         ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.type"))',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.type"))',
           'value' => 'delete'
         ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.table"))',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.table"))',
           'value' => $table
         ], [
-          'field' => 'JSON_UNQUOTE(JSON_EXTRACT(cfg, "$.id"))',
+          'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', "$.id"))',
           'value' => $id
         ], [
           'logic' => 'OR',
           'conditions' => [[
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'value' => static::$states['untreated']
           ], [
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'value' => static::$states['email']
           ], [
-            'field' => 'state',
+            'field' => $this->fields['state'],
             'operator' => 'isnull'
           ]]
         ]];
@@ -1588,8 +1365,8 @@ class Changes extends EntityTable
 
     return isset($conditions) ? $this->db->selectOne(
       [
-        'table' => static::$table,
-        'fields' => ['id'],
+        'table' => $this->class_table,
+        'fields' => [$this->fields['id']],
         'where' => [
           'conditions' => $conditions
         ]
@@ -1636,9 +1413,8 @@ class Changes extends EntityTable
    * @param bool   $is_sub
    * @return string|null
    */
-  private function tiers(string $id, array $data, string $action, bool $is_sub = false): ?string
+  private function _identity(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $tiers = new \apst\tiers($this->db);
     $exists = $this->db->rselect($this->tables['tiers'], [], ['id' => $id]);
     if (!empty($exists)
       && ($action === 'insert')
@@ -1656,7 +1432,7 @@ class Changes extends EntityTable
           unset($data['id']);
         }
 
-        if ($id = $tiers->add($data, true)) {
+        if ($id = $this->identities()->add($data, true)) {
           // Fonctions
           if (!empty($fonction)) {
             $this->entity->fonction()->insert(
@@ -1706,7 +1482,7 @@ class Changes extends EntityTable
           unset($exists['cfg']);
         }
         $data = X::mergeArrays($exists, $data);
-        $ok2  = $tiers->update($id, $data);
+        $ok2  = $this->identities()->update($id, $data);
         $ret  = !!$ok1 || !!$ok2;
         break;
       case 'delete':
@@ -1716,7 +1492,7 @@ class Changes extends EntityTable
             $this->entity->fonction()->delete($id_lien);
           }
 
-          $ret = !!$tiers->delete($id);
+          $ret = !!$this->identities()->delete($id);
         }
         break;
     }
@@ -1732,9 +1508,8 @@ class Changes extends EntityTable
    * @param bool   $is_sub
    * @return string|null
    */
-  private function lieu(string $id, array $data, string $action, bool $is_sub = false): ?string
+  private function _address(string $id, array $data, string $action, bool $is_sub = false): ?string
   {
-    $lieux  = $this->address();
     $exists = $this->db->rselect($this->tables['lieux'], [], ['id' => $id]);
     if (($action === 'update') && empty($exists)) {
       $action = 'insert';
@@ -1746,16 +1521,16 @@ class Changes extends EntityTable
           unset($data['id']);
         }
 
-        if ($id = $lieux->add($data, true)) {
+        if ($id = $this->address()->add($data, true)) {
           $ret = true;
         }
         break;
       case 'update':
-        $ret = !!$lieux->update($id, $data);
+        $ret = !!$this->address()->update($id, $data);
         break;
       case 'delete':
         if (!$is_sub) {
-          $ret = !!$lieux->delete($id);
+          $ret = !!$this->address()->delete($id);
         }
         break;
     }
