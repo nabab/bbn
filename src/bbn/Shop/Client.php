@@ -136,7 +136,7 @@ class Client extends DbCls
 
 	public function addClientName(string $idClient, string $name, string $lastName){
 		if ($this->dbTraitRselect([$this->fields['id'] => $idClient])) {
-			if ($this->dbTraitUpdate([
+			if ($this->dbTraitUpdate($idClient, [
         $this->fields['first_name'] => $name,
         $this->fields['last_name'] => $lastName
       ])) {

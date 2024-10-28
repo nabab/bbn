@@ -10,6 +10,7 @@ use bbn\Appui\History;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\DbUauth;
 use bbn\Models\Cls\Db as DbCls;
+use bbn\Entities\Tables\Link;
 use bbn\Entities\Models\Entities;
 use bbn\Models\Cls\Nullall;
 
@@ -85,6 +86,14 @@ class Identities extends DbCls
     parent::__construct($db);
     $this->initClassCfg();
     $this->dbUauthInit();
+  }
+
+  public function getRelatedEntities(string $id): array
+  {
+    $lnk = new Link($this->db, $this->entities);
+    return array_unique(array_map(function ($a) {
+      return $a['id_entity'];
+    }, $lnk->getFullList(['id_identity' => $id])));
   }
 
 
@@ -375,21 +384,7 @@ class Identities extends DbCls
 
     return $r;
   }
-    */
-
-
-  /**
-   * Retrieves relations of a person based on their ID.
-   *
-   * @param mixed $id The ID of the person.
-   * @return mixed The relations of the person.
-   */
-  public function relations($id): ?array
-  {
-    return $this->dbTraitGetRelations($id);
-  }
-
-
+  */
 
   /**
    * Adds or updates a person record in the database.

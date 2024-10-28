@@ -169,11 +169,11 @@ class Provider extends DbCls
         $this->addProviderEmail($id, $data['email']);
       }
       return $this->dbTraitUpdate(
+        $id,
         [
           $dbcfg['arch']['providers']['name'] => $data['name'],
           $dbcfg['arch']['providers']['cfg']  => $data['cfg'] ? json_encode($data['cfg']) : null
-        ],
-        [$dbcfg['arch']['providers']['id'] => $id]
+        ]
       );
     }
 

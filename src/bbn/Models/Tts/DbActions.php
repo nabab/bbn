@@ -38,7 +38,7 @@ trait DbActions
 
     if (!empty($cfg) && $this->db->count(
       $this->class_table,
-      $this->dbTraitFilterCfg($cfg)
+      $this->dbTraitGetFilterCfg($cfg)
     )) {
       return true;
     }
@@ -90,7 +90,7 @@ trait DbActions
         $filter = [$f['id'] => $filter];
       }
 
-      return (bool)$this->db->delete($cfg['table'], $this->dbTraitFilterCfg($filter));
+      return (bool)$this->db->delete($cfg['table'], $this->dbTraitGetFilterCfg($filter));
     }
 
     return false;
@@ -106,16 +106,16 @@ trait DbActions
    *
    * @return bool
    */
-  protected function dbTraitUpdate(array $data, string|array $filter): bool
+  protected function dbTraitUpdate(string|array $filter, array $data): bool
   {
-    if (!$this->dbTraitExists($filter)) {
-      throw new Exception(X::_("Impossible to find the given row"));
-    }
-
     $ccfg = $this->getClassCfg();
     $f = $ccfg['arch'][$this->class_table_index];
     if (!is_array($filter)) {
       $filter = [$f['id'] => $filter];
+    }
+
+    if (!$this->dbTraitExists($filter)) {
+      throw new Exception(X::_("Impossible to find the given row"));
     }
 
     if ($data = $this->dbTraitPrepare($data)) {
@@ -128,11 +128,12 @@ trait DbActions
           }
 
           $jsonUpdate .= ")";
+          X::ddump($jsonUpdate, $data[$col]);
           $data[$col] = [null, $jsonUpdate];
         }
       }
       
-      return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitFilterCfg($filter));
+      return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
     }
 
     return false;
@@ -147,7 +148,7 @@ trait DbActions
    *
    * @return mixed
    */
-  protected function dbTraitSelectOne(string $field, $filter = [], array $order = [])
+  protected function dbTraitSelectOne(string $field, string|array $filter = [], array $order = [])
   {
     if ($res = $this->dbTraitSingleSelection($filter, $order, 'array', [$field])) {
       return $res[$field] ?? null;
@@ -165,7 +166,7 @@ trait DbActions
    *
    * @return stdClass|null
    */
-  protected function dbTraitSelect($filter = [], array $order = [], array $fields = []): ?stdClass
+  protected function dbTraitSelect(string|array $filter = [], array $order = [], array $fields = []): ?stdClass
   {
     return $this->dbTraitSingleSelection($filter, $order, 'object', $fields);
   }
@@ -179,7 +180,7 @@ trait DbActions
    *
    * @return array|null
    */
-  protected function dbTraitRselect($filter = [], array $order = [], array $fields = []): ?array
+  protected function dbTraitRselect(string|array $filter = [], array $order = [], array $fields = []): ?array
   {
     return $this->dbTraitSingleSelection($filter, $order, 'array', $fields);
   }

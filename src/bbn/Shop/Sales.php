@@ -83,7 +83,7 @@ class Sales extends DbCls
     if (!empty($errorCode)) {
       $data[$this->fields['error_code']] = $errorCode;
     }
-    return (bool)$this->dbTraitUpdate($data, $idTransaction);
+    return (bool)$this->dbTraitUpdate($idTransaction, $data);
   }
 
   public function setStatusPaid(string $idTransaction, $errorMessage = null, $errorCode = null): bool

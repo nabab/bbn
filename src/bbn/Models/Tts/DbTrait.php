@@ -14,11 +14,6 @@ trait DbTrait
   use DbConfig;
 
   /**
-   * @var array Configuration for filters applied to database queries.
-   */
-  protected $dbTraitFilterCfg = [];
-
-  /**
    * @var array Configuration for the root filter.
    */
   protected $rootFilterCfg = [];
@@ -117,7 +112,7 @@ trait DbTrait
    *
    * @return array The combined filter configuration.
    */
-  protected function dbTraitFilterCfg(array $cfg): array
+  protected function dbTraitGetFilterCfg(array $cfg): array
   {
     $conditions = [];
     if (!empty($this->rootFilterCfg)) {
@@ -323,7 +318,7 @@ trait DbTrait
     $req = [
       'table' => $this->class_table,
       'fields' => $properFields,
-      'where' => $this->dbTraitFilterCfg($filter),
+      'where' => $this->dbTraitGetFilterCfg($filter),
       'order' => $order
     ];
 

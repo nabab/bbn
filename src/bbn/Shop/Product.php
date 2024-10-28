@@ -333,7 +333,7 @@ class Product extends DbCls
    */
   public function setStock(string $id, int $quantity): bool
   {
-    return (bool)$this->dbTraitUpdate([$this->fields['stock'] => $quantity], $id);
+    return (bool)$this->dbTraitUpdate($id, [$this->fields['stock'] => $quantity]);
   }
 
 

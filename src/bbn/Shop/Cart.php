@@ -364,7 +364,7 @@ class Cart extends DbCls
     }
     $idCart = empty($idCart) ? $this->getCurrentCartID() : $idCart;
     if (!empty($idCart)) {
-      return $this->dbTraitUpdate([$this->fields['id_client'] => $idClient], $idCart);
+      return $this->dbTraitUpdate($idCart, [$this->fields['id_client'] => $idClient]);
     }
     return false;
   }

@@ -2793,6 +2793,7 @@ public function getIdAlias($code = null): ?string
           $c['num'] => $it[$c['num']] ?? null,
           $c['cfg'] => $it[$c['cfg']] ?? null
         ];
+
         if (isset($it[$c['id']]) && !$this->exists($it[$c['id']])) {
           $values[$c['id']] = $it[$c['id']];
         }
@@ -2807,7 +2808,10 @@ public function getIdAlias($code = null): ?string
           }
           catch (Exception $e) {
             X::log([X::_("Impossible to add the option"), $values], 'OptionAddErrors');
-            throw new Exception(X::_("Impossible to add the option"));
+            throw new Exception(
+              X::_("Impossible to add the option") . ':' . PHP_EOL . 
+              X::getDump($values) . $e->getMessage()
+            );
           }
 
           $id = $this->db->lastId();
@@ -3922,8 +3926,6 @@ public function getIdAlias($code = null): ?string
    */
   public function import(array $options, $id_parent = null, array &$todo = null)
   {
-    $default = $this->getDefault();
-    $this->setDefault($this->root);
     if (is_array($id_parent)) {
       array_push($id_parent, $this->getRoot());
       $id_parent = $this->fromCode($id_parent);
@@ -4035,9 +4037,6 @@ public function getIdAlias($code = null): ?string
       }
 
     }
-
-    $this->setDefault($default);
-
   }
 
 

@@ -46,13 +46,15 @@ trait Optional
         throw new Exception(X::_("There is no options object as needed by").' '.__CLASS__);
       }
 
+      $justDefined = false;
       if (!\defined("BBN_APPUI")) {
+        $justDefined = true;
         \define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));
       }
 
       if (!$path) {
         if (!BBN_APPUI) {
-          throw new Exception('Impossible to find the option appui for '.__CLASS__);
+          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));
         }
 
         $tmp                   = explode('\\', __CLASS__);

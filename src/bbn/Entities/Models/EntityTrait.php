@@ -30,7 +30,7 @@ trait EntityTrait
     parent::__construct($db);
     $this->initClassCfg(static::$default_class_cfg);
     $this->cacheInit();
-    if ($entity) {
+    if (!is_a($entity, 'bbn\\Models\\Cls\\Nullall')) {
       $this->id_entity = $entity->getId();
       $this->dbTraitSetFilterCfg([$this->fields['id_entity'] => $this->id_entity]);
     }

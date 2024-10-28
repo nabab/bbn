@@ -31,7 +31,7 @@ trait DbJunction
    * @param array|string $id
    * @return bool
    */
-  public function dbTraitExists(array $filter): bool
+  public function dbTraitExists(string|array $filter): bool
   {
     if (!$this->class_table_index) {
       throw new Exception(X::_("The table index parameter should be defined"));
@@ -40,7 +40,7 @@ trait DbJunction
     $f = $this->class_cfg['arch'][$this->class_table_index];
     if (!empty($filter) && $this->db->count(
       $this->class_table,
-      $this->dbTraitFilterCfg($filter)
+      $this->dbTraitGetFilterCfg($filter)
     )) {
       return true;
     }
@@ -88,7 +88,7 @@ trait DbJunction
       $cfg = $this->getClassCfg();
       $f = $cfg['arch'][$this->class_table_index];
 
-      return (bool)$this->db->delete($cfg['table'], $this->dbTraitFilterCfg($filter));
+      return (bool)$this->db->delete($cfg['table'], $this->dbTraitGetFilterCfg($filter));
     }
 
     return false;
@@ -103,7 +103,7 @@ trait DbJunction
    *
    * @return bool
    */
-  public function dbTraitUpdate(array $filter, array $data, bool $addCfg = false): bool
+  public function dbTraitUpdate(string|array $filter, array $data, bool $addCfg = false): bool
   {
     if (!$this->dbTraitExists($filter)) {
       throw new Exception(X::_("Impossible to find the given row"));
@@ -125,7 +125,7 @@ trait DbJunction
         }
       }
       
-      return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitFilterCfg($filter));
+      return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
     }
 
     return false;
@@ -140,7 +140,7 @@ trait DbJunction
    *
    * @return mixed
    */
-  public function dbTraitSelectOne(string $field, array $filter = [], array $order = [])
+  public function dbTraitSelectOne(string $field, string|array $filter = [], array $order = [])
   {
     if ($res = $this->dbTraitSingleSelection($filter, $order, 'array', [$field])) {
       return $res[$field] ?? null;
@@ -158,7 +158,7 @@ trait DbJunction
    *
    * @return stdClass|null
    */
-  public function dbTraitSelect(array $filter = [], array $order = [], array $fields = []): ?stdClass
+  public function dbTraitSelect(string|array $filter = [], array $order = [], array $fields = []): ?stdClass
   {
     return $this->dbTraitSingleSelection($filter, $order, 'object', $fields);
   }
@@ -172,12 +172,12 @@ trait DbJunction
    *
    * @return array|null
    */
-  public function dbTraitRselect(array $filter = [], array $order = [], array $fields = []): ?array
+  public function dbTraitRselect(string|array $filter = [], array $order = [], array $fields = []): ?array
   {
     return $this->dbTraitSingleSelection($filter, $order, 'array', $fields);
   }
 
-  public function dbTraitSelectValues(string $field, array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
+  public function dbTraitSelectValues(string $field, string|array $filter = [], array $order = [], int $limit = 0, int $start = 0): array
   {
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'value', [$field]);
   }
@@ -241,12 +241,16 @@ trait DbJunction
    * @return mixed
    */
   private function dbTraitSingleSelection(
-    array $filter,
+    string|array $filter,
     array $order,
     string $mode = 'array',
     array $fields = []
   ): mixed
   {
+    if (is_string($filter) || is_int($filter)) {
+      $filter = [$this->fields['id'] => $filter];
+    }
+
     if ($res = $this->dbTraitSelection($filter, $order, 1, 0, $mode, $fields)) {
       return $res[0];
     }

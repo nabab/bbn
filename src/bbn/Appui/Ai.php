@@ -513,11 +513,11 @@ ws ::= ([ \t\n] ws)?',
     $this->note->update($note['id'], $title, $content);
     
     // Update the prompt with the provided ID, input, and output values
-    $this->dbTraitUpdate([
+    $this->dbTraitUpdate($id, [
       $this->class_cfg['arch']['ai_prompt']['input'] => $input,
       $this->class_cfg['arch']['ai_prompt']['output'] => $output,
       $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
-    ], $id);
+    ]);
     
     return true;
   }

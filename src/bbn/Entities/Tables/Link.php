@@ -76,8 +76,8 @@ class Link extends EntityTable
 
     $o = $this->options();
     $codes = self::getCodes($this);
+    $this->cfg =& static::$linkCfg;
     if (!empty($codes) && ($this->type = $o->fromCode($codes))) {
-      $this->cfg =& static::$linkCfg;
       $option = $o->option($this->type);
       $this->code = $option['code'];
       $this->text = $option['text'];
@@ -141,6 +141,11 @@ class Link extends EntityTable
   public function getList(array $filter = [])
   {
     return $this->dbTraitSelectValues($this->fields['id'], $filter);
+  }
+
+  public function getFullList(array $filter = [])
+  {
+    return $this->dbTraitRselectAll($filter);
   }
 
   public function get($id = null): ?array
