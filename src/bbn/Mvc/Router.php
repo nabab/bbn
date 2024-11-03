@@ -163,10 +163,10 @@ class Router
         return '_super.php';
       }
       if ($cfg['mode'] === 'model') {
-        return '_model.php';
+        return '_super.php';
       }
       if (!empty($cfg['ext']) && ($cfg['ext'] === 'less')) {
-        return '_mixins.less';
+        return '_super.less';
       }
     }
 
@@ -764,7 +764,8 @@ class Router
     }
 
     $mode = $o['mode'];
-    $path = self::parse($o['path']);
+    $path = $o['path'];
+    $index = $o['request'] ?? $o['path'];
     // The root in the main application where to search in is defined according to the mode
     $root = $this->_get_root($mode);
     if (!empty($o['plugin'])) {
@@ -774,9 +775,9 @@ class Router
     }
 
     // About to define self::$_known[$mode][$path] so first check it has not already been defined
-    if (!isset(self::$_known[$mode][$path])) {
-      self::$_known[$mode][$path] = $o;
-      $s                          = &self::$_known[$mode][$path];
+    if (!isset(self::$_known[$mode][$index])) {
+      self::$_known[$mode][$index] = $o;
+      $s                          = &self::$_known[$mode][$index];
       // Defining the checker files' name according to the mode (controllers, Models and CSS)
       $checker_file = self::getCheckerFile($o);
       if (!empty($checker_file)) {
@@ -817,13 +818,13 @@ class Router
 
     if (!$save) {
       // If not saving the index is unset and the function will be relaunched in case the same request is done again
-      $o = self::$_known[$mode][$path];
-      unset(self::$_known[$mode][$path]);
+      $o = self::$_known[$mode][$index];
+      unset(self::$_known[$mode][$index]);
 
       return $o;
     }
 
-    return self::$_known[$mode][$path];
+    return self::$_known[$mode][$index];
   }
 
 
@@ -840,6 +841,9 @@ class Router
     // Removing trailing slashes
     $path = self::parse($path);
     // If the result is already known we just return it
+    if ($path !== 'core/poller') {
+      X::log([$path, $mode, $this->_is_known($path, $mode)], 'known');
+    }
     if ($this->_is_known($path, $mode)) {
       return $this->_get_known($path, $mode);
     }
@@ -981,6 +985,19 @@ class Router
                 */
 
     if ($file) {
+      if ($path !== 'core/poller') {
+        X::log([$path, $mode, $this->_is_known($path, $mode), [
+          'file' => $file,
+          'path' => $real_path,
+          'root' => X::dirname($root, 2) . '/',
+          'request' => $path,
+          'mode' => $mode,
+          'plugin' => $plugin ? $plugin['url'] : false,
+          'plugin_name' => $plugin ? $plugin['name'] : false,
+          'args' => $args,
+          ]], 'known');
+      }
+
       return $this->_set_known(
         [
         'file' => $file,

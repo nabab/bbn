@@ -54,7 +54,7 @@ trait DbTrait
     $res = [];
     
     // Handle 'cfg' field if present in the table configuration
-    if (!empty($f['cfg'])) {
+    if (!empty($ccfg['cfg'])) {
       if (array_key_exists($f['cfg'], $data)) {
         $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
         unset($data[$f['cfg']]);

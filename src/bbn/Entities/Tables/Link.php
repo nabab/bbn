@@ -18,7 +18,6 @@ class Link extends EntityTable
 
   private $type;
   private $cfg;
-
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_links',
     'tables' => [
@@ -162,10 +161,37 @@ class Link extends EntityTable
     return $this->dbTraitRselect([$this->fields['id'] => $id]);
   }
 
+  public function update(array $data, array $where = []): int
+  {
+    return $this->dbTraitUpdate($where, $data);
+  }
+
+  public function delete(string $id): int
+  {
+    return $this->dbTraitDelete($id);
+  }
+
+  public function insert(array $data): ?string
+  {
+    foreach (self::$linkCfg as $k => $v) {
+      if ($v['required'] && !isset($data[$k])) {
+        throw new Exception(X::_("The field %s is required", $k));
+      }
+    }
+
+    foreach ($data as $k => $v) {
+      if (!in_array($k, $this->class_cfg['arch']['links']) && !isset($this->cfg[$k])) {
+        throw new Exception(X::_("The field %s is not valid", $k));
+      }
+    }
+
+    $data[$this->fields['link_type']] = $this->type;
+    return $this->dbTraitInsert($data);
+  }
+
   public static function getCodes(Link $link): array
   {
     return $link::$codes;
   }
-  
 }
 

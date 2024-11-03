@@ -18,6 +18,4 @@ trait DbAttached
       $this->class_cfg['arch'][$this->class_table]['id'] => $id
     ]) ? true : false;
   }
-
-
 }

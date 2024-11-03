@@ -49,7 +49,10 @@ class Identities extends DbCls
       ]
     ],
     'uauth_system' => 'many-to-one',
-    'uauth_modes' => ['email', 'phone'],
+    'uauth_modes' => [
+      'email' => 'email',
+      'phone' => 'phone'
+    ],
     'uauth_phone_region' => null
   ];
 
@@ -163,62 +166,6 @@ class Identities extends DbCls
     return null;
   }
 
-  /**
-   * Processes and sets information for a person based on input.
-   *
-   * @param array $fn Input data.
-   * @param bool $email Optional email for the person.
-   * @param bool $phone Optional phone number for the person.
-   * @return mixed Processed person data.
-   */
-  public function setInfo(array $fn): ?array
-  {
-    $fn = $this->prepareData($fn);
-    $arc = &$this->class_cfg['arch']['identities'];
-    if (!empty($fn)) {
-      if (!isset($fn[$arc['fname']])) {
-        $fn[$arc['fname']] = '';
-      }
-
-      if (!isset($fn[$arc['civility']])) {
-        $fn[$arc['civility']] = empty($fn[$arc['fname']]) ? null : 'M';
-      }
-
-      if (isset($fn['email']) && !Str::isEmail($fn['email'])) {
-        unset($fn['email']);
-      }
-
-      if (isset($fn['tel'])) {
-        $fn['phone'] = $fn['tel'];
-        unset($fn['tel']);
-      }
-
-      if (isset($fn['phone'])) {
-        $fn['phone'] = Str::getNumbers($fn['phone']);
-        if (strlen($fn['phone']) > 10 && strpos($fn['phone'], '33') === 0) {
-          $fn['phone'] = substr($fn['phone'], 2);
-        }
-
-        /** @todo A proper phone number check system */
-        if (strlen($fn['phone']) === 9 && strpos($fn['phone'], '0') !== 0) {
-          $fn['phone'] = '0' . $fn['phone'];
-        }
-
-        if (strlen($fn['phone']) !== 10) {
-          unset($fn['phone']);
-        }
-      }
-
-      if (!isset($fn[$arc['name']])) {
-        $fn = [];
-      }
-
-      return $fn;
-    }
-
-    return null;
-  }
-
 
   /**
    * Retrieves detailed information about a person by ID.
@@ -226,7 +173,7 @@ class Identities extends DbCls
    * @param mixed $id The ID of the person.
    * @return array|null Detailed information about the person.
    */
-  public function getInfo($id): array
+  public function getInfo($id): ?array
   {
     $res = $this->dbTraitRselect($id);
     if (!empty($res)) {
@@ -242,125 +189,10 @@ class Identities extends DbCls
           $res[$mode] = $arr[$mode] ?? null;
         }
       }
-
-      $res[$arc['cfg']] = empty($res[$arc['cfg']]) ? [] : json_decode($res[$arc['cfg']], true);
     }
 
     return $res;
   }
-
-
-  /**
-   * Performs a search based on a given full name.
-   *
-   * @param array|string $fn The full name to search for.
-   * @return string|null The ID of the person found.
-   */
-  /*
-  public function search(array|string $fn): ?string
-  {
-    $arc = &$this->class_cfg['arch']['identities'];
-    $fn = $this->setInfo(is_string($fn) ? $this->parse($fn) : $fn);
-    if (!empty($fn[$arc['fullname']])) {
-      $conditions = [
-        'logic' => 'OR',
-        'conditions' => [
-          [
-            'field' => $arc['fullname'],
-            'operator' => 'contains',
-            'value' => $fn[$arc['fullname']]
-          ], [
-            'logic' => 'AND',
-            'conditions' => [
-              [
-                'field' => $arc[$arc['name']],
-                'operator' => 'LIKE',
-                'value' => $fn[$arc['name']]
-              ]
-            ]
-          ]
-        ]
-      ];
-      if (!empty($fn[$arc['fname']])) {
-        $conditions['conditions'][1]['conditions'][] = [
-          'field' => $arc['fname'],
-          'operator' => 'LIKE',
-          'value' => $fn[$arc['fname']]
-        ];
-      }
-
-      if (!empty($fn['email']) || !empty($fn['phone'])) {
-        $tmp = [
-          'logic' => 'AND',
-          'conditions' => []
-        ];
-        if (!empty($fn['email'])) {
-          $tmp['conditions'][] = [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => 'email',
-              'operator' => 'LIKE',
-              'value' => $fn['email']
-            ], [
-              'field' => 'email',
-              'operator' => 'isempty'
-            ]]
-          ];
-        }
-
-        if (!empty($fn['phone'])) {
-          $tmp['conditions'][] = [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => 'phone',
-              'operator' => 'LIKE',
-              'value' => $fn['phone']
-            ], [
-              'field' => 'phone',
-              'operator' => 'isempty'
-            ]]
-          ];
-        }
-
-        $tmp['conditions'][] = $conditions;
-        $conditions = $tmp;
-      }
-  
-      return $this->dbTraitSelectOne($arc['id'], $conditions);
-    }
-
-    return null;
-  }
-    */
-
-    /*
-	public function seek($p, int $start = 0, int $limit = 100){
-    $arc = &$this->class_cfg['arch']['identities'];
-    if (!is_array($p)) {
-      $p = $this->parse($p);
-    }
-
-    if (is_array($p) && (
-        !empty($p[$arc['fullname']])
-        || !empty($p['email'])
-        || !empty($p['phone'])
-        || !empty($p[$arc['name']])
-    )
-    ){
-      $cond = [];
-
-      foreach ($arc as $v) {
-        if ( !empty($p[$v]) ){
-          array_push($cond, [$v, 'contains', $p[$v]]);
-        }
-      }
-
-      return $this->dbTraitSelectValues($arc['id'], $cond, [$arc['fullname']], $limit, $start);
-    }
-
-    return false;
-	}
-    */
 
   /**
    * Conducts a full search for identities records.
@@ -405,8 +237,7 @@ class Identities extends DbCls
       }
     }
 
-    if (($fn = $this->setInfo($fn))
-      && !empty($fn[$arc['name']])
+    if (!empty($fn[$arc['name']])
       && ($id = $this->dbTraitInsert($fn))
     ) {
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
@@ -423,6 +254,47 @@ class Identities extends DbCls
     }
 
     return $id;
+  }
+
+  public function search(array|string $filter, array $cols = [], array $fields = [], array $order = [], bool $strict = false, int $limit = 0, int $start = 0): array
+  {
+    $ccfg = $this->getClassCfg();
+    $uauthCfg = self::$dbUauth->getClassCfg();
+    if (is_array($filter)) {
+      $finalFilter = $filter;
+      if (empty($fields) && !empty($cols)) {
+        $fields = $cols;
+      }
+    }
+    else {
+      $finalFilter = $this->dbTraitGetSearchFilter($filter, $cols, $strict);
+    }
+
+    if (empty($fields)) {
+      $fields = array_values($ccfg['arch']['identities']);
+      foreach ($ccfg['uauth_modes'] as $mode) {
+        $fields[$mode] = $this->db->cfn($uauthCfg['arch']['uauth']['value'], 'uauth_' . $mode);
+        if (!is_array($filter)) {
+          $finalFilter['conditions'][] = [
+            'field' => $this->db->cfn($uauthCfg['arch']['uauth']['value'], 'uauth_' . $mode),
+            'operator' => $strict ? '=' : 'contains',
+            'value' => $filter
+          ];
+        }
+      }
+    }
+
+    $cfg = [
+      'table' => $ccfg['table'],
+      'join' => $this->getJoin(),
+      'fields' => $fields,
+      'limit' => $limit,
+      'start' => $start,
+      'where' => $finalFilter,
+    ];
+
+    //X::ddump($cfg);
+    return $this->db->rselectAll($cfg);
   }
 
 
@@ -450,9 +322,8 @@ class Identities extends DbCls
         }
       }
 
-      $fn = $this->prepareData($fn);
+      $fn = $this->dbTraitPrepare($fn);
       if (!empty($fn)) {
-        $fn[$arc['cfg']] = empty($fn[$arc['cfg']]) ? null : json_encode($fn[$arc['cfg']]);
         $ok += (int)$this->dbTraitUpdate($id, $fn);
       }
 
@@ -472,7 +343,7 @@ class Identities extends DbCls
   }
 
 
-  public function delete($id, $force): bool
+  public function delete(string $id, bool $force = false): bool
   {
     return $this->dbTraitDelete($id);
   }
@@ -538,41 +409,6 @@ class Identities extends DbCls
   }
 
 
-  protected function prepareData(array $fn): array
-  {
-    $arc = &$this->class_cfg['arch']['identities'];
-
-    foreach ($fn as $k => $v) {
-      if (!in_array($k, $arc)) {
-        if (empty($fn[$arc['cfg']])) {
-          $fn[$arc['cfg']] = [];
-        }
-        else if (is_string($fn[$arc['cfg']])) {
-          $fn[$arc['cfg']] = json_decode($fn[$arc['cfg']], true);
-        }
-
-        $fn[$arc['cfg']][$k] = is_array($fn[$k]) ? $fn[$k] : (string)$fn[$k];
-        unset($fn[$k]);
-      }
-
-      if ($k === 'email') {
-        if (empty($v)) {
-          $fn[$k] = null;
-        }
-        elseif (!Str::isEmail($v)) {
-          throw new Exception(X::_("The email is not valid"));
-        }
-      }
-    }
-
-    $fn[$arc['cfg']] = !empty($fn[$arc['cfg']]) ? json_encode($fn[$arc['cfg']]) : null;
-    if (isset($fn['id']) && ($fn['id'] === '')) {
-      unset($fn['id']);
-    }
-
-    return $fn;
-  }
-
   public function retrieveUauth(string $identity, string $type): ?array
   {
     return $this->dbUauthRetrieve($identity, $type);
@@ -585,6 +421,46 @@ class Identities extends DbCls
   public function removeUauth(string $identity, string $value, string $type): ?string
   {
     return $this->dbUauthRemove($identity, $value, $type);
+  }
+
+  protected function getJoin(): array
+  {
+    $ccfg = $this->getClassCfg();
+    $uauthCfg = self::$dbUauth->getClassCfg();
+    $join = [];
+    foreach ($ccfg['uauth_modes'] as $mode) {
+      $join[] = [
+        'table' => $ccfg['tables']['uauth'],
+        'alias' => 'uauth_link_' . $mode,
+        'type' => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($ccfg['arch']['identities']['id'], $ccfg['table']),
+            'operator' => '=',
+            'exp' => $this->db->cfn($ccfg['arch']['uauth']['id_associate'], 'uauth_link_' . $mode)
+          ]]
+        ]
+      ];
+
+      $join[] = [
+        'table' => $uauthCfg['table'],
+        'alias' => 'uauth_' . $mode,
+        'type' => 'left',
+        'on' => [
+          'conditions' => [[
+            'field' => $this->db->cfn($ccfg['arch']['uauth']['id_uauth'], 'uauth_link_' . $mode),
+            'operator' => '=',
+            'exp' => $this->db->cfn($uauthCfg['arch']['uauth']['id'], 'uauth_' . $mode)
+          ], [
+            'field' => $this->db->cfn($uauthCfg['arch']['uauth']['typology'], 'uauth_' . $mode),
+            'operator' => '=',
+            'value' => self::$dbUauth->getIdTypology($mode)
+          ]]
+        ]
+      ];
+    }
+
+    return $join;
   }
 
 }

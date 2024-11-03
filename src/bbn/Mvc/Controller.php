@@ -146,13 +146,13 @@ class Controller implements Api
    * All subsequent calls to controllers should be done through $this->add($path).
    *
    * @param Mvc       $mvc
-   * @param array         $files
+   * @param array         $route
    * @param array|boolean $data
    */
-  public function __construct(Mvc $mvc, array $files, $data = false)
+  public function __construct(Mvc $mvc, array $route, $data = false)
   {
     $this->_mvc = $mvc;
-    $this->reset($files, $data);
+    $this->reset($route, $data);
   }
 
 
@@ -162,30 +162,33 @@ class Controller implements Api
    */
   public function reset(array $info, $data = false)
   {
-    if (isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
-      $this->_path        = $info['path'];
-      $this->_plugin      = $info['plugin'];
-      $this->_request     = $this->getRequest();
-      $this->_file        = $info['file'];
-      $this->_root        = $info['root'];
-      $this->arguments    = $info['args'];
-      $this->_checkers    = $info['checkers'];
-      $this->_plugin      = $info['plugin'];
-      $this->_plugin_name = $info['plugin_name'];
-      $this->mode         = $info['mode'];
-      $this->data         = \is_array($data) ? $data : [];
-      // When using CLI a first parameter can be used as route,
-      // a second JSON encoded can be used as $this->post
-      /** @var Db db */
-      $this->db     = $this->_mvc->getDb();
-      $this->inc    = &$this->_mvc->inc;
-      $this->post   = $this->_mvc->getPost();
-      $this->get    = $this->_mvc->getGet();
-      $this->files  = $this->_mvc->getFiles();
-      $this->params = $this->_mvc->getParams();
-      $this->url    = $this->getUrl();
-      $this->obj    = new stdClass();
+    if (!isset($info['mode'], $info['path'], $info['file'], $info['request'], $info['root'])) {
+      X::log($info, 'error_control_reset');
+      throw new Exception("Impossible to reset the controller without the necessary information");
     }
+
+    $this->_path        = $info['path'];
+    $this->_plugin      = $info['plugin'];
+    $this->_request     = $this->getRequest();
+    $this->_file        = $info['file'];
+    $this->_root        = $info['root'];
+    $this->arguments    = $info['args'];
+    $this->_checkers    = $info['checkers'];
+    $this->_plugin      = $info['plugin'];
+    $this->_plugin_name = $info['plugin_name'];
+    $this->mode         = $info['mode'];
+    $this->data         = \is_array($data) ? $data : [];
+    // When using CLI a first parameter can be used as route,
+    // a second JSON encoded can be used as $this->post
+    /** @var Db db */
+    $this->db     = $this->_mvc->getDb();
+    $this->inc    = &$this->_mvc->inc;
+    $this->post   = $this->_mvc->getPost();
+    $this->get    = $this->_mvc->getGet();
+    $this->files  = $this->_mvc->getFiles();
+    $this->params = $this->_mvc->getParams();
+    $this->url    = $this->getUrl();
+    $this->obj    = new stdClass();
   }
 
 

@@ -106,7 +106,7 @@ trait DbActions
    *
    * @return bool
    */
-  protected function dbTraitUpdate(string|array $filter, array $data): bool
+  protected function dbTraitUpdate(string|array $filter, array $data): int
   {
     $ccfg = $this->getClassCfg();
     $f = $ccfg['arch'][$this->class_table_index];
@@ -122,21 +122,24 @@ trait DbActions
       if (!empty($f['cfg'])) {
         $col = $f['cfg'];
         if (!empty($data[$col])) {
+          if (is_string($data[$col])) {
+            $data[$col] = json_decode($data[$col], true);
+          }
+
           $jsonUpdate = 'JSON_SET(' . $this->db->csn($col, true);
           foreach ($data[$col] as $k => $v) {
             $jsonUpdate .= ', "$.' . $k . '", "' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '"';
           }
 
           $jsonUpdate .= ")";
-          X::ddump($jsonUpdate, $data[$col]);
           $data[$col] = [null, $jsonUpdate];
         }
       }
       
-      return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
+      return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
     }
 
-    return false;
+    return 0;
   }
 
 
@@ -259,6 +262,52 @@ trait DbActions
     }
 
     return null;
+  }
+
+  protected function dbTraitGetSearchFilter(string|int $filter, array $cols = [], bool $strict = false): array
+  {
+    $cfg = $this->getClassCfg();
+    $isNumber = Str::isNumber($filter);
+    $finalFilter = [
+      'logic' => 'OR',
+      'conditions' => []
+    ];
+    if (empty($cols)) {
+      $tableCols = $this->db->modelize($cfg['table'])['fields'];
+      foreach ($tableCols as $col => $colCfg) {
+        if ((strpos($colCfg['type'], 'text') !== false) || (strpos($colCfg['type'], 'char') !== false)) {
+          $cols[] = $col;
+        }
+        elseif ($isNumber && (strpos($colCfg['type'], 'int') !== false)) {
+          $cols[] = $col;
+        }
+      }
+    }
+
+    foreach ($cols as $col) {
+      $finalFilter['conditions'][] = [
+        'field' => $this->db->cfn($col, $cfg['table']),
+        'operator' => $strict ? '=' : 'contains',
+        'value' => $filter
+      ];
+    }
+
+    return $finalFilter;
+  }
+
+  protected function dbTraitSearch(array|string $filter, array $cols = [], array $fields = [], array $order = [], bool $strict = false, int $limit = 0, int $start = 0): array
+  {
+    if (is_array($filter)) {
+      $finalFilter = $filter;
+      if (empty($fields) && !empty($cols)) {
+        $fields = $cols;
+      }
+    }
+    else {
+      $finalFilter = $this->dbTraitGetSearchFilter($filter, $cols);
+    }
+
+    return $this->dbTraitRselectAll($finalFilter, $order, $limit, $start, $fields);
   }
 
   /**

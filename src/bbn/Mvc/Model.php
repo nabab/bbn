@@ -120,6 +120,11 @@ class Model extends DbClass
     }
   }
 
+  public function getController(): Controller
+  {
+    return $this->_ctrl;
+  }
+
 
   /**
    * @param array|null $vars
@@ -231,6 +236,12 @@ class Model extends DbClass
           unset($oldTextDomain);
         }
       }
+    }
+
+    foreach ($this->_checkers as $appui_checker_file) {
+      // If a checker file returns false, the controller is not processed
+      // The checker file can define data and inc that can be used in the subsequent controller
+      Mvc::includeModel($appui_checker_file, $this);
     }
 
     $res = Mvc::includeModel($this->_file, $this);

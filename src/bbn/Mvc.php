@@ -407,7 +407,7 @@ class Mvc implements Mvc\Api
   }
 
 
-  public static function includeModel($bbn_inc_file, $model)
+  public static function includeModel($bbn_inc_file, $model, $bbn_is_super = false)
   {
     if (is_file($bbn_inc_file)) {
       ob_start();

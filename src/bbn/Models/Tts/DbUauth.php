@@ -36,6 +36,10 @@ trait DbUauth
     'many-to-many'
   ];
 
+  /**
+   * 
+   * @var Uauth
+   */
   protected static $dbUauth;
 
   private static function dbUauthSetup(Db $db, array $cfg = []) : void
@@ -189,6 +193,16 @@ trait DbUauth
 
   }
 
+  /**
+   * Adds a new uauth to the associate, creating it if needed.
+   * 
+   * @param string $id
+   * @param string $value
+   * @param string $type
+   * @param array $cfg
+   * @throws \Exception
+   * @return mixed
+   */
   public function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
   {
     $this->dbUauthInitCheck();
