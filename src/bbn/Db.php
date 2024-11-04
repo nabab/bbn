@@ -2638,11 +2638,11 @@ class Db implements Db\Actions
    * @return string
    * @throws Exception
    */
-  public function getJoin(array $cfg): string
+  public function getJoin(array $cfg, array $join = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    return $this->language->getJoin($cfg);
+    return $this->language->getJoin($cfg, $join);
   }
 
 

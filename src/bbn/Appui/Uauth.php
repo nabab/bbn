@@ -5,13 +5,11 @@ namespace bbn\Appui;
 use Exception;
 use bbn\Db;
 use bbn\Str;
+use bbn\Phone;
 use bbn\X;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
-use Brick\PhoneNumber\PhoneNumber;
-use Brick\PhoneNumber\PhoneNumberParseException;
-use Brick\PhoneNumber\PhoneNumberFormat;
 
 
 class Uauth extends DbCls
@@ -95,6 +93,11 @@ class Uauth extends DbCls
     return $this->dbTraitSelectOne($arc['value'], $id);
   }
 
+  public function exists(string $id): bool
+  {
+    return $this->dbTraitExists($id);
+  }
+
 
   public function insert(string $value, string $type): ?string
   {
@@ -144,23 +147,13 @@ class Uauth extends DbCls
   }
 
 
-  public function checkPhone(string $phone)
+  public function checkPhone(string $phone): ?string
   {
-    try {
-      $ph = PhoneNumber::parse($phone, $this->class_cfg['uauth_phone_region']);
-      if ($ph) {
-        if (!$ph->isPossibleNumber()) {
-          throw new Exception(X::_("The value (%s) is not a valid phone number", $phone));
-        }
-
-        $phone = $ph->format(PhoneNumberFormat::E164);
-      }
-    }
-    catch (PhoneNumberParseException $e) {
-      throw new Exception(X::_("The value (%s) is not a valid phone number: %s", $e->getMessage(), $phone));
+    if (Phone::isPhone($phone)) {
+      return Phone::format($phone);
     }
 
-    return $phone;
+    return null;
   }
 
 

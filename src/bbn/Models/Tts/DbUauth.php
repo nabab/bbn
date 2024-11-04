@@ -49,6 +49,11 @@ trait DbUauth
     }
   }
 
+  protected static function dbUauthGetClass(): Uauth
+  {
+    return self::$dbUauth;
+  }
+
   protected function dbUauthInit(): void
   {
     if (!$this->_dbUauthIsInit) {
@@ -436,6 +441,18 @@ trait DbUauth
   {
     $this->dbUauthInitCheck();
     return self::$dbUauth->find($value, $type);
+  }
+
+  protected function dbUauthGetByUauth(string $id_uauth): ?array
+  {
+    $this->dbUauthInitCheck();
+    if (self::$dbUauth->exists($id_uauth)) {
+      return $this->db->getColumnValues(
+        $this->class_cfg['tables']['uauth'],
+        $this->class_cfg['arch']['uauth']['id_associate'],
+        [$this->class_cfg['arch']['uauth']['id_uauth'] => $id_uauth]
+      );
+    }
   }
 
 

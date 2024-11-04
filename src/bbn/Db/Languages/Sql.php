@@ -1450,17 +1450,32 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return string
    * @throws \Exception
    */
-  public function getJoin(array $cfg): string
+  public function getJoin(array $cfg, array $joins = null): string
   {
     $res = '';
-    if (!empty($cfg['join'])) {
-      foreach ($cfg['join'] as $join) {
+    if (!$joins) {
+      $joins = $cfg['join'];
+    }
+
+    if (!empty($joins)) {
+      foreach ($joins as $join) {
         if (isset($join['table'], $join['on']) && ($cond = $this->getConditions($join['on'], $cfg, false, 4))) {
           $res .= '  ' .
             (isset($join['type']) && (strtolower($join['type']) === 'left') ? 'LEFT ' : '') .
-            'JOIN ' . $this->tableFullName($join['table'], true) .
-            (!empty($join['alias']) ? ' AS ' . $this->escape($join['alias']) : '')
-            . PHP_EOL . '    ON ' . $cond;
+            'JOIN ';
+          if (isset($join['join'])) {
+            $res .= '(';
+          }
+
+          $res .= $this->tableFullName($join['table'], true) .
+          (!empty($join['alias']) ? ' AS ' . $this->escape($join['alias']) : '');
+
+          if (isset($join['join'])) {
+            $res .= $this->getJoin($cfg, $join['join']);
+            $res .= ')';
+          }
+
+          $res .= PHP_EOL . '    ON ' . $cond;
         }
       }
     }
@@ -2868,7 +2883,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
 
       foreach ($args['join'] as $key => $join){
-        if (!empty($join['table']) && !empty($join['on'])) {
+        if (!empty($join['table'])) {
           $tfn = $this->tableFullName($join['table']);
           if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
             $models[$tfn] = $model;
@@ -2876,6 +2891,19 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
           $idx               = $join['alias'] ?? $tfn;
           $tables_full[$idx] = $tfn;
+          if (isset($join['join'])) {
+            foreach ($join['join'] as $j){
+              if (!empty($j['table'])) {
+                $tfn = $this->tableFullName($j['table']);
+                if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
+                  $models[$tfn] = $model;
+                }
+      
+                $idx               = $j['alias'] ?? $tfn;
+                $tables_full[$idx] = $tfn;
+              }
+            }
+          }
         }
         else{
           $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join), false);
@@ -2975,8 +3003,19 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
 
       foreach ($res['join'] as $r){
-        $this->getValuesDesc($r['on'], $res, $res['values_desc']);
+        if (!empty($r['join'])) {
+          foreach ($r['join'] as $j){
+            if (!empty($j['on'])) {
+              $this->getValuesDesc($j['on'], $res, $res['values_desc']);
+            }
+          }
+        }
+
+        if (!empty($r['on'])) {
+          $this->getValuesDesc($r['on'], $res, $res['values_desc']);
+        }
       }
+
       $this->getValuesDesc($res['filters'], $res, $res['values_desc']);
       $this->getValuesDesc($res['having'], $res, $res['values_desc']);
 
@@ -3237,10 +3276,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             }
           }
 
+          if (!isset($join['type'])) {
+            $join['type'] = 'right';
+          }
+
           if (isset($join['table'], $join['on']) && ($tmp = $this->treatConditions($join['on'], false))) {
-            if (!isset($join['type'])) {
-              $join['type'] = 'right';
-            }
 
             $res['join'][] = array_merge($join, ['on' => $tmp]);
           }
@@ -3262,9 +3302,29 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     if (!empty($res['join'])) {
       $new_join = [];
-      foreach ($res['join'] as $k => $join){
-        if ($tmp = $this->treatConditions($join['on'])) {
-          $new_item             = $join;
+      foreach ($res['join'] as $k => $join ){
+        $new_item = $join;
+        if (!empty($join['join'])) {
+          $new_join2 = [];
+          foreach ($join['join'] as $join2 ){
+            if ($tmp = $this->treatConditions($join2['on'])) {
+              $new_item2 = $join2;
+              $new_item2['on']       = $tmp['where'];
+              $res['hashed_join'][] = $tmp['hashed'];
+              if (!empty($tmp['values'])) {
+                foreach ($tmp['values'] as $v){
+                  $res['values'][] = $v;
+                }
+              }
+    
+              $new_join2[] = $new_item2;
+            }
+          }
+
+          $new_item['join'] = $new_join2;
+        }
+
+        if ($tmp = $this->treatConditions($new_item['on'])) {
           $new_item['on']       = $tmp['where'];
           $res['hashed_join'][] = $tmp['hashed'];
           if (!empty($tmp['values'])) {

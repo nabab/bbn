@@ -1066,51 +1066,25 @@ MYSQL;
       if ( !isset($cfg['history']) ){
         $cfg['history'] = [];
         $new_join = [];
-        foreach ( $cfg['join'] as $i => $t ){
-          $post_join = false;
+        foreach ( $cfg['join'] as $t ){
           $model = $db->modelize($t['table']);
           if (
             isset($model['keys']['PRIMARY']) &&
-            ($model['keys']['PRIMARY']['ref_table'] === $db->csn(self::$table_uids))
+            ($model['keys']['PRIMARY']['ref_table'] === $db->tsn(self::$table_uids))
           ){
             $change++;
-            if ( $t['type'] !== 'left' ){
-              $post_join = [
-                'table' => $db->tsn(self::$table_uids),
-                'alias' => $db->tsn(self::$table_uids).$change,
-                'type' => $t['type'] ?? 'right',
-                'on' => [
-                  'conditions' => [
-                    [
-                      'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
-                      'operator' => 'eq',
-                      'exp' => $db->cfn(
-                        $model['keys']['PRIMARY']['columns'][0],
-                        !empty($t['alias']) ? $t['alias'] : $t['table'],
-                        true
-                      )
-                    ], [
-                      'field' => $db->cfn('bbn_active', self::$table_uids.$change),
-                      'operator' => '=',
-                      'exp' => '1'
-                    ]
-                  ],
-                  'logic' => 'AND'
-                ]
-              ];
+            if (!isset($t['join'])) {
+              $t['join'] = [];
             }
-            else{
-              $join_alias = $t;
-              $alias = strtolower(Str::genpwd());
-              $join_alias['alias'] = $alias;
-              $join_alias['on']['conditions'] = $db->replaceTableInConditions($join_alias['on']['conditions'], !empty($t['alias']) ? $t['alias'] : $t['table'], $alias);
-              $new_join[] = $join_alias;
-              $t['on'] = [
+            $t['join'][] = [
+              'table' => self::$table_uids,
+              'alias' => $db->tsn(self::$table_uids).$change,
+              'on' => [
                 'conditions' => [
                   [
                     'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
                     'operator' => 'eq',
-                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], !empty($t['alias']) ? $t['alias'] : $t['table'], true)
+                    'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $t['alias'] ?? $t['table'], true)
                   ], [
                     'field' => $db->cfn('bbn_active', self::$table_uids.$change),
                     'operator' => '=',
@@ -1118,29 +1092,45 @@ MYSQL;
                   ]
                 ],
                 'logic' => 'AND'
-              ];
-              $new_join[] = [
-                'table' => $db->tsn(self::$table_uids),
-                'alias' => $db->tsn(self::$table_uids).$change,
-                'type' => 'left',
-                'on' => [
-                  'conditions' => [
-                    [
-                      'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
-                      'operator' => 'eq',
-                      'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $alias, true)
+              ]
+            ];
+          }
+
+          if (!empty($t['join'])) {
+            foreach ($t['join'] as $j) {
+              if ($j['table'] !== self::$table_uids) {
+                $model = $db->modelize($j['table']);
+                if (
+                  isset($model['keys']['PRIMARY']) &&
+                  ($model['keys']['PRIMARY']['ref_table'] === $db->csn(self::$table_uids))
+                ){
+                  $change++;
+                  $t['join'][] = [
+                    'table' => self::$table_uids,
+                    'alias' => $db->tsn(self::$table_uids).$change,
+                    'on' => [
+                      'conditions' => [
+                        [
+                          'field' => $db->cfn('bbn_uid', self::$table_uids.$change),
+                          'operator' => 'eq',
+                          'exp' => $db->cfn($model['keys']['PRIMARY']['columns'][0], $t['alias'] ?? $t['table'], true)
+                        ], [
+                          'field' => $db->cfn('bbn_active', self::$table_uids.$change),
+                          'operator' => '=',
+                          'exp' => '1'
+                        ]
+                      ],
+                      'logic' => 'AND'
                     ]
-                  ],
-                  'logic' => 'AND'
-                ]
-              ];
+                  ];
+                }
+              }
             }
           }
+
           $new_join[] = $t;
-          if ( $post_join ){
-            $new_join[] = $post_join;
-          }
         }
+
         foreach ( $cfg['tables'] as $alias => $table ){
           $model = $db->modelize($table);
           if (

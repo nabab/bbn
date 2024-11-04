@@ -7,6 +7,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\Db;
 use bbn\Appui\History;
+use bbn\Appui\Uauth;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\DbUauth;
 use bbn\Models\Cls\Db as DbCls;
@@ -290,11 +291,16 @@ class Identities extends DbCls
       'fields' => $fields,
       'limit' => $limit,
       'start' => $start,
-      'where' => $finalFilter,
+      'where' => $finalFilter
     ];
 
     //X::ddump($cfg);
     return $this->db->rselectAll($cfg);
+  }
+
+  public function getByUauth(string $id_uauth): array
+  {
+    return $this->dbUauthGetByUauth($id_uauth);
   }
 
 
@@ -408,6 +414,11 @@ class Identities extends DbCls
     return History::fusion($ids, $this->class_cfg['table'], $this->db, $main);
   }
 
+  public function getUauth(): Uauth
+  {
+    return $this->dbUauthGetClass();
+  }
+
 
   public function retrieveUauth(string $identity, string $type): ?array
   {
@@ -418,10 +429,18 @@ class Identities extends DbCls
   {
     return $this->dbUauthAdd($identity, $value, $type);
   }
+
+  public function searchUauth(string $value, string $type): ?array
+  {
+    return $this->dbUauthFind($value, $type);
+  }
+
+
   public function removeUauth(string $identity, string $value, string $type): ?string
   {
     return $this->dbUauthRemove($identity, $value, $type);
   }
+
 
   protected function getJoin(): array
   {
@@ -433,6 +452,21 @@ class Identities extends DbCls
         'table' => $ccfg['tables']['uauth'],
         'alias' => 'uauth_link_' . $mode,
         'type' => 'left',
+        'join' => [[
+          'table' => $uauthCfg['table'],
+          'alias' => 'uauth_' . $mode,
+          'on' => [
+            'conditions' => [[
+              'field' => $this->db->cfn($ccfg['arch']['uauth']['id_uauth'], 'uauth_link_' . $mode),
+              'operator' => '=',
+              'exp' => $this->db->cfn($uauthCfg['arch']['uauth']['id'], 'uauth_' . $mode)
+            ], [
+              'field' => $this->db->cfn($uauthCfg['arch']['uauth']['typology'], 'uauth_' . $mode),
+              'operator' => '=',
+              'value' => self::$dbUauth->getIdTypology($mode)
+            ]]
+          ]
+        ]],
         'on' => [
           'conditions' => [[
             'field' => $this->db->cfn($ccfg['arch']['identities']['id'], $ccfg['table']),
@@ -441,26 +475,8 @@ class Identities extends DbCls
           ]]
         ]
       ];
-
-      $join[] = [
-        'table' => $uauthCfg['table'],
-        'alias' => 'uauth_' . $mode,
-        'type' => 'left',
-        'on' => [
-          'conditions' => [[
-            'field' => $this->db->cfn($ccfg['arch']['uauth']['id_uauth'], 'uauth_link_' . $mode),
-            'operator' => '=',
-            'exp' => $this->db->cfn($uauthCfg['arch']['uauth']['id'], 'uauth_' . $mode)
-          ], [
-            'field' => $this->db->cfn($uauthCfg['arch']['uauth']['typology'], 'uauth_' . $mode),
-            'operator' => '=',
-            'value' => self::$dbUauth->getIdTypology($mode)
-          ]]
-        ]
-      ];
     }
 
     return $join;
   }
-
 }

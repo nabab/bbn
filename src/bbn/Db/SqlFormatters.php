@@ -46,7 +46,7 @@ interface SqlFormatters
    * @param array $cfg
    * @return string
    */
-  public function getJoin(array $cfg): string;
+  public function getJoin(array $cfg, array $join = null): string;
 
 
   /**
