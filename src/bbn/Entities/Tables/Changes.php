@@ -406,7 +406,7 @@ class Changes extends EntityTable
           case 'identities':
             $field_sub = 'id_identity';
             if (!$id_sub) {
-              $id_sub = $this->identities()->add($subdata, true);
+              $id_sub = $this->identity()->add($subdata, true);
               $cfg['data'][] = [
                 'field' => 'id_identity',
                 'value' => $id_sub
@@ -1406,7 +1406,7 @@ class Changes extends EntityTable
           unset($data['id']);
         }
 
-        if ($id = $this->identities()->add($data, true)) {
+        if ($id = $this->identity()->add($data, true)) {
           $ret = true;
         }
 
@@ -1425,11 +1425,11 @@ class Changes extends EntityTable
         }
 
         $data = X::mergeArrays($exists, $data);
-        $ret  = !!$this->identities()->update($id, $data);
+        $ret  = !!$this->identity()->update($id, $data);
         break;
       case 'delete':
         if (!$is_sub) {
-          $ret = !!$this->identities()->delete($id);
+          $ret = !!$this->identity()->delete($id);
         }
 
         break;

@@ -62,9 +62,9 @@ trait EntityTrait
   }
   
 
-  public function identities(): ?Identities
+  public function identity(): ?Identities
   {
-    return $this->entities->identities();
+    return $this->entities->identity();
   }
 
   public function address(): ?Address

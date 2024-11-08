@@ -945,6 +945,14 @@ class Option extends DbCls
         }
       }
 
+      if ($schema = $this->getSchema($id)) {
+        foreach ($schema as $s) {
+          if (isset($s['field']) && !isset($opt[$s['field']])) {
+            $opt[$s['field']] = $s['default'] ?? null;
+          }
+        }
+      }
+
       return $opt;
     }
 
@@ -1138,7 +1146,7 @@ class Option extends DbCls
    * @param string     $value The value field name for id column
    * @return array Options' list in a text/value indexed array
    */
-  public function textValueOptions($id, string $text = 'text', string $value = 'value'): ?array
+  public function textValueOptions($id, string $text = 'text', string $value = 'value', string ...$additionalFields): ?array
   {
     $res = [];
     if ($opts = $this->fullOptions($id)) {
@@ -1155,6 +1163,11 @@ class Option extends DbCls
         ];
         if (!empty($cfg['show_code'])) {
           $res[$i][$this->fields['code']] = $o[$this->fields['code']];
+        }
+        foreach ($additionalFields as $f) {
+          if (!array_key_exists($f, $res[$i])) {
+            $res[$i][$f] = $o[$f] ?? null;
+          }
         }
 
         /*
@@ -4240,6 +4253,16 @@ public function getIdAlias($code = null): ?string
     return $opts ?? [];
   }
 
+  public function getSchema($id): ?array
+  {
+    if ($cfg = $this->getCfg($id)) {
+      if (!empty($cfg['schema']) && is_string($cfg['schema'])) {
+        return json_decode($cfg['schema'], true);
+      }
+    }
+
+    return null;
+  }
 
   /**
    * Retourne toutes les caractéristiques des options d'une catégorie donnée dans un tableau indexé sur leur `id`
@@ -4263,7 +4286,13 @@ public function getIdAlias($code = null): ?string
     if ($cats = $this->fullOptions($id ?: false)) {
       foreach ($cats as $cat){
         if (!empty($cat['tekname'])) {
-          $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']]);
+          $additional = [];
+          if ($schema = $this->getSchema($cat[$this->fields['id']])) {
+            array_push($additional, ...array_map(function($a) {
+              return $a['field'];
+            }, $schema));
+          }
+          $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']], 'text', 'value', ...$additional);
           $res['categories'][$cat[$this->fields['id']]] = $cat['tekname'];
         }
       }

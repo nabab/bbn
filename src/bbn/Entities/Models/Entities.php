@@ -362,7 +362,7 @@ abstract class Entities extends DbCls
     return $this->masks;
   }
 
-  public function identities(): ?Identities
+  public function identity(): ?Identities
   {
     $cls = $this->class_cfg['classes'];
     if (!$this->identities && $cls['identities']) {

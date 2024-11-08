@@ -85,7 +85,7 @@ class Link extends EntityTable
       ];
 
       if (!empty($this->cfg['identities'])) {
-        $this->identities = $this->entities->identities();
+        $this->identities = $this->entities->identity();
       }
 
       if (!empty($this->cfg['address'])) {
@@ -102,7 +102,7 @@ class Link extends EntityTable
       }
     }
     else {
-      $this->identities = $this->entities->identities();
+      $this->identities = $this->entities->identity();
       $this->address = $this->entities->address();
     }
   }
@@ -161,7 +161,7 @@ class Link extends EntityTable
     return $this->dbTraitRselect([$this->fields['id'] => $id]);
   }
 
-  public function update(array $data, array $where = []): int
+  public function update(array $data, string|array $where): int
   {
     return $this->dbTraitUpdate($where, $data);
   }
@@ -179,13 +179,15 @@ class Link extends EntityTable
       }
     }
 
-    foreach ($data as $k => $v) {
-      if (!in_array($k, $this->class_cfg['arch']['links']) && !isset($this->cfg[$k])) {
-        throw new Exception(X::_("The field %s is not valid", $k));
-      }
+    $data[$this->fields['link_type']] = $this->type;
+    if ($this->entity) {
+      $data[$this->fields['id_entity']] = $this->entity->getId();
     }
 
-    $data[$this->fields['link_type']] = $this->type;
+    if (empty($data[$this->fields['id_entity']])) {
+      throw new Exception(X::_("The entity is not defined"));
+    }
+
     return $this->dbTraitInsert($data);
   }
 

@@ -101,9 +101,9 @@ class Entity
     if ($force || !array_key_exists($field, $this->info)) {
       if (!in_array($field, $this->fields)) {
         if (isset($this->fields['identity'])) {
-          $identityCfg = array_flip($this->identities()->getClassCfg()['arch']['identities']);
+          $identityCfg = array_flip($this->identity()->getClassCfg()['arch']['identities']);
           if (isset($identityCfg[$field])) {
-            $identity = $this->identities()->get($this->getField($this->fields['identity']));
+            $identity = $this->identity()->get($this->getField($this->fields['identity']));
             X::extendOut($this->info, $identity);
             if (isset($identity[$field])) {
               return $identity[$field];
@@ -111,7 +111,7 @@ class Entity
           }
           else if ($this->entities->getClassCfg()['classes']['uauth']) {
             try {
-              $uauth = $this->identities()->retrieveUauth($this->getField($this->fields['identity']), $field);
+              $uauth = $this->identity()->retrieveUauth($this->getField($this->fields['identity']), $field);
               return $uauth[$field];
             }
             catch (Exception $e) {
@@ -174,7 +174,7 @@ class Entity
     );
 
     if (!empty($res[$arc['identity']])) {
-      $res = X::mergeArrays($this->identities()->get($res[$arc['identity']]), $res);
+      $res = X::mergeArrays($this->identity()->get($res[$arc['identity']]), $res);
     }
 
     return $res;
@@ -198,7 +198,7 @@ class Entity
     );
 
     if (!empty($res[$arc['identity']])) {
-      $res = X::mergeArrays($this->identities()->get($res[$arc['identity']]), $res);
+      $res = X::mergeArrays($this->identity()->get($res[$arc['identity']]), $res);
     }
 
     return $res;
@@ -229,9 +229,9 @@ class Entity
     return $this->entities->getLink($linkCls, $this);
   }
 
-  public function identities(): ?Identities
+  public function identity(): ?Identities
   {
-    return $this->entities->identities();
+    return $this->entities->identity();
   }
 
   public function uauth(): ?Uauth
