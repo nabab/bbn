@@ -142,7 +142,7 @@ class Changes extends EntityTable
    * @param string $code
    * @return string
    */
-  public static function crypt_code(string $code): string
+  public static function cryptCode(string $code): string
   {
     return rtrim(strtr(base64_encode(\bbn\Util\Enc::crypt($code)), '+/', '-_'), '=');
   }
@@ -152,7 +152,7 @@ class Changes extends EntityTable
    * @param string $code
    * @return string
    */
-  public static function decrypt_code(string $code): string
+  public static function decryptCode(string $code): string
   {
     return \bbn\Util\Enc::decrypt(base64_decode(strtr($code, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($code)) % 4)));
   }
@@ -164,14 +164,14 @@ class Changes extends EntityTable
    * @param string $file
    * @return null|bool
    */
-  public function attach_file(string $id, string $code, string $file): bool
+  public function attachFile(string $id, string $code, string $file): bool
   {
     if (Str::isUid($id)) {
-      $filesLinked = $this->get_files_link($id);
+      $filesLinked = $this->getFilesLink($id);
       $cCfg = $this->getClassCfg();
       $filesFields = $cCfg['arch']['files'];
       foreach ($filesLinked as $fl) {
-        $f = $this->_get_file([
+        $f = $this->_getFile([
           $this->db->cfn($filesFields['id'], $cCfg['tables']['files']) => $fl[$filesFields['id_file']]
         ]);
         if (!empty($f)
@@ -186,7 +186,7 @@ class Changes extends EntityTable
           }
 
           $data[$filesFields['files']] = json_encode($data[$filesFields['files']]);
-          return $this->update_file($f[$filesFields['id']], $data);
+          return $this->updateFile($f[$filesFields['id']], $data);
         }
       }
     }
@@ -199,19 +199,19 @@ class Changes extends EntityTable
    * @param string $id_type
    * @return bool
    */
-  public function reset_file_by_type(string $id_type): bool
+  public function resetFileByType(string $id_type): bool
   {
     $filesFields = $this->getClassCfg()['arch']['files'];
-    if (($file = $this->get_file_by_type($id_type))
-      && $this->update_file(
+    if (($file = $this->getFileByType($id_type))
+      && $this->updateFile(
         $file[$filesFields['id']], [
           $filesFields['files'] => null,
           $filesFields['date_added'] => null
         ]
       )
     ) {
-      foreach ($this->get_ids_by_file($file[$filesFields['id']]) as $id){
-        $this->_set_state($id);
+      foreach ($this->getIdsByFile($file[$filesFields['id']]) as $id){
+        $this->_setState($id);
       }
 
       return true;
@@ -226,19 +226,14 @@ class Changes extends EntityTable
    * @param string $code
    * @return bool
    */
-  public function send_conf_email(string $email, string $code): bool
+  public function sendEmailVerification(string $email, string $code): bool
   {
-    if (Str::isEmail($email)
-      && $this->db->insert('bbn_emails', [
+    return Str::isEmail($email)
+      && !!$this->db->insert('bbn_emails', [
         'email' => $email,
         'subject' => 'Confirming your email',
-        'text' => _('Click the following link to confirm your email address:').' '.BBN_URL.(\str_ends_with(BBN_URL, '/') ? '' : '/').'confirm_email/'.$code
-      ])
-    ) {
-      return true;
-    }
-
-    return false;
+        'text' => _('Click the following link to confirm your email address:').' '.BBN_URL.(\str_ends_with(BBN_URL, '/') ? '' : '/').'confirm_email/'.static::cryptCode($code)
+      ]);
   }
 
 
@@ -275,7 +270,7 @@ class Changes extends EntityTable
         && !empty($subdata['data'])
       ) {
         foreach ($subdata['data'] as $i => $v){
-          $subdata['data'][$i] = $this->check_email_required($subdata['table'], $v);
+          $subdata['data'][$i] = $this->checkEmailRequired($subdata['table'], $v);
         }
 
         $tocfg['subdata'] = $subdata;
@@ -283,19 +278,19 @@ class Changes extends EntityTable
 
       if (X::isAssoc($todata)) {
         if ((!empty($is_update) || !empty($is_delete))
-          && ($id_change = $this->check_exists($table, $id, $todata, $type))
+          && ($id_change = $this->checkExists($table, $id, $todata, $type))
         ) {
           if (!empty($is_update)) {
             if ($this->_update($id_change, $todata, $moment, $subdata)) {
               return [$id_change];
             }
           }
-          elseif ($this->_set_moment($id_change, $moment)) {
+          elseif ($this->_setMoment($id_change, $moment)) {
             return [$id_change];
           }
         }
         else {
-          $tocfg['data'][] = $this->check_email_required($table, $todata);
+          $tocfg['data'][] = $this->checkEmailRequired($table, $todata);
           if ($id_change = $this->_insert($moment, $tocfg)) {
             return [$id_change];
           }
@@ -304,13 +299,13 @@ class Changes extends EntityTable
       }
       elseif (!empty($is_insert) || !empty($is_delete)) {
         foreach ($todata as $i => $t){
-          $todata[$i] = !empty($is_insert) ? $this->check_email_required($table, $t) : $t;
+          $todata[$i] = !empty($is_insert) ? $this->checkEmailRequired($table, $t) : $t;
         }
 
         $tocfg['data'] = $todata;
         if (!empty($is_delete)
-          && ($id_change = $this->check_exists($table, $id, $todata, $type))
-          && $this->_set_moment($id_change, $moment)
+          && ($id_change = $this->checkExists($table, $id, $todata, $type))
+          && $this->_setMoment($id_change, $moment)
         ) {
           return [$id_change];
         }
@@ -325,13 +320,13 @@ class Changes extends EntityTable
         if (!empty($todata)) {
         foreach ($todata as $t){
             if (!empty($is_update)
-              && ($id_change = $this->check_exists($table, $id, $t))
+              && ($id_change = $this->checkExists($table, $id, $t))
               && $this->_update($id_change, $t, $moment, $subdata)
             ) {
             $ret[] = $id_change;
           }
           else {
-            $tocfg['data'] = [$this->check_email_required($table, $t)];
+            $tocfg['data'] = [$this->checkEmailRequired($table, $t)];
               if ($id_change = $this->_insert($moment, $tocfg))
               $ret[] = $id_change;
             }
@@ -339,7 +334,7 @@ class Changes extends EntityTable
         }
         elseif (!empty($subdata)) {
           if (!empty($is_update)
-            && ($id_change = $this->check_exists($table, $id, $todata))
+            && ($id_change = $this->checkExists($table, $id, $todata))
             && $this->_update($id_change, $todata, $moment, $subdata)
           ) {
             $ret[] = $id_change;
@@ -363,7 +358,7 @@ class Changes extends EntityTable
    */
   public function delete(string $id): ?int
   {
-    if (Str::isUid($id) && $this->delete_file_and_link($id)) {
+    if (Str::isUid($id) && $this->deleteFileAndLink($id)) {
       return $this->dbTraitDelete($id);
     }
 
@@ -516,7 +511,7 @@ class Changes extends EntityTable
       }
 
       return empty($error)
-        && $this->delete_file_and_link($id)
+        && $this->deleteFileAndLink($id)
         && $this->db->update($this->class_table, [
           $this->fields['state'] => static::$states['accepted'],
           $this->fields['cfg'] => json_encode($cfg)
@@ -538,7 +533,7 @@ class Changes extends EntityTable
     if (Str::isUid($id)
       && $this->check()
       && $this->get($id, [$this->fields['id_entity'] => $this->getId()])
-      && $this->delete_file_and_link($id)
+      && $this->deleteFileAndLink($id)
     ) {
       return $this->db->update($this->class_table, [
         $this->fields['state'] => static::$states['refused']
@@ -551,7 +546,7 @@ class Changes extends EntityTable
   }
 
 
-  public function force_state(string $id, $state): bool
+  public function forceState(string $id, $state): bool
   {
     if (\in_array($state, array_values(static::$states), true)) {
       return !!$this->db->update($this->class_table, [$this->fields['state'] => $state], [$this->fields['id'] => $id]);
@@ -576,7 +571,7 @@ class Changes extends EntityTable
    * @param array  $cfg
    * @return null|int
    */
-  public function get_current_state(string $id, array $cfg): ?int
+  public function getCurrentState(string $id, array $cfg): ?int
   {
     $state = static::$states['untreated'];
     if (!empty($cfg['subdata'])
@@ -601,7 +596,7 @@ class Changes extends EntityTable
       }
     }
 
-    /* if (($files = $this->get_required_files($id, $cfg['type'])) && \array_filter(
+    /* if (($files = $this->getRequiredFiles($id, $cfg['type'])) && \array_filter(
         $files, function ($file) {
         return empty($file['files']) && !empty($file['mandatory']);
       }
@@ -625,7 +620,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function get_untreated(): ?array
+  public function getUntreated(): ?array
   {
     return $this->_get(
       [
@@ -644,7 +639,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function get_unready(): ?array
+  public function getUnready(): ?array
   {
     return $this->_get(
       [
@@ -663,7 +658,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function get_unready_untreated(): ?array
+  public function getUnreadyUntreated(): ?array
   {
     $cfgField = $this->fields['cfg'];
     return array_map(
@@ -673,7 +668,7 @@ class Changes extends EntityTable
             $cfg['data'] = array_map(
               function ($d) {
                 if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = static::crypt_code($d['email']);
+                  $d['email'] = static::cryptCode($d['email']);
                 }
 
                 return $d;
@@ -685,7 +680,7 @@ class Changes extends EntityTable
             $cfg['subdata']['data'] = array_map(
               function ($d) {
                 if (array_key_exists('email', $d) && ($d['email'] !== true)) {
-                  $d['email'] = static::crypt_code($d['email']);
+                  $d['email'] = static::cryptCode($d['email']);
                 }
 
                 return $d;
@@ -722,7 +717,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function get_not_accepted_refused(): ?array
+  public function getNotAcceptedRefused(): ?array
   {
     return $this->_get(
       [
@@ -754,7 +749,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function get_accepted(): ?array
+  public function getAccepted(): ?array
   {
     return $this->_get(
       [
@@ -773,7 +768,7 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
-  public function get_refused(): ?array
+  public function getRefused(): ?array
   {
     return $this->_get(
       [
@@ -853,7 +848,7 @@ class Changes extends EntityTable
         function ($e) use ($t, $withFiles) {
           if ($withFiles) {
             $cfg = json_decode($e[$t->fields['cfg']], true);
-            $e['files'] = $t->get_required_files($e[$t->fields['id']], $cfg['type']);
+            $e['files'] = $t->getRequiredFiles($e[$t->fields['id']], $cfg['type']);
           }
 
           return $e;
@@ -886,8 +881,8 @@ class Changes extends EntityTable
         ])
         && ($id = $this->db->lastId())
       ) {
-        $this->set_required_files($id);
-        $this->_set_state($id, $this->get_current_state($id, $cfg));
+        $this->setRequiredFiles($id);
+        $this->_setState($id, $this->getCurrentState($id, $cfg));
         return $id;
       }
     }
@@ -901,7 +896,7 @@ class Changes extends EntityTable
    * @param bool|null|int $state
    * @return bool
    */
-  protected function _set_state(string $id, $state = false): bool
+  protected function _setState(string $id, $state = false): bool
   {
     if (Str::isUid($id)) {
       if ($state === false) {
@@ -910,7 +905,7 @@ class Changes extends EntityTable
         }
 
         if (isset($cfg) && is_array($cfg)) {
-          $state = $this->get_current_state($id, $cfg);
+          $state = $this->getCurrentState($id, $cfg);
         }
         else{
           return false;
@@ -937,7 +932,7 @@ class Changes extends EntityTable
    * @param string $moment
    * @return bool
    */
-  protected function _set_moment(string $id, string $moment = ''): bool
+  protected function _setMoment(string $id, string $moment = ''): bool
   {
     if (Str::isUid($id)) {
       return !!$this->db->update(
@@ -972,7 +967,7 @@ class Changes extends EntityTable
       && ($cfg = \json_decode($old[$this->fields['cfg']], true))
     ) {
       if (($idx = X::find($cfg['data'], ['field' => $todata['field']])) !== null) {
-        $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->check_email_required($cfg['table'], $todata));
+        $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata));
         $cfg['subdata']    = $subdata;
         if ($this->db->update(
           $this->class_table,
@@ -984,8 +979,8 @@ class Changes extends EntityTable
             $this->fields['id'] => $id
           ]
         )) {
-          $this->set_required_files($id);
-          $this->_set_state($id, $this->get_current_state($id, $cfg));
+          $this->setRequiredFiles($id);
+          $this->_setState($id, $this->getCurrentState($id, $cfg));
           return 1;
         }
       }
@@ -1003,7 +998,7 @@ class Changes extends EntityTable
    * @param string $type
    * @return null|array
    */
-  protected function field_requires_file(string $type, string $table, $field = null): ?array
+  protected function fieldRequiresFile(string $type, string $table, $field = null): ?array
   {
     if (($arr = static::requiredFiles())
       && !empty($arr[$table])
@@ -1030,9 +1025,9 @@ class Changes extends EntityTable
    * @param bool         $files
    * @return null|array
    */
-  protected function get_file_by_type($id_type, bool $files = true): ?array
+  protected function getFileByType($id_type, bool $files = true): ?array
   {
-    return $this->_get_file_by_type(
+    return $this->_getFileByType(
       $id_type,
       $files,
       [[
@@ -1048,7 +1043,7 @@ class Changes extends EntityTable
    * @param string $type
    * @return null|array
    */
-  protected function get_required_files(string $id_change, string $type): ?array
+  protected function getRequiredFiles(string $id_change, string $type): ?array
   {
     if ($change = $this->get($id_change)) {
       $cCfg = $this->getClassCfg();
@@ -1104,13 +1099,13 @@ class Changes extends EntityTable
       ]));
       $codes = [];
       if (empty($cfg['data'])) {
-        if ($c = $this->field_requires_file($type, $cfg['table'])) {
+        if ($c = $this->fieldRequiresFile($type, $cfg['table'])) {
           \array_push($codes, ...$c);
         }
       }
       else {
         foreach ($cfg['data'] as $d){
-          if ($c = $this->field_requires_file($type, $cfg['table'], $d['field'])) {
+          if ($c = $this->fieldRequiresFile($type, $cfg['table'], $d['field'])) {
             \array_push($codes, ...$c);
           }
         }
@@ -1186,19 +1181,19 @@ class Changes extends EntityTable
    * @param string $id_change
    * @param string $type
    */
-  protected function set_required_files(string $idChange)
+  protected function setRequiredFiles(string $idChange)
   {
     if ($change = $this->get($idChange)) {
       $cfg    = json_decode($change[$this->fields['cfg']], true);
       $codes = [];
       if (empty($cfg['data'])) {
-        if ($c = $this->field_requires_file($cfg['type'], $cfg['table'])) {
+        if ($c = $this->fieldRequiresFile($cfg['type'], $cfg['table'])) {
           \array_push($codes, ...$c);
         }
       }
       else {
         foreach ($cfg['data'] as $d) {
-          if ($c = $this->field_requires_file($cfg['type'], $cfg['table'], $d['field'])) {
+          if ($c = $this->fieldRequiresFile($cfg['type'], $cfg['table'], $d['field'])) {
             \array_push($codes, ...$c);
           }
         }
@@ -1212,11 +1207,11 @@ class Changes extends EntityTable
 
           if (\is_array($code)) {
             foreach ($code as $c){
-              $this->_file_insert($idChange, $c, $mandatory);
+              $this->_fileInsert($idChange, $c, $mandatory);
             }
           }
           else {
-            $this->_file_insert($idChange, $code, $mandatory);
+            $this->_fileInsert($idChange, $code, $mandatory);
           }
         }
       }
@@ -1229,14 +1224,14 @@ class Changes extends EntityTable
    * @param bool   $mandatory
    * @return string|null
    */
-  protected function _file_insert(string $id_link, string $type, bool $mandatory): ?string
+  protected function _fileInsert(string $id_link, string $type, bool $mandatory): ?string
   {
     if (Str::isUid($id_link)) {
-      $id_file = $this->insert_file($type);
+      $id_file = $this->insertFile($type);
       if (Str::isUid($id_file)
-        && !$this->has_file_link($id_link, $id_file)
+        && !$this->hasFileLink($id_link, $id_file)
       ) {
-        $this->insert_file_link($id_link, $id_file, $mandatory);
+        $this->insertFileLink($id_link, $id_file, $mandatory);
       }
 
       return $id_file;
@@ -1250,7 +1245,7 @@ class Changes extends EntityTable
    * @param string $id
    * @return array
    */
-  protected function get_ids_by_file(string $id): array
+  protected function getIdsByFile(string $id): array
   {
     if (Str::isUid($id)) {
       $cCfg = $this->getClassCfg();
@@ -1273,7 +1268,7 @@ class Changes extends EntityTable
    * @param array  $data
    * @return string
    */
-  protected function check_exists(string $table, string $id, array $data, string $type = 'update')
+  protected function checkExists(string $table, string $id, array $data, string $type = 'update')
   {
     switch ($type){
       case 'update':
@@ -1355,7 +1350,7 @@ class Changes extends EntityTable
    * @param string $field
    * @return bool
    */
-  protected function email_required(string $table, string $field): bool
+  protected function emailRequired(string $table, string $field): bool
   {
     return ($em = static::emailVerification())
       && !empty($em[$table])
@@ -1368,13 +1363,13 @@ class Changes extends EntityTable
    * @param array  $data
    * @return array
    */
-  protected function check_email_required(string $table, array $data): array
+  protected function checkEmailRequired(string $table, array $data): array
   {
     if (!empty($data['value'])
-      && $this->email_required($table, $data['field'])
+      && $this->emailRequired($table, $data['field'])
     ) {
       $data['email'] = Str::genpwd();
-      $this->send_conf_email($data['value'], static::crypt_code($data['email']));
+      $this->sendEmailVerification($data['value'], $data['email']);
     }
 
     return $data;

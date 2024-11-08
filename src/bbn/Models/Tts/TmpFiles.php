@@ -7,13 +7,11 @@ use bbn\X;
 trait TmpFiles
 {
 
-  private $table_links_extrafields = [];
-
   /**
    * @param array $where
    * @return array|null
    */
-  private function _get_file(array $where): ?array
+  private function _getFile(array $where): ?array
   {
     $cCfg = $this->getClassCfg();
     $oCfg = $this->options()->getClassCfg();
@@ -72,7 +70,7 @@ trait TmpFiles
    * @param array        $conditions
    * @return null|array
    */
-  private function _get_file_by_type($id_type, bool $files = true, array $conditions = []): ?array
+  private function _getFileByType($id_type, bool $files = true, array $conditions = []): ?array
   {
     $cCfg = $this->getClassCfg();
     if (\is_array($id_type)) {
@@ -103,7 +101,7 @@ trait TmpFiles
       ];
     }
 
-    return $this->_get_file($conditions);
+    return $this->_getFile($conditions);
   }
 
 
@@ -112,7 +110,7 @@ trait TmpFiles
    * @param array  $files
    * @return null|string
    */
-  private function insert_file(string $type, array $files = [], string $labels = ''): ?string
+  private function insertFile(string $type, array $files = [], string $labels = ''): ?string
   {
     $cCfg = $this->getClassCfg();
     return $this->db->insert(
@@ -131,7 +129,7 @@ trait TmpFiles
    * @param array  $data
    * @return bool
    */
-  private function update_file(string $id, array $data): bool
+  private function updateFile(string $id, array $data): bool
   {
     $cCfg = $this->getClassCfg();
     return Str::isUid($id) && $this->db->update($cCfg['tables']['files'], $data, [$cCfg['arch']['files']['id'] => $id]);
@@ -142,9 +140,9 @@ trait TmpFiles
    * @param string $id
    * @return bool
    */
-  private function delete_file(string $id): bool
+  private function deleteFile(string $id): bool
   {
-    if (Str::isUid($id) && !$this->has_links($id)) {
+    if (Str::isUid($id) && !$this->hasLinks($id)) {
       $cCfg = $this->getClassCfg();
       // Can be linked to others
       return !!$this->db->deleteIgnore($cCfg['tables']['files'], [$cCfg['arch']['files']['id'] => $id]);
@@ -160,7 +158,7 @@ trait TmpFiles
    * @param bool   $mandatory
    * @return nul|int
    */
-  private function insert_file_link(string $id_link, string $id_file, bool $mandatory = true): ?int
+  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?int
   {
     if (Str::isUid($id_link) && Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
@@ -182,7 +180,7 @@ trait TmpFiles
    * @param string $id_file
    * @return bool
    */
-  private function delete_file_link(string $id_link, string $id_file): bool
+  private function deleteFileLink(string $id_link, string $id_file): bool
   {
     if (Str::isUid($id_link) && Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
@@ -204,18 +202,18 @@ trait TmpFiles
    * @param bool   $mandatory
    * @return string|null
    */
-  private function _file_exists_or_insert(string $id_link, string $type, bool $mandatory): ?string
+  private function _fileExistsOrInsert(string $id_link, string $type, bool $mandatory): ?string
   {
     if (Str::isUid($id_link)) {
       if ($exists = $this->get_file_by_type($type, false)) {
         $id_file = $exists[$this->getClassCfg()['arch']['links']['id_link']];
       }
       else {
-        $id_file = $this->insert_file($type);
+        $id_file = $this->insertFile($type);
       }
 
-      if (Str::isUid($id_file) && !$this->has_file_link($id_link, $id_file)) {
-        $this->insert_file_link($id_link, $id_file, $mandatory);
+      if (Str::isUid($id_file) && !$this->hasFileLink($id_link, $id_file)) {
+        $this->insertFileLink($id_link, $id_file, $mandatory);
       }
 
       return $id_file;
@@ -230,7 +228,7 @@ trait TmpFiles
    * @param string $id
    * @return array|null
    */
-  private function get_files_link(string $id): ?array
+  private function getFilesLink(string $id): ?array
   {
     if (Str::isUid($id)) {
       $cCfg = $this->getClassCfg();
@@ -286,7 +284,7 @@ trait TmpFiles
    * @param string $id_file
    * @return null|bool
    */
-  private function has_file_link(string $id_link, string $id_file): ?bool
+  private function hasFileLink(string $id_link, string $id_file): ?bool
   {
     if (Str::isUid($id_link) && Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
@@ -301,7 +299,7 @@ trait TmpFiles
     }
   }
 
-  public function has_links(string $id_file){
+  public function hasLinks(string $id_file){
     if (Str::isUid($id_file)) {
       $cCfg = $this->getClassCfg();
       return !!$this->db->selectAll([
@@ -324,17 +322,17 @@ trait TmpFiles
    * @param string $id
    * @return bool
    */
-  public function delete_file_and_link(string $id): bool
+  public function deleteFileAndLink(string $id): bool
   {
     if (Str::isUid($id)) {
-      if ($links = $this->get_files_link($id)) {
+      if ($links = $this->getFilesLink($id)) {
         $cCfg = $this->getClassCfg();
         foreach ($links as $link){
-          if (!$this->delete_file_link($id, $link[$cCfg['arch']['links']['id_file']])) {
+          if (!$this->deleteFileLink($id, $link[$cCfg['arch']['links']['id_file']])) {
             return false;
           }
 
-          $this->delete_file($link[$cCfg['arch']['links']['id_file']]);
+          $this->deleteFile($link[$cCfg['arch']['links']['id_file']]);
         }
       }
 
