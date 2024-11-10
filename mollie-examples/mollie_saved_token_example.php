@@ -14,7 +14,7 @@ $cfg = [
   ],
 ];
 
-/** @var $ctrl \bbn\Mvc\Controller */
+/** @var bbn\Mvc\Controller $ctrl */
 
 $token_handler = new class implements MollieTokensHandlerContract {
 

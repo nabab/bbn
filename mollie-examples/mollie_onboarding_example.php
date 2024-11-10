@@ -5,7 +5,7 @@ use bbn\Api\Permissions\MollieManager;
 
 require '../vendor/autoload.php';
 
-/** @var $ctrl \bbn\Mvc\Controller */
+/** @var bbn\Mvc\Controller $ctrl */
 
 // The saved access token in db
 $access_token = '';
