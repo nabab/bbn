@@ -7,6 +7,9 @@ use bbn\X;
 trait TmpFiles
 {
 
+  private $tableLinksExtrafields = [];
+
+
   /**
    * @param array $where
    * @return array|null
@@ -205,7 +208,7 @@ trait TmpFiles
   private function _fileExistsOrInsert(string $id_link, string $type, bool $mandatory): ?string
   {
     if (Str::isUid($id_link)) {
-      if ($exists = $this->get_file_by_type($type, false)) {
+      if ($exists = $this->_getFileByType($type, false)) {
         $id_file = $exists[$this->getClassCfg()['arch']['links']['id_link']];
       }
       else {
@@ -240,7 +243,7 @@ trait TmpFiles
             $this->db->cfn($cCfg['arch']['links']['mandatory'], $cCfg['tables']['links']),
             'other_link' => 'IF(l.'.$cCfg['arch']['links']['id_link'].' IS NULL, false, true)'
           ],
-          array_map(fn($f) => $this->db->cfn($f, $cCfg['tables']['links']), $this->table_links_extrafields)
+          array_map(fn($f) => $this->db->cfn($f, $cCfg['tables']['links']), $this->tableLinksExtrafields)
         ),
         'join' => [[
           'table' => $cCfg['tables']['files'],
