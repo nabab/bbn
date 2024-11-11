@@ -11,8 +11,6 @@ namespace bbn\Entities\Tables;
 use bbn\Db;
 use bbn\X;
 use bbn\Str;
-use bbn\User;
-use bbn\Entities\Options as EntityOptions;
 use bbn\Entities\Models\EntityTable;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Entity;
@@ -22,6 +20,19 @@ use bbn\Models\Tts\TmpFiles;
 class Changes extends EntityTable
 {
   use TmpFiles;
+
+  /** @todo is it used?? */
+  public static $editable = [
+  ];
+
+  public static $states = [
+    'unready' => null,
+    'email' => 1,
+    'untreated' => 2,
+    'accepted' => 3,
+    'refused' => 4,
+    'meeting' => 5
+  ];
 
   protected static $default_class_cfg = [
     'table' => 'bbn_entities_changes',
@@ -63,18 +74,7 @@ class Changes extends EntityTable
   protected $tablesOld = [
   ];
 
-  /** @todo is it used?? */
-  public static $editable = [
-  ];
-
-  public static $states = [
-    'unready' => null,
-    'email' => 1,
-    'untreated' => 2,
-    'accepted' => 3,
-    'refused' => 4,
-    'meeting' => 5
-  ];
+  protected $skipEmailVerfication = false;
 
 
   public function __construct(Db &$db, Entities $entities, Entity $entity)
@@ -829,6 +829,12 @@ class Changes extends EntityTable
   }
 
 
+  public function setSkipEmailVerification(bool $skip = true)
+  {
+    $this->skipEmailVerfication = $skip;
+  }
+
+
   protected static function getFieldsList()
   {
     return static::getEAFields();
@@ -1365,7 +1371,8 @@ class Changes extends EntityTable
    */
   protected function checkEmailRequired(string $table, array $data): array
   {
-    if (!empty($data['value'])
+    if (!$this->skipEmailVerfication
+      && !empty($data['value'])
       && $this->emailRequired($table, $data['field'])
     ) {
       $data['email'] = Str::genpwd();
