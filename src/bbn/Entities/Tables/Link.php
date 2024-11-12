@@ -39,31 +39,27 @@ class Link extends EntityTable
   protected static array $linkCfg = [
     "single" => false,
     "required" => false,
-    "identities" => false,
+    "identity" => false,
     "address" => false,
     "cfg" => false
   ];
 
 
-  protected $identities = null;
-  protected $address = null;
   private $id_parent = null;
-  
   private $code;
   private $text;
-  
+
   protected $where = [];
 
   protected static array $codes = [];
 
   /**
-   * @param array $link
-   * @param array|null $identities
-   * @param array|null $address
-   * @param array|null $option
+   * @param Db $db
+   * @param Entities $entities
+   * @param Entity|Nullall $entity
    */
   public function __construct(
-    Db $db, 
+    Db $db,
     protected Entities $entities,
     protected Entity|Nullall $entity = new Nullall()
   )
@@ -84,14 +80,6 @@ class Link extends EntityTable
         $this->fields['link_type'] => $this->type
       ];
 
-      if (!empty($this->cfg['identities'])) {
-        $this->identities = $this->entities->identity();
-      }
-
-      if (!empty($this->cfg['address'])) {
-        $this->address = $this->entities->address();
-      }
-
       if (!empty($this->cfg['option'])) {
         if (!empty($this->cfg['option']['id_parent'])) {
           $this->id_parent = $this->options()->fromCode(...$this->cfg['option']['id_parent']);
@@ -100,10 +88,6 @@ class Link extends EntityTable
           }
         }
       }
-    }
-    else {
-      $this->identities = $this->entities->identity();
-      $this->address = $this->entities->address();
     }
   }
 
@@ -159,6 +143,22 @@ class Link extends EntityTable
     }
 
     return $this->dbTraitRselect([$this->fields['id'] => $id]);
+  }
+
+  public function getByIdentity(string $id): ?array
+  {
+    return $this->{$this->cfg['single'] ? 'dbTraitRselect' : 'dbTraitRselectAll'}([
+      $this->fields['id_entity'] => $this->entity->getId(),
+      $this->fields['id_identity'] => $id
+    ]);
+  }
+
+  public function getByAddress(string $id): ?array
+  {
+    return $this->{$this->cfg['single'] ? 'dbTraitRselect' : 'dbTraitRselectAll'}([
+      $this->fields['id_entity'] => $this->entity->getId(),
+      $this->fields['id_address'] => $id
+    ]);
   }
 
   public function update(array $data, string|array $where): int
