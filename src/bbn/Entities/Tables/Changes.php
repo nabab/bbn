@@ -245,7 +245,14 @@ class Changes extends EntityTable
    * @param array  $subdata
    * @return null|int
    */
-  public function create(string $table, string $type, array $todata, string $id = '', array $subdata = []): ?array
+  public function create(
+    string $table,
+    string $type,
+    array $todata,
+    string $id = '',
+    array $subdata = [],
+    string $subid = ''
+  ): ?array
   {
     $is_insert = $type === 'insert';
     $is_update = $type === 'update';
@@ -262,7 +269,23 @@ class Changes extends EntityTable
         'data' => []
       ];
       if (!empty($id)) {
-        $tocfg['id'] = $id;
+        if (str_starts_with($id, '_bbn_')) {
+          $tocfg['tmpId'] = $id;
+          $id = '';
+        }
+        else {
+          $tocfg['id'] = $id;
+        }
+      }
+
+      if (!empty($subid)) {
+        if (str_starts_with($subid, '_bbn_')) {
+          $tocfg['tmpSubId'] = $subid;
+          $subid = '';
+        }
+        else {
+          $tocfg['subId'] = $subid;
+        }
       }
 
       if (!empty($subdata)
@@ -318,17 +341,18 @@ class Changes extends EntityTable
       else {
         $ret = [];
         if (!empty($todata)) {
-        foreach ($todata as $t){
+          foreach ($todata as $t){
             if (!empty($is_update)
               && ($id_change = $this->checkExists($table, $id, $t))
               && $this->_update($id_change, $t, $moment, $subdata)
             ) {
-            $ret[] = $id_change;
-          }
-          else {
-            $tocfg['data'] = [$this->checkEmailRequired($table, $t)];
-              if ($id_change = $this->_insert($moment, $tocfg))
               $ret[] = $id_change;
+            }
+            else {
+              $tocfg['data'] = [$this->checkEmailRequired($table, $t)];
+              if ($id_change = $this->_insert($moment, $tocfg)) {
+                $ret[] = $id_change;
+              }
             }
           }
         }
