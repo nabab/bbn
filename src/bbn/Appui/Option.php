@@ -53,6 +53,8 @@ class Option extends DbCls
 
   protected $magicAppuiTemplateId;
 
+  protected $magicPluginsTemplateId;
+
 
   protected static /** @var array */
     $default_class_cfg = [
@@ -368,6 +370,10 @@ class Option extends DbCls
         return null;
       }
 
+      if (end($args) === 'appui') {
+        $args[] = 'plugins';
+        $num++;
+      }
       // They must all have the same form at start with an id_parent as last argument
       if (!Str::isUid(end($args))) {
         $args[] = $this->default;
@@ -411,24 +417,6 @@ class Option extends DbCls
           [$f['code'], '=', $true_code]
         ]
       )) {
-        $this->cacheSet($id_parent, $cache_name, $tmp);
-      }
-      // Magic code appui can be bypassed
-      elseif (($true_code === 'appui') 
-          && ($tmp2 = $this->db->selectOne(
-            $c['table'], $f['id'], [
-              $f['id_parent'] => $id_parent,
-              $f['code'] => 'plugins'
-            ]
-          ))
-          && ($tmp = $this->db->selectOne(
-            $c['table'], $f['id'], [
-              $f['id_parent'] => $tmp2,
-              $f['code'] => $true_code,
-              $f['id_alias'] => $this->getMagicAppuiTemplateId()
-            ]
-          ))
-      ) {
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
       // Magic code options can be bypassed
@@ -3767,9 +3755,9 @@ public function getIdAlias($code = null): ?string
             $cfg['schema'] = json_decode($cfg['schema'], true);
           }
 
-          if (isset($cfg['id'])) {
+          //if (isset($cfg['id'])) {
             //unset($cfg['id']);
-          }
+          //}
 
           if (isset($cfg['scfg'])
               && !empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])
@@ -3796,6 +3784,7 @@ public function getIdAlias($code = null): ?string
             $o[$this->fields['cfg']] = $cfg;
           }
 
+          unset($o[$this->fields['id']]);
           unset($o[$this->fields['id_parent']]);
           if (isset($o['num_children'])) {
             unset($o['num_children']);
@@ -4420,47 +4409,107 @@ public function getIdAlias($code = null): ?string
 
 
   /**
-   * @param string|null $id
+   * @param string $id
+   * @param bool $rootAlso
    * @return int|null
    */
-  public function applyTemplate(string $id = null): ?int
+  public function applyTemplate(string $id, bool $rootAlso = false): ?int
   {
     if (!($idAlias = $this->alias($id))) {
+      X::ddump($this->option($id));
       throw new Exception(X::_("Impossible to apply a template, the option must be aliased"));
     }
 
+    $tot = 0;
     $templateParent = $this->parent($idAlias);
-    if (!$templateParent['id_alias']) {
-      throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
+    if ($templateParent['id'] !== $this->getMagicTemplateId()) {
+      if (!$templateParent['id_alias']) {
+        throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
+      }
+  
+      if ($templateParent['id_alias'] !== $this->getMagicTemplateTemplateId()) {
+        throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
+      }
     }
 
-    if ($templateParent['id_alias'] !== $this->getMagicTemplateTemplateId()) {
-      throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
+    if ($rootAlso) {
+      $opt = $this->option($id);
+      $topt = $this->option($idAlias);
+      unset($opt['id_alias'], $opt['alias']);
+      if ((json_encode($opt) !== json_encode($topt)) && $this->set($id, $topt)) {
+        $tot++;
+      }
     }
 
-    if (($export = $this->export($idAlias, 'sfull')) && !empty($export['items'])) {
-      $items = X::map(function($a) {
-        $a['id_alias'] = $this->getCodePath($a['id']);
-        unset($a['id']);
-        return $a;
-      }, $export['items'], 'items');
-      $res = 0;
-      X::ddump($items);
-      foreach ($this->import($items, $id) as $num) {
-        $res += $num;
+    foreach ($this->items($idAlias) as $tid) {
+      $tot += $this->applyChildTemplate($tid, $id);
+    }
+
+    return $tot;
+  }
+
+  public function applyChildTemplate($idSubtemplate, $target): int
+  {
+    $tot = 0;
+    $opt = $this->option($idSubtemplate);
+    $foptions = $this->fullOptions($target);
+    if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
+      if ($opt['code']) {
+        $o = X::getRow($foptions, ['code' => $opt['code']]);
+      }
+      else {
+        $o = X::getRow($foptions, ['text' => $opt['text']]);
       }
 
-      return $res;
+      if ($o) {
+        $o['id_alias'] = $idSubtemplate;
+      }
     }
 
-    return null;
+    $id = null;
+    $cfg = $this->getCfg($idSubtemplate);
+    if ($o) {
+      $id = $o['id'];
+      unset($opt['alias']);
+      $opt['id_alias'] = $idSubtemplate;
+      $ocfg = $this->getCfg($id);
+      $totDone = false;
+      if ((json_encode($opt) !== json_encode($o)) && $this->set($id, $opt)) {
+        $tot++;
+        $totDone = true;
+      }
+      if ((json_encode($cfg) !== json_encode($ocfg)) && $this->setCfg($id, $cfg) && !$totDone) {
+        $tot++;
+      }
+    }
+    else {
+      $opt['id_parent'] = $target;
+      $opt['id_alias'] = $idSubtemplate;
+      if ($id = $this->add($opt)) {
+        $this->setCfg($id, $cfg);
+        $tot++;
+      }
+    }
+
+    foreach ($this->items($idSubtemplate) as $tid) {
+      $tot += $this->applyChildTemplate($tid, $id);
+    }
+
+    return $tot;
   }
 
   public function applyAllTemplates(): ?int
   {
     $tot = 0;
-    $tids = $this->optionsRef($this->getMagicTemplateTemplateId());
-    foreach (array_keys($tids) as $tid) {
+    $tids = $this->items($this->getMagicTemplateId());
+    foreach ($tids as $tid) {
+      foreach ($this->getAliasItems($tid) as $id) {
+        $tot += $this->applyTemplate($id);
+      }
+    }
+
+    $tids = $this->getAliasItems($this->getMagicTemplateTemplateId());
+    foreach ($tids as $tid) {
       foreach ($this->getAliasItems($tid) as $id) {
         $tot += $this->applyTemplate($id);
       }
@@ -4808,6 +4857,33 @@ public function getIdAlias($code = null): ?string
 
   }
 
+  /**
+   * Gets the closest parent which has either the given id_alias or 
+   * @param mixed $id
+   * @param mixed $target
+   * @return mixed
+   */
+  public function closest(string $id, string|array $target): ?string
+  {
+    $ids = $this->parents($id);
+    if (!\is_array($target)) {
+      $target = [Str::isUid($target) ? 'id_alias' : 'code' => $target];
+    }
+
+    foreach ($ids as $i) {
+      $opt = $this->option($i);
+      if (X::getRow([$opt], $target)) {
+        return $i;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Returns the ID of the root templates
+   * @return string
+   */
   public function getMagicTemplateId() : string
   {
     if (!$this->magicTemplateId && $this->check()) {
@@ -4817,6 +4893,25 @@ public function getIdAlias($code = null): ?string
     return $this->magicTemplateId;
   }
 
+
+  /**
+   * Returns the ID of the 'plugin > permissions' template
+   * @return string
+   */
+  public function getPermissionsTemplateId()
+  {
+    if (!$this->magicOptionsTemplateId && $this->check()) {
+      $this->magicOptionsTemplateId = $this->fromCode('permissions', 'plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicOptionsTemplateId;
+  }
+
+
+  /**
+   * Returns the ID of the 'plugin > options' template
+   * @return string
+   */
   public function getMagicOptionsTemplateId()
   {
     if (!$this->magicOptionsTemplateId && $this->check()) {
@@ -4826,6 +4921,11 @@ public function getIdAlias($code = null): ?string
     return $this->magicOptionsTemplateId;
   }
 
+
+  /**
+   * Returns the ID of the 'plugin' template
+   * @return string
+   */
   public function getMagicPluginTemplateId()
   {
     if (!$this->magicPluginTemplateId && $this->check()) {
@@ -4835,6 +4935,11 @@ public function getIdAlias($code = null): ?string
     return $this->magicPluginTemplateId;
   }
 
+
+  /**
+   * Returns the ID of the 'plugin > template' template
+   * @return string
+   */
   public function getMagicTemplateTemplateId()
   {
     if (!$this->magicTemplateTemplateId && $this->check()) {
@@ -4844,10 +4949,25 @@ public function getIdAlias($code = null): ?string
     return $this->magicTemplateTemplateId;
   }
 
+
+  public function getMagicPluginsTemplateId()
+  {
+    if (!$this->magicPluginsTemplateId && $this->check()) {
+      $this->magicPluginsTemplateId = $this->fromCode('plugins', 'plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicPluginsTemplateId;
+  }
+
+
+  /**
+   * Returns the ID of the 'plugin > plugins > appui' template
+   * @return string
+   */
   public function getMagicAppuiTemplateId()
   {
     if (!$this->magicAppuiTemplateId && $this->check()) {
-      $this->magicAppuiTemplateId = $this->fromCode('appui', 'plugins', 'plugin', 'templates', $this->getRoot());
+      $this->magicAppuiTemplateId = $this->fromCode('appui', $this->getMagicPluginsTemplateId());
     }
 
     return $this->magicAppuiTemplateId;
@@ -4943,16 +5063,6 @@ public function getIdAlias($code = null): ?string
       }
     }
     return $res;
-  }
-
-
-  public function getPermissionsTemplateId()
-  {
-    if (!$this->magicOptionsTemplateId && $this->check()) {
-      $this->magicOptionsTemplateId = $this->fromCode('permissions', 'plugin', 'templates', $this->getRoot());
-    }
-
-    return $this->magicOptionsTemplateId;
   }
 
 

@@ -4,7 +4,18 @@
  */
 namespace bbn\User;
 
-use Exception, bbn, bbn\X, bbn\Str, bbn\User, bbn\Db, bbn\Appui\Option, bbn\Mvc, bbn\File\System;
+use Exception;
+use bbn\X;
+use bbn\Str;
+use bbn\User;
+use bbn\Db;
+use bbn\Mvc;
+use bbn\User\Preferences;
+use bbn\Appui\Option;
+use bbn\File\System;
+use bbn\Models\Cls\Basic;
+use bbn\Models\Tts\Retriever;
+use bbn\Models\Tts\Current;
 /**
  * A permission system linked to options, User classes and preferences.
  *
@@ -24,21 +35,21 @@ use Exception, bbn, bbn\X, bbn\Str, bbn\User, bbn\Db, bbn\Appui\Option, bbn\Mvc,
  * @todo Store the deleted preferences? And restore them if the a permission is re-given
  */
 
-class Permissions extends bbn\Models\Cls\Basic
+class Permissions extends Basic
 {
-  use bbn\Models\Tts\Retriever;
-  use bbn\Models\Tts\Current;
+  use Retriever;
+  use Current;
 
-  /** @var bbn\Appui\Option */
+  /** @var Option */
   protected $opt;
 
-  /** @var bbn\User\Preferences */
+  /** @var Preferences */
   protected $pref;
 
-  /** @var bbn\User */
+  /** @var User */
   protected $user;
 
-  /** @var bbn\Db */
+  /** @var Db */
   protected $db;
 
   /** @var array */
@@ -227,7 +238,7 @@ class Permissions extends bbn\Models\Cls\Basic
               'code' => $p,
               'text' => $p
             ],
-            $prev_parent
+            $prev_parent,
           )
           ) {
             $parent = $this->db->lastId();
@@ -654,10 +665,11 @@ class Permissions extends bbn\Models\Cls\Basic
   public function getSources($only_with_children = true): array
   {
     $appui   = $this->opt->fromCode('appui');
-    $root    = $this->opt->fromCode('permissions', $appui);
+    $root    = $this->opt->fromCode('permissions');
     $access  = $this->opt->fromCode('access', $root);
     $options = $this->opt->fromCode('options', $root);
     $plugins = $this->opt->fromCode('plugins');
+    //X::ddump($root, $appui, $access, $options, $plugins);
     $sources = [[
       'text' => _("Main application"),
       'rootAccess' => $access,
@@ -692,6 +704,37 @@ class Permissions extends bbn\Models\Cls\Basic
     }
 
     return $sources;
+  }
+
+
+  /**
+   * Returns
+   *
+   * @param string $name
+   *
+   * @return string|null
+   */
+  public function optionPermissionRoot(string $id, $create = false): ?string
+  {
+    /** @var string The option's ID for appui */
+    $root   = $this->opt->fromCode('permissions');
+
+    /** @var string The option's ID for plugins */
+    $plugins = $this->opt->fromCode('plugins');
+
+    /** @var string The option's ID for plugins */
+    $appui = $this->opt->fromCode('appui', $plugins);
+
+    /** @var array The parents, the first being root, the second the project */
+    $parents = $this->opt->parents($id);
+    $idPlugin = $this->opt->getTemplateId('plugin');
+    foreach ($parents as $p) {
+      if ($this->opt->option($p)['id_alias'] === $idPlugin) {
+        return $this->opt->fromCode('options', 'permissions', $p);
+      }
+    }
+
+    return null;
   }
 
 
@@ -768,51 +811,21 @@ class Permissions extends bbn\Models\Cls\Basic
 
 
   /**
-   * Returns
-   *
-   * @param string $name
-   *
-   * @return string|null
-   */
-  public function optionPermissionRoot(string $id, $create = false): ?string
-  {
-    /** @var string The option's ID for appui */
-    $root   = $this->opt->fromCode('permissions');
-
-    /** @var string The option's ID for plugins */
-    $plugins = $this->opt->fromCode('plugins');
-
-    /** @var string The option's ID for plugins */
-    $appui = $this->opt->fromCode('appui', $plugins);
-
-    /** @var array The parents, the first being root, the second the project */
-    $parents = $this->opt->parents($id);
-    $idPlugin = $this->opt->getTemplateId('plugin');
-    foreach ($parents as $p) {
-      if ($this->opt->option($p)['id_alias'] === $idPlugin) {
-        return $this->opt->fromCode('options', 'permissions', $p);
-      }
-    }
-
-    return null;
-  }
-
-
-  /**
    * Updates all access permission for the given path in the given root.
    *
    * @param string $path    The path to look for files in (mustn't include mvc/public)
    * @param string $root    The ID of the root access option
    * @param string $url     The path part of the URL root of the given absolute path
-   * @param string $urlPath The part of the absolute path corresponding to the url
+   * @param array  $res The part of the absolute path corresponding to the url
    *
-   * @return int
+   * @return array
    */
   public function accessUpdatePath(
       string $path,
       string $root,
-      string $url = ''
-  ): int
+      string $url = '',
+      array $res = []
+  ): array
   {
     if (!empty($url) && (substr($url, -1) !== '/')) {
       $url .= '/';
@@ -835,17 +848,19 @@ class Permissions extends bbn\Models\Cls\Basic
       return $this->fFilter($a);
     };
 
+    $res = [];
     if ($all = $fs->getTree($path.'mvc/public', '', false, $ff)) {
       $all = self::fTreat($all, false);
       usort($all, ['\\bbn\User\\Permissions', 'fSort']);
       array_walk($all, ['\\bbn\\User\\Permissions', 'fWalk']);
+
       foreach ($all as $i => $it) {
         $it['cfg'] = json_encode(['order' => $i + 1]);
-        $num      += $this->_add($it, $root);
+        $this->_add($it, $root, $url, $res);
       }
     }
 
-    return $num;
+    return $res;
   }
 
 
@@ -1013,57 +1028,60 @@ class Permissions extends bbn\Models\Cls\Basic
    *
    * @return void
    */
-  public function updateAll(array $routes, $withApp = false)
+  public function updateAll(array $routes)
   {
     $this->opt->deleteCache();
 
     $res = ['total' => 0];
 
-    /** @var string The ID option for permissions < appui */
-    if ($id_permission = $this->getOptionRoot()) {
-      /** @var string The option's ID for appui */
-      $appui = $this->opt->fromCode('appui');
+    /** @var string The option's ID of the permissions on pages (controllers) $id_page */
+    $id_page = $this->opt->fromCode('access', 'permissions');
 
-      /** @var string The option's ID for plugins */
-      $plugins = $this->opt->fromCode('plugins');
+    /** @var string The option's ID of the permissions on pages (controllers) $id_page */
 
-      /** @var string The option's ID of the permissions on pages (controllers) $id_page */
-      $id_page = $this->opt->fromCode('access', 'permissions');
+    // The app base access
+    if ($id_page) {
 
-      /** @var string The option's ID of the permissions on pages (controllers) $id_page */
-      $id_plugins = $this->getOptionId('plugins');
-
-      // The app base access
-      if ($id_page) {
-
-        /** @todo Add the possibility to do it for another project? */
-        $fs = new System();
-
-        if ($withApp) {
-          $res['total'] += (int)$this->accessUpdateApp();
+      /** @todo Add the possibility to do it for another project? */
+      $idPluginsTemplate = $this->opt->getMagicPluginsTemplateId();
+      $idPluginTemplate = $this->opt->getMagicPluginTemplateId();
+      $aliases = $this->opt->getAliasFullOptions($idPluginTemplate);
+      $aliasesByName = [];
+      foreach ($aliases as $a) {
+        $pluginGroup = $this->opt->closest($a['id'], $idPluginsTemplate);
+        if ($pluginGroup) {
+          $name = $this->opt->toPath($a['id'], '-', $pluginGroup);
+        }
+        elseif ($a['code'] === constant('BBN_APP_NAME')) {
+          $name = $a['code'];
         }
 
-        if (!empty($routes)) {
-          foreach ($routes as $url => $route) {
-            $root = $this->accessPluginRoot($route['name']);
+        if ($name) {
+          $aliasesByName[$name] = $a;
+        }
 
-            if (!$root) {
-              $err = X::_(
-                "Impossible to find the plugin %s",
-                substr($route['name'], 6)
-              );
+      }
 
-              X::log($err, 'errorUpdatePermissions');
-              continue;
-              throw new Exception($err);
-            }
-
-            $res['total'] += $this->accessUpdatePath($route['path'].'src/', $root, $url);
+      if (!empty($routes)) {
+        foreach ($routes as $url => $route) {
+          if (!isset($aliasesByName[$route['name']])) {
+            $err = X::_("Impossible to find the plugin %s", $route['name']);
+            X::log($err, 'errorUpdatePermissions');
+            throw new Exception($err);
           }
+
+          $root = $this->opt->fromCode('access', 'permissions', $aliasesByName[$route['name']]['id']);
+          if (!$root) {
+            $err = X::_("Impossible to find the plugin %s", $route['name']);
+            X::log($err, 'errorUpdatePermissions');
+            throw new Exception($err);
+          }
+
+          $res['data'] = $this->accessUpdatePath($route['path'], $root, $url);
         }
       }
 
-      $res['total'] += $this->optionsUpdateAll();
+      //$res['total'] += $this->optionsUpdateAll();
 
       $this->opt->deleteCache();
     }
@@ -1376,15 +1394,16 @@ class Permissions extends bbn\Models\Cls\Basic
 
 
   // Add options to the options table
-  private function _add($o, $id_parent, $total = 0)
+  private function _add($o, $id_parent, string $url = '', array &$res = [])
   {
     $items = isset($o['items']) ? $o['items'] : false;
     unset($o['items']);
+    $path = $url . $o['code'];
     $o['id_parent'] = $id_parent;
     if (!($id = $this->opt->fromCode($o['code'], $id_parent))) {
-      $total += (int)$this->opt->add($o, false, true);
-      X::log($o, 'insertPerm');
-      $id     = $this->db->lastId();
+      if ($id = $this->opt->add($o)) {
+        $res[$id] = $path;
+      }
     }
 
     /* No(bool)!
@@ -1394,7 +1413,11 @@ class Permissions extends bbn\Models\Cls\Basic
     */
     if (\is_array($items)) {
       foreach ($items as $it){
-        $total = $this->_add($it, $id, $total);
+        if (substr($path, -1) !== '/') {
+          $path .= '/';
+        }
+
+        $total = $this->_add($it, $id, $path, $res);
       }
     }
 
