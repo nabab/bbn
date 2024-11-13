@@ -1394,8 +1394,9 @@ class Permissions extends Basic
 
 
   // Add options to the options table
-  private function _add($o, $id_parent, string $url = '', array &$res = [])
+  private function _add($o, $id_parent, string $url = '', array &$res = []): int
   {
+    $total = 0;
     $items = isset($o['items']) ? $o['items'] : false;
     unset($o['items']);
     $path = $url . $o['code'];
@@ -1417,7 +1418,7 @@ class Permissions extends Basic
           $path .= '/';
         }
 
-        $total = $this->_add($it, $id, $path, $res);
+        $total += $this->_add($it, $id, $path, $res);
       }
     }
 
