@@ -87,6 +87,49 @@ trait DbTrait
     return $res;
   }
 
+  protected function dbTraitTreat(array ...$rows): array
+  {
+    // Ensure that the class configuration is initialized
+    if (!$this->isInitClassCfg()) {
+      throw new Exception(X::_("Impossible to prepare an item if the class config has not been initialized"));
+    }
+
+    $ccfg = $this->getClassCfg();
+    // Get the table index from the class configuration
+    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];
+    if (!$table_index) {
+      throw new Exception(X::_("The class config is not correct as the main table doesn't have an arch"));
+    }
+
+    $f = $ccfg['arch'][$table_index];
+    $res = [];
+    // Handle 'cfg' field if present in the table configuration
+    if (empty($f['cfg'])) {
+      return [...$rows];
+    }
+    foreach ($rows as &$data) {
+      if (array_key_exists($f['cfg'], $data)) {
+        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];
+        if (!empty($ccfg['cfg'])) {
+          foreach ($ccfg['cfg'] as $k => $v) {
+            if (isset($v['field']) 
+                && array_key_exists($v['field'], $data[$f['cfg']])
+                && !array_key_exists($v['field'], $data)) {
+              $data[$v['field']] = $data[$f['cfg']][$v['field']];
+            }
+          }
+          unset($data[$f['cfg']]);
+        }
+      }
+
+      $res[] = $data;
+    }
+
+    unset($data);
+    return $res;
+  }
+
+
   /**
    * Sets the filter configuration for database queries.
    *
