@@ -801,6 +801,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         }
       }
 
+      $res['removed_virtual'] = $to_remove;
       foreach ($to_remove as $i) {
         array_splice($res['fields'], $i, 1);
         array_splice($res['values'], $i, 1);
@@ -2819,13 +2820,24 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     if (isset($args['hash'])) {
       if (isset($this->cfgs[$args['hash']])) {
-        return array_merge(
+        $fromHash = array_merge(
           $this->cfgs[$args['hash']], [
             'values' => $args['values'] ?? [],
             'where' => $args['where'] ?? [],
             'filters' => $args['filters'] ?? []
           ]
         );
+        if (!empty($fromHash['values'])
+          && !empty($fromHash['removed_virtual'])
+          &&(($fromHash['kind'] === 'INSERT')
+            || ($fromHash['kind'] === 'UPDATE'))
+        ) {
+          foreach ($fromHash['removed_virtual'] as $i) {
+            array_splice($fromHash['values'], $i, 1);
+          }
+        }
+
+        return $fromHash;
       }
 
       $tables_full = [];
@@ -2898,7 +2910,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
                 if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
                   $models[$tfn] = $model;
                 }
-      
                 $idx               = $j['alias'] ?? $tfn;
                 $tables_full[$idx] = $tfn;
               }

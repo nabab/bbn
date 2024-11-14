@@ -147,7 +147,7 @@ class Link extends EntityTable
 
   public function getByIdentity(string $id): ?array
   {
-    return $this->{$this->cfg['single'] ? 'dbTraitRselect' : 'dbTraitRselectAll'}([
+    return $this->dbTraitRselect([
       $this->fields['id_entity'] => $this->entity->getId(),
       $this->fields['id_identity'] => $id
     ]);
@@ -155,7 +155,7 @@ class Link extends EntityTable
 
   public function getByAddress(string $id): ?array
   {
-    return $this->{$this->cfg['single'] ? 'dbTraitRselect' : 'dbTraitRselectAll'}([
+    return $this->dbTraitRselect([
       $this->fields['id_entity'] => $this->entity->getId(),
       $this->fields['id_address'] => $id
     ]);
