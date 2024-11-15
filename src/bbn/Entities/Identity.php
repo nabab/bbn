@@ -20,7 +20,7 @@ use bbn\Models\Cls\Nullall;
  * and provides methods to manipulate these entities, including
  * CRUD operations, search, and relation management, tailored for French civilities.
  */
-class Identities extends DbCls
+class Identity extends DbCls
 {
   use DbActions;
   use DbUauth;

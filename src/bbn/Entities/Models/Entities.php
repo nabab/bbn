@@ -9,7 +9,7 @@ use bbn\Str;
 use bbn\X;
 use bbn\Entities\Entity;
 use bbn\Entities\Tables\Link;
-use bbn\Entities\Identities;
+use bbn\Entities\Identity;
 use bbn\Entities\Address;
 use bbn\Entities\Models\EntityJunction;
 use bbn\Entities\Models\EntityTable;
@@ -130,7 +130,7 @@ abstract class Entities extends DbCls
    * @param array|null $cfg Configuration options.
    * @param Option|null $options Option object.
    * @param Mail|null $mail Mail object.
-   * @param Identities|null $identities Identities object.
+   * @param Identity|null $identity Identity object.
    * @param Address|null $address Address object.
    * @param Consultation|null $consultation Consultation object.
    * @param Document|null $document Document object.
@@ -144,7 +144,7 @@ abstract class Entities extends DbCls
     array $cfg = null,
     protected Option|null $options = null,
     protected Mail|null $mail = null,
-    private Identities|null $identities = null,
+    private Identity|null $identity = null,
     private Address|null $address = null,
     private Consultation|null $consultation = null,
     private Document|null $document = null,
@@ -362,14 +362,14 @@ abstract class Entities extends DbCls
     return $this->masks;
   }
 
-  public function identity(): ?Identities
+  public function identity(): ?Identity
   {
     $cls = $this->class_cfg['classes'];
-    if (!$this->identities && $cls['identities']) {
-      $this->identities = new $cls['identities']($this->db, $this);
+    if (!$this->identity && $cls['identities']) {
+      $this->identity = new $cls['identities']($this->db, $this);
     }
 
-    return $this->identities;
+    return $this->identity;
   }
 
 

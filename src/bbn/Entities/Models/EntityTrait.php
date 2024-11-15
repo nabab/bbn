@@ -10,7 +10,7 @@ use bbn\X;
 use bbn\Appui\Option;
 use bbn\Entities\Models\Entities;
 use bbn\Entities\Entity;
-use bbn\Entities\Identities;
+use bbn\Entities\Identity;
 use bbn\Entities\Address;
 
 trait EntityTrait
@@ -45,12 +45,6 @@ trait EntityTrait
     return $this->id_entity;
   }
 
-  public function unsetEntity()
-  {
-    $this->id_entity = null;
-    $this->dbTraitResetFilterCfg();
-  }
-
 
   public function check(): bool
   {
@@ -62,7 +56,7 @@ trait EntityTrait
   }
   
 
-  public function identity(): ?Identities
+  public function identity(): ?Identity
   {
     return $this->entities->identity();
   }

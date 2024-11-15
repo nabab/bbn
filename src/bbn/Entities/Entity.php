@@ -224,22 +224,22 @@ class Entity
     return $this->entities;
   }
 
-  public function getLink(string $linkCls): ?Link
+  public function getLink(string $linkCls): Link
   {
     return $this->entities->getLink($linkCls, $this);
   }
 
-  public function identity(): ?Identities
+  public function identity(): Identity
   {
     return $this->entities->identity();
   }
 
-  public function uauth(): ?Uauth
+  public function uauth(): Uauth
   {
     return $this->entities->uauth();
   }
 
-  public function address(): ?Address
+  public function address(): Address
   {
     return $this->entities->address();
   }
@@ -253,12 +253,12 @@ class Entity
     return $this->links;
   }
   
-  public function options(): ?Option
+  public function options(): Option
   {
     return $this->entities->options();
   }
   
-  public function entityOptions(): ?EntityOptions
+  public function entityOptions(): EntityOptions
   {
     return $this->entities->entityOptions($this);
   }
