@@ -174,7 +174,7 @@ class Link extends EntityTable
   public function insert(array $data): ?string
   {
     foreach (self::$linkCfg as $k => $v) {
-      if ($v['required'] && !isset($data[$k])) {
+      if (!empty($v['required']) && !isset($data[$k])) {
         throw new Exception(X::_("The field %s is required", $k));
       }
     }
