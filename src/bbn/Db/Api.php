@@ -33,7 +33,7 @@ interface Api
 	public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass;
 
 	/**
-	 * Fetches a given table and returns an array of a single row text-indexed
+	 * Fetches a given table and returns an array of text-indexed rows as objects
 	 *
    * @param string|array $table The table's name or a configuration array
    * @param string|array $fields The fields' name
@@ -62,7 +62,7 @@ interface Api
    * Return the searched rows as an array of numeric arrays.
    *
    * @param string|array $table The table's name or a configuration array
-   * @param string|array $fields The fields's name
+   * @param string|array $fields The fields's names
    * @param array $where  The "where" condition
    * @param array | boolean The "order" condition, default: false
    * @param int $limit The "limit" condition, default: 0
@@ -75,7 +75,7 @@ interface Api
 	 * Fetches a given table and returns an array of a single row text-indexed
 	 *
    * @param string|array $table The table's name or a configuration array
-   * @param string|array $fields The fields' name
+   * @param string|array $fields The fields' names
    * @param array $where  The "where" condition
    * @param array|boolean $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
@@ -84,10 +84,10 @@ interface Api
 	public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;
 
 	/**
-	 * Fetches a given table and returns an array of a single row text-indexed
+	 * Fetches a given table and returns an array of an array of text-indexed rows as arrays
 	 *
    * @param string|array $table The table's name or a configuration array
-   * @param string|array $fields The fields' name
+   * @param string|array $fields The fields' names
    * @param array $where  The "where" condition
    * @param array | boolean $order condition, default: false
    * @param int $limit The "limit" condition, default: 0
@@ -97,10 +97,49 @@ interface Api
 	public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
 
 	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as objects
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+
+	/**
 	 * Fetches a given table and returns an array of a single row text-indexed
 	 *
 	 * @param string $table The table name.
-	 * @param string $field The fields name.
+	 * @param string $field The field's name.
 	 * @param array $where  The "where" condition.
 	 * @param string|array $order The "order" condition, default: false.
 	 * @param int $start The "start" condition, default: 0.

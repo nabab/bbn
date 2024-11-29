@@ -8,15 +8,19 @@ use PDOException;
 use PDOStatement;
 use bbn\Str;
 use bbn\X;
+use bbn\Models\Tts\Cache;
 use bbn\Db\Engines;
+use bbn\Db\HasError;
 use bbn\Db\EnginesApi;
+use bbn\Db\Query;
 use bbn\Db\SqlEngines;
 use bbn\Db\SqlFormatters;
 use PHPSQLParser\PHPSQLParser;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 {
-  use \bbn\Db\HasError, \bbn\Models\Tts\Cache;
+  use HasError;
+  use Cache;
 
   /** @var string The quote character */
   public $qte = '`';
@@ -388,7 +392,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param string $item The item's name (escaped or not)
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function escape(string $item): string
   {
@@ -397,7 +401,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     foreach ($items as $m) {
       if (!Str::checkName($m)) {
-        throw new \Exception(X::_("Illegal name %s for the column", $m));
+        throw new Exception(X::_("Illegal name %s for the column", $m));
       }
 
       $r[] = $this->qte . $m . $this->qte;
@@ -551,7 +555,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $switch_to_fancy = true;
     }
 
-    $result = $this->pdo->query(...\func_get_args());
+    $result = $this->pdo->query(...func_get_args());
 
     if (!empty($switch_to_fancy)) {
       $this->startFancyStuff();
@@ -577,7 +581,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $r    = $this->_parser->parse($statement);
       $done = 1;
     }
-    catch (\Exception $e){
+    catch (Exception $e){
       $this->log('Error while parsing the query '.$statement);
     }
 
@@ -589,7 +593,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
       if (isset($r['BRACKET']) && (\count($r) === 1)) {
         /** @todo Is it impossible to parse queries with brackets ? */
-        //throw new \Exception('Bracket in the query '.$statement);
+        //throw new Exception('Bracket in the query '.$statement);
         return null;
       }
 
@@ -623,7 +627,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         ) {
           $res[] = hex2bin($v);
         }
-        elseif (\is_string($v)
+        elseif (is_string($v)
           && ((($cfg['values_desc'][$i]['type'] === 'date') && (\strlen($v) < 10))
             || (($cfg['values_desc'][$i]['type'] === 'time') && (\strlen($v) < 8))
             || (($cfg['values_desc'][$i]['type'] === 'datetime') && (\strlen($v) < 19)))
@@ -670,12 +674,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param $tables
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getFieldsList($tables): array
   {
     $res = [];
-    if (!\is_array($tables)) {
+    if (!is_array($tables)) {
       $tables = [$tables];
     }
 
@@ -683,7 +687,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $model = $this->getColumns($t);
       if (!is_array($model)) {
         $this->error('Impossible to find the table '.$t);
-        throw new \Exception(X::_('Impossible to find the table ').$t);
+        throw new Exception(X::_('Impossible to find the table ').$t);
       }
 
       foreach (array_keys($model) as $f){
@@ -769,7 +773,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     if (!empty($cfg['available_fields']) && isset($conditions['conditions'])) {
       foreach ($conditions['conditions'] as &$c){
-        if (array_key_exists('conditions', $c) && \is_array($c['conditions'])) {
+        if (array_key_exists('conditions', $c) && is_array($c['conditions'])) {
           $this->arrangeConditions($c, $cfg);
         }
         elseif (isset($c['field']) && empty($cfg['available_fields'][$c['field']]) && !$this->isColFullName($c['field'])) {
@@ -792,12 +796,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     if (isset($res['fields'])) {
       $to_remove = [];
-      foreach ($res['fields'] as $i => $f){
-        if (!empty($res['available_fields'][$f])
-          && isset($res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)])
-          && !empty($res['models'][$res['available_fields'][$f]]['fields'][$this->colSimpleName($f)]['virtual'])
-        ) {
-          array_unshift($to_remove, $i);
+      foreach ($res['fields'] as $i => $f) {
+        if (!empty($res['available_fields'][$f])) {
+          $model = $this->modelize($res['available_fields'][$f]);
+          if (isset($model['fields'][$this->colSimpleName($f)])
+            && !empty($model['fields'][$this->colSimpleName($f)]['virtual'])
+          ) {
+            array_unshift($to_remove, $i);
+          }
         }
       }
 
@@ -822,7 +828,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     if (!empty($where['conditions'])) {
       foreach ($where['conditions'] as &$f){
         // It's an imbricated condition
-        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
+        if (isset($f['logic'], $f['conditions']) && is_array($f['conditions'])) {
           $this->getValuesDesc($f, $cfg, $others);
         }
         // Value is set
@@ -833,10 +839,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             'maxlength' => null,
             'operator' => $f['operator'] ?? null
           ];
-          if (isset($cfg['models'], $f['field'], $cfg['available_fields'][$f['field']])) {
+          if (isset($f['field'], $cfg['available_fields'][$f['field']])) {
             $t = $cfg['available_fields'][$f['field']];
-            if (isset($cfg['models'], $f['field'], $cfg['tables_full'][$t], $cfg['models'][$cfg['tables_full'][$t]])
-              && ($model = $cfg['models'][$cfg['tables_full'][$t]])
+            if (isset($f['field'], $cfg['tables_full'][$t])
+              && ($model = $this->modelize($cfg['tables_full'][$t]))
               && ($fname = $this->colSimpleName($f['field']))
             ) {
               $desc['name'] = $fname;
@@ -889,7 +895,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     if (isset($conditions['conditions'], $conditions['logic'])) {
       $logic = isset($conditions['logic']) && ($conditions['logic'] === 'OR') ? 'OR' : 'AND';
       foreach ($conditions['conditions'] as $key => $f) {
-        if (\is_array($f) && isset($f['logic']) && isset($f['conditions'])) {
+        if (is_array($f) && isset($f['logic']) && isset($f['conditions'])) {
           if ($tmp = $this->getConditions($f, $cfg, $is_having, $indent + 2)) {
             $res .= (empty($res) ? '(' : PHP_EOL . str_repeat(' ', $indent) . "$logic (") .
               $tmp . PHP_EOL . str_repeat(' ', $indent) . ")";
@@ -913,8 +919,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           elseif (isset($cfg['available_fields'][$field])) {
             $table  = $cfg['tables_full'][$cfg['available_fields'][$field]] ?? false;
             $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
-            if ($table && $column && isset($cfg['models'][$table]['fields'][$column])) {
-              $model = $cfg['models'][$table]['fields'][$column];
+            $model = $this->modelize($table)['fields'][$column];
+            if ($table && $column && $model) {
               $res  .= PHP_EOL . 
                   str_repeat(' ', $indent) . 
                   (empty($res) ? '' : "$logic ") .
@@ -1029,7 +1035,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
             case 'doesnotcontains':
             case 'doesnotcontain':
-              $res .= 'NOT LIKE ' . ($f['exp'] ?? '?');
+              $res .= ($is_number ? '!= ' : 'NOT LIKE ') . ($f['exp'] ?? '?');
               break;
 
             case 'endswith':
@@ -1040,78 +1046,38 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
             case 'gte':
             case '>=':
-              if (isset($f['exp'])) {
-                $res .= '>= ' . $f['exp'];
-              }
-              else {
-                $res .= '>= ?';
-              }
+              $res .= '>= ' . ($f['exp'] ?? '?');
               break;
 
             case 'gten':
-              if (isset($f['exp'])) {
-                $res .= '>= DATE_ADD(NOW(), INTERVAL '.$f['exp'].')';
-              }
-              else {
-                $res .= '>= DATE_ADD(NOW(), INTERVAL ?)';
-              }
+              $res .= '>= DATE_ADD(NOW(), INTERVAL ' . ($f['exp'] ?? '?');
               break;
 
             case 'gt':
             case '>':
-              if (isset($f['exp'])) {
-                $res .= '> ' . $f['exp'];
-              }
-              else {
-                $res .= '> ?';
-              }
+              $res .= '> ' . ($f['exp'] ?? '?');
               break;
 
             case 'gtn':
-              if (isset($f['exp'])) {
-                $res .= '> DATE_ADD(NOW(), INTERVAL '.$f['exp'].')';
-              }
-              else {
-                $res .= '> DATE_ADD(NOW(), INTERVAL ?)';
-              }
+              $res .= '> DATE_ADD(NOW(), INTERVAL '.($f['exp'] ?? '?').')';
               break;
 
             case 'lte':
             case '<=':
-              if (isset($f['exp'])) {
-                $res .= '<= ' . $f['exp'];
-              }
-              else {
-                $res .= '<= ?';
-              }
+              $res .= '<= ' . ($f['exp'] ?? '?');
               break;
 
             case 'lten':
-              if (isset($f['exp'])) {
-                $res .= '<= DATE_SUB(NOW(), INTERVAL '.$f['exp'].')';
-              }
-              else {
-                $res .= '<= DATE_SUB(NOW(), INTERVAL ?)';
-              }
+              $res .= '<= DATE_SUB(NOW(), INTERVAL '.($f['exp'] ?? '?').')';
               break;
 
             case 'lt':
             case '<':
-              if (isset($f['exp'])) {
-                $res .= '< ' . $f['exp'];
-              }
-              else {
-                $res .= '< ?';
-              }
+              $res .= '< ' . ($f['exp'] ?? '?');
               break;
 
             case 'ltn':
-              if (isset($f['exp'])) {
-                $res .= '< DATE_SUB(NOW(), INTERVAL '.$f['exp'].')';
-              }
-              else {
-                $res .= '< DATE_SUB(NOW(), INTERVAL ?)';
-              }
+              $res .= '< DATE_SUB(NOW(), INTERVAL '.($f['exp'] ?? '?').')';
               break;
 
             /** @todo Check if it is working with an array */
@@ -1129,14 +1095,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
             case 'isnotempty':
               $res .= $is_number ? '!= 0' : "NOT LIKE ''";
-              break;
-
-            case 'doesnotcontain':
-              $res .= $is_number ? '!= ?' : 'NOT LIKE ?';
-              break;
-
-            case 'contains':
-              $res .= 'LIKE ?';
               break;
 
             default:
@@ -1160,12 +1118,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getSelect(array $cfg): string
   {
     $res = '';
-    if (\is_array($cfg['tables']) && !empty($cfg['tables'])) {
+    if (is_array($cfg['tables']) && !empty($cfg['tables'])) {
       $res = 'SELECT ';
       if (!empty($cfg['count'])) {
         if (!empty($cfg['group_by'])) {
@@ -1249,7 +1207,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
           // Adding the alias in $fields
           if (strpos($f, '(')) {
-            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $f . (\is_string($alias) ? ' AS ' . $this->escape($alias) : '');
+            $fields_to_put[] = ($is_distinct ? 'DISTINCT ' : '') . $f . (is_string($alias) ? ' AS ' . $this->escape($alias) : '');
+          }
+          elseif (is_string($alias) && ((strpos($f, "'") === 0) || (strpos($f, '"') === 0))) {
+            $fields_to_put[] = $f . ' AS ' . $this->escape($alias);
           }
           elseif (isset($cfg['available_fields']) && array_key_exists($f, $cfg['available_fields'])) {
             $idx    = $cfg['available_fields'][$f];
@@ -1260,11 +1221,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             $csn    = $this->colSimpleName($f);
             $is_uid = false;
             //die(var_dump($idx, $f, $tables[$idx]));
-            if (($idx !== false) && isset($cfg['models'][$idx]['fields'][$csn])) {
-              $column = $cfg['models'][$idx]['fields'][$csn];
+            $model = $this->modelize($idx);
+            if (($idx !== false) && isset($model['fields'][$csn])) {
+              $column = $model['fields'][$csn];
               if (($column['type'] === 'binary') && ($column['maxlength'] === 16)) {
                 $is_uid = true;
-                if (!\is_string($alias)) {
+                if (!is_string($alias)) {
                   $alias = $csn;
                 }
               }
@@ -1287,7 +1249,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               $st = $this->colFullName($csn, $cfg['available_fields'][$f], true);
             }
 
-            if (\is_string($alias)) {
+            if (is_string($alias)) {
               $st .= ' AS ' . $this->escape($alias);
             }
 
@@ -1321,11 +1283,65 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   }
 
 
+  public function getUnion(array $cfg): string
+  {
+    $sql  = 'SELECT ';
+    if (empty($cfg['fields'])) {
+      $sql .= '* ';
+    }
+    else{
+      foreach ($cfg['fields'] as $i => $f){
+        if ($i) {
+          $sql .= ', ';
+        }
+
+        $sql .= strpos($f, '(') === false ? $this->colSimpleName($f, true) : $f;
+      }
+    }
+
+    $sql .= ' FROM (('.PHP_EOL;
+    $vals = [];
+    $i    = 0;
+    foreach ($cfg['union'] as $u) {
+      $subcfg = $this->processCfg($u);
+      if ($subcfg && $subcfg['sql']) {
+        /** @todo From here needs to analyze the where array to the light of the tables' config */
+        if (!empty($where)) {
+          if (empty($fields)) {
+            $fields = $subcfg['fields'];
+          }
+
+          foreach ($fields as $k => $f){
+            if (!empty($subcfg['available_fields'][$f])) {
+              $model = $this->modelize($subcfg['available_fields'][$f]);
+              if ($model) {
+                throw new Exception("Impossible to create the where in union for the following request: ".PHP_EOL.$subcfg['sql']);
+                //die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));
+              }
+            }
+          }
+        }
+
+        if ($i) {
+          $sql .= PHP_EOL.') UNION ('.PHP_EOL;
+        }
+
+        $sql .= $subcfg['sql'];
+        array_push($vals, ...$subcfg['values']);
+        $i++;
+      }
+    }
+
+    $sql .= PHP_EOL.')) AS t' . PHP_EOL;
+    return $sql;
+  }
+
+
   /**
    * Generates a string for the insert from a cfg array.
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getInsert(array $cfg): string
   {
@@ -1335,8 +1351,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     ];
     $i             = 0;
     foreach ($cfg['fields'] as $i => $f) {
-      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+      if (!empty($cfg['available_fields'][$f])) {
+        $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);
         if (isset($model['fields'][$csn])) {
 
@@ -1371,7 +1387,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /**
    * @param array $cfg The configuration array
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getUpdate(array $cfg): string
   {
@@ -1381,8 +1397,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       'fields' => [],
     ];
     foreach ($cfg['fields'] as $i => $f) {
-      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+      if (!empty($cfg['available_fields'][$f])) {
+        $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);
         if (isset($model['fields'][$csn])) {
           $fields_to_put['fields'][] = $this->colSimpleName($f, true);
@@ -1449,7 +1465,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getJoin(array $cfg, array $joins = null): string
   {
@@ -1506,7 +1522,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getGroupBy(array $cfg): string
   {
@@ -1565,7 +1581,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     $res = '';
     if (!empty($cfg['order'])) {
       foreach ($cfg['order'] as $col => $dir) {
-        if (\is_array($dir) && isset($dir['field'])) {
+        if (is_array($dir) && isset($dir['field'])) {
           $col = $dir['field'];
           $dir = $dir['dir'] ?? 'ASC';
         }
@@ -1621,7 +1637,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateConstraints(string $table, array $model = null): string
   {
@@ -1724,7 +1740,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $where['conditions'] = $where;
     }
 
-    if (isset($where['conditions']) && \is_array($where['conditions'])) {
+    if (isset($where['conditions']) && is_array($where['conditions'])) {
       if (!isset($where['logic']) || (strtoupper($where['logic']) !== 'OR')) {
         $where['logic'] = 'AND';
       }
@@ -1734,15 +1750,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         'logic' => $where['logic']
       ];
       foreach ($where['conditions'] as $key => $f){
-        $is_array = \is_array($f);
+        $is_array = is_array($f);
         if ($is_array
           && array_key_exists('conditions', $f)
-          && \is_array($f['conditions'])
+          && is_array($f['conditions'])
         ) {
           $res['conditions'][] = $this->treatConditions($f, false);
         }
         else {
-          if (\is_string($key)) {
+          if (is_string($key)) {
             // 'id_user' => [1, 2] Will do OR
             if (!$is_array) {
               if (null === $f) {
@@ -1863,7 +1879,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     if (isset($where['conditions'])) {
       foreach ($where['conditions'] as &$f){
         ksort($f);
-        if (isset($f['logic'], $f['conditions']) && \is_array($f['conditions'])) {
+        if (isset($f['logic'], $f['conditions']) && is_array($f['conditions'])) {
           $tmp = $this->_remove_conditions_value($f, $values);
           $f   = $tmp['hashed'];
         }
@@ -2005,7 +2021,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param $statement
    * @return false|PDOStatement
-   * @throws \Exception
+   * @throws Exception
    */
   public function query($statement)
   {
@@ -2013,24 +2029,24 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       return null;
     }
 
-    $args = \func_get_args();
+    $args = func_get_args();
     // If fancy is false we just use the regular PDO query function
     if (!$this->_fancy) {
       return $this->pdo->query(...$args);
     }
 
     // The function can be called directly with func_get_args()
-    while ((\count($args) === 1) && \is_array($args[0])){
+    while ((\count($args) === 1) && is_array($args[0])){
       $args = $args[0];
     }
 
-    if (!empty($args[0]) && \is_string($args[0])) {
+    if (!empty($args[0]) && is_string($args[0])) {
       // The first argument is the statement
       $statement = trim(array_shift($args));
 
       // Sending a hash as second argument from helper functions will bind it to the saved statement
       if (count($args)
-        && \is_string($args[0])
+        && is_string($args[0])
         && isset($this->queries[$args[0]])
       ) {
         $hash      = is_string($this->queries[$args[0]]) ? $this->queries[$args[0]] : $args[0];
@@ -2042,7 +2058,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
       $driver_options = [];
       if (count($args)
-        && \is_array($args[0])
+        && is_array($args[0])
       ) {
         // Case where drivers are arguments
         if (!array_key_exists(0, $args[0])) {
@@ -2062,7 +2078,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       ];
       $num_values = 0;
       foreach ($args as $i => $arg){
-        if (!\is_array($arg)) {
+        if (!is_array($arg)) {
           $params['values'][] = $arg;
           $num_values++;
         }
@@ -2079,7 +2095,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           /* Or looking for question marks */
           $sequences = array_keys($sequences);
           preg_match_all('/(\?)/', $statement, $exp);
-          $placeholders = isset($exp[1]) && \is_array($exp[1]) ? \count($exp[1]) : 0;
+          $placeholders = isset($exp[1]) && is_array($exp[1]) ? \count($exp[1]) : 0;
           while ($sequences[0] === 'OPTIONS'){
             array_shift($sequences);
           }
@@ -2093,7 +2109,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $params['kind'] = 'PRAGMA';
         }
         else {
-          throw new \Exception(
+          throw new Exception(
             \defined('BBN_IS_DEV') && BBN_IS_DEV
               ? "Impossible to parse the query $statement"
               : 'Impossible to parse the query'
@@ -2113,7 +2129,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         }
       }
       // The hash of the hash for retrieving a query based on the helper's config's hash
-      elseif (\is_string($this->queries[$hash])) {
+      elseif (is_string($this->queries[$hash])) {
         $hash = $this->queries[$hash];
       }
 
@@ -2134,7 +2150,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $this->error(
           X::_('Incorrect arguments count (your values: %u, in the statement: %u)', $num_values, $q['placeholders'])."\n\n"
             . $statement."\n\n".'Number of values'.count($params['values']).'Arguments:'
-            . print_r(\func_get_args(), true)
+            . print_r(func_get_args(), true)
             . print_r($q, true),
           false
         );
@@ -2236,7 +2252,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
   public function correctTypes($st)
   {
-    if (\is_string($st)) {
+    if (is_string($st)) {
       if (Str::isBuid($st)) {
         $st = \bin2hex($st);
       }
@@ -2266,7 +2282,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         return \normalizer_normalize($st);
       }
     }
-    elseif (\is_array($st)) {
+    elseif (is_array($st)) {
       foreach ($st as $k => $v) {
         $st[$k] = $this->correctTypes($v);
       }
@@ -2333,12 +2349,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
   /**
    * @param $hash
-   * @throws \Exception
+   * @throws Exception
    * @return void
    */
   private function _update_query($hash)
   {
-    if (isset($this->queries[$hash]) && \is_array(($this->queries[$hash]))) {
+    if (isset($this->queries[$hash]) && is_array(($this->queries[$hash]))) {
       $last_index                   = count($this->list_queries) - 1;
       $now                          = \microtime(true);
       $this->queries[$hash]['last'] = $now;
@@ -2349,7 +2365,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           X::move($this->list_queries, $idx, $last_index);
         }
         else {
-          throw new \Exception(X::_("Impossible to find the corresponding hash"));
+          throw new Exception(X::_("Impossible to find the corresponding hash"));
         }
       }
       else {
@@ -2373,11 +2389,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       if (empty($this->queries)) {
         $debug = debug_backtrace();
         X::log($debug, 'db_explained');
-        throw new \Exception(X::_("The queries object is empty!"));
+        throw new Exception(X::_("The queries object is empty!"));
       }
     }
     else {
-      throw new \Exception(X::_("Impossible to find the query corresponding to this hash"));
+      throw new Exception(X::_("Impossible to find the query corresponding to this hash"));
     }
   }
 
@@ -2388,7 +2404,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string $mode The type of item to get (columns, tables, Databases)
    * @param bool $force If true the cache is recreated even if it exists
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   private function _get_cache(string $item, string $mode = 'columns', bool $force = false): ?array
   {
@@ -2404,7 +2420,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           case 'columns':
             $keys = $this->getKeys($item);
             $cols = $this->getColumns($item);
-            if (\is_array($keys) && \is_array($cols)) {
+            if (is_array($keys) && is_array($cols)) {
               $tmp = [
                 'keys' => $keys['keys'],
                 'cols' => $keys['cols'],
@@ -2420,10 +2436,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             break;
         }
 
-        if (!isset($tmp) || !\is_array($tmp)) {
+        if (!isset($tmp) || !is_array($tmp)) {
           $st = "Error while creating the cache for the table $item in mode $mode";
           $this->log($st);
-          throw new \Exception($st);
+          throw new Exception($st);
         }
 
         $this->cacheSet($cache_name, '', $tmp, $this->cache_renewal);
@@ -2481,30 +2497,32 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param null|array|string $table The table's name
    * @param bool $force If set to true will force the modernization to re-perform even if the cache exists
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function modelize($table = null, bool $force = false): ?array
   {
     $r      = [];
     $tables = false;
+    $single = false;
     if (empty($table) || ($table === '*')) {
       $tables = $this->getTables();
     }
-    elseif (\is_string($table)) {
+    elseif (is_string($table)) {
+      $single = true;
       $tables = [$table];
     }
-    elseif (\is_array($table)) {
+    elseif (is_array($table)) {
       $tables = $table;
     }
 
-    if (\is_array($tables)) {
+    if (is_array($tables)) {
       foreach ($tables as $t) {
         if ($full = $this->tableFullName($t)) {
           $r[$full] = $this->_get_cache($full, 'columns', $force);
         }
       }
 
-      if (\count($r) === 1) {
+      if ($single) {
         return end($r);
       }
 
@@ -2575,7 +2593,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     if (empty($kind)) {
       $kind = $kinds;
     }
-    elseif (!\is_array($kind)) {
+    elseif (!is_array($kind)) {
       $kind = (array)strtoupper($kind);
     }
     else{
@@ -2586,7 +2604,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $moment = $moments;
     }
     else {
-      $moment = !\is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);
+      $moment = !is_array($moment) ? (array)strtolower($moment) : array_map('strtolower', $moment);
     }
 
     foreach ($kind as $k){
@@ -2600,7 +2618,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
               $tables = [$tables];
             }
 
-            if (\is_array($tables)) {
+            if (is_array($tables)) {
               foreach ($tables as $table){
                 $t = $this->tableFullName($table);
                 if (!isset($this->_triggers[$k][$m][$t])) {
@@ -2654,7 +2672,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     if (!empty($cfg['tables']) && !empty($this->_triggers[$cfg['kind']][$cfg['moment']])) {
-      $table = $this->tableFullName(\is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
+      $table = $this->tableFullName(is_array($cfg['tables']) ? current($cfg['tables']) : $cfg['tables']);
       // Specific to a table
       if (isset($this->_triggers[$cfg['kind']][$cfg['moment']][$table])) {
         foreach ($this->_triggers[$cfg['kind']][$cfg['moment']][$table] as $i => $f){
@@ -2686,7 +2704,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       return null;
     }
 
-    if (!\is_array($args[0])) {
+    if (!is_array($args[0])) {
       array_unshift($args, $kind);
     }
     else {
@@ -2739,10 +2757,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   {
     if ($this->pdo
       && $this->check()
-      && ($cfg = $this->processCfg(\func_get_args()))
+      && ($cfg = $this->processCfg(func_get_args()))
       && !empty($cfg['sql'])
     ) {
-      //die(var_dump('0exec cfg', $cfg, \func_get_args()));
+      //die(var_dump('0exec cfg', $cfg, func_get_args()));
       $cfg['moment'] = 'before';
       $cfg['trig']   = null;
       if ($cfg['kind'] === 'INSERT') {
@@ -2801,12 +2819,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array $args
    * @param bool $force
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function processCfg(array $args, bool $force = false): ?array
   {
     // Avoid confusion when
-    while (isset($args[0]) && \is_array($args[0])) {
+    while (isset($args[0]) && is_array($args[0])) {
       $args = $args[0];
     }
 
@@ -2855,13 +2873,13 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       foreach ($args['tables'] as $key => $tab) {
         if (empty($tab)) {
           $this->log(\debug_backtrace());
-          throw new \Exception("$key is not defined");
+          throw new Exception("$key is not defined");
         }
 
         $tfn = $this->tableFullName($tab);
 
         // 2 tables in the same statement can't have the same idx
-        $idx = \is_string($key) ? $key : $tfn;
+        $idx = is_string($key) ? $key : $tfn;
         // Error if they do
         if (isset($tables_full[$idx])) {
           $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']), false);
@@ -2937,7 +2955,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
 
       foreach ($res['fields'] as $idx => &$col){
-        if (strpos($col, '(')
+        if (!empty($res['union'])
+          || strpos($col, '(')
           || strpos($col, '-')
           || strpos($col, "+")
           || strpos($col, '*')
@@ -2954,7 +2973,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $res['available_fields'][$col] = false;
         }
 
-        if (\is_string($idx)) {
+        if (is_string($idx)) {
           if (!isset($res['available_fields'][$col])) {
             //$this->log($res);
             //$this->log(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
@@ -2972,7 +2991,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
 
       unset($col);
-      $res['models']      = $models;
+
       $res['tables_full'] = $tables_full;
 
       if (($res['kind'] === 'SELECT') && empty($res['fields'])) {
@@ -2983,16 +3002,31 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         }
       }
 
+      if (!empty($res['union'])) {
+        $res['values'] = [];
+        foreach ($res['union'] as $i => $u) {
+          $res['union'][$i] = $this->processCfg($u);
+          foreach ($res['union'][$i]['join'] as $j){
+            if (!empty($j['on'])) {
+              $this->getValuesDesc($j['on'], $res['union'][$i], $res['values_desc']);
+            }
+          }
+          $this->getValuesDesc($res['union'][$i]['filters'], $res['union'][$i], $res['values_desc']);
+          $this->getValuesDesc($res['union'][$i]['having'], $res['union'][$i], $res['values_desc']);
+          array_push($res['values'], ...$res['union'][$i]['values']);
+        }
+      }
+
       if (in_array($res['kind'], ['INSERT', 'UPDATE'])) {
         $res = $this->removeVirtual($res);
         foreach ($res['fields'] as $i => $name) {
           $desc = [
             'name' => $name
           ];
-          if (isset($res['models'], $res['available_fields'][$name])) {
+          if (isset($models, $res['available_fields'][$name])) {
             $t = $res['available_fields'][$name];
             if (isset($tables_full[$t])
-              && ($model = $res['models'][$tables_full[$t]]['fields'])
+              && ($model = $models[$tables_full[$t]]['fields'])
               && ($fname = $this->colSimpleName($name))
               && !empty($model[$fname]['type'])
             ) {
@@ -3032,7 +3066,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
       switch ($res['kind']){
         case 'SELECT':
-          if ($res['select_st'] = $this->getSelect($res)) {
+          if (!empty($res['union'])) {
+            $res['select_st'] = $this->getUnion($res);
+            $res['sql'] = $res['select_st'];
+            //die(json_encode([$res, $this->processCfg(['kind' => 'select', 'table' => 'bbn_users', 'fields' => [], 'where' => ['id' => 2]])]));
+          }
+          elseif ($res['select_st'] = $this->getSelect($res)) {
             $res['sql'] = $res['select_st'];
           }
           break;
@@ -3093,7 +3132,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   /**
    * @param array $cfg
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function reprocessCfg(array $cfg): ?array
   {
@@ -3141,12 +3180,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   protected function _treat_arguments($cfg): array
   {
-    while (isset($cfg[0]) && \is_array($cfg[0])){
+    while (isset($cfg[0]) && is_array($cfg[0])){
       $cfg = $cfg[0];
     }
 
-    if (\is_array($cfg)
-      && array_key_exists('tables', $cfg)
+    if (is_array($cfg)
       && array_key_exists('bbn_db_treated', $cfg)
       && ($cfg['bbn_db_treated'] === true)
     ) {
@@ -3163,6 +3201,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       'group_by' => [],
       'having' => [],
     ];
+
     if (X::isAssoc($cfg)) {
       if (isset($cfg['table']) && !isset($cfg['tables'])) {
         $cfg['tables'] = $cfg['table'];
@@ -3183,7 +3222,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
 
       if (isset($cfg[4])) {
-        $res['order'] = \is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
+        $res['order'] = is_string($cfg[4]) ? [$cfg[4] => 'ASC'] : $cfg[4];
       }
 
       if (isset($cfg[5]) && Str::isInteger($cfg[5])) {
@@ -3212,59 +3251,63 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     $res['ignore'] = $res['write'] && !empty($res['ignore']);
     $res['count']  = !$res['write'] && !empty($res['count']);
 
+    
     if (!empty($res['tables'])) {
-      if (!\is_array($res['tables'])) {
-        $res['tables'] = \is_string($res['tables']) ? [$res['tables']] : [];
+      if (!is_array($res['tables'])) {
+        $res['tables'] = is_string($res['tables']) ? [$res['tables']] : [];
       }
 
       foreach ($res['tables'] as $i => $t){
         if (!is_string($t)) {
           X::log([$cfg, debug_backtrace()], 'db_explained');
-          throw new \Exception("Impossible to identify the tables, check the log");
+          throw new Exception("Impossible to identify the tables, check the log");
         }
 
         $res['tables'][$i] = $this->tableFullName($t);
       }
     }
-    else{
+    elseif (empty($res['union'])) {
       throw new \Error(X::_('No table given'));
     }
 
     if (!empty($res['fields'])) {
-      if (\is_string($res['fields'])) {
+      if (is_string($res['fields'])) {
         $res['fields'] = [$res['fields']];
       }
     }
     elseif (!empty($res['columns'])) {
       $res['fields'] = (array)$res['columns'];
     }
+    elseif (!empty($res['field'])) {
+      $res['fields'] = is_string($res['field']) ? [$res['field']] : $res['field'];
+    }
 
     if (!empty($res['fields'])) {
       if ($res['kind'] === 'SELECT') {
         foreach ($res['fields'] as $k => $col) {
-          if (\is_string($k)) {
+          if (is_string($k)) {
             $res['aliases'][$col] = $k;
           }
         }
       }
       elseif ((($res['kind'] === 'INSERT') || ($res['kind'] === 'UPDATE'))
-        && \is_string(array_keys($res['fields'])[0])
+        && is_string(array_keys($res['fields'])[0])
       ) {
         $res['values'] = array_values($res['fields']);
         $res['fields'] = array_keys($res['fields']);
       }
     }
 
-    if (!\is_array($res['group_by'])) {
+    if (!is_array($res['group_by'])) {
       $res['group_by'] = empty($res['group_by']) ? [] : [$res['group_by']];
     }
 
-    if (!\is_array($res['where'])) {
+    if (!is_array($res['where'])) {
       $res['where'] = [];
     }
 
-    if (!\is_array($res['order'])) {
-      $res['order'] = \is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
+    if (!is_array($res['order'])) {
+      $res['order'] = is_string($res['order']) ? [$res['order'] => 'ASC'] : [];
     }
 
     if (!Str::isInteger($res['limit'])) {
@@ -3277,8 +3320,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     if (!empty($cfg['join'])) {
       foreach ($cfg['join'] as $k => $join){
-        if (\is_array($join)) {
-          if (\is_string($k)) {
+        if (is_array($join)) {
+          if (is_string($k)) {
             if (empty($join['table'])) {
               $join['table'] = $k;
             }
@@ -3354,7 +3397,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     if (!empty($res['filters']) && ($tmp = $this->treatConditions($res['filters']))) {
       $res['filters']      = $tmp['where'];
       $res['hashed_where'] = $tmp['hashed'];
-      if (\is_array($tmp) && isset($tmp['values'])) {
+      if (is_array($tmp) && isset($tmp['values'])) {
         foreach ($tmp['values'] as $v){
           $res['values'][] = $v;
         }
@@ -3483,7 +3526,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   protected function _set_limit_1(array $args): array
   {
-    if (\is_array($args[0])
+    if (is_array($args[0])
       && (isset($args[0]['tables']) || isset($args[0]['table']))
     ) {
       $args[0]['limit'] = 1;
@@ -3608,7 +3651,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       }
       else{
         $id = $this->pdo->lastInsertId();
-        if (\is_string($id) && Str::isInteger($id) && ((int)$id != PHP_INT_MAX)) {
+        if (is_string($id) && Str::isInteger($id) && ((int)$id != PHP_INT_MAX)) {
           $id = (int)$id;
         }
       }
@@ -3687,14 +3730,14 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   protected function makeHash(): string
   {
-    $args = \func_get_args();
-    if ((\count($args) === 1) && \is_array($args[0])) {
+    $args = func_get_args();
+    if ((\count($args) === 1) && is_array($args[0])) {
       $args = $args[0];
     }
 
     $st = '';
     foreach ($args as $a){
-      $st .= \is_array($a) ? serialize($a) : '--'.$a.'--';
+      $st .= is_array($a) ? serialize($a) : '--'.$a.'--';
     }
 
     return $this->hash_contour.md5($st).$this->hash_contour;
@@ -3707,7 +3750,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   protected function setHash()
   {
-    $this->hash = $this->makeHash(...\func_get_args());
+    $this->hash = $this->makeHash(...func_get_args());
   }
 
   /**
@@ -3766,7 +3809,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   protected function _set_start(array $args, int $start): array
   {
-    if (\is_array($args[0])
+    if (is_array($args[0])
       && (isset($args[0]['tables']) || isset($args[0]['table']))
     ) {
       $args[0]['start'] = $start;
@@ -3806,7 +3849,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function retrieveQuery(string $hash): ?array
   {
     if (isset($this->queries[$hash])) {
-      if (\is_string($this->queries[$hash])) {
+      if (is_string($this->queries[$hash])) {
         $hash = $this->queries[$hash];
       }
 
@@ -3902,7 +3945,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function getOne()
   {
     /** @var \bbn\Db\Query $r */
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
       return $r->fetchColumn(0);
     }
 
@@ -3942,7 +3985,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getKeyVal(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       if ($rows = $r->getRows()) {
         return X::indexByFirstVal($rows);
       }
@@ -3968,7 +4012,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function getColArray(): array
   {
-    if ($r = $this->getByColumns(...\func_get_args())) {
+    if ($r = $this->getByColumns(...func_get_args())) {
       return array_values(current($r));
     }
 
@@ -4001,11 +4045,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return null|\stdClass
-   * @throws \Exception
+   * @throws Exception
    */
   public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\stdClass
   {
-    $args = $this->_add_kind($this->_set_limit_1(\func_get_args()));
+    $args = $this->_add_kind($this->_set_limit_1(func_get_args()));
     if ($r = $this->_exec(...$args)) {
       if (!is_object($r)) {
         $this->log([$args, $this->processCfg($args)]);
@@ -4045,11 +4089,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param int $limit The "limit" condition, default: 0
    * @param int $start The "start" condition, default: 0
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
+    if ($r = $this->_exec(...$this->_add_kind(func_get_args()))) {
       return $r->getObjects();
     }
 
@@ -4075,11 +4119,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
+    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(func_get_args())))) {
       return $r->getIrow();
     }
 
@@ -4114,16 +4158,84 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param int $limit The "limit" condition, default: 0
    * @param int $start The "start" condition, default: 0
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
+    if ($r = $this->_exec(...$this->_add_kind(func_get_args()))) {
       return $r->getIrows();
     }
 
     return null;
   }
+
+  public function countUnion(array $union, array $where = []): ?int
+  {
+    if (!X::isAssoc($union)) {
+      $union = [
+        'kind' => 'SELECT',
+        'union' => $union,
+        'where' => $where,
+        'fields' => ['COUNT(*)']
+      ];
+    }
+
+    if (!empty($union['union']) && is_object($r = $this->_exec($union))) {
+      $a = $r->getIrow();
+      return $a ? (int)$a[0] : null;
+    }
+
+    return null;
+  }
+
+  public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    if ($r = $this->_exec($this->adaptUnionParams($union, $fields, $where, $order, $limit, $start))) {
+      return $r->getObjects();
+    }
+
+    return [];
+  }
+
+  public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    if ($r = $this->_exec($this->adaptUnionParams($union, $fields, $where, $order, $limit, $start))) {
+      return $r->getIrows();
+    }
+
+    return [];
+  }
+
+  public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    if ($r = $this->_exec($this->adaptUnionParams($union, $fields, $where, $order, $limit, $start))) {
+      return $r->getRows();
+    }
+
+    return [];
+  }
+
+  protected function adaptUnionParams(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)
+  {
+    if (!X::isAssoc($union)) {
+      $union = [
+        'kind' => 'SELECT',
+        'union' => $union,
+        'fields' => $fields,
+        'where' => $where,
+        'order' => $order,
+        'limit' => $limit,
+        'start' => $start
+      ];
+    }
+
+    if (!empty($union['union'])) {
+      return $union;
+    }
+
+    return null;
+  }
+
 
   /**
    * Return the first row resulting from the query as an indexed array.
@@ -4144,11 +4256,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
+    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(func_get_args())))) {
       return $r->getRow();
     }
 
@@ -4182,16 +4294,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param int $limit The "limit" condition, default: 0
    * @param int $start The "start" condition, default: 0
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
   {
-    if ($r = $this->_exec(...$this->_add_kind(\func_get_args()))) {
-      if (method_exists($r, 'getRows')) {
-        return $r->getRows();
-      }
-
-      $this->log('ERROR IN RSELECT_ALL', $r);
+    if ($r = $this->_exec(...$this->_add_kind(func_get_args()))) {
+      return $r->getRows();
     }
 
     return [];
@@ -4212,16 +4320,16 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array $order The "order" condition, default: false
    * @param int $start The "start" condition, default: 0
    * @return mixed
-   * @throws \Exception
+   * @throws Exception
    */
   public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
   {
-    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(\func_get_args())))) {
+    if ($r = $this->_exec(...$this->_add_kind($this->_set_limit_1(func_get_args())))) {
       if (method_exists($r, 'getIrow')) {
         return ($a = $r->getIrow()) ? $a[0] : false;
       }
 
-      $this->log('ERROR IN SELECT_ONE', $this->last_cfg, $r, $this->_add_kind($this->_set_limit_1(\func_get_args())));
+      $this->log('ERROR IN SELECT_ONE', $this->last_cfg, $r, $this->_add_kind($this->_set_limit_1(func_get_args())));
     }
 
     return false;
@@ -4242,7 +4350,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function count($table, array $where = []): ?int
   {
-    $args          = \is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [
+    $args          = is_array($table) && (isset($table['tables']) || isset($table['table'])) ? $table : [
       'tables' => [$table],
       'where' => $where
     ];
@@ -4286,7 +4394,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param int $limit The $limit condition, default: 0
    * @param int $start The $limit condition, default: 0
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
@@ -4320,7 +4428,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array $where The "where" condition.
    * @param array $order The "order" condition.
    * @return array|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function stat(string $table, string $column, array $where = [], array $order = []): ?array
   {
@@ -4358,7 +4466,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function countFieldValues($table, string $field = null, array $where = [], array $order = []): ?array
   {
-    if (\is_array($table) && \is_array($table['fields']) && count($table['fields'])) {
+    if (is_array($table) && is_array($table['fields']) && count($table['fields'])) {
       $args  = $table;
       $field = array_values($table['fields'])[0];
     }
@@ -4410,10 +4518,10 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     $res = null;
     if ($this->check()) {
       $res = [];
-      if (\is_array($table) && isset($table['fields']) && \is_array($table['fields']) && !empty($table['fields'][0])) {
+      if (is_array($table) && isset($table['fields']) && is_array($table['fields']) && !empty($table['fields'][0])) {
         array_splice($table['fields'], 0, 1, 'DISTINCT '.(string)$table['fields'][0]);
       }
-      elseif (\is_string($table) && \is_string($field) && (stripos($field, 'DISTINCT') !== 0)) {
+      elseif (is_string($table) && is_string($field) && (stripos($field, 'DISTINCT') !== 0)) {
         $field = 'DISTINCT '.$field;
       }
 
@@ -4465,23 +4573,23 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param bool $ignore If true, controls if the row is already existing and ignores it.
    *
    * @return int|null Number affected rows.
-   * @throws \Exception
+   * @throws Exception
    */
   public function insert($table, array $values = null, bool $ignore = false): ?int
   {
     if (empty($table)) {
-      throw new \Exception(X::_('Table name is not specified'));
+      throw new Exception(X::_('Table name is not specified'));
     }
 
-    if (\is_array($table) && isset($table['values'])) {
+    if (is_array($table) && isset($table['values'])) {
       $values = $table['values'];
     }
 
     // Array of arrays
-    if (\is_array($values)
+    if (is_array($values)
       && count($values)
       && !X::isAssoc($values)
-      && \is_array($values[0])
+      && is_array($values[0])
     ) {
       $res = 0;
 
@@ -4500,7 +4608,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       return $res;
     }
 
-    $cfg         = \is_array($table) ? $table : [
+    $cfg         = is_array($table) ? $table : [
       'tables' => [$table],
       'fields' => $values,
       'ignore' => $ignore
@@ -4527,15 +4635,15 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array|null $values The values to insert.
    *
    * @return int|null The number of rows inserted or updated.
-   * @throws \Exception
+   * @throws Exception
    */
   public function insertUpdate($table, array $values = null): ?int
   {
     if (empty($table)) {
-      throw new \Exception(X::_('Table name is not specified'));
+      throw new Exception(X::_('Table name is not specified'));
     }
     // Twice the arguments
-    if (\is_array($table) && isset($table['values'])) {
+    if (is_array($table) && isset($table['values'])) {
       $values = $table['values'];
     }
 
@@ -4605,11 +4713,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param boolean $ignore If IGNORE should be added to the statement
    *
    * @return int|null The number of rows updated.
-   * @throws \Exception
+   * @throws Exception
    */
   public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
   {
-    $cfg         = \is_array($table) ? $table : [
+    $cfg         = is_array($table) ? $table : [
       'tables' => [$table],
       'where' => $where,
       'fields' => $values,
@@ -4631,11 +4739,11 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param bool $ignore default: false.
    *
    * @return int|null The number of rows deleted.
-   * @throws \Exception
+   * @throws Exception
    */
   public function delete($table, array $where = null, bool $ignore = false): ?int
   {
-    $cfg         = \is_array($table) ? $table : [
+    $cfg         = is_array($table) ? $table : [
       'tables' => [$table],
       'where' => $where,
       'ignore' => $ignore
@@ -4669,7 +4777,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function fetch(string $query)
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
       return $r->fetch();
     }
 
@@ -4708,7 +4816,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function fetchAll(string $query)
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
       return $this->fetchAllResults($r);
     }
 
@@ -4763,7 +4871,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function fetchObject($query)
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
       return $r->fetchObject();
     }
 
@@ -4790,11 +4898,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string
    * @param int The var ? value
    * @return array|false
-   * @throws \Exception
+   * @throws Exception
    */
   public function getRows(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getRows();
     }
 
@@ -4816,11 +4925,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string query.
    * @param int The var ? value.
    * @return array|false
-   * @throws \Exception
+   * @throws Exception
    */
   public function getRow(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getRow();
     }
 
@@ -4842,11 +4952,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string query
    * @param int The var ? value
    * @return array|false
-   * @throws \Exception
+   * @throws Exception
    */
   public function getIrow(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getIrow();
     }
 
@@ -4872,11 +4983,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * ```
    *
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getIrows(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getIrows();
     }
 
@@ -4903,11 +5015,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    *
    * @param string query
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getByColumns(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getByColumns();
     }
 
@@ -4927,11 +5040,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * ```
    *
    * @return null|\stdClass
-   * @throws \Exception
+   * @throws Exception
    */
   public function getObject(): ?\stdClass
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getObject();
     }
 
@@ -4966,11 +5080,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * ```
    *
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getObjects(): ?array
   {
-    if ($r = $this->query(...\func_get_args())) {
+    if ($r = $this->query(...func_get_args())) {
+      /** @var Query $r */
       return $r->getObjects();
     }
 
@@ -5046,7 +5161,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    */
   public function fmodelize(string $table = '', bool $force = false): ?array
   {
-    if ($res = $this->modelize(...\func_get_args())) {
+    if ($res = $this->modelize(...func_get_args())) {
       foreach ($res['fields'] as $n => $f){
         $res['fields'][$n]['name'] = $n;
         $res['fields'][$n]['keys'] = [];
@@ -5071,6 +5186,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function fetchAllResults(PDOStatement $PDOStatement, ...$args)
   {
     if (method_exists($PDOStatement, '_fetchAll')) {
+      /** @var Query $PDOStatement */
       return $PDOStatement->_fetchAll(...$args);
     }
 

@@ -1594,8 +1594,8 @@ PGSQL
     ];
     $i             = 0;
     foreach ($cfg['fields'] as $alias => $f) {
-      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+      if (isset($cfg['available_fields'][$f])) {
+        $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);
         $is_uid = false;
         //X::hdump('---------------', $idx, $f, $tables[$idx]['model']['fields'][$csn], $args['values'],
@@ -1639,8 +1639,8 @@ PGSQL
       'fields' => [],
     ];
     foreach ($cfg['fields'] as $alias => $f) {
-      if (isset($cfg['available_fields'][$f], $cfg['models'][$cfg['available_fields'][$f]])) {
-        $model  = $cfg['models'][$cfg['available_fields'][$f]];
+      if (isset($cfg['available_fields'][$f])) {
+        $model  = $this->modelize($cfg['available_fields'][$f]);
         $csn    = $this->colSimpleName($f);
         $is_uid = false;
         if (isset($model['fields'][$csn])) {

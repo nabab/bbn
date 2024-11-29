@@ -80,6 +80,54 @@ interface EnginesApi
    */
   public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
 
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as objects
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;
+
+	/**
+	 * Count the result against a given array of tables and returns the number
+	 *
+   * @param array $union An array of select configurations
+   * @param array $where  The "where" condition
+	 * @return int
+	 */
+	public function countUnion(array $union, array $where = []): ?int;
+
   /**
    * Fetches a given table and returns an array of a single row text-indexed
    *

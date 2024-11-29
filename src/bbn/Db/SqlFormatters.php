@@ -12,6 +12,13 @@ interface SqlFormatters
    */
   public function getSelect(array $cfg): string;
 
+  /**
+   * Generates a string starting with SELECT ... FROM (SELECT ... UNION SELECT...) AS alias
+   *
+   * @param array $cfg The configuration array
+   * @return string
+   */
+  public function getUnion(array $cfg): string;
 
   /**
    * Fetches the database and returns an array of objects

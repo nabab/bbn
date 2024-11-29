@@ -1458,6 +1458,58 @@ class Db implements Db\Actions
     return $this->language->rselectAll($table, $fields, $where, $order, $limit, $start);
   }
 
+  public function countUnion(array $union, array $where = []): ?int
+  {
+    return $this->language->countUnion($union, $where);
+  }
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as objects
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    return $this->language->selectUnion($union, $fields, $where, $order, $limit, $start);
+  }
+
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    return $this->language->rselectUnion($union, $fields, $where, $order, $limit, $start);
+  }
+
+	/**
+	 * Fetches a given array of tables and returns an array of text-indexed rows as arrays
+	 *
+   * @param array $union An array of select configurations
+   * @param string|array $fields The fields' names
+   * @param array $where  The "where" condition
+   * @param array | boolean $order condition, default: false
+   * @param int $limit The "limit" condition, default: 0
+   * @param int $start The "start" condition, default: 0
+	 * @return null|array
+	 */
+	public function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array
+  {
+    return $this->language->iselectUnion($union, $fields, $where, $order, $limit, $start);
+  }
+
 
   /**
    * Return a single value
@@ -1477,66 +1529,6 @@ class Db implements Db\Actions
   public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0)
   {
     return $this->language->selectOne($table, $field, $where, $order, $start);
-  }
-
-  // TODO-testing: is this used??
-  public function selectUnion(array $union, array $fields = [], array $where = [], array $order = [], int $start = 0):? array
-  {
-    $cfgs = [];
-    $sql  = 'SELECT ';
-    if (empty($fields)) {
-      $sql .= '* ';
-    }
-    else{
-      foreach ($fields as $i => $f){
-        if ($i) {
-          $sql .= ', ';
-        }
-
-        $sql .= $this->csn($f, true);
-      }
-    }
-
-    $sql .= ' FROM (('.PHP_EOL;
-    $vals = [];
-    $i    = 0;
-    foreach ($union as $u){
-      $cfg = $this->processCfg($this->_add_kind([$u]));
-      if ($cfg && $cfg['sql']) {
-        /** @todo From here needs to analyze the where array to the light of the tables' config */
-        if (!empty($where)) {
-          if (empty($fields)) {
-            $fields = $cfg['fields'];
-          }
-
-          foreach ($fields as $k => $f){
-            if (isset($cfg['available_fields'][$f])) {
-              if ($cfg['available_fields'][$f] && ($t = $cfg['models'][$cfg['available_fields'][$f]])
-              ) {
-                throw new Exception("Impossible to create the where in union for the following request: ".PHP_EOL.$cfg['sql']);
-                //die(var_dump($t['fields'][$cfg['fields'][$f] ?? $this->csn($f)]));
-              }
-            }
-          }
-        }
-
-        if ($i) {
-          $sql .= PHP_EOL.') UNION ('.PHP_EOL;
-        }
-
-        $sql .= $cfg['sql'];
-        foreach ($cfg['values'] as $v){
-          $vals[] = $v;
-        }
-
-        $i++;
-      }
-    }
-
-    $sql .= PHP_EOL.')) AS t';
-    return $this->getRows($sql, ...$vals);
-    //echo nl2br($sql);
-    return [];
   }
 
 
@@ -2553,6 +2545,13 @@ class Db implements Db\Actions
     return $this->language->getSelect($cfg);
   }
 
+  public function getUnion(array $cfg): string
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
+    return $this->language->getUnion($cfg);
+  }
+
 
   /**
    * Returns the SQL code for an INSERT statement.
@@ -3399,15 +3398,19 @@ class Db implements Db\Actions
   }
 
 
-  public function getQuery(string $type, array $cfg): string
+  public function getQuery(array $cfg): Query
   {
-    if (in_array(strtoupper($type), ['INSERT', 'UPDATE', 'DELETE', 'SELECT'])) {
-      $cfg['kind'] = $type;
-      $cfg = $this->processCfg($cfg);
-      return $cfg['sql'] ?: '';
+    if (!isset($cfg['kind'])) {
+      $cfg['kind'] = 'SELECT';
     }
 
-    throw new Exception(X::_("Impossible to make a query of type %s", $type));
+    if ($cfg = $this->processCfg($cfg)) {
+      return $this->language->query($cfg['sql'], ...array_map(function($a) {
+        return Str::isUid($a) ? hex2bin($a) : $a;
+      }, $cfg['values']));
+    }
+
+    throw new Exception(X::_("Impossible to make a query"));
   }
 
 
