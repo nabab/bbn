@@ -708,30 +708,16 @@ class Permissions extends Basic
 
 
   /**
-   * Returns
+   * Returns the closest Plugin > Permissions > Options root for the given option.
    *
    * @param string $name
    *
    * @return string|null
    */
-  public function optionPermissionRoot(string $id, $create = false): ?string
+  public function optionPermissionRoot(string $id): ?string
   {
-    /** @var string The option's ID for appui */
-    $root   = $this->opt->fromCode('permissions');
-
-    /** @var string The option's ID for plugins */
-    $plugins = $this->opt->fromCode('plugins');
-
-    /** @var string The option's ID for plugins */
-    $appui = $this->opt->fromCode('appui', $plugins);
-
-    /** @var array The parents, the first being root, the second the project */
-    $parents = $this->opt->parents($id);
-    $idPlugin = $this->opt->getTemplateId('plugin');
-    foreach ($parents as $p) {
-      if ($this->opt->option($p)['id_alias'] === $idPlugin) {
-        return $this->opt->fromCode('options', 'permissions', $p);
-      }
+    if ($idPlugin = $this->opt->getParentPlugin($id)) {
+      return $this->opt->fromCode('options', 'permissions', $idPlugin);
     }
 
     return null;

@@ -111,9 +111,9 @@ trait Cache
    *
    * @param string $uid
    * @param string $method
-   * @return void
+   * @return mixed
    */
-  protected function cacheGet(string $uid, string $method = '')
+  protected function cacheGet(string $uid, string $method = ''): mixed
   {
     $this->cacheCheck();
     return $this->cache_engine->get($this->_cache_name($uid, $method));
@@ -126,9 +126,9 @@ trait Cache
    * @param string $uid
    * @param string $locale
    * @param string $method
-   * @return void
+   * @return mixed
    */
-  protected function cacheGetLocale(string $uid, string $locale, string $method = '')
+  protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed
   {
     $this->cacheCheck();
     return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));

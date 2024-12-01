@@ -6,11 +6,16 @@
 
 namespace bbn\Appui;
 
+use Exception;
 use bbn;
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
 use bbn\Mvc;
-use Exception;
+use bbn\User;
+use bbn\User\Permissions;
+use bbn\User\Preferences;
+use bbn\Appui\Option;
 use bbn\Models\Cls\Basic;
 
 class Dashboard extends Basic
@@ -80,11 +85,11 @@ class Dashboard extends Basic
    */
   public function __construct(string $id = '')
   {
-    $this->opt      = bbn\Appui\Option::getInstance();
-    $this->user     = bbn\User::getInstance();
-    $this->perm     = bbn\User\Permissions::getInstance();
-    $this->pref     = bbn\User\Preferences::getInstance();
-    $this->db       = bbn\Db::getInstance();
+    $this->opt      = Option::getInstance();
+    $this->user     = User::getInstance();
+    $this->perm     = Permissions::getInstance();
+    $this->pref     = Preferences::getInstance();
+    $this->db       = Db::getInstance();
     $this->cfgPref  = $this->pref->getClassCfg();
     $this->archOpt  = $this->opt->getClassCfg()['arch']['options'];
     $this->archPref = $this->cfgPref['arch']['user_options'];
@@ -94,12 +99,12 @@ class Dashboard extends Basic
     $this->nativeWidgetFields = \array_merge($this->nativeWidgetFields, \array_values($this->archOpt));
     $this->idList             = $this->getOptionId('list');
     if (!Str::isUid($this->idList)) {
-      throw new \Exception(_("Unable to load the option 'list'"));
+      throw new Exception(_("Unable to load the option 'list'"));
     }
 
     $this->idWidgets = $this->getOptionId('widgets');
     if (!Str::isUid($this->idWidgets)) {
-      throw new \Exception(_("Unable to load the option 'widgets'"));
+      throw new Exception(_("Unable to load the option 'widgets'"));
     }
 
     if (!empty($id)) {
@@ -129,13 +134,13 @@ class Dashboard extends Basic
     if (!empty($id)) {
       if (Str::isUid($id)) {
         if (!($this->code = $this->getCode($id))) {
-          throw new \Exception(sprintf(_("Unable to load the dashboard code using identifier: %s"), $id));
+          throw new Exception(sprintf(_("Unable to load the dashboard code using identifier: %s"), $id));
         }
 
         $this->id = $id;
       } else {
         if (!($this->id = $this->getId($id))) {
-          throw new \Exception(sprintf(_("Unable to load the dashboard using identifier: %s"), $id));
+          throw new Exception(sprintf(_("Unable to load the dashboard using identifier: %s"), $id));
         }
 
         $this->code = $id;
@@ -147,6 +152,11 @@ class Dashboard extends Basic
     return false;
   }
 
+  public function getCurrent()
+  {
+    return $this->id;
+  }
+
 
   /**
    * Creates a new dashboard
@@ -156,11 +166,11 @@ class Dashboard extends Basic
   public function insert(array $d): ?string
   {
     if (empty($d['code'])) {
-      throw new \Exception(_("The dashboard's code is mandatory"));
+      throw new Exception(_("The dashboard's code is mandatory"));
     }
 
     if (empty($d[$this->archPref['text']])) {
-      throw new \Exception(_("The dashboard's text is mandatory"));
+      throw new Exception(_("The dashboard's text is mandatory"));
     }
 
     if ($this->db->insert(
@@ -193,11 +203,11 @@ class Dashboard extends Basic
   {
     if ($this->_check()) {
       if (empty($d['code'])) {
-        throw new \Exception(_("The dashboard's code is mandatory"));
+        throw new Exception(_("The dashboard's code is mandatory"));
       }
 
       if (empty($d[$this->archPref['text']])) {
-        throw new \Exception(_("The dashboard's text is mandatory"));
+        throw new Exception(_("The dashboard's text is mandatory"));
       }
 
       $t                            = &$this;
@@ -238,11 +248,11 @@ class Dashboard extends Basic
   {
     if ($this->_check()) {
       if (!Str::isUid($id)) {
-        throw new \Exception(_("The id must be a uuid"));
+        throw new Exception(_("The id must be a uuid"));
       }
 
       if (!($text = $this->opt->text($id))) {
-        throw new \Exception(sprintf(_("No text for the widget with id %s"), $id));
+        throw new Exception(sprintf(_("No text for the widget with id %s"), $id));
       }
 
       return $this->pref->addBit(
@@ -268,11 +278,11 @@ class Dashboard extends Basic
   public function updateWidget(string $id, array $widget): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
 
     if (!($opt = $this->getWidgetOption($id, true))) {
-      throw new \Exception(sprintf(_("No option found with this id %s"), $id));
+      throw new Exception(sprintf(_("No option found with this id %s"), $id));
     }
 
     $d1                              = $this->pref->getBitCfg(null, $this->_prepareWidget($widget));
@@ -297,7 +307,7 @@ class Dashboard extends Basic
   public function deleteWidget(string $id): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
 
     $res = false;
@@ -330,11 +340,11 @@ class Dashboard extends Basic
   public function setOrderWidget(string $id, int $num): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
 
     if (!($bit = $this->pref->getBit($id, false))) {
-      throw new \Exception(sprintf(_("No widget found witheì the id %s"), $id));
+      throw new Exception(sprintf(_("No widget found witheì the id %s"), $id));
     }
 
     if ((int)$bit[$this->archBits['num']] === $num) {
@@ -378,7 +388,7 @@ class Dashboard extends Basic
   public function updateNativeWidget(string $id, array $widget): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
 
     return (bool)$this->opt->set($id, $this->_prepareNativeWidget($widget));
@@ -393,7 +403,7 @@ class Dashboard extends Basic
   public function deleteNativeWidget(string $id): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
 
     $idPerm = $this->perm->optionToPermission($id);
@@ -418,10 +428,10 @@ class Dashboard extends Basic
   public function moveNativeWidget(string $id, string $idParent): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
     if (!Str::isUid($idParent)) {
-      throw new \Exception(_("The parent id must be a uuid"));
+      throw new Exception(_("The parent id must be a uuid"));
     }
     return (bool)$this->opt->move($id, $idParent);
   }
@@ -435,7 +445,7 @@ class Dashboard extends Basic
   public function isPvtWidget(string $id): bool
   {
     if (!Str::isUid($id)) {
-      throw new \Exception(_("The id must be a uuid"));
+      throw new Exception(_("The id must be a uuid"));
     }
     return ($bit = $this->pref->getBit($id)) && \is_null($bit[$this->archBits['id_option']]);
   }
@@ -450,10 +460,10 @@ class Dashboard extends Basic
   public function addPvtWidget(array $widget, string $idDashboard = ''): ?string
   {
     if (empty($idDashboard) && empty($this->id)) {
-      throw new \Exception(_('The dashboard ID is mandatory'));
+      throw new Exception(_('The dashboard ID is mandatory'));
     }
     if (empty($widget[$this->archBits['text']])) {
-      throw new \Exception(_('The widget name is mandatory'));
+      throw new Exception(_('The widget name is mandatory'));
     }
     $idDashboard = $idDashboard ?: $this->id;
     $userDash = $this->getUserDashboard($idDashboard);
@@ -792,7 +802,7 @@ class Dashboard extends Basic
   public function getId(string $code): string
   {
     if (empty($code)) {
-      throw new \Exception(_('A wrong argument value is passed'));
+      throw new Exception(_('A wrong argument value is passed'));
     }
 
     if (!Str::isUid($code)) {
@@ -837,7 +847,7 @@ class Dashboard extends Basic
   public function getCode(string $id): ?string
   {
     if (empty($id)) {
-      throw new \Exception(_('A wrong argument value is passed'));
+      throw new Exception(_('A wrong argument value is passed'));
     }
 
     if ($pref = $this->pref->get($id)) {
@@ -907,7 +917,7 @@ class Dashboard extends Basic
   private function _check()
   {
     if (!Str::isUid($this->id)) {
-      throw new \Exception(_("The dashboard's ID is mandatory"));
+      throw new Exception(_("The dashboard's ID is mandatory"));
     }
 
     return true;
@@ -922,20 +932,20 @@ class Dashboard extends Basic
   private function _prepareNativeWidget(array $widget): array
   {
     if (empty($widget[$this->archOpt['text']])) {
-      throw new \Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archOpt['text']));
+      throw new Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archOpt['text']));
     }
 
     if (empty($widget[$this->archOpt['code']])) {
-      throw new \Exception(_("The widget's 'code' property is mandatory"));
+      throw new Exception(_("The widget's 'code' property is mandatory"));
     }
 
     if ((empty($widget['component']) && empty($widget['itemComponent']))) {
-      throw new \Exception(_("The widget's 'component' or 'itemComponent' property is mandatory"));
+      throw new Exception(_("The widget's 'component' or 'itemComponent' property is mandatory"));
     }
 
     $widget[$this->archOpt['id_parent']] = empty($widget[$this->archOpt['id_parent']]) ? $this->idWidgets : $widget[$this->archOpt['id_parent']];
     if (empty($widget[$this->archOpt['id_parent']])) {
-      throw new \Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archOpt['id_parent']));
+      throw new Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archOpt['id_parent']));
     }
 
     $widget[$this->archOpt['id_alias']] = $widget[$this->archOpt['id_alias']] ?? null;
@@ -964,7 +974,7 @@ class Dashboard extends Basic
   private function _prepareWidget(array $widget): array
   {
     if (empty($widget[$this->archBits['text']])) {
-      throw new \Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archBits['text']));
+      throw new Exception(sprintf(_("The widget's '%s' property is mandatory"), $this->archBits['text']));
     }
 
     foreach ($widget as $field => $val) {
@@ -990,7 +1000,7 @@ class Dashboard extends Basic
     $res = [];
     /** @var array The user's own preferences */
     $widgetPrefs = [];
-    if ((bool)$this->id) {
+    if ($this->id) {
       // Looking for some preferences if he has some
       $uDash = $this->getUserDashboard($this->id);
       if (!empty($uDash)
@@ -1011,7 +1021,7 @@ class Dashboard extends Basic
             !empty($w[$this->archBits['id_option']])
             && ($o = $this->opt->option($w[$this->archBits['id_option']]))
           ) {
-            if ($id_plugin = $this->opt->getParentPlugin($o['id'])) {
+            if ($id_plugin = $this->opt->getParentPlugin($o[$this->archOpt['id']])) {
               $plugin = $this->opt->option($id_plugin);
               $plugin_name = $plugin['code'];
               if ($plugin['id_parent'] === BBN_APPUI) {
@@ -1077,6 +1087,8 @@ class Dashboard extends Basic
           }
         }
       }
+
+      //X::ddump($res);
       if (!empty($uDash)
         && ($pvtWidgets = $this->pref->getBits($uDash[$this->archPref['id']], false))
       ) {
