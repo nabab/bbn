@@ -43,9 +43,15 @@ trait Plugin
   {
     if ($pluginAlias = $this->getMagicPluginTemplateId()) {
       $ids = $this->parents(...\func_get_args());
-      foreach ($ids as $id) {
+      $num = count($ids);
+      foreach ($ids as $i => $id) {
         if ($this->alias($id) === $pluginAlias) {
           return $id;
+        }
+
+        // Roots are plugin too, don't return them
+        if ($num - $i < 4) {
+          break;
         }
       }
     }
@@ -89,7 +95,8 @@ trait Plugin
           $res[] = [
             'id' => $p['id'],
             'code' => $code,
-            'text' => $p['text']
+            'text' => $p['text'],
+            'icon' => $p['icon']
           ];
         }
         else {
@@ -102,7 +109,8 @@ trait Plugin
               $res[] = [
                 'id' => $p2['id'],
                 'code' => $code . '-' . $p2['code'],
-                'text' => $p2['text']
+                'text' => $p2['text'],
+                'icon' => $p2['icon']
               ];
             }
           }

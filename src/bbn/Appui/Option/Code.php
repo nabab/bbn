@@ -134,6 +134,24 @@ trait Code
       ) {
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
+      // Case where we have a full alias (no text) with the right code, we follow it
+      else {
+        $aliases = $this->db->getColumnValues($c['table'], $f['id_alias'], [
+          $f['id_parent'] => $id_parent,
+          [$f['id_alias'], 'isnotnull'],
+          [$f['text'], 'isnull']
+        ]);
+        $done = [];
+        foreach ($aliases as $a) {
+          if ($a && !in_array($a, $done, true)) {
+            $done[] = $a;
+            if ($this->code($a) === $true_code) {
+              $this->cacheSet($id_parent, $cache_name, $tmp);
+              break;
+            }
+          }
+        }
+      }
 
       if ($tmp) {
         if (\count($args)) {

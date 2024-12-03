@@ -294,4 +294,57 @@ trait Template
 
     return $tot;
   }
+
+  public function parentTemplate(string $id): ?string
+  {
+    if ($this->exists($id) && ($idAlias = $this->getIdAlias($id))) {
+      $idTemplate = $this->getMagicTemplateId();
+      $idParent = $idAlias;
+      while ($idParent) {
+        $id = $idParent;
+        if ($idParent === $idTemplate) {
+          return $id;
+        }
+        else if ($this->getIdAlias($idParent) === $idTemplate) {
+          return $id;
+        }
+        $idParent = $this->getIdParent($idParent);
+      }
+    }
+
+    return null;
+  }
+
+  public function hasTemplate(string $id): bool
+  {
+    return (bool)$this->parentTemplate($id);
+  }
+
+
+  public function isInTemplate(string $id): bool
+  {
+    $templateId = $this->getMagicTemplateId();
+    while ($idParent = $this->getIdParent($id)) {
+      if ($idParent === $templateId) {
+        return true;
+      }
+      if ($this->getIdAlias($idParent) === $templateId) {
+        return true;
+      }
+
+      $id = $idParent;
+    }
+
+    return false;
+  }
+
+
+  public function getOptionTemplate(string $id): ?array
+  {
+    if ($this->isInTemplate($id)) {
+      return $this->option($this->alias($id));
+    }
+
+    return null;
+  }
 }
