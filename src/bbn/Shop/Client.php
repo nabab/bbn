@@ -178,7 +178,7 @@ class Client extends DbCls
       $idAddress = $addressCls->insert($toAddress);
     }
     if (!empty($oldAddress)) {
-      if ($oldCfg = \json_decode($oldAddress[$addressCfg['arch']['addresses']['cfg']])) {
+      if ($oldCfg = \json_decode($oldAddress[$addressCfg['arch']['addresses']['cfg']], true)) {
         $oldAddress = X::mergeArrays($oldAddress, $oldCfg);
       }
       $oldAddress = \array_filter($oldAddress, function($k) use($toAddress){
