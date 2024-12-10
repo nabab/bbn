@@ -76,7 +76,7 @@ trait DbTrait
     $structure = $this->dbTraitGetStructure();
     foreach ($data as $k => $v) {
       if (in_array($k, $f)) {
-        // Set the value to null if it's empty and the field allows null and the field is not a numeric type
+        // Set the value to null if it's empty and not 0 and the field allows null
         if (empty($v)
           && ($v !== 0)
           && $structure['fields'][$k]['null']
