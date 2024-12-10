@@ -78,11 +78,12 @@ trait DbTrait
       if (in_array($k, $f)) {
         // Set the value to null if it's empty and the field allows null and the field is not a numeric type
         if (empty($v)
+          && ($v !== 0)
           && $structure['fields'][$k]['null']
-          && !in_array($structure['fields'][$k]['type'], ['tinyint', 'smallint', 'mediumint', 'int', 'bigint', 'decimal', 'float', 'double', 'real'])
         ) {
           $v = null;
         }
+
         $res[$k] = $v;
       }
     }
