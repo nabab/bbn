@@ -40,7 +40,6 @@ trait Template
       return $this->templateIds[$code] ?? null;
     }
     return null;
-
   }
 
 
@@ -48,7 +47,7 @@ trait Template
    * Returns the ID of the root templates
    * @return string
    */
-  public function getMagicTemplateId() : string
+  public function getMagicTemplateId(): string
   {
     if (!$this->magicTemplateId && $this->check()) {
       $this->magicTemplateId = $this->fromCode('templates', $this->getRoot());
@@ -94,6 +93,20 @@ trait Template
   {
     if (!$this->magicPluginTemplateId && $this->check()) {
       $this->magicPluginTemplateId = $this->fromCode('plugin', 'templates', $this->getRoot());
+    }
+
+    return $this->magicPluginTemplateId;
+  }
+
+
+  /**
+   * Returns the ID of the 'plugin' template
+   * @return string
+   */
+  public function getMagicSubpluginTemplateId()
+  {
+    if (!$this->magicPluginTemplateId && $this->check()) {
+      $this->magicPluginTemplateId = $this->fromCode('subplugin', 'templates', $this->getRoot());
     }
 
     return $this->magicPluginTemplateId;
@@ -169,9 +182,10 @@ trait Template
       $res = 0;
       // All the options referring to this template
       $all = $this->getAliases($id);
-      if (!empty($all)
-          && ($export = $this->export($id, 'sfull'))
-          && !empty($export['items'])
+      if (
+        !empty($all)
+        && ($export = $this->export($id, 'sfull'))
+        && !empty($export['items'])
       ) {
         foreach ($all as $a) {
           foreach ($this->import($export['items'], $a[$this->fields['id']]) as $num) {
@@ -223,7 +237,7 @@ trait Template
       if (!$templateParent['id_alias']) {
         throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
       }
-  
+
       if ($templateParent['id_alias'] !== $this->getMagicTemplateTemplateId()) {
         throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
       }
@@ -253,8 +267,7 @@ trait Template
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
       if ($opt['code']) {
         $o = X::getRow($foptions, ['code' => $opt['code']]);
-      }
-      else {
+      } else {
         $o = X::getRow($foptions, ['text' => $opt['text']]);
       }
 
@@ -278,8 +291,7 @@ trait Template
       if ((json_encode($cfg) !== json_encode($ocfg)) && $this->setCfg($id, $cfg) && !$totDone) {
         $tot++;
       }
-    }
-    else {
+    } else {
       $opt['id_parent'] = $target;
       $opt['id_alias'] = $idSubtemplate;
       if ($id = $this->add($opt)) {
@@ -304,8 +316,7 @@ trait Template
         $id = $idParent;
         if ($idParent === $idTemplate) {
           return $id;
-        }
-        else if ($this->getIdAlias($idParent) === $idTemplate) {
+        } else if ($this->getIdAlias($idParent) === $idTemplate) {
           return $id;
         }
         $idParent = $this->getIdParent($idParent);
@@ -346,5 +357,11 @@ trait Template
     }
 
     return null;
+  }
+
+
+  public function isApp(string $id): bool
+  {
+    return $this->isPlugin($id) && ($this->getIdParent($id) === $this->root);
   }
 }

@@ -4,137 +4,140 @@ namespace bbn\Appui\Option;
 
 use bbn\Str;
 
-
+/**
+ * The Code trait provides methods for working with options' codes.
+ */
 trait Code
 {
   /**
    * Retrieves an option's ID from its "codes path"
-   * 
-   * Gets an option ID from diverse combinations of elements:
-   * - A code or a serie of codes from the most specific to a child of the root
-   * - A code or a serie of codes and an id_parent where to find the last code
+   *
+   * This method can handle diverse combinations of elements, such as:
+   * - A code or a series of codes from the most specific to a child of the root
+   * - A code or a series of codes and an id_parent where to find the last code
    * - A code alone having $this->default as parent
    *
-   * ```php
-   * X::dump($opt->fromCode(25));
-   * // (int) 25
-   * X::dump($opt->fromCode('bbn_ide'));
-   * // (int) 25
-   * X::dump($opt->fromCode('test', 58));
-   * // (int) 42
-   * X::dump($opt->fromCode('test', 'users', 'bbn_ide'));
-   * // (int) 42
-   * ```
-   *
-   * @param mixed $code
-   * @return null|string The ID of the option or false if the row cannot be found
+   * @param string ...$codes The option's code(s)
+   * @return string|null The ID of the option, null if not found, or false if the row cannot be found
    */
-  public function fromCode($code = null): ?string
+  public function fromCode(...$codes): ?string
   {
+    // Check if the class is initialized and the database connection is valid.
     if ($this->check()) {
-      $args = \func_get_args();
-      // An array can be used as parameters too
-      while (isset($args[0]) && \is_array($args[0])){
-        $args = $args[0];
+      // If the input is an array, extract its elements as separate arguments.
+      while (isset($codes[0]) && \is_array($codes[0])) {
+        $codes = $codes[0];
       }
 
-      // If we get an option array as param
-      if (isset($args[$this->fields['id']])) {
-        return $args[$this->fields['id']];
+      // Check if we have an option array as a parameter and return its ID directly.
+      if (isset($codes[$this->fields['id']])) {
+        return $codes[$this->fields['id']];
       }
 
-      $num = \count($args);
+      // Get the number of arguments provided.
+      $num = \count($codes);
+
+      // If no arguments are provided, return null.
       if (!$num) {
         return null;
       }
 
-      // False is accepted as id_parent for root
-      if (($num === 1) && ($args[0] === false)) {
+      // Check for a special case where false is accepted as id_parent for root.
+      if (($num === 1) && ($codes[0] === false)) {
         return $this->default;
       }
 
-      if (Str::isUid($args[0])) {
+      // If the first argument is a valid UID, check if it's an existing option ID or proceed with further checks.
+      if (Str::isUid($codes[0])) {
         if ($num === 1) {
-          return $args[0];
+          return $codes[0];
         }
 
-        // If there are extra arguments with the ID we check that they correspond to its parent (that would be an extra check)
-        if ($this->getIdParent($args[0]) === $this->fromCode(...\array_slice($args, 1))) {
-          return $args[0];
+        // Perform an extra check to ensure the provided ID corresponds to its parent.
+        if ($this->getIdParent($codes[0]) === $this->fromCode(...\array_slice($codes, 1))) {
+          return $codes[0];
         }
       }
 
-      // We can use whatever alphanumeric value for code
-      if (empty($args) || (!\is_string($args[0]) && !is_numeric($args[0]))) {
+      // Check if the first argument is a valid alphanumeric code.
+      if (empty($codes) || (!\is_string($codes[0]) && !is_numeric($codes[0]))) {
         return null;
       }
 
-      if (end($args) === 'appui') {
-        $args[] = 'plugins';
+      // Handle special cases for certain codes, such as 'appui' or 'plugins'.
+      if (end($codes) === 'appui') {
+        $codes[] = 'plugins';
         $num++;
       }
-      // They must all have the same form at start with an id_parent as last argument
-      if (!Str::isUid(end($args))) {
-        $args[] = $this->default;
+      // Ensure that the last argument is a valid UID; otherwise, append the default value.
+      if (!Str::isUid(end($codes))) {
+        $codes[] = $this->default;
         $num++;
       }
 
-      // At this stage we need at least one code and one id
+      // At this stage, we need at least one code and one ID to proceed with the query.
       if ($num < 2) {
         return null;
       }
 
-      // So the target has always the same name
-      // This is the full name with all the arguments plus the root
-      // eg ['c1', 'c2', 'c3', UID]
-      // UID-c3-c4-c5
-      // UID-c3-c4
-      // UID-c3
-      // Using the code(s) as argument(s) from now
-      $id_parent = array_pop($args);
-      $true_code = array_pop($args);
+      // Extract the parent ID and true code from the arguments.
+      $id_parent = array_pop($codes);
+      $true_code = array_pop($codes);
       $enc_code  = $true_code ? base64_encode($true_code) : 'null';
-      // This is the cache name
-      // get_codeX::_(base64(first_code))
-      $cache_name = 'get_code_'.$enc_code;
-      // UID-get_codeX::_(base64(first_code))
+
+      // Define the cache name based on the encoded code.
+      $cache_name = 'get_code_' . $enc_code;
+
+      // Check if a cached result is available for the given parent ID and cache name.
       if (($tmp = $this->cacheGet($id_parent, $cache_name))) {
-        if (!count($args)) {
+        // If no more arguments are provided, return the cached result directly.
+        if (!count($codes)) {
           return $tmp;
         }
 
-        $args[] = $tmp;
-        return $this->fromCode(...$args);
+        // Otherwise, append the cached result to the remaining arguments and proceed recursively.
+        $codes[] = $tmp;
+        return $this->fromCode(...$codes);
       }
 
-      $c =& $this->class_cfg;
-      $f =& $this->fields;
+      // Perform a database query to find an option matching the provided code and parent ID.
+      $c = &$this->class_cfg;
+      $f = &$this->fields;
+
       /** @var int|false $tmp */
       if ($tmp = $this->db->selectOne(
-        $c['table'], $f['id'], [
+        $c['table'],
+        $f['id'],
+        [
           [$f['id_parent'], '=', $id_parent],
           [$f['code'], '=', $true_code]
         ]
       )) {
+        // Cache the result for future queries.
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
-      // Magic code options can be bypassed
+      // If no direct match is found, attempt to find a magic code option that bypasses the normal matching logic.
       elseif (($tmp2 = $this->db->selectOne(
-            $c['table'], $f['id'], [
-              $f['id_parent'] => $id_parent,
-              $f['id_alias'] => $this->getMagicOptionsTemplateId()
-            ]
-          ))
-          && ($tmp = $this->db->selectOne(
-            $c['table'], $f['id'], [
-              [$f['id_parent'], '=', $tmp2],
-              [$f['code'], '=', $true_code]
-            ]
-          ))
+          $c['table'],
+          $f['id'],
+          [
+            $f['id_parent'] => $id_parent,
+            $f['id_alias'] => $this->getMagicOptionsTemplateId()
+          ]
+        ))
+        && ($tmp = $this->db->selectOne(
+          $c['table'],
+          $f['id'],
+          [
+            [$f['id_parent'], '=', $tmp2],
+            [$f['code'], '=', $true_code]
+          ]
+        ))
       ) {
+        // Cache the result for future queries.
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
-      // Case where we have a full alias (no text) with the right code, we follow it
+      // If still no match is found, attempt to follow an alias with a matching code.
       else {
         $aliases = $this->db->getColumnValues($c['table'], $f['id_alias'], [
           $f['id_parent'] => $id_parent,
@@ -145,6 +148,7 @@ trait Code
         foreach ($aliases as $a) {
           if ($a && !in_array($a, $done, true)) {
             $done[] = $a;
+            // Check if the alias has a matching code and cache the result if found.
             if ($this->code($a) === $true_code) {
               $this->cacheSet($id_parent, $cache_name, $tmp);
               break;
@@ -153,10 +157,11 @@ trait Code
         }
       }
 
+      // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($tmp) {
-        if (\count($args)) {
-          $args[] = $tmp;
-          return $this->fromCode(...$args);
+        if (\count($codes)) {
+          $codes[] = $tmp;
+          return $this->fromCode(...$codes);
         }
 
         return $tmp;
@@ -168,14 +173,19 @@ trait Code
 
 
   /**
+   * Retrieves an option's ID from its code path, starting from the root.
+   *
    * @return string|null
    */
   public function fromRootCode(): ?string
   {
+    // Save the default value and set it to the root for this query.
     if ($this->check()) {
       $def = $this->default;
       $this->setDefault($this->root);
+      // Proceed with the query using the updated default value.
       $res = $this->fromCode(...func_get_args());
+      // Restore the original default value after the query.
       $this->setDefault($def);
       return $res;
     }
@@ -184,35 +194,22 @@ trait Code
   }
 
 
-
-
-
-
   /**
-   * Returns an array of options in the form id => code
-   * @todo Add cache
-   *
-   * ```php
-   * X::dump($opt->getCodes());
-   * /*
-   * array [
-   *   21 => "opt21",
-   *   22 => "opt22",
-   *   25 => "opt25",
-   *   27 => "opt27"
-   * ]
-   * ```
+   * Returns an array of options in the form id => code.
    *
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array Options' array
    */
-  public function getCodes($code = null): array
+  public function getCodes(...$codes): array
   {
-    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $c   =& $this->fields;
+    // Check if a valid ID is provided or can be resolved from the given codes.
+    if (Str::isUid($id = $this->fromCode(...$codes))) {
+      $c   = &$this->fields;
+      // Retrieve all options with their IDs and codes, sorted by either the 'num' or 'code' field depending on whether the parent option is sortable.
       $opt = $this->db->rselectAll($this->class_cfg['table'], [$c['id'], $c['code']], [$c['id_parent'] => $id], [($this->isSortable($id) ? $c['num'] : $c['code']) => 'ASC']);
       $res = [];
-      foreach ($opt as $r){
+      // Iterate over the retrieved options and populate the result array with their IDs and codes.
+      foreach ($opt as $r) {
         if (!empty($r[$c['code']]) && Str::isInteger($r[$c['code']])) {
           $r[$c['code']] = (int)$r[$c['code']];
         }
@@ -227,24 +224,24 @@ trait Code
 
 
   /**
-   * Returns an option's code
-   *
-   * ```php
-   * X::dump($opt->code(12));
-   * // (string) bbn_ide
-   * ```
+   * Returns an option's code.
    *
    * @param string $id The options' ID
    * @return string|null The code value, null is none, false if option not found
    */
   public function code(string $id): ?string
   {
+    // Check if a valid ID is provided and the instance is properly initialized.
     if ($this->check() && Str::isUid($id)) {
+      // Retrieve the code for the given ID from the database.
       $code = $this->db->selectOne(
-        $this->class_cfg['table'], $this->fields['code'], [
-        $this->fields['id'] => $id
+        $this->class_cfg['table'],
+        $this->fields['code'],
+        [
+          $this->fields['id'] => $id
         ]
       );
+      // If the retrieved code is an integer, cast it to an integer for consistency.
       if (!empty($code) && Str::isInteger($code)) {
         $code = (int)$code;
       }
@@ -253,5 +250,4 @@ trait Code
 
     return null;
   }
-
 }

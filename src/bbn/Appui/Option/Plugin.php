@@ -13,7 +13,8 @@ trait Plugin
   public function updatePlugins(): ?int
   {
     if (($pluginAlias = $this->getMagicPluginTemplateId())
-        && ($export = $this->export($pluginAlias, 'sfull'))) {
+      && ($export = $this->export($pluginAlias, 'sfull'))
+    ) {
       $res = 0;
       /*
       $codePath = $this->getCodePath($pluginAlias);
@@ -67,7 +68,7 @@ trait Plugin
     $o = $this->option($id);
     if ($pluginAlias && ($o['id_alias'] === $pluginAlias)) {
       $st = '';
-      while ($o['id_alias'] !== $pluginsAlias) {
+      while ($o && ($o['id_alias'] !== $pluginsAlias)) {
         $st .= $o['code'] . ($st ? '-' . $st : '');
         $o = $this->option($o['id_parent']);
       }
@@ -77,6 +78,16 @@ trait Plugin
 
     return null;
   }
+
+  public function isPlugin($id): bool
+  {
+    if ($this->alias($id) === $this->getMagicPluginTemplateId()) {
+      return true;
+    }
+
+    return false;
+  }
+
 
   public function getPlugins($root = null): ?array
   {
@@ -98,8 +109,7 @@ trait Plugin
             'text' => $p['text'],
             'icon' => $p['icon']
           ];
-        }
-        else {
+        } else {
           foreach ($this->fullOptions($p['id']) as $p2) {
             if (empty($p2['code'])) {
               throw new Exception(X::_("The plugin option must have a code"));
@@ -119,7 +129,7 @@ trait Plugin
 
       return $res;
     }
-    
+
     if ($pluginAlias = $this->getMagicPluginTemplateId()) {
 
       $all = $this->optionsByAlias($pluginAlias);
@@ -134,4 +144,59 @@ trait Plugin
     return null;
   }
 
+
+  public function getSubplugins(string $id_plugin): ?array
+  {
+    $pluginAlias = $this->getMagicPluginTemplateId();
+    $pluginsAlias = $this->getMagicPluginsTemplateId();
+    $plugins = $this->fromCode('plugins', $id_plugin);
+    $res = [];
+    if ($pluginAlias && $pluginsAlias && $plugins) {
+      foreach ($this->fullOptions($plugins) as $p) {
+        if (empty($p['code'])) {
+          throw new Exception(X::_("The plugin option must have a code"));
+        }
+
+        $code = $p['code'];
+        if ($p['id_alias'] === $pluginAlias) {
+          $res[] = [
+            'id' => $p['id'],
+            'code' => $code,
+            'text' => $p['text'],
+            'icon' => $p['icon']
+          ];
+        } else {
+          foreach ($this->fullOptions($p['id']) as $p2) {
+            if (empty($p2['code'])) {
+              throw new Exception(X::_("The plugin option must have a code"));
+            }
+
+            if ($p2['id_alias'] === $pluginAlias) {
+              $res[] = [
+                'id' => $p2['id'],
+                'code' => $code . '-' . $p2['code'],
+                'text' => $p2['text'],
+                'icon' => $p2['icon']
+              ];
+            }
+          }
+        }
+      }
+
+      return $res;
+    }
+
+    if ($pluginAlias = $this->getMagicPluginTemplateId()) {
+
+      $all = $this->optionsByAlias($pluginAlias);
+      foreach ($all as &$a) {
+        $a['name'] = $this->getPluginName($a['id']);
+      }
+
+      unset($a);
+      return $all;
+    }
+
+    return null;
+  }
 }

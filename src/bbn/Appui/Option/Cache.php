@@ -5,89 +5,107 @@ namespace bbn\Appui\Option;
 use bbn\Str;
 use bbn\Appui\Option;
 
-
+/**
+ * Trait Cache provides caching functionality for options.
+ */
 trait Cache
 {
-  /** @var array A store for parameters sent to @see from_code */
+  /**
+   * A store for parameters sent to methods that utilize caching.
+   *
+   * @var array
+   */
   private $_local_cache = [];
 
   /**
-   * Sets the cache
-   * @param string $id
-   * @param string $method
-   * @param mixed $data
-   * @param string|null $locale
+   * Sets the cache value for a given method and ID, with optional locale support.
+   *
+   * If no locale is provided, it will attempt to retrieve the translating locale for the given ID.
+   *
+   * @param string $id The option's ID
+   * @param string $method The method name to cache
+   * @param mixed $data The data to cache
+   * @param string|null $locale Optional locale for caching (defaults to null)
+   *
    * @return self
    */
-  public function setCache(string $id, string $method, $data, ?string $locale = null)
+  public function setCache(string $id, string $method, $data, ?string $locale = null): self
   {
+    // If no locale is provided, attempt to retrieve the translating locale for the given ID.
     if (empty($locale)) {
       $locale = $this->getTranslatingLocale($id);
     }
 
+    // If a locale exists, cache with locale support; otherwise, cache without locale.
     if (!empty($locale)) {
       return $this->cacheSetLocale($id, $locale, $method, $data);
+    } else {
+      return $this->cacheSet($id, $method, $data);
     }
-
-    return $this->cacheSet($id, $method, $data);
   }
 
-
   /**
-   * Gets the cache
-   * @param string $id
-   * @param string $method
-   * @param string|null $locale
+   * Retrieves the cached value for a given method and ID, with optional locale support.
+   *
+   * If no locale is provided, it will attempt to retrieve the translating locale for the given ID.
+   *
+   * @param string $id The option's ID
+   * @param string $method The method name to retrieve from cache
+   * @param string|null $locale Optional locale for caching (defaults to null)
+   *
    * @return mixed
    */
   public function getCache(string $id, string $method, ?string $locale = null)
   {
+    // If no locale is provided, attempt to retrieve the translating locale for the given ID.
     if (empty($locale)) {
       $locale = $this->getTranslatingLocale($id);
     }
 
+    // If a locale exists, retrieve cache with locale support; otherwise, retrieve without locale.
     if (!empty($locale)) {
       return $this->cacheGetLocale($id, $locale, $method);
+    } else {
+      return $this->cacheGet($id, $method);
     }
-
-    return $this->cacheGet($id, $method);
   }
 
-
   /**
-   * Deletes the options' cache, specifically for an ID or globally
-   * If specific, it will also destroy the cache of the parent
+   * Deletes the options' cache for a given ID or globally, with optional deep deletion of children's caches.
    *
-   * ```php
-   * $opt->option->deleteCache(25)
-   * // This is chainable
-   * // ->...
-   * ```
-   * @param string|null $id The option's ID
-   * @param boolean $deep If sets to true, children's cache will also be deleted
-   * @param boolean $subs Used internally only for deleting children's cache without their parent
+   * @param string|null $id The option's ID (or null for global deletion)
+   * @param boolean $deep If true, also deletes children's caches
+   * @param boolean $subs Used internally for recursive cache deletion without deleting the parent's cache
+   *
    * @return Option
    */
-  public function deleteCache(string $id = null, $deep = false, $subs = false): self
+  public function deleteCache(string $id = null, bool $deep = false, bool $subs = false): self
   {
+    // Ensure the class is initialized and has a valid database connection before proceeding with cache deletion.
     if ($this->check()) {
+      // If an ID is provided and it's a valid UID, proceed with cache deletion for that ID.
       if (Str::isUid($id)) {
+        // Recursively delete caches of children if deep deletion is enabled or not deleting the parent's cache.
         if (($deep || !$subs) && ($items = $this->items($id))) {
-          foreach ($items as $it){
+          foreach ($items as $it) {
             $this->deleteCache($it, $deep, true);
           }
         }
 
+        // Delete the alias's cache if it exists and not deleting the parent's cache.
         if (!$subs && ($id_alias = $this->alias($id))) {
           $this->deleteCache($id_alias, false, true);
         }
 
+        // Delete the cache for the given ID.
         $this->cacheDelete($id);
+
+        // If not deleting the parent's cache, also delete its cache.
         if (!$subs) {
           $this->cacheDelete($this->getIdParent($id));
         }
-      }
-      elseif (is_null($id)) {
+      } elseif (is_null($id)) {
+        // Delete all caches if no ID is provided.
         $this->cacheDeleteAll();
       }
     }
@@ -95,24 +113,26 @@ trait Cache
     return $this;
   }
 
-
   /**
-   * @param $name
-   * @param $val
+   * Sets a value in the local cache.
+   *
+   * @param string $name The name of the cache entry
+   * @param mixed $val The value to cache
    */
-  private function _set_local_cache($name, $val): void
+  private function _set_local_cache(string $name, $val): void
   {
     $this->_local_cache[$name] = $val;
   }
 
-
   /**
-   * @param $name
-   * @return string|null
+   * Retrieves a value from the local cache.
+   *
+   * @param string $name The name of the cache entry
+   *
+   * @return string|null The cached value or null if not found
    */
-  private function _get_local_cache($name): ?string
+  private function _get_local_cache(string $name): ?string
   {
-    return isset($this->_local_cache[$name]) ? $this->_local_cache[$name] : null;
+    return $this->_local_cache[$name] ?? null;
   }
-
 }
