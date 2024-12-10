@@ -59,6 +59,9 @@ class Entity
         $this->easyId = $this->entities->selectOne($this->fields['easy_id'], [$this->fields['id'] => $id]);
         $this->id = $id;
       }
+      else {
+        throw new Exception(X::_("The entity does not exist"));
+      }
     }
     elseif ($this->entities->exists($id)) {
       $this->id = $id;
