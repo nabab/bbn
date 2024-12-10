@@ -60,7 +60,7 @@ class Entity
         $this->id = $id;
       }
       else {
-        throw new Exception(X::_("The entity does not exist"));
+        throw new Exception(X::_("The entity %s does not exist", $id));
       }
     }
     elseif ($this->entities->exists($id)) {
