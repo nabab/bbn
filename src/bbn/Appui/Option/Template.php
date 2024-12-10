@@ -105,11 +105,11 @@ trait Template
    */
   public function getMagicSubpluginTemplateId()
   {
-    if (!$this->magicPluginTemplateId && $this->check()) {
-      $this->magicPluginTemplateId = $this->fromCode('subplugin', 'templates', $this->getRoot());
+    if (!$this->magicSubpluginTemplateId && $this->check()) {
+      $this->magicSubpluginTemplateId = $this->fromCode('subplugin', 'templates', $this->getRoot());
     }
 
-    return $this->magicPluginTemplateId;
+    return $this->magicSubpluginTemplateId;
   }
 
 

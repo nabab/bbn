@@ -440,6 +440,7 @@ class Search extends Basic
         }
 
         $item = $config_array[$i];
+        $results['done'][] = basename($item['file'], '.php');
         $item['cfg']['limit'] = $limit - count($results['data']);
         if ($search_results = $this->db->rselectAll($item['cfg'])) {
           array_walk($search_results, function (&$a) use ($item) {

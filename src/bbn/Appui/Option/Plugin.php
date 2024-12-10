@@ -89,7 +89,7 @@ trait Plugin
   }
 
 
-  public function getPlugins($root = null): ?array
+  public function getPlugins($root = null, bool $full = false, bool $withSubs = false): ?array
   {
     $pluginAlias = $this->getMagicPluginTemplateId();
     $pluginsAlias = $this->getMagicPluginsTemplateId();
@@ -103,25 +103,54 @@ trait Plugin
 
         $code = $p['code'];
         if ($p['id_alias'] === $pluginAlias) {
-          $res[] = [
+          $item = [
             'id' => $p['id'],
             'code' => $code,
             'text' => $p['text'],
-            'icon' => $p['icon']
+            'icon' => $p['icon'],
           ];
-        } else {
+          if ($full) {
+            $item = array_merge($item, [
+              'rootPlugins' => $this->fromCode('plugins', $p['id']),
+              'rootOptions' => $this->fromCode('options', $p['id']),
+              'rootTemplates' => $this->fromCode('templates', $p['id']),
+              'rootPermissions' => $this->fromCode('permissions', $p['id'])
+            ]);
+          }
+
+          if ($withSubs) {
+            $item['subplugins'] = $this->getSubplugins($p['id']);
+          }
+
+          $res[] = $item;
+        }
+        else {
           foreach ($this->fullOptions($p['id']) as $p2) {
             if (empty($p2['code'])) {
               throw new Exception(X::_("The plugin option must have a code"));
             }
 
             if ($p2['id_alias'] === $pluginAlias) {
-              $res[] = [
+              $item = [
                 'id' => $p2['id'],
                 'code' => $code . '-' . $p2['code'],
                 'text' => $p2['text'],
-                'icon' => $p2['icon']
+                'icon' => $p2['icon'],
               ];
+              if ($full) {
+                $item = array_merge($item, [
+                  'rootPlugins' => $this->fromCode('plugins', $p2['id']),
+                  'rootOptions' => $this->fromCode('options', $p2['id']),
+                  'rootTemplates' => $this->fromCode('templates', $p2['id']),
+                  'rootPermissions' => $this->fromCode('permissions', $p2['id'])
+                ]);
+              }
+
+              if ($withSubs) {
+                $item['subplugins'] = $this->getSubplugins($p2['id']);
+              }
+
+              $res[] = $item;
             }
           }
         }
@@ -130,23 +159,13 @@ trait Plugin
       return $res;
     }
 
-    if ($pluginAlias = $this->getMagicPluginTemplateId()) {
-
-      $all = $this->optionsByAlias($pluginAlias);
-      foreach ($all as &$a) {
-        $a['name'] = $this->getPluginName($a['id']);
-      }
-
-      unset($a);
-      return $all;
-    }
-
     return null;
   }
 
 
   public function getSubplugins(string $id_plugin): ?array
   {
+    $subpluginAlias = $this->getMagicSubpluginTemplateId();
     $pluginAlias = $this->getMagicPluginTemplateId();
     $pluginsAlias = $this->getMagicPluginsTemplateId();
     $plugins = $this->fromCode('plugins', $id_plugin);
@@ -158,12 +177,14 @@ trait Plugin
         }
 
         $code = $p['code'];
-        if ($p['id_alias'] === $pluginAlias) {
+        if ($p['id_alias'] === $subpluginAlias) {
           $res[] = [
             'id' => $p['id'],
             'code' => $code,
             'text' => $p['text'],
-            'icon' => $p['icon']
+            'icon' => $p['icon'],
+            'rootOptions' => $this->fromCode('options', $p['id']),
+            'rootPermissions' => $this->fromCode('permissions', $p['id'])
           ];
         } else {
           foreach ($this->fullOptions($p['id']) as $p2) {
@@ -171,12 +192,14 @@ trait Plugin
               throw new Exception(X::_("The plugin option must have a code"));
             }
 
-            if ($p2['id_alias'] === $pluginAlias) {
+            if ($p2['id_alias'] === $subpluginAlias) {
               $res[] = [
                 'id' => $p2['id'],
                 'code' => $code . '-' . $p2['code'],
                 'text' => $p2['text'],
-                'icon' => $p2['icon']
+                'icon' => $p2['icon'],
+                'rootOptions' => $this->fromCode('options', $p2['id']),
+                'rootPermissions' => $this->fromCode('permissions', $p2['id'])
               ];
             }
           }
@@ -184,17 +207,6 @@ trait Plugin
       }
 
       return $res;
-    }
-
-    if ($pluginAlias = $this->getMagicPluginTemplateId()) {
-
-      $all = $this->optionsByAlias($pluginAlias);
-      foreach ($all as &$a) {
-        $a['name'] = $this->getPluginName($a['id']);
-      }
-
-      unset($a);
-      return $all;
     }
 
     return null;
