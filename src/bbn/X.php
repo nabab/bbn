@@ -3158,15 +3158,16 @@ class X
       }
     }
     else {
+      $end = count($data) + ($with_titles ? 1 : 0);
       foreach ($cfg['fields'] as $i => $field) {
         // Get cell object
-        $cell = $sheet->getCellByColumnAndRow($i + 1, 0);
+        $cell = $sheet->getCell([$i + 1, $with_titles ? 2 : 1]);
         // Get colum name
-        $col_idx = $cell->getColumn();
+        $column = $cell->getColumn();
         // Set auto width to the column
-        $sheet->getColumnDimension($col_idx)->setAutoSize(true);
+        $sheet->getColumnDimension($column)->setAutoSize(true);
         // Cell style object
-        $style = $sheet->getStyle("$col_idx:$col_idx");
+        $style = $sheet->getStyle($column.($with_titles ? '2' : '1').':'.$column.$end);
         // Get number format object
         $format = $style->getNumberFormat();
         // Set the vertical alignment to center
@@ -3215,7 +3216,7 @@ class X
         }
 
         if ($with_titles) {
-          $cell  = $sheet->getCellByColumnAndRow($i + 1, 1);
+          $cell  = $sheet->getCell([$i + 1, 1]);
           $style = $cell->getStyle();
           // Set code's format to text
           $style->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
@@ -3231,7 +3232,7 @@ class X
       if (isset($cfg['map'], $cfg['map']['callable'])
           && is_callable($cfg['map']['callable'])
       ) {
-        array_walk($data, $cfg['map']['callable'], is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
+        array_walk($data, $cfg['map']['callable'], !empty($cfg['map']['params']) && is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
       }
 
       $sheet->fromArray($data, null, 'A' . ($with_titles ? '2' : '1'));
