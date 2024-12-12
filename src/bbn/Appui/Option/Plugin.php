@@ -91,7 +91,7 @@ trait Plugin
           }
         }
         elseif ($this->getIdAlias($id) === $pluginAlias) {
-          if ($num - $i < 4) {
+          if ($num < 3) {
             if (!$type || ($type === 'app')) {
               return ['type' => 'app', 'id' => $id];
             }
@@ -104,6 +104,8 @@ trait Plugin
             }
           }
         }
+
+        $num--;
       }
     }
 

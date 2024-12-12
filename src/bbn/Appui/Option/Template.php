@@ -15,6 +15,8 @@ trait Template
 
   protected $magicPluginTemplateId;
 
+  protected $magicSubpluginTemplateId;
+
   protected $magicTemplateTemplateId;
 
   protected $magicAppuiTemplateId;
