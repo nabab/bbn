@@ -186,7 +186,7 @@ class Search extends Basic
    * @return array
    * @throws Exception
    */
-  protected function getSearchCfg(): array
+  protected function getRawCfg(): array
   {
     if ($cached_data = $this->cacheGet($this->cfg_cache_name, __FUNCTION__.'_'.\md5(\json_encode(self::$functions)))) {
       return $cached_data;
@@ -227,12 +227,12 @@ class Search extends Basic
    * @param string $search_value
    * @return array
    */
-  protected function executeFunctions(string $search_value): array
+  public function getExecutedCfg(string $search_value): array
   {
     $result = [];
     $i      = 0;
 
-    foreach ($this->getSearchCfg() as $items) {
+    foreach ($this->getRawCfg() as $items) {
       if (!is_array($items)) {
         continue;
       }
@@ -319,7 +319,7 @@ class Search extends Basic
     if (!($config_array = $this->cacheGet($this->user->getId(), $cache_name))) {
 
       // Execute all functions with the given search string
-      $config_array = $this->executeFunctions($search_value);
+      $config_array = $this->getExecutedCfg($search_value);
 
       // Save it in cache
       $this->cacheSet($this->user->getId(), $cache_name, $config_array);
@@ -426,7 +426,7 @@ class Search extends Basic
         $step = 0;
       }
 
-      //X::ddump($config_array, "DDDD", $this->executeFunctions($search_value), $search_value, $this->search_cfg);
+      //X::ddump($config_array, "DDDD", $this->getExecutedCfg($search_value), $search_value, $this->search_cfg);
       $num_cfg = count($config_array);
       if (!$start && !$step) {
         array_walk($config_array, function (&$a) {
@@ -442,32 +442,8 @@ class Search extends Basic
         $item = $config_array[$i];
         $results['done'][] = basename($item['file'], '.php');
         $item['cfg']['limit'] = $limit - count($results['data']);
-        if ($search_results = $this->db->rselectAll($item['cfg'])) {
-          array_walk($search_results, function (&$a) use ($item) {
-            if (!empty($item['component'])) {
-              $a['component'] = $item['component'];
-            }
-            $b = $a;
-            unset($b['match']);
-            ksort($b);
-            $a['hash']      = md5(json_encode($b));
-            $a['score']     = $item['score'];
-            $a['signature'] = $item['signature'];
 
-            if (!empty($item['options'])) {
-              $a['options'] = $item['options'];
-            }
-
-            if (!empty($item['url'])) {
-              $a['url'] = Tpl::render($item['url'], $a);
-            }
-
-            if (!empty($item['action'])) {
-              $a['action'] = $item['action'];
-            }
-
-          });
-
+        if ($search_results = $this->getResult($item)) {
           foreach ($search_results as $s) {
             $row = X::find($results['data'], ['hash' => $s['hash']]);
             if (!empty($results['data'][$row])) {
@@ -505,6 +481,39 @@ class Search extends Basic
 
     $this->cacheSet($this->user->getId(), $cache_name, $config_array);
     return $results;
+  }
+
+
+  public function getResult(array $item): array
+  {
+    if ($search_results = $this->db->rselectAll($item['cfg'])) {
+      array_walk($search_results, function (&$a) use ($item) {
+        if (!empty($item['component'])) {
+          $a['component'] = $item['component'];
+        }
+        $b = $a;
+        unset($b['match']);
+        ksort($b);
+        $a['hash']      = md5(json_encode($b));
+        $a['score']     = $item['score'];
+        $a['signature'] = $item['signature'];
+
+        if (!empty($item['options'])) {
+          $a['options'] = $item['options'];
+        }
+
+        if (!empty($item['url'])) {
+          $a['url'] = Tpl::render($item['url'], $a);
+        }
+
+        if (!empty($item['action'])) {
+          $a['action'] = $item['action'];
+        }
+
+      });
+    }
+
+    return $search_results;
   }
 
 

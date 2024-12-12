@@ -38,21 +38,71 @@ trait Plugin
 
 
   /**
-   * @return int|null
+   * @return string|null
    */
-  public function getParentPlugin($code = null): ?string
+  public function getParentSubplugin(...$codes): ?string
   {
-    if ($pluginAlias = $this->getMagicPluginTemplateId()) {
-      $ids = $this->parents(...\func_get_args());
+    if ($id = $this->fromCode(...$codes)) {
+      return ($r = $this->getClosest($id, 'subplugin')) ? $r['id'] : null;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @return string|null
+   */
+  public function getParentPlugin(...$codes): ?string
+  {
+    if ($id = $this->fromCode(...$codes)) {
+      return ($r = $this->getClosest($id, 'plugin')) ? $r['id'] : null;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * @return string|null
+   */
+  public function getParentApp(...$codes): ?string
+  {
+    if ($id = $this->fromCode(...$codes)) {
+      return ($r = $this->getClosest($id, 'app')) ? $r['id'] : null;
+    }
+
+    return null;
+  }
+
+
+  public function getClosest($id, $type): ?array
+  {
+    $subpluginAlias = $this->getMagicSubpluginTemplateId();
+    $pluginAlias = $this->getMagicPluginTemplateId();
+
+    if ($subpluginAlias && $pluginAlias) {
+      $ids = $this->parents($id);
       $num = count($ids);
       foreach ($ids as $i => $id) {
-        if ($this->alias($id) === $pluginAlias) {
-          return $id;
+        if ($this->getIdAlias($id) === $subpluginAlias) {
+          if (!$type || ($type === 'subplugin')) {
+            return ['type' => 'subplugin', 'id' => $id];
+          }
         }
+        elseif ($this->getIdAlias($id) === $pluginAlias) {
+          if ($num - $i < 4) {
+            if (!$type || ($type === 'app')) {
+              return ['type' => 'app', 'id' => $id];
+            }
 
-        // Roots are plugin too, don't return them
-        if ($num - $i < 4) {
-          break;
+            break;
+          }
+          else {
+            if (!$type || ($type === 'plugin')) {
+              return ['type' => 'plugin', 'id' => $id];
+            }
+          }
         }
       }
     }
@@ -69,7 +119,25 @@ trait Plugin
     if ($pluginAlias && ($o['id_alias'] === $pluginAlias)) {
       $st = '';
       while ($o && ($o['id_alias'] !== $pluginsAlias)) {
-        $st .= $o['code'] . ($st ? '-' . $st : '');
+        $st = $o['code'] . ($st ? '-' . $st : '');
+        $o = $this->option($o['id_parent']);
+      }
+
+      return $st;
+    }
+
+    return null;
+  }
+
+  public function getSubpluginName($id): ?string
+  {
+    $subpluginAlias = $this->getMagicSubpluginTemplateId();
+    $pluginsAlias = $this->getMagicPluginsTemplateId();
+    $o = $this->option($id);
+    if ($subpluginAlias && ($o['id_alias'] === $subpluginAlias)) {
+      $st = '';
+      while ($o && ($o['id_alias'] !== $pluginsAlias)) {
+        $st = $o['code'] . ($st ? '-' . $st : '');
         $o = $this->option($o['id_parent']);
       }
 

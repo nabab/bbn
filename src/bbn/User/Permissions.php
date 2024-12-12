@@ -607,6 +607,7 @@ class Permissions extends Basic
     /** @var string The root (with options code) for this option's permission */
     $root    = $this->optionPermissionRoot($id_option);
 
+    //X::ddump($root);
     foreach ($aliases as $a) {
       $parents = $this->opt->parents($a);
       if (in_array($root, $parents)) {
@@ -716,11 +717,14 @@ class Permissions extends Basic
    */
   public function optionPermissionRoot(string $id): ?string
   {
+    if ($idSubplugin = $this->opt->getParentSubplugin($id)) {
+      return $this->opt->fromCode('permissions', $idSubplugin);
+    }
     if ($idPlugin = $this->opt->getParentPlugin($id)) {
       return $this->opt->fromCode('options', 'permissions', $idPlugin);
     }
 
-    return null;
+    return $this->opt->fromCode('options', 'permissions');
   }
 
 
