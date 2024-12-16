@@ -177,7 +177,7 @@ trait Plugin
             'id' => $p['id'],
             'code' => $code,
             'text' => $p['text'],
-            'icon' => $p['icon'],
+            'icon' => $p['icon'] ?? '',
           ];
           if ($full) {
             $item = array_merge($item, [
@@ -205,7 +205,7 @@ trait Plugin
                 'id' => $p2['id'],
                 'code' => $code . '-' . $p2['code'],
                 'text' => $p2['text'],
-                'icon' => $p2['icon'],
+                'icon' => $p2['icon'] ?? '',
               ];
               if ($full) {
                 $item = array_merge($item, [
@@ -252,7 +252,7 @@ trait Plugin
             'id' => $p['id'],
             'code' => $code,
             'text' => $p['text'],
-            'icon' => $p['icon'],
+            'icon' => $p['icon'] ?? '',
             'rootOptions' => $this->fromCode('options', $p['id']),
             'rootPermissions' => $this->fromCode('permissions', $p['id'])
           ];
@@ -267,7 +267,7 @@ trait Plugin
                 'id' => $p2['id'],
                 'code' => $code . '-' . $p2['code'],
                 'text' => $p2['text'],
-                'icon' => $p2['icon'],
+                'icon' => $p2['icon'] ?? '',
                 'rootOptions' => $this->fromCode('options', $p2['id']),
                 'rootPermissions' => $this->fromCode('permissions', $p2['id'])
               ];
