@@ -525,27 +525,7 @@ class User extends Basic implements Implementor
       }
       elseif (!empty($params[$f['access_token']])
         && !empty($params[$f['access_token_pass']])
-        && ($idUser = $this->db->selectOne([
-          'table' => $this->class_cfg['tables']['access_tokens'],
-          'fields' => $this->class_cfg['arch']['access_tokens']['id_user'],
-          'where' => [[
-            'field' => $this->class_cfg['arch']['access_tokens']['token'],
-            'value' => $params[$f['access_token']]
-          ], [
-            'field' => $this->class_cfg['arch']['access_tokens']['pass'],
-            'value' => \bbn\Util\Enc::decrypt64($params[$f['access_token_pass']])
-          ], [
-            'logic' => 'OR',
-            'conditions' => [[
-              'field' => $this->class_cfg['arch']['access_tokens']['validity'],
-              'operator' => 'isnull'
-            ], [
-              'field' => $this->class_cfg['arch']['access_tokens']['validity'],
-              'operator' => '<=',
-              'value' => date('Y-m-d H:i:s')
-            ]]
-          ]]
-        ]))
+        && ($idUser = $this->getIdByAccessToken($params[$f['access_token']], $params[$f['access_token_pass']]))
       ) {
         $this->id = $idUser;
         $this->id_group = $this->db->selectOne(
@@ -1188,7 +1168,7 @@ class User extends Basic implements Implementor
     if ($this->auth) {
       if (\is_null($usr)) {
         $usr = $this->getSession();
-      } elseif (str::isUid($usr) && ($mgr = $this->getManager())) {
+      } elseif (Str::isUid($usr) && ($mgr = $this->getManager())) {
         $usr = $mgr->getUser($usr);
       }
 
@@ -1270,6 +1250,35 @@ class User extends Basic implements Implementor
     $this->_set_session('num_attempts', $this->cfg['num_attempts']);
     $this->saveSession();
     return $this;
+  }
+
+
+  /**
+   * Returns the user's ID from the magic string.
+   */
+  protected function getIdByAccessToken(string $accessToken, string $accessTokenPass): ?string
+  {
+    return $this->db->selectOne([
+      'table' => $this->class_cfg['tables']['access_tokens'],
+      'fields' => $this->class_cfg['arch']['access_tokens']['id_user'],
+      'where' => [[
+        'field' => $this->class_cfg['arch']['access_tokens']['token'],
+        'value' => $accessToken
+      ], [
+        'field' => $this->class_cfg['arch']['access_tokens']['pass'],
+        'value' => \bbn\Util\Enc::decrypt64($accessTokenPass)
+      ], [
+        'logic' => 'OR',
+        'conditions' => [[
+          'field' => $this->class_cfg['arch']['access_tokens']['validity'],
+          'operator' => 'isnull'
+        ], [
+          'field' => $this->class_cfg['arch']['access_tokens']['validity'],
+          'operator' => '<=',
+          'value' => date('Y-m-d H:i:s')
+        ]]
+      ]]
+    ]);
   }
 
 
