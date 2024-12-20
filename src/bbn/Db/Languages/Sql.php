@@ -919,7 +919,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           elseif (isset($cfg['available_fields'][$field])) {
             $table  = $cfg['tables_full'][$cfg['available_fields'][$field]] ?? false;
             $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
-            $model = $this->modelize($table)['fields'][$column];
+            $model  = $this->modelize($table)['fields'];
+            $model = array_key_exists($column, $model) ? $model[$column] : null;
             if ($table && $column && $model) {
               $res  .= PHP_EOL . 
                   str_repeat(' ', $indent) . 

@@ -265,7 +265,12 @@ class Permissions extends Basic
       $prefix = '';
       foreach ($parents as $i => $p) {
         if ($this->opt->getIdAlias($p) === $idPlugin) {
-          $path = array_slice($this->opt->getCodePath($id_option), 0, $i - 1);
+          $codes = $this->opt->getCodePath($id_option);
+          if (!is_array($codes)) {
+            throw new Exception("No array for path in $id_option");
+          }
+
+          $path = array_slice($codes, 0, $i - 1);
           if ($p !== $this->opt->getDefault()) {
             $isOk = true;
             while ($isOk) {

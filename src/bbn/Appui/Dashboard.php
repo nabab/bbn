@@ -1023,11 +1023,7 @@ class Dashboard extends Basic
           ) {
             if ($id_plugin = $this->opt->getParentPlugin($o[$this->archOpt['id']])) {
               $plugin = $this->opt->option($id_plugin);
-              $plugin_name = $plugin['code'];
-              if ($plugin['id_parent'] === BBN_APPUI) {
-                $plugin_name = 'appui-' . $plugin_name;
-              }
-
+              $plugin_name = $this->opt->getPluginName($plugin['id']);
               if (($plugin_name !== constant('BBN_APP_NAME')) && !$mvc->hasPlugin($plugin_name)) {
                 continue;
               }

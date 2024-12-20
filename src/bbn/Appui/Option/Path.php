@@ -119,6 +119,14 @@ trait Path
 
         $id = $o[$this->fields['id_parent']];
       }
+      elseif ($o[$this->fields['id_alias']] && ($code = $this->code($o[$this->fields['id_alias']]))) {
+        $res[] = $code;
+        if ($o[$this->fields['id_parent']] === ($fromRoot ? $this->root : $this->default)) {
+          break;
+        }
+
+        $id = $o[$this->fields['id_parent']];
+      }
       else {
         return null;
       }

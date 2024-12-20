@@ -9,31 +9,9 @@ use bbn\Str;
  */
 trait Code
 {
-  /**
-   * Retrieves an option's ID from its "codes path"
-   *
-   * This method can handle diverse combinations of elements, such as:
-   * - A code or a series of codes from the most specific to a child of the root
-   * - A code or a series of codes and an id_parent where to find the last code
-   * - A code alone having $this->default as parent
-   *
-   * @param string ...$codes The option's code(s)
-   * @return string|null The ID of the option, null if not found, or false if the row cannot be found
-   */
-  public function fromCode(...$codes): ?string
+  private function _fromCode(array $codes, $depth = 0): ?string
   {
-    // Check if the class is initialized and the database connection is valid.
     if ($this->check()) {
-      // If the input is an array, extract its elements as separate arguments.
-      while (isset($codes[0]) && \is_array($codes[0])) {
-        $codes = $codes[0];
-      }
-
-      // Check if we have an option array as a parameter and return its ID directly.
-      if (isset($codes[$this->fields['id']])) {
-        return $codes[$this->fields['id']];
-      }
-
       // Get the number of arguments provided.
       $num = \count($codes);
 
@@ -54,7 +32,7 @@ trait Code
         }
 
         // Perform an extra check to ensure the provided ID corresponds to its parent.
-        if ($this->getIdParent($codes[0]) === $this->fromCode(...\array_slice($codes, 1))) {
+        if ($this->getIdParent($codes[0]) === $this->_fromCode(\array_slice($codes, 1), $depth + 1)) {
           return $codes[0];
         }
       }
@@ -65,7 +43,7 @@ trait Code
       }
 
       // Handle special cases for certain codes, such as 'appui' or 'plugins'.
-      if (end($codes) === 'appui') {
+      if (!$depth && (end($codes) === 'appui')) {
         $codes[] = 'plugins';
         $num++;
       }
@@ -97,7 +75,7 @@ trait Code
 
         // Otherwise, append the cached result to the remaining arguments and proceed recursively.
         $codes[] = $tmp;
-        return $this->fromCode(...$codes);
+        return $this->_fromCode($codes, $depth + 1);
       }
 
       // Perform a database query to find an option matching the provided code and parent ID.
@@ -138,30 +116,33 @@ trait Code
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
       // If still no match is found, attempt to follow an alias with a matching code.
-      else {
-        $aliases = $this->db->getColumnValues($c['table'], $f['id_alias'], [
-          $f['id_parent'] => $id_parent,
-          [$f['id_alias'], 'isnotnull'],
-          [$f['text'], 'isnull']
-        ]);
-        $done = [];
-        foreach ($aliases as $a) {
-          if ($a && !in_array($a, $done, true)) {
-            $done[] = $a;
-            // Check if the alias has a matching code and cache the result if found.
-            if ($this->code($a) === $true_code) {
-              $this->cacheSet($id_parent, $cache_name, $tmp);
-              break;
-            }
-          }
-        }
+      elseif ($tmp = $this->db->selectOne([
+        'table' => $c['table'],
+        'fields' => [$c['table'] . '.' . $f['id']],
+        'join' => [[
+          'table' => $c['table'],
+          'alias' => 'o1',
+          'on' => [
+            [
+              'field' => 'o1.' . $f['id'],
+              'exp' => $c['table'] . '.' . $f['id_alias']
+            ]
+          ]
+        ]],
+        'where' => [
+          [$c['table'] . '.' . $f['id_parent'], '=', $id_parent],
+          ['o1.' . $f['code'], 'LIKE', $true_code]
+        ]
+      ])) {
+        // Cache the result for future queries.
+        $this->cacheSet($id_parent, $cache_name, $tmp);
       }
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($tmp) {
         if (\count($codes)) {
           $codes[] = $tmp;
-          return $this->fromCode(...$codes);
+          return $this->_fromCode($codes, $depth + 1);
         }
 
         return $tmp;
@@ -169,6 +150,32 @@ trait Code
     }
 
     return null;
+  }
+  /**
+   * Retrieves an option's ID from its "codes path"
+   *
+   * This method can handle diverse combinations of elements, such as:
+   * - A code or a series of codes from the most specific to a child of the root
+   * - A code or a series of codes and an id_parent where to find the last code
+   * - A code alone having $this->default as parent
+   *
+   * @param string ...$codes The option's code(s)
+   * @return string|null The ID of the option, null if not found, or false if the row cannot be found
+   */
+  public function fromCode(...$codes): ?string
+  {
+    // Check if the class is initialized and the database connection is valid.
+    // If the input is an array, extract its elements as separate arguments.
+    while (isset($codes[0]) && \is_array($codes[0])) {
+      $codes = $codes[0];
+    }
+    
+    // Check if we have an option array as a parameter and return its ID directly.
+    if (isset($codes[$this->fields['id']])) {
+      return $codes[$this->fields['id']];
+    }
+
+    return $this->_fromCode($codes);
   }
 
 

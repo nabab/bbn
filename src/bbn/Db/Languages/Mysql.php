@@ -487,6 +487,7 @@ MYSQL
   public function tableSize(string $table, string $type = ''): int
   {
     $size = 0;
+    $table = $this->tableSimpleName($table);
     if (Str::checkName($table)) {
       $row = $this->getRow('SHOW TABLE STATUS WHERE Name LIKE ?', $table);
 

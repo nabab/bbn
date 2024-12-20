@@ -242,11 +242,11 @@ trait Plugin
     $res = [];
     if ($pluginAlias && $pluginsAlias && $plugins) {
       foreach ($this->fullOptions($plugins) as $p) {
-        if (empty($p['code'])) {
+        $code = $p['code'] ?: $p['alias']['code'];
+        if (empty($code)) {
           throw new Exception(X::_("The plugin option must have a code"));
         }
 
-        $code = $p['code'];
         if ($p['id_alias'] === $subpluginAlias) {
           $res[] = [
             'id' => $p['id'],
