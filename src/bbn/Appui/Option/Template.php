@@ -17,6 +17,10 @@ trait Template
 
   protected $magicSubpluginTemplateId;
 
+  protected $magicSubOptionsTemplateId;
+
+  protected $magicSubPermissionsTemplateId;
+
   protected $magicTemplateTemplateId;
 
   protected $magicAppuiTemplateId;
@@ -66,7 +70,7 @@ trait Template
   public function getPermissionsTemplateId()
   {
     if (!$this->magicOptionsTemplateId && $this->check()) {
-      $this->magicOptionsTemplateId = $this->fromCode('permissions', 'plugin', 'templates', $this->getRoot());
+      $this->magicOptionsTemplateId = $this->fromCode('permissions', $this->getMagicPluginTemplateId());
     }
 
     return $this->magicOptionsTemplateId;
@@ -102,7 +106,7 @@ trait Template
 
 
   /**
-   * Returns the ID of the 'plugin' template
+   * Returns the ID of the 'subplugin' template i.e. plugins in plugin
    * @return string
    */
   public function getMagicSubpluginTemplateId()
@@ -116,13 +120,41 @@ trait Template
 
 
   /**
+   * Returns the ID of the options template in the 'subplugin' template
+   * @return string
+   */
+  public function getMagicSubOptionsTemplateId()
+  {
+    if (!$this->magicSubpluginTemplateId && $this->check()) {
+      $this->magicSubpluginTemplateId = $this->fromCode('options', $this->getMagicSubpluginTemplateId());
+    }
+
+    return $this->magicSubOptionsTemplateId;
+  }
+
+
+  /**
+   * Returns the ID of the options template in the 'subplugin' template
+   * @return string
+   */
+  public function getMagicSubPermissionsTemplateId()
+  {
+    if (!$this->magicSubpluginTemplateId && $this->check()) {
+      $this->magicSubpluginTemplateId = $this->fromCode('permissions', $this->getMagicSubpluginTemplateId());
+    }
+
+    return $this->magicSubPermissionsTemplateId;
+  }
+
+
+  /**
    * Returns the ID of the 'plugin > template' template
    * @return string
    */
   public function getMagicTemplateTemplateId()
   {
     if (!$this->magicTemplateTemplateId && $this->check()) {
-      $this->magicTemplateTemplateId = $this->fromCode('templates', 'plugin', 'templates', $this->getRoot());
+      $this->magicTemplateTemplateId = $this->fromCode('templates', $this->getMagicPluginTemplateId());
     }
 
     return $this->magicTemplateTemplateId;
@@ -132,7 +164,7 @@ trait Template
   public function getMagicPluginsTemplateId()
   {
     if (!$this->magicPluginsTemplateId && $this->check()) {
-      $this->magicPluginsTemplateId = $this->fromCode('plugins', 'plugin', 'templates', $this->getRoot());
+      $this->magicPluginsTemplateId = $this->fromCode('plugins', $this->getMagicPluginTemplateId());
     }
 
     return $this->magicPluginsTemplateId;
