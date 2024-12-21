@@ -2,6 +2,7 @@
 
 namespace bbn\Appui\Option;
 
+use bbn\X;
 use bbn\Str;
 
 /**
@@ -47,12 +48,18 @@ trait Code
         $codes[] = 'plugins';
         $num++;
       }
+
       // Ensure that the last argument is a valid UID; otherwise, append the default value.
       if (!Str::isUid(end($codes))) {
+        if (end($codes) === false) {
+          array_pop($codes);
+        }
+
         $codes[] = $this->default;
         $num++;
       }
 
+      X::log($codes, 'codes');
       // At this stage, we need at least one code and one ID to proceed with the query.
       if ($num < 2) {
         return null;
