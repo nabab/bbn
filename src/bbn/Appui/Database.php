@@ -911,7 +911,7 @@ class Database extends bbn\Models\Cls\Cache
       $host = $this->db->getConnectionCode();
       $old_db = $conn->getCurrent();
       if (Str::isUid($db)) {
-        $db = $this->o->getCode($db);
+        $db = $this->o->code($db);
       }
 
       if ($db && ($old_db !== $db)) {
@@ -1410,7 +1410,7 @@ class Database extends bbn\Models\Cls\Cache
                 $num_keys_rem += (int)$this->o->removeFull($cid);
               }
 
-              $num_keys_rem += (int)$this->o->remove($id);
+              $num_keys_rem += (int)$this->o->removeFull($id);
             }
           }
         }
@@ -1442,7 +1442,7 @@ class Database extends bbn\Models\Cls\Cache
       $db    = $tf[0];
       $table = $tf[1];
 
-      if (($id_host = $this->importHost($this->db->host))
+      if (($id_host = $this->importHost($this->db->getHost(), $this->db->getEngine(), $this->db->getCfg()))
           && ($id_db = $this->importDb($db, $id_host))
       ) {
         $res = $this->importTable($table, $id_db);

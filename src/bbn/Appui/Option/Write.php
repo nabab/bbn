@@ -68,6 +68,7 @@ trait Write
       }
 
       if ($it) {
+
         $c =& $this->fields;
         if ($it[$c['code']]) {
           $id = $this->db->selectOne(
@@ -293,9 +294,9 @@ trait Write
    * @param string $code Any option(s) accepted by {@link fromCode()}
    * @return int|null The number of affected rows or null if option not found
    */
-  public function remove($code)
+  public function remove(...$codes)
   {
-    if (Str::isUid($id = $this->fromCode(...\func_get_args()))
+    if (Str::isUid($id = $this->fromCode(...$codes))
         && ($id !== $this->default)
         && ($id !== $this->root)
         && Str::isUid($id_parent = $this->getIdParent($id))
@@ -308,9 +309,16 @@ trait Write
       }
 
       $this->deleteCache($id);
+      $this->db->update(
+        $this->class_cfg['table'], [
+          $this->fields['code'] => null
+        ], [
+          $this->fields['id'] => $id
+        ]
+      );
       $num += (int)$this->db->delete(
         $this->class_cfg['table'], [
-        $this->fields['id'] => $id
+          $this->fields['id'] => $id
         ]
       );
       if ($this->isSortable($id_parent)) {
@@ -881,7 +889,7 @@ trait Write
         throw new Exception(X::_("Impossible to find the parent"));
       }
     }
-    elseif (!$this->exists($it[$c['id_parent']])) {
+    elseif (!isset($it[$c['id_parent']]) || !$this->exists($it[$c['id_parent']])) {
       throw new Exception(X::_("Impossible to find the parent"));
     }
 

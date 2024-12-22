@@ -397,7 +397,7 @@ class Project extends DbCls
   public function getDbs(): array
   {
     $res = $this->getFullTree();
-    if (isset($res['db'])) {
+    if (isset($res['db']) && !empty($res['db']['items'])) {
       $o = self::getOptionsObject();
       foreach ($res['db']['items'] as $i => $db) {
         foreach ($db['items'] as $j => $conn) {
