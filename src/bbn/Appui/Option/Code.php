@@ -59,7 +59,7 @@ trait Code
         $num++;
       }
 
-      X::log($codes, 'codes');
+      //X::log($codes, 'codes');
       // At this stage, we need at least one code and one ID to proceed with the query.
       if ($num < 2) {
         return null;
