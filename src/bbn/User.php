@@ -1283,6 +1283,212 @@ class User extends Basic implements Implementor
 
 
   /**
+   * Gets or creates (also in database) the user's session for the first time.
+   *
+   * @return self
+   */
+  protected function _init_session($defaults = []): self
+  {
+    // Getting or creating the session is it doesn't exist yet
+    /** @var User\Session */
+    $this->session = User\Session::getInstance();
+    if (!$this->session) {
+      $session_cls   = defined('BBN_SESSION')
+        && is_string(BBN_SESSION)
+        && class_exists(BBN_SESSION) ? BBN_SESSION : '\\bbn\\User\\Session';
+      $this->session = new $session_cls($defaults);
+    }
+
+    /** @var int $id_session The ID of the session row in the DB */
+    if (
+      !($id_session = $this->getIdSession())
+      || !($tmp = $this->db->selectOne(
+        $this->class_cfg['tables']['sessions'],
+        $this->class_cfg['arch']['sessions']['cfg'],
+        [$this->class_cfg['arch']['sessions']['id'] => $id_session]
+      ))
+    ) {
+      /** @var string $salt */
+      $salt = self::makeFingerprint();
+
+      /** @var string $fingerprint */
+      $fingerprint = self::makeFingerprint();
+
+      /** @var array $p The fields of the sessions table */
+      $p = &$this->class_cfg['arch']['sessions'];
+
+      $this->sess_cfg = [
+        'fingerprint' => $this->getPrint($fingerprint),
+        'last_renew' => time()
+      ];
+
+      $id_session = $this->session->getId();
+
+      // Inserting the session in the database
+      if (
+        $id_session && $this->db->insert(
+          $this->class_cfg['tables']['sessions'],
+          [
+            $p['sess_id'] => $id_session,
+            $p['ip_address'] => $this->ip_address,
+            $p['user_agent'] => $this->user_agent,
+            $p['opened'] => 1,
+            $p['last_activity'] => date('Y-m-d H:i:s'),
+            $p['creation'] => date('Y-m-d H:i:s'),
+            $p['cfg'] => json_encode($this->sess_cfg)
+          ]
+        )
+      ) {
+        // Setting the session with its ID
+        $id = $this->db->lastId();
+        if (!$id) {
+          throw new Exception(X::_("No session ID, check if your tables have the indexes defined"));
+        }
+
+        $this->session->set(
+          [
+            'fingerprint' => $fingerprint,
+            'tokens' => [],
+            'id_session' => $id,
+            'salt' => $salt
+          ],
+          $this->sessIndex
+        );
+
+        $this->saveSession();
+      } else {
+        $this->setError(16);
+      }
+    } else {
+      $this->sess_cfg = json_decode($tmp, true);
+    }
+
+    return $this;
+  }
+
+
+  /**
+   * Gets an attribute or the whole the "session" part of the session (sessIndex).
+   *
+   * @param string|null $attr Name of the attribute to get.
+   * @return mixed
+   */
+  protected function _get_session(string $attr = null)
+  {
+    if ($this->session->has($this->sessIndex)) {
+      return $attr ? $this->session->get($this->sessIndex, $attr) : $this->session->get($this->sessIndex);
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Checks the credentials of a user.
+   *
+   * @param array $params Credentials
+   * @return bool
+   */
+  protected function _check_credentials($params, bool $makeHotlink = true): bool
+  {
+    if ($this->check()) {
+
+      /** @var array $f The form fields sent to identify the users */
+      $f = &$this->class_cfg['fields'];
+
+      if (!isset($params[$f['salt']])) {
+        $this->setError(11);
+      } else {
+        if (!$this->checkSalt($params[$f['salt']])) {
+          $this->setError(17);
+          $this->session->destroy();
+        }
+      }
+
+      if ($this->check()) {
+        if (isset($params[$f['user']], $params[$f['pass']])) {
+          // Table structure
+          $arch = &$this->class_cfg['arch'];
+
+          $this->_just_login = 1;
+          if (!$this->check()) {
+            $this->setError(19);
+            //$this->session->destroy();
+            //$this->_init_session();
+          }
+
+          // Database Query
+          elseif ($id = $this->db->selectOne(
+            $this->class_cfg['tables']['users'],
+            $this->fields['id'],
+            X::mergeArrays(
+              $this->class_cfg['conditions'],
+              [$arch['users']['active'] => 1],
+              [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]]
+            )
+          )) {
+            $numPasses = $this->db->count(
+              $this->class_cfg['tables']['passwords'],
+              [$arch['passwords']['id_user'] => $id]
+            );
+            // If no password is recorded we send a connection link
+            if (!$numPasses) {
+              $cfg = json_decode($this->db->selectOne($this->class_cfg['tables']['users'], $this->fields['cfg'], [$arch['users']['id'] => $id]) ?: '[]', true);
+              if (empty($cfg['empty_attempts'])) {
+                $cfg['empty_attempts'] = [
+                  'num' => 0,
+                  'last' => time()
+                ];
+
+              }
+              if ($cfg['empty_attempts']['num'] >= self::MAX_EMPTY_ATTEMPTS) {
+                if ($cfg['empty_attempts']['last'] > (time() - (3*3600))) {
+                  $this->setError(25);
+                }
+                else {
+                  $cfg['empty_attempts']['num'] = 0;
+                  $cfg['empty_attempts']['last'] = time();
+                }
+              }
+
+              if ($this->check()) {
+                $cfg['empty_attempts']['num']++;
+                $this->db->update($this->class_cfg['tables']['users'], [$this->fields['cfg'] => json_encode($cfg)], [$arch['users']['id'] => $id]);
+                if ($makeHotlink) {
+                  $this->getManager()->makeHotlink($id);
+                  $this->setError(26);
+                }
+              }
+            }
+            else {
+              $pass = $this->db->selectOne(
+                $this->class_cfg['tables']['passwords'],
+                $arch['passwords']['pass'],
+                [$arch['passwords']['id_user'] => $id],
+                [$arch['passwords']['added'] => 'DESC']
+              );
+              if ($this->_check_password($params[$f['pass']], $pass)) {
+                $this->_login($id);
+              } else {
+                $this->recordAttempt();
+                // Canceling authentication if num_attempts > max_attempts
+                $this->setError($this->checkAttempts() ? 6 : 4);
+              }
+            }
+          } else {
+            $this->setError(6);
+          }
+        } else {
+          $this->setError(12);
+        }
+      }
+    }
+
+    return $this->auth;
+  }
+
+
+  /**
    * Initialize and saves the session after authentication.
    *
    * @param string $id The user's ID (as stored in the database).
@@ -1437,91 +1643,6 @@ class User extends Basic implements Implementor
 
 
   /**
-   * Gets or creates (also in database) the user's session for the first time.
-   *
-   * @return self
-   */
-  private function _init_session($defaults = []): self
-  {
-    // Getting or creating the session is it doesn't exist yet
-    /** @var User\Session */
-    $this->session = User\Session::getInstance();
-    if (!$this->session) {
-      $session_cls   = defined('BBN_SESSION')
-        && is_string(BBN_SESSION)
-        && class_exists(BBN_SESSION) ? BBN_SESSION : '\\bbn\\User\\Session';
-      $this->session = new $session_cls($defaults);
-    }
-
-    /** @var int $id_session The ID of the session row in the DB */
-    if (
-      !($id_session = $this->getIdSession())
-      || !($tmp = $this->db->selectOne(
-        $this->class_cfg['tables']['sessions'],
-        $this->class_cfg['arch']['sessions']['cfg'],
-        [$this->class_cfg['arch']['sessions']['id'] => $id_session]
-      ))
-    ) {
-      /** @var string $salt */
-      $salt = self::makeFingerprint();
-
-      /** @var string $fingerprint */
-      $fingerprint = self::makeFingerprint();
-
-      /** @var array $p The fields of the sessions table */
-      $p = &$this->class_cfg['arch']['sessions'];
-
-      $this->sess_cfg = [
-        'fingerprint' => $this->getPrint($fingerprint),
-        'last_renew' => time()
-      ];
-
-      $id_session = $this->session->getId();
-
-      // Inserting the session in the database
-      if (
-        $id_session && $this->db->insert(
-          $this->class_cfg['tables']['sessions'],
-          [
-            $p['sess_id'] => $id_session,
-            $p['ip_address'] => $this->ip_address,
-            $p['user_agent'] => $this->user_agent,
-            $p['opened'] => 1,
-            $p['last_activity'] => date('Y-m-d H:i:s'),
-            $p['creation'] => date('Y-m-d H:i:s'),
-            $p['cfg'] => json_encode($this->sess_cfg)
-          ]
-        )
-      ) {
-        // Setting the session with its ID
-        $id = $this->db->lastId();
-        if (!$id) {
-          throw new Exception(X::_("No session ID, check if your tables have the indexes defined"));
-        }
-
-        $this->session->set(
-          [
-            'fingerprint' => $fingerprint,
-            'tokens' => [],
-            'id_session' => $id,
-            'salt' => $salt
-          ],
-          $this->sessIndex
-        );
-
-        $this->saveSession();
-      } else {
-        $this->setError(16);
-      }
-    } else {
-      $this->sess_cfg = json_decode($tmp, true);
-    }
-
-    return $this;
-  }
-
-
-  /**
    * Sets an attribute the "session" part of the session (sessIndex).
    *
    * @param mixed $attr Attribute if value follows, or an array with attribute of value key pairs
@@ -1545,125 +1666,6 @@ class User extends Basic implements Implementor
     }
 
     return $this;
-  }
-
-
-  /**
-   * Gets an attribute or the whole the "session" part of the session (sessIndex).
-   *
-   * @param string|null $attr Name of the attribute to get.
-   * @return mixed
-   */
-  private function _get_session(string $attr = null)
-  {
-    if ($this->session->has($this->sessIndex)) {
-      return $attr ? $this->session->get($this->sessIndex, $attr) : $this->session->get($this->sessIndex);
-    }
-
-    return null;
-  }
-
-
-  /**
-   * Checks the credentials of a user.
-   *
-   * @param array $params Credentials
-   * @return bool
-   */
-  private function _check_credentials($params): bool
-  {
-    if ($this->check()) {
-
-      /** @var array $f The form fields sent to identify the users */
-      $f = &$this->class_cfg['fields'];
-
-      if (!isset($params[$f['salt']])) {
-        $this->setError(11);
-      } else {
-        if (!$this->checkSalt($params[$f['salt']])) {
-          $this->setError(17);
-          $this->session->destroy();
-        }
-      }
-
-      if ($this->check()) {
-        if (isset($params[$f['user']], $params[$f['pass']])) {
-          // Table structure
-          $arch = &$this->class_cfg['arch'];
-
-          $this->_just_login = 1;
-          if (!$this->check()) {
-            $this->setError(19);
-            //$this->session->destroy();
-            //$this->_init_session();
-          }
-
-          // Database Query
-          elseif ($id = $this->db->selectOne(
-            $this->class_cfg['tables']['users'],
-            $this->fields['id'],
-            X::mergeArrays(
-              $this->class_cfg['conditions'],
-              [$arch['users']['active'] => 1],
-              [($arch['users']['login'] ?? $arch['users']['email']) => $params[$f['user']]]
-            )
-          )) {
-            $numPasses = $this->db->count(
-              $this->class_cfg['tables']['passwords'],
-              [$arch['passwords']['id_user'] => $id]
-            );
-            // If no password is recorded we send a connection link
-            if (!$numPasses) {
-              $cfg = json_decode($this->db->selectOne($this->class_cfg['tables']['users'], $this->fields['cfg'], [$arch['users']['id'] => $id]) ?: '[]', true);
-              if (empty($cfg['empty_attempts'])) {
-                $cfg['empty_attempts'] = [
-                  'num' => 0,
-                  'last' => time()
-                ];
-
-              }
-              if ($cfg['empty_attempts']['num'] >= self::MAX_EMPTY_ATTEMPTS) {
-                if ($cfg['empty_attempts']['last'] > (time() - (3*3600))) {
-                  $this->setError(25);
-                }
-                else {
-                  $cfg['empty_attempts']['num'] = 0;
-                  $cfg['empty_attempts']['last'] = time();
-                }
-              }
-
-              if ($this->check()) {
-                $cfg['empty_attempts']['num']++;
-                $this->db->update($this->class_cfg['tables']['users'], [$this->fields['cfg'] => json_encode($cfg)], [$arch['users']['id'] => $id]);
-                $this->getManager()->makeHotlink($id);
-                $this->setError(26);
-              }
-            }
-            else {
-              $pass = $this->db->selectOne(
-                $this->class_cfg['tables']['passwords'],
-                $arch['passwords']['pass'],
-                [$arch['passwords']['id_user'] => $id],
-                [$arch['passwords']['added'] => 'DESC']
-              );
-              if ($this->_check_password($params[$f['pass']], $pass)) {
-                $this->_login($id);
-              } else {
-                $this->recordAttempt();
-                // Canceling authentication if num_attempts > max_attempts
-                $this->setError($this->checkAttempts() ? 6 : 4);
-              }
-            }
-          } else {
-            $this->setError(6);
-          }
-        } else {
-          $this->setError(12);
-        }
-      }
-    }
-
-    return $this->auth;
   }
 
 
