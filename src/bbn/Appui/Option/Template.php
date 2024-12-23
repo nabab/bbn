@@ -13,6 +13,8 @@ trait Template
 
   protected $magicOptionsTemplateId;
 
+  protected $magicPermissionsTemplateId;
+
   protected $magicPluginTemplateId;
 
   protected $magicSubpluginTemplateId;
@@ -69,11 +71,11 @@ trait Template
    */
   public function getPermissionsTemplateId()
   {
-    if (!$this->magicOptionsTemplateId && $this->check()) {
-      $this->magicOptionsTemplateId = $this->fromCode('permissions', $this->getMagicPluginTemplateId());
+    if (!$this->magicPermissionsTemplateId && $this->check()) {
+      $this->magicPermissionsTemplateId = $this->fromCode('permissions', $this->getMagicPluginTemplateId());
     }
 
-    return $this->magicOptionsTemplateId;
+    return $this->magicPermissionsTemplateId;
   }
 
 
