@@ -681,7 +681,8 @@ class Project extends DbCls
       array_map($fn, $filtered);
       if (ksort($folders, SORT_STRING | SORT_FLAG_CASE) && ksort($files, SORT_STRING | SORT_FLAG_CASE)) {
         //return merge of file and folder create in function get
-        $tot = array_merge(array_values($folders), array_values($files));
+        //X::ddump($folders, $files);
+        $tot = [...array_values($folders), ...array_values($files)];
         return $tot;
       }
     }
@@ -836,6 +837,8 @@ class Project extends DbCls
     $public_path = $cfg['publicPath'];
 
     //object return of a single node
+    $uid = $component === true ? $public_path.$name.'/'.$name : $public_path.$name . ($t['dir'] ? '/' : '');
+
     $res = [
       'text' => $name,
       'name' => $name,
@@ -843,7 +846,7 @@ class Project extends DbCls
       //Previously the 'uid' property was called 'path'
       /** @todo check that it is working for directories */
       // uid of the file depends to his type
-      'uid' => $component === true ? $public_path.$name.'/'.$name : $public_path.$name,
+      'uid' => $uid,
       'has_index' => !$t['file'] && Dir::hasFile($t['name'], 'index.php', 'index.html', 'index.htm'),
       'is_svg' => $t['file'] && ($t['ext'] === 'svg'),
       // $is_vue not use
