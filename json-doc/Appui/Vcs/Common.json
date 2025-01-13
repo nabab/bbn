@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Appui\\Vcs\\Common",
     "namespace": true,
+    "realName": "Common",
+    "realNamespace": "bbn\\Appui\\Vcs",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Appui\/Vcs\/Common.php",
     "startLine": 11,
     "endLine": 109,
-    "numMethods": 4,
-    "numProperties": 0,
+    "numMethods": 6,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -41,11 +42,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Common",
+            "class": "bbn\\Appui\\Vcs\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "code": "  public function hasAdminAccessToken(string $id = ''): bool\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 24,
             "endLine": 27,
             "isDeprecated": false,
@@ -56,15 +60,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "hasAdminAccessToken",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -77,11 +86,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Common",
+            "class": "bbn\\Appui\\Vcs\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "code": "  public function getAdminAccessToken(string $id = ''): ?string\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 30,
             "endLine": 33,
             "isDeprecated": false,
@@ -92,16 +104,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getAdminAccessToken",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -114,11 +131,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Common",
+            "class": "bbn\\Appui\\Vcs\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "code": "  public function getUserAccessToken(string $id = ''): string\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 36,
             "endLine": 67,
             "isDeprecated": false,
@@ -129,15 +149,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUserAccessToken",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -150,11 +175,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Common",
+            "class": "bbn\\Appui\\Vcs\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "code": "  public function getServer(string $id = ''): object\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 70,
             "endLine": 76,
             "isDeprecated": false,
@@ -165,26 +193,199 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getServer",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "normalizeServer": {
+            "name": "normalizeServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Vcs\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function normalizeServer(array $server): object\n  {\n    try {\n      $ut = $this->getUserAccessToken($server['id']);\n    }\n    catch(\\Exception $e) {\n      $ut = '';\n    }\n    return (object)[\n      'id' => $server['id'],\n      'name' => $server['text'],\n      'host' => 'https:\/\/' . $server['code'],\n      'type' => $server['type'],\n      'engine' => $server['engine'],\n      'userAccessToken' => $ut,\n      'hasAdminAccessToken' => $this->hasAdminAccessToken($server['id']),\n      'hasUserAccessToken'=> !empty($ut)\n    ];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 79,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "normalizeServer",
+            "returns": [
+                "object"
+            ],
+            "arguments": [
+                {
+                    "name": "server",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "checkServerHost": {
+            "name": "checkServerHost",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Vcs\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function checkServerHost(string $host)\n  {\n    if (!str_starts_with($host, 'http')) {\n      $host = 'https:\/\/' . $host;\n    }\n    if (!Str::isUrl($host)) {\n      throw new \\Exception(X::_('No valid host URL: %s', $host));\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 100,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "checkServerHost",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Common"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Db The bbn\\Db class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "opt": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Common"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Appui\\Option The bbn\\Appui\\Option class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "pwd": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Common"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Appui\\Passwords The bbn\\Appui\\Passwords class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "idUser": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Common"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\User": "User",
+        "bbn\\User\\Preferences": "Preferences"
+    },
+    "dummyComments": [
+        "\/** @var bbn\\Db The bbn\\Db class instance *\/",
+        "\/** @var bbn\\Appui\\Option The bbn\\Appui\\Option class instance *\/",
+        "\/** @var bbn\\Appui\\Passwords The bbn\\Appui\\Passwords class instance *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

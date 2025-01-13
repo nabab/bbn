@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Api\\Prosody",
     "namespace": true,
+    "realName": "Prosody",
+    "realNamespace": "bbn\\Api",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Prosody.php",
     "startLine": 7,
     "endLine": 450,
-    "numMethods": 19,
-    "numProperties": 0,
+    "numMethods": 20,
+    "numProperties": 7,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -38,7 +39,6 @@
     "namespaceName": "bbn\\Api",
     "shortName": "Prosody",
     "contentConstructor": {
-        "file": "bbn\\Api\\Prosody",
         "returns": []
     },
     "methods": {
@@ -47,11 +47,14 @@
             "summary": "Class Contructor",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($host = 'fiduhub.dev', $port = '5280', $username = 'admin', $password = 'pass', $module = 'admin_rest')\n  {\n      $this->client = new Client(['http_errors' => false]);\n      $this->host = $host;\n      $this->port = $port;\n      $this->username = $username;\n      $this->password = $password;\n      $this->module = $module;\n      $this->params = array();\n  }",
+            "code": "  public function __construct($host = 'fiduhub.dev', $port = '5280', $username = 'admin', $password = 'pass', $module = 'admin_rest')\n  {\n      $this->client = new Client(['http_errors' => false]);\n      $this->host = $host;\n      $this->port = $port;\n      $this->username = $username;\n      $this->password = $password;\n      $this->module = $module;\n      $this->params = array();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 21,
             "endLine": 30,
             "isDeprecated": false,
@@ -62,13 +65,16 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "host",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "fiduhub.dev",
@@ -78,6 +84,9 @@
                     "name": "port",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "5280",
@@ -87,6 +96,9 @@
                     "name": "username",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "admin",
@@ -96,6 +108,9 @@
                     "name": "password",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "pass",
@@ -105,23 +120,123 @@
                     "name": "module",
                     "position": 4,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "admin_rest",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Class Contructor\n",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Class Contructor\n   *\n   *\/"
+        },
+        "doRequest": {
+            "name": "doRequest",
+            "summary": "Make the request and analyze the result",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function doRequest($type, $endpoint, $params=array())\n  {\n    $url = \"http:\/\/\" . $this->host . \":\" .$this->port . \"\/\" . $this->module . \"\/\" . $endpoint;\n    $headers = array(\n      'Accept' => 'application\/json',\n      'Authorization' => 'Basic '. base64_encode($this->username . \":\" . $this->password)\n    );\n\n      $body = json_encode($params);\n\n      switch ($type) {\n          case 'get':\n              $result = $this->client->get($url, compact('headers'));\n              break;\n          case 'post':\n              $headers += ['Content-Type'=>'application\/json'];\n              $result = $this->client->post($url, compact('headers','body'));\n              break;\n          case 'delete':\n              $headers += ['Content-Type'=>'application\/json'];\n              $result = $this->client->delete($url, compact('headers','body'));\n              break;\n          case 'put':\n              $headers += ['Content-Type'=>'application\/json'];\n              $result = $this->client->put($url, compact('headers','body'));\n              break;\n          default:\n              $result = null;\n              break;\n      }\n      if ($result->getStatusCode() == 200 || $result->getStatusCode() == 201) {\n          return array('status'=>true, 'message'=>json_decode($result->getBody()));\n      }\n      return array('status'=>false, 'message'=>json_decode($result->getBody()));\n    \n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 41,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "doRequest",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Request method"
+                },
+                {
+                    "name": "endpoint",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Api request endpoint"
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "Parameters"
+                }
+            ],
+            "doc": {
+                "description": "Make the request and analyze the result\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$type",
+                        "description": "Request method"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$endpoint",
+                        "description": "Api request endpoint"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$params",
+                        "description": "Parameters"
+                    }
+                ],
+                "return": "array|false                     Array with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Make the request and analyze the result\n   *\n   * @param   string          $type           Request method\n   * @param   string          $endpoint       Api request endpoint\n   * @param   array           $params         Parameters\n   * @return  array|false                     Array with data or error, or False when something went fully wrong\n   *\/"
         },
         "getUsers": {
             "name": "getUsers",
             "summary": "Get all connected users",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $endpoint = 'users';        \n    return $this->doRequest('get',$endpoint);\n  }",
+            "code": "  public function getUsers()\n  {\n    $endpoint = 'users';        \n    return $this->doRequest('get',$endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 83,
             "endLine": 87,
             "isDeprecated": false,
@@ -132,20 +247,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUsers",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Get all connected users\n",
+                "params": [],
+                "return": "Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Get all connected users\n   *\n   * @return json|False   Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "addUser": {
             "name": "addUser",
             "summary": "Create a new user",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $password, $name = false, $email = false, $groups = false)\n  {\n      $endpoint = 'user\/' . $username; \n      return $this->doRequest('post', $endpoint, compact('password','name','email', 'groups'));\n  }",
+            "code": "  public function addUser($username, $password, $name=false, $email=false, $groups=false)\n  {\n      $endpoint = 'user\/' . $username; \n      return $this->doRequest('post', $endpoint, compact('password','name','email', 'groups'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 99,
             "endLine": 103,
             "isDeprecated": false,
@@ -156,13 +280,16 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 2,
+            "shortName": "addUser",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -173,6 +300,9 @@
                     "name": "password",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -183,6 +313,9 @@
                     "name": "name",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -193,6 +326,9 @@
                     "name": "email",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -203,13 +339,48 @@
                     "name": "groups",
                     "position": 4,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "Groups  (Optional)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Create a new user\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$password",
+                        "description": "Password"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$name",
+                        "description": "Name    (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$email",
+                        "description": "Email   (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$groups",
+                        "description": "Groups  (Optional)"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Create a new user\n   *\n   * @param   string          $username   Username\n   * @param   string          $password   Password\n   * @param   string|false    $name       Name    (Optional)\n   * @param   string|false    $email      Email   (Optional)\n   * @param   string[]|false  $groups     Groups  (Optional)\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "getUser": {
             "name": "getUser",
@@ -218,14 +389,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>TODO : Get information for a specified user<\/p>"
+                    "content": "TODO : Get information for a specified user"
                 }
             ],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username)\n  {\n      $endpoint = '\/'.$username.'\/connected'; \n      return $this->doRequest('get', $endpoint);\n  }",
+            "code": "  public function getUser($username)\n  {\n      $endpoint = '\/'.$username.'\/connected'; \n      return $this->doRequest('get', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 111,
             "endLine": 115,
             "isDeprecated": false,
@@ -236,30 +410,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUser",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "NOW : Get user satus (connected or not)\nTODO : Get information for a specified user\n",
+                "params": [],
+                "return": "Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * NOW : Get user satus (connected or not)\n   * TODO : Get information for a specified user\n   *\n   * @return json|false   Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "deleteUser": {
             "name": "deleteUser",
             "summary": "Delete an user",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username)\n  {\n      $endpoint = '\/user\/'.$username; \n      return $this->doRequest('delete', $endpoint);\n  }",
+            "code": "  public function deleteUser($username)\n  {\n      $endpoint = '\/user\/'.$username; \n      return $this->doRequest('delete', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 123,
             "endLine": 127,
             "isDeprecated": false,
@@ -270,20 +456,35 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "deleteUser",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Username"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Delete an user\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Delete an user\n   *\n   * @param   string          $username   Username\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "updateUser": {
             "name": "updateUser",
@@ -292,14 +493,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>TODO: Update user's infos (all)<\/p>"
+                    "content": "TODO: Update user's infos (all)"
                 }
             ],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $password, $name = false, $email = false, $groups = false)\n  {\n      $endpoint = '\/user\/'.$username.'\/attribute';\n      return $this->doRequest('patch', $endpoint, compact('username', 'password','name','email', 'groups'));\n  }",
+            "code": "  public function updateUser($username, $password, $name=false, $email=false, $groups=false)\n  {\n      $endpoint = '\/user\/'.$username.'\/attribute';\n      return $this->doRequest('patch', $endpoint, compact('username', 'password','name','email', 'groups'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 140,
             "endLine": 144,
             "isDeprecated": false,
@@ -310,13 +514,16 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 2,
+            "shortName": "updateUser",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -327,6 +534,9 @@
                     "name": "password",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -337,6 +547,9 @@
                     "name": "name",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -347,6 +560,9 @@
                     "name": "email",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -357,24 +573,62 @@
                     "name": "groups",
                     "position": 4,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "Groups (Optional)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "NOW: Update user's infos (password)\nTODO: Update user's infos (all)\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$password",
+                        "description": "Password (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$name",
+                        "description": "Name (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$email",
+                        "description": "Email (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$groups",
+                        "description": "Groups (Optional)"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * NOW: Update user's infos (password)\n   * TODO: Update user's infos (all)\n   *\n   * @param   string          $username   Username\n   * @param   string|false    $password   Password (Optional)\n   * @param   string|false    $name       Name (Optional)\n   * @param   string|false    $email      Email (Optional)\n   * @param   string[]|false  $groups     Groups (Optional)\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "addRoster": {
             "name": "addRoster",
             "summary": "Create a roster between an user and a contact",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $contact)\n  {\n      $endpoint = 'roster\/' . $username;\n      $contact = $contact . '@' . $this->host;\n      return $this->doRequest('post', $endpoint, compact('contact'));\n  }",
+            "code": "  public function addRoster($username, $contact)\n  {\n      $endpoint = 'roster\/' . $username;\n      $contact = $contact . '@' . $this->host;\n      return $this->doRequest('post', $endpoint, compact('contact'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 153,
             "endLine": 158,
             "isDeprecated": false,
@@ -385,13 +639,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "addRoster",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -402,24 +659,47 @@
                     "name": "contact",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ID     Contact's JID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Create a roster between an user and a contact\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$contact",
+                        "description": "ID     Contact's JID"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Create a roster between an user and a contact\n   *\n   * @param   string          $username       Username\n   * @param   string          $contactJID     Contact's JID\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "deleteRoster": {
             "name": "deleteRoster",
             "summary": "Delete a roster between an user and a contact",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $contact)\n  {\n      $endpoint = 'roster\/' . $username;\n      $contact = $contact . '@' . $this->host;\n      return $this->doRequest('delete', $endpoint, compact('contact'));\n  }",
+            "code": "  public function deleteRoster($username, $contact)\n  {\n      $endpoint = 'roster\/' . $username;\n      $contact = $contact . '@' . $this->host;\n      return $this->doRequest('delete', $endpoint, compact('contact'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 167,
             "endLine": 172,
             "isDeprecated": false,
@@ -430,13 +710,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "deleteRoster",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -447,24 +730,47 @@
                     "name": "contact",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ID     Contact's JID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Delete a roster between an user and a contact\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$contact",
+                        "description": "ID     Contact's JID"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Delete a roster between an user and a contact\n   *\n   * @param   string          $username       Username\n   * @param   string          $contactJID     Contact's JID\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "lockoutUser": {
             "name": "lockoutUser",
             "summary": "locks\/Disables an OpenFire user",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username)\n  {\n      $endpoint = '\/lockouts\/'.$username; \n      return $this->doRequest('post', $endpoint);\n  }",
+            "code": "  public function lockoutUser($username)\n  {\n      $endpoint = '\/lockouts\/'.$username; \n      return $this->doRequest('post', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 314,
             "endLine": 318,
             "isDeprecated": false,
@@ -475,31 +781,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "lockoutUser",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Username"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "locks\/Disables an OpenFire user\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * locks\/Disables an OpenFire user\n   *\n   * @param   string          $username   Username\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "unlockUser": {
             "name": "unlockUser",
             "summary": "unlocks an OpenFire user",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username)\n  {\n      $endpoint = '\/lockouts\/'.$username; \n      return $this->doRequest('delete', $endpoint);\n  }",
+            "code": "  public function unlockUser($username)\n  {\n      $endpoint = '\/lockouts\/'.$username; \n      return $this->doRequest('delete', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 327,
             "endLine": 331,
             "isDeprecated": false,
@@ -510,31 +834,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "unlockUser",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Username"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "unlocks an OpenFire user\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * unlocks an OpenFire user\n   *\n   * @param   string          $username   Username\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "addToRoster": {
             "name": "addToRoster",
             "summary": "Adds to this OpenFire user's roster",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $jid, $nickname = false, $subscriptionType = false)\n  {\n      $endpoint = '\/users\/'.$username.'\/roster';\n      return $this->doRequest('post', $endpoint, compact('jid','nickname','subscriptionType'));\n  }",
+            "code": "  public function addToRoster($username, $jid, $nickname=false, $subscriptionType=false)\n  {\n      $endpoint = '\/users\/'.$username.'\/roster';\n      return $this->doRequest('post', $endpoint, compact('jid','nickname','subscriptionType'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 343,
             "endLine": 347,
             "isDeprecated": false,
@@ -545,13 +887,16 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "addToRoster",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -562,6 +907,9 @@
                     "name": "jid",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -572,6 +920,9 @@
                     "name": "nickname",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -582,24 +933,57 @@
                     "name": "subscriptionType",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "ype   Subscription (Optional)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Adds to this OpenFire user's roster\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$jid",
+                        "description": "JID"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$nickname",
+                        "description": "Name         (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$subscription",
+                        "description": "ype   Subscription (Optional)"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Adds to this OpenFire user's roster\n   *\n   * @param   string          $username       Username\n   * @param   string          $jid            JID\n   * @param   string|false    $nickname           Name         (Optional)\n   * @param   int|false       $subscriptionType   Subscription (Optional)\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "deleteFromRoster": {
             "name": "deleteFromRoster",
             "summary": "Removes from this OpenFire user's roster",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $jid)\n  {\n      $endpoint = '\/users\/'.$username.'\/roster\/'.$jid;\n      return $this->doRequest('delete', $endpoint, $jid);\n  }",
+            "code": "  public function deleteFromRoster($username, $jid)\n  {\n      $endpoint = '\/users\/'.$username.'\/roster\/'.$jid;\n      return $this->doRequest('delete', $endpoint, $jid);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 357,
             "endLine": 361,
             "isDeprecated": false,
@@ -610,13 +994,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "deleteFromRoster",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -627,24 +1014,47 @@
                     "name": "jid",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "JID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Removes from this OpenFire user's roster\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$jid",
+                        "description": "JID"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Removes from this OpenFire user's roster\n   *\n   * @param   string          $username   Username\n   * @param   string          $jid        JID\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "updateRoster": {
             "name": "updateRoster",
             "summary": "Updates this OpenFire user's roster",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($username, $jid, $nickname = false, $subscriptionType = false)\n  {\n      $endpoint = '\/users\/'.$username.'\/roster\/'.$jid;\n      return $this->doRequest('put', $endpoint, $jid, compact('jid','username','subscriptionType'));     \n  }",
+            "code": "  public function updateRoster($username, $jid, $nickname=false, $subscriptionType=false)\n  {\n      $endpoint = '\/users\/'.$username.'\/roster\/'.$jid;\n      return $this->doRequest('put', $endpoint, $jid, compact('jid','username','subscriptionType'));     \n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 372,
             "endLine": 376,
             "isDeprecated": false,
@@ -655,13 +1065,16 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "updateRoster",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "username",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -672,6 +1085,9 @@
                     "name": "jid",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -682,6 +1098,9 @@
                     "name": "nickname",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -692,24 +1111,57 @@
                     "name": "subscriptionType",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "ype   Subscription (Optional)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Updates this OpenFire user's roster\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$username",
+                        "description": "Username"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$jid",
+                        "description": "JID"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$nickname",
+                        "description": "Nick Name (Optional)"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$subscription",
+                        "description": "ype   Subscription (Optional)"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Updates this OpenFire user's roster\n   *\n   * @param   string          $username           Username\n   * @param   string          $jid                 JID\n   * @param   string|false    $nickname           Nick Name (Optional)\n   * @param   int|false       $subscriptionType   Subscription (Optional)\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "getGroups": {
             "name": "getGroups",
             "summary": "Get all groups",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      $endpoint = '\/groups';\n      return $this->doRequest('get', $endpoint);\n  }",
+            "code": "  public function getGroups()\n  {\n      $endpoint = '\/groups';\n      return $this->doRequest('get', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 383,
             "endLine": 387,
             "isDeprecated": false,
@@ -720,20 +1172,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getGroups",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Get all groups\n",
+                "params": [],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Get all groups\n   *\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "getGroup": {
             "name": "getGroup",
             "summary": "Retrieve a group",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name)\n  {\n      $endpoint = '\/groups\/'.$name;\n      return $this->doRequest('get', $endpoint);\n  }",
+            "code": "  public function getGroup($name)\n  {\n      $endpoint = '\/groups\/'.$name;\n      return $this->doRequest('get', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 395,
             "endLine": 399,
             "isDeprecated": false,
@@ -744,31 +1205,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getGroup",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Name of group"
                 }
-            ]
+            ],
+            "doc": {
+                "description": " Retrieve a group\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$name",
+                        "description": "Name of group"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   *  Retrieve a group\n   *\n   * @param  string   $name                       Name of group\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "createGroup": {
             "name": "createGroup",
             "summary": "Create a group",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $description = false)\n  {\n      $endpoint = '\/groups\/';\n      return $this->doRequest('post', $endpoint, compact('name','description'));\n  }",
+            "code": "  public function createGroup($name, $description = false)\n  {\n      $endpoint = '\/groups\/';\n      return $this->doRequest('post', $endpoint, compact('name','description'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 409,
             "endLine": 413,
             "isDeprecated": false,
@@ -779,13 +1258,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "createGroup",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -796,24 +1278,47 @@
                     "name": "description",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "Some description of the group"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Create a group\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$name",
+                        "description": "Name of the group"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$description",
+                        "description": "Some description of the group"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Create a group \n   *\n   * @param   string   $name                      Name of the group\n   * @param   string   $description               Some description of the group\n   *\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "deleteGroup": {
             "name": "deleteGroup",
             "summary": "Delete a group",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name)\n  {\n      $endpoint = '\/groups\/'.$name;\n      return $this->doRequest('delete', $endpoint);\n  }",
+            "code": "  public function deleteGroup($name)\n  {\n      $endpoint = '\/groups\/'.$name;\n      return $this->doRequest('delete', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 421,
             "endLine": 425,
             "isDeprecated": false,
@@ -824,31 +1329,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "deleteGroup",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Name of the Group to delete"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Delete a group\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$name",
+                        "description": "Name of the Group to delete"
+                    }
+                ],
+                "return": "json|false  Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Delete a group\n   *\n   * @param   string      $name               Name of the Group to delete\n   * @return  json|false  Json with data or error, or False when something went fully wrong\n   *\/"
         },
         "updateGroup": {
             "name": "updateGroup",
             "summary": "Update a group (description)",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $description)\n  {\n      $endpoint = '\/groups\/'.$name;\n      return $this->doRequest('put', $endpoint, compact('name','description'));\n  }",
+            "code": "  public function updateGroup($name,  $description)\n  {\n      $endpoint = '\/groups\/'.$name;\n      return $this->doRequest('put', $endpoint, compact('name','description'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 434,
             "endLine": 438,
             "isDeprecated": false,
@@ -859,13 +1382,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "updateGroup",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -876,24 +1402,47 @@
                     "name": "description",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Some description of the group"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Update a group (description)\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "name": "$name",
+                        "description": "Name of group"
+                    },
+                    {
+                        "tag": "param",
+                        "name": "$description",
+                        "description": "Some description of the group"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Update a group (description)\n   *\n   * @param   string      $name               Name of group\n   * @param   string      $description        Some description of the group\n   *\n   *\/"
         },
         "getSessions": {
             "name": "getSessions",
             "summary": "Gell all active sessions",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Prosody",
+            "class": "bbn\\Api\\Prosody",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Prosody.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      $endpoint = '\/sessions';\n      return $this->doRequest('get', $endpoint);\n  }",
+            "code": "  public function getSessions()\n  {\n      $endpoint = '\/sessions';\n      return $this->doRequest('get', $endpoint);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 445,
             "endLine": 449,
             "isDeprecated": false,
@@ -904,14 +1453,130 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getSessions",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gell all active sessions\n",
+                "params": [],
+                "return": "Json with data or error, or False when something went fully wrong"
+            },
+            "comments": "  \/**\n   * Gell all active sessions\n   *\n   * @return json|false   Json with data or error, or False when something went fully wrong\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "host": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "port": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "username": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "password": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "module": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "params": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "client": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Prosody"
+            },
+            "declaring_trait": "bbn\\Api\\Prosody",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "GuzzleHttp\\Client": "Client"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

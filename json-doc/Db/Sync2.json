@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Db\\Sync2",
     "namespace": true,
+    "realName": "Sync2",
+    "realNamespace": "bbn\\Db",
     "traits": [
         "bbn\\Models\\Tts\\Singleton",
         "bbn\\Models\\Tts\\Dbconfig",
@@ -14,17 +16,12 @@
     "fileName": "\/Db\/Sync2.php",
     "startLine": 9,
     "endLine": 567,
-    "numMethods": 53,
-    "numProperties": 0,
+    "numMethods": 44,
+    "numProperties": 30,
     "numConstants": 0,
-    "numStaticProperties": 8,
+    "numStaticProperties": 7,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Singleton",
-        "bbn\\Models\\Tts\\Dbconfig",
-        "bbn\\Models\\Tts\\Optional"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -58,7 +55,6 @@
         "singleton_exists": false,
         "optional_is_init": false,
         "option_root_id": null,
-        "option_appui_id": null,
         "current_connection": null,
         "sync_connection": null,
         "has_history": false,
@@ -72,9 +68,11 @@
         "db": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
-        "_is_init_class_cfg": false,
+        "_isInitClassCfg": false,
         "fields": null,
         "class_cfg": null,
         "class_table": null,
@@ -86,7 +84,6 @@
     "namespaceName": "bbn\\Db",
     "shortName": "Sync2",
     "contentConstructor": {
-        "file": "bbn\\Db\\Sync2",
         "returns": []
     },
     "methods": {
@@ -95,32 +92,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $tables, array $sync_cfg = NULL, array $arch = [])\n  {\n    parent::__construct($db);\n    Singleton::init($this);\n    $this->_init_class_cfg($arch);\n    $this->opt = bbn\\Appui\\Option::getInstance();\n    if ($this->opt) {\n      self::retrieverInit($this);\n    }\n  }",
-            "startLine": 96,
-            "endLine": 105,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
+            "code": "  public function __construct(Db $db, array $tables, array $sync_cfg = null, array $arch = [])\n  {\n    parent::__construct($db);\n    Singleton::init($this);\n    $this->initClassCfg($arch);\n    $this->opt = bbn\\Appui\\Option::getInstance();\n    if ($this->opt) {\n      self::retrieverInit($this);\n    }\n  }",
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Db",
+                "class": "bbn\\Models\\Cls\\Db",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Db.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\Db $db)\n  {\n    $this->db = $db;\n  }",
+                "code": "  public function __construct(dbClass $db)\n  {\n    $this->db = $db;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 37,
                 "endLine": 40,
                 "isDeprecated": false,
@@ -131,26 +121,62 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "__construct",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "db",
                         "position": 0,
                         "type": "bbn\\Db",
+                        "type_arr": [
+                            "bbn\\Db"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": "",
                         "description": "A database connection"
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "Constructor.\n",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "dbClass",
+                            "name": "$db",
+                            "description": "A database connection"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Constructor.\n   *\n   * @param dbClass $db A database connection\n   *\/"
             },
+            "trait": false,
+            "startLine": 96,
+            "endLine": 105,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
+            "returns": [],
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -160,6 +186,11 @@
                     "name": "tables",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -168,7 +199,13 @@
                 {
                     "name": "sync_cfg",
                     "position": 2,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -178,6 +215,11 @@
                     "name": "arch",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -190,11 +232,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $sync_cfg = [], array $tables = [], string $sync_table = '')\n  {\n    if ($this->is_init) {\n      throw new \\Exception(\"Impossible to init twice the dbsync class\");\n    }\n    $this->current_connection = $db;\n\n\n    if (!empty($sync_table)) {\n      $this->sync_table = $sync_table;\n    }\n    if (!Str::checkName($this->sync_table)) {\n      throw new \\Exception(X::_(\"Table name not allowed\"));\n    }\n    if (empty($sync_cfg)) {\n      $this->sync_connection = new Db(self::$default_cfg);\n    }\n    elseif (isset($sync_cfg['connection'])) {\n      if (is_object($sync_cfg['connection']) && (is_a($sync_cfg['connection'], '\\\\bbn\\\\Db')\n          || is_subclass_of($sync_cfg['connection'], '\\\\bbn\\\\Db'))\n      ) {\n        $this->sync_connection = $sync_cfg['connection'];\n      }\n      else {\n        throw new \\Exception(X::_(\"Invalid connection given to the synchronization class\"));\n      }\n    }\n    elseif (isset($sync_cfg['engine'])) {\n      if (($sync_cfg['engine'] === 'sqlite')\n          || ($sync_cfg['engine'] !== $this->current_connection->getEngine())\n      ) {\n        $this->sync_connection = new Db($sync_cfg);\n      }\n      elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n        $this->sync_connection =& $this->current_connection;\n        $this->sync_table = $this->sync_connection->tfn($this->sync_table, $sync_cfg['db']);\n      }\n    }\n    elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n      $this->sync_connection =& $this->current_connection;\n      $this->sync_table = $this->sync_connection->tfn($this->sync_table, $sync_cfg['db']);\n    }\n    $this->tables = $tables;\n    $this->is_init = true;\n    if (\\count($this->tables) === 0) {\n      $this->tables = $this->current_connection->getTables();\n    }\n    if (\\is_array($this->tables)) {\n      foreach ($this->tables as $i => $t){\n        $this->tables[$i] = $this->current_connection->tableFullName($t);\n      }\n      $this->current_connection->setTrigger(\n        '\\\\bbn\\Db\\\\sync::trigger',\n        ['delete', 'update', 'insert'],\n        ['before', 'after'],\n        $this->tables\n      );\n    }\n  }",
+            "code": "  public function init(db $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void\n  {\n    if ($this->is_init) {\n      throw new \\Exception(\"Impossible to init twice the dbsync class\");\n    }\n    $this->current_connection = $db;\n\n\n    if (!empty($sync_table)) {\n      $this->sync_table = $sync_table;\n    }\n    if (!Str::checkName($this->sync_table)) {\n      throw new \\Exception(X::_(\"Table name not allowed\"));\n    }\n    if (empty($sync_cfg)) {\n      $this->sync_connection = new Db(self::$default_cfg);\n    }\n    elseif (isset($sync_cfg['connection'])) {\n      if (is_object($sync_cfg['connection']) && (is_a($sync_cfg['connection'], '\\\\bbn\\\\Db')\n          || is_subclass_of($sync_cfg['connection'], '\\\\bbn\\\\Db'))\n      ) {\n        $this->sync_connection = $sync_cfg['connection'];\n      }\n      else {\n        throw new \\Exception(X::_(\"Invalid connection given to the synchronization class\"));\n      }\n    }\n    elseif (isset($sync_cfg['engine'])) {\n      if (($sync_cfg['engine'] === 'sqlite')\n          || ($sync_cfg['engine'] !== $this->current_connection->getEngine())\n      ) {\n        $this->sync_connection = new Db($sync_cfg);\n      }\n      elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n        $this->sync_connection =& $this->current_connection;\n        $this->sync_table = $this->sync_connection->tfn($this->sync_table, $sync_cfg['db']);\n      }\n    }\n    elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n      $this->sync_connection =& $this->current_connection;\n      $this->sync_table = $this->sync_connection->tfn($this->sync_table, $sync_cfg['db']);\n    }\n    $this->tables = $tables;\n    $this->is_init = true;\n    if (\\count($this->tables) === 0) {\n      $this->tables = $this->current_connection->getTables();\n    }\n    if (\\is_array($this->tables)) {\n      foreach ($this->tables as $i => $t){\n        $this->tables[$i] = $this->current_connection->tableFullName($t);\n      }\n      $this->current_connection->setTrigger(\n        '\\\\bbn\\Db\\\\sync::trigger',\n        ['delete', 'update', 'insert'],\n        ['before', 'after'],\n        $this->tables\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 114,
             "endLine": 172,
             "isDeprecated": false,
@@ -205,15 +250,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "init",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -223,6 +273,11 @@
                     "name": "sync_cfg",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -233,6 +288,11 @@
                     "name": "tables",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -242,24 +302,61 @@
                     "name": "sync_table",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": "",
                     "description": "table"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\Db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$sync",
+                        "description": "cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$tables"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$sync",
+                        "description": "table"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param bbn\\Db $db\n   * @param array $sync_cfg\n   * @param array  $tables\n   * @param string  $sync_table\n   * @return void\n   *\/"
         },
         "isInit": {
             "name": "isInit",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->is_init;\n  }",
+            "code": "  public function isInit()\n  {\n    return $this->is_init;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 174,
             "endLine": 177,
             "isDeprecated": false,
@@ -270,8 +367,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isInit",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "createTable": {
@@ -279,11 +376,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (\\is_array($this->sync_connection)) {\n      $this->sync_connection = new bbn\\Db($this->sync_connection);\n    }\n    if (class_exists('\\\\bbn\\\\Appui\\\\History') && bbn\\Appui\\History::$is_used) {\n      $this->has_history = 1;\n    }\n    \/** @todo Replace with DB functions *\/\n    if ($this->sync_connection->getEngine() === 'sqlite') {\n      $this->sync_connection->exec(\n        sprintf(\n          'CREATE TABLE \"%s\" (\n            \"id\" INTEGER PRIMARY KEY  NOT NULL ,\n            \"db\" TEXT NOT NULL ,\n            \"tab\" TEXT NOT NULL ,\n            \"chrono\" REAL NOT NULL,\n            \"action\" TEXT NOT NULL,\n            \"rows\" TEXT,\"vals\" TEXT,\n            \"state\" INTEGER NOT NULL DEFAULT (0)\n          );\n          CREATE INDEX \"db\" \"dbsync\" (\"db\");\n          CREATE INDEX \"tab\" \"dbsync\" (\"tab\");\n          CREATE INDEX \"chrono\" \"dbsync\" (\"chrono\");\n          CREATE INDEX \"action\" \"dbsync\" (\"action\");\n          CREATE INDEX \"state\" \"dbsync\" (\"state\");',\n          $this->table_sync\n        )\n      );\n    }\n    elseif ($this->sync_connection->getEngine() === 'mysql') {\n      $this->sync_connection->exec(\n        sprintf(\n          \"CREATE TABLE IF NOT EXISTS `%s` (\n            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n            `db` varchar(50) NOT NULL,\n            `tab` varchar(50) NOT NULL,\n            `chrono` decimal(14,4) unsigned NOT NULL,\n            `action` varchar(20) NOT NULL,\n            `rows` text,\n            `vals` longtext,\n            `state` int(10) NOT NULL DEFAULT '0'\n          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n          ALTER TABLE `dbsync`\n            ADD PRIMARY KEY (`id`),\n            ADD KEY `db` (`db`),\n            ADD KEY `tab` (`tab`),\n            ADD KEY `chrono` (`chrono`),\n            ADD KEY `action` (`action`),\n            ADD KEY `state` (`state`);\",\n            $this->table_sync\n        )\n      );\n    }\n  }",
+            "code": "  public function createTable()\n  {\n    if (\\is_array($this->sync_connection)) {\n      $this->sync_connection = new bbn\\Db($this->sync_connection);\n    }\n    if (class_exists('\\\\bbn\\\\Appui\\\\History') && bbn\\Appui\\History::$is_used) {\n      $this->has_history = 1;\n    }\n    \/** @todo Replace with DB functions *\/\n    if ($this->sync_connection->getEngine() === 'sqlite') {\n      $this->sync_connection->exec(\n        sprintf(\n          'CREATE TABLE \"%s\" (\n            \"id\" INTEGER PRIMARY KEY  NOT NULL ,\n            \"db\" TEXT NOT NULL ,\n            \"tab\" TEXT NOT NULL ,\n            \"chrono\" REAL NOT NULL,\n            \"action\" TEXT NOT NULL,\n            \"rows\" TEXT,\"vals\" TEXT,\n            \"state\" INTEGER NOT NULL DEFAULT (0)\n          );\n          CREATE INDEX \"db\" \"dbsync\" (\"db\");\n          CREATE INDEX \"tab\" \"dbsync\" (\"tab\");\n          CREATE INDEX \"chrono\" \"dbsync\" (\"chrono\");\n          CREATE INDEX \"action\" \"dbsync\" (\"action\");\n          CREATE INDEX \"state\" \"dbsync\" (\"state\");',\n          $this->table_sync\n        )\n      );\n    }\n    elseif ($this->sync_connection->getEngine() === 'mysql') {\n      $this->sync_connection->exec(\n        sprintf(\n          \"CREATE TABLE IF NOT EXISTS `%s` (\n            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n            `db` varchar(50) NOT NULL,\n            `tab` varchar(50) NOT NULL,\n            `chrono` decimal(14,4) unsigned NOT NULL,\n            `action` varchar(20) NOT NULL,\n            `rows` text,\n            `vals` longtext,\n            `state` int(10) NOT NULL DEFAULT '0'\n          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n          ALTER TABLE `dbsync`\n            ADD PRIMARY KEY (`id`),\n            ADD KEY `db` (`db`),\n            ADD KEY `tab` (`tab`),\n            ADD KEY `chrono` (`chrono`),\n            ADD KEY `action` (`action`),\n            ADD KEY `state` (`state`);\",\n            $this->table_sync\n        )\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 179,
             "endLine": 233,
             "isDeprecated": false,
@@ -294,8 +394,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "createTable",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "check": {
@@ -303,11 +403,46 @@
             "summary": "Checks if the initialization has been all right - performs it only once.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset($this->is_checked)) {\n      $this->is_checked = \\is_object($this->current_connection)\n        && \\is_object($this->sync_connection)\n        && $this->current_connection->check()\n        && $this->sync_connection->check();\n    }\n    return $this->is_checked;\n  }",
+            "code": "  public function check(): bool\n  {\n    if (!isset($this->is_checked)) {\n      $this->is_checked = \\is_object($this->current_connection)\n        && \\is_object($this->sync_connection)\n        && $this->current_connection->check()\n        && $this->sync_connection->check();\n    }\n    return $this->is_checked;\n  }",
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "check",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
             "startLine": 240,
             "endLine": 249,
             "isDeprecated": false,
@@ -318,45 +453,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [
                 "bool"
             ],
-            "parent": {
-                "name": "check",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the initialization has been all right - performs it only once.\n\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks if the initialization has been all right - performs it only once.\n   * \n   * @return bool\n   *\/"
         },
         "disable": {
             "name": "disable",
             "summary": "Disable the sync trigger.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->disabled = true;\n  }",
+            "code": "  public function disable(): void\n  {\n    $this->disabled = true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 256,
             "endLine": 259,
             "isDeprecated": false,
@@ -367,22 +488,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "disable",
             "returns": [
                 "void"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Disable the sync trigger.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Disable the sync trigger.\n   *\n   * @return void\n   *\/"
         },
         "enable": {
             "name": "enable",
             "summary": "Enable the sync trigger.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->disabled = false;\n  }",
+            "code": "  public function enable(): void\n  {\n    $this->disabled = false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 266,
             "endLine": 269,
             "isDeprecated": false,
@@ -393,22 +523,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "enable",
             "returns": [
                 "void"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Enable the sync trigger.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Enable the sync trigger.\n   *\n   * @return void\n   *\/"
         },
         "trigger": {
             "name": "trigger",
             "summary": "Writes new rows in the sync table after a writing operation has happened.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    \/** @todo I would like to understand... *\/\n    if (!isset($cfg['run'])) {\n      $cfg['run'] = 1;\n    }\n    if (!isset($cfg['trig'])) {\n      $cfg['run'] = 1;\n    }\n    if (!$this->disabled\n        && $this->check()\n        && (count($cfg['tables']) === 1)\n        && ($table = $this->current_connection->tfn(current($cfg['tables'])))\n        && \\in_array($table, $this->tables, true)\n    ) {\n      if ($cfg['moment'] === 'after') {\n        \/\/ Case where we actually delete or restore through the $hcol column\n        $values = [];\n        if (X::hasProps($cfg, ['fields', 'values'], true)) {\n          foreach ($cfg['fields'] as $i => $f) {\n            $values[$f] = $cfg['values'][$i];\n          }\n        }\n        $this->sync_connection->insert(\n          $this->sync_table, [\n          'db' => $this->current_connection->getCurrent(),\n          'tab' => $this->current_connection->tsn($table),\n          'action' => $cfg['kind'],\n          'chrono' => microtime(true),\n          'rows' => empty($cfg['where']) ? '[]' : X::jsonBase64Encode($cfg['where']),\n          'vals' => empty($values) ? '[]' : X::jsonBase64Encode($values)\n          ]\n        );\n      }\n    }\n    return $cfg;\n  }",
+            "code": "  public function trigger(array $cfg): array\n  {\n    \/** @todo I would like to understand... *\/\n    if (!isset($cfg['run'])) {\n      $cfg['run'] = 1;\n    }\n    if (!isset($cfg['trig'])) {\n      $cfg['run'] = 1;\n    }\n    if (!$this->disabled\n        && $this->check()\n        && (count($cfg['tables']) === 1)\n        && ($table = $this->current_connection->tfn(current($cfg['tables'])))\n        && \\in_array($table, $this->tables, true)\n    ) {\n      if ($cfg['moment'] === 'after') {\n        \/\/ Case where we actually delete or restore through the $hcol column\n        $values = [];\n        if (X::hasProps($cfg, ['fields', 'values'], true)) {\n          foreach ($cfg['fields'] as $i => $f) {\n            $values[$f] = $cfg['values'][$i];\n          }\n        }\n        $this->sync_connection->insert(\n          $this->sync_table, [\n          'db' => $this->current_connection->getCurrent(),\n          'tab' => $this->current_connection->tsn($table),\n          'action' => $cfg['kind'],\n          'chrono' => microtime(true),\n          'rows' => empty($cfg['where']) ? '[]' : X::jsonBase64Encode($cfg['where']),\n          'vals' => empty($values) ? '[]' : X::jsonBase64Encode($values)\n          ]\n        );\n      }\n    }\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 277,
             "endLine": 313,
             "isDeprecated": false,
@@ -419,33 +558,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "trigger",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Configuration array"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Writes new rows in the sync table after a writing operation has happened.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "Configuration array"
+                    }
+                ],
+                "return": "Resulting configuration"
+            },
+            "comments": "  \/**\n   * Writes new rows in the sync table after a writing operation has happened.\n   *\n   * @param array $cfg Configuration array\n   * @return array Resulting configuration\n   *\/"
         },
         "callback1": {
             "name": "callback1",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $f)\n  {\n    self::addMethod('cbf1', $f);\n  }",
+            "code": "  public static function callback1(callable $f)\n  {\n    self::addMethod('cbf1', $f);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 315,
             "endLine": 318,
             "isDeprecated": false,
@@ -456,13 +616,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "callback1",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "f",
                     "position": 0,
                     "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -475,11 +640,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $f)\n  {\n    self::addMethod('cbf2', $f);\n  }",
+            "code": "  public static function callback2(callable $f)\n  {\n    self::addMethod('cbf2', $f);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 320,
             "endLine": 323,
             "isDeprecated": false,
@@ -490,13 +658,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "callback2",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "f",
                     "position": 0,
                     "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -509,11 +682,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(float $start = NULL)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    if (!$start\n        || !($start = $this->sync_connection->selectOne(\n          $this->sync_table, 'MIN(chrono)', [\n          ['db', 'NOT LIKE', $this->current_connection->getCurrent()],\n          'state' => 0\n          ]\n        ))\n    ) {\n      $start = time();\n    }\n    \/\/ Deleting the entries prior to this sync we produced and have been seen by the twin process\n    return $this->sync_connection->delete(\n      $this->sync_table, [\n      'db' => $this->current_connection->getCurrent(),\n      'state'=> 1,\n      ['chrono', '<', $start]\n      ]\n    );\n  }",
+            "code": "  public function deleteCompleted(float $start = null)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    if (!$start\n        || !($start = $this->sync_connection->selectOne(\n          $this->sync_table, 'MIN(chrono)', [\n          ['db', 'NOT LIKE', $this->current_connection->getCurrent()],\n          'state' => 0\n          ]\n        ))\n    ) {\n      $start = time();\n    }\n    \/\/ Deleting the entries prior to this sync we produced and have been seen by the twin process\n    return $this->sync_connection->delete(\n      $this->sync_table, [\n      'db' => $this->current_connection->getCurrent(),\n      'state'=> 1,\n      ['chrono', '<', $start]\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 325,
             "endLine": 348,
             "isDeprecated": false,
@@ -524,13 +700,19 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "deleteCompleted",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "start",
                     "position": 0,
-                    "type": "float",
+                    "type": "null|float",
+                    "type_arr": [
+                        "null",
+                        "float"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -543,11 +725,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($row)\n  {\n\n  }",
+            "code": "  public function currentRowCfg($row): array\n  {\n\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 350,
             "endLine": 353,
             "isDeprecated": false,
@@ -558,15 +743,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "currentRowCfg",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "row",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -579,11 +767,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($row)\n  {\n\n  }",
+            "code": "  public function destRowCfg($row): array\n  {\n\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 355,
             "endLine": 358,
             "isDeprecated": false,
@@ -594,15 +785,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "destRowCfg",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "row",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -615,11 +809,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, $dbs = '', $sync_table = '', $num_try = 0)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    self::disable();\n    $mode_db = $this->current_connection->getErrorMode();\n    $mode_dbs = $this->sync_connection->getErrorMode();\n    $this->current_connection->setErrorMode(\"continue\");\n    $this->sync_connection->setErrorMode(\"continue\");\n\n    $num_try++;\n\n    $to_log = [\n      'deleted_sync' => 0,\n      'deleted_real' => 0,\n      'updated_sync' => 0,\n      'updated_real' => 0,\n      'inserted_sync' => 0,\n      'inserted_real' => 0,\n      'num_problems' => 0,\n      'problems' => []\n    ];\n\n    $to_log['deleted_sync'] = self::deleteCompleted();\n\n    $retry = false;\n\n    \/\/ Selecting the entries inserted\n    $ds = $this->sync_connection->rselectAll(\n      $this->sync_table, ['id', 'tab', 'vals', 'chrono'], [\n      ['db', '!=', $this->current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['action', 'LIKE', 'INSERT']\n      ], [\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    \/\/ They just have to be inserted\n    foreach ($ds as $i => $d){\n      if (isset($this->methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      $vals = X::jsonBase64Decode($d['vals']);\n      if (!\\is_array($vals)) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Hey, look urgently at the row $d[id]!\";\n      }\n      elseif ($this->current_connection->insert($d['tab'], $vals)) {\n        if (isset($this->methods['cbf2'])) {\n          self::cbf2($d);\n        }\n        $to_log['inserted_sync']++;\n        $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      elseif ($this->current_connection->select($d['tab'], [], $vals)) {\n        $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      else{\n        if ($num_try > $this->max_retry) {\n          $to_log['num_problems']++;\n          $to_log['problems'][] = \"Problem while syncing (insert), check data with status 5 and ID \".$d['id'];\n          $this->sync_connection->update($this->sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n        }\n        $retry = 1;\n      }\n    }\n\n\n    \/\/ Selecting the entries modified and deleted in the twin DB,\n    \/\/ ordered by table and rows (so the same go together)\n    $ds = $this->sync_connection->rselectAll(\n      $this->sync_table, ['id', 'tab', 'action', 'rows', 'vals', 'chrono'], [\n      ['db', '!=', $this->current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['rows', '!=', '[]'],\n      ['action', '!=', 'insert']\n      ], [\n      'tab' => 'ASC',\n      'rows' => 'ASC',\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    foreach ($ds as $i => $d){\n      \/\/ Executing the first callback\n      $d['rows'] = X::jsonBase64Decode($d['rows']);\n      $d['vals'] = X::jsonBase64Decode($d['vals']);\n      if (isset($this->methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      \/\/ Proceeding to the actions: delete is before\n      if (strtolower($d['action']) === 'delete') {\n        if ($this->current_connection->delete($d['tab'], $d['rows'])) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['deleted_real']++;\n        }\n        elseif (!$this->current_connection->select($d['tab'], [], $d['rows'])) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > $this->max_retry) {\n            $this->sync_connection->update($this->sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (delete), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Checking if there is another change done to this record and when in the twin DB\n      $next_time = (\n              isset($ds[$i+1]) &&\n              ($ds[$i+1]['tab'] === $d['tab']) &&\n              ($ds[$i+1]['rows'] === $d['rows'])\n            ) ? $ds[$i+1]['chrono'] : microtime();\n      \/\/ Looking for the actions done on this specific record in our database\n      \/\/ between the twin change and the next (or now if there is no other change)\n      $each = $this->sync_connection->rselectAll(\n        $this->sync_table, ['id', 'chrono', 'action', 'vals'], [\n        ['db', '=', $this->current_connection->getCurrent()],\n        ['tab', '=', $d['tab']],\n        ['rows', '=', $d['rows']],\n        ['chrono', '>=', $d['chrono']],\n        ['chrono', '<', $next_time],\n        ]\n      );\n      if (\\count($each) > 0) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Conflict!\";\n        $to_log['problems'][] = $d;\n        foreach ($each as $e){\n          $e['vals'] = X::jsonBase64Decode($e['vals']);\n          \/\/ If it's deleted locally and updated on the twin we restore\n          if (strtolower($e['action']) === 'delete') {\n            if (strtolower($d['action']) === 'update') {\n              if (!$this->current_connection->insertUpdate(\n                $d['tab'],\n                X::mergeArrays(\n                  $e['vals'],\n                  $d['vals']\n                )\n              )\n              ) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update number 1 had a problem\";\n              }\n            }\n          }\n          \/\/ If it's updated locally and deleted in the twin we restore\n          elseif (strtolower($e['action']) === 'update') {\n            if (strtolower($d['action']) === 'delete') {\n              if (!$this->current_connection->insertUpdate($d['tab'], X::mergeArrays($d['vals'], $e['vals']))) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update had a problem\";\n              }\n            }\n            \/\/ If it's updated locally and in the twin we merge the values for the update\n            elseif (strtolower($d['action']) === 'update') {\n              $d['vals'] = X::mergeArrays($d['vals'], $e['vals']);\n            }\n          }\n        }\n      }\n      \/\/ Proceeding to the actions update is after in case we needed to restore\n      if (strtolower($d['action']) === 'update') {\n        X::log(X::mergeArrays($d['rows'], $d['vals']), 'synct');\n        if ($this->current_connection->update($d['tab'], $d['vals'], $d['rows'])) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['updated_real']++;\n        }\n        elseif ($this->current_connection->count($d['tab'], X::mergeArrays($d['rows'], $d['vals']))) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > $this->max_retry) {\n            $this->sync_connection->update($this->sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (update), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Callback number 2\n      if (isset($this->methods['cbf2'])) {\n        self::cbf2($d);\n      }\n    }\n\n\n    $res = [];\n    foreach ($to_log as $k => $v){\n      if (!empty($v)) {\n        $res[$k] = $v;\n      }\n    }\n    $this->current_connection->setErrorMode($mode_db);\n    $this->sync_connection->setErrorMode($mode_dbs);\n    self::enable();\n    if ($retry && ( $num_try <= $this->max_retry )) {\n      $res = X::mergeArrays($res, self::sync($db, $dbs, $sync_table, $num_try));\n    }\n    return $res;\n  }",
+            "code": "  public function sync(bbn\\Db $db, $dbs='', $sync_table='', $num_try = 0)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    self::disable();\n    $mode_db = $this->current_connection->getErrorMode();\n    $mode_dbs = $this->sync_connection->getErrorMode();\n    $this->current_connection->setErrorMode(\"continue\");\n    $this->sync_connection->setErrorMode(\"continue\");\n\n    $num_try++;\n\n    $to_log = [\n      'deleted_sync' => 0,\n      'deleted_real' => 0,\n      'updated_sync' => 0,\n      'updated_real' => 0,\n      'inserted_sync' => 0,\n      'inserted_real' => 0,\n      'num_problems' => 0,\n      'problems' => []\n    ];\n\n    $to_log['deleted_sync'] = self::deleteCompleted();\n\n    $retry = false;\n\n    \/\/ Selecting the entries inserted\n    $ds = $this->sync_connection->rselectAll(\n      $this->sync_table, ['id', 'tab', 'vals', 'chrono'], [\n      ['db', '!=', $this->current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['action', 'LIKE', 'INSERT']\n      ], [\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    \/\/ They just have to be inserted\n    foreach ($ds as $i => $d){\n      if (isset($this->methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      $vals = X::jsonBase64Decode($d['vals']);\n      if (!\\is_array($vals)) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Hey, look urgently at the row $d[id]!\";\n      }\n      elseif ($this->current_connection->insert($d['tab'], $vals)) {\n        if (isset($this->methods['cbf2'])) {\n          self::cbf2($d);\n        }\n        $to_log['inserted_sync']++;\n        $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      elseif ($this->current_connection->select($d['tab'], [], $vals)) {\n        $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      else{\n        if ($num_try > $this->max_retry) {\n          $to_log['num_problems']++;\n          $to_log['problems'][] = \"Problem while syncing (insert), check data with status 5 and ID \".$d['id'];\n          $this->sync_connection->update($this->sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n        }\n        $retry = 1;\n      }\n    }\n\n\n    \/\/ Selecting the entries modified and deleted in the twin DB,\n    \/\/ ordered by table and rows (so the same go together)\n    $ds = $this->sync_connection->rselectAll(\n      $this->sync_table, ['id', 'tab', 'action', 'rows', 'vals', 'chrono'], [\n      ['db', '!=', $this->current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['rows', '!=', '[]'],\n      ['action', '!=', 'insert']\n      ], [\n      'tab' => 'ASC',\n      'rows' => 'ASC',\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    foreach ($ds as $i => $d){\n      \/\/ Executing the first callback\n      $d['rows'] = X::jsonBase64Decode($d['rows']);\n      $d['vals'] = X::jsonBase64Decode($d['vals']);\n      if (isset($this->methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      \/\/ Proceeding to the actions: delete is before\n      if (strtolower($d['action']) === 'delete') {\n        if ($this->current_connection->delete($d['tab'], $d['rows'])) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['deleted_real']++;\n        }\n        elseif (!$this->current_connection->select($d['tab'], [], $d['rows'])) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > $this->max_retry) {\n            $this->sync_connection->update($this->sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (delete), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Checking if there is another change done to this record and when in the twin DB\n      $next_time = (\n              isset($ds[$i+1]) &&\n              ($ds[$i+1]['tab'] === $d['tab']) &&\n              ($ds[$i+1]['rows'] === $d['rows'])\n            ) ? $ds[$i+1]['chrono'] : microtime();\n      \/\/ Looking for the actions done on this specific record in our database\n      \/\/ between the twin change and the next (or now if there is no other change)\n      $each = $this->sync_connection->rselectAll(\n        $this->sync_table, ['id', 'chrono', 'action', 'vals'], [\n        ['db', '=', $this->current_connection->getCurrent()],\n        ['tab', '=', $d['tab']],\n        ['rows', '=', $d['rows']],\n        ['chrono', '>=', $d['chrono']],\n        ['chrono', '<', $next_time],\n        ]\n      );\n      if (\\count($each) > 0) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Conflict!\";\n        $to_log['problems'][] = $d;\n        foreach ($each as $e){\n          $e['vals'] = X::jsonBase64Decode($e['vals']);\n          \/\/ If it's deleted locally and updated on the twin we restore\n          if (strtolower($e['action']) === 'delete') {\n            if (strtolower($d['action']) === 'update') {\n              if (!$this->current_connection->insertUpdate(\n                $d['tab'],\n                X::mergeArrays(\n                  $e['vals'],\n                  $d['vals']\n                )\n              )\n              ) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update number 1 had a problem\";\n              }\n            }\n          }\n          \/\/ If it's updated locally and deleted in the twin we restore\n          elseif (strtolower($e['action']) === 'update') {\n            if (strtolower($d['action']) === 'delete') {\n              if (!$this->current_connection->insertUpdate($d['tab'], X::mergeArrays($d['vals'], $e['vals']))) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update had a problem\";\n              }\n            }\n            \/\/ If it's updated locally and in the twin we merge the values for the update\n            elseif (strtolower($d['action']) === 'update') {\n              $d['vals'] = X::mergeArrays($d['vals'], $e['vals']);\n            }\n          }\n        }\n      }\n      \/\/ Proceeding to the actions update is after in case we needed to restore\n      if (strtolower($d['action']) === 'update') {\n        X::log(X::mergeArrays($d['rows'], $d['vals']), 'synct');\n        if ($this->current_connection->update($d['tab'], $d['vals'], $d['rows'])) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['updated_real']++;\n        }\n        elseif ($this->current_connection->count($d['tab'], X::mergeArrays($d['rows'], $d['vals']))) {\n          $this->sync_connection->update($this->sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > $this->max_retry) {\n            $this->sync_connection->update($this->sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (update), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Callback number 2\n      if (isset($this->methods['cbf2'])) {\n        self::cbf2($d);\n      }\n    }\n\n\n    $res = [];\n    foreach ($to_log as $k => $v){\n      if (!empty($v)) {\n        $res[$k] = $v;\n      }\n    }\n    $this->current_connection->setErrorMode($mode_db);\n    $this->sync_connection->setErrorMode($mode_dbs);\n    self::enable();\n    if ($retry && ( $num_try <= $this->max_retry )) {\n      $res = X::mergeArrays($res, self::sync($db, $dbs, $sync_table, $num_try));\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 363,
             "endLine": 566,
             "isDeprecated": false,
@@ -630,13 +827,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "sync",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -646,6 +848,9 @@
                     "name": "dbs",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -655,6 +860,9 @@
                     "name": "sync_table",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -664,6 +872,9 @@
                     "name": "num_try",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -676,34 +887,27 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -712,24 +916,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -738,160 +937,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "test",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -899,63 +980,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -964,17 +1103,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -985,43 +1300,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -1032,42 +1365,148 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
+        },
+        "singletonInit": {
+            "name": "singletonInit",
+            "summary": "Initialize the singleton by putting its own instance as static property.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function singletonInit(self $instance)\n  {\n    if (self::singletonExists()) {\n      throw new \\Exception(X::_(\"Impossible to create a new instance of\").' '.\\get_class($instance));\n    }\n\n    self::$singleton_exists = 1;\n    self::$singleton_instance = $instance;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Singleton",
+            "startLine": 35,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "singletonInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "instance",
+                    "position": 0,
+                    "type": "self",
+                    "type_arr": [
+                        "self"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The instance object."
+                }
+            ],
+            "doc": {
+                "description": "Initialize the singleton by putting its own instance as static property.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "self",
+                        "name": "$instance",
+                        "description": "The instance object."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initialize the singleton by putting its own instance as static property.\n   *\n   * @param self $instance The instance object.\n   * @return void\n   *\/"
         },
         "getInstance": {
             "name": "getInstance",
             "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::singletonExists() ? self::$singleton_instance : null;\n  }",
+            "code": "  public static function getInstance(): ?self\n  {\n    return self::singletonExists() ? self::$singleton_instance : null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Singleton",
             "startLine": 50,
             "endLine": 53,
             "isDeprecated": false,
@@ -1078,23 +1517,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getInstance",
             "returns": [
                 null,
                 "self"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the instance of the singleton or null.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the instance of the singleton or null.\n   * \n   * @return self\n   *\/"
         },
         "singletonExists": {
             "name": "singletonExists",
             "summary": "Returns true if the instance as been initiated.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$singleton_exists ? true : false;\n  }",
+            "code": "  public static function singletonExists(): bool\n  {\n    return self::$singleton_exists ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Singleton",
             "startLine": 60,
             "endLine": 63,
             "isDeprecated": false,
@@ -1105,60 +1553,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "singletonExists",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
-        },
-        "exists": {
-            "name": "exists",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter)\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (is_string($filter)) {\n      $cfg = [$f['id'] => $filter];\n    }\n    elseif (is_array($filter)) {\n      $cfg = $filter;\n    }\n\n    if (!empty($cfg) && $arr = $this->db->count(\n      $this->class_table,\n      $cfg\n    )) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 37,
-            "endLine": 59,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if the instance as been initiated.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the instance as been initiated.\n   *\n   * @return bool\n   *\/"
         },
         "getClassCfg": {
             "name": "getClassCfg",
             "summary": "Returns the class configuration.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
-            "startLine": 67,
-            "endLine": 70,
+            "code": "  public function getClassCfg()\n  {\n    return $this->class_cfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 37,
+            "endLine": 40,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1167,22 +1588,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getClassCfg",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the class configuration.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the class configuration.\n   * \n   * @return mixed\n   *\/"
         },
         "getFields": {
             "name": "getFields",
             "summary": "Returns the fields of the main table.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->fields;\n  }",
-            "startLine": 78,
-            "endLine": 81,
+            "code": "  public function getFields()\n  {\n    return $this->fields;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 48,
+            "endLine": 51,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1191,22 +1621,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFields",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the fields of the main table.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the fields of the main table.\n   *\n   * @return array\n   *\/"
         },
-        "insert": {
-            "name": "insert",
-            "summary": "Inserts a new row in the table.",
+        "initClassCfg": {
+            "name": "initClassCfg",
+            "summary": "Sets the class configuration as defined in self::default_class_cfg",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(array $data)\n  {\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if ($this->db->insert($ccfg['table'], $data)) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 91,
-            "endLine": 101,
+            "code": "  protected function initClassCfg(array $cfg = null)\n  {\n$arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n    foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 59,
+            "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1214,35 +1653,53 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initClassCfg",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "data",
+                    "name": "cfg",
                     "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the class configuration as defined in self::default_class_cfg\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the class configuration as defined in self::default_class_cfg\n   * @param array $cfg\n   * @return $this\n   *\/"
         },
-        "delete": {
-            "name": "delete",
-            "summary": "Deletes a single row from the table through its id.",
+        "isInitClassCfg": {
+            "name": "isInitClassCfg",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 111,
+            "code": "  protected function isInitClassCfg(): bool\n  {\n    return $this->_isInitClassCfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 117,
             "endLine": 120,
             "isDeprecated": false,
             "isGenerator": false,
@@ -1250,234 +1707,29 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isInitClassCfg",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
+            "arguments": []
         },
-        "update": {
-            "name": "update",
-            "summary": "Updates a single row in the table through its id.",
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
             "final": false,
-            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->rselect($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 131,
-            "endLine": 148,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
+            "code": "  protected static function optionalInit(array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      $justDefined = false;\n      if (!\\defined(\"BBN_APPUI\")) {\n        $justDefined = true;\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = strtolower(end($tmp));\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        if (!$cls) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
             "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "data",
-                    "position": 1,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "addCfg",
-                    "position": 2,
-                    "type": "bool",
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
-                }
-            ]
-        },
-        "selectOne": {
-            "name": "selectOne",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $field, $filter, array $order = [])\n  {\n    if ($res = $this->dbConfigSingleSelection($filter, $order, false, [$field])) {\n      return $res[$field] ?? null;\n    }\n\n    return null;\n  }",
-            "startLine": 159,
-            "endLine": 166,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "field",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "filter",
-                    "position": 1,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 2,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "select": {
-            "name": "select",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, true);\n  }",
-            "startLine": 177,
-            "endLine": 180,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "stdClass"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "rselect": {
-            "name": "rselect",
-            "summary": "Retrieves a row as an array from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, false);\n  }",
-            "startLine": 191,
-            "endLine": 194,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "count": {
-            "name": "count",
-            "summary": "Returns the number of rows from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter = [])\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    return $this->db->count($this->class_table, $filter);\n  }",
-            "startLine": 204,
-            "endLine": 211,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 75,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1486,160 +1738,176 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
-            "parent": false,
+            "shortName": "optionalInit",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "path",
                     "position": 0,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": [],
+                    "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
         },
-        "selectAll": {
-            "name": "selectAll",
-            "summary": "Returns an array of rows as objects from the table for the given conditions.",
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": false,
-            "visibility": "public",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
             "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, true);\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!\\defined(\"BBN_APPUI\")) {\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');\n          return;\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n            if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 85,
+            "endLine": 111,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "opt",
                     "position": 0,
-                    "type": "array",
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "order",
+                    "name": "path",
                     "position": 1,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
+                    "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
         },
-        "rselectAll": {
-            "name": "rselectAll",
-            "summary": "Returns an array of rows as arrays from the table for the given conditions.",
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, false);\n  }",
-            "startLine": 240,
-            "endLine": 243,
+            "code": "  protected function initOptional(array $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 120,
+            "endLine": 128,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "path",
                     "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
+                    "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
-            "startLine": 150,
-            "endLine": 154,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 131,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1648,32 +1916,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
             "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getAppuiRoot": {
-            "name": "getAppuiRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_appui_id;\n  }",
-            "startLine": 157,
-            "endLine": 161,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsObject": {
@@ -1681,13 +1925,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
-            "startLine": 164,
-            "endLine": 172,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 138,
+            "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1696,10 +1943,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
             "returns": [
                 "bbn\\Appui\\Option"
             ],
-            "parent": false,
             "arguments": []
         },
         "getOptionId": {
@@ -1707,13 +1954,16 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 181,
-            "endLine": 184,
+            "code": "  public static function getOptionId()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1722,22 +1972,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
             "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 193,
-            "endLine": 203,
+            "code": "  public static function getOptionsIds(): array\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 167,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1746,24 +2011,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
         },
         "getOptionsTree": {
             "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 206,
-            "endLine": 209,
+            "code": "  public static function getOptionsTree()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1772,8 +2050,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTreeRef": {
@@ -1781,13 +2059,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 212,
-            "endLine": 215,
+            "code": "  public static function getOptionsTreeRef()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 186,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1796,8 +2077,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptions": {
@@ -1805,13 +2086,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 218,
-            "endLine": 221,
+            "code": "  public static function getOptions()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1820,8 +2104,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsRef": {
@@ -1829,13 +2113,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  public static function getOptionsRef()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 198,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1844,8 +2131,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOption": {
@@ -1853,13 +2140,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 230,
-            "endLine": 233,
+            "code": "  public static function getOption()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1868,8 +2158,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValue": {
@@ -1877,13 +2167,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 236,
-            "endLine": 239,
+            "code": "  public static function getOptionsTextValue()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1892,8 +2185,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValue",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValueRef": {
@@ -1901,13 +2194,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
-            "startLine": 242,
-            "endLine": 245,
+            "code": "  public static function getOptionsTextValueRef()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1916,169 +2212,902 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValueRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
-        "getOptionId": {
-            "name": "getOptionId",
-            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 254,
-            "endLine": 257,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsIds": {
-            "name": "getOptionsIds",
+        "_treat_args": {
+            "name": "_treat_args",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
+            "class": "bbn\\Db\\Sync2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 260,
-            "endLine": 272,
+            "code": "  protected static function _treat_args(array $args, $appui = false): array\n  {\n    $hasUid = Str::isUid(end($args));\n    if (count($args) && !$hasUid) {\n      self::optionalInit();\n      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {\n        $args[] = 'options';\n      }\n    }\n\n    if (!$hasUid) {\n      $args[] = self::$option_root_id;\n    }\n\n    return $args;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 223,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_treat_args",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTree": {
-            "name": "getOptionsTree",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 275,
-            "endLine": 278,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptions": {
-            "name": "getOptions",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 281,
-            "endLine": 284,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOption": {
-            "name": "getOption",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 287,
-            "endLine": 290,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValue": {
-            "name": "getOptionsTextValue",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Sync2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 293,
-            "endLine": 296,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "appui",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "current_connection": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "db",
+                        "description": "The current DB connection"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "sync_connection": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The sync connection information"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "has_history": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "tables": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The tables to be synchronized in the current DB."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "sync_table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The name of the sync table."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "dbsync"
+        },
+        "methods": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "default_cfg": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The default configuration for the sync database."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "engine": "sqlite",
+                "host": "localhost",
+                "db": "dbsync"
+            }
+        },
+        "default_class_cfg": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The synchronization database structure."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "table": "dbsync",
+                "tables": {
+                    "dbsync": "dbsync"
+                },
+                "arch": {
+                    "dbsync": {
+                        "id": "id",
+                        "tab": "tab",
+                        "action": "action",
+                        "rows": "rows",
+                        "vals": "vals"
+                    }
+                }
+            }
+        },
+        "is_init": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Remains false until the function is initiated."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "is_checked": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "all_disabled": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "disabled": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "max_retry": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Db\\Sync2",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "int",
+                        "description": "The max number of times the rows is error status will be tried before abandonning."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": 5
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Db"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Db",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "dbClass"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "db",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Db"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Db",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "dbClass"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            },
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "singleton_instance": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Singleton",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "self",
+                        "description": "An instance of the current class."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "singleton_exists": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Singleton",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Will be true from the moment the instance exists."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "_isInitClassCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "fields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "class_table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_table_index": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "default_cfg": {
             "engine": "sqlite",
@@ -2104,10 +3133,16 @@
         "singleton_instance": null,
         "singleton_exists": false,
         "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "option_root_id": null
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\Db": "Db",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

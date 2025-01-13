@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Cache",
     "namespace": true,
+    "realName": "Cache",
+    "realNamespace": "bbn",
     "traits": [],
     "interfaces": {
         "Psr\\SimpleCache\\CacheInterface": {
@@ -18,17 +20,16 @@
         }
     },
     "fileName": "\/Cache.php",
-    "startLine": 20,
+    "startLine": 21,
     "endLine": 776,
-    "numMethods": 24,
-    "numProperties": 0,
+    "numMethods": 30,
+    "numProperties": 8,
     "numConstants": 0,
     "numStaticProperties": 5,
     "interfaceNames": [
         "Psr\\SimpleCache\\CacheInterface"
     ],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -51,22 +52,81 @@
     "namespaceName": "bbn",
     "shortName": "Cache",
     "contentConstructor": {
-        "file": "bbn\\Cache",
         "returns": []
     },
     "methods": {
-        "makeHash": {
-            "name": "makeHash",
-            "summary": "Makes a unique hash out of whatever value which will be used to check if the value has changed.",
+        "_init": {
+            "name": "_init",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": true,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function($value)\n  {\n    if (\\is_object($value) || \\is_array($value)) {\n      $value = serialize($value);\n    }\n\n    return md5($value);\n  }",
-            "startLine": 121,
-            "endLine": 128,
+            "code": "  private static function _init(string $engine = null): int\n  {\n    if (!self::$is_init) {\n      self::$engine  = new Cache($engine);\n      self::$is_init = 1;\n    }\n\n    return 1;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 44,
+            "endLine": 52,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_init",
+            "returns": [
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "engine",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "null",
+                        "name": "$engine"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param null $engine\n   * @return int\n   *\/"
+        },
+        "_set_type": {
+            "name": "_set_type",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _set_type(string $type): void\n  {\n    self::$type = $type;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -75,15 +135,72 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "_set_type",
             "returns": [
-                "string"
+                "void"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "value",
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $type\n   *\/"
+        },
+        "_sanitize": {
+            "name": "_sanitize",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _sanitize($st)\n  {\n    $st = \\mb_ereg_replace(\"([^\\w\\s\\d\\-_~,;\\\/\\[\\]\\(\\).])\", '', $st);\n    $st = \\mb_ereg_replace(\"([\\.]{2,})\", '', $st);\n    return $st;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 64,
+            "endLine": 69,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_sanitize",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "st",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -91,18 +208,241 @@
                 }
             ]
         },
+        "_dir": {
+            "name": "_dir",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _dir(string $dir, string $path, $parent = true): string\n  {\n    if ($parent) {\n      $dir = X::dirname($dir);\n    }\n\n    if (empty($dir)) {\n      return $path;\n    }\n    elseif (substr($dir, -1) === '\/') {\n      $dir = substr($dir, 0, -1);\n    }\n\n    return self::_sanitize(\n      str_replace(\n        '..\/',\n        '',\n        str_replace(\n          '\\\\',\n          '\/',\n          str_replace('\/\/', '\/', $path.$dir)\n        )\n      )\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 78,
+            "endLine": 102,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_dir",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "parent",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$parent"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $dir\n   * @param string $path\n   * @param bool   $parent\n   * @return string\n   *\/"
+        },
+        "_file": {
+            "name": "_file",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _file(string $key, string $path): string\n  {\n    return self::_dir($key, $path).'\/'.self::_sanitize(X::basename($key)).'.bbn.cache';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_file",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $key\n   * @param string $path\n   * @return string\n   *\/"
+        },
+        "makeHash": {
+            "name": "makeHash",
+            "summary": "Makes a unique hash out of whatever value which will be used to check if the value has changed.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function makeHash($value): string\n  {\n    if (\\is_object($value) || \\is_array($value)) {\n      $value = serialize($value);\n    }\n\n    return md5($value);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 122,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "makeHash",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "value",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Makes a unique hash out of whatever value which will be used to check if the value has changed.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$value"
+                    }
+                ],
+                "return": "The hash"
+            },
+            "comments": "  \/**\n   * Makes a unique hash out of whatever value which will be used to check if the value has changed.\n   *\n   * @param $value\n   * @return string The hash\n   *\/"
+        },
         "getType": {
             "name": "getType",
             "summary": "Returns the type of cache engine running in the class.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$type;\n  }",
-            "startLine": 136,
-            "endLine": 139,
+            "code": "  public static function getType(): ?string\n  {\n    return self::$type;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 137,
+            "endLine": 140,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -111,25 +451,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getType",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the type of cache engine running in the class.\n",
+                "params": [],
+                "return": "The cache engine"
+            },
+            "comments": "  \/**\n   * Returns the type of cache engine running in the class.\n   *\n   * @return string The cache engine\n   *\/"
         },
         "ttl": {
             "name": "ttl",
             "summary": "Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($ttl)\n  {\n    if (is_null($ttl)) {\n      return self::$default_ttl;\n    }\n\n    if (Str::isInteger($ttl)) {\n      return (int)$ttl;\n    }\n\n    if (\\is_string($ttl)) {\n      switch ($ttl) {\n        case 'xxs':\n          return 30;\n        case 'xs':\n          return 60;\n        case 's':\n          return 300;\n        case 'm':\n          return 3600;\n        case 'l':\n          return 3600 * 24;\n        case 'xl':\n          return 3600 * 24 * 7;\n        case 'xxl':\n          return 3600 * 24 * 30;\n      }\n    }\n\n    ob_start();\n    var_dump($ttl);\n    $ttl = ob_get_contents();\n    ob_end_clean();\n    X::log($ttl);\n    throw new Exception(\n      X::_(\"Wrong ttl parameter\")\n    );\n  }",
-            "startLine": 148,
-            "endLine": 185,
+            "code": "  public static function ttl($ttl): int\n  {\n    if (is_null($ttl)) {\n      return self::$default_ttl;\n    }\n\n    if (Str::isInteger($ttl)) {\n      return (int)$ttl;\n    }\n\n    if (\\is_string($ttl)) {\n      switch ($ttl) {\n        case 'xxs':\n          return 30;\n        case 'xs':\n          return 60;\n        case 's':\n          return 300;\n        case 'm':\n          return 3600;\n        case 'l':\n          return 3600 * 24;\n        case 'xl':\n          return 3600 * 24 * 7;\n        case 'xxl':\n          return 3600 * 24 * 30;\n      }\n    }\n\n    ob_start();\n    var_dump($ttl);\n    $ttl = ob_get_contents();\n    ob_end_clean();\n    X::log($ttl);\n    throw new Exception(\n      X::_(\"Wrong ttl parameter\")\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 149,
+            "endLine": 186,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -138,34 +487,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "ttl",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "ttl",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|int",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": "The corresponding length in seconds."
+            },
+            "comments": "  \/**\n   * Returns a length in seconds based on the given parameter, allowing strings such as xl or s to be given as ttl arguments.\n   *\n   * @param string|int $ttl\n   * @return int The corresponding length in seconds.\n   *\/"
         },
         "getCache": {
             "name": "getCache",
             "summary": "Returns the cache object (and creates one of the given type if it doesn't exist).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $engine = NULL)\n  {\n    self::_init($engine);\n    return self::$engine;\n  }",
-            "startLine": 194,
-            "endLine": 198,
+            "code": "  public static function getCache(string $engine = null): self\n  {\n    self::_init($engine);\n    return self::$engine;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 195,
+            "endLine": 199,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -174,34 +541,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCache",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "engine",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the cache object (and creates one of the given type if it doesn't exist).\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$engine"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the cache object (and creates one of the given type if it doesn't exist).\n   *\n   * @param string $engine\n   * @return self\n   *\/"
         },
         "getEngine": {
             "name": "getEngine",
             "summary": "Alias of get_cache.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $engine = NULL)\n  {\n    return self::getCache($engine);\n  }",
-            "startLine": 207,
-            "endLine": 210,
+            "code": "  public static function getEngine(string $engine = null): self\n  {\n    return self::getCache($engine);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 208,
+            "endLine": 211,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -210,34 +598,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getEngine",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "engine",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Alias of get_cache.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$engine"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Alias of get_cache.\n   *\n   * @param string $engine\n   * @return self\n   *\/"
         },
         "__construct": {
             "name": "__construct",
             "summary": "Constructor - this is a singleton: it can't be called more then once.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $engine = NULL)\n  {\n    \/** @todo APC doesn't work *\/\n    $engine = 'files';\n    if (self::$is_init) {\n      throw new Exception(\n        X::_(\"Only one cache object can be called. Use static function Cache::getEngine()\")\n      );\n    }\n\n    if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {\n      self::_set_type('apc');\n    }\n    elseif ((!$engine || ($engine === 'memcache')) && class_exists(\"Memcache\")) {\n      $this->obj = new \\Memcache();\n      if ($this->obj->connect(\"127.0.0.1\", 11211)) {\n        self::_set_type('memcache');\n      }\n    }\n    elseif ($this->path = Mvc::getCachePath()) {\n      self::_set_type('files');\n      $this->fs = new File\\System();\n    }\n  }",
-            "startLine": 220,
-            "endLine": 243,
+            "code": "  public function __construct(string $engine = null)\n  {\n    \/** @todo APC doesn't work *\/\n    $engine = 'files';\n    if (self::$is_init) {\n      throw new Exception(\n        X::_(\"Only one cache object can be called. Use static function Cache::getEngine()\")\n      );\n    }\n\n    if ((!$engine || ($engine === 'apc')) && function_exists('apc_clear_cache')) {\n      self::_set_type('apc');\n    }\n    elseif ((!$engine || ($engine === 'memcache')) && class_exists(\"Memcache\")) {\n      $this->obj = new \\Memcache();\n      if ($this->obj->connect(\"127.0.0.1\", 11211)) {\n        self::_set_type('memcache');\n      }\n    }\n    elseif ($this->path = Mvc::getCachePath()) {\n      self::_set_type('files');\n      $this->fs = new File\\System();\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 221,
+            "endLine": 244,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -246,33 +655,59 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "engine",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The type of engine to use"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor - this is a singleton: it can't be called more then once.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$engine",
+                        "description": "The type of engine to use"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n     * Constructor - this is a singleton: it can't be called more then once.\n     *\n     * @param string $engine The type of engine to use\n     *\n     * @throws Exception\n     *\/"
         },
         "has": {
             "name": "has",
             "summary": "Checks whether a valid cache exists for the given item.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $ttl = NULL)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_exists($item);\n        case 'memcache':\n          return $this->obj->get($item) !== $item;\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (($content = $this->fs->getContents($file))\n              && ($t = json_decode($content, true))\n          ) {\n            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))\n                && (!$t['expire'] || ($t['expire'] > time()))\n            ) {\n              return true;\n            }\n\n            $this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
-            "startLine": 253,
-            "endLine": 277,
+            "code": "  public function has($key, $ttl = null): bool\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_exists($key);\n        case 'memcache':\n          return $this->obj->get($key) !== $key;\n        case 'files':\n          $file = self::_file($key, $this->path);\n          if (($content = $this->fs->getContents($file))\n              && ($t = json_decode($content, true))\n          ) {\n            if ((!$ttl || !isset($t['ttl']) || ($ttl === $t['ttl']))\n                && (!$t['expire'] || ($t['expire'] > time()))\n            ) {\n              return true;\n            }\n\n            $this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 254,
+            "endLine": 278,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -281,15 +716,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "has",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -300,26 +738,51 @@
                     "name": "ttl",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The time-to-live value"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks whether a valid cache exists for the given item.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|int",
+                        "name": "$ttl",
+                        "description": "The time-to-live value"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a valid cache exists for the given item.\n   *\n   * @param string     $key The name of the item\n   * @param string|int $ttl  The time-to-live value\n   * @return bool\n   *\/"
         },
         "delete": {
             "name": "delete",
             "summary": "Removes the given item from the cache.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item)\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_delete($item);\n        case 'memcache':\n          return $this->obj->delete($item);\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if (is_file($file)) {\n            return (bool)$this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
-            "startLine": 286,
-            "endLine": 302,
+            "code": "  public function delete($key): bool\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_delete($key);\n        case 'memcache':\n          return $this->obj->delete($key);\n        case 'files':\n          $file = self::_file($key, $this->path);\n          if ($this->fs->isFile($file)) {\n            return (bool)$this->fs->delete($file);\n          }\n          return false;\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 287,
+            "endLine": 303,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -328,35 +791,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "delete",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The name of the item"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Removes the given item from the cache.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Removes the given item from the cache.\n   *\n   * @param string $key The name of the item\n   * @return bool\n   *\/"
         },
         "deleteAll": {
             "name": "deleteAll",
             "summary": "Deletes all the cache from the given path or globally if none is given.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $st = NULL)\n  {\n    if (self::$type === 'files') {\n      if ($st === null) {\n          $st = '';\n      }\n\n      $dir = self::_dir($st, $this->path, false);\n      if ($this->fs->isDir($dir)) {\n        return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);\n      }\n      else {\n        try {\n          $res = $this->fs->delete($dir.'.bbn.cache');\n        }\n        catch (Exception $e) {\n          $res = false;\n        }\n\n        return (bool)$res;\n      }\n    }\n    elseif (self::$type) {\n      $items = $this->items($st);\n      $res   = 0;\n      foreach ($items as $item){\n        if (!$st || strpos($item, $st) === 0) {\n          switch (self::$type){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
-            "startLine": 312,
-            "endLine": 354,
+            "code": "  public function deleteAll(string $st = null): bool\n  {\n    if (self::$type === 'files') {\n      if ($st === null) {\n          $st = '';\n      }\n\n      $dir = self::_dir($st, $this->path, false);\n      if ($this->fs->isDir($dir)) {\n        return (bool)$this->fs->delete($dir, $dir === $this->path ? false : true);\n      }\n      else {\n        try {\n          $res = $this->fs->delete($dir.'.bbn.cache');\n        }\n        catch (Exception $e) {\n          $res = false;\n        }\n\n        return (bool)$res;\n      }\n    }\n    elseif (self::$type) {\n      $items = $this->items($st);\n      $res   = 0;\n      foreach ($items as $item){\n        if (!$st || strpos($item, $st) === 0) {\n          switch (self::$type){\n            case 'apc':\n              $res += (int)apc_delete($item);\n              break;\n            case 'memcache':\n              $res += (int)$this->obj->delete($item);\n              break;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 313,
+            "endLine": 355,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -365,34 +847,56 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "deleteAll",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "st",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The path of the items to delete"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Deletes all the cache from the given path or globally if none is given.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$st",
+                        "description": "The path of the items to delete"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n     * Deletes all the cache from the given path or globally if none is given.\n     *\n     * @param string|null $st The path of the items to delete\n     *\n     * @return bool|int\n     *\/"
         },
         "clear": {
             "name": "clear",
             "summary": "Deletes all the cache globally.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->deleteAll();\n    return $this;\n  }",
-            "startLine": 362,
+            "code": "  public function clear(): bool\n  {\n    return (bool)$this->deleteAll();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 363,
             "endLine": 366,
             "isDeprecated": false,
             "isGenerator": false,
@@ -402,22 +906,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "clear",
             "returns": [
-                "self"
+                "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the cache globally.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the cache globally.\n   *\n   * @return self\n   *\/"
         },
         "timestamp": {
             "name": "timestamp",
             "summary": "Returns the timestamp of the given item.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $item)\n  {\n    if ($r = $this->getRaw($item)) {\n      return $r['timestamp'];\n    }\n\n    return null;\n  }",
+            "code": "  public function timestamp(string $key): ?int\n  {\n    if ($r = $this->getRaw($key)) {\n      return $r['timestamp'];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 375,
             "endLine": 382,
             "isDeprecated": false,
@@ -428,34 +941,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "timestamp",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The name of the item"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the timestamp of the given item.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the timestamp of the given item.\n   *\n   * @param string $key The name of the item\n   * @return null|int\n   *\/"
         },
         "hash": {
             "name": "hash",
             "summary": "Returns the hash of the given item.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $item)\n  {\n    if ($r = $this->getRaw($item)) {\n      return $r['hash'];\n    }\n\n    return null;\n  }",
+            "code": "  public function hash(string $key): ?string\n  {\n    if ($r = $this->getRaw($key)) {\n      return $r['hash'];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 391,
             "endLine": 398,
             "isDeprecated": false,
@@ -466,34 +1000,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "hash",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The name of the item"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the hash of the given item.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the hash of the given item.\n   *\n   * @param string $key The name of the item\n   * @return null|string\n   *\/"
         },
         "isNew": {
             "name": "isNew",
             "summary": "Checks whether or not the given item is more recent than the given timestamp.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $item, int $time = NULL)\n  {\n    if (!$time) {\n      return false;\n    }\n\n    if ($r = $this->getRaw($item)) {\n      return $r['timestamp'] > $time;\n    }\n\n    return true;\n  }",
+            "code": "  public function isNew(string $key, int $time = null): bool\n  {\n    if (!$time) {\n      return false;\n    }\n\n    if ($r = $this->getRaw($key)) {\n      return $r['timestamp'] > $time;\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 408,
             "endLine": 419,
             "isDeprecated": false,
@@ -504,15 +1059,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "isNew",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -522,25 +1082,53 @@
                 {
                     "name": "time",
                     "position": 1,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The timestamp to which the item's timestamp will be compared"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks whether or not the given item is more recent than the given timestamp.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|int",
+                        "name": "$time",
+                        "description": "The timestamp to which the item's timestamp will be compared"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether or not the given item is more recent than the given timestamp.\n   *\n   * @param string   $key The name of the item\n   * @param null|int $time The timestamp to which the item's timestamp will be compared\n   * @return bool\n   *\/"
         },
         "set": {
             "name": "set",
             "summary": "Stores the given value in the cache for as long as says the TTL.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $val, $ttl = NULL, float $exec = NULL)\n  {\n    if (self::$type) {\n      $ttl  = self::ttl($ttl);\n      $hash = self::makeHash($val);\n      switch (self::$type){\n        case 'apc':\n          return \\apc_store(\n            $item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], $ttl\n          );\n        case 'memcache':\n          return $this->obj->set(\n            $item, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], false, $ttl\n          );\n        case 'files':\n          $file = self::_file($item, $this->path);\n          if ($this->fs->createPath(X::dirname($file))) {\n            $value = [\n              'timestamp' => microtime(1),\n              'hash' => $hash,\n              'expire' => $ttl ? time() + $ttl : 0,\n              'ttl' => $ttl,\n              'exec' => $exec,\n              'value' => $val\n            ];\n            if ($this->fs->putContents($file, json_encode($value, JSON_PRETTY_PRINT))) {\n              return true;\n            }\n          }\n      }\n    }\n\n    return false;\n  }",
+            "code": "  public function set($key, $val, $ttl = null, float $exec = null): bool\n  {\n    if (self::$type) {\n      $ttl  = self::ttl($ttl);\n      $hash = self::makeHash($val);\n      switch (self::$type){\n        case 'apc':\n          return \\apc_store(\n            $key, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], $ttl\n          );\n        case 'memcache':\n          return $this->obj->set(\n            $key, [\n            'timestamp' => microtime(1),\n            'hash' => $hash,\n            'ttl' => $ttl,\n            'value' => $val\n            ], false, $ttl\n          );\n        case 'files':\n          $file = self::_file($key, $this->path);\n          if ($this->fs->createPath(X::dirname($file))) {\n            $value = [\n              'timestamp' => microtime(1),\n              'hash' => $hash,\n              'expire' => $ttl ? time() + $ttl : 0,\n              'ttl' => $ttl,\n              'exec' => $exec,\n              'value' => $val\n            ];\n            if ($this->fs->putContents($file, json_encode($value, JSON_PRETTY_PRINT))) {\n              return true;\n            }\n          }\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 430,
             "endLine": 473,
             "isDeprecated": false,
@@ -551,15 +1139,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "set",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -570,6 +1161,9 @@
                     "name": "val",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -580,6 +1174,9 @@
                     "name": "ttl",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -589,24 +1186,58 @@
                 {
                     "name": "exec",
                     "position": 3,
-                    "type": "float",
+                    "type": "null|float",
+                    "type_arr": [
+                        "null",
+                        "float"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Stores the given value in the cache for as long as says the TTL.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$val",
+                        "description": "The value to be stored in the cache"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$ttl",
+                        "description": "The length in seconds during which the value will be considered as valid"
+                    }
+                ],
+                "return": "Returns true in case of success false otherwise"
+            },
+            "comments": "  \/**\n   * Stores the given value in the cache for as long as says the TTL.\n   *\n   * @param string $key The name of the item\n   * @param mixed  $val  The value to be stored in the cache\n   * @param int    $ttl  The length in seconds during which the value will be considered as valid\n   * @return bool Returns true in case of success false otherwise\n   *\/"
         },
         "isChanged": {
             "name": "isChanged",
             "summary": "Checks if the value of the item corresponds to the given hash.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $item, $hash)\n  {\n    return $hash !== $this->hash($item);\n  }",
+            "code": "  public function isChanged(string $key, $hash): bool\n  {\n    return $hash !== $this->hash($key);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 483,
             "endLine": 486,
             "isDeprecated": false,
@@ -617,15 +1248,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "isChanged",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -636,24 +1272,144 @@
                     "name": "hash",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "A MD5 hash to compare with"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks if the value of the item corresponds to the given hash.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$hash",
+                        "description": "A MD5 hash to compare with"
+                    }
+                ],
+                "return": "Returns true if the hashes are different, false otherwise"
+            },
+            "comments": "  \/**\n   * Checks if the value of the item corresponds to the given hash.\n   *\n   * @param string $key The name of the item\n   * @param string $hash A MD5 hash to compare with\n   * @return bool Returns true if the hashes are different, false otherwise\n   *\/"
+        },
+        "getRaw": {
+            "name": "getRaw",
+            "summary": "Returns the cache object (array) as stored.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getRaw(string $key, int $ttl = null, bool $force = false): ?array\n  {\n    switch (self::$type) {\n      case 'apc':\n        \/*\n        if (\\apc_exists($key)) {\n          return \\apc_fetch($key);\n        }\n        break;\n        *\/\n      case 'memcache':\n        \/*\n        $tmp = $this->obj->get($key);\n        if ($tmp !== $key) {\n          return $tmp;\n        }\n        break;\n        *\/\n      case 'files':\n        $file = self::_file($key, $this->path);\n        if (!$this->fs->isFile($file)) {\n          $tmp_file = X::dirname($file).'\/_'.X::basename($file);\n          if ($this->fs->isFile($tmp_file)) {\n            $num = 0;\n            while (!$this->fs->isFile($file) && ($num < self::$max_wait)) {\n              X::log([$key, $file, $tmp_file, date('Y-m-d H:i:s')], 'wait_for_cache');\n              sleep(1);\n              $num++;\n            }\n          }\n        }\n\n        if (($t = $this->fs->getContents($file))\n            && ($t = json_decode($t, true))\n        ) {\n          if ($t\n              && (!$ttl || !isset($t['ttl']) || ($ttl <= $t['ttl']))\n              && (!$t['expire'] || ($t['expire'] > time()))\n          ) {\n            return $t;\n          }\n        }\n        break;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 496,
+            "endLine": 542,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getRaw",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the item"
+                },
+                {
+                    "name": "ttl",
+                    "position": 1,
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The cache length"
+                },
+                {
+                    "name": "force",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the cache object (array) as stored.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$ttl",
+                        "description": "The cache length"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the cache object (array) as stored.\n   *\n   * @param string $key The name of the item\n   * @param int    $ttl  The cache length\n   * @return null|array\n   *\/"
         },
         "get": {
             "name": "get",
             "summary": "Returns the cache value, false otherwise.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item, $ttl = NULL)\n  {\n    if ($r = $this->getRaw($item, $ttl)) {\n      return $r['value'];\n    }\n\n    return false;\n  }",
+            "code": "  public function get(string $key, mixed $ttl = null): mixed\n  {\n    if ($r = $this->getRaw($key, $ttl)) {\n      return $r['value'];\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 552,
             "endLine": 559,
             "isDeprecated": false,
@@ -664,13 +1420,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
+            "shortName": "get",
+            "returns": [
+                null,
+                "mixed"
+            ],
             "arguments": [
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -680,25 +1444,53 @@
                 {
                     "name": "ttl",
                     "position": 1,
-                    "type": "",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The cache length"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the cache value, false otherwise.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$ttl",
+                        "description": "The cache length"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the cache value, false otherwise.\n   *\n   * @param string $key The name of the item\n   * @param int    $ttl  The cache length\n   * @return mixed\n   *\/"
         },
         "getSet": {
             "name": "getSet",
             "summary": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $fn, string $item, int $ttl = NULL)\n  {\n    switch (self::$type) {\n      case 'apc':\n        break;\n      case 'memcache':\n        break;\n      case 'files':\n        \/\/ Getting the data\n        $tmp  = $this->getRaw($item, $ttl);\n        $data = null;\n        \/\/ Can't get the data\n        if (!$tmp) {\n          $file = self::_file($item, $this->path);\n          \/\/ Temporary file will be created to tell other processes the cache is being created\n          $tmp_file = X::dirname($file).'\/_'.X::basename($file);\n          \/\/ Will become true if the cache should be created\n          $do = false;\n          \/\/ If the temporary file doesn't exist we create one\n          if (!$this->fs->isFile($tmp_file)) {\n            $this->fs->createPath(X::dirname($tmp_file));\n            $this->fs->putContents($tmp_file, ' ');\n            \/\/ If the original file exists we delete it\n            if ($this->fs->isFile($file)) {\n              $this->fs->delete($file);\n            }\n\n            $timer = new Util\\Timer();\n            $timer->start();\n            try {\n              $data = $fn();\n            }\n            catch (Exception $e) {\n              unlink($tmp_file);\n              throw $e;\n            }\n\n            $exec = $timer->stop();\n            $this->set($item, $data, $ttl, $exec);\n            $this->fs->delete($tmp_file);\n          }\n          \/\/ Otherwise another process is certainly creating the cache, so wait for it\n          else {\n            return $this->get($item);\n          }\n\n          \/\/ Creating the cache\n        }\n        else {\n          $data = $tmp['value'];\n        }\n        return $data;\n    }\n  }",
+            "code": "  public function getSet(callable $fn, string $key, int $ttl = null)\n  {\n    switch (self::$type) {\n      case 'apc':\n        break;\n      case 'memcache':\n        break;\n      case 'files':\n        \/\/ Getting the data\n        $tmp  = $this->getRaw($key, $ttl);\n        $data = null;\n        \/\/ Can't get the data\n        if (!$tmp) {\n          $file = self::_file($key, $this->path);\n          \/\/ Temporary file will be created to tell other processes the cache is being created\n          $tmp_file = X::dirname($file).'\/_'.X::basename($file);\n          \/\/ Will become true if the cache should be created\n          $do = false;\n          \/\/ If the temporary file doesn't exist we create one\n          if (!$this->fs->isFile($tmp_file)) {\n            $this->fs->createPath(X::dirname($tmp_file));\n            $this->fs->putContents($tmp_file, ' ');\n            \/\/ If the original file exists we delete it\n            if ($this->fs->isFile($file)) {\n              $this->fs->delete($file);\n            }\n\n            $timer = new Util\\Timer();\n            $timer->start();\n            try {\n              $data = $fn();\n            }\n            catch (Exception $e) {\n              unlink($tmp_file);\n              throw $e;\n            }\n\n            $exec = $timer->stop();\n            $this->set($key, $data, $ttl, $exec);\n            $this->fs->delete($tmp_file);\n          }\n          \/\/ Otherwise another process is certainly creating the cache, so wait for it\n          else {\n            return $this->get($key);\n          }\n\n          \/\/ Creating the cache\n        }\n        else {\n          $data = $tmp['value'];\n        }\n        return $data;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 572,
             "endLine": 625,
             "isDeprecated": false,
@@ -709,13 +1501,18 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "getSet",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "fn",
                     "position": 0,
                     "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -723,9 +1520,14 @@
                     "description": "The function which returns the value for the cache"
                 },
                 {
-                    "name": "item",
+                    "name": "key",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -735,25 +1537,63 @@
                 {
                     "name": "ttl",
                     "position": 2,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The cache length"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the cache for the given item, but if expired or absent creates it before by running the provided function.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn",
+                        "description": "The function which returns the value for the cache"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The name of the item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$ttl",
+                        "description": "The cache length"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n     * Returns the cache for the given item, but if expired or absent creates it before by running the provided function.\n     *\n     * @param callable $fn   The function which returns the value for the cache\n     * @param string   $key The name of the item\n     * @param int      $ttl  The cache length\n     *\n     * @return mixed\n     * @throws Exception\n     *\/"
         },
         "info": {
             "name": "info",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats('slabs');\n        case 'files':\n          return $this->fs->getFiles($this->path);\n      }\n    }\n  }",
+            "code": "  public function info()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats('slabs');\n        case 'files':\n          return $this->fs->getFiles($this->path);\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 631,
             "endLine": 643,
             "isDeprecated": false,
@@ -764,20 +1604,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "info",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array|bool|false\n   *\/"
         },
         "stat": {
             "name": "stat",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats();\n        case 'files':\n          return $this->fs->getFiles($this->path);\n      }\n    }\n  }",
+            "code": "  public function stat()\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          return apc_cache_info();\n        case 'memcache':\n          return $this->obj->getStats();\n        case 'files':\n          return $this->fs->getFiles($this->path);\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 649,
             "endLine": 661,
             "isDeprecated": false,
@@ -788,20 +1637,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "stat",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array|bool|false\n   *\/"
         },
         "items": {
             "name": "items",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir = '')\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          $all  = apc_cache_info();\n          $list = [];\n          foreach ($all['cache_list'] as $a){\n            array_push($list, $a['info']);\n          }\n          return $list;\n        case 'memcache':\n          $list     = [];\n          $allSlabs = $this->obj->getExtendedStats('slabs');\n          foreach ($allSlabs as $server => $slabs){\n            foreach ($slabs as $slabId => $slabMeta){\n              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);\n              foreach ($cdump AS $keys => $arrVal){\n                foreach ($arrVal AS $k => $v){\n                  if ($k !== 'CLIENT_ERROR') {\n                    echo array_push($list, $k);\n                  }\n                }\n              }\n            }\n          }\n          return $list;\n        case 'files':\n          $cache =& $this;\n          $list  = array_filter(\n            array_map(\n              function ($a) use ($dir) {\n                return ( $dir ? $dir.'\/' : '' ).X::basename($a, '.bbn.cache');\n              }, $this->fs->getFiles($this->path.($dir ? '\/'.$dir : ''))\n            ),\n            function ($a) use ($cache) {\n              \/\/ Only gives valid cache\n              return $cache->has($a);\n            }\n          );\n          $dirs  = $this->fs->getDirs($this->path.($dir ? '\/'.$dir : ''));\n          if (\\count($dirs)) {\n            foreach ($dirs as $d){\n              $res = $this->items($dir ? $dir.'\/'.X::basename($d) : X::basename($d));\n              foreach ($res as $r){\n                array_push($list, $r);\n              }\n            }\n          }\n          return $list;\n      }\n    }\n  }",
+            "code": "  public function items(string $dir = '')\n  {\n    if (self::$type) {\n      switch (self::$type){\n        case 'apc':\n          $all  = apc_cache_info();\n          $list = [];\n          foreach ($all['cache_list'] as $a){\n            array_push($list, $a['info']);\n          }\n          return $list;\n        case 'memcache':\n          $list     = [];\n          $allSlabs = $this->obj->getExtendedStats('slabs');\n          foreach ($allSlabs as $server => $slabs){\n            foreach ($slabs as $slabId => $slabMeta){\n              $cdump = $this->obj->getExtendedStats('cachedump',(int)$slabId);\n              foreach ($cdump AS $keys => $arrVal){\n                foreach ($arrVal AS $k => $v){\n                  if ($k !== 'CLIENT_ERROR') {\n                    echo array_push($list, $k);\n                  }\n                }\n              }\n            }\n          }\n          return $list;\n        case 'files':\n          $cache =& $this;\n          $list  = array_filter(\n            array_map(\n              function ($a) use ($dir) {\n                return ( $dir ? $dir.'\/' : '' ).X::basename($a, '.bbn.cache');\n              }, $this->fs->getFiles($this->path.($dir ? '\/'.$dir : ''))\n            ),\n            function ($a) use ($cache) {\n              \/\/ Only gives valid cache\n              return $cache->has($a);\n            }\n          );\n          $dirs  = $this->fs->getDirs($this->path.($dir ? '\/'.$dir : ''));\n          if (\\count($dirs)) {\n            foreach ($dirs as $d){\n              $res = $this->items($dir ? $dir.'\/'.X::basename($d) : X::basename($d));\n              foreach ($res as $r){\n                array_push($list, $r);\n              }\n            }\n          }\n          return $list;\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 668,
             "endLine": 720,
             "isDeprecated": false,
@@ -812,30 +1670,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "items",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $dir\n   * @return array\n   *\/"
         },
         "serializeFunction": {
             "name": "serializeFunction",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(Closure $function)\n  {\n    return serialize(\n      new SerializableClosure($function)\n    );\n  }",
+            "code": "  public function serializeFunction(Closure $function): string\n  {\n    return serialize(\n      new SerializableClosure($function)\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 726,
             "endLine": 731,
             "isDeprecated": false,
@@ -846,32 +1724,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "serializeFunction",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "function",
                     "position": 0,
                     "type": "Closure",
+                    "type_arr": [
+                        "Closure"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param callable $function\n   * @return string\n   *\/"
         },
         "getMultiple": {
             "name": "getMultiple",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($keys, $default = NULL)\n  {\n    if (!is_iterable($keys)) {\n      throw new InvalidArgumentException(\"Keys must be iterable\");\n    }\n\n    $res = [];\n    foreach ($keys as $k) {\n      $res[$k] = $this->has($k) ? $this->get($k) : $default;\n    }\n\n    return $res;\n  }",
+            "code": "  public function getMultiple($keys, $default = null): Traversable|array\n  {\n    if (!is_iterable($keys)) {\n      throw new InvalidArgumentException(\"Keys must be iterable\");\n    }\n\n    $res = [];\n    foreach ($keys as $k) {\n      $res[$k] = $this->has($k) ? $this->get($k) : $default;\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 734,
             "endLine": 746,
             "isDeprecated": false,
@@ -882,13 +1780,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getMultiple",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "keys",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -898,6 +1799,9 @@
                     "name": "default",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -910,11 +1814,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($values, $ttl = NULL)\n  {\n    foreach ($values as $k => $v) {\n      if (!$this->set($k, $v, $ttl)) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
+            "code": "  public function setMultiple($values, $ttl = null): bool\n  {\n    foreach ($values as $k => $v) {\n      if (!$this->set($k, $v, $ttl)) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 749,
             "endLine": 758,
             "isDeprecated": false,
@@ -925,13 +1832,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
+            "shortName": "setMultiple",
+            "returns": [
+                "bool"
+            ],
             "arguments": [
                 {
                     "name": "values",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -941,6 +1853,9 @@
                     "name": "ttl",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -953,11 +1868,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cache",
+            "class": "bbn\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cache.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($keys)\n  {\n    if (!is_iterable($keys)) {\n      throw new InvalidArgumentException(\"Keys must be iterable\");\n    }\n\n    foreach ($keys as $k) {\n      if (!$this->delete($k)) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
+            "code": "  public function deleteMultiple($keys): bool\n  {\n    if (!is_iterable($keys)) {\n      throw new InvalidArgumentException(\"Keys must be iterable\");\n    }\n\n    foreach ($keys as $k) {\n      if (!$this->delete($k)) {\n        return false;\n      }\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 761,
             "endLine": 774,
             "isDeprecated": false,
@@ -968,13 +1886,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
+            "shortName": "deleteMultiple",
+            "returns": [
+                "bool"
+            ],
             "arguments": [
                 {
                     "name": "keys",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -983,7 +1906,128 @@
             ]
         }
     },
-    "properties": null,
+    "properties": {
+        "is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": false
+        },
+        "type": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "max_wait": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 10
+        },
+        "default_ttl": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 60
+        },
+        "engine": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "obj": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "fs": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cache"
+            },
+            "declaring_trait": "bbn\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "is_init": 1,
         "type": "files",
@@ -992,6 +2036,17 @@
         "engine": {}
     },
     "constants": null,
+    "uses": {
+        "Closure": "Closure",
+        "Exception": "Exception",
+        "Traversable": "Traversable",
+        "Opis\\Closure\\SerializableClosure": "SerializableClosure",
+        "Psr\\SimpleCache\\InvalidArgumentException": "InvalidArgumentException",
+        "Psr\\SimpleCache\\CacheInterface": "CacheInterface"
+    },
+    "dummyComments": [
+        "\/**\n * Universal caching class: called once per request, it holds the cache system.\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Jan 23, 2016, 23:23:55 +0000\n * @category  Cache\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n *\/"
+    ],
     "summary": "Universal caching class: called once per request, it holds the cache system.",
     "description": "",
     "description_parts": []

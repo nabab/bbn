@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Db\\Sync",
     "namespace": true,
+    "realName": "Sync",
+    "realNamespace": "bbn\\Db",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Db\/Sync.php",
     "startLine": 9,
     "endLine": 570,
-    "numMethods": 15,
-    "numProperties": 0,
+    "numMethods": 16,
+    "numProperties": 11,
     "numConstants": 0,
     "numStaticProperties": 11,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -52,11 +53,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": true,
-            "code": "function(string $name, array $arguments)\n  {\n    if (($name === 'cbf1') || ($name === 'cbf2')) {\n      return \\call_user_func_array(self::$methods[$name], $arguments);\n    }\n  }",
+            "code": "  final public static function __callStatic(string $name, array $arguments)\n  {\n    if (($name === 'cbf1') || ($name === 'cbf2')) {\n      return \\call_user_func_array(self::$methods[$name], $arguments);\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 76,
             "endLine": 81,
             "isDeprecated": false,
@@ -67,13 +71,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__callStatic",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -83,23 +92,52 @@
                     "name": "arguments",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "@param string $name\n@param array  $arguments\n@return void"
+                }
+            },
+            "comments": "  \/**\n   * @todo\n   *\n   * @param string $name\n   * @param array  $arguments\n   * @return void\n   *\/"
         },
         "addMethod": {
             "name": "addMethod",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": true,
-            "code": "function(string $name, callable $fn)\n  {\n    self::$methods[$name] = \\Closure::bind($fn, null, __CLASS__);\n  }",
+            "code": "  final public static function addMethod(string $name, callable $fn): void\n  {\n    self::$methods[$name] = \\Closure::bind($fn, null, __CLASS__);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 90,
             "endLine": 93,
             "isDeprecated": false,
@@ -110,15 +148,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "addMethod",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -128,23 +171,91 @@
                     "name": "fn",
                     "position": 1,
                     "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "@param string   $name\n@param callable $fn\n@return void"
+                }
+            },
+            "comments": "  \/**\n   * @todo\n   *\n   * @param string   $name\n   * @param callable $fn\n   * @return void\n   *\/"
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function log(): void\n  {\n    $args = \\func_get_args();\n    foreach ($args as $a){\n      X::log($a, 'dbsync');\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 100,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "@return void"
+                }
+            },
+            "comments": "  \/**\n   * @todo\n   *\n   * @return void\n   *\/"
         },
         "init": {
             "name": "init",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $sync_cfg = [], array $tables = [], string $sync_table = '')\n  {\n    if (self::$is_init) {\n      throw new \\Exception(\"Impossible to init twice the dbsync class\");\n    }\n    self::$current_connection = $db;\n\n\n    if (!empty($sync_table)) {\n      self::$sync_table = $sync_table;\n    }\n    if (!Str::checkName(self::$sync_table)) {\n      throw new \\Exception(X::_(\"Table name not allowed\"));\n    }\n    if (empty($sync_cfg)) {\n      self::$sync_connection = new Db(self::$default_cfg);\n    }\n    elseif (isset($sync_cfg['connection'])) {\n      if (is_object($sync_cfg['connection']) && (is_a($sync_cfg['connection'], '\\\\bbn\\\\Db')\n          || is_subclass_of($sync_cfg['connection'], '\\\\bbn\\\\Db'))\n      ) {\n        self::$sync_connection = $sync_cfg['connection'];\n      }\n      else {\n        throw new \\Exception(X::_(\"Invalid connection given to the synchronization class\"));\n      }\n    }\n    elseif (isset($sync_cfg['engine'])) {\n      if (($sync_cfg['engine'] === 'sqlite')\n          || ($sync_cfg['engine'] !== self::$current_connection->getEngine())\n      ) {\n        self::$sync_connection = new Db($sync_cfg);\n      }\n      elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n        self::$sync_connection =& self::$current_connection;\n        self::$sync_table = self::$sync_connection->tfn($sync_cfg['db'].'.'.self::$sync_table);\n      }\n    }\n    elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n      self::$sync_connection =& self::$current_connection;\n      self::$sync_table = self::$sync_connection->tfn($sync_cfg['db'].'.'.self::$sync_table);\n    }\n    self::$tables = $tables;\n    self::$is_init = true;\n    if (\\count(self::$tables) === 0) {\n      self::$tables = self::$current_connection->getTables();\n    }\n    if (\\is_array(self::$tables)) {\n      foreach (self::$tables as $i => $t){\n        self::$tables[$i] = self::$current_connection->tfn($t);\n      }\n      self::$current_connection->setTrigger(\n        '\\\\bbn\\Db\\\\sync::trigger',\n        ['delete', 'update', 'insert'],\n        ['before', 'after'],\n        self::$tables\n      );\n    }\n  }",
+            "code": "  public static function init(Db $db, array $sync_cfg = [], array $tables = [], string $sync_table = ''): void\n  {\n    if (self::$is_init) {\n      throw new \\Exception(\"Impossible to init twice the dbsync class\");\n    }\n    self::$current_connection = $db;\n\n\n    if (!empty($sync_table)) {\n      self::$sync_table = $sync_table;\n    }\n    if (!Str::checkName(self::$sync_table)) {\n      throw new \\Exception(X::_(\"Table name not allowed\"));\n    }\n    if (empty($sync_cfg)) {\n      self::$sync_connection = new Db(self::$default_cfg);\n    }\n    elseif (isset($sync_cfg['connection'])) {\n      if (is_object($sync_cfg['connection']) && (is_a($sync_cfg['connection'], '\\\\bbn\\\\Db')\n          || is_subclass_of($sync_cfg['connection'], '\\\\bbn\\\\Db'))\n      ) {\n        self::$sync_connection = $sync_cfg['connection'];\n      }\n      else {\n        throw new \\Exception(X::_(\"Invalid connection given to the synchronization class\"));\n      }\n    }\n    elseif (isset($sync_cfg['engine'])) {\n      if (($sync_cfg['engine'] === 'sqlite')\n          || ($sync_cfg['engine'] !== self::$current_connection->getEngine())\n      ) {\n        self::$sync_connection = new Db($sync_cfg);\n      }\n      elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n        self::$sync_connection =& self::$current_connection;\n        self::$sync_table = self::$sync_connection->tfn($sync_cfg['db'].'.'.self::$sync_table);\n      }\n    }\n    elseif (isset($sync_cfg['db']) && !isset($sync_cfg['user'])) {\n      self::$sync_connection =& self::$current_connection;\n      self::$sync_table = self::$sync_connection->tfn($sync_cfg['db'].'.'.self::$sync_table);\n    }\n    self::$tables = $tables;\n    self::$is_init = true;\n    if (\\count(self::$tables) === 0) {\n      self::$tables = self::$current_connection->getTables();\n    }\n    if (\\is_array(self::$tables)) {\n      foreach (self::$tables as $i => $t){\n        self::$tables[$i] = self::$current_connection->tfn($t);\n      }\n      self::$current_connection->setTrigger(\n        '\\\\bbn\\Db\\\\sync::trigger',\n        ['delete', 'update', 'insert'],\n        ['before', 'after'],\n        self::$tables\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 115,
             "endLine": 173,
             "isDeprecated": false,
@@ -155,15 +266,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "init",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -173,6 +289,11 @@
                     "name": "sync_cfg",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -183,6 +304,11 @@
                     "name": "tables",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -192,24 +318,61 @@
                     "name": "sync_table",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": "",
                     "description": "table"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$sync",
+                        "description": "cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$tables"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$sync",
+                        "description": "table"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param Db $db\n   * @param array $sync_cfg\n   * @param array  $tables\n   * @param string  $sync_table\n   * @return void\n   *\/"
         },
         "isInit": {
             "name": "isInit",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$is_init;\n  }",
+            "code": "  public static function isInit()\n  {\n    return self::$is_init;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 175,
             "endLine": 178,
             "isDeprecated": false,
@@ -220,8 +383,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isInit",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "createTable": {
@@ -229,11 +392,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (\\is_array(self::$sync_connection)) {\n      self::$sync_connection = new bbn\\Db(self::$sync_connection);\n    }\n    if (class_exists('\\\\bbn\\\\Appui\\\\History') && bbn\\Appui\\History::$is_used) {\n      self::$has_history = 1;\n    }\n    \/** @todo Replace with DB functions *\/\n    if (self::$sync_connection->getEngine() === 'sqlite') {\n      self::$sync_connection->exec(\n        sprintf(\n          'CREATE TABLE \"%s\" (\n            \"id\" INTEGER PRIMARY KEY  NOT NULL ,\n            \"db\" TEXT NOT NULL ,\n            \"tab\" TEXT NOT NULL ,\n            \"chrono\" REAL NOT NULL,\n            \"action\" TEXT NOT NULL,\n            \"rows\" TEXT,\"vals\" TEXT,\n            \"state\" INTEGER NOT NULL DEFAULT (0)\n          );\n          CREATE INDEX \"db\" \"dbsync\" (\"db\");\n          CREATE INDEX \"tab\" \"dbsync\" (\"tab\");\n          CREATE INDEX \"chrono\" \"dbsync\" (\"chrono\");\n          CREATE INDEX \"action\" \"dbsync\" (\"action\");\n          CREATE INDEX \"state\" \"dbsync\" (\"state\");',\n          self::$table_sync\n        )\n      );\n    }\n    elseif (self::$sync_connection->getEngine() === 'mysql') {\n      self::$sync_connection->exec(\n        sprintf(\n          \"CREATE TABLE IF NOT EXISTS `%s` (\n            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n            `db` varchar(50) NOT NULL,\n            `tab` varchar(50) NOT NULL,\n            `chrono` decimal(14,4) unsigned NOT NULL,\n            `action` varchar(20) NOT NULL,\n            `rows` text,\n            `vals` longtext,\n            `state` int(10) NOT NULL DEFAULT '0'\n          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n          ALTER TABLE `dbsync`\n            ADD PRIMARY KEY (`id`),\n            ADD KEY `db` (`db`),\n            ADD KEY `tab` (`tab`),\n            ADD KEY `chrono` (`chrono`),\n            ADD KEY `action` (`action`),\n            ADD KEY `state` (`state`);\",\n            self::$table_sync\n        )\n      );\n    }\n  }",
+            "code": "  public static function createTable()\n  {\n    if (\\is_array(self::$sync_connection)) {\n      self::$sync_connection = new Db(self::$sync_connection);\n    }\n    if (History::$is_used) {\n      self::$has_history = 1;\n    }\n    \/** @todo Replace with DB functions *\/\n    if (self::$sync_connection->getEngine() === 'sqlite') {\n      self::$sync_connection->exec(\n        sprintf(\n          'CREATE TABLE \"%s\" (\n            \"id\" INTEGER PRIMARY KEY  NOT NULL ,\n            \"db\" TEXT NOT NULL ,\n            \"tab\" TEXT NOT NULL ,\n            \"chrono\" REAL NOT NULL,\n            \"action\" TEXT NOT NULL,\n            \"rows\" TEXT,\"vals\" TEXT,\n            \"state\" INTEGER NOT NULL DEFAULT (0)\n          );\n          CREATE INDEX \"db\" \"dbsync\" (\"db\");\n          CREATE INDEX \"tab\" \"dbsync\" (\"tab\");\n          CREATE INDEX \"chrono\" \"dbsync\" (\"chrono\");\n          CREATE INDEX \"action\" \"dbsync\" (\"action\");\n          CREATE INDEX \"state\" \"dbsync\" (\"state\");',\n          self::$table_sync\n        )\n      );\n    }\n    elseif (self::$sync_connection->getEngine() === 'mysql') {\n      self::$sync_connection->exec(\n        sprintf(\n          \"CREATE TABLE IF NOT EXISTS `%s` (\n            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,\n            `db` varchar(50) NOT NULL,\n            `tab` varchar(50) NOT NULL,\n            `chrono` decimal(14,4) unsigned NOT NULL,\n            `action` varchar(20) NOT NULL,\n            `rows` text,\n            `vals` longtext,\n            `state` int(10) NOT NULL DEFAULT '0'\n          ) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n          ALTER TABLE `dbsync`\n            ADD PRIMARY KEY (`id`),\n            ADD KEY `db` (`db`),\n            ADD KEY `tab` (`tab`),\n            ADD KEY `chrono` (`chrono`),\n            ADD KEY `action` (`action`),\n            ADD KEY `state` (`state`);\",\n            self::$table_sync\n        )\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 180,
             "endLine": 234,
             "isDeprecated": false,
@@ -244,8 +410,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "createTable",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "check": {
@@ -253,11 +419,14 @@
             "summary": "Checks if the initialization has been all right - performs it only once.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset(self::$is_checked)) {\n      self::$is_checked = \\is_object(self::$current_connection)\n        && \\is_object(self::$sync_connection)\n        && self::$current_connection->check()\n        && self::$sync_connection->check();\n    }\n    return self::$is_checked;\n  }",
+            "code": "  public static function check(): bool\n  {\n    if (!isset(self::$is_checked)) {\n      self::$is_checked = \\is_object(self::$current_connection)\n        && \\is_object(self::$sync_connection)\n        && self::$current_connection->check()\n        && self::$sync_connection->check();\n    }\n    return self::$is_checked;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 241,
             "endLine": 250,
             "isDeprecated": false,
@@ -268,22 +437,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the initialization has been all right - performs it only once.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if the initialization has been all right - performs it only once.\n   * \n   * @return bool\n   *\/"
         },
         "disable": {
             "name": "disable",
             "summary": "Disable the sync trigger.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::$disabled = true;\n  }",
+            "code": "  public static function disable(): void\n  {\n    self::$disabled = true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 257,
             "endLine": 260,
             "isDeprecated": false,
@@ -294,22 +472,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "disable",
             "returns": [
                 "void"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Disable the sync trigger.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Disable the sync trigger.\n   *\n   * @return void\n   *\/"
         },
         "enable": {
             "name": "enable",
             "summary": "Enable the sync trigger.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::$disabled = false;\n  }",
+            "code": "  public static function enable(): void\n  {\n    self::$disabled = false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 267,
             "endLine": 270,
             "isDeprecated": false,
@@ -320,22 +507,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "enable",
             "returns": [
                 "void"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Enable the sync trigger.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Enable the sync trigger.\n   *\n   * @return void\n   *\/"
         },
         "trigger": {
             "name": "trigger",
             "summary": "Writes new rows in the sync table after a writing operation has happened.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    \/** @todo I would like to understand... *\/\n    if (!isset($cfg['run'])) {\n      $cfg['run'] = 1;\n    }\n    if (!isset($cfg['trig'])) {\n      $cfg['run'] = 1;\n    }\n    if (!self::$disabled\n        && self::check()\n        && (count($cfg['tables']) === 1)\n        && ($table = self::$current_connection->tfn(current($cfg['tables'])))\n        && \\in_array($table, self::$tables, true)\n    ) {\n      if ($cfg['moment'] === 'after') {\n        \/\/ Case where we actually delete or restore through the $hcol column\n        $values = [];\n        if (X::hasProps($cfg, ['fields', 'values'], true)) {\n          foreach ($cfg['fields'] as $i => $f) {\n            $values[$f] = $cfg['values'][$i];\n          }\n        }\n        $last_id = self::$sync_connection->lastId();\n        self::$sync_connection->insert(\n          self::$sync_table, [\n          'db' => self::$current_connection->getCurrent(),\n          'tab' => self::$current_connection->tsn($table),\n          'action' => $cfg['kind'],\n          'chrono' => microtime(true),\n          'rows' => empty($cfg['where']) ? '[]' : X::jsonBase64Encode($cfg['where']),\n          'vals' => empty($values) ? '[]' : X::jsonBase64Encode($values)\n          ]\n        );\n        self::$sync_connection->setLastInsertId($last_id);\n      }\n    }\n    return $cfg;\n  }",
+            "code": "  public static function trigger(array $cfg): array\n  {\n    \/** @todo I would like to understand... *\/\n    if (!isset($cfg['run'])) {\n      $cfg['run'] = 1;\n    }\n    if (!isset($cfg['trig'])) {\n      $cfg['run'] = 1;\n    }\n    if (!self::$disabled\n        && self::check()\n        && (count($cfg['tables']) === 1)\n        && ($table = self::$current_connection->tfn(current($cfg['tables'])))\n        && \\in_array($table, self::$tables, true)\n    ) {\n      if ($cfg['moment'] === 'after') {\n        \/\/ Case where we actually delete or restore through the $hcol column\n        $values = [];\n        if (X::hasProps($cfg, ['fields', 'values'], true)) {\n          foreach ($cfg['fields'] as $i => $f) {\n            $values[$f] = $cfg['values'][$i];\n          }\n        }\n        $last_id = self::$sync_connection->lastId();\n        self::$sync_connection->insert(\n          self::$sync_table, [\n          'db' => self::$current_connection->getCurrent(),\n          'tab' => self::$current_connection->tsn($table),\n          'action' => $cfg['kind'],\n          'chrono' => microtime(true),\n          'rows' => empty($cfg['where']) ? '[]' : X::jsonBase64Encode($cfg['where']),\n          'vals' => empty($values) ? '[]' : X::jsonBase64Encode($values)\n          ]\n        );\n        self::$sync_connection->setLastInsertId($last_id);\n      }\n    }\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 278,
             "endLine": 316,
             "isDeprecated": false,
@@ -346,33 +542,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "trigger",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Configuration array"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Writes new rows in the sync table after a writing operation has happened.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "Configuration array"
+                    }
+                ],
+                "return": "Resulting configuration"
+            },
+            "comments": "  \/**\n   * Writes new rows in the sync table after a writing operation has happened.\n   *\n   * @param array $cfg Configuration array\n   * @return array Resulting configuration\n   *\/"
         },
         "callback1": {
             "name": "callback1",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $f)\n  {\n    self::addMethod('cbf1', $f);\n  }",
+            "code": "  public static function callback1(callable $f)\n  {\n    self::addMethod('cbf1', $f);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 318,
             "endLine": 321,
             "isDeprecated": false,
@@ -383,13 +600,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "callback1",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "f",
                     "position": 0,
                     "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -402,11 +624,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(callable $f)\n  {\n    self::addMethod('cbf2', $f);\n  }",
+            "code": "  public static function callback2(callable $f)\n  {\n    self::addMethod('cbf2', $f);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 323,
             "endLine": 326,
             "isDeprecated": false,
@@ -417,13 +642,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "callback2",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "f",
                     "position": 0,
                     "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -436,11 +666,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(float $start = NULL)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    if (!$start\n        || !($start = self::$sync_connection->selectOne(\n          self::$sync_table, 'MIN(chrono)', [\n          ['db', 'NOT LIKE', self::$current_connection->getCurrent()],\n          'state' => 0\n          ]\n        ))\n    ) {\n      $start = time();\n    }\n    \/\/ Deleting the entries prior to this sync we produced and have been seen by the twin process\n    return self::$sync_connection->delete(\n      self::$sync_table, [\n      'db' => self::$current_connection->getCurrent(),\n      'state'=> 1,\n      ['chrono', '<', $start]\n      ]\n    );\n  }",
+            "code": "  public static function deleteCompleted(float $start = null)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    if (!$start\n        || !($start = self::$sync_connection->selectOne(\n          self::$sync_table, 'MIN(chrono)', [\n          ['db', 'NOT LIKE', self::$current_connection->getCurrent()],\n          'state' => 0\n          ]\n        ))\n    ) {\n      $start = time();\n    }\n    \/\/ Deleting the entries prior to this sync we produced and have been seen by the twin process\n    return self::$sync_connection->delete(\n      self::$sync_table, [\n      'db' => self::$current_connection->getCurrent(),\n      'state'=> 1,\n      ['chrono', '<', $start]\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 328,
             "endLine": 351,
             "isDeprecated": false,
@@ -451,13 +684,19 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "deleteCompleted",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "start",
                     "position": 0,
-                    "type": "float",
+                    "type": "null|float",
+                    "type_arr": [
+                        "null",
+                        "float"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -470,11 +709,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($row)\n  {\n\n  }",
+            "code": "  public static function currentRowCfg($row): array\n  {\n\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 353,
             "endLine": 356,
             "isDeprecated": false,
@@ -485,15 +727,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "currentRowCfg",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "row",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -506,11 +751,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($row)\n  {\n\n  }",
+            "code": "  public static function destRowCfg($row): array\n  {\n\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 358,
             "endLine": 361,
             "isDeprecated": false,
@@ -521,15 +769,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "destRowCfg",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "row",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -542,11 +793,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Sync",
+            "class": "bbn\\Db\\Sync",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Sync.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, $dbs = '', $sync_table = '', $num_try = 0)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    self::disable();\n    $mode_db = self::$current_connection->getErrorMode();\n    $mode_dbs = self::$sync_connection->getErrorMode();\n    self::$current_connection->setErrorMode(\"continue\");\n    self::$sync_connection->setErrorMode(\"continue\");\n\n    $num_try++;\n\n    $to_log = [\n      'deleted_sync' => 0,\n      'deleted_real' => 0,\n      'updated_sync' => 0,\n      'updated_real' => 0,\n      'inserted_sync' => 0,\n      'inserted_real' => 0,\n      'num_problems' => 0,\n      'problems' => []\n    ];\n\n    $to_log['deleted_sync'] = self::deleteCompleted();\n\n    $retry = false;\n\n    \/\/ Selecting the entries inserted\n    $ds = self::$sync_connection->rselectAll(\n      self::$sync_table, ['id', 'tab', 'vals', 'chrono'], [\n      ['db', '!=', self::$current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['action', 'LIKE', 'INSERT']\n      ], [\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    \/\/ They just have to be inserted\n    foreach ($ds as $i => $d){\n      if (isset(self::$methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      $vals = X::jsonBase64Decode($d['vals']);\n      if (!\\is_array($vals)) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Hey, look urgently at the row $d[id]!\";\n      }\n      elseif (self::$current_connection->insert($d['tab'], $vals)) {\n        if (isset(self::$methods['cbf2'])) {\n          self::cbf2($d);\n        }\n        $to_log['inserted_sync']++;\n        self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      elseif (self::$current_connection->select($d['tab'], [], $vals)) {\n        self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      else{\n        if ($num_try > self::$max_retry) {\n          $to_log['num_problems']++;\n          $to_log['problems'][] = \"Problem while syncing (insert), check data with status 5 and ID \".$d['id'];\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n        }\n        $retry = 1;\n      }\n    }\n\n\n    \/\/ Selecting the entries modified and deleted in the twin DB,\n    \/\/ ordered by table and rows (so the same go together)\n    $ds = self::$sync_connection->rselectAll(\n      self::$sync_table, ['id', 'tab', 'action', 'rows', 'vals', 'chrono'], [\n      ['db', '!=', self::$current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['rows', '!=', '[]'],\n      ['action', '!=', 'insert']\n      ], [\n      'tab' => 'ASC',\n      'rows' => 'ASC',\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    foreach ($ds as $i => $d){\n      \/\/ Executing the first callback\n      $d['rows'] = X::jsonBase64Decode($d['rows']);\n      $d['vals'] = X::jsonBase64Decode($d['vals']);\n      if (isset(self::$methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      \/\/ Proceeding to the actions: delete is before\n      if (strtolower($d['action']) === 'delete') {\n        if (self::$current_connection->delete($d['tab'], $d['rows'])) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['deleted_real']++;\n        }\n        elseif (!self::$current_connection->select($d['tab'], [], $d['rows'])) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > self::$max_retry) {\n            self::$sync_connection->update(self::$sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (delete), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Checking if there is another change done to this record and when in the twin DB\n      $next_time = (\n              isset($ds[$i+1]) &&\n              ($ds[$i+1]['tab'] === $d['tab']) &&\n              ($ds[$i+1]['rows'] === $d['rows'])\n            ) ? $ds[$i+1]['chrono'] : microtime();\n      \/\/ Looking for the actions done on this specific record in our database\n      \/\/ between the twin change and the next (or now if there is no other change)\n      $each = self::$sync_connection->rselectAll(\n        self::$sync_table, ['id', 'chrono', 'action', 'vals'], [\n        ['db', '=', self::$current_connection->getCurrent()],\n        ['tab', '=', $d['tab']],\n        ['rows', '=', $d['rows']],\n        ['chrono', '>=', $d['chrono']],\n        ['chrono', '<', $next_time],\n        ]\n      );\n      if (\\count($each) > 0) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Conflict!\";\n        $to_log['problems'][] = $d;\n        foreach ($each as $e){\n          $e['vals'] = X::jsonBase64Decode($e['vals']);\n          \/\/ If it's deleted locally and updated on the twin we restore\n          if (strtolower($e['action']) === 'delete') {\n            if (strtolower($d['action']) === 'update') {\n              if (!self::$current_connection->insertUpdate(\n                $d['tab'],\n                X::mergeArrays(\n                  $e['vals'],\n                  $d['vals']\n                )\n              )\n              ) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update number 1 had a problem\";\n              }\n            }\n          }\n          \/\/ If it's updated locally and deleted in the twin we restore\n          elseif (strtolower($e['action']) === 'update') {\n            if (strtolower($d['action']) === 'delete') {\n              if (!self::$current_connection->insertUpdate($d['tab'], X::mergeArrays($d['vals'], $e['vals']))) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update had a problem\";\n              }\n            }\n            \/\/ If it's updated locally and in the twin we merge the values for the update\n            elseif (strtolower($d['action']) === 'update') {\n              $d['vals'] = X::mergeArrays($d['vals'], $e['vals']);\n            }\n          }\n        }\n      }\n      \/\/ Proceeding to the actions update is after in case we needed to restore\n      if (strtolower($d['action']) === 'update') {\n        X::log(X::mergeArrays($d['rows'], $d['vals']), 'synct');\n        if (self::$current_connection->update($d['tab'], $d['vals'], $d['rows'])) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['updated_real']++;\n        }\n        elseif (self::$current_connection->count($d['tab'], X::mergeArrays($d['rows'], $d['vals']))) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > self::$max_retry) {\n            self::$sync_connection->update(self::$sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (update), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Callback number 2\n      if (isset(self::$methods['cbf2'])) {\n        self::cbf2($d);\n      }\n    }\n\n\n    $res = [];\n    foreach ($to_log as $k => $v){\n      if (!empty($v)) {\n        $res[$k] = $v;\n      }\n    }\n    self::$current_connection->setErrorMode($mode_db);\n    self::$sync_connection->setErrorMode($mode_dbs);\n    self::enable();\n    if ($retry && ( $num_try <= self::$max_retry )) {\n      $res = X::mergeArrays($res, self::sync($db, $dbs, $sync_table, $num_try));\n    }\n    return $res;\n  }",
+            "code": "  public static function sync(Db $db, $dbs='', $sync_table='', $num_try = 0)\n  {\n    if (!self::isInit()) {\n      die(\"DB sync is not initiated\");\n    }\n    self::disable();\n    $mode_db = self::$current_connection->getErrorMode();\n    $mode_dbs = self::$sync_connection->getErrorMode();\n    self::$current_connection->setErrorMode(\"continue\");\n    self::$sync_connection->setErrorMode(\"continue\");\n\n    $num_try++;\n\n    $to_log = [\n      'deleted_sync' => 0,\n      'deleted_real' => 0,\n      'updated_sync' => 0,\n      'updated_real' => 0,\n      'inserted_sync' => 0,\n      'inserted_real' => 0,\n      'num_problems' => 0,\n      'problems' => []\n    ];\n\n    $to_log['deleted_sync'] = self::deleteCompleted();\n\n    $retry = false;\n\n    \/\/ Selecting the entries inserted\n    $ds = self::$sync_connection->rselectAll(\n      self::$sync_table, ['id', 'tab', 'vals', 'chrono'], [\n      ['db', '!=', self::$current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['action', 'LIKE', 'INSERT']\n      ], [\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    \/\/ They just have to be inserted\n    foreach ($ds as $i => $d){\n      if (isset(self::$methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      $vals = X::jsonBase64Decode($d['vals']);\n      if (!\\is_array($vals)) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Hey, look urgently at the row $d[id]!\";\n      }\n      elseif (self::$current_connection->insert($d['tab'], $vals)) {\n        if (isset(self::$methods['cbf2'])) {\n          self::cbf2($d);\n        }\n        $to_log['inserted_sync']++;\n        self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      elseif (self::$current_connection->select($d['tab'], [], $vals)) {\n        self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n      }\n      else{\n        if ($num_try > self::$max_retry) {\n          $to_log['num_problems']++;\n          $to_log['problems'][] = \"Problem while syncing (insert), check data with status 5 and ID \".$d['id'];\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n        }\n        $retry = 1;\n      }\n    }\n\n\n    \/\/ Selecting the entries modified and deleted in the twin DB,\n    \/\/ ordered by table and rows (so the same go together)\n    $ds = self::$sync_connection->rselectAll(\n      self::$sync_table, ['id', 'tab', 'action', 'rows', 'vals', 'chrono'], [\n      ['db', '!=', self::$current_connection->getCurrent()],\n      ['state', '=', 0],\n      ['rows', '!=', '[]'],\n      ['action', '!=', 'insert']\n      ], [\n      'tab' => 'ASC',\n      'rows' => 'ASC',\n      'chrono' => 'ASC',\n      'id' => 'ASC'\n      ]\n    );\n    foreach ($ds as $i => $d){\n      \/\/ Executing the first callback\n      $d['rows'] = X::jsonBase64Decode($d['rows']);\n      $d['vals'] = X::jsonBase64Decode($d['vals']);\n      if (isset(self::$methods['cbf1'])) {\n        self::cbf1($d);\n      }\n      \/\/ Proceeding to the actions: delete is before\n      if (strtolower($d['action']) === 'delete') {\n        if (self::$current_connection->delete($d['tab'], $d['rows'])) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['deleted_real']++;\n        }\n        elseif (!self::$current_connection->select($d['tab'], [], $d['rows'])) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > self::$max_retry) {\n            self::$sync_connection->update(self::$sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (delete), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Checking if there is another change done to this record and when in the twin DB\n      $next_time = (\n              isset($ds[$i+1]) &&\n              ($ds[$i+1]['tab'] === $d['tab']) &&\n              ($ds[$i+1]['rows'] === $d['rows'])\n            ) ? $ds[$i+1]['chrono'] : microtime();\n      \/\/ Looking for the actions done on this specific record in our database\n      \/\/ between the twin change and the next (or now if there is no other change)\n      $each = self::$sync_connection->rselectAll(\n        self::$sync_table, ['id', 'chrono', 'action', 'vals'], [\n        ['db', '=', self::$current_connection->getCurrent()],\n        ['tab', '=', $d['tab']],\n        ['rows', '=', $d['rows']],\n        ['chrono', '>=', $d['chrono']],\n        ['chrono', '<', $next_time],\n        ]\n      );\n      if (\\count($each) > 0) {\n        $to_log['num_problems']++;\n        $to_log['problems'][] = \"Conflict!\";\n        $to_log['problems'][] = $d;\n        foreach ($each as $e){\n          $e['vals'] = X::jsonBase64Decode($e['vals']);\n          \/\/ If it's deleted locally and updated on the twin we restore\n          if (strtolower($e['action']) === 'delete') {\n            if (strtolower($d['action']) === 'update') {\n              if (!self::$current_connection->insertUpdate(\n                $d['tab'],\n                X::mergeArrays(\n                  $e['vals'],\n                  $d['vals']\n                )\n              )\n              ) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update number 1 had a problem\";\n              }\n            }\n          }\n          \/\/ If it's updated locally and deleted in the twin we restore\n          elseif (strtolower($e['action']) === 'update') {\n            if (strtolower($d['action']) === 'delete') {\n              if (!self::$current_connection->insertUpdate($d['tab'], X::mergeArrays($d['vals'], $e['vals']))) {\n                $to_log['num_problems']++;\n                $to_log['problems'][] = \"insert_update had a problem\";\n              }\n            }\n            \/\/ If it's updated locally and in the twin we merge the values for the update\n            elseif (strtolower($d['action']) === 'update') {\n              $d['vals'] = X::mergeArrays($d['vals'], $e['vals']);\n            }\n          }\n        }\n      }\n      \/\/ Proceeding to the actions update is after in case we needed to restore\n      if (strtolower($d['action']) === 'update') {\n        X::log(X::mergeArrays($d['rows'], $d['vals']), 'synct');\n        if (self::$current_connection->update($d['tab'], $d['vals'], $d['rows'])) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n          $to_log['updated_real']++;\n        }\n        elseif (self::$current_connection->count($d['tab'], X::mergeArrays($d['rows'], $d['vals']))) {\n          self::$sync_connection->update(self::$sync_table, [\"state\" => 1], [\"id\" => $d['id']]);\n        }\n        else{\n          if ($num_try > self::$max_retry) {\n            self::$sync_connection->update(self::$sync_table, [\"state\" => 5], [\"id\" => $d['id']]);\n            $to_log['num_problems']++;\n            $to_log['problems'][] = \"Problem while syncing (update), check data with status 5 and ID \".$d['id'];\n          }\n          $retry = 1;\n        }\n      }\n      \/\/ Callback number 2\n      if (isset(self::$methods['cbf2'])) {\n        self::cbf2($d);\n      }\n    }\n\n\n    $res = [];\n    foreach ($to_log as $k => $v){\n      if (!empty($v)) {\n        $res[$k] = $v;\n      }\n    }\n    self::$current_connection->setErrorMode($mode_db);\n    self::$sync_connection->setErrorMode($mode_dbs);\n    self::enable();\n    if ($retry && ( $num_try <= self::$max_retry )) {\n      $res = X::mergeArrays($res, self::sync($db, $dbs, $sync_table, $num_try));\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 366,
             "endLine": 569,
             "isDeprecated": false,
@@ -557,13 +811,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "sync",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -573,6 +832,9 @@
                     "name": "dbs",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -582,6 +844,9 @@
                     "name": "sync_table",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -591,6 +856,9 @@
                     "name": "num_try",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -599,7 +867,267 @@
             ]
         }
     },
-    "properties": null,
+    "properties": {
+        "current_connection": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "db",
+                        "description": "The current DB connection"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "sync_connection": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The sync connection information"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "has_history": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "tables": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The tables to be synchronized in the current DB."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "sync_table": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The name of the sync table."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "dbsync"
+        },
+        "methods": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "default_cfg": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The default configuration for the sync database."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "engine": "sqlite",
+                "host": "localhost",
+                "db": "dbsync"
+            }
+        },
+        "is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Remains false until the function is initiated."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "is_checked": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "disabled": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "max_retry": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Sync"
+            },
+            "declaring_trait": "bbn\\Db\\Sync",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "int",
+                        "description": "The max number of times the rows is error status will be tried before abandonning."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": 5
+        }
+    },
     "staticProperties": {
         "current_connection": false,
         "sync_connection": null,
@@ -618,6 +1146,13 @@
         "max_retry": 5
     },
     "constants": null,
+    "uses": {
+        "bbn\\Db": "Db",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Appui\\History": "History"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

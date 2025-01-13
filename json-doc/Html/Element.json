@@ -14,18 +14,19 @@
     },
     "name": "bbn\\Html\\Element",
     "namespace": true,
+    "realName": "Element",
+    "realNamespace": "bbn\\Html",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Html\/Element.php",
     "startLine": 24,
     "endLine": 674,
-    "numMethods": 17,
-    "numProperties": 11,
+    "numMethods": 21,
+    "numProperties": 17,
     "numConstants": 0,
     "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -78,20 +79,173 @@
     "namespaceName": "bbn\\Html",
     "shortName": "Element",
     "contentConstructor": {
-        "file": "bbn\\Html\\Element",
         "returns": []
     },
     "methods": {
+        "_init": {
+            "name": "_init",
+            "summary": "This creates a unique JSON schema validator object",
+            "description": "And for each type of class generates the according JSON schema\nBy combining this root classs element schema\nAnd the child class' schema\nThe schema has then to be called static::$schema and not self::$schema",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "And for each type of class generates the according JSON schema\nBy combining this root classs element schema\nAnd the child class' schema\nThe schema has then to be called static::$schema and not self::$schema"
+                }
+            ],
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _init(){\n    if ( !self::$validator ){\n      self::$validator = new \\JsonSchema\\Validator();\n      if ( \\is_string(self::$schema) ){\n        self::$schema = json_decode(self::$schema);\n      }\n    }\n    if ( !empty(static::$schema) ){\n      static::$schema = bbn\\X::mergeObjects(self::$schema, bbn\\X::toObject(static::$schema));\n    }\n    else{\n      static::$schema = self::$schema;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 169,
+            "endLine": 182,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_init",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "This creates a unique JSON schema validator object\nAnd for each type of class generates the according JSON schema\nBy combining this root classs element schema\nAnd the child class' schema\nThe schema has then to be called static::$schema and not self::$schema\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * This creates a unique JSON schema validator object\n   * And for each type of class generates the according JSON schema\n   * By combining this root classs element schema\n   * And the child class' schema\n   * The schema has then to be called static::$schema and not self::$schema\n\t *\n\t * @return void \n\t *\/"
+        },
+        "cast": {
+            "name": "cast",
+            "summary": "Returns a config more adequate for the schema:",
+            "description": "converts the types according to the schema",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "converts the types according to the schema"
+                }
+            ],
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function cast(array $cfg, $schema=null){\n    if ( \\is_null($schema) && \\is_object(static::$schema) ){\n      $schema = static::$schema;\n    }\n    if ( \\is_object($schema) && \\is_array($cfg) && isset($schema->properties) ){\n      foreach ( $schema->properties as $k => $p ){\n        if ( empty($cfg[$k]) ){\n          unset($cfg[$k]);\n        }\n        else if ( \\is_object($p) ){\n          if ( \\is_string($cfg[$k]) && $p->type === 'integer' ){\n            $cfg[$k] = (int)$cfg[$k];\n          }\n          else if ( \\is_int($cfg[$k]) && $p->type === 'boolean' ){\n            $cfg[$k] = (bool)$cfg[$k];\n          }\n          else if ( \\is_array($cfg[$k]) ){\n            $cfg[$k] = self::cast($cfg[$k], $p);\n          }\n        }\n      }\n    }\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 192,
+            "endLine": 215,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cast",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Configuration"
+                },
+                {
+                    "name": "schema",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "JSON Schema"
+                }
+            ],
+            "doc": {
+                "description": "Returns a config more adequate for the schema:\nconverts the types according to the schema\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "Configuration"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$schema",
+                        "description": "JSON Schema"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Returns a config more adequate for the schema:\n   * converts the types according to the schema\n   * \n   * @param array $cfg Configuration\n   * @param object $schema JSON Schema\n\t * @return array\n\t *\/"
+        },
+        "getSchema": {
+            "name": "getSchema",
+            "summary": "Returns the current schema",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function getSchema(){\n    return static::$schema;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 222,
+            "endLine": 224,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSchema",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the current schema\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Returns the current schema\n\t *\n\t * @return object\n\t *\/"
+        },
         "checkConfig": {
             "name": "checkConfig",
             "summary": "Confront the JSON schema object with the current configuration",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg)\n  {\n      self::$error = \"The configuration is not a valid array\";\n      return false;\n    }\n    self::$validator->check(bbn\\X::toObject($cfg), static::$schema);\n    self::$error = '';\n    if ( self::$validator->isValid() ){\n      return 1;\n    }\n    foreach ( self::$validator->getErrors() as $error ){\n      self::$error .= sprintf(\"[%s] %s\",$error['property'], $error['message']);\n      var_dump($cfg);\n    }\n    return false;\n  }",
+            "code": "  public static function checkConfig($cfg){\n    if ( !\\is_array($cfg) ){\n      self::$error = \"The configuration is not a valid array\";\n      return false;\n    }\n    self::$validator->check(bbn\\X::toObject($cfg), static::$schema);\n    self::$error = '';\n    if ( self::$validator->isValid() ){\n      return 1;\n    }\n    foreach ( self::$validator->getErrors() as $error ){\n      self::$error .= sprintf(\"[%s] %s\",$error['property'], $error['message']);\n      var_dump($cfg);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 232,
             "endLine": 247,
             "isDeprecated": false,
@@ -102,31 +256,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "checkConfig",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "Configuration"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Confront the JSON schema object with the current configuration\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "Configuration"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Confront the JSON schema object with the current configuration\n\t *\n   * @param array $cfg Configuration\n\t * @return bool\n\t *\/"
         },
         "getError": {
             "name": "getError",
             "summary": "Returns the current error(s)",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$error;\n  }",
+            "code": "  public static function getError()\n  {\n    return self::$error;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 254,
             "endLine": 257,
             "isDeprecated": false,
@@ -137,20 +310,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the current error(s)\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Returns the current error(s)\n\t *\n\t * @return string\n\t *\/"
         },
         "cssToString": {
             "name": "cssToString",
             "summary": "Generates style string for a HTML tag",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($css)\n  {\n      return ' style=\"'.bbn\\Str::escapeDquotes($css).'\"';\n    }\n    else if ( \\is_array($css) && \\count($css) > 0 ){\n      $st = '';\n      foreach ( $css as $prop => $val ){\n        $st .= $prop.':'.$val.';';\n      }\n      return ' style=\"'.bbn\\Str::escapeDquotes($st).'\"';\n    }\n  }",
+            "code": "  public static function cssToString($css){\n    if ( \\is_string($css) ){\n      return ' style=\"'.bbn\\Str::escapeDquotes($css).'\"';\n    }\n    else if ( \\is_array($css) && \\count($css) > 0 ){\n      $st = '';\n      foreach ( $css as $prop => $val ){\n        $st .= $prop.':'.$val.';';\n      }\n      return ' style=\"'.bbn\\Str::escapeDquotes($st).'\"';\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 266,
             "endLine": 277,
             "isDeprecated": false,
@@ -161,31 +343,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "cssToString",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "css",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "CSS properties\/values array"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Generates style string for a HTML tag\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|string",
+                        "name": "$css",
+                        "description": "CSS properties\/values array"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Generates style string for a HTML tag\n\t *\n   * @param array|string $css CSS properties\/values array\n\t * @return string\n\t *\/"
         },
         "css": {
             "name": "css",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n      if ( !bbn\\Str::isNumber($i) ){\n        $this->css[$i] = $k;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
+            "code": "  public function css(array $cfg){\n    foreach ( $cfg as $i => $k ){\n      if ( !bbn\\Str::isNumber($i) ){\n        $this->css[$i] = $k;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 279,
             "endLine": 287,
             "isDeprecated": false,
@@ -196,13 +397,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "css",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,11 +421,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($class)\n  {\n      $this->attr['class'] = $class;\n    }\n    else{\n      $cls = explode(\" \", $this->attr['class']);\n      if ( !\\in_array($class, $cls) ){\n        $this->attr['class'] .= ' '.$class;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
+            "code": "  public function addClass($class){\n    if ( !isset($this->attr['class']) ){\n      $this->attr['class'] = $class;\n    }\n    else{\n      $cls = explode(\" \", $this->attr['class']);\n      if ( !\\in_array($class, $cls) ){\n        $this->attr['class'] .= ' '.$class;\n      }\n    }\n    $this->update();\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 289,
             "endLine": 301,
             "isDeprecated": false,
@@ -230,13 +439,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "addClass",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "class",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -249,11 +461,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg)\n  {\n    self::_init();\n    if ( \\is_string($cfg) && !empty($cfg) ){\n      \/\/ Looking for classes, IDs, or name (|) in the string\n      preg_match_all(\"\/([\\\\.|\\\\||#]{1})([A-z0-9-]+)\/\", $cfg, $m);\n      $classes = [];\n      $id = false;\n      $name = false;\n      if ( isset($m[0], $m[1], $m[2]) && \\count($m[0]) > 0 ){\n        foreach ( $m[1] as $k => $v ){\n          if ( $v === '.' ){\n            array_push($classes, $m[2][$k]);\n          }\n          else if ( $v === '#' ){\n            $id = $m[2][$k];\n          }\n          else if ( $v === '|' ){\n            $name = $m[2][$k];\n          }\n        }\n      }\n      \/\/ Looking for the tag (mandatory)\n      preg_match_all(\"\/^([A-z0-9-]+)\/\", $cfg, $n);\n      if ( isset($n[0]) && \\count($n[0]) > 0 ){\n        $cfg = ['tag' => $n[0][0]];\n        if ( (\\count($classes) > 0) || $id || $name ){\n          $cfg['attr'] = [];\n          if ( \\count($classes) > 0 ){\n            $cfg['attr']['class'] = implode(\" \", $classes);\n          }\n          if ( $id ){\n            $cfg['attr']['id'] = $id;\n          }\n          if ( $name ){\n            $cfg['attr']['name'] = $name;\n          }\n        }\n      }\n    }\n    $cfg = self::cast($cfg);\n\t\tif ( self::checkConfig($cfg) ){\n      foreach ( $cfg as $key => $val ){\n        if ( $key === 'tag' ){\n          $this->tag = strtolower($val);\n        }\n        else if ( property_exists(\\get_called_class(), $key) ){\n          $this->$key = $val;\n        }\n      }\n      $this->update();\n    }\n    else{\n      $err[] = self::getError();\n      if ( isset($cfg['tag']) ){\n        $err[] = 'Tag: '.$cfg['tag'];\n      }\n      if ( isset($cfg['name']) ){\n        $err[] = 'Name: '.$cfg['name'];\n      }\n      var_dump($err);\n    }\n  }",
+            "code": "  public function __construct($cfg)\n\t{\n    self::_init();\n    if ( \\is_string($cfg) && !empty($cfg) ){\n      \/\/ Looking for classes, IDs, or name (|) in the string\n      preg_match_all(\"\/([\\\\.|\\\\||#]{1})([A-z0-9-]+)\/\", $cfg, $m);\n      $classes = [];\n      $id = false;\n      $name = false;\n      if ( isset($m[0], $m[1], $m[2]) && \\count($m[0]) > 0 ){\n        foreach ( $m[1] as $k => $v ){\n          if ( $v === '.' ){\n            array_push($classes, $m[2][$k]);\n          }\n          else if ( $v === '#' ){\n            $id = $m[2][$k];\n          }\n          else if ( $v === '|' ){\n            $name = $m[2][$k];\n          }\n        }\n      }\n      \/\/ Looking for the tag (mandatory)\n      preg_match_all(\"\/^([A-z0-9-]+)\/\", $cfg, $n);\n      if ( isset($n[0]) && \\count($n[0]) > 0 ){\n        $cfg = ['tag' => $n[0][0]];\n        if ( (\\count($classes) > 0) || $id || $name ){\n          $cfg['attr'] = [];\n          if ( \\count($classes) > 0 ){\n            $cfg['attr']['class'] = implode(\" \", $classes);\n          }\n          if ( $id ){\n            $cfg['attr']['id'] = $id;\n          }\n          if ( $name ){\n            $cfg['attr']['name'] = $name;\n          }\n        }\n      }\n    }\n    $cfg = self::cast($cfg);\n\t\tif ( self::checkConfig($cfg) ){\n      foreach ( $cfg as $key => $val ){\n        if ( $key === 'tag' ){\n          $this->tag = strtolower($val);\n        }\n        else if ( property_exists(\\get_called_class(), $key) ){\n          $this->$key = $val;\n        }\n      }\n      $this->update();\n    }\n    else{\n      $err[] = self::getError();\n      if ( isset($cfg['tag']) ){\n        $err[] = 'Tag: '.$cfg['tag'];\n      }\n      if ( isset($cfg['name']) ){\n        $err[] = 'Name: '.$cfg['name'];\n      }\n      var_dump($err);\n    }\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 306,
             "endLine": 368,
             "isDeprecated": false,
@@ -264,30 +479,75 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return bbn\\Html\\Element\n\t *\/"
+        },
+        "update": {
+            "name": "update",
+            "summary": "Sets the configuration property according to the current configuration",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function update()\n  {\n    $this->cfg = [];\n    foreach ( $this as $key => $var ){\n      if ( $key !== 'cfg' && !\\is_null($var) ){\n        if ( \\is_array($var) ){\n          foreach ( $var as $k => $v ){\n            if ( !isset($this->cfg[$key]) ){\n              $this->cfg[$key] = [];\n            }\n            if ( !\\is_null($v) ){\n              $this->cfg[$key][$k] = $v;\n            }\n          }\n        }\n        else{\n          $this->cfg[$key] = $var;\n        }\n      }\n    }\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 375,
+            "endLine": 396,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "update",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Sets the configuration property according to the current configuration\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the configuration property according to the current configuration\n   * \n\t * @return bbn\\Html\\Element\n\t *\/"
         },
         "append": {
             "name": "append",
             "summary": "Add an element to the content, or a string if it's one",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($ele)\n  {\n    $args = \\func_get_args();\n    foreach ( $args as $ele ){\n      if ( !isset($this->content) ){\n        if ( \\is_array($ele) && isset($ele[0]) ){\n          $this->content = $ele;\n        }\n        else{\n          $this->content = \\is_object($ele) ? [$ele] : $ele;\n        }\n      }\n      else if ( \\is_array($this->content) ){\n        if ( \\is_array($ele) ){\n          array_merge($this->content, $ele);\n        }\n        else{\n          array_push($this->content, $ele);\n        }\n      }\n      else if ( \\is_string($this->content) ){\n        if ( \\is_array($ele) ){\n          foreach ( $ele as $e ){\n            $this->content .= $e->html();\n          }\n        }\n        else{\n          $this->content .= \\is_object($ele) ? $ele->html() : $ele;\n        }\n      }\n    }\n    return $this;\n  }",
+            "code": "  public function append($ele)\n  {\n    $args = \\func_get_args();\n    foreach ( $args as $ele ){\n      if ( !isset($this->content) ){\n        if ( \\is_array($ele) && isset($ele[0]) ){\n          $this->content = $ele;\n        }\n        else{\n          $this->content = \\is_object($ele) ? [$ele] : $ele;\n        }\n      }\n      else if ( \\is_array($this->content) ){\n        if ( \\is_array($ele) ){\n          array_merge($this->content, $ele);\n        }\n        else{\n          array_push($this->content, $ele);\n        }\n      }\n      else if ( \\is_string($this->content) ){\n        if ( \\is_array($ele) ){\n          foreach ( $ele as $e ){\n            $this->content .= $e->html();\n          }\n        }\n        else{\n          $this->content .= \\is_object($ele) ? $ele->html() : $ele;\n        }\n      }\n    }\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 403,
             "endLine": 435,
             "isDeprecated": false,
@@ -298,30 +558,48 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "append",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "ele",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Add an element to the content, or a string if it's one\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|bbn\\Html\\Element",
+                        "name": "$ele"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Add an element to the content, or a string if it's one\n   * \n   * @param string|bbn\\Html\\Element $ele\n   *\/"
         },
         "getConfig": {
             "name": "getConfig",
             "summary": "Returns the current configuration.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->update();\n\t\t$tmp = bbn\\X::removeEmpty($this->cfg);\n    if ( isset($tmp['content']) && \\is_array($tmp['content']) ){\n      foreach ( $tmp['content'] as $i => $c ){\n        if ( \\is_object($c) ){\n          if (method_exists($c, 'get_config') ){\n            $tmp['content'][$i] = $c->getConfig();\n          }\n        }\n      }\n    }\n    return $tmp;\n  }",
+            "code": "\tpublic function getConfig()\n\t{\n    $this->update();\n\t\t$tmp = bbn\\X::removeEmpty($this->cfg);\n    if ( isset($tmp['content']) && \\is_array($tmp['content']) ){\n      foreach ( $tmp['content'] as $i => $c ){\n        if ( \\is_object($c) ){\n          if (method_exists($c, 'get_config') ){\n            $tmp['content'][$i] = $c->getConfig();\n          }\n        }\n      }\n    }\n    return $tmp;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 441,
             "endLine": 455,
             "isDeprecated": false,
@@ -332,20 +610,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getConfig",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the current configuration.\n\n",
+                "params": [],
+                "return": "Current configuration"
+            },
+            "comments": "  \/**\n\t * Returns the current configuration.\n   * \n   * @return array Current configuration\n\t *\/"
         },
         "getParam": {
             "name": "getParam",
             "summary": "Returns the current configuration  HOW???",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return bbn\\Str::makeReadable($this->getConfig());\n  }",
+            "code": "  public function getParam()\n  {\n    return bbn\\Str::makeReadable($this->getConfig());\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 462,
             "endLine": 465,
             "isDeprecated": false,
@@ -356,20 +643,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getParam",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the current configuration  HOW???\n\n",
+                "params": [],
+                "return": "Current configuration"
+            },
+            "comments": "  \/**\n\t * Returns the current configuration  HOW???\n   * \n   * @return array Current configuration\n\t *\/"
         },
         "showConfig": {
             "name": "showConfig",
             "summary": "Returns the current configuration for PHP",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return bbn\\Str::export(bbn\\Str::makeReadable($this->getConfig()), 1);\n  }",
+            "code": "  public function showConfig()\n  {\n    return bbn\\Str::export(bbn\\Str::makeReadable($this->getConfig()), 1);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 472,
             "endLine": 475,
             "isDeprecated": false,
@@ -380,20 +676,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "showConfig",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the current configuration for PHP\n\n",
+                "params": [],
+                "return": "Current configuration"
+            },
+            "comments": "  \/**\n\t * Returns the current configuration for PHP\n   * \n   * @return array Current configuration\n\t *\/"
         },
         "script": {
             "name": "script",
             "summary": "Returns the javascript coming with the object",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($with_ele = 1)\n  {\n    $this->update();\n\t\t$r = '';\n\t\tif ( isset($this->attr['id']) ){\n      if ( isset($this->cfg['events']) ){\n        foreach ( $this->cfg['events'] as $event => $fn ){\n          $r .= '.'.$event.'('.\n                  ( strpos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).\n                  ')';\n        }\n      }\n      if ( isset($this->cfg['widget'], $this->cfg['widget']['name']) ){\n        $r .= '.'.$this->cfg['widget']['name'].'(';\n        if ( isset($this->cfg['widget']['options']) ){\n          $r .= '{';\n          foreach ( $this->cfg['widget']['options'] as $n => $o ){\n            $r .= '\"'.$n.'\":';\n            if ( \\is_string($o) ){\n              $o = trim($o);\n              if ( (strpos($o, 'function(') === 0) ){\n                $r .= $o;\n              }\n              else{\n                $r .= '\"'.bbn\\Str::escapeDquotes($o).'\"';\n              }\n            }\n            else if ( \\is_bool($o) ){\n              $r .= $o ? 'true' : 'false';\n            }\n            else{\n              $r .= json_encode($o);\n            }\n            $r .= ',';\n          }\n          $r .= '}';\n        }\n        $r .= ')';\n      }\n      if ( !empty($this->help) ){\n        \/\/ tooltip\n      }\n      if ( !empty($r) ){\n        if ( $with_ele ){\n          $r = '$(\"#'.$this->attr['id'].'\")'.$r.';'.PHP_EOL;\n        }\n        else{\n          $r = $r.';'.PHP_EOL;\n        }\n      }\n\t\t}\n    if ( !empty($this->script) ){\n      $r .= $this->script.PHP_EOL;\n    }\n    if ( \\is_array($this->content) ){\n      foreach ( $this->content as $c ){\n        if ( \\is_array($c) ){\n          $c = new bbn\\Html\\Element($c);\n        }\n        if (\\is_object($c) && method_exists($c, 'script') ){\n          $r .= $c->script();\n        }\n      }\n    }\n\t\treturn $r;\n  }",
+            "code": "\tpublic function script($with_ele=1)\n\t{\n    $this->update();\n\t\t$r = '';\n\t\tif ( isset($this->attr['id']) ){\n      if ( isset($this->cfg['events']) ){\n        foreach ( $this->cfg['events'] as $event => $fn ){\n          $r .= '.'.$event.'('.\n                  ( strpos($fn, 'function') === 0 ? $fn : 'function(e){'.$fn.'}' ).\n                  ')';\n        }\n      }\n      if ( isset($this->cfg['widget'], $this->cfg['widget']['name']) ){\n        $r .= '.'.$this->cfg['widget']['name'].'(';\n        if ( isset($this->cfg['widget']['options']) ){\n          $r .= '{';\n          foreach ( $this->cfg['widget']['options'] as $n => $o ){\n            $r .= '\"'.$n.'\":';\n            if ( \\is_string($o) ){\n              $o = trim($o);\n              if ( (strpos($o, 'function(') === 0) ){\n                $r .= $o;\n              }\n              else{\n                $r .= '\"'.bbn\\Str::escapeDquotes($o).'\"';\n              }\n            }\n            else if ( \\is_bool($o) ){\n              $r .= $o ? 'true' : 'false';\n            }\n            else{\n              $r .= json_encode($o);\n            }\n            $r .= ',';\n          }\n          $r .= '}';\n        }\n        $r .= ')';\n      }\n      if ( !empty($this->help) ){\n        \/\/ tooltip\n      }\n      if ( !empty($r) ){\n        if ( $with_ele ){\n          $r = '$(\"#'.$this->attr['id'].'\")'.$r.';'.PHP_EOL;\n        }\n        else{\n          $r = $r.';'.PHP_EOL;\n        }\n      }\n\t\t}\n    if ( !empty($this->script) ){\n      $r .= $this->script.PHP_EOL;\n    }\n    if ( \\is_array($this->content) ){\n      foreach ( $this->content as $c ){\n        if ( \\is_array($c) ){\n          $c = new bbn\\Html\\Element($c);\n        }\n        if (\\is_object($c) && method_exists($c, 'script') ){\n          $r .= $c->script();\n        }\n      }\n    }\n\t\treturn $r;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 482,
             "endLine": 547,
             "isDeprecated": false,
@@ -404,30 +709,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "script",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "with_ele",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the javascript coming with the object\n\n",
+                "params": [],
+                "return": "javascript string"
+            },
+            "comments": "  \/**\n\t * Returns the javascript coming with the object\n   * \n   * @return string javascript string\n\t *\/"
         },
         "attr": {
             "name": "attr",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($arr)\n  {\n    $args = \\func_get_args();\n    if ( \\is_array($arr) ){\n      foreach ( $arr as $k => $v ){\n        if ( $k === 'class' ){\n          $this->addClass($v);\n        }\n        else{\n          $this->attr[$k] = $v;\n        }\n      }\n    }\n    else if ( (\\count($args) === 2) && \\is_string($args[0]) && \\is_string($args[1]) ){\n      if ( $args[0] === 'class' ){\n        $this->addClass($args[1]);\n      }\n      else{\n        $this->attr[$args[0]] = $args[1];\n      }\n    }\n    else if ( \\is_string($arr) && isset($this->attr[$arr]) ){\n      return $this->attr[$arr];\n    }\n    return $this;\n  }",
+            "code": "  public function attr($arr)\n  {\n    $args = \\func_get_args();\n    if ( \\is_array($arr) ){\n      foreach ( $arr as $k => $v ){\n        if ( $k === 'class' ){\n          $this->addClass($v);\n        }\n        else{\n          $this->attr[$k] = $v;\n        }\n      }\n    }\n    else if ( (\\count($args) === 2) && \\is_string($args[0]) && \\is_string($args[1]) ){\n      if ( $args[0] === 'class' ){\n        $this->addClass($args[1]);\n      }\n      else{\n        $this->attr[$args[0]] = $args[1];\n      }\n    }\n    else if ( \\is_string($arr) && isset($this->attr[$arr]) ){\n      return $this->attr[$arr];\n    }\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 549,
             "endLine": 574,
             "isDeprecated": false,
@@ -438,13 +755,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "attr",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "arr",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -457,11 +777,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($txt = NULL)\n  {\n    if ( !\\is_null($txt) ){\n      $this->text = bbn\\Str::html2text($txt);\n      return $this;\n    }\n\n    return $this->text;\n  }",
+            "code": "  public function text($txt=null)\n  {\n    if ( !\\is_null($txt) ){\n      $this->text = bbn\\Str::html2text($txt);\n      return $this;\n    }\n\n    return $this->text;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 576,
             "endLine": 584,
             "isDeprecated": false,
@@ -472,13 +795,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "text",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "txt",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -491,11 +817,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($c = NULL)\n  {\n    if ( \\is_null($c) ){\n      return $this->content;\n    }\n    else if ( \\is_array($c) || \\is_string($c) ){\n      $this->content = $c;\n      return $this;\n    }\n  }",
+            "code": "  public function content($c=null)\n  {\n    if ( \\is_null($c) ){\n      return $this->content;\n    }\n    else if ( \\is_array($c) || \\is_string($c) ){\n      $this->content = $c;\n      return $this;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 586,
             "endLine": 595,
             "isDeprecated": false,
@@ -506,13 +835,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "content",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "c",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -525,11 +857,14 @@
             "summary": "Returns the corresponding HTML string",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($with_js = 1)\n  {\n    $html = '';\n\t\tif ( $this->tag ){\n\t\t\t$this->update();\n      \/\/ TAG\n\t\t\t$html .= '<'.$this->tag;\n\n      foreach ( $this->attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $html .= ' '.htmlspecialchars($key).'=\"';\n          if ( is_numeric($val) ){\n            $html .= $val;\n          }\n          else if (\\is_string($val) ){\n            $html .= htmlspecialchars($val);\n          }\n          $html .= '\"';\n        }\n      }\n\t\t\t\n      if ( \\count($this->css) > 0 ){\n\t\t\t\t$html .= self::cssToString($this->css);\n\t\t\t}\n      if ( $this->xhtml ){\n        $html .= ' \/';\n      }\n      $html .= '>';\n\n\t\t\t\n\t\t\tif ( !\\in_array($this->tag, self::$self_closing_tags) ){\n\n        if ( isset($this->text) ){\n          $html .= $this->text;\n        }\n        \n        if ( isset($this->content) ){\n          \/\/ @todo: Add the ability to imbricate elements\n          if ( \\is_string($this->content) ){\n            $html .= $this->content;\n          }\n          else if ( \\is_array($this->content) ){\n            foreach ( $this->content as $c ){\n              if ( \\is_array($c) ){\n                $c = new bbn\\Html\\Element($c);\n              }\n              $html .= $c->html($with_js);\n            }\n          }\n        }\n\t\t\t\t$html .= '<\/'.$this->tag.'>';\n\t\t\t}\n\t\t\t\n\t\t\tif ( isset($this->placeholder) && strpos($this->placeholder,'%s') !== false ){\n\t\t\t\t$html = sprintf($this->placeholder, $html);\n\t\t\t}\n      \n\t\t}\n\t\treturn $html;\n  }",
+            "code": "\tpublic function html($with_js = 1)\n\t{\n    $html = '';\n\t\tif ( $this->tag ){\n\t\t\t$this->update();\n      \/\/ TAG\n\t\t\t$html .= '<'.$this->tag;\n\n      foreach ( $this->attr as $key => $val ){\n        if ( \\is_string($key) ){\n          $html .= ' '.htmlspecialchars($key).'=\"';\n          if ( is_numeric($val) ){\n            $html .= $val;\n          }\n          else if (\\is_string($val) ){\n            $html .= htmlspecialchars($val);\n          }\n          $html .= '\"';\n        }\n      }\n\t\t\t\n      if ( \\count($this->css) > 0 ){\n\t\t\t\t$html .= self::cssToString($this->css);\n\t\t\t}\n      if ( $this->xhtml ){\n        $html .= ' \/';\n      }\n      $html .= '>';\n\n\t\t\t\n\t\t\tif ( !\\in_array($this->tag, self::$self_closing_tags) ){\n\n        if ( isset($this->text) ){\n          $html .= $this->text;\n        }\n        \n        if ( isset($this->content) ){\n          \/\/ @todo: Add the ability to imbricate elements\n          if ( \\is_string($this->content) ){\n            $html .= $this->content;\n          }\n          else if ( \\is_array($this->content) ){\n            foreach ( $this->content as $c ){\n              if ( \\is_array($c) ){\n                $c = new bbn\\Html\\Element($c);\n              }\n              $html .= $c->html($with_js);\n            }\n          }\n        }\n\t\t\t\t$html .= '<\/'.$this->tag.'>';\n\t\t\t}\n\t\t\t\n\t\t\tif ( isset($this->placeholder) && strpos($this->placeholder,'%s') !== false ){\n\t\t\t\t$html = sprintf($this->placeholder, $html);\n\t\t\t}\n      \n\t\t}\n\t\treturn $html;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 602,
             "endLine": 661,
             "isDeprecated": false,
@@ -540,31 +875,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "html",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "with_js",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
                     "default_name": "",
                     "description": "js Includes the javascript"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the corresponding HTML string\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "js Includes the javascript"
+                    }
+                ],
+                "return": "HTML string"
+            },
+            "comments": "  \/**\n\t * Returns the corresponding HTML string\n   * \n   * @param bool $with_js Includes the javascript\n   * @return string HTML string\n\t *\/"
         },
         "eleAndScript": {
             "name": "eleAndScript",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ['$(\\''.bbn\\Str::escapeSquotes($this->html()).'\\')',$this->script(false)];\n  }",
+            "code": "  public function eleAndScript()\n  {\n    return ['$(\\''.bbn\\Str::escapeSquotes($this->html()).'\\')',$this->script(false)];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 663,
             "endLine": 666,
             "isDeprecated": false,
@@ -575,8 +929,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "eleAndScript",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "makeEmpty": {
@@ -584,11 +938,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Html\\Element",
+            "class": "bbn\\Html\\Element",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Html\/Element.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->content = null;\n    $this->html = '';\n    $this->script = '';\n  }",
+            "code": "  public function makeEmpty()\n  {\n    $this->content = null;\n    $this->html = '';\n    $this->script = '';\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 668,
             "endLine": 673,
             "isDeprecated": false,
@@ -599,82 +956,244 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "makeEmpty",
             "returns": [],
-            "parent": false,
             "arguments": []
         }
     },
     "properties": {
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array The element's configuration",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "text": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string The element's textNode",
+                "tags": []
+            },
+            "parent": false,
+            "value": ""
+        },
+        "content": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string|array The element's content (can be an array of elements)",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
         "tag": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var string The element's tag",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": false
         },
         "attr": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var string The element's tag",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": []
         },
         "css": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array The element's attributes",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": []
         },
         "script": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array Styles",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": ""
         },
         "events": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var string JavaScript code which should be executed",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": null
         },
         "data": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array The element's data",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": null
         },
         "widget": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array Widget's configuration",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": null
         },
         "help": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var string Help for tooltip",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": null
         },
         "xhtml": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var bool XHTML tag ending, false by default",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": false
         },
         "self_closing_tags": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array List of known HTML self-closing tags",
                 "tags": []
             },
+            "parent": false,
             "value": [
                 "area",
                 "base",
@@ -695,17 +1214,80 @@
             ]
         },
         "input_fields": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array List of known inputs",
                 "tags": []
             },
+            "parent": false,
             "value": [
                 "input",
                 "textarea",
                 "select"
             ]
+        },
+        "validator": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var bool|object The JSON validator object. Will be generated only once",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "error": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string last error",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "schema": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Html\\Element"
+            },
+            "declaring_trait": "bbn\\Html\\Element",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string JSON schema of the configuration",
+                "tags": []
+            },
+            "parent": false,
+            "value": "{\n\t\"type\":\"object\",\n\t\"$schema\": \"http:\\\/\\\/json-schema.org\\\/draft-03\\\/schema\",\n\t\"id\": \"#\",\n\t\"required\":false,\n\t\"properties\":{\n\t\t\"attr\": {\n\t\t\t\"type\":\"object\",\n\t\t\t\"id\": \"attr\",\n      \"description\": \"Attributes\",\n\t\t\t\"required\":false,\n\t\t\t\"properties\":{}\n\t\t},\n    \"content\": {\n\t\t\t\"type\":[\"array\",\"string\",\"null\"],\n\t\t\t\"id\": \"content\",\n\t\t\t\"required\":false,\n      \"description\": \"Css properties\"\n\t\t},\n    \"css\": {\n\t\t\t\"type\":[\"object\",\"null\"],\n\t\t\t\"id\": \"css\",\n\t\t\t\"required\":false,\n      \"description\": \"Css properties\"\n\t\t},\n\t\t\"events\": {\n\t\t\t\"type\":\"object\",\n\t\t\t\"id\": \"events\",\n      \"description\": \"Events\",\n\t\t\t\"required\":false,\n\t\t\t\"properties\":{\n\t\t\t\t\"change\": {\n\t\t\t\t\t\"type\":\"string\",\n\t\t\t\t\t\"required\":false\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"script\": {\n\t\t\t\"type\":\"string\",\n      \"description\": \"Script\",\n\t\t\t\"id\": \"script\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"tag\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"tag\",\n      \"description\": \"Tag\",\n\t\t\t\"required\":true\n\t\t},\n\t\t\"text\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"text\",\n      \"description\": \"Text\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"widget\": {\n\t\t\t\"type\":[\"object\",\"array\"],\n\t\t\t\"id\": \"widget\",\n      \"description\": \"Widget\",\n\t\t\t\"required\":false,\n\t\t\t\"properties\":{\n\t\t\t\t\"name\": {\n\t\t\t\t\t\"type\":\"string\",\n\t\t\t\t\t\"required\":true\n\t\t\t\t},\n\t\t\t\t\"options\": {\n\t\t\t\t\t\"type\":[\"object\",\"array\"],\n\t\t\t\t\t\"required\":false\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"xhtml\": {\n\t\t\t\"type\":\"boolean\",\n\t\t\t\"id\": \"xhtml\",\n      \"description\": \"XHTML conformity\",\n\t\t\t\"required\":false\n\t\t}\n\t}\n}"
         }
     },
     "staticProperties": {
@@ -737,12 +1319,19 @@
         "schema": "{\n\t\"type\":\"object\",\n\t\"$schema\": \"http:\\\/\\\/json-schema.org\\\/draft-03\\\/schema\",\n\t\"id\": \"#\",\n\t\"required\":false,\n\t\"properties\":{\n\t\t\"attr\": {\n\t\t\t\"type\":\"object\",\n\t\t\t\"id\": \"attr\",\n      \"description\": \"Attributes\",\n\t\t\t\"required\":false,\n\t\t\t\"properties\":{}\n\t\t},\n    \"content\": {\n\t\t\t\"type\":[\"array\",\"string\",\"null\"],\n\t\t\t\"id\": \"content\",\n\t\t\t\"required\":false,\n      \"description\": \"Css properties\"\n\t\t},\n    \"css\": {\n\t\t\t\"type\":[\"object\",\"null\"],\n\t\t\t\"id\": \"css\",\n\t\t\t\"required\":false,\n      \"description\": \"Css properties\"\n\t\t},\n\t\t\"events\": {\n\t\t\t\"type\":\"object\",\n\t\t\t\"id\": \"events\",\n      \"description\": \"Events\",\n\t\t\t\"required\":false,\n\t\t\t\"properties\":{\n\t\t\t\t\"change\": {\n\t\t\t\t\t\"type\":\"string\",\n\t\t\t\t\t\"required\":false\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"script\": {\n\t\t\t\"type\":\"string\",\n      \"description\": \"Script\",\n\t\t\t\"id\": \"script\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"tag\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"tag\",\n      \"description\": \"Tag\",\n\t\t\t\"required\":true\n\t\t},\n\t\t\"text\": {\n\t\t\t\"type\":\"string\",\n\t\t\t\"id\": \"text\",\n      \"description\": \"Text\",\n\t\t\t\"required\":false\n\t\t},\n\t\t\"widget\": {\n\t\t\t\"type\":[\"object\",\"array\"],\n\t\t\t\"id\": \"widget\",\n      \"description\": \"Widget\",\n\t\t\t\"required\":false,\n\t\t\t\"properties\":{\n\t\t\t\t\"name\": {\n\t\t\t\t\t\"type\":\"string\",\n\t\t\t\t\t\"required\":true\n\t\t\t\t},\n\t\t\t\t\"options\": {\n\t\t\t\t\t\"type\":[\"object\",\"array\"],\n\t\t\t\t\t\"required\":false\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"xhtml\": {\n\t\t\t\"type\":\"boolean\",\n\t\t\t\"id\": \"xhtml\",\n      \"description\": \"XHTML conformity\",\n\t\t\t\"required\":false\n\t\t}\n\t}\n}"
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * @package html\n *\/",
+        "\/**\n * Creates DOM elements\n * \n * Depends on JsonSchema\\Validator\n *\n *\n * This class will create a DOM element.\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 2, 2013, 23:23:55 +0000\n * @category  HTML\n * @package html\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.3\n * @todo Tooltips\n *\/"
+    ],
     "summary": "Creates DOM elements",
     "description": "Depends on JsonSchema\\Validator\n\n\nThis class will create a DOM element.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>Depends on JsonSchema\\Validator<\/p>\n<p>This class will create a DOM element.<\/p>"
+            "content": "Depends on JsonSchema\\Validator\n\n\nThis class will create a DOM element."
         }
     ]
 }

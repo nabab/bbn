@@ -1,0 +1,300 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Root",
+    "namespace": true,
+    "realName": "Root",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Root.php",
+    "startLine": 8,
+    "endLine": 161,
+    "numMethods": 5,
+    "numProperties": 2,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "root": null,
+        "default": null
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Root",
+    "contentConstructor": null,
+    "methods": {
+        "getRoot": {
+            "name": "getRoot",
+            "summary": "Returns the ID of the root option - mother of all",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->getRoot());\n\/\/ (int)0"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRoot(): ?string\n  {\n    if ($this->check()) {\n      return $this->root;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 26,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getRoot",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the root option - mother of all\n\n```php\nX::dump($opt->getRoot());\n\/\/ (int)0\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the root option - mother of all\n   *\n   * ```php\n   * X::dump($opt->getRoot());\n   * \/\/ (int)0\n   * ```\n   *\n   * @return string|null\n   *\/"
+        },
+        "getDefault": {
+            "name": "getDefault",
+            "summary": "Returns the ID of the default option ($id_parent used when not provided)",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->getDefault());\n\/\/ (int) 0\n$opt->setDefault(5);\nX::dump($opt->getDefault());\n\/\/ (int) 5\n$opt->setDefault();\nX::dump($opt->getDefault());\n\/\/ (int) 0"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDefault(): ?string\n  {\n    if ($this->check()) {\n      return $this->default;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 52,
+            "endLine": 59,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getDefault",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the ID of the default option ($id_parent used when not provided)\n\n```php\nX::dump($opt->getDefault());\n\/\/ (int) 0\n$opt->setDefault(5);\nX::dump($opt->getDefault());\n\/\/ (int) 5\n$opt->setDefault();\nX::dump($opt->getDefault());\n\/\/ (int) 0\n```\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the default option ($id_parent used when not provided)\n   *\n   * ```php\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * $opt->setDefault(5);\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 5\n   * $opt->setDefault();\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * ```\n   *\n   * @return string|null\n   *\/"
+        },
+        "setDefault": {
+            "name": "setDefault",
+            "summary": "Makes an option act as if it was the root option",
+            "description": "It will be the default $id_parent for options requested by code",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "It will be the default $id_parent for options requested by code"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->getDefault());\n\/\/ (int) 0\n\/\/ Default root option\n$new = $opt->fromCode('test');\n\/\/ false\n\/\/ Option not found\n$opt->setDefault($new);\n\/\/ Default is now 5\nX::dump($opt->getDefault());\n\/\/ (int) 5\nX::dump($opt->fromCode('test));\n\/\/ (int) 24\n\/\/ Returns the ID (24) of a child of option 5 with code 'test'\n$opt->setDefault();\n\/\/ Default is back to root\nX::dump($opt->getDefault());\n\/\/ (int) 0"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDefault($uid): self\n  {\n    if ($this->check() && $this->exists($uid)) {\n      $this->default = $uid;\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 90,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDefault",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Makes an option act as if it was the root option\nIt will be the default $id_parent for options requested by code\n\n```php\nX::dump($opt->getDefault());\n\/\/ (int) 0\n\/\/ Default root option\n$new = $opt->fromCode('test');\n\/\/ false\n\/\/ Option not found\n$opt->setDefault($new);\n\/\/ Default is now 5\nX::dump($opt->getDefault());\n\/\/ (int) 5\nX::dump($opt->fromCode('test));\n\/\/ (int) 24\n\/\/ Returns the ID (24) of a child of option 5 with code 'test'\n$opt->setDefault();\n\/\/ Default is back to root\nX::dump($opt->getDefault());\n\/\/ (int) 0\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Makes an option act as if it was the root option\n   * It will be the default $id_parent for options requested by code\n   *\n   * ```php\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * \/\/ Default root option\n   * $new = $opt->fromCode('test');\n   * \/\/ false\n   * \/\/ Option not found\n   * $opt->setDefault($new);\n   * \/\/ Default is now 5\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 5\n   * X::dump($opt->fromCode('test));\n   * \/\/ (int) 24\n   * \/\/ Returns the ID (24) of a child of option 5 with code 'test'\n   * $opt->setDefault();\n   * \/\/ Default is back to root\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * ```\n   *\n   * @param string $uid\n   * @return Option\n   * @throws Exception\n   *\/"
+        },
+        "getDefaults": {
+            "name": "getDefaults",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDefaults(): array\n  {\n    if ($this->check()) {\n      return array_filter($this->fullOptions($this->root), function($a) {\n        return $a['code'] !== 'templates';\n      });\n    }\n\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 100,
+            "endLine": 109,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getDefaults",
+            "returns": [
+                "array"
+            ],
+            "arguments": []
+        },
+        "init": {
+            "name": "init",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Root",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Root.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function init(): bool\n  {\n    if (!$this->is_init) {\n      $this->cacheInit();\n      $t          =& $this;\n      $this->root = $this->cacheGetSet(\n        function () use (&$t) {\n          return $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [\n            $t->fields['id_parent'] => null, $t->fields['code'] => 'root']);\n        },\n        'root',\n        'root',\n        60\n      );\n      if (!$this->root) {\n        return false;\n      }\n\n      if (\\defined('BBN_APP_NAME')) {\n        $this->default = $this->cacheGetSet(\n          function () use (&$t) {\n            $res = $t->db->selectOne(\n              $t->class_cfg['table'],\n              $t->fields['id'],\n              [\n                $t->fields['id_parent'] => $this->root,\n                $t->fields['code'] => BBN_APP_NAME\n              ]\n            );\n            if (!$res) {\n              $res = $t->root;\n            }\n\n            return $res;\n          },\n          BBN_APP_NAME,\n          BBN_APP_NAME,\n          60\n        );\n      }\n      else {\n        $this->default = $this->root;\n      }\n\n      $this->is_init = true;\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 112,
+            "endLine": 160,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "init",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        }
+    },
+    "properties": {
+        "root": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Root"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Root",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var int The root ID of the options in the table",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "default": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Root"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Root",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var int The default ID as parent",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\Appui\\Option": "Option"
+    },
+    "dummyComments": [
+        "\/** @var int The root ID of the options in the table *\/",
+        "\/** @var int The default ID as parent *\/",
+        "\/**\n   * Returns the ID of the root option - mother of all\n   *\n   * ```php\n   * X::dump($opt->getRoot());\n   * \/\/ (int)0\n   * ```\n   *\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns the ID of the default option ($id_parent used when not provided)\n   *\n   * ```php\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * $opt->setDefault(5);\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 5\n   * $opt->setDefault();\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * ```\n   *\n   * @return string|null\n   *\/",
+        "\/**\n   * Makes an option act as if it was the root option\n   * It will be the default $id_parent for options requested by code\n   *\n   * ```php\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * \/\/ Default root option\n   * $new = $opt->fromCode('test');\n   * \/\/ false\n   * \/\/ Option not found\n   * $opt->setDefault($new);\n   * \/\/ Default is now 5\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 5\n   * X::dump($opt->fromCode('test));\n   * \/\/ (int) 24\n   * \/\/ Returns the ID (24) of a child of option 5 with code 'test'\n   * $opt->setDefault();\n   * \/\/ Default is back to root\n   * X::dump($opt->getDefault());\n   * \/\/ (int) 0\n   * ```\n   *\n   * @param string $uid\n   * @return Option\n   * @throws Exception\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\Cache",
     "namespace": true,
+    "realName": "Cache",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/Cache.php",
     "startLine": 16,
     "endLine": 246,
-    "numMethods": 0,
-    "numProperties": 0,
+    "numMethods": 15,
+    "numProperties": 2,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -33,10 +34,1303 @@
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Cache",
     "contentConstructor": null,
-    "methods": null,
-    "properties": null,
+    "methods": {
+        "cacheInit": {
+            "name": "cacheInit",
+            "summary": "Initializes the cache object, must be called in __construct",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheInit(): void\n  {\n    if ( \\is_null($this->cache_engine) ){\n      $this->cache_engine = CacheCls::getEngine();\n      $this->_cache_prefix = Str::encodeFilename(str_replace('\\\\', '\/', \\get_class($this)), true).'\/';\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 27,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Initializes the cache object, must be called in __construct\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initializes the cache object, must be called in __construct\n   *\n   * @return void\n   *\/"
+        },
+        "cacheCheck": {
+            "name": "cacheCheck",
+            "summary": "Throws an exception if the cache has not been initialized",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheCheck(): void\n  {\n    if (!$this->cache_engine) {\n      throw new Exception(X::_(\"The cache object has not been initialized\"));\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 41,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheCheck",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Throws an exception if the cache has not been initialized\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Throws an exception if the cache has not been initialized\n   *\n   * @return void\n   *\/"
+        },
+        "_cache_name": {
+            "name": "_cache_name",
+            "summary": "Generates a name for the cache based on the class name and the method called - or a gievn string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function _cache_name($uid, $method = '', string $locale = ''): string\n  {\n    $uid  = (string)$uid;\n    $path = Str::isUid($uid) ? substr($uid, 0, 3).'\/'.substr($uid, 3, 3).'\/'.substr($uid, 6) : $uid;\n    return $this->_cache_prefix.$path.(empty($method) ? '' : '\/'.(string)$method).(empty($locale) ? '' : \"-$locale\");\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 57,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_cache_name",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Generates a name for the cache based on the class name and the method called - or a gievn string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a name for the cache based on the class name and the method called - or a gievn string\n   *\n   * @param [type] $uid\n   * @param string $method\n   * @param string $locale\n   * @return string\n   *\/"
+        },
+        "cacheDeleteAll": {
+            "name": "cacheDeleteAll",
+            "summary": "Deletes all the cache related to the current class",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteAll(): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_prefix);\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 70,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheDeleteAll",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the cache related to the current class\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the cache related to the current class\n   *\n   * @return self\n   *\/"
+        },
+        "cacheDelete": {
+            "name": "cacheDelete",
+            "summary": "Deletes the given cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDelete(string $uid, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method));\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 85,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheDelete",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheDeleteLocale": {
+            "name": "cacheDeleteLocale",
+            "summary": "Deletes the given cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 101,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheDeleteLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheGet": {
+            "name": "cacheGet",
+            "summary": "Gets the cached data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGet(string $uid, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 116,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheGet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data\n   *\n   * @param string $uid\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheGetLocale": {
+            "name": "cacheGetLocale",
+            "summary": "Gets the cached data for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheSet": {
+            "name": "cacheSet",
+            "summary": "Sets the cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 147,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheSet",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheSetLocale": {
+            "name": "cacheSetLocale",
+            "summary": "Sets the cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 165,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheSetLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheGetSet": {
+            "name": "cacheGetSet",
+            "summary": "Gets the cache or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method), $ttl);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 182,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetSet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheGetSetLocale": {
+            "name": "cacheGetSetLocale",
+            "summary": "Gets the cache for a specific locale or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSetLocale(callable $fn, string $uid, string $locale, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method, $locale), $ttl);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 199,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "shortName": "cacheGetSetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache for a specific locale or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache for a specific locale or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheHas": {
+            "name": "cacheHas",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHas(string $uid, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGet($uid, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 213,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheHas",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "cacheHasLocale": {
+            "name": "cacheHasLocale",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHasLocale(string $uid, string $locale, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGetLocale($uid, $locale, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 227,
+            "endLine": 231,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheHasLocale",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "serializeFunction": {
+            "name": "serializeFunction",
+            "summary": "Transforms a function in a cacheable string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 241,
+            "endLine": 245,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "serializeFunction",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "function",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Transforms a function in a cacheable string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
+        }
+    },
+    "properties": {
+        "_cache_prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Cache"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "cache_engine": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Cache"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Cache": "CacheCls"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 05\/11\/2016\n * Time: 19:51\n *\/",
+        "\/**\n   * Initializes the cache object, must be called in __construct\n   *\n   * @return void\n   *\/",
+        "\/**\n   * Throws an exception if the cache has not been initialized\n   *\n   * @return void\n   *\/",
+        "\/**\n   * Generates a name for the cache based on the class name and the method called - or a gievn string\n   *\n   * @param [type] $uid\n   * @param string $method\n   * @param string $locale\n   * @return string\n   *\/",
+        "\/**\n   * Deletes all the cache related to the current class\n   *\n   * @return self\n   *\/",
+        "\/**\n   * Deletes the given cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @return self\n   *\/",
+        "\/**\n   * Deletes the given cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return self\n   *\/",
+        "\/**\n   * Gets the cached data\n   *\n   * @param string $uid\n   * @param string $method\n   * @return mixed\n   *\/",
+        "\/**\n   * Gets the cached data for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return mixed\n   *\/",
+        "\/**\n   * Sets the cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/",
+        "\/**\n   * Sets the cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/",
+        "\/**\n   * Gets the cache or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/",
+        "\/**\n   * Gets the cache for a specific locale or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/",
+        "\/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/",
+        "\/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/",
+        "\/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

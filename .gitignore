@@ -19,3 +19,4 @@ filemode = false
 .env
 composer.lock
 .phpunit.cache/
+json-doc copy

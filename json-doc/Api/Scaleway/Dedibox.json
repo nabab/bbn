@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Api\\Scaleway\\Dedibox",
     "namespace": true,
+    "realName": "Dedibox",
+    "realNamespace": "bbn\\Api\\Scaleway",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Scaleway\/Dedibox.php",
@@ -16,7 +18,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -36,11 +37,14 @@
             "summary": "Gets Dedibox plans list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Dedibox",
+            "class": "bbn\\Api\\Scaleway\\Dedibox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Dedibox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('dedibox\/plans');\n  }",
+            "code": "  public function getPlans(): array\n  {\n    return $this->_callCommand('dedibox\/plans');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 16,
             "endLine": 19,
             "isDeprecated": false,
@@ -51,22 +55,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPlans",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets Dedibox plans list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets Dedibox plans list\n   * @return array\n   *\/"
         },
         "getDediboxOptions": {
             "name": "getDediboxOptions",
             "summary": "Gets the list of available options products",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Dedibox",
+            "class": "bbn\\Api\\Scaleway\\Dedibox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Dedibox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/options\/$id\");\n  }",
+            "code": "  public function getDediboxOptions(int $id): array\n  {\n    return $this->_callCommand(\"dedibox\/options\/$id\");\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 27,
             "endLine": 30,
             "isDeprecated": false,
@@ -77,33 +90,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDediboxOptions",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The dedibox product ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the list of available options products\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The dedibox product ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the list of available options products\n   * @param int $id The dedibox product ID\n   * @return array\n   *\/"
         },
         "getDediboxDatacenters": {
             "name": "getDediboxDatacenters",
             "summary": "Gets the list of available datacenters",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Dedibox",
+            "class": "bbn\\Api\\Scaleway\\Dedibox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Dedibox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/availability\/$id\");\n  }",
+            "code": "  public function getDediboxDatacenters(int $id): array\n  {\n    return $this->_callCommand(\"dedibox\/availability\/$id\");\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 38,
             "endLine": 41,
             "isDeprecated": false,
@@ -114,27 +148,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDediboxDatacenters",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The dedibox product ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the list of available datacenters\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The dedibox product ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the list of available datacenters\n   * @param int $id The dedibox product ID\n   * @return array\n   *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * Scaleway Dedibox trait\n *\/",
+        "\/**\n   * Gets Dedibox plans list\n   * @return array\n   *\/",
+        "\/**\n   * Gets the list of available options products\n   * @param int $id The dedibox product ID\n   * @return array\n   *\/",
+        "\/**\n   * Gets the list of available datacenters\n   * @param int $id The dedibox product ID\n   * @return array\n   *\/"
+    ],
     "summary": "Scaleway Dedibox trait",
     "description": "",
     "description_parts": []

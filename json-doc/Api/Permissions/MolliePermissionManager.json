@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Api\\Permissions\\MolliePermissionManager",
     "namespace": true,
+    "realName": "MolliePermissionManager",
+    "realNamespace": "bbn\\Api\\Permissions",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Permissions\/MolliePermissionManager.php",
     "startLine": 5,
     "endLine": 136,
-    "numMethods": 8,
-    "numProperties": 0,
+    "numMethods": 9,
+    "numProperties": 2,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -30,7 +31,6 @@
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "MolliePermissionManager",
     "contentConstructor": {
-        "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
         "returns": []
     },
     "methods": {
@@ -39,11 +39,14 @@
             "summary": "MollieUserManager constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Api\\Permissions\\MollieTokensHandlerContract $tokensHandler, bbn\\Api\\Permissions\\ApiPermissionsContract $apiPermission)\n  {\n    $this->tokensHandler = $tokensHandler;\n    $this->apiPermission = $apiPermission;\n  }",
+            "code": "  public function __construct(MollieTokensHandlerContract $tokensHandler, ApiPermissionsContract $apiPermission)\n  {\n    $this->tokensHandler = $tokensHandler;\n    $this->apiPermission = $apiPermission;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 23,
             "endLine": 27,
             "isDeprecated": false,
@@ -54,13 +57,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "tokensHandler",
                     "position": 0,
                     "type": "bbn\\Api\\Permissions\\MollieTokensHandlerContract",
+                    "type_arr": [
+                        "bbn\\Api\\Permissions\\MollieTokensHandlerContract"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -71,24 +79,51 @@
                     "name": "apiPermission",
                     "position": 1,
                     "type": "bbn\\Api\\Permissions\\ApiPermissionsContract",
+                    "type_arr": [
+                        "bbn\\Api\\Permissions\\ApiPermissionsContract"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ermission"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "MollieUserManager constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "MollieTokensHandlerContract",
+                        "name": "$tokens",
+                        "description": "andler"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "ApiPermissionsContract",
+                        "name": "$api",
+                        "description": "ermission"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * MollieUserManager constructor.\n   *\n   * @param MollieTokensHandlerContract $tokensHandler\n   * @param ApiPermissionsContract $apiPermission\n   *\/"
         },
         "authorize": {
             "name": "authorize",
             "summary": "Redirect the user to get authorization.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $authorization_url = $this->apiPermission->getAuthorizationUrl();\n\n    \/\/ Get the state generated for you and store it to the session.\n    $_SESSION['oauth2state'] = $this->apiPermission->getProvider()->getState();\n\n    \/\/ Redirect the user to the authorization URL.\n    header('Location: ' . $authorization_url);\n    exit;\n  }",
+            "code": "  public function authorize(): void\n  {\n    $authorization_url = $this->apiPermission->getAuthorizationUrl();\n\n    \/\/ Get the state generated for you and store it to the session.\n    $_SESSION['oauth2state'] = $this->apiPermission->getProvider()->getState();\n\n    \/\/ Redirect the user to the authorization URL.\n    header('Location: ' . $authorization_url);\n    exit;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 32,
             "endLine": 42,
             "isDeprecated": false,
@@ -99,22 +134,30 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "authorize",
             "returns": [
                 "void"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Redirect the user to get authorization.",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Redirect the user to get authorization.\n   *\/"
         },
         "getAccessToken": {
             "name": "getAccessToken",
             "summary": "Get access token from authorization code and save it in database for the chosen account name.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $authorization_code, string $account_name)\n  {\n    $tokens =  $this->apiPermission->getTokens($authorization_code);\n\n    $access_token  = $tokens['access_token'];\n    $refresh_token = $tokens['refresh_token'];\n    $expires_in    = $tokens['expires_in']; \/\/ The number of seconds left before the access token expires.\n\n    $this->saveTokensInDb($access_token, $refresh_token, $expires_in, $account_name);\n\n    return $access_token;\n  }",
+            "code": "  public function getAccessToken(string $authorization_code, string $account_name)\n  {\n    $tokens =  $this->apiPermission->getTokens($authorization_code);\n\n    $access_token  = $tokens['access_token'];\n    $refresh_token = $tokens['refresh_token'];\n    $expires_in    = $tokens['expires_in']; \/\/ The number of seconds left before the access token expires.\n\n    $this->saveTokensInDb($access_token, $refresh_token, $expires_in, $account_name);\n\n    return $access_token;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 51,
             "endLine": 62,
             "isDeprecated": false,
@@ -125,13 +168,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getAccessToken",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "authorization_code",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -142,24 +190,51 @@
                     "name": "account_name",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Get access token from authorization code and save it in database for the chosen account name.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$authorization",
+                        "description": "code"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$account",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Get access token from authorization code and save it in database for the chosen account name.\n   *\n   * @param string $authorization_code\n   * @param string $account_name\n   * @return mixed\n   *\/"
         },
         "refreshAccessToken": {
             "name": "refreshAccessToken",
             "summary": "Refresh access token from the given refresh token and update it in db for the given account name.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $refresh_token, string $account_name)\n  {\n    $tokens = $this->apiPermission->refreshAccessToken($refresh_token);\n\n    $access_token  = $tokens['access_token'];\n    $refresh_token = $tokens['refresh_token'];\n    $expires_in    = $tokens['expires_in']; \/\/ The number of seconds left before the access token expires.\n\n    $this->updateTokensInDb($access_token, $refresh_token, $expires_in, $account_name);\n\n    return $access_token;\n  }",
+            "code": "  public function refreshAccessToken(string $refresh_token, string $account_name): string\n  {\n    $tokens = $this->apiPermission->refreshAccessToken($refresh_token);\n\n    $access_token  = $tokens['access_token'];\n    $refresh_token = $tokens['refresh_token'];\n    $expires_in    = $tokens['expires_in']; \/\/ The number of seconds left before the access token expires.\n\n    $this->updateTokensInDb($access_token, $refresh_token, $expires_in, $account_name);\n\n    return $access_token;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 71,
             "endLine": 82,
             "isDeprecated": false,
@@ -170,15 +245,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "refreshAccessToken",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "refresh_token",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -189,24 +269,51 @@
                     "name": "account_name",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Refresh access token from the given refresh token and update it in db for the given account name.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$refresh",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$account",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Refresh access token from the given refresh token and update it in db for the given account name.\n   *\n   * @param string $refresh_token\n   * @param string $account_name\n   * @return string\n   *\/"
         },
         "getResourceOwner": {
             "name": "getResourceOwner",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($access_token)\n  {\n    \/\/ Using the access token, we may look up details about the resource owner.\n    $resourceOwner = $this->apiPermission->getProvider()->getResourceOwner($access_token);\n\n    return $resourceOwner->toArray();\n  }",
+            "code": "  public function getResourceOwner($access_token)\n  {\n    \/\/ Using the access token, we may look up details about the resource owner.\n    $resourceOwner = $this->apiPermission->getProvider()->getResourceOwner($access_token);\n\n    return $resourceOwner->toArray();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 88,
             "endLine": 94,
             "isDeprecated": false,
@@ -217,30 +324,47 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getResourceOwner",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "access_token",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$access_token"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $access_token\n   * @return array\n   *\/"
         },
         "unsetSessionState": {
             "name": "unsetSessionState",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (isset($_SESSION['oauth2state'])) {\n      unset($_SESSION['oauth2state']);\n    }\n  }",
+            "code": "  public function unsetSessionState()\n  {\n    if (isset($_SESSION['oauth2state'])) {\n      unset($_SESSION['oauth2state']);\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 99,
             "endLine": 104,
             "isDeprecated": false,
@@ -251,20 +375,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "unsetSessionState",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return void\n   *\/"
         },
         "getSessionState": {
             "name": "getSessionState",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $_SESSION['oauth2state'] ?? null;\n  }",
+            "code": "  public function getSessionState()\n  {\n    return $_SESSION['oauth2state'] ?? null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 106,
             "endLine": 109,
             "isDeprecated": false,
@@ -275,22 +408,25 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getSessionState",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
-        "updateTokensInDb": {
-            "name": "updateTokensInDb",
-            "summary": "Updates tokens and expiry for the given account name.",
+        "saveTokensInDb": {
+            "name": "saveTokensInDb",
+            "summary": "Saves tokens and expiry for the given account name.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(string $access_token, string $refresh_token, int $expires_in, string $account_name)\n  {\n    return $this->tokensHandler->updatePermissionTokens($access_token, $refresh_token, $expires_in, $account_name);\n  }",
-            "startLine": 132,
-            "endLine": 135,
+            "code": "  protected function saveTokensInDb(string $access_token, string $refresh_token, int $expires_in, string $account_name)\n  {\n    return $this->tokensHandler->saveNewPermissionTokens($access_token, $refresh_token, $expires_in, $account_name);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 119,
+            "endLine": 122,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -299,13 +435,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
+            "shortName": "saveTokensInDb",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "access_token",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -316,6 +457,11 @@
                     "name": "refresh_token",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -326,6 +472,11 @@
                     "name": "expires_in",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -336,18 +487,222 @@
                     "name": "account_name",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Saves tokens and expiry for the given account name.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$access",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$refresh",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$expires",
+                        "description": "in"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$account",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Saves tokens and expiry for the given account name.\n   *\n   * @param string $access_token\n   * @param string $refresh_token\n   * @param int $expires_in\n   * @param string $account_name\n   *\/"
+        },
+        "updateTokensInDb": {
+            "name": "updateTokensInDb",
+            "summary": "Updates tokens and expiry for the given account name.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MolliePermissionManager.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function updateTokensInDb(string $access_token, string $refresh_token, int $expires_in, string $account_name)\n  {\n    return $this->tokensHandler->updatePermissionTokens($access_token, $refresh_token, $expires_in, $account_name);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 132,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 4,
+            "shortName": "updateTokensInDb",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "access_token",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "token"
+                },
+                {
+                    "name": "refresh_token",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "token"
+                },
+                {
+                    "name": "expires_in",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "in"
+                },
+                {
+                    "name": "account_name",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "name"
+                }
+            ],
+            "doc": {
+                "description": "Updates tokens and expiry for the given account name.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$access",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$refresh",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$expires",
+                        "description": "in"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$account",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Updates tokens and expiry for the given account name.\n   *\n   * @param string $access_token\n   * @param string $refresh_token\n   * @param int $expires_in\n   * @param string $account_name\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "tokensHandler": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Api\\Permissions\\MollieTokensHandlerContract",
+            "declaring": {
+                "name": "bbn\\Api\\Permissions\\MolliePermissionManager"
+            },
+            "declaring_trait": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "MollieTokensHandlerContract"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "apiPermission": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Api\\Permissions\\ApiPermissionsContract",
+            "declaring": {
+                "name": "bbn\\Api\\Permissions\\MolliePermissionManager"
+            },
+            "declaring_trait": "bbn\\Api\\Permissions\\MolliePermissionManager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "ApiPermissionsContract"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

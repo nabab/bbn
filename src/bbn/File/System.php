@@ -94,7 +94,7 @@ class System extends bbn\Models\Cls\Basic
           $this->mode   = 'webdav';
           $this->prefix = 'https://' . $cfg['host'] . $cfg['prefix'];
           $this->obj    = new \Sabre\DAV\Client([
-            'baseUri' => $this->path,
+            'baseUri' => $this->prefix,
             'userName' => $cfg['user'],
             'password' => $cfg['pass']
           ]);
@@ -1060,7 +1060,7 @@ class System extends bbn\Models\Cls\Basic
           $this->current = ftp_pwd($this->obj);
           if (
             !empty($cfg['passive'])
-            || (defined('BBN_SERVER_NAME') && !@fsockopen(BBN_SERVER_NAME, $args[1]))
+            || (defined('BBN_SERVER_NAME') && !@fsockopen(constant('BBN_SERVER_NAME'), $args[1]))
           ) {
             ftp_pasv($this->obj, true);
             stream_set_chunk_size($this->obj, 1024 * 1024);

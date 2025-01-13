@@ -1,0 +1,954 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Manip",
+    "namespace": true,
+    "realName": "Manip",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Manip.php",
+    "startLine": 9,
+    "endLine": 558,
+    "numMethods": 9,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Manip",
+    "contentConstructor": null,
+    "methods": {
+        "export": {
+            "name": "export",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function export(string $id, string $mode = 'single'): ?array\n  {\n    $default = $this->getDefault();\n    $this->setDefault($this->root);\n    $o = null;\n    $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];\n    if (!in_array($mode, $modes)) {\n      throw new Exception(X::_(\"The given mode is forbidden\"));\n    }\n\n    $simple = false;\n    switch ($mode) {\n      case 'single':\n        $o = $this->rawOption($id);\n        break;\n      case 'simple':\n        $o = $this->option($id);\n        $simple = true;\n        break;\n      case 'schildren':\n        $o = $this->fullOptions($id);\n        $simple = true;\n        break;\n      case 'children':\n        $o = $this->exportDb($id, false, true);\n        break;\n      case 'full':\n        $o = $this->exportDb($id, true, true);\n        break;\n      case 'sfull':\n        $o = $this->fullTree($id);\n        $simple = true;\n        break;\n    }\n\n    if ($o) {\n      if ($simple) {\n        $opt =& $this;\n        $fn  = function ($o) use (&$opt) {\n\n          $o[$opt->fields['text']] = $opt->rawText($o[$opt->fields['id']]);\n\n          $cfg = $opt->getCfg($o[$this->fields['id']]);\n          if (!is_array($cfg) || !empty($cfg['inherit_from'])) {\n            $cfg = [];\n          }\n          elseif (!empty($cfg['schema']) && is_string($cfg['schema'])) {\n            $cfg['schema'] = json_decode($cfg['schema'], true);\n          }\n\n          \/\/if (isset($cfg['id'])) {\n            \/\/unset($cfg['id']);\n          \/\/}\n\n          if (isset($cfg['scfg'])\n              && !empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])\n          ) {\n            $cfg['scfg']['schema'] = json_decode($cfg['scfg']['schema'], true);\n          }\n\n          if (!empty($cfg['id_root_alias'])) {\n            if ($codes = $opt->getCodePath($cfg['id_root_alias'])) {\n              $cfg['id_root_alias'] = $codes;\n            }\n            else {\n              unset($cfg['id_root_alias']);\n            }\n          }\n\n          foreach ($cfg as $n => $v) {\n            if (!$v) {\n              unset($cfg[$n]);\n            }\n          }\n\n          if (!empty($cfg)) {\n            $o[$this->fields['cfg']] = $cfg;\n          }\n\n          unset($o[$this->fields['id']]);\n          unset($o[$this->fields['id_parent']]);\n          if (isset($o['num_children'])) {\n            unset($o['num_children']);\n          }\n\n          if (isset($o['alias'])) {\n            unset($o['alias']);\n          }\n\n          foreach ($o as $n => $v) {\n            if (!$v) {\n              unset($o[$n]);\n            }\n          }\n\n          if (!empty($o[$this->fields['id_alias']])\n              && ($codes = $opt->getCodePath($o[$this->fields['id_alias']]))\n          ) {\n            $o[$this->fields['id_alias']] = $codes;\n          }\n          else {\n            unset($o[$this->fields['id_alias']]);\n          }\n\n          return $o;\n        };\n\n        switch ($mode) {\n          case 'simple':\n            $o = $fn($o);\n            break;\n          case 'schildren':\n            $o = X::map($fn, $o, 'items');\n            break;\n          case 'sfull':\n            $o = $fn($o);\n            $o['items'] = empty($o['items']) ? [] : X::map($fn, $o['items'], 'items');\n            break;\n        }\n      }\n\n    }\n    \n    $this->setDefault($default);\n    return $o;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 18,
+            "endLine": 143,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "export",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "single",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param string $id\n   * @param string $mode\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "exportDb": {
+            "name": "exportDb",
+            "summary": "Converts an option or a hierarchy to a multi-level array with JSON values",
+            "description": "If $return is false the resulting array will be printed",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "If $return is false the resulting array will be printed"
+                },
+                {
+                    "type": "code",
+                    "content": ""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function exportDb($id, bool $deep = false, bool $return = false, bool $aliases = false)\n  {\n    if (($ret = $deep ? $this->rawTree($id) : $this->rawOptions($id))) {\n      $ret  = $this->analyzeOut($ret);\n      $res  = [];\n      $done = [];\n      $max  = 3;\n      foreach ($ret['options'] as $i => $o) {\n        if (!$i || in_array($o[$this->fields['id_parent']], $done, true)) {\n          if (empty($o[$this->fields['id_alias']])) {\n            $res[]  = $o;\n            $done[] = $o[$this->fields['id']];\n          }\n        }\n      }\n\n      while ($max && (count($res) < count($ret['options']))) {\n        foreach ($ret['options'] as $i => $o) {\n          if (!empty($o[$this->fields['id_alias']])\n              && !in_array($o[$this->fields['id']], $done, true)\n              && in_array($o[$this->fields['id_parent']], $done, true)\n              && in_array($o[$this->fields['id_alias']], $done, true)\n          ) {\n            $res[]  = $o;\n            $done[] = $o[$this->fields['id']];\n          }\n        }\n\n        $max--;\n      }\n\n      if (count($res) < count($ret['options'])) {\n        foreach ($ret['options'] as $i => $o) {\n          if (!in_array($o[$this->fields['id_parent']], $done, true)) {\n            $o[$this->fields['id_parent']] = $this->getCodePath($o[$this->fields['id_parent']]);\n          }\n\n          if (!empty($o[$this->fields['id_alias']])\n              && !in_array($o[$this->fields['id']], $done, true)\n          ) {\n            if (!in_array($o[$this->fields['id_alias']], $done, true)) {\n              $code_path     = $this->getCodePath($o[$this->fields['id_alias']]);\n              $o[$this->fields['id_alias']] = $code_path ?: $o[$this->fields['id_alias']];\n            }\n\n            $res[]  = $o;\n            $done[] = $o[$this->fields['id']];\n          }\n        }\n      }\n\n      return $return ? $res : var_export($res, 1);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 159,
+            "endLine": 214,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "exportDb",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The ID of the option to clone"
+                },
+                {
+                    "name": "deep",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true children will be included"
+                },
+                {
+                    "name": "return",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the resulting array will be returned"
+                },
+                {
+                    "name": "aliases",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Converts an option or a hierarchy to a multi-level array with JSON values\nIf $return is false the resulting array will be printed\n\n```php\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The ID of the option to clone"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep",
+                        "description": "If set to true children will be included"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$return",
+                        "description": "If set to true the resulting array will be returned"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Example output"
+                }
+            },
+            "comments": "  \/**\n   * Converts an option or a hierarchy to a multi-level array with JSON values\n   * If $return is false the resulting array will be printed\n   *\n   * ```php\n   * ```\n   *\n   * @todo Example output\n   * @param int     $id     The ID of the option to clone\n   * @param boolean $deep   If set to true children will be included\n   * @param boolean $return If set to true the resulting array will be returned\n   * @return array|string|null\n   *\/"
+        },
+        "importAll": {
+            "name": "importAll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function importAll(array $options, $id_parent = null) {\n    $res = 0;\n    foreach ($this->import($options, $id_parent) as $num) {\n      $res += $num;\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 217,
+            "endLine": 224,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "importAll",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "options",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "import": {
+            "name": "import",
+            "summary": "Insert into the option table an exported array of options",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": ""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function import(array $options, $id_parent = null, array &$todo = null)\n  {\n    if (is_array($id_parent)) {\n      array_push($id_parent, $this->getRoot());\n      $id_parent = $this->fromCode($id_parent);\n    }\n    elseif (null === $id_parent) {\n      $id_parent = $this->getDefault();\n    }\n\n    if (!empty($options) && $this->check() && $this->exists($id_parent)) {\n      $c       =& $this->fields;\n      $is_root = false;\n      if ($todo === null) {\n        $is_root = true;\n        $todo    = [];\n      }\n\n      if (!isset($options[0])) {\n        $options = [$options];\n      }\n\n      if (X::isAssoc($options)) {\n        $options = [$options];\n      }\n\n      foreach ($options as $o) {\n        $tmp   = [];\n        $items = [];\n        \/** @todo Temp solution *\/\n        if (!is_array($o)) {\n          continue;\n        }\n        if (isset($o[$c['id']])) {\n          if ($this->exists($o[$c['id']])) {\n            unset($o[$c['id']]);\n          }\n        }\n\n        $o[$c['id_parent']] = $id_parent ?: $this->default;\n        if (isset($o['items'])) {\n          $items = $o['items'] ?: null;\n          unset($o['items']);\n        }\n\n\n        $hasNoText = empty($o[$c['text']]);\n        if (isset($o[$c['id_alias']])) {\n          $tmp['id_alias'] = $o[$c['id_alias']];\n          if ($hasNoText) {\n            $o[$c['text']] = 'waiting for alias';\n          }\n          unset($o[$c['id_alias']]);\n        }\n\n        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_root_alias'])) {\n          $tmp['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];\n          unset($o[$c['cfg']]['id_root_alias']);\n        }\n\n        if ($id = $this->add($o, true)) {\n          yield 1;\n          if (!empty($tmp)) {\n            $todo[$id] = $tmp;\n          }\n\n          if (!empty($items)) {\n            foreach ($this->import($items, $id, $todo) as $success) {\n              yield $success;\n            }\n          }\n        }\n        else {\n          X::log($o);\n          throw new Exception(X::_(\"Error while importing: impossible to add\"));\n        }\n      }\n\n      if ($is_root && !empty($todo)) {\n        foreach ($todo as $id => $td) {\n          if (!empty($td['id_alias'])) {\n            array_push($td['id_alias'], $this->getRoot());\n            if ($id_alias = $this->fromCode(...$td['id_alias'])) {\n              try {\n                $this->setAlias($id, $id_alias);\n                if ($hasNoText) {\n                  $this->setText($id, null);\n                }\n              }\n              catch (Exception $e) {\n                throw new Exception($e->getMessage());\n              }\n            }\n            else {\n              X::log($td['id_alias']);\n              throw new Exception(\n                X::_(\n                  \"Error while importing: impossible to set the alias %s\",\n                  json_encode($td, JSON_PRETTY_PRINT)\n                )\n              );\n            }\n          }\n\n          if (!empty($td['id_root_alias'])\n              && ($id_root_alias = $this->fromCode(...$td['id_root_alias']))\n          ) {\n            $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);\n          }\n        }\n      }\n\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 239,
+            "endLine": 352,
+            "isDeprecated": false,
+            "isGenerator": true,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "import",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "options",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of option(s) as export returns it"
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "parent The option target, if not specified {@link default}"
+                },
+                {
+                    "name": "todo",
+                    "position": 2,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Insert into the option table an exported array of options\n\n```php\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$options",
+                        "description": "An array of option(s) as export returns it"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|string|int|null",
+                        "name": "$id",
+                        "description": "parent The option target, if not specified {@link default}"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$todo"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Usage example"
+                }
+            },
+            "comments": "  \/**\n   * Insert into the option table an exported array of options\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param array    $options   An array of option(s) as export returns it\n   * @param array|string|int|null $id_parent The option target, if not specified {@link default}\n   * @param array|null $todo\n   * @return iterable|null\n   *\/"
+        },
+        "duplicate": {
+            "name": "duplicate",
+            "summary": "Copies and insert an option into a target option",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": ""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function duplicate($id, $target, $deep = false, $force = false, $return_num = false)\n  {\n    $res    = null;\n    $target = $this->fromCode($target);\n    if (Str::isUid($target)) {\n      if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {\n        foreach ($this->import($opt, $target) as $num) {\n          $res += $num;\n        }\n        $this->deleteCache($target);\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 368,
+            "endLine": 382,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "duplicate",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The source option's ID"
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The destination option's ID"
+                },
+                {
+                    "name": "deep",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true, children will also be duplicated"
+                },
+                {
+                    "name": "force",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true and option exists it will be merged"
+                },
+                {
+                    "name": "return_num",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Copies and insert an option into a target option\n\n```php\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The source option's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$target",
+                        "description": "The destination option's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep",
+                        "description": "If set to true, children will also be duplicated"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$force",
+                        "description": "If set to true and option exists it will be merged"
+                    }
+                ],
+                "return": "The number of affected rows or null if option not found",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Usage example"
+                }
+            },
+            "comments": "  \/**\n   * Copies and insert an option into a target option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param int|string  $id     The source option's ID\n   * @param int|string  $target The destination option's ID\n   * @param boolean     $deep   If set to true, children will also be duplicated\n   * @param boolean     $force  If set to true and option exists it will be merged\n   * @return int|null The number of affected rows or null if option not found\n   *\/"
+        },
+        "apply": {
+            "name": "apply",
+            "summary": "Applies a function to children of an option and updates the database",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": ""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function apply(callable $f, $id, $deep = false, bool $force = false)\n  {\n    if ($this->check()) {\n      $originals = \\is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );\n      if (isset($originals['items'])) {\n        $originals = $originals['items'];\n      }\n      $t = $this;\n      $originals = $this->map(function($o) use($t){\n        $o[$t->fields['text']] = $t->rawText($o[$this->fields['id']]);\n        return $o;\n      }, $originals, $deep);\n      $opts = $this->map($f, $originals, $deep);\n      if (\\is_array($opts)) {\n        $changes = 0;\n        foreach ($opts as $i => $o){\n          if ($force || $originals[$i] !== $o) {\n            $changes += (int)$this->set($o[$this->fields['id']], $o);\n          }\n\n          if ($deep && !empty($o['num_children']) && !empty($o['items'])) {\n            $changes += (int)$this->apply($f, $o, 1, true);\n          }\n        }\n\n        return $changes;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 398,
+            "endLine": 428,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "apply",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "f",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The function to apply (the unique argument will be the option as in {@link option()}"
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The options' ID on which children the function should be applied"
+                },
+                {
+                    "name": "deep",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the function will be applied to all children's levels"
+                },
+                {
+                    "name": "force",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true it will update the row in db without checking with $originals"
+                }
+            ],
+            "doc": {
+                "description": "Applies a function to children of an option and updates the database\n\n```php\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$f",
+                        "description": "The function to apply (the unique argument will be the option as in {@link option()}"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|array",
+                        "name": "$id",
+                        "description": "The options' ID on which children the function should be applied"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep",
+                        "description": "If set to true the function will be applied to all children's levels"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$force",
+                        "description": "If set to true it will update the row in db without checking with $originals"
+                    }
+                ],
+                "return": "The number of affected rows or null if option not found",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Usage example"
+                }
+            },
+            "comments": "  \/**\n   * Applies a function to children of an option and updates the database\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options' ID on which children the function should be applied\n   * @param boolean   $deep If set to true the function will be applied to all children's levels\n   * @param boolean   $force If set to true it will update the row in db without checking with $originals\n   * @return int|null The number of affected rows or null if option not found\n   *\/"
+        },
+        "map": {
+            "name": "map",
+            "summary": "Applies a function to children of an option",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": ""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function map(callable $f, $id, $deep = false)\n  {\n    $opts = \\is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );\n    $res  = [];\n    if (\\is_array($opts)) {\n      if (isset($opts['items'])) {\n        $opts = $opts['items'];\n      }\n\n      foreach ($opts as $i => $o){\n        $opts[$i] = $f($o);\n        if ($deep && $opts[$i] && !empty($opts[$i]['items'])) {\n          $opts[$i]['items'] = $this->map($f, $opts[$i]['items'], 1);\n        }\n\n        if (\\is_array($opts[$i])) {\n          $res[] = $opts[$i];\n        }\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 443,
+            "endLine": 465,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "map",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "f",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The function to apply (the unique argument will be the option as in {@link option()}"
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The options' ID on which children the function should be applied"
+                },
+                {
+                    "name": "deep",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the function will be applied to all children's levels"
+                }
+            ],
+            "doc": {
+                "description": "Applies a function to children of an option\n\n```php\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$f",
+                        "description": "The function to apply (the unique argument will be the option as in {@link option()}"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|array",
+                        "name": "$id",
+                        "description": "The options' ID on which children the function should be applied"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean|int",
+                        "name": "$deep",
+                        "description": "If set to true the function will be applied to all children's levels"
+                    }
+                ],
+                "return": "The new array with the function applied",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Usage example"
+                }
+            },
+            "comments": "  \/**\n   * Applies a function to children of an option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options' ID on which children the function should be applied\n   * @param boolean|int   $deep If set to true the function will be applied to all children's levels\n   * @return array The new array with the function applied\n   *\/"
+        },
+        "mapCfg": {
+            "name": "mapCfg",
+            "summary": "Applies a function to children of an option, with the cfg array included",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": ""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function mapCfg(callable $f, $id, $deep = false)\n  {\n    $opts = \\is_array($id) ? $id : ( $deep ? $this->fullTree($id) : $this->fullOptions($id) );\n    if (isset($opts['items'])) {\n      $opts = $opts['items'];\n    }\n\n    $res = [];\n    if (\\is_array($opts)) {\n      foreach ($opts as $i => $o){\n        $o[$this->fields['cfg']] = $this->getCfg($o[$this->fields['id']]);\n        $opts[$i] = $f($o);\n        if ($deep && $opts[$i] && !empty($opts[$i]['items'])) {\n          $opts[$i]['items'] = $this->mapCfg($f, $opts[$i]['items'], 1);\n        }\n\n        if (\\is_array($opts[$i])) {\n          $res[] = $opts[$i];\n        }\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 480,
+            "endLine": 503,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "mapCfg",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "f",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The function to apply (the unique argument will be the option as in {@link option()}"
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The options'ID on which children the function should be applied"
+                },
+                {
+                    "name": "deep",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the function will be applied to all children's levels"
+                }
+            ],
+            "doc": {
+                "description": "Applies a function to children of an option, with the cfg array included\n\n```php\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$f",
+                        "description": "The function to apply (the unique argument will be the option as in {@link option()}"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|array",
+                        "name": "$id",
+                        "description": "The options'ID on which children the function should be applied"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep",
+                        "description": "If set to true the function will be applied to all children's levels"
+                    }
+                ],
+                "return": "The new array with the function applied",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Usage example"
+                }
+            },
+            "comments": "  \/**\n   * Applies a function to children of an option, with the cfg array included\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options'ID on which children the function should be applied\n   * @param boolean   $deep If set to true the function will be applied to all children's levels\n   * @return array The new array with the function applied\n   *\/"
+        },
+        "analyzeOut": {
+            "name": "analyzeOut",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Manip",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Manip.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function analyzeOut(array $options, array &$results = [])\n  {\n    if ($this->check()) {\n\n      if (isset($options[0]) && is_array($options[0])) {\n        foreach ($options as $option) {\n          $this->analyzeOut($option, $results);\n        }\n        return $results;\n      }\n\n      if (empty($results)) {\n        $results['options'] = [];\n        $results['ids']     = [];\n        $results['aliases'] = [];\n      }\n\n      if (!empty($options[$this->fields['id']])) {\n        $results['ids'][$options[$this->fields['id']]] = null;\n      }\n\n      if (!empty($options[$this->fields['id_alias']])) {\n        $results['aliases'][$options[$this->fields['id_alias']]] = [\n          'id' => null,\n          'codes' => $this->getCodePath($options[$this->fields['id_alias']])\n        ];\n      }\n\n      $items = false;\n      if (!empty($options['items'])) {\n        $items = $options['items'];\n        unset($options['items']);\n      }\n\n      $results['options'][] = $options;\n      if ($items) {\n        foreach ($items as $it) {\n          $this->analyzeOut($it, $results);\n        }\n      }\n\n      return $results;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 511,
+            "endLine": 556,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "analyzeOut",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "options",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "results",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$options"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$results"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $options\n   * @param array $results\n   * @return array|null\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * @param string $id\n   * @param string $mode\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * Converts an option or a hierarchy to a multi-level array with JSON values\n   * If $return is false the resulting array will be printed\n   *\n   * ```php\n   * ```\n   *\n   * @todo Example output\n   * @param int     $id     The ID of the option to clone\n   * @param boolean $deep   If set to true children will be included\n   * @param boolean $return If set to true the resulting array will be returned\n   * @return array|string|null\n   *\/",
+        "\/**\n   * Insert into the option table an exported array of options\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param array    $options   An array of option(s) as export returns it\n   * @param array|string|int|null $id_parent The option target, if not specified {@link default}\n   * @param array|null $todo\n   * @return iterable|null\n   *\/",
+        "\/** @todo Temp solution *\/",
+        "\/**\n   * Copies and insert an option into a target option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param int|string  $id     The source option's ID\n   * @param int|string  $target The destination option's ID\n   * @param boolean     $deep   If set to true, children will also be duplicated\n   * @param boolean     $force  If set to true and option exists it will be merged\n   * @return int|null The number of affected rows or null if option not found\n   *\/",
+        "\/**\n   * Applies a function to children of an option and updates the database\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options' ID on which children the function should be applied\n   * @param boolean   $deep If set to true the function will be applied to all children's levels\n   * @param boolean   $force If set to true it will update the row in db without checking with $originals\n   * @return int|null The number of affected rows or null if option not found\n   *\/",
+        "\/**\n   * Applies a function to children of an option\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options' ID on which children the function should be applied\n   * @param boolean|int   $deep If set to true the function will be applied to all children's levels\n   * @return array The new array with the function applied\n   *\/",
+        "\/**\n   * Applies a function to children of an option, with the cfg array included\n   *\n   * ```php\n   * ```\n   *\n   * @todo Usage example\n   * @param callable  $f    The function to apply (the unique argument will be the option as in {@link option()}\n   * @param int|array $id   The options'ID on which children the function should be applied\n   * @param boolean   $deep If set to true the function will be applied to all children's levels\n   * @return array The new array with the function applied\n   *\/",
+        "\/**\n   * @param array $options\n   * @param array $results\n   * @return array|null\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

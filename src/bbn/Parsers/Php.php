@@ -307,7 +307,10 @@ class Php extends bbn\Models\Cls\Basic
         'staticProperties' => $statprops,
         'constants' => !empty($constants) ? $this->orderElement($constants, 'constants', $rc) : null
       ];
-      $code = file_get_contents($res['fileName']);
+      if (!file_exists($path . '/' . $res['fileName'])) {
+        throw new Exception("No file name for $res[fileName] {$rc->getName()}");
+      }
+      $code = file_get_contents($path . '/' . $res['fileName']);
       //X::ddump($code);
       try {
         $res['uses'] = $this->getUses($code);
@@ -335,7 +338,7 @@ class Php extends bbn\Models\Cls\Basic
   {
     if (!empty($namespace)) {
       if (substr($namespace, -1) !== '\\') {
-        $namespace = '';
+        $namespace = '\\' . $namespace;
       }
     }
     if (!empty($path)) {
@@ -347,7 +350,7 @@ class Php extends bbn\Models\Cls\Basic
           foreach ($files as $file) {
             $bits = X::split($file, '/');
             $name = X::basename(array_pop($bits), '.php');
-            $class = $namespace . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
+            $class = $namespace . '\\' . (empty($bits) ? '' : X::join($bits, '\\') . '\\') . $name;
             $res = [
               'name' => $name,
               'file' => $file,
@@ -966,7 +969,13 @@ class Php extends bbn\Models\Cls\Basic
 
   private function _get_method_code(ReflectionMethod $method)
   {
-    $st = file_get_contents($method->getFileName());
+    $file = $method->getFileName();
+    // Native functions have no file name
+    if (empty($file)) {
+      return '';
+    }
+
+    $st = file_get_contents($file);
     $ar = X::split($st, PHP_EOL);
     return X::join(array_splice($ar, $method->getStartLine()-1, ($method->getEndLine() - $method->getStartLine() + 1)), PHP_EOL);
   }
@@ -1266,12 +1275,25 @@ class Php extends bbn\Models\Cls\Basic
     ) {
       $property = $cls->getProperty($prop);
       $defaults = $cls->getDefaultProperties();
+      $propType = $property->hasType() ? $property->getType() : null;
+      if ($propType && method_exists($propType, 'getTypes')) {
+        $types = $propType->getTypes();
+      } else {
+        $types = [$propType];
+      }
+
       $arr = [
         'name' => $property->getName(),
         'trait' => false,
         'static' => $property->isStatic(),
         'readonly' => $property->isReadOnly(),
-        'type' => $property->hasType() ? $property->getType()->getName() : null,
+        'type' => X::join(array_map(function($b) {
+          if ($b) {
+            return $b->getName();
+          }
+
+          return '';
+        }, $types), '|'),
         'declaring' => $property->getDeclaringClass(),
         'declaring_trait' => $this->getDeclaringTraitForProperty($cls->getName(), $property->getName())->name,
         'promoted' => $property->isPromoted(),

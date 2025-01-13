@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Api\\Scaleway",
     "namespace": true,
+    "realName": "Scaleway",
+    "realNamespace": "bbn\\Api",
     "traits": [
         "bbn\\Models\\Tts\\Cache",
         "bbn\\Api\\Scaleway\\Server",
@@ -23,20 +25,12 @@
     "fileName": "\/Api\/Scaleway.php",
     "startLine": 16,
     "endLine": 113,
-    "numMethods": 18,
-    "numProperties": 0,
+    "numMethods": 35,
+    "numProperties": 5,
     "numConstants": 3,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Cache",
-        "bbn\\Api\\Scaleway\\Server",
-        "bbn\\Api\\Scaleway\\Dedibox",
-        "bbn\\Api\\Scaleway\\Failover",
-        "bbn\\Api\\Scaleway\\Domain",
-        "bbn\\Api\\Scaleway\\Hosting"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -56,7 +50,6 @@
     "namespaceName": "bbn\\Api",
     "shortName": "Scaleway",
     "contentConstructor": {
-        "file": "bbn\\Api\\Scaleway",
         "returns": []
     },
     "methods": {
@@ -65,11 +58,14 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $token, bool $testmode = false)\n  {\n    if (empty($token)) {\n      throw new \\Error(_('The API token is mandatory'));\n    }\n\n    self::cacheInit();\n    $this->_token = $token;\n    $this->_testmode = $testmode;\n    if (class_exists('\\\\bbn\\\\Cache')) {\n      $this->_cacher = Cache::getEngine();\n    }\n  }",
+            "code": "  public function __construct(string $token, bool $testmode = false)\n  {\n    if (empty($token)) {\n      throw new \\Error(_('The API token is mandatory'));\n    }\n\n    self::cacheInit();\n    $this->_token = $token;\n    $this->_testmode = $testmode;\n    if (class_exists('\\\\bbn\\\\Cache')) {\n      $this->_cacher = Cache::getEngine();\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 48,
             "endLine": 60,
             "isDeprecated": false,
@@ -80,13 +76,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "token",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -97,23 +98,1418 @@
                     "name": "testmode",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$token",
+                        "description": "THe API auth token"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   * @param string $token THe API auth token\n   *\/"
+        },
+        "_makeApiUrl": {
+            "name": "_makeApiUrl",
+            "summary": "Makes the API url by the command",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _makeApiUrl(string $command): string\n  {\n    if (strpos($command, '\/') === 0) {\n      $command = substr($command, 1);\n    }\n\n    return self::API_URL .\n      (strpos($command, self::API_URL_PREFIX) !== 0 ? self::API_URL_PREFIX : '') .\n      $command;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 68,
+            "endLine": 77,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_makeApiUrl",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "command",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The command"
+                }
+            ],
+            "doc": {
+                "description": "Makes the API url by the command\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$command",
+                        "description": "The command"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Makes the API url by the command\n   * @param string $command The command\n   * @return string\n   *\/"
+        },
+        "_callCommand": {
+            "name": "_callCommand",
+            "summary": "Makes the call to the API",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _callCommand(string $command, array $post = []): array\n  {\n    $header = [\n      'HTTPHEADER' => [\n        'Authorization: Bearer ' . $this->_token\n      ]\n    ];\n    if (empty($post)) {\n      $header['get'] = 1;\n    }\n    else {\n      $header['post'] = 1;\n    }\n\n    $curl = X::curl(\n      $this->_makeApiUrl($command),\n      $post,\n      $header\n    );\n    if (Str::isJson($curl)) {\n      $curl = json_decode($curl, true);\n    }\n\n    return $curl ?: [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 86,
+            "endLine": 110,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_callCommand",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "command",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The command"
+                },
+                {
+                    "name": "post",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The data to send"
+                }
+            ],
+            "doc": {
+                "description": "Makes the call to the API\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$command",
+                        "description": "The command"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$post",
+                        "description": "The data to send"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Makes the call to the API\n   * @param string $command The command\n   * @param array  $post    The data to send\n   * @return array\n   *\/"
+        },
+        "cacheInit": {
+            "name": "cacheInit",
+            "summary": "Initializes the cache object, must be called in __construct",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheInit(): void\n  {\n    if ( \\is_null($this->cache_engine) ){\n      $this->cache_engine = CacheCls::getEngine();\n      $this->_cache_prefix = Str::encodeFilename(str_replace('\\\\', '\/', \\get_class($this)), true).'\/';\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 27,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Initializes the cache object, must be called in __construct\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initializes the cache object, must be called in __construct\n   *\n   * @return void\n   *\/"
+        },
+        "cacheCheck": {
+            "name": "cacheCheck",
+            "summary": "Throws an exception if the cache has not been initialized",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheCheck(): void\n  {\n    if (!$this->cache_engine) {\n      throw new Exception(X::_(\"The cache object has not been initialized\"));\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 41,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheCheck",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Throws an exception if the cache has not been initialized\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Throws an exception if the cache has not been initialized\n   *\n   * @return void\n   *\/"
+        },
+        "_cache_name": {
+            "name": "_cache_name",
+            "summary": "Generates a name for the cache based on the class name and the method called - or a gievn string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function _cache_name($uid, $method = '', string $locale = ''): string\n  {\n    $uid  = (string)$uid;\n    $path = Str::isUid($uid) ? substr($uid, 0, 3).'\/'.substr($uid, 3, 3).'\/'.substr($uid, 6) : $uid;\n    return $this->_cache_prefix.$path.(empty($method) ? '' : '\/'.(string)$method).(empty($locale) ? '' : \"-$locale\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 57,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_cache_name",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Generates a name for the cache based on the class name and the method called - or a gievn string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a name for the cache based on the class name and the method called - or a gievn string\n   *\n   * @param [type] $uid\n   * @param string $method\n   * @param string $locale\n   * @return string\n   *\/"
+        },
+        "cacheDeleteAll": {
+            "name": "cacheDeleteAll",
+            "summary": "Deletes all the cache related to the current class",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteAll(): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_prefix);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 70,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheDeleteAll",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the cache related to the current class\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the cache related to the current class\n   *\n   * @return self\n   *\/"
+        },
+        "cacheDelete": {
+            "name": "cacheDelete",
+            "summary": "Deletes the given cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDelete(string $uid, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 85,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheDelete",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheDeleteLocale": {
+            "name": "cacheDeleteLocale",
+            "summary": "Deletes the given cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 101,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheDeleteLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheGet": {
+            "name": "cacheGet",
+            "summary": "Gets the cached data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGet(string $uid, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 116,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheGet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data\n   *\n   * @param string $uid\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheGetLocale": {
+            "name": "cacheGetLocale",
+            "summary": "Gets the cached data for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 131,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheSet": {
+            "name": "cacheSet",
+            "summary": "Sets the cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 147,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheSet",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheSetLocale": {
+            "name": "cacheSetLocale",
+            "summary": "Sets the cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 165,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheSetLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheGetSet": {
+            "name": "cacheGetSet",
+            "summary": "Gets the cache or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 182,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetSet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheGetSetLocale": {
+            "name": "cacheGetSetLocale",
+            "summary": "Gets the cache for a specific locale or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSetLocale(callable $fn, string $uid, string $locale, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method, $locale), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 199,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "shortName": "cacheGetSetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache for a specific locale or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache for a specific locale or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheHas": {
+            "name": "cacheHas",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHas(string $uid, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGet($uid, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 213,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheHas",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "cacheHasLocale": {
+            "name": "cacheHasLocale",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHasLocale(string $uid, string $locale, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGetLocale($uid, $locale, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 227,
+            "endLine": 231,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheHasLocale",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "serializeFunction": {
+            "name": "serializeFunction",
+            "summary": "Transforms a function in a cacheable string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 241,
+            "endLine": 245,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "serializeFunction",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "function",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Transforms a function in a cacheable string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
         },
         "getServers": {
             "name": "getServers",
             "summary": "Gets the servers list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('server');\n  }",
+            "code": "  public function getServers(): array\n  {\n    return $this->_callCommand('server');\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 17,
             "endLine": 20,
             "isDeprecated": false,
@@ -124,22 +1520,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getServers",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the servers list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the servers list\n   * @return array\n   *\/"
         },
         "getServer": {
             "name": "getServer",
             "summary": "Gets the server info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/$id\" : $id);\n  }",
+            "code": "  public function getServer($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 28,
             "endLine": 31,
             "isDeprecated": false,
@@ -150,33 +1555,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getServer",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The server ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the server info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The server ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the server info\n   * @param int|string $id The server ID\n   * @return array\n   *\/"
         },
         "getFailoverIps": {
             "name": "getFailoverIps",
             "summary": "Gets the failover IPs list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('server\/failover');\n  }",
+            "code": "  public function getFailoverIps(): array\n  {\n    return $this->_callCommand('server\/failover');\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 38,
             "endLine": 41,
             "isDeprecated": false,
@@ -187,22 +1611,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFailoverIps",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the failover IPs list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the failover IPs list\n   * @return array\n   *\/"
         },
         "getIpInfo": {
             "name": "getIpInfo",
             "summary": "Gets the IP info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $ip)\n  {\n    return $this->_callCommand(\"server\/ip\/$ip\");\n  }",
+            "code": "  public function getIpInfo(string $ip): array\n  {\n    return $this->_callCommand(\"server\/ip\/$ip\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 49,
             "endLine": 52,
             "isDeprecated": false,
@@ -213,33 +1646,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getIpInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "ip",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The IP address"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the IP info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$ip",
+                        "description": "The IP address"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the IP info\n   * @param string $ip The IP address\n   * @return array\n   *\/"
         },
         "getDiskInfo": {
             "name": "getDiskInfo",
             "summary": "Gets information on a server's disk",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/disk\/$id\" : $id);\n  }",
+            "code": "  public function getDiskInfo($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/disk\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 60,
             "endLine": 63,
             "isDeprecated": false,
@@ -250,33 +1704,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDiskInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The disk ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets information on a server's disk\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The disk ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets information on a server's disk\n   * @param int|string $id The disk ID\n   * @return array\n   *\/"
         },
         "getRaidInfo": {
             "name": "getRaidInfo",
             "summary": "Gets information on a server's RAID controller",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/raidController\/$id\" : $id);\n  }",
+            "code": "  public function getRaidInfo($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/raidController\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 71,
             "endLine": 74,
             "isDeprecated": false,
@@ -287,33 +1760,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getRaidInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The disk ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets information on a server's RAID controller\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The disk ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets information on a server's RAID controller\n   * @param int|string $id The disk ID\n   * @return array\n   *\/"
         },
         "getProductInfo": {
             "name": "getProductInfo",
             "summary": "Gets server product info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/product\/$id\" : $id);\n  }",
+            "code": "  public function getProductInfo($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/product\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Server",
             "startLine": 82,
             "endLine": 85,
             "isDeprecated": false,
@@ -324,33 +1816,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProductInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The server ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets server product info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The server ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets server product info\n   * @param int|string $id The server ID\n   * @return array\n   *\/"
         },
         "getPlans": {
             "name": "getPlans",
             "summary": "Gets Dedibox plans list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Dedibox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('dedibox\/plans');\n  }",
+            "code": "  public function getPlans(): array\n  {\n    return $this->_callCommand('dedibox\/plans');\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Dedibox",
             "startLine": 16,
             "endLine": 19,
             "isDeprecated": false,
@@ -361,22 +1872,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPlans",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets Dedibox plans list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets Dedibox plans list\n   * @return array\n   *\/"
         },
         "getDediboxOptions": {
             "name": "getDediboxOptions",
             "summary": "Gets the list of available options products",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Dedibox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/options\/$id\");\n  }",
+            "code": "  public function getDediboxOptions(int $id): array\n  {\n    return $this->_callCommand(\"dedibox\/options\/$id\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Dedibox",
             "startLine": 27,
             "endLine": 30,
             "isDeprecated": false,
@@ -387,33 +1907,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDediboxOptions",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The dedibox product ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the list of available options products\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The dedibox product ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the list of available options products\n   * @param int $id The dedibox product ID\n   * @return array\n   *\/"
         },
         "getDediboxDatacenters": {
             "name": "getDediboxDatacenters",
             "summary": "Gets the list of available datacenters",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Dedibox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $id)\n  {\n    return $this->_callCommand(\"dedibox\/availability\/$id\");\n  }",
+            "code": "  public function getDediboxDatacenters(int $id): array\n  {\n    return $this->_callCommand(\"dedibox\/availability\/$id\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Dedibox",
             "startLine": 38,
             "endLine": 41,
             "isDeprecated": false,
@@ -424,33 +1965,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDediboxDatacenters",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The dedibox product ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the list of available datacenters\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The dedibox product ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the list of available datacenters\n   * @param int $id The dedibox product ID\n   * @return array\n   *\/"
         },
         "getAvailableFailoverIps": {
             "name": "getAvailableFailoverIps",
             "summary": "Gets the list of available failover ips",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Failover.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return X::sortBy($this->_callCommand('failover\/ips'), 'ip', 'asc');\n  }",
+            "code": "  public function getAvailableFailoverIps(): array\n  {\n    return X::sortBy($this->_callCommand('failover\/ips'), 'ip', 'asc');\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Failover",
             "startLine": 17,
             "endLine": 20,
             "isDeprecated": false,
@@ -461,22 +2023,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getAvailableFailoverIps",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the list of available failover ips\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the list of available failover ips\n   * @return array\n   *\/"
         },
         "getDomains": {
             "name": "getDomains",
             "summary": "Gets a list of domains owned by the current user",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Domain.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('domain\/');\n  }",
+            "code": "  public function getDomains(): array\n  {\n    return $this->_callCommand('domain\/');\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Domain",
             "startLine": 15,
             "endLine": 18,
             "isDeprecated": false,
@@ -487,22 +2058,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getDomains",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets a list of domains owned by the current user\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets a list of domains owned by the current user\n   * @return array\n   *\/"
         },
         "getDomain": {
             "name": "getDomain",
             "summary": "Gets a domain info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Domain.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\");\n  }",
+            "code": "  public function getDomain(string $name): array\n  {\n    return $this->_callCommand(\"domain\/$name\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Domain",
             "startLine": 26,
             "endLine": 29,
             "isDeprecated": false,
@@ -513,33 +2093,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDomain",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The domain name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets a domain info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The domain name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets a domain info\n   * @param string $name The domain name\n   * @return array\n   *\/"
         },
         "getDomainVersion": {
             "name": "getDomainVersion",
             "summary": "Returns a paginated list of zone version associated with the domain",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Domain.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\/version\");\n  }",
+            "code": "  public function getDomainVersion(string $name): array\n  {\n    return $this->_callCommand(\"domain\/$name\/version\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Domain",
             "startLine": 37,
             "endLine": 40,
             "isDeprecated": false,
@@ -550,33 +2151,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDomainVersion",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The domain name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a paginated list of zone version associated with the domain\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The domain name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a paginated list of zone version associated with the domain\n   * @param string $name The domain name\n   * @return array\n   *\/"
         },
         "getDomainZone": {
             "name": "getDomainZone",
             "summary": "Returns the currently active zone of the domain",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Domain.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $name)\n  {\n    return $this->_callCommand(\"domain\/$name\/zone\");\n  }",
+            "code": "  public function getDomainZone(string $name): array\n  {\n    return $this->_callCommand(\"domain\/$name\/zone\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Domain",
             "startLine": 48,
             "endLine": 51,
             "isDeprecated": false,
@@ -587,33 +2209,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDomainZone",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The domain name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the currently active zone of the domain\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The domain name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the currently active zone of the domain\n   * @param string $name The domain name\n   * @return array\n   *\/"
         },
         "getHostings": {
             "name": "getHostings",
             "summary": "Gets a list of links to the user's hostings",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Hosting.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('hosting');\n  }",
+            "code": "  public function getHostings(): array\n  {\n    return $this->_callCommand('hosting');\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Hosting",
             "startLine": 15,
             "endLine": 18,
             "isDeprecated": false,
@@ -624,22 +2267,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getHostings",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets a list of links to the user's hostings\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets a list of links to the user's hostings\n   * @return array\n   *\/"
         },
         "getHosting": {
             "name": "getHosting",
             "summary": "Gets information on a hosting",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Hosting.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    return $this->_callCommand(\"hosting\/$id\");\n  }",
+            "code": "  public function getHosting(string $id): array\n  {\n    return $this->_callCommand(\"hosting\/$id\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\Scaleway\\Hosting",
             "startLine": 26,
             "endLine": 29,
             "isDeprecated": false,
@@ -650,27 +2302,181 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getHosting",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The hosting ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets information on a hosting\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The hosting ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets information on a hosting\n   * @param string $id The hosting ID\n   * @return array\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "_token": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Scaleway"
+            },
+            "declaring_trait": "bbn\\Api\\Scaleway",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string The API auth token",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "_cacher": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Scaleway"
+            },
+            "declaring_trait": "bbn\\Api\\Scaleway",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var \\bbn\\Cache cacher",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "_testmode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Scaleway"
+            },
+            "declaring_trait": "bbn\\Api\\Scaleway",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool testmode",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "_cache_prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Scaleway"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "cache_engine": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Scaleway"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
-    "constants": [],
+    "constants": {
+        "CACHE_NAME": {
+            "name": "CACHE_NAME",
+            "value": "bbn\/api\/scaleway",
+            "class": "bbn\\Api\\Scaleway",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "@var string The name reserved for the cache",
+                "tags": []
+            }
+        },
+        "API_URL": {
+            "name": "API_URL",
+            "value": "https:\/\/api.online.net\/",
+            "class": "bbn\\Api\\Scaleway",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "@var string The API url",
+                "tags": []
+            }
+        },
+        "API_URL_PREFIX": {
+            "name": "API_URL_PREFIX",
+            "value": "api\/v1\/",
+            "class": "bbn\\Api\\Scaleway",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "@var string The API url prefix",
+                "tags": []
+            }
+        }
+    },
+    "uses": {
+        "bbn\\Cache": "Cache",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n * Scaleway API\n * @category API\n * @package Api\n * @author Mirko Argentino <mirko@bbn.solutions>\n * @license http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License\n * @link https:\/\/bbn.io\/bbn-php\/doc\/class\/Api\/Scaleway\n *\/"
+    ],
     "summary": "Scaleway API",
     "description": "",
     "description_parts": []

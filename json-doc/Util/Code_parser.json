@@ -1,0 +1,346 @@
+{
+    "doc": {
+        "description": "A tool for parsing code.\n\n\nThis class will work with PHP, Javascript, and CSS\n",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Utilities",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89"
+        }
+    },
+    "name": "bbn\\Util\\code_parser",
+    "namespace": true,
+    "realName": "code_parser",
+    "realNamespace": "bbn\\Util",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Util\/Code_parser.php",
+    "startLine": 19,
+    "endLine": 219,
+    "numMethods": 4,
+    "numProperties": 3,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "specials": [
+            ";",
+            "=",
+            "+",
+            "-",
+            "@",
+            "(",
+            ")",
+            "{",
+            "}",
+            "[",
+            "]",
+            ",",
+            ":"
+        ],
+        "type": null,
+        "sequences": [
+            {
+                "kind": "code",
+                "content": ""
+            }
+        ]
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Util",
+    "shortName": "code_parser",
+    "contentConstructor": {
+        "returns": []
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\code_parser",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Code_parser.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function __construct($string, $type='js')\n\t{\n\t\t$this->type = $type;\n\t\t$this->css = ( $this->type === 'css' );\n\t\t\/* An array of each char of the string *\/\n\t\t$chars = str_split($string);\n\t\t\/* Says if the actual char is escaped by \\ or not *\/\n\t\t$escape = false;\n\t\t\/* Says if we are in a single quotes sequence *\/\n\t\t$single_quotes = false;\n\t\t\/* Says if we are in a double quotes sequence *\/\n\t\t$double_quotes = false;\n\t\t\/* Says if we are in a regex sequence *\/\n\t\t$regex = false;\n\t\t\/* Says if we are in a block comments (like here!) sequence *\/\n\t\t$block_comments = false;\n\t\t\/* Says if we are in a line comments (like here!) sequence *\/\n\t\t$line_comments = false;\n\t\t\/* $index is the actual index of the sequence (in the $seq array) *\/\n\t\t$index = 0;\n\t\t\/* We will go through each char called $c \n\t\t$a is the previous char, excluded of spaces, new lines and tabs\n\t\t$b is the previous char, whatever it is\n\t\t$d is the next char\n\t\t*\/\n\t\t$a = $b = $d = '';\n\t\tforeach ( $chars as $i => $c )\n\t\t{\n\t\t\t\/* When we will have to change sequence, either $cur or $var will be defined *\/\n\t\t\t$cur = false;\n\t\t\t$next = false;\n\t\t\tif ( isset($chars[$i+1]) )\n\t\t\t\t$d = $chars[$i+1];\n\t\t\t\/* Single quote *\/\n\t\t\tif ( $c === \"'\" && !$double_quotes && !$regex && !$block_comments && !$line_comments && !$escape && !$this->css )\n\t\t\t{\n\t\t\t\tif ( $single_quotes )\n\t\t\t\t{\n\t\t\t\t\t$single_quotes = false;\n\t\t\t\t\t$cur = 'code';\n\t\t\t\t}\n\t\t\t\telse\n\t\t\t\t{\n\t\t\t\t\t$single_quotes = 1;\n\t\t\t\t\t$next = 'single_quotes';\n\t\t\t\t}\n\t\t\t}\n\t\t\t\/* Double quote *\/\n\t\t\telse if ( $c === '\"' && !$single_quotes && !$regex && !$block_comments && !$line_comments && !$escape && !$this->css )\n\t\t\t{\n\t\t\t\tif ( $double_quotes )\n\t\t\t\t{\n\t\t\t\t\t$double_quotes = false;\n\t\t\t\t\t$cur = 'code';\n\t\t\t\t}\n\t\t\t\telse\n\t\t\t\t{\n\t\t\t\t\t$double_quotes = 1;\n\t\t\t\t\t$next = 'double_quotes';\n\t\t\t\t}\n\t\t\t}\n\t\t\t\/* Slash *\/\n\t\t\telse if ( $c === '\/' )\n\t\t\t{\n\t\t\t\tif ( $block_comments && $b === '*' )\n\t\t\t\t{\n\t\t\t\t\t$block_comments = false;\n\t\t\t\t\t$cur = 'code';\n\t\t\t\t}\n\t\t\t\telse if ( !$single_quotes && !$double_quotes && !$block_comments && !$line_comments )\n\t\t\t\t{\n\t\t\t\t\tif ( $d === '\/' && !$escape && !$this->css )\n\t\t\t\t\t{\n\t\t\t\t\t\t$line_comments = 1;\n\t\t\t\t\t\t$next = 'line_comments';\n\t\t\t\t\t}\n\t\t\t\t\telse if ( $d === '*' && !$escape )\n\t\t\t\t\t{\n\t\t\t\t\t\t\/* Checks whether it's conditional compilation for IE or not *\/\n\t\t\t\t\t\tif ( !isset($chars[$i+2]) || $chars[$i+2] !== '@' )\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t$block_comments = 1;\n\t\t\t\t\t\t\t$next = 'block_comments';\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\telse if ( !$escape && !$this->css )\n\t\t\t\t\t{\n\t\t\t\t\t\tif ( $regex )\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t$regex = false;\n\t\t\t\t\t\t\t$cur = 'code';\n\t\t\t\t\t\t}\n\t\t\t\t\t\telse if ( !$regex && ( $a === '=' || $a === '[' || $a === ':' || $a === '(' || $a === '!' || $a === '&' ) )\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t$regex = 1;\n\t\t\t\t\t\t\t$next = 'regex';\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\t\/* New line *\/\n\t\t\telse if ( $c === \"\n\" && $line_comments )\n\t\t\t{\n\t\t\t\t$line_comments = false;\n\t\t\t\t$cur = 'code';\n\t\t\t}\n\t\t\t\/* Check if the next char will be escaped *\/\n\t\t\tif ( $c === '\\\\' && !$this->css )\n\t\t\t\t$escape = $escape ? false : 1;\n\t\t\telse\n\t\t\t\t$escape = false;\n\t\t\t\/*\n\t\t\tIf $cur is defined, the character $c will finish the current sequence\n\t\t\tIf $next is defined, the character $c will start the next sequence\n\t\t\tIn both cases, we add a sequence and increment index\n\t\t\tOtherwise we just add the character to the current sequence\n\t\t\t*\/\n\t\t\tif ( $cur )\n\t\t\t{\n\t\t\t\t$this->sequences[$index]['content'] .= $c;\n\t\t\t\tif ( trim($this->sequences[$index]['content']) !== '' || $cur !== 'code' )\n\t\t\t\t\t$index++;\n\t\t\t\t$this->sequences[$index] = ['kind' => $cur, 'content' => ''];\n\t\t\t}\n\t\t\telse if ( $next )\n\t\t\t{\n\t\t\t\tif ( trim($this->sequences[$index]['content']) !== '' || $cur !== 'code' )\n\t\t\t\t\t$index++;\n\t\t\t\t$this->sequences[$index] = ['kind' => $next, 'content' => $c];\n\t\t\t}\n\t\t\telse\n\t\t\t\t$this->sequences[$index]['content'] .= $c;\n\t\t\t$b = $c;\n\t\t\tif ( $b !== ' ' && $b !== '\t' && $b !== \"\n\t\" )\n\t\t\t\t$a = $b;\n\t\t}\n\t\t\/* file_put_contents('_log\/log.log',print_r($this->sequences,true),FILE_APPEND); *\/\n\t\treturn $this;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 42,
+            "endLine": 182,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "string",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "js",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
+        },
+        "get_sequences": {
+            "name": "get_sequences",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\code_parser",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Code_parser.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function get_sequences()\n\t{\n\t\treturn $this->sequences;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 187,
+            "endLine": 190,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "get_sequences",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
+        },
+        "get_code": {
+            "name": "get_code",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\code_parser",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Code_parser.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function get_code()\n\t{\n\t\t$r = '';\n\t\tforeach ( $this->sequences as $s )\n\t\t{\n\t\t\tif ( $s['kind'] == 'code' || $s['kind'] == 'double_quotes' || $s['kind'] == 'single_quotes' || $s['kind'] == 'regex' )\n\t\t\t\t$r .= $s['content'];\n\t\t}\n\t\treturn $r;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 195,
+            "endLine": 204,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "get_code",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
+        },
+        "get_minified": {
+            "name": "get_minified",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\code_parser",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Code_parser.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function get_minified()\n\t{\n\t\t$r = '';\n\t\tforeach ( $this->sequences as $s ) {\n\t\t\t$r .= $s['content'];\n\t\t}\n\n\t\treturn $r;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 209,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "get_minified",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
+        }
+    },
+    "properties": {
+        "type": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\code_parser"
+            },
+            "declaring_trait": "bbn\\Util\\code_parser",
+            "promoted": false,
+            "visibility": "public",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "sequences": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\code_parser"
+            },
+            "declaring_trait": "bbn\\Util\\code_parser",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "will be the resulting array of the string, divided in sequences, having a kind and a content\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                {
+                    "kind": "code",
+                    "content": ""
+                }
+            ]
+        },
+        "specials": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\code_parser"
+            },
+            "declaring_trait": "bbn\\Util\\code_parser",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "Special chars we know don't need space around in the code - no \/ * or \\ on purpose\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                ";",
+                "=",
+                "+",
+                "-",
+                "@",
+                "(",
+                ")",
+                "{",
+                "}",
+                "[",
+                "]",
+                ",",
+                ":"
+            ]
+        }
+    },
+    "staticProperties": {
+        "specials": [
+            ";",
+            "=",
+            "+",
+            "-",
+            "@",
+            "(",
+            ")",
+            "{",
+            "}",
+            "[",
+            "]",
+            ",",
+            ":"
+        ]
+    },
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * @package util\n *\/",
+        "\/**\n * A tool for parsing code.\n *\n *\n * This class will work with PHP, Javascript, and CSS\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Utilities\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
+    "summary": "A tool for parsing code.",
+    "description": "This class will work with PHP, Javascript, and CSS",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "This class will work with PHP, Javascript, and CSS"
+        }
+    ]
+}

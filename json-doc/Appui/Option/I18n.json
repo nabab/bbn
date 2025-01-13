@@ -1,0 +1,617 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\I18n",
+    "namespace": true,
+    "realName": "I18n",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/I18n.php",
+    "startLine": 9,
+    "endLine": 347,
+    "numMethods": 9,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "I18n",
+    "contentConstructor": null,
+    "methods": {
+        "itext": {
+            "name": "itext",
+            "summary": "Returns translation of an option's text",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->itext(12));\n\/\/ Result of X::_(\"BBN's own IDE\") with fr as locale\n\/\/ (string) L'IDE de BBN\nX::dump($opt->itext('bbn_ide'));\n\/\/ (string) L'IDE de BBN"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function itext($code = null): ?string\n  {\n    return $this->getTranslation($this->fromCode(\\func_get_args()));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 25,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "itext",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns translation of an option's text\n\n```php\nX::dump($opt->itext(12));\n\/\/ Result of X::_(\"BBN's own IDE\") with fr as locale\n\/\/ (string) L'IDE de BBN\nX::dump($opt->itext('bbn_ide'));\n\/\/ (string) L'IDE de BBN\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Text of the option"
+            },
+            "comments": "  \/**\n   * Returns translation of an option's text\n   *\n   * ```php\n   * X::dump($opt->itext(12));\n   * \/\/ Result of X::_(\"BBN's own IDE\") with fr as locale\n   * \/\/ (string) L'IDE de BBN\n   * X::dump($opt->itext('bbn_ide'));\n   * \/\/ (string) L'IDE de BBN\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return string|null Text of the option\n   *\/"
+        },
+        "findI18n": {
+            "name": "findI18n",
+            "summary": "Returns an array containing all options that have the property i18n set",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findI18n(?string $startFromID = null, $items = false)\n  {\n    $res = [];\n    if ($this->check()) {\n      $where = [[\n        'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', \"$.i18n\"))',\n        'operator' => 'isnotnull'\n      ], [\n        'field' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', \"$.i18n\"))',\n        'operator' => '!=',\n        'value' => ''\n      ]];\n      if (Str::isUid($startFromID)) {\n        $where = [[\n          'field' => $this->fields['id'],\n          'value' => $startFromID\n        ]];\n      }\n      $opts = $this->db->rselectAll([\n        'table' => $this->class_cfg['table'],\n        'fields' => [\n          $this->fields['id'],\n          $this->fields['id_parent'],\n          $this->fields['code'],\n          $this->fields['text'],\n          'language' => 'JSON_UNQUOTE(JSON_EXTRACT(' . $this->fields['cfg'] . ', \"$.i18n\"))'\n        ],\n        'where' => $where\n      ]);\n\n      if ($opts) {\n        foreach ($opts as $opt){\n          if (!empty($opt[$this->fields['code']])\n            && Str::isInteger($opt[$this->fields['code']])\n          ) {\n            $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];\n          }\n          if (\\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {\n            $cfg = $this->getCfg($opt[$this->fields['id']]);\n            if (!empty($cfg['i18n'])) {\n              $res[] = $opt;\n            }\n            if (!empty($cfg['i18n_inheritance'])) {\n              $this->findI18nChildren($opt, $res, $cfg['i18n_inheritance'] === 'cascade');\n            }\n          }\n        }\n      }\n      if (!empty($res) && !empty($items)) {\n        $res2 = [];\n        foreach ($res as $r) {\n          $res2[] = \\array_merge($r, [\n            'items' => array_values(array_filter($res, function($o) use($r) {\n              return $o[$this->fields['id_parent']] === $r[$this->fields['id']];\n            }))\n          ]);\n        }\n        return $res2;\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 37,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "findI18n",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "startFromID",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "romID"
+                },
+                {
+                    "name": "items",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns an array containing all options that have the property i18n set\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$start",
+                        "description": "romID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$items"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array containing all options that have the property i18n set\n   * @param string|null $startFromID\n   * @param bool $items\n   * @return array\n   *\/"
+        },
+        "findI18nOption": {
+            "name": "findI18nOption",
+            "summary": "returns an array containing the option (having the property i18n set) corresponding to the given id",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findI18nOption($id, $items = true)\n  {\n    $res = [];\n    if ($this->check()) {\n      if ($opt = $this->db->rselect(\n        $this->class_cfg['table'], [\n          $this->fields['id'],\n          $this->fields['id_parent'],\n          $this->fields['text'],\n          $this->fields['cfg']\n        ], [$this->fields['id'] => $id]\n      )\n      ) {\n        $cfg  = json_decode($opt[$this->fields['cfg']]);\n        if (!empty($cfg->i18n)) {\n          $opt['language'] = $cfg->i18n;\n        }\n\n        unset($opt[$this->fields['cfg']]);\n        if (!empty($items)) {\n          $res[] = array_merge($opt, ['items' => $this->fullOptions($id) ?? []]);\n        }\n        else {\n          $res[] = $opt;\n        }\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 109,
+            "endLine": 138,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "findI18nOption",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "items",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "returns an array containing the option (having the property i18n set) corresponding to the given id\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$items"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * returns an array containing the option (having the property i18n set) corresponding to the given id\n   *\n   * @param $id\n   * @param bool $items\n   * @return array\n   *\/"
+        },
+        "findI18nLocales": {
+            "name": "findI18nLocales",
+            "summary": "Returns an array containing all languages set",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findI18nLocales(?string $startFromID = null): ?array\n  {\n    if ($this->check()) {\n      if (empty($startFromID)) {\n        return \\array_unique($this->db->getFieldValues([\n          'table' => $this->class_cfg['table'],\n          'fields' => [\n            'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', \"$.i18n\"))'\n          ],\n          'where' => [[\n            'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', \"$.i18n\"))',\n            'operator' => 'isnotnull'\n          ], [\n            'field' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', \"$.i18n\"))',\n            'operator' => '!=',\n            'value' => ''\n          ]]\n        ]));\n      }\n      $res = [];\n      $cfg = $this->getCfg($startFromID);\n      if (!empty($cfg['i18n'])) {\n        $res[] = $cfg['i18n'];\n      }\n      if ($items = $this->items($startFromID)) {\n        foreach ($items as $item) {\n          $res = X::mergeArrays($res, $this->findI18n($item));\n        }\n      }\n      return \\array_unique($res);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 146,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "findI18nLocales",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "startFromID",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns an array containing all languages set\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array containing all languages set\n   *\n   * @return null|array\n   *\/"
+        },
+        "findI18nByLocale": {
+            "name": "findI18nByLocale",
+            "summary": "Returns an array containing all options that have the property i18n set",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findI18nByLocale(string $locale, $items = false): array\n  {\n    $res = [];\n    if ($this->check()) {\n      $opts = $this->db->rselectAll([\n        'table' => $this->class_cfg['table'],\n        'fields' => [\n          $this->fields['id'],\n          $this->fields['id_parent'],\n          $this->fields['code'],\n          $this->fields['text'],\n          'language' => 'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', \"$.i18n\"))'\n        ],\n        'where' => [\n          'JSON_UNQUOTE(JSON_EXTRACT('.$this->fields['cfg'].', \"$.i18n\"))' => $locale\n        ]\n      ]) ?: [];\n      if ($opts) {\n        foreach ($opts as $opt){\n          if (!empty($opt[$this->fields['code']])\n            && Str::isInteger($opt[$this->fields['code']])\n          ) {\n            $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];\n          }\n          if (\\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {\n            $cfg = $this->getCfg($opt[$this->fields['id']]);\n            $res[] = $opt;\n            if (!empty($cfg['i18n_inheritance'])) {\n              $this->findI18nChildren($opt, $res, $cfg['i18n_inheritance'] === 'cascade');\n            }\n          }\n        }\n      }\n      if (!empty($res) && !empty($items)) {\n        $res2 = [];\n        foreach ($res as $r) {\n          $res2[] = \\array_merge($r, [\n            'items' => array_values(array_filter($res, function($o) use($r) {\n              return $o[$this->fields['id_parent']] === $r[$this->fields['id']];\n            }))\n          ]);\n        }\n        return $res2;\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 188,
+            "endLine": 234,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "findI18nByLocale",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "locale",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "items",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns an array containing all options that have the property i18n set\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$items"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array containing all options that have the property i18n set\n   *\n   * @param string $locale\n   * @param bool $items\n   * @return array\n   *\/"
+        },
+        "findI18nById": {
+            "name": "findI18nById",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findI18nById(string $id): ?string\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      if ($c = $this->cacheGet($id, __FUNCTION__)) {\n        return $c['i18n'];\n      }\n\n      $i18n = null;\n      if ($cfg = $this->getCfg($id)) {\n        if (!empty($cfg['i18n'])) {\n          $i18n = $cfg['i18n'];\n        }\n      }\n\n      if (empty($i18n)\n        && ($parents = $this->parents($id))\n      ) {\n        foreach ($parents as $i => $parent) {\n          $pcfg = $this->getCfg($parent);\n          if (empty($pcfg)\n            || empty($pcfg['i18n'])\n          ) {\n            continue;\n          }\n\n          if (!empty($pcfg['i18n_inheritance'])\n            && (($pcfg['i18n_inheritance'] === 'cascade')\n              || (($pcfg['i18n_inheritance'] === 'children')\n                && ($i === 0)))\n          ) {\n            $i18n = $pcfg['i18n'];\n            break;\n          }\n\n          $i18n = null;\n          break;\n        }\n      }\n\n      $this->cacheSet($id, __FUNCTION__, ['i18n' => $i18n]);\n      return $i18n;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 237,
+            "endLine": 281,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "findI18nById",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getTranslation": {
+            "name": "getTranslation",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getTranslation(string $id, string $locale = ''): ?string\n  {\n    if (Str::isUid($id)\n      && ($originalLocale = $this->findI18nById($id))\n      && ($text = $this->text($id))\n    ) {\n      if (empty($locale)) {\n        $locale = $this->getTranslatingLocale($id);\n      }\n      if (!empty($locale)) {\n        $i18nCls = new I18nCls($this->db);\n        return  $i18nCls->getTranslation($text, $originalLocale, $locale);\n      }\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 284,
+            "endLine": 299,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTranslation",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "findI18nChildren": {
+            "name": "findI18nChildren",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function findI18nChildren(array $opt, array &$res, bool $cascade = false, string $locale = null){\n    $fid = $this->fields['id'];\n    if ($children = $this->fullOptions($opt[$fid])) {\n      foreach ($children as $child) {\n        if (\\is_null(X::find($res, [$fid => $child[$fid]]))) {\n          $cfg = $this->getCfg($child[$fid]);\n          $child = [\n            $this->fields['id'] => $child[$this->fields['id']],\n            $this->fields['id_parent'] => $child[$this->fields['id_parent']],\n            $this->fields['code'] => $child[$this->fields['code']],\n            $this->fields['text'] => $child[$this->fields['text']],\n            'language' => !empty($cfg['i18n']) ? $cfg['i18n'] : $opt['language']\n          ];\n          if (empty($locale)\n            || ($child['language'] === $locale)\n          ) {\n            $res[] = $child;\n          }\n          if (!empty($cfg['i18n_inheritance'])\n            || (empty($cfg['i18n']) && $cascade)\n          ) {\n            $c = ($cfg['i18n_inheritance'] === 'cascade')\n              || (empty($cfg['i18n']) && $cascade);\n            $this->findI18nChildren($child, $res, $c);\n          }\n        }\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 302,
+            "endLine": 331,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "findI18nChildren",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "res",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cascade",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 3,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getTranslatingLocale": {
+            "name": "getTranslatingLocale",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\I18n",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/I18n.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getTranslatingLocale(string $id): ?string\n  {\n    $originalLocale = $this->findI18nById($id);\n    $locale = null;\n    if (!empty($originalLocale)\n      && \\defined('BBN_LANG')\n      && (BBN_LANG !== $originalLocale)\n    ) {\n      $locale = BBN_LANG;\n    }\n\n    return $locale;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 334,
+            "endLine": 346,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTranslatingLocale",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str",
+        "bbn\\X": "X",
+        "bbn\\Appui\\I18n": "I18nCls"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns translation of an option's text\n   *\n   * ```php\n   * X::dump($opt->itext(12));\n   * \/\/ Result of X::_(\"BBN's own IDE\") with fr as locale\n   * \/\/ (string) L'IDE de BBN\n   * X::dump($opt->itext('bbn_ide'));\n   * \/\/ (string) L'IDE de BBN\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return string|null Text of the option\n   *\/",
+        "\/**\n   * Returns an array containing all options that have the property i18n set\n   * @param string|null $startFromID\n   * @param bool $items\n   * @return array\n   *\/",
+        "\/**\n   * returns an array containing the option (having the property i18n set) corresponding to the given id\n   *\n   * @param $id\n   * @param bool $items\n   * @return array\n   *\/",
+        "\/**\n   * Returns an array containing all languages set\n   *\n   * @return null|array\n   *\/",
+        "\/**\n   * Returns an array containing all options that have the property i18n set\n   *\n   * @param string $locale\n   * @param bool $items\n   * @return array\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

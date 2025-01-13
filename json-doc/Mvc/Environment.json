@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Mvc\\Environment",
     "namespace": true,
+    "realName": "Environment",
+    "realNamespace": "bbn\\Mvc",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Mvc\/Environment.php",
     "startLine": 23,
     "endLine": 715,
-    "numMethods": 17,
-    "numProperties": 0,
+    "numMethods": 24,
+    "numProperties": 14,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -37,7 +38,7 @@
         "_files": null,
         "_cookie": null,
         "_locale": null,
-        "cli": null,
+        "_cli": null,
         "new_url": null
     },
     "isIterable": false,
@@ -45,7 +46,6 @@
     "namespaceName": "bbn\\Mvc",
     "shortName": "Environment",
     "contentConstructor": {
-        "file": "bbn\\Mvc\\Environment",
         "returns": []
     },
     "methods": {
@@ -54,11 +54,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $httpAcceptLanguageHeader = self::_getHttpAcceptLanguageHeader();\n\n    if ($httpAcceptLanguageHeader == null) {\n      return [];\n    }\n\n    $locales = self::_getWeightedLocales($httpAcceptLanguageHeader);\n\n    $sortedLocales = self::_sortLocalesByWeight($locales);\n\n    return array_map(\n      function ($weightedLocale) {\n        return $weightedLocale['locale'];\n      }, $sortedLocales\n    );\n  }",
+            "code": "  public static function detectLanguage(): array\n  {\n    $httpAcceptLanguageHeader = self::_getHttpAcceptLanguageHeader();\n\n    if ($httpAcceptLanguageHeader == null) {\n      return [];\n    }\n\n    $locales = self::_getWeightedLocales($httpAcceptLanguageHeader);\n\n    $sortedLocales = self::_sortLocalesByWeight($locales);\n\n    return array_map(\n      function ($weightedLocale) {\n        return $weightedLocale['locale'];\n      }, $sortedLocales\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 90,
             "endLine": 107,
             "isDeprecated": false,
@@ -69,10 +72,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "detectLanguage",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getInput": {
@@ -80,11 +83,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$_input;\n  }",
+            "code": "  public static function getInput()\n  {\n    return self::$_input;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 110,
             "endLine": 113,
             "isDeprecated": false,
@@ -95,8 +101,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getInput",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "setMode": {
@@ -104,11 +110,14 @@
             "summary": "Change the output mode (content-type)",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($mode)\n  {\n    if (Router::isMode($mode)) {\n      $this->_mode = $mode;\n    }\n\n    return $this->_mode;\n  }",
+            "code": "  public function setMode($mode)\n  {\n    if (Router::isMode($mode)) {\n      $this->_mode = $mode;\n    }\n\n    return $this->_mode;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 122,
             "endLine": 129,
             "isDeprecated": false,
@@ -119,13 +128,72 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setMode",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "mode",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Change the output mode (content-type)\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    }
+                ],
+                "return": "$this->_mode"
+            },
+            "comments": "  \/**\n   * Change the output mode (content-type)\n   *\n   * @param $mode\n   * @return string $this->_mode\n   *\/"
+        },
+        "_tryLocales": {
+            "name": "_tryLocales",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _tryLocales(array $locales): ?string\n  {\n    foreach ($locales as $l) {\n      if (setlocale(LC_TIME, $l)) {\n        return $l;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 140,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_tryLocales",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "locales",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -133,16 +201,56 @@
                 }
             ]
         },
+        "_init": {
+            "name": "_init",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _init()\n  {\n    \/\/ When using CLI a first parameter can be used as route,\n    \/\/ a second JSON encoded can be used as $this->_post\n    if ($this->isCli()) {\n      $this->_mode = 'cli';\n      $this->getCli();\n    }\n    \/\/ Non CLI request\n    else {\n      if (!isset($this->_post)) {\n        $this->getPost();\n      }\n\n      if ($this->_has_post || \\count($_FILES)) {\n        \/** @todo Remove the json parameter from the bbn.js functions *\/\n        $this->setMode(BBN_DEFAULT_MODE);\n      }\n      \/\/ If no post, assuming to be a DOM document\n      else {\n        $this->setMode('dom');\n      }\n\n      if (isset($_SERVER['REQUEST_URI'])) {\n        $current = $_SERVER['REQUEST_URI'];\n      }\n\n      if (isset($current) && (BBN_CUR_PATH === '\/' || strpos($current, BBN_CUR_PATH) !== false)\n      ) {\n        $url = explode(\"?\", urldecode($current))[0];\n        if (BBN_CUR_PATH === '\/') {\n          $this->setParams($url);\n        }\n        else {\n          $this->setParams(substr($url, \\strlen(BBN_CUR_PATH)));\n        }\n      }\n    }\n\n    $this->_url = implode('\/', $this->_params ?: []);\n    \/\/ This won't be changed after a reroute\n    if (!$this->_request) {\n      $this->_request = $this->_url;\n    }\n\n    if (!$this->_locale) {\n      $this->setLocale(defined('BBN_LOCALE') ? BBN_LOCALE : null);\n    }\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 147,
+            "endLine": 196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_init",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return self\n   * @throws \\Exception\n   *\/"
+        },
         "__construct": {
             "name": "__construct",
             "summary": "Environment constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!self::$_initiated) {\n      self::_initialize();\n      $this->_init();\n    }\n  }",
+            "code": "  public function __construct()\n  {\n    if (!self::$_initiated) {\n      self::_initialize();\n      $this->_init();\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 204,
             "endLine": 210,
             "isDeprecated": false,
@@ -153,9 +261,19 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Environment constructor.\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * Environment constructor.\n   *\n   * @throws \\Exception\n   *\/"
         },
         "setLocale": {
             "name": "setLocale",
@@ -164,14 +282,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>If no parameter is provided and the constant BBN_LANG and BBN_LOCALE are not defined\nthe function will also define those constants.<\/p>"
+                    "content": "If no parameter is provided and the constant BBN_LANG and BBN_LOCALE are not defined\nthe function will also define those constants."
                 }
             ],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $locale = NULL)\n  {\n    $locales = [];\n    if (empty($locale)) {\n      array_push(\n        $locales,\n        'en-EN.utf8',\n        'en_EN.utf8',\n        'en-EN',\n        'en-US.utf8',\n        'en_US.utf8',\n        'en-US',\n        'en',\n        'en_US'\n      );\n\n      if (!defined('BBN_LOCALE')) {\n        \/\/ No user detection for CLI: default language\n        if ($this->_mode === 'cli') {\n          if (defined('BBN_LANG')) {\n            $lang = BBN_LANG;\n          }\n        }\n        else {\n          $user_locales = self::detectLanguage();\n          if (!defined('BBN_LANG') && $user_locales) {\n            if (strpos($user_locales[0], '-')) {\n              if ($lang = X::split($user_locales[0], '-')[0]) {\n                define('BBN_LANG', $lang);\n              }\n            }\n            elseif (strpos($user_locales[0], '_')) {\n              if ($lang = X::split($user_locales[0], '_')[0]) {\n                define('BBN_LANG', $lang);\n              }\n            }\n            elseif ($user_locales[0]) {\n              define('BBN_LANG', $user_locales[0]);\n            }\n          }\n\n          if (!defined('BBN_LANG')) {\n            throw new \\Exception(\"Impossible to determine the language\");\n          }\n\n          $lang = BBN_LANG;\n        }\n\n        if (isset($lang)) {\n          array_unshift(\n            $locales,\n            $lang . '-' . strtoupper($lang) . '.utf8',\n            $lang . '_' . strtoupper($lang) . '.utf8',\n            $lang . '-' . strtoupper($lang),\n            $lang\n          );\n\n          if (!empty($user_locales)) {\n            array_unshift($locales, ...$user_locales);\n          }\n        }\n      }\n    }\n    elseif (!strpos($locale, '-') && !strpos($locale, '_')) {\n      if ($locale === 'en') {\n        array_unshift(\n          $locales,\n          'en_US.utf8',\n          'en-US.utf8',\n          'en_US',\n          'en-US'\n        );\n      }\n\n      array_unshift(\n        $locales,\n        strtolower($locale) . '-' . strtoupper($locale) . '.utf8',\n        strtolower($locale) . '_' . strtoupper($locale) . '.utf8',\n        strtolower($locale) . '-' . strtoupper($locale),\n        strtolower($locale)\n      );\n    }\n    else {\n      $locales[] = $locale;\n    }\n\n    if ($confirmed = $this->_tryLocales($locales)) {\n      if (!defined('BBN_LOCALE')) {\n        define('BBN_LOCALE', $confirmed);\n      }\n\n      $this->_locale = $confirmed;\n      if (!isset($lang)) {\n        $lang = X::split(X::split($this->_locale, '-')[0], '_')[0];\n      }\n\n      putenv(\"LANG=\".$lang);\n      putenv(\"LC_MESSAGES=\".$this->_locale);\n      setlocale(LC_MESSAGES, $this->_locale);\n    }\n    else {\n      throw new \\Exception(\"Impossible to find a corresponding locale on this server for this app\");\n    }\n  }",
+            "code": "  public function setLocale(?string $locale = null)\n  {\n    $locales = [];\n    if (empty($locale)) {\n      array_push(\n        $locales,\n        'en-EN.utf8',\n        'en_EN.utf8',\n        'en-EN',\n        'en-US.utf8',\n        'en_US.utf8',\n        'en-US',\n        'en',\n        'en_US'\n      );\n\n      if (!defined('BBN_LOCALE')) {\n        \/\/ No user detection for CLI: default language\n        if ($this->_mode === 'cli') {\n          if (defined('BBN_LANG')) {\n            $lang = BBN_LANG;\n          }\n        }\n        else {\n          $user_locales = self::detectLanguage();\n          if (!defined('BBN_LANG') && $user_locales) {\n            if (strpos($user_locales[0], '-')) {\n              if ($lang = X::split($user_locales[0], '-')[0]) {\n                define('BBN_LANG', $lang);\n              }\n            }\n            elseif (strpos($user_locales[0], '_')) {\n              if ($lang = X::split($user_locales[0], '_')[0]) {\n                define('BBN_LANG', $lang);\n              }\n            }\n            elseif ($user_locales[0]) {\n              define('BBN_LANG', $user_locales[0]);\n            }\n          }\n\n          if (!defined('BBN_LANG')) {\n            throw new \\Exception(\"Impossible to determine the language\");\n          }\n\n          $lang = BBN_LANG;\n        }\n\n        if (isset($lang)) {\n          array_unshift(\n            $locales,\n            $lang . '-' . strtoupper($lang) . '.utf8',\n            $lang . '_' . strtoupper($lang) . '.utf8',\n            $lang . '-' . strtoupper($lang),\n            $lang\n          );\n\n          if (!empty($user_locales)) {\n            array_unshift($locales, ...$user_locales);\n          }\n        }\n      }\n    }\n    elseif (!strpos($locale, '-') && !strpos($locale, '_')) {\n      if ($locale === 'en') {\n        array_unshift(\n          $locales,\n          'en_US.utf8',\n          'en-US.utf8',\n          'en_US',\n          'en-US'\n        );\n      }\n\n      array_unshift(\n        $locales,\n        strtolower($locale) . '-' . strtoupper($locale) . '.utf8',\n        strtolower($locale) . '_' . strtoupper($locale) . '.utf8',\n        strtolower($locale) . '-' . strtoupper($locale),\n        strtolower($locale)\n      );\n    }\n    else {\n      $locales[] = $locale;\n    }\n\n    if ($confirmed = $this->_tryLocales($locales)) {\n      if (!defined('BBN_LOCALE')) {\n        define('BBN_LOCALE', $confirmed);\n      }\n\n      $this->_locale = $confirmed;\n      if (!isset($lang)) {\n        $lang = X::split(X::split($this->_locale, '-')[0], '_')[0];\n      }\n\n      putenv(\"LANG=\".$lang);\n      putenv(\"LC_MESSAGES=\".$this->_locale);\n      setlocale(LC_MESSAGES, $this->_locale);\n    }\n    else {\n      throw new \\Exception(\"Impossible to find a corresponding locale on this server for this app\");\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 222,
             "endLine": 325,
             "isDeprecated": false,
@@ -182,30 +303,51 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "setLocale",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "locale",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the current locale.\nIf no parameter is provided and the constant BBN_LANG and BBN_LOCALE are not defined\nthe function will also define those constants.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the current locale.\n   * If no parameter is provided and the constant BBN_LANG and BBN_LOCALE are not defined\n   * the function will also define those constants.\n   *\n   * @param string $locale\n   *\n   * @return void\n   *\/"
         },
         "getLocale": {
             "name": "getLocale",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_locale;\n  }",
+            "code": "  public function getLocale()\n  {\n    return $this->_locale;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 331,
             "endLine": 334,
             "isDeprecated": false,
@@ -216,20 +358,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getLocale",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string\n   *\/"
         },
         "setPrepath": {
             "name": "setPrepath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    $path = X::removeEmpty(explode('\/', $path));\n    if (\\count($path)) {\n      foreach ($path as $p) {\n        if (!empty($this->_params[0]) && $this->_params[0] === $p) {\n          array_shift($this->_params);\n          $this->_url = substr($this->_url, \\strlen($p) + 1);\n        } else {\n          throw new \\Exception(\n            X::_(\"The prepath $p doesn't seem to correspond to the current path {$this->_url}\")\n          );\n        }\n      }\n    }\n\n    return true;\n  }",
+            "code": "  public function setPrepath($path)\n  {\n    $path = X::removeEmpty(explode('\/', $path));\n    if (\\count($path)) {\n      foreach ($path as $p) {\n        if (!empty($this->_params[0]) && $this->_params[0] === $p) {\n          array_shift($this->_params);\n          $this->_url = substr($this->_url, \\strlen($p) + 1);\n        } else {\n          throw new \\Exception(\n            X::_(\"The prepath $p doesn't seem to correspond to the current path {$this->_url}\")\n          );\n        }\n      }\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 341,
             "endLine": 358,
             "isDeprecated": false,
@@ -240,30 +391,47 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setPrepath",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $path\n   * @return bool\n   *\/"
         },
         "isCli": {
             "name": "isCli",
             "summary": "Returns true if called from CLI\/Cron, false otherwise",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset($this->_cli)) {\n      $this->_cli = X::isCli();\n      if ($this->_cli) {\n        $opt = getopt('', ['cli']);\n        if (isset($opt['cli'])) {\n          $this->_cli = 'direct';\n        }\n      }\n    }\n\n    return $this->_cli;\n  }",
+            "code": "  public function isCli()\n  {\n    if (!isset($this->_cli)) {\n      $this->_cli = X::isCli();\n      if ($this->_cli) {\n        $opt = getopt('', ['cli']);\n        if (isset($opt['cli'])) {\n          $this->_cli = 'direct';\n        }\n      }\n    }\n\n    return $this->_cli;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 366,
             "endLine": 379,
             "isDeprecated": false,
@@ -274,20 +442,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isCli",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if called from CLI\/Cron, false otherwise\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if called from CLI\/Cron, false otherwise\n   *\n   * @return boolean\n   *\/"
         },
         "getUrl": {
             "name": "getUrl",
             "summary": "Get the request url.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_url;\n  }",
+            "code": "  public function getUrl()\n  {\n    return $this->_url;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 387,
             "endLine": 390,
             "isDeprecated": false,
@@ -298,20 +475,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUrl",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Get the request url.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Get the request url.\n   *\n   * @return string|null\n   *\/"
         },
         "simulate": {
             "name": "simulate",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($url, $post = false, $arguments = NULL)\n  {\n    unset($this->_params);\n    $this->setParams($url . (empty($arguments) ? '' : '\/' . implode('\/', $arguments)));\n    $this->_post = $post ?: null;\n    $this->_init();\n    $this->_url = $url;\n  }",
+            "code": "  public function simulate($url, $post = false, $arguments = null)\n  {\n    unset($this->_params);\n    $this->setParams($url . (empty($arguments) ? '' : '\/' . implode('\/', $arguments)));\n    $this->_post = $post ?: null;\n    $this->_init();\n    $this->_url = $url;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 399,
             "endLine": 406,
             "isDeprecated": false,
@@ -322,13 +508,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "simulate",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -338,6 +527,9 @@
                     "name": "post",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -347,23 +539,54 @@
                     "name": "arguments",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$url"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "false",
+                        "name": "$post"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param $url\n   * @param false $post\n   * @param array|null $arguments\n   * @throws \\Exception\n   *\/"
         },
         "getMode": {
             "name": "getMode",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mode;\n  }",
+            "code": "  public function getMode()\n  {\n    return $this->_mode;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 412,
             "endLine": 415,
             "isDeprecated": false,
@@ -374,20 +597,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getMode",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
         },
         "getCli": {
             "name": "getCli",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    global $argv;\n    if ($this->isCli()) {\n      if ($this->isCli() === 'direct') {\n        array_shift($argv);\n      }\n\n      $this->_post = [];\n      if (isset($argv[1])) {\n        $this->setParams($argv[1]);\n        if (isset($argv[2])) {\n          if (!isset($argv[3]) && \\bbn\\Str::isJson($argv[2])) {\n            $this->_post = json_decode($argv[2], 1);\n          } else {\n            for ($i = 2, $iMax = \\count($argv); $i < $iMax; $i++) {\n              $this->_post[] = $argv[$i];\n            }\n          }\n        }\n      }\n\n      return $this->_post;\n    }\n\n    return null;\n  }",
+            "code": "  public function getCli()\n  {\n    global $argv;\n    if ($this->isCli()) {\n      if ($this->isCli() === 'direct') {\n        array_shift($argv);\n      }\n\n      $this->_post = [];\n      if (isset($argv[1])) {\n        $this->setParams($argv[1]);\n        if (isset($argv[2])) {\n          if (!isset($argv[3]) && \\bbn\\Str::isJson($argv[2])) {\n            $this->_post = json_decode($argv[2], 1);\n          } else {\n            for ($i = 2, $iMax = \\count($argv); $i < $iMax; $i++) {\n              $this->_post[] = $argv[$i];\n            }\n          }\n        }\n      }\n\n      return $this->_post;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 422,
             "endLine": 448,
             "isDeprecated": false,
@@ -398,20 +630,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCli",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return array|null\n   * @throws \\Exception\n   *\/"
         },
         "getGet": {
             "name": "getGet",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset($this->_get)) {\n      $this->_get = [];\n      if (\\count($_GET) > 0) {\n        $this->_get = array_map(\n          function ($a) {\n            return bbn\\Str::correctTypes($a);\n          }, $_GET\n        );\n      }\n    }\n\n    return $this->_get;\n  }",
+            "code": "  public function getGet()\n  {\n    if (!isset($this->_get)) {\n      $this->_get = [];\n      if (\\count($_GET) > 0) {\n        $this->_get = array_map(\n          function ($a) {\n            return bbn\\Str::correctTypes($a);\n          }, $_GET\n        );\n      }\n    }\n\n    return $this->_get;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 454,
             "endLine": 468,
             "isDeprecated": false,
@@ -422,9 +667,15 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getGet",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "getPost": {
             "name": "getPost",
@@ -433,14 +684,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>If the _post private prop is not set, puts all the post information into it,\nexcept any index starting with <em>bbn<\/em>; in that case it will become a BBN constant\nif it has not been yet defined (e.g. _bbn_baseURL will become BBN_BASEURL)<\/p>"
+                    "content": "If the _post private prop is not set, puts all the post information into it,\nexcept any index starting with _bbn_; in that case it will become a BBN constant\nif it has not been yet defined (e.g. _bbn_baseURL will become BBN_BASEURL)"
                 }
             ],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset($this->_post)) {\n      if (self::$_input && \\bbn\\Str::isJson(self::$_input)) {\n        $this->_post = json_decode(self::$_input, 1);\n      }\n      elseif (!empty($_POST)) {\n        $this->_post = $_POST;\n      }\n\n      if (!$this->_post) {\n        $this->_post = [];\n      }\n      else {\n        $this->_has_post = true;\n        \/\/$this->_post     = bbn\\Str::correctTypes($this->_post);\n        foreach ($this->_post as $k => $v) {\n          if (X::indexOf($k, '_bbn_') === 0) {\n            if (!defined(strtoupper(substr($k, 1)))) {\n              define(strtoupper(substr($k, 1)), $v);\n            }\n\n            unset($this->_post[$k]);\n          }\n        }\n      }\n    }\n\n    return $this->_post;\n  }",
+            "code": "  public function getPost()\n  {\n    if (!isset($this->_post)) {\n      if (self::$_input && \\bbn\\Str::isJson(self::$_input)) {\n        $this->_post = json_decode(self::$_input, 1);\n      }\n      elseif (!empty($_POST)) {\n        $this->_post = $_POST;\n      }\n\n      if (!$this->_post) {\n        $this->_post = [];\n      }\n      else {\n        $this->_has_post = true;\n        \/\/$this->_post     = bbn\\Str::correctTypes($this->_post);\n        foreach ($this->_post as $k => $v) {\n          if (X::indexOf($k, '_bbn_') === 0) {\n            if (!defined(strtoupper(substr($k, 1)))) {\n              define(strtoupper(substr($k, 1)), $v);\n            }\n\n            unset($this->_post[$k]);\n          }\n        }\n      }\n    }\n\n    return $this->_post;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 479,
             "endLine": 508,
             "isDeprecated": false,
@@ -451,20 +705,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPost",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the post information.\nIf the _post private prop is not set, puts all the post information into it,\nexcept any index starting with _bbn_; in that case it will become a BBN constant\nif it has not been yet defined (e.g. _bbn_baseURL will become BBN_BASEURL)\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the post information.\n   * If the _post private prop is not set, puts all the post information into it,\n   * except any index starting with _bbn_; in that case it will become a BBN constant\n   * if it has not been yet defined (e.g. _bbn_baseURL will become BBN_BASEURL)\n   * \n   * @return array\n   *\/"
         },
         "getFiles": {
             "name": "getFiles",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!isset($this->_files)) {\n      $this->_files = [];\n      \/\/ Rebuilding the $_FILES array into $this->_files in a more logical structure\n      if (\\count($_FILES) > 0) {\n        \/\/ Some devices send multiple files with the same name\n        $names = [];\n        foreach ($_FILES as $n => $f) {\n          if (\\is_array($f['name'])) {\n            $this->_files[$n] = [];\n            foreach ($f['name'] as $i => $v) {\n              while (\\in_array($v, $names, true)) {\n                if (!isset($j)) {\n                  $j = 0;\n                }\n\n                $j++;\n                $file = bbn\\Str::fileExt($f['name'][$i], true);\n                $v    = $file[0] . '_' . $j . '.' . $file[1];\n              }\n\n              $this->_files[$n][] = [\n                'name' => $v,\n                'tmp_name' => $f['tmp_name'][$i],\n                'type' => $f['type'][$i],\n                'error' => $f['error'][$i],\n                'size' => $f['size'][$i],\n              ];\n              $names[]            = $v;\n            }\n          } else {\n            while (\\in_array($f['name'], $names, true)) {\n              if (!isset($jj)) {\n                $jj = 0;\n              }\n\n              $jj++;\n              $file       = bbn\\Str::fileExt($f['name'], true);\n              $f['name']  = $file[0] . '_' . $jj . '.' . $file[1];\n            }\n\n            $this->_files[$n] = $f;\n            $names[] = $f['name'];\n          }\n        }\n      }\n\n      \/* @todo Maybe something for managing PUT requests\n      else if (!empty(self::$_input) && !bbn\\Str::isJson(self::$_input)) {\n        $this->_files[] = [\n          'name' => $v,\n          'tmp_name' => $f['tmp_name'][$i],\n          'type' => $f['type'][$i],\n          'error' => $f['error'][$i],\n          'size' => $f['size'][$i],\n        ];\n      }\n      *\/\n    }\n\n    return $this->_files;\n  }",
+            "code": "  public function getFiles()\n  {\n    if (!isset($this->_files)) {\n      $this->_files = [];\n      \/\/ Rebuilding the $_FILES array into $this->_files in a more logical structure\n      if (\\count($_FILES) > 0) {\n        \/\/ Some devices send multiple files with the same name\n        $names = [];\n        foreach ($_FILES as $n => $f) {\n          if (\\is_array($f['name'])) {\n            $this->_files[$n] = [];\n            foreach ($f['name'] as $i => $v) {\n              while (\\in_array($v, $names, true)) {\n                if (!isset($j)) {\n                  $j = 0;\n                }\n\n                $j++;\n                $file = bbn\\Str::fileExt($f['name'][$i], true);\n                $v    = $file[0] . '_' . $j . '.' . $file[1];\n              }\n\n              $this->_files[$n][] = [\n                'name' => $v,\n                'tmp_name' => $f['tmp_name'][$i],\n                'type' => $f['type'][$i],\n                'error' => $f['error'][$i],\n                'size' => $f['size'][$i],\n              ];\n              $names[]            = $v;\n            }\n          } else {\n            while (\\in_array($f['name'], $names, true)) {\n              if (!isset($jj)) {\n                $jj = 0;\n              }\n\n              $jj++;\n              $file       = bbn\\Str::fileExt($f['name'], true);\n              $f['name']  = $file[0] . '_' . $jj . '.' . $file[1];\n            }\n\n            $this->_files[$n] = $f;\n            $names[] = $f['name'];\n          }\n        }\n      }\n\n      \/* @todo Maybe something for managing PUT requests\n      else if (!empty(self::$_input) && !bbn\\Str::isJson(self::$_input)) {\n        $this->_files[] = [\n          'name' => $v,\n          'tmp_name' => $f['tmp_name'][$i],\n          'type' => $f['type'][$i],\n          'error' => $f['error'][$i],\n          'size' => $f['size'][$i],\n        ];\n      }\n      *\/\n    }\n\n    return $this->_files;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 514,
             "endLine": 576,
             "isDeprecated": false,
@@ -475,20 +738,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFiles",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "getParams": {
             "name": "getParams",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_params;\n  }",
+            "code": "  public function getParams()\n  {\n    return $this->_params;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 582,
             "endLine": 585,
             "isDeprecated": false,
@@ -499,20 +771,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getParams",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array|null\n   *\/"
         },
         "getRequest": {
             "name": "getRequest",
             "summary": "Returns the original request sent to the server.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Environment",
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_request;\n  }",
+            "code": "  public function getRequest(): ?string\n  {\n    return $this->_request;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 593,
             "endLine": 596,
             "isDeprecated": false,
@@ -523,20 +804,555 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRequest",
             "returns": [
                 null,
                 "string"
             ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the original request sent to the server.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the original request sent to the server.\n   * \n   * @return string|null\n   *\/"
+        },
+        "_getHttpAcceptLanguageHeader": {
+            "name": "_getHttpAcceptLanguageHeader",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _getHttpAcceptLanguageHeader(): ?string\n  {\n    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {\n      return trim($_SERVER['HTTP_ACCEPT_LANGUAGE']);\n    }\n\n    return null;\n  }",
             "parent": false,
+            "trait": false,
+            "startLine": 602,
+            "endLine": 609,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_getHttpAcceptLanguageHeader",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
+        },
+        "_getWeightedLocales": {
+            "name": "_getWeightedLocales",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _getWeightedLocales($httpAcceptLanguageHeader)\n  {\n    if (strlen($httpAcceptLanguageHeader) == 0) {\n      return [];\n    }\n\n    $weightedLocales = [];\n\n    \/\/ We break up the string 'en-CA,ar-EG;q=0.5' along the commas,\n    \/\/ and iterate over the resulting array of individual locales. Once\n    \/\/ we're done, $weightedLocales should look like\n    \/\/ [['locale' => 'en-CA', 'q' => 1.0], ['locale' => 'ar-EG', 'q' => 0.5]]\n    foreach (explode(',', $httpAcceptLanguageHeader) as $locale) {\n      \/\/ separate the locale key (\"ar-EG\") from its weight (\"q=0.5\")\n      $localeParts = explode(';', $locale);\n\n      $weightedLocale = ['locale' => $localeParts[0]];\n\n      if (count($localeParts) == 2) {\n        \/\/ explicit weight e.g. 'q=0.5'\n        $weightParts = explode('=', $localeParts[1]);\n\n        \/\/ grab the '0.5' bit and parse it to a float\n        $weightedLocale['q'] = floatval($weightParts[1]);\n      } else {\n        \/\/ no weight given in string, ie. implicit weight of 'q=1.0'\n        $weightedLocale['q'] = 1.0;\n      }\n\n      $weightedLocales[] = $weightedLocale;\n    }\n\n    return $weightedLocales;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 616,
+            "endLine": 649,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_getWeightedLocales",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "httpAcceptLanguageHeader",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$httpAcceptLanguageHeader"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $httpAcceptLanguageHeader\n   * @return array\n   *\/"
+        },
+        "_sortLocalesByWeight": {
+            "name": "_sortLocalesByWeight",
+            "summary": "Sort by high to low `q` value.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _sortLocalesByWeight(array $locales)\n  {\n    usort(\n      $locales, function ($a, $b) {\n        \/\/ usort will cast float values that we return here into integers,\n        \/\/ which can mess up our sorting. So instead of subtracting the `q`,\n        \/\/ values and returning the difference, we compare the `q` values and\n        \/\/ explicitly return integer values.\n        if ($a['q'] == $b['q']) {\n          return 0;\n        }\n\n        if ($a['q'] > $b['q']) {\n          return -1;\n        }\n\n        return 1;\n      }\n    );\n\n    return $locales;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 658,
+            "endLine": 679,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_sortLocalesByWeight",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "locales",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sort by high to low `q` value.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$locales"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sort by high to low `q` value.\n   *\n   * @param array $locales\n   * @return array\n   *\/"
+        },
+        "_initialize": {
+            "name": "_initialize",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _initialize()\n  {\n    self::$_initiated = true;\n    self::$_input     = file_get_contents('php:\/\/input');\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 682,
+            "endLine": 686,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_initialize",
+            "returns": [],
             "arguments": []
+        },
+        "setParams": {
+            "name": "setParams",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Environment",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Environment.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function setParams(string $path)\n  {\n    if (!isset($this->_params)) {\n      $this->_params = [];\n      $tmp           = explode('\/', bbn\\Str::parsePath($path));\n      foreach ($tmp as $t) {\n        $t = trim($t);\n        if (!empty($t) || bbn\\Str::isNumber($t)) {\n          if (\\in_array($t, bbn\\Mvc::$reserved, true)) {\n            $msg = X::_('The controller you are asking for contains one of these reserved words')\n                .': '.implode(', ', bbn\\Mvc::$reserved);\n            throw new \\Exception($msg);\n          }\n\n          $this->_params[] = $t;\n        }\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 694,
+            "endLine": 712,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setParams",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param string $path\n   * @throws \\Exception\n   * @return void\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "_initiated": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": false
+        },
+        "_input": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "_has_post": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": false
+        },
+        "_params": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "An array of strings enclosed between the slashes of the requested path\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_mode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The mode of the output (doc, html, json, txt, Xml...)\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_request": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The original request address sent to the server.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_url": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The URL as it will be given to the controller.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_post": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "$_POST"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_get": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "$_GET"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_files": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "$_FILES"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_cookie": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "$_cookie"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_locale": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The current active locale, shared with the whole MVC."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_cli": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "Determines if it is sent through the command line\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "new_url": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Environment"
+            },
+            "declaring_trait": "bbn\\Mvc\\Environment",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "_initiated": true,
-        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"s5XbSp3znN9014c3D81928JxoWZS3w8\"}"
+        "_input": "{\"_bbn\":\"public\",\"_bbn_token\":\"Gbwz1a0il5lE9f8q0lx8lS323\"}"
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 12\/05\/2015\n * Time: 12:53\n * Environment class manages the HTTP environment and sets up the MVC variables\n * - cli\n * - post\n * - get\n * - files\n * - params\n * - url\n * It uses the preset environment variables but can also be simulated\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

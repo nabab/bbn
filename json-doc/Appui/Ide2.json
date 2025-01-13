@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Appui\\Ide2",
     "namespace": true,
+    "realName": "Ide2",
+    "realNamespace": "bbn\\Appui",
     "traits": [
         "bbn\\Models\\Tts\\Optional"
     ],
@@ -12,15 +14,12 @@
     "fileName": "\/Appui\/Ide2.php",
     "startLine": 14,
     "endLine": 732,
-    "numMethods": 38,
-    "numProperties": 2,
+    "numMethods": 43,
+    "numProperties": 15,
     "numConstants": 0,
-    "numStaticProperties": 4,
+    "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -31,12 +30,11 @@
     "defaultProperties": {
         "excluded": {
             "public": [
-                "_ctrl.php"
+                "_super.php"
             ]
         },
         "optional_is_init": false,
         "option_root_id": null,
-        "option_appui_id": null,
         "id": null,
         "fs": null,
         "projectInfo": null,
@@ -44,6 +42,8 @@
         "db": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
         "options": null
@@ -53,7 +53,6 @@
     "namespaceName": "bbn\\Appui",
     "shortName": "Ide2",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Ide2",
         "returns": []
     },
     "methods": {
@@ -62,32 +61,25 @@
             "summary": "constructor of the classe Project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, string $id)\n  {\n    parent::__construct($db);\n    self::optionalInit();\n    $this->id = $id;\n    $this->fs = new System();\n  }",
-            "startLine": 32,
-            "endLine": 38,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
+            "code": "  public function __construct(Db $db, string $id)\n  {\n    parent::__construct($db);\n    self::optionalInit();\n    $this->id = $id;\n    $this->fs = new System();\n  }",
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Db",
+                "class": "bbn\\Models\\Cls\\Db",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Db.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\Db $db)\n  {\n    $this->db = $db;\n  }",
+                "code": "  public function __construct(dbClass $db)\n  {\n    $this->db = $db;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 37,
                 "endLine": 40,
                 "isDeprecated": false,
@@ -98,26 +90,62 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "__construct",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "db",
                         "position": 0,
                         "type": "bbn\\Db",
+                        "type_arr": [
+                            "bbn\\Db"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": "",
                         "description": "A database connection"
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "Constructor.\n",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "dbClass",
+                            "name": "$db",
+                            "description": "A database connection"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Constructor.\n   *\n   * @param dbClass $db A database connection\n   *\/"
             },
+            "trait": false,
+            "startLine": 32,
+            "endLine": 38,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
+            "returns": [],
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -127,23 +155,48 @@
                     "name": "id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "constructor of the classe Project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * constructor of the classe Project\n   *\n   * @param Db $db\n   * @param string $id\n   *\/"
         },
         "urlToPaths": {
             "name": "urlToPaths",
             "summary": "Gets the potential existing paths from an URL",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url)\n  {\n    $cfg = $this->urlToConfig($url, true);\n    $file = array_pop(X::split($cfg['file'], '\/'));\n    $res = [\n      'root' => $cfg['info']['parent_code'],\n      'path' => $cfg['path'],\n      'files' => (!empty($cfg['typology']['tabs'])) ? $files : $cfg['file'],\n    ];\n    if (!empty($cfg['typology']['tabs'])) {\n      $files = [];\n      foreach($cfg['typology']['tabs'] as $tab) {\n        if ($cfg['typology']['directories'] === true) {\n          $path = $cfg['typology']['code'].'\/'.$tab['path'].$file;\n        }\n        else {\n          $path = $cfg['typology']['code'].'\/'.$file.'\/'.$file;\n        }\n        $files[$tab['url']] = [\n          'path' => $path,\n          'extensions' => $tab['extensions']\n        ];\n      }\n      $res['files'] = $files;\n    }\n    else {\n      $res['files'] = $cfg['file'];\n      $res['extensions'] = $cfg['extensions'];\n    }\n    return $res;\n  }",
+            "code": "  public function urlToPaths(string $url) : array\n  {\n    $cfg = $this->urlToConfig($url, true);\n    $file = array_pop(X::split($cfg['file'], '\/'));\n    $res = [\n      'root' => $cfg['info']['parent_code'],\n      'path' => $cfg['path'],\n      'files' => (!empty($cfg['typology']['tabs'])) ? $files : $cfg['file'],\n    ];\n    if (!empty($cfg['typology']['tabs'])) {\n      $files = [];\n      foreach($cfg['typology']['tabs'] as $tab) {\n        if ($cfg['typology']['directories'] === true) {\n          $path = $cfg['typology']['code'].'\/'.$tab['path'].$file;\n        }\n        else {\n          $path = $cfg['typology']['code'].'\/'.$file.'\/'.$file;\n        }\n        $files[$tab['url']] = [\n          'path' => $path,\n          'extensions' => $tab['extensions']\n        ];\n      }\n      $res['files'] = $files;\n    }\n    else {\n      $res['files'] = $cfg['file'];\n      $res['extensions'] = $cfg['extensions'];\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 46,
             "endLine": 76,
             "isDeprecated": false,
@@ -154,33 +207,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "urlToPaths",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The file's URL\nreturn array"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the potential existing paths from an URL\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL\nreturn array"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the potential existing paths from an URL\n   *\n   * @param string $url The file's URL\n   * return array\n   *\/"
         },
         "urlToConfig": {
             "name": "urlToConfig",
             "summary": "Gets the configuration of an URL",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url, bool $force = false)\n  {\n    \/\/ a typical url : lib\/appui-api\/js\/test\/_end_\/code\n    \/** @var array $bits each substring of the url *\/\n    $bits = X::split($url, '\/');\n    \/** @var string $root the first element must correspond to a path retriever function of mvc (app, lib, data, cdn) *\/\n    $root = array_shift($bits);\n    \/** @var string $path the code of the repository under $root (in the options) *\/\n    $path = array_shift($bits);\n    \/** @var array $info all the options for this project *\/\n    $info = $this->getProjectInfo();\n    \/** @var array $path_info full option for the current path *\/\n    $path_info = X::getRow($info['path'], ['parent_code' => $root, 'code' => $path]);\n    \/** @var string $type the last part of the url after _end_ *\/\n    $type = false;\n    if (in_array('_end_', $bits)) {\n      $type = array_pop($bits);\n      \/\/ the url structure with _end_ and $type is mandatory\n      if (array_pop($bits) !== '_end_') {\n        throw new Exception('Malformed URL');\n      }\n    }\n    $mvc = Mvc::getInstance();\n    if ($path_info && method_exists($mvc, $root.'Path')) {\n      if ($path_info['path'] === '\/') {\n        $path_info['path'] = '';\n      }\n      elseif (substr($path_info['path'], -1) !== '\/') {\n        $path_info['path'] .= '\/';\n      }\n      $res = [\n        'root' => $mvc->{$root.'Path'}(true),\n        'path' => $path_info['path'],\n        'info' => $path_info\n      ];\n      \/** @var string $real the result of this function *\/\n      $real = $res['root'].$res['path'];\n      \/\/ case of folder is a component or a mvc\n      $path_info = $path_info['alias'];\n      $source_path = $path_info['sourcePath'] ?? '';\n      $real .= $source_path;\n      if (!empty($path_info['types'])) {\n        \/** @var string $path_type type found in the url (mvc, component, lib cli) *\/\n        $path_type = array_shift($bits);\n        \/** @var array $path_row option corresponding to the type $path_type *\/\n        $path_row = X::getRow($path_info['types'], ['type' => $path_type]);\n        if (!$path_row) {\n          throw new Exception(X::_('Impossible to find the type %s', $path_type));\n        }\n        $res['typology'] = $this->getType($path_type);\n        $real .= $path_type.'\/';\n        if ($force && !$type) {\n          if (!empty($res['typology']['tabs'])) {\n            if ($row = X::getRow($res['typology']['tabs'], ['default' => true])) {\n              $type = $row['url'];\n            }\n          }\n        }\n        $path_info = X::getRow($res['typology']['tabs'], ['url' => $type]);\n        \/\/ add directly what remain in the url\n        if (empty($res['typology']['directories'])) {\n          $real .= X::join($bits, '\/');\n        }\n        \/\/ add the directory to explore if 'directories' value is true (public, private, html, ...)\n        else {\n          $real .= $path_info['path'];\n          if (!$this->fs->isDir($real)) {\n            throw new Exception(X::_(\"The directory %s doesn't exist\", $real));\n          }\n          $real .= X::join($bits, '\/');\n        }\n      }\n      \/\/ case of a simple file\n      else {\n        $real .= '\/'.X::join($bits, '\/');\n        if ($type !== 'code') {\n          $real .= '\/';\n        }\n      }\n      $res['file'] = $real;\n      $res['extensions'] = $path_info['extensions'];\n      return $res;\n    }\n    return null;\n  }",
+            "code": "  public function urlToConfig(string $url, bool $force = false) : array\n  {\n    \/\/ a typical url : lib\/appui-api\/js\/test\/_end_\/code\n    \/** @var array $bits each substring of the url *\/\n    $bits = X::split($url, '\/');\n    \/** @var string $root the first element must correspond to a path retriever function of mvc (app, lib, data, cdn) *\/\n    $root = array_shift($bits);\n    \/** @var string $path the code of the repository under $root (in the options) *\/\n    $path = array_shift($bits);\n    \/** @var array $info all the options for this project *\/\n    $info = $this->getProjectInfo();\n    \/** @var array $path_info full option for the current path *\/\n    $path_info = X::getRow($info['path'], ['parent_code' => $root, 'code' => $path]);\n    \/** @var string $type the last part of the url after _end_ *\/\n    $type = false;\n    if (in_array('_end_', $bits)) {\n      $type = array_pop($bits);\n      \/\/ the url structure with _end_ and $type is mandatory\n      if (array_pop($bits) !== '_end_') {\n        throw new Exception('Malformed URL');\n      }\n    }\n    $mvc = Mvc::getInstance();\n    if ($path_info && method_exists($mvc, $root.'Path')) {\n      if ($path_info['path'] === '\/') {\n        $path_info['path'] = '';\n      }\n      elseif (substr($path_info['path'], -1) !== '\/') {\n        $path_info['path'] .= '\/';\n      }\n      $res = [\n        'root' => $mvc->{$root.'Path'}(true),\n        'path' => $path_info['path'],\n        'info' => $path_info\n      ];\n      \/** @var string $real the result of this function *\/\n      $real = $res['root'].$res['path'];\n      \/\/ case of folder is a component or a mvc\n      $path_info = $path_info['alias'];\n      $source_path = $path_info['sourcePath'] ?? '';\n      $real .= $source_path;\n      if (!empty($path_info['types'])) {\n        \/** @var string $path_type type found in the url (mvc, component, lib cli) *\/\n        $path_type = array_shift($bits);\n        \/** @var array $path_row option corresponding to the type $path_type *\/\n        $path_row = X::getRow($path_info['types'], ['type' => $path_type]);\n        if (!$path_row) {\n          throw new Exception(X::_('Impossible to find the type %s', $path_type));\n        }\n        $res['typology'] = $this->getType($path_type);\n        $real .= $path_type.'\/';\n        if ($force && !$type) {\n          if (!empty($res['typology']['tabs'])) {\n            if ($row = X::getRow($res['typology']['tabs'], ['default' => true])) {\n              $type = $row['url'];\n            }\n          }\n        }\n        $path_info = X::getRow($res['typology']['tabs'], ['url' => $type]);\n        \/\/ add directly what remain in the url\n        if (empty($res['typology']['directories'])) {\n          $real .= X::join($bits, '\/');\n        }\n        \/\/ add the directory to explore if 'directories' value is true (public, private, html, ...)\n        else {\n          $real .= $path_info['path'];\n          if (!$this->fs->isDir($real)) {\n            throw new Exception(X::_(\"The directory %s doesn't exist\", $real));\n          }\n          $real .= X::join($bits, '\/');\n        }\n      }\n      \/\/ case of a simple file\n      else {\n        $real .= '\/'.X::join($bits, '\/');\n        if ($type !== 'code') {\n          $real .= '\/';\n        }\n      }\n      $res['file'] = $real;\n      $res['extensions'] = $path_info['extensions'];\n      return $res;\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 84,
             "endLine": 168,
             "isDeprecated": false,
@@ -191,15 +265,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "urlToConfig",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -210,23 +289,44 @@
                     "name": "force",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the configuration of an URL\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the configuration of an URL\n   *\n   * @param string $url The file's URL\n   * @return array\n   *\/"
         },
         "urlToReal": {
             "name": "urlToReal",
             "summary": "Gets the real file's path from an URL",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url)\n  {\n    $res = $this->urlToConfig($url);\n    if ($url) {\n      foreach($res['extensions'] as $e) {\n        $file = $res['file'].'.'.$e['ext'];\n        if ($this->fs->exists($file)) {\n          return $file;\n        }\n      }\n    }\n    return null;\n  }",
+            "code": "  public function urlToReal(string $url) : ?string\n  {\n    $res = $this->urlToConfig($url);\n    if ($url) {\n      foreach($res['extensions'] as $e) {\n        $file = $res['file'].'.'.$e['ext'];\n        if ($this->fs->exists($file)) {\n          return $file;\n        }\n      }\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 177,
             "endLine": 189,
             "isDeprecated": false,
@@ -237,34 +337,60 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "urlToReal",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The file's URL"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the real file's path from an URL\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "The file's URL"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$obj"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the real file's path from an URL\n   *\n   * @param string $url The file's URL\n   * @param bool   $obj\n   * @return string\n   *\/"
         },
         "realToUrl": {
             "name": "realToUrl",
             "summary": "Gets the file's URL from the real file's path.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $file)\n  {\n    foreach ($this->repositories as $i => $d) {\n      $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);\n      if (\n        $root\n        && (strpos($file, $root) === 0)\n      ) {\n        $rep = $i;\n        break;\n      }\n    }\n    if (isset($rep)) {\n      X::log([561, $file, $rep, $root], 'real');\n      $res = $rep . '\/';\n      $bits = explode('\/', substr($file, \\strlen($root)));\n      $filename  = array_pop($bits);\n      $extension = \\bbn\\Str::fileExt($filename);\n      $basename  = \\bbn\\Str::fileExt($filename, 1)[0];\n      \/\/ MVC or Component\n      if (!empty($d['tabs'])) {\n        \/\/ URL is interverted\n        if ($d['type'] === 'components') {\n          foreach ($d['tabs'] as $tab) {\n            foreach ($tab['extensions'] as $ext) {\n              if ($extension === $ext['ext']) {\n                $tab_path = $tab['url'];\n                break;\n              }\n            }\n\n            if (isset($tab_path)) {\n              break;\n            }\n          }\n        }\n        else {\n          $tab_path = array_shift($bits);\n          X::log([$tab_path, $bits], 'real');\n        }\n        $res     .= implode('\/', $bits);\n        foreach ($d['tabs'] as $t) {\n          if (\n            empty($t['fixed'])\n            && ($t['path'] === $tab_path . '\/')\n          ) {\n            $res .= \"\/$filename\";\n            break;\n          }\n        }\n      }\n      \/\/ Normal file\n      else {\n        $res .= implode('\/', $bits) . '\/' . $basename . '.' . $extension;\n      }\n      return \\bbn\\Str::parsePath($res);\n    }\n    return false;\n  }",
+            "code": "  public function realToUrl(string $file) : array\n  {\n    foreach ($this->repositories as $i => $d) {\n      $root = isset($d['root_path']) ? $d['root_path'] : $this->getRootPath($d['name']);\n      if (\n        $root\n        && (strpos($file, $root) === 0)\n      ) {\n        $rep = $i;\n        break;\n      }\n    }\n    if (isset($rep)) {\n      X::log([561, $file, $rep, $root], 'real');\n      $res = $rep . '\/';\n      $bits = explode('\/', substr($file, \\strlen($root)));\n      $filename  = array_pop($bits);\n      $extension = \\bbn\\Str::fileExt($filename);\n      $basename  = \\bbn\\Str::fileExt($filename, 1)[0];\n      \/\/ MVC or Component\n      if (!empty($d['tabs'])) {\n        \/\/ URL is interverted\n        if ($d['type'] === 'components') {\n          foreach ($d['tabs'] as $tab) {\n            foreach ($tab['extensions'] as $ext) {\n              if ($extension === $ext['ext']) {\n                $tab_path = $tab['url'];\n                break;\n              }\n            }\n\n            if (isset($tab_path)) {\n              break;\n            }\n          }\n        }\n        else {\n          $tab_path = array_shift($bits);\n          X::log([$tab_path, $bits], 'real');\n        }\n        $res     .= implode('\/', $bits);\n        foreach ($d['tabs'] as $t) {\n          if (\n            empty($t['fixed'])\n            && ($t['path'] === $tab_path . '\/')\n          ) {\n            $res .= \"\/$filename\";\n            break;\n          }\n        }\n      }\n      \/\/ Normal file\n      else {\n        $res .= implode('\/', $bits) . '\/' . $basename . '.' . $extension;\n      }\n      return \\bbn\\Str::parsePath($res);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 197,
             "endLine": 255,
             "isDeprecated": false,
@@ -275,33 +401,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "realToUrl",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "file",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The real file's path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the file's URL from the real file's path.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file",
+                        "description": "The real file's path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the file's URL from the real file's path.\n   *\n   * @param string $file The real file's path\n   * @return bool|string\n   *\/"
         },
         "getFullTree": {
             "name": "getFullTree",
             "summary": "function to get the full option tree of the project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $res = self::getOptionsObject()->fullTree($this->id);\n    foreach($res['items'] as $t) {\n      $res[$t['code']] = $t;\n    }\n    unset($res['items']);\n    return $res;\n  }",
+            "code": "  public function getFullTree(): array\n  {\n    $res = self::getOptionsObject()->fullTree($this->id);\n    foreach($res['items'] as $t) {\n      $res[$t['code']] = $t;\n    }\n    unset($res['items']);\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 262,
             "endLine": 270,
             "isDeprecated": false,
@@ -312,22 +459,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFullTree",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "function to get the full option tree of the project\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get the full option tree of the project\n   *\n   * @return array\n   *\/"
         },
         "getPaths": {
             "name": "getPaths",
             "summary": "function to get all path of the project and format each path",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $withPath = false, bool $force = false)\n  {\n    if ($force || !$this->pathInfo) {\n      $tree = $this->getFullTree();\n      $roots = $tree['path']['items'];\n      $res = [];\n      foreach($roots as $root) {\n        if (defined(\"BBN_\".strtoupper($root['code']).\"_PATH\")) {\n          $path = constant(\"BBN_\".strtoupper($root['code']).\"_PATH\");\n          foreach($root['items'] as $option) {\n            $tmp = [\n              'id' => $option['id'],\n              'id_alias' => $option['id_alias'],\n              'parent_code' => $root['code'],\n              'text' => $option['text'],\n              'code' => $option['code'],\n              'bcolor' => $option['bcolor'] ?? null,\n              'fcolor' => $option['fcolor'] ?? null,\n              'language' => $option['language'] ?? BBN_LANG,\n              'alias' => $option['alias'],\n              'parent' => $path,\n              'path' => $option['path'] === '\/' ? '\/' : $option['path']\n            ];\n            $res[] = $tmp;\n          }\n        }\n      }\n      $this->pathInfo = $res;\n    }\n    if (!$withPath) {\n      foreach($roots as $root) {\n        if (defined(\"BBN_\".strtoupper($root['code']).\"_PATH\")) {\n          foreach($root['items'] as &$option) {\n            unset($option['parent']);\n            unset($option['path']);\n          }\n        }\n      }\n    }\n    return $this->pathInfo;\n  }",
+            "code": "  public function getPaths(bool $withPath = false, bool $force = false): array\n  {\n    if ($force || !$this->pathInfo) {\n      $tree = $this->getFullTree();\n      $roots = $tree['path']['items'];\n      $res = [];\n      foreach($roots as $root) {\n        if (defined(\"BBN_\".strtoupper($root['code']).\"_PATH\")) {\n          $path = constant(\"BBN_\".strtoupper($root['code']).\"_PATH\");\n          foreach($root['items'] as $option) {\n            $tmp = [\n              'id' => $option['id'],\n              'id_alias' => $option['id_alias'],\n              'parent_code' => $root['code'],\n              'text' => $option['text'],\n              'code' => $option['code'],\n              'bcolor' => $option['bcolor'] ?? null,\n              'fcolor' => $option['fcolor'] ?? null,\n              'language' => $option['language'] ?? BBN_LANG,\n              'alias' => $option['alias'],\n              'parent' => $path,\n              'path' => $option['path'] === '\/' ? '\/' : $option['path']\n            ];\n            $res[] = $tmp;\n          }\n        }\n      }\n      $this->pathInfo = $res;\n    }\n    if (!$withPath) {\n      foreach($roots as $root) {\n        if (defined(\"BBN_\".strtoupper($root['code']).\"_PATH\")) {\n          foreach($root['items'] as &$option) {\n            unset($option['parent']);\n            unset($option['path']);\n          }\n        }\n      }\n    }\n    return $this->pathInfo;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 279,
             "endLine": 319,
             "isDeprecated": false,
@@ -338,15 +494,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPaths",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "withPath",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -357,24 +518,51 @@
                     "name": "force",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "force update $this->pathInfo"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "function to get all path of the project and format each path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ath  adds the full path to the results"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force",
+                        "description": "force update $this->pathInfo"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get all path of the project and format each path\n   *\n   * @param bool $withPath  adds the full path to the results\n   * @param bool $force  force update $this->pathInfo\n   * @return array\n   *\/"
         },
         "getPath": {
             "name": "getPath",
             "summary": "function to get a path by id",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, bool $withPath = false, bool $force = false)\n  {\n    $paths = $this->getPaths($withPath, $force);\n    $row = X::getRow($paths, ['id' => $id]);\n    return $row ?: null;\n  }",
+            "code": "  public function getPath(string $id, bool $withPath = false, bool $force = false): ?array\n  {\n    $paths = $this->getPaths($withPath, $force);\n    $row = X::getRow($paths, ['id' => $id]);\n    return $row ?: null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 329,
             "endLine": 334,
             "isDeprecated": false,
@@ -385,16 +573,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "getPath",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -405,6 +598,11 @@
                     "name": "withPath",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -415,24 +613,57 @@
                     "name": "force",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "force update $this->pathInfo"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "function to get a path by id\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "id of the path to get"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$with",
+                        "description": "ath  adds the full path to the results"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force",
+                        "description": "force update $this->pathInfo"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get a path by id\n   *\n   * @param string $id  id of the path to get\n   * @param bool $withPath  adds the full path to the results\n   * @param bool $force  force update $this->pathInfo\n   * @return array\n   *\/"
         },
         "getProjectInfo": {
             "name": "getProjectInfo",
             "summary": "function to get all path of the project and format each path",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $force = false)\n  {\n    if ($force || !$this->projectInfo) {\n      $info = $this->getFullTree();\n      $info['path'] = $this->getPaths();\n      $this->projectInfo = $info;\n    }\n    return $this->projectInfo;\n  }",
+            "code": "  public function getProjectInfo(bool $force = false): array\n  {\n    if ($force || !$this->projectInfo) {\n      $info = $this->getFullTree();\n      $info['path'] = $this->getPaths();\n      $this->projectInfo = $info;\n    }\n    return $this->projectInfo;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 342,
             "endLine": 350,
             "isDeprecated": false,
@@ -443,33 +674,143 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "force",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "force update $this->projectInfo"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "function to get all path of the project and format each path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$force",
+                        "description": "force update $this->projectInfo"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get all path of the project and format each path\n   *\n   * @param bool $force  force update $this->projectInfo\n   * @return array\n   *\/"
+        },
+        "_getDifferenceGit": {
+            "name": "_getDifferenceGit",
+            "summary": "function to get difference between local and git version",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _getDifferenceGit()\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 357,
+            "endLine": 360,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_getDifferenceGit",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "function to get difference between local and git version\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get difference between local and git version\n   *\n   * @return array\n   *\/"
+        },
+        "_checkGit": {
+            "name": "_checkGit",
+            "summary": "function to get git status of the element",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _checkGit($ele): bool\n  {\n    $difference_git = $this->getDifferenceGit();\n    $info_git = false;\n    if (!empty($difference_git['ide'])) {\n      foreach($difference_git['ide'] as $commit){\n        $info_git = strpos($commit['ele'], $ele) === 0;\n        if (!empty($info_git)) {\n          return $info_git;\n        }\n      }\n    }\n    return $info_git;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 368,
+            "endLine": 381,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_checkGit",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "ele",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "given element to check its status"
+                }
+            ],
+            "doc": {
+                "description": "function to get git status of the element\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$ele",
+                        "description": "given element to check its status"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get git status of the element\n   *\n   * @param bool $ele  given element to check its status\n   * @return bool\n   *\/"
         },
         "openTree": {
             "name": "openTree",
             "summary": "function to get array to fill the tree component",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $id_path, string $type = NULL)\n  {\n    return $this->_getTree($path, $id_path, $type);\n  }",
+            "code": "  public function openTree(string $path, string $id_path, string $type = null): array\n  {\n    return $this->_getTree($path, $id_path, $type);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 391,
             "endLine": 394,
             "isDeprecated": false,
@@ -480,15 +821,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "openTree",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -499,6 +845,11 @@
                     "name": "id_path",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -508,25 +859,59 @@
                 {
                     "name": "type",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "type given in order to fill the tree"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "function to get array to fill the tree component\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "given path of the file selected"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "path  given id_path of the directory"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "type given in order to fill the tree"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get array to fill the tree component\n   *\n   * @param string $path  given path of the file selected\n   * @param string $id_path  given id_path of the directory\n   * @param string $type  type given in order to fill the tree\n   * @return array\n   *\/"
         },
         "getType": {
             "name": "getType",
             "summary": "function to get a type by a code",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $code)\n  {\n    $o = self::getOptionsObject();\n    return $o->option($code, 'types', 'ide', 'appui');\n  }",
+            "code": "  public function getType(string $code): array\n  {\n    $o = self::getOptionsObject();\n    return $o->option($code, 'types', 'ide', 'appui');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 402,
             "endLine": 406,
             "isDeprecated": false,
@@ -537,33 +922,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getType",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "code",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "code given to retrieve its type"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "function to get a type by a code\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "code given to retrieve its type"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get a type by a code\n   *\n   * @param string $code  code given to retrieve its type\n   * @return array\n   *\/"
         },
         "getIcon": {
             "name": "getIcon",
             "summary": "function to get a icon of a type",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $code)\n  {\n    $type = $this->getType($code);\n    if (!empty($type['icon'])) {\n      return $type['icon'];\n    }\n    return '';\n  }",
+            "code": "  public function getIcon(string $code): string\n  {\n    $type = $this->getType($code);\n    if (!empty($type['icon'])) {\n      return $type['icon'];\n    }\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 414,
             "endLine": 421,
             "isDeprecated": false,
@@ -574,270 +980,468 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getIcon",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "code",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "code given to retrieve its icon"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "function to get a icon of a type\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "code given to retrieve its icon"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get a icon of a type\n   *\n   * @param string $code  code given to retrieve its icon\n   * @return string\n   *\/"
         },
-        "test": {
-            "name": "test",
-            "summary": "Checks whether the error property has been set (so an error happened).",
+        "retrieveAllFiles": {
+            "name": "retrieveAllFiles",
+            "summary": "function to get all files by a path",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
+            "code": "  private function retrieveAllFiles(string $path, bool $onlydirs = false): array\n  {\n    if (!$this->fs->isDir($path)) {\n      throw new Exception(X::_('Invalid Path %s', $path));\n    }\n    return !empty($onlydirs) ? $this->getDirs($path, false, 'tmce') : $this->fs->getFiles($path, true, false, false, 'tmce');\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 430,
+            "endLine": 436,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "test",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "retrieveAllFiles",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path given to search files"
+                },
+                {
+                    "name": "onlydirs",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "get files AND folders if it is true"
+                }
+            ],
+            "doc": {
+                "description": "function to get all files by a path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "path given to search files"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$onlydirs",
+                        "description": "get files AND folders if it is true"
+                    }
+                ],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * function to get all files by a path\n   *\n   * @param string $path  path given to search files\n   * @param bool $onlydirs  get files AND folders if it is true\n   * @return array\n   *\/"
         },
-        "check": {
-            "name": "check",
-            "summary": "Checks whether the error property has been set (so an error happened).",
+        "retrieveComponentFiles": {
+            "name": "retrieveComponentFiles",
+            "summary": "function to get files refer to a component by a path",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
+            "code": "  private function retrieveComponentFiles(string $root, string $path, bool $onlydirs = false): array\n  {\n    return $this->fs->getDirs($root.$path, false, 'tmce');\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 445,
+            "endLine": 448,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "check",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "retrieveComponentFiles",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "root",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path given to search files"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "get files AND folders if it is true"
+                },
+                {
+                    "name": "onlydirs",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "function to get files refer to a component by a path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "path given to search files"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$onlydirs",
+                        "description": "get files AND folders if it is true"
+                    }
+                ],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * function to get files refer to a component by a path\n   *\n   * @param string $path  path given to search files\n   * @param bool $onlydirs  get files AND folders if it is true\n   * @return array\n   *\/"
         },
-        "getError": {
-            "name": "getError",
-            "summary": "",
+        "retrieveMvcFiles": {
+            "name": "retrieveMvcFiles",
+            "summary": "function to get files refer to a mvc by a path",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "code": "  private function retrieveMvcFiles(string $root, string $path, bool $onlydirs = false): array\n  {\n    $currentTabs = $this->getType('mvc');\n    $todo = [];\n    if (!$this->fs->isDir($root)) {\n      throw new Exception(X::_('Invalid Root'));\n    }\n    if (!empty($currentTabs['tabs'])) {\n      foreach($currentTabs['tabs'] as $tab) {\n        if (empty($tab['fixed'])) {\n          $tmp = $root.$tab['path'].($path ? $path : '');\n          array_push(\n            $todo,\n            ...array_map(function($a) use ($tab) {\n              $a['tab'] = $tab['url'];\n              return $a;\n            }, !empty($onlydirs) ? $this->getDirs($tmp, false, 'tmce') : $this->fs->getFiles($tmp, true, false, false, 'tmce'))\n          );\n        }\n      }\n    }\n    return $todo;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 458,
+            "endLine": 480,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "retrieveMvcFiles",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "root",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "adds"
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path given to search files"
+                },
+                {
+                    "name": "onlydirs",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "get files AND folders if it is true"
+                }
+            ],
+            "doc": {
+                "description": "function to get files refer to a mvc by a path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$root",
+                        "description": "adds"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "path given to search files"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$onlydirs",
+                        "description": "get files AND folders if it is true"
+                    }
+                ],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * function to get files refer to a mvc by a path\n   *\n   * @param string $root  adds\n   * @param string $path  path given to search files\n   * @param bool $onlydirs  get files AND folders if it is true\n   * @return array\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
-            "summary": "",
+        "_getTree": {
+            "name": "_getTree",
+            "summary": "function to get the tree array to fill tree component",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
+            "code": "  private function _getTree(string $path, string $id_path, string $type = null, bool $onlydirs = false): array\n  {\n    \/\/ get info of the current path selected in first dropdown\n    $currentPathArray = $this->getPath($id_path);\n    if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {\n      throw new Exception('Invalid Path');\n    }\n    $path = Url::sanitize($path);\n    $o = self::getOptionsObject();\n    \/\/ get current path type options\n    $typePath = $o->option($currentPathArray['id_alias']);\n    \/\/ finalPath is the parameter for the getFiles function\n    $finalPath = $currentPathArray['parent'].$currentPathArray['path'].($typePath['code'] === 'bbn-project' ? '\/src' : '');\n    $isBbnProject = false;\n    $todo = [];\n    if (!empty($typePath['types'])) {\n      \/\/ do if the path is a bbn-project\n      $isBbnProject = true;\n      \/\/ check the type between mvc, component, classes and cli\n      $currentType = X::getRow($typePath['types'], ['type' => $type]);\n      if (!$currentType) {\n        throw new Exception('Invalid Type');\n      }\n      \/\/ concatenate finalPath with the path of the type\n      $finalPath .= '\/'.$currentType['path'];\n    }\n    else {\n      $currentType = $typePath;\n      $finalPath .= '\/';\n    }\n    $currentPathArray['type'] = $currentType;\n    $currentPathArray['publicPath'] = $path.'\/';\n    \/\/ fill $todo with MVC files \/ folders\n    if ($currentType['type'] === 'mvc') {\n      $todo = $this->retrieveMvcFiles($finalPath, $path, $onlydirs);\n    }\n    \/\/ fill $todo with Components files \/ folders\n    elseif ($currentType['type'] === 'components') {\n      $todo = $this->retrieveComponentFiles($finalPath, $path, $onlydirs);\n    }\n    \/\/ fill $todo with all files \/ folders\n    else {\n      $todo = $this->retrieveAllFiles($finalPath.($path ?: ''), $onlydirs);\n    }\n    if (is_array($todo)) {\n      \/\/we browse the element\n      $files = [];\n      $filtered = array_values(array_filter(\n        $todo,\n        function($a) use (&$files) {\n          \/\/ get name and extension of each files\n          $ext  = \\bbn\\Str::fileExt($a['name']);\n          $name = \\bbn\\Str::fileExt($a['name'], 1)[0];\n          if (!isset($files[$name])) {\n            $files[$name] = true;\n            return true;\n          }\n          return false;\n        }\n      ));\n      $that =& $this;\n      $files = [];\n      $folders = [];\n      \/\/ launch _getNode on all path of $currentPathArray to get array of nodes\n      $fn = function($a) use (&$currentPathArray, $that, &$files,  &$folders) {\n        $tmp = $that->_getNode($a, $currentPathArray);\n        if ($tmp['file']) {\n          $files[$tmp['name']] = $tmp;\n        }\n        else {\n          $folders[$tmp['name']] = $tmp;\n        }\n        return $tmp;\n      };\n      array_map($fn, $filtered);\n      if (ksort($folders, SORT_STRING | SORT_FLAG_CASE) && ksort($files, SORT_STRING | SORT_FLAG_CASE)) {\n        \/\/return merge of file and folder create in function get\n        $tot = array_merge(array_values($folders), array_values($files));\n        return $tot;\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 494,
+            "endLine": 575,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "getErrors",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_getTree",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "given path of the file selected"
+                },
+                {
+                    "name": "id_path",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "path  given id_path of the directory"
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "type given in order to fill the tree"
+                },
+                {
+                    "name": "onlydirs",
+                    "position": 3,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "get files AND folders if it is true"
+                }
+            ],
+            "doc": {
+                "description": "function to get the tree array to fill tree component\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "given path of the file selected"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "path  given id_path of the directory"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "type given in order to fill the tree"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$onlydirs",
+                        "description": "get files AND folders if it is true"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$color",
+                        "description": "color given in order to set icon color"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tab",
+                        "description": "extension of the file"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$types",
+                        "description": "types given in order to fill tree array"
+                    }
+                ],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * function to get the tree array to fill tree component\n   *\n   * @param string $path  given path of the file selected\n   * @param string $id_path  given id_path of the directory\n   * @param string $type  type given in order to fill the tree\n   * @param bool $onlydirs  get files AND folders if it is true\n   * @param string $color  color given in order to set icon color\n   * @param string $tab  extension of the file\n   * @param array $types  types given in order to fill tree array\n   * @return array\n   *\/"
         },
-        "log": {
-            "name": "log",
-            "summary": "",
+        "_getNode": {
+            "name": "_getNode",
+            "summary": "function to get node by info of the selected file\/folder",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Ide2.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
+            "code": "  private function _getNode(array $t, array $cfg): array {\n    $component = false;\n    $is_vue    = false;\n    $name      = $t['basename'];\n    \/\/if is type and is components\n    if ($cfg['type']['type'] === 'components') {\n      \/\/if is the component\n      \/*if(empty($this->fs->getDirs($t['name'])) && !empty($cnt = $this->fs->getFiles($t))) {\n        $component = true;\n        $num       = 0;\n        $folder    = false;\n        if (is_array($cnt)) {\n          foreach($cnt as $f){\n            $item = explode(\".\", basename($f))[0];\n            if ($item === basename($t)) {\n              $arr[]  = \\bbn\\Str::fileExt($f);\n              $is_vue = true;\n            }\n          }\n        }\n      }\n      elseif (empty($model->inc->fs->getFiles($t, true))) {\n        $component = false;\n        $num       = 0;\n        $folder    = true;\n      }\n      \/\/else is folder\n      elseif (($cnt = $model->inc->fs->getFiles($t, true, true))) {\n        $num       = \\count($cnt);\n        $folder    = true;\n        $arr       = [];\n        $component = false;\n        $num_check = 0;\n\n        if (is_array($cnt)) {\n          $num_check = 0;\n          foreach($cnt as $f){\n            \/\/$name = explode(\".\", basename($f))[0];\n            $ele  = explode(\".\", basename($f));\n            $item = $ele[0];\n            $ext  = isset($ele[1]) ? $ele[1] : false;\n            \/\/if is folder and component\n            if ($item === basename($t)) {\n              $folder    = false;\n              $arr[]     = \\bbn\\Str::fileExt($f);\n              $is_vue    = true;\n              $component = true;\n              if (!empty($ext) && (in_array($ext, $excludeds) === false)) {\n                $num_check++;\n              }\n            }\n          }\n\n          if($num > 0) {\n            \/\/for component in case file with name different or folder hidden\n            $element_exluded = 0;\n            if($num_check < $num) {\n              foreach($cnt as $f){\n                $ele  = explode(\".\", basename($f));\n                $item = $ele[0];\n                $ext  = isset($ele[1]) ? $ele[1] : false;\n                if (($model->inc->fs->isDir($f) && (strpos(basename($f), '.') === 0))\n                    || ($model->inc->fs->isFile($f) && (($item !== basename($t)) || (!empty($ext) && (in_array($ext, $excludeds) === true))))\n                   ) {\n                  $element_exluded++;\n                }\n              }\n            }\n\n            \/\/check if the files of the component + those that have a different name or have hidden folders is the same as all the content, leaving only the possibility in case of folders not hidden\n            $num = $num - ($num_check + $element_exluded);\n          }\n        }\n\n        \/\/in this block check check if there is the file with the extension 'js' otherwise take the first from the list and if it is php then let's say that we are in the html\n        if (count($arr) > 0) {\n          if(array_search('js',$arr, true) !== false) {\n            $tab = 'js';\n          }\n          else{\n            $tab = $arr[0] === 'php' ? 'html' : $arr[0];\n          }\n        }\n      }*\/\n    }\n\n    \/\/on the basis of various checks, set the icon\n    \/\/case file but no component\n    if (!empty($t['file']) && empty($component)) {\n      if ($t['ext'] === 'js') {\n        $icon = \"icon-javascript\";\n      }\n      elseif ($t['ext'] === 'less') {\n        $icon = 'nf nf-dev-less';\n      }\n      else{\n        $icon = \"icon-$t[ext]\";\n      }\n    }\n    \/\/case component o folder who contain other component\n    elseif (!empty($component) && !empty($is_vue)) {\n      $icon = \"nf nf-mdi-vuejs\";\n    }\n    \/\/case folder\n    else {\n      $icon = \"nf nf-fa-folder\";\n    }\n\n    \/\/object return of a single node\n    $res = [\n      'text' => $name,\n      'name' => $name,\n      \/\/'git' => $check_git($t),\n      \/\/Previously the 'uid' property was called 'path'\n      \/** @todo check that it is working for directories *\/\n      \/\/ uid of the file depends to his type\n      'uid' => $component === true ? $cfg['publicPath'].$name.'\/'.$name : $cfg['publicPath'].$name,\n      'has_index' => !$t['file'] && \\bbn\\File\\Dir::hasFile($t['name'], 'index.php', 'index.html', 'index.htm'),\n      'is_svg' => $t['file'] && ($t['ext'] === 'svg'),\n      \/\/ $is_vue not use\n      'is_vue' => $is_vue,\n      'icon' => $icon,\n      'bcolor' => $cfg['bcolor'],\n      'folder' => $t['dir'],\n      'lazy' => $t['dir'] && ((empty($onlydirs) && $t['num']) || (!empty($onlydirs) && $this->fs->getDirs($t['name']))),\n      'numChildren' => $t['num'],\n      'tab' => $t['tab'],\n      'ext' => $t['file'] ? $t['ext'] : false\n    ];\n\n    \/*if(!empty($tree_popup)) {\n      $cfg['tree_popup'] = !empty($tree_popup);\n    }*\/\n\n    \/\/based on various checks, we set the type by adding it to the cfg\n    \/*if ($cfg['type'] && !empty($types)) {\n      $res['type'] = !empty($types[$name]) ? $types[$name] : false;\n    }\n    elseif (!empty($type) && empty($types)) {\n      $cfg['type']['type'] = $type;\n    }\n    elseif (empty($type) && empty($types)) {\n      $cfg['type']['type'] = false;\n    }*\/\n\n    \/\/add to the list of folders or files so that we traced them for the next cycle\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 584,
+            "endLine": 731,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -846,83 +1450,109 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [],
+            "shortName": "_getNode",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "t",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "info of the file\/folder selected"
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "config of the file\/folder to create result for tree"
+                }
+            ],
+            "doc": {
+                "description": "function to get node by info of the selected file\/folder\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$t",
+                        "description": "info of the file\/folder selected"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "config of the file\/folder to create result for tree"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * function to get node by info of the selected file\/folder\n   *\n   * @param array $t  info of the file\/folder selected\n   * @param array $cfg  config of the file\/folder to create result for tree\n   * @return array\n   *\/"
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
-                "name": "__call",
-                "summary": "",
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
                 "isUserDefined": true,
                 "isVariadic": false,
                 "returnsReference": false,
-                "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "name",
-                        "position": 0,
-                        "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "arguments",
-                        "position": 1,
-                        "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
-            "arguments": [
-                {
-                    "name": "name",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
                 },
-                {
-                    "name": "arguments",
-                    "position": 1,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "isDebug": {
-            "name": "isDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -931,17 +1561,424 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "test",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "check",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "check",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+        },
+        "setError": {
+            "name": "setError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
+            "parent": {
+                "name": "setError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "protected",
+                "final": false,
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
+                "returns": [],
+                "arguments": [
+                    {
+                        "name": "err",
+                        "position": 0,
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "code",
+                        "position": 1,
+                        "type": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "err",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getError": {
+            "name": "getError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getError",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -952,43 +1989,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -999,44 +2054,272 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      $justDefined = false;\n      if (!\\defined(\"BBN_APPUI\")) {\n        $justDefined = true;\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = strtolower(end($tmp));\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        if (!$cls) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!\\defined(\"BBN_APPUI\")) {\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');\n          return;\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n            if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 85,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 120,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
-            "startLine": 150,
-            "endLine": 154,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 131,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1045,32 +2328,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
             "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getAppuiRoot": {
-            "name": "getAppuiRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_appui_id;\n  }",
-            "startLine": 157,
-            "endLine": 161,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsObject": {
@@ -1078,13 +2337,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
-            "startLine": 164,
-            "endLine": 172,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 138,
+            "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1093,10 +2355,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
             "returns": [
                 "bbn\\Appui\\Option"
             ],
-            "parent": false,
             "arguments": []
         },
         "getOptionId": {
@@ -1104,13 +2366,16 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 181,
-            "endLine": 184,
+            "code": "  public static function getOptionId()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1119,22 +2384,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
             "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 193,
-            "endLine": 203,
+            "code": "  public static function getOptionsIds(): array\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 167,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1143,24 +2423,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
         },
         "getOptionsTree": {
             "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 206,
-            "endLine": 209,
+            "code": "  public static function getOptionsTree()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1169,8 +2462,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTreeRef": {
@@ -1178,13 +2471,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 212,
-            "endLine": 215,
+            "code": "  public static function getOptionsTreeRef()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 186,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1193,8 +2489,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptions": {
@@ -1202,13 +2498,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 218,
-            "endLine": 221,
+            "code": "  public static function getOptions()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1217,8 +2516,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsRef": {
@@ -1226,13 +2525,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  public static function getOptionsRef()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 198,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1241,8 +2543,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOption": {
@@ -1250,13 +2552,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 230,
-            "endLine": 233,
+            "code": "  public static function getOption()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1265,8 +2570,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValue": {
@@ -1274,13 +2579,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 236,
-            "endLine": 239,
+            "code": "  public static function getOptionsTextValue()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1289,8 +2597,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValue",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValueRef": {
@@ -1298,13 +2606,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
-            "startLine": 242,
-            "endLine": 245,
+            "code": "  public static function getOptionsTextValueRef()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1313,187 +2624,548 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValueRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
-        "getOptionId": {
-            "name": "getOptionId",
-            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 254,
-            "endLine": 257,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsIds": {
-            "name": "getOptionsIds",
+        "_treat_args": {
+            "name": "_treat_args",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
+            "class": "bbn\\Appui\\Ide2",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 260,
-            "endLine": 272,
+            "code": "  protected static function _treat_args(array $args, $appui = false): array\n  {\n    $hasUid = Str::isUid(end($args));\n    if (count($args) && !$hasUid) {\n      self::optionalInit();\n      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {\n        $args[] = 'options';\n      }\n    }\n\n    if (!$hasUid) {\n      $args[] = self::$option_root_id;\n    }\n\n    return $args;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 223,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_treat_args",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTree": {
-            "name": "getOptionsTree",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 275,
-            "endLine": 278,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptions": {
-            "name": "getOptions",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 281,
-            "endLine": 284,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOption": {
-            "name": "getOption",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 287,
-            "endLine": 290,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValue": {
-            "name": "getOptionsTextValue",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Ide2",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 293,
-            "endLine": 296,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "appui",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": {
         "id": {
-            "visibility": "public"
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Appui\\Ide2",
+            "promoted": false,
+            "visibility": "public",
+            "doc": "",
+            "parent": false,
+            "value": null
         },
         "fs": {
-            "visibility": "public"
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Appui\\Ide2",
+            "promoted": false,
+            "visibility": "public",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "excluded": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Appui\\Ide2",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": {
+                "public": [
+                    "_super.php"
+                ]
+            }
+        },
+        "projectInfo": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Appui\\Ide2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "pathInfo": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Appui\\Ide2",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Db"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Db",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "dbClass"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "db",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Db"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Db",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "dbClass"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            },
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Ide2"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
         }
     },
     "staticProperties": {
         "excluded": {
             "public": [
-                "_ctrl.php"
+                "_super.php"
             ]
         },
         "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "option_root_id": null
     },
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Mvc": "Mvc",
+        "bbn\\Db": "Db",
+        "bbn\\Models\\Cls\\Db": "modelDb",
+        "bbn\\Models\\Tts\\Optional": "Optional",
+        "bbn\\Appui\\Url": "Url",
+        "bbn\\File\\System": "System",
+        "bbn\\User\\Preferences": "Preferences"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

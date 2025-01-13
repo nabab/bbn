@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Parsers\\Php",
     "namespace": true,
+    "realName": "Php",
+    "realNamespace": "bbn\\Parsers",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Parsers\/Php.php",
-    "startLine": 10,
-    "endLine": 1019,
-    "numMethods": 18,
-    "numProperties": 0,
+    "startLine": 15,
+    "endLine": 1309,
+    "numMethods": 33,
+    "numProperties": 6,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -27,6 +28,8 @@
     "defaultProperties": {
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": []
     },
@@ -35,7 +38,6 @@
     "namespaceName": "bbn\\Parsers",
     "shortName": "Php",
     "contentConstructor": {
-        "file": "bbn\\Parsers\\Php",
         "returns": []
     },
     "methods": {
@@ -44,13 +46,16 @@
             "summary": "Construct function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->docParser = \\phpDocumentor\\Reflection\\DocBlockFactory::createInstance();\n    $this->parser    = new Doc('', 'php');\n  }",
-            "startLine": 17,
-            "endLine": 21,
+            "code": "  public function __construct()\n  {\n    $this->docParser = DocBlockFactory::createInstance();\n    $this->parser = new Doc('', 'php');\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 22,
+            "endLine": 26,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -59,22 +64,30 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Construct function",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Construct function\n   *\/"
         },
         "analyzeMethod": {
             "name": "analyzeMethod",
             "summary": "Function to take all the information related to the method sought and if it also contains the method of its relative",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $meth, $cls)\n  {\n    if (is_string($cls)) {\n      $cls = new \\ReflectionClass($cls);\n    }\n\n    $arr = null;\n    if (\n        !empty($meth)\n        && !empty($cls)\n        && $cls->hasMethod($meth)\n    ) {\n      $f = &$this;\n\n      \/\/get method in current class\n      $arr = $this->_get_method_info($cls->getMethod($meth));\n\n      \/\/get method in parent class\n      $parent = $cls->getParentClass();\n\n      while ($parent) {\n        if ($parent->hasMethod($meth)) {\n          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth));\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    return $arr ?: null;\n  }",
-            "startLine": 31,
-            "endLine": 61,
+            "code": "  public function analyzeMethod(string $meth, $cls): ?array\n  {\n    if (is_string($cls)) {\n      $cls = new ReflectionClass($cls);\n    }\n    \n    $arr = null;\n    if (\n      !empty($meth)\n      && !empty($cls)\n      && $cls->hasMethod($meth)\n    ) {\n      $f = &$this;\n      \n      \/\/get method in current class\n      $arr = $this->_get_method_info($cls->getMethod($meth), $cls);\n      \n      \/\/get method in parent class\n      $parent = $cls->getParentClass();\n      \n      while ($parent) {\n        if ($parent->hasMethod($meth)) {\n          $arr['parent'] = $this->_get_method_info($parent->getMethod($meth), $cls);\n        }\n        \n        $parent = $parent->getParentClass();\n      }\n    }\n    \n    return $arr ?: null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 36,
+            "endLine": 66,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -83,16 +96,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "analyzeMethod",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "meth",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -103,25 +121,49 @@
                     "name": "cls",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Function to take all the information related to the method sought and if it also contains the method of its relative\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$meth",
+                        "description": "Name of the method to search for to take information"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "ReflectionClass",
+                        "name": "$cls"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function to take all the information related to the method sought and if it also contains the method of its relative\n   *\n   * @param string $meth Name of the method to search for to take information\n   * @param ReflectionClass $cls\n   * @return array|null\n   *\/"
         },
         "analyzeProperty": {
             "name": "analyzeProperty",
             "summary": "Function to take all the information relating to the property sought and if it also contains that of his relative",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $prop, ReflectionClass $cls)\n  {\n    if ($arr = $this->_get_property_info($prop, $cls)) {\n      $parent = $cls->getParentClass();\n      while ($parent) {\n        if ($arr_parent = $this->_get_property_info($prop, $parent)) {\n          $arr['parent'] = $arr_parent;\n          break;\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    return $arr ?: null;\n  }",
-            "startLine": 71,
-            "endLine": 86,
+            "code": "  public function analyzeProperty(string $prop, ReflectionClass $cls): ?array\n  {\n    if ($arr = $this->_get_property_info($prop, $cls)) {\n      $parent = $cls->getParentClass();\n      while ($parent) {\n        if ($arr_parent = $this->_get_property_info($prop, $parent)) {\n          $arr['parent'] = $arr_parent;\n          break;\n        }\n        \n        $parent = $parent->getParentClass();\n      }\n    }\n    \n    return $arr ?: null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 76,
+            "endLine": 91,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -130,16 +172,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "analyzeProperty",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "prop",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -150,25 +197,51 @@
                     "name": "cls",
                     "position": 1,
                     "type": "ReflectionClass",
+                    "type_arr": [
+                        "ReflectionClass"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Function to take all the information relating to the property sought and if it also contains that of his relative\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$prop",
+                        "description": "Name of the property to be searched"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "ReflectionClass",
+                        "name": "$cls"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function to take all the information relating to the property sought and if it also contains that of his relative\n   *\n   * @param string $prop Name of the property to be searched\n   * @param ReflectionClass $cls\n   * @return array|null\n   *\/"
         },
         "analyzeConstant": {
             "name": "analyzeConstant",
             "summary": "Function that analyzes the constant passed to him and even if it contains the relative parent of the class of belonging",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $const, ReflectionClass $cls)\n  {\n    if (\n        !empty($const)\n        && !empty($cls)\n        && $cls->hasConstant($const)\n    ) {\n      $cst    = $cls->getReflectionConstant($const);\n      $arr    = [\n        'name' => $cst->name,\n        'value' => $cls->getConstant($const),\n        'class' => $cls->name,\n        'parent' => false,\n        'private' => $cst->isPrivate(),\n        'protected' => $cst->isProtected(),\n        'public' => $cst->isPublic(),\n        'doc' => $this->parsePropertyComments($cst->getDocComment()),\n      ];\n      $parent = $cls->getParentClass();\n      while ($parent) {\n        if ($parent->hasConstant($const)) {\n          $cst           = $cls->getReflectionConstant($const);\n          $arr['parent'] = [\n            'name' => $cst->name,\n            'doc' => $this->parsePropertyComments($cst->getDocComment()),\n            'value' => $parent->getConstant($const),\n            'protected' => $cst->isProtected(),\n            'public' => $cst->isPublic(),\n            'class' => $parent->name,\n            'parent' => false\n          ];\n        }\n\n        $parent = $parent->getParentClass();\n      }\n    }\n\n    if (isset($arr)) {\n      return $arr;\n    }\n\n    return null;\n  }",
-            "startLine": 96,
-            "endLine": 138,
+            "code": "  public function analyzeConstant(string $const, ReflectionClass $cls): ?array\n  {\n    if (\n      !empty($const)\n      && !empty($cls)\n      && $cls->hasConstant($const)\n    ) {\n      $cst = $cls->getReflectionConstant($const);\n      $arr = [\n        'name' => $cst->name,\n        'value' => $cls->getConstant($const),\n        'class' => $cls->name,\n        'parent' => false,\n        'private' => $cst->isPrivate(),\n        'protected' => $cst->isProtected(),\n        'public' => $cst->isPublic(),\n        'final' => $cst->isFinal(),\n        'doc' => $this->parsePropertyComments($cst->getDocComment()),\n      ];\n      $parent = $cls->getParentClass();\n      while ($parent) {\n        if ($parent->hasConstant($const)) {\n          $cst = $cls->getReflectionConstant($const);\n          $arr['parent'] = [\n            'name' => $cst->name,\n            'doc' => $this->parsePropertyComments($cst->getDocComment()),\n            'value' => $parent->getConstant($const),\n            'protected' => $cst->isProtected(),\n            'public' => $cst->isPublic(),\n            'class' => $parent->name,\n            'parent' => false\n          ];\n        }\n        \n        $parent = $parent->getParentClass();\n      }\n    }\n    \n    if (isset($arr)) {\n      return $arr;\n    }\n    \n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 101,
+            "endLine": 144,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -177,16 +250,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "analyzeConstant",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "const",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -197,6 +275,109 @@
                     "name": "cls",
                     "position": 1,
                     "type": "ReflectionClass",
+                    "type_arr": [
+                        "ReflectionClass"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Function that analyzes the constant passed to him and even if it contains the relative parent of the class of belonging\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$const",
+                        "description": "Name of constant to search for information"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "\\ReflectionClass",
+                        "name": "$cls"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function that analyzes the constant passed to him and even if it contains the relative parent of the class of belonging\n   *\n   * @param string $const Name of constant to search for information\n   * @param \\ReflectionClass $cls\n   * @return array|null\n   *\/"
+        },
+        "getDummyComments": {
+            "name": "getDummyComments",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDummyComments($code) {\n\n    $res = [\n    ];\n    $tokens = token_get_all($code, TOKEN_PARSE);\n\n    foreach ($tokens as $i => $token) {\n      if (is_array($token)) {\n        $t = token_name($token[0]);\n        if ($t === 'T_CLASS') {\n          break;\n        }\n        if ($t === 'T_DOC_COMMENT') {\n          $res[] = $token[1];\n        }\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 147,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getDummyComments",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUses": {
+            "name": "getUses",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getUses($code) {\n    $res = [\n    ];\n    $usable = ['T_WHITESPACE', 'T_NAME_QUALIFIED', 'T_AS', 'T_STRING'];\n    $isUse = false;\n    $tokens = token_get_all($code, TOKEN_PARSE);\n  \/\/   foreach ($tokens as $token) {\n  \/\/     if (is_array($token)) {\n  \/\/         echo htmlentities(\"Line {$token[2]}: \". token_name($token[0]). \" ('{$token[1]}')\". PHP_EOL).'<br>';\n  \/\/     }\n  \/\/ }\n  \/\/ die();\n  \n    foreach ($tokens as $i => $token) {\n      if (is_array($token)) {\n        $t = token_name($token[0]);\n        if ($t === 'T_CLASS') {\n          break;\n        }\n        if ($isUse) {\n          if (in_array($t, $usable)) {\n            switch ($t) {\n              case 'T_NAME_QUALIFIED':\n                $isUse['fqn'] = $token[1];\n                break;\n              case 'T_AS':\n                $isUse['as'] = true;\n                break;\n              case 'T_STRING':\n                if ($isUse['as']) {\n                  $isUse['alias'] = $token[1];\n                  \/\/throw new Exception(\"No alias without as\");\n                }\n                else {\n                  $isUse['fqn'] = $token[1];\n                }\n                break;\n            }\n            if (!empty($isUse['fqn'])) {\n              if (!isset($res[$isUse['fqn']])) {\n                $res[$isUse['fqn']] = '';\n              }\n              elseif ($isUse['alias']) {\n                $res[$isUse['fqn']] = $isUse['alias'];\n              }\n            }\n          }\n          else {\n            $isUse = false;\n          }\n        }\n        if ($t === 'T_USE') {\n          $isUse = ['fqn' => '', 'alias' => '', 'as' => false];\n        }\n      }\n    }\n    foreach ($res as $fqn => $alias) {\n      if (empty($alias)) {\n        $res[$fqn] = basename(str_replace(\"\\\\\", \"\/\", $fqn));\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 167,
+            "endLine": 229,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getUses",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -209,13 +390,16 @@
             "summary": "Function that analyzes the desired class by returning the information belonging to it",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $cls, string $path = '', $level = 'public')\n  {\n    $rc = new \\ReflectionClass($cls);\n    if (!empty($cls) && is_object($rc)) {\n      $constructor = $rc->getConstructor();\n      if ($level) {\n        \n      }\n      $methods     = $rc->getMethods(\\ReflectionMethod::IS_PUBLIC);\n      $props       = $rc->getProperties(\\ReflectionMethod::IS_PUBLIC);\n      $statprops   = $rc->getStaticProperties();\n      $constants   = $rc->getConstants();\n      $parent      = $rc->getParentClass();\n      $res         = [\n        'doc' => $this->parseClassComments($rc->getDocComment()),\n        'name' => $rc->getName(),\n        'namespace' => $rc->getNamespaceName(),\n        'traits' => $rc->getTraitNames(),\n        'interfaces' => $rc->getInterfaces(),\n        \/\/'isInstantiable' => $rc->isInstantiable(),\n        \/\/'cloneable' =>  $rc->isCloneable(),\n        'fileName' => substr($rc->getFileName(), strlen($path)),\n        'startLine' => $rc->getStartLine(),\n        'endLine' => $rc->getEndLine(),\n        'numMethods' => $methods ? count($methods) : 0,\n        'numProperties' => $props ? count($props) : 0,\n        'numConstants' => $constants ? count($constants) : 0,\n        'numStaticProperties' => $statprops ? count($statprops) : 0,\n        'interfaces' => $rc->getInterfaces(),\n        'interfaceNames' => $rc->getInterfaceNames(),\n        'isInterface' => $rc->isInterface(),\n        'traitNames' => $rc->getTraitNames(),\n        'traitAliases' => $rc->getTraitAliases(),\n        'isTrait' => $rc->isTrait(),\n        'isAbstract' => $rc->isAbstract(),\n        'isFinal' => $rc->isFinal(),\n        'modifiers' => $rc->getModifiers(),\n        'parentClass' => $parent ? $parent->name : null,\n        'isSubclassOf' => $rc->isSubclassOf($cls),\n        'defaultProperties' => $rc->getDefaultProperties(),\n        'isIterable' => $rc->isIterable(),\n      \/\/'implementsInterface' => $rc->implementsInterface(),\n        'extensionName' => $rc->getExtensionName(),\n        'namespace' => $rc->inNamespace(),\n        'namespaceName' => $rc->getNamespaceName(),\n        'shortName' => $rc->getShortName(),\n        'contentConstructor' => !empty($constructor) ? array_filter(\n            $this->analyzeMethod($constructor->name, $rc),\n            function ($m, $i) {\n                return in_array($i, ['file', 'returns']);\n            },\n            ARRAY_FILTER_USE_BOTH\n        ) : null,\n        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,\n        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,\n        'staticProperties' => $statprops,\n        'constants' => $constants ? $this->orderElement($constants, 'costants', $rc) : null\n      ];\n      if (\n          $res['doc']\n          && ($extracted = $this->_extract_description($res['doc']['description']))\n      ) {\n        $res = X::mergeArrays($res, $extracted);\n      }\n\n      return $res;\n    }\n  }",
-            "startLine": 148,
-            "endLine": 215,
+            "code": "  public function analyzeClass(string $cls, string $path = '', string $level = null): ?array\n  {\n    $rc = new ReflectionClass($cls);\n    if (!empty($cls) && is_object($rc)) {\n      $constructor = $rc->getConstructor();\n      $filter = null;\n      if ($level && defined('ReflectionMethod::IS_' . strtoupper($level))) {\n        $filter = constant('ReflectionMethod::IS_' . strtoupper($level));\n      }\n      $fullname = $rc->getName();\n      $name = basename(str_replace(\"\\\\\", \"\/\", $fullname));\n      $namespace = str_replace(\"\/\", \"\\\\\", dirname(str_replace(\"\\\\\", \"\/\", $fullname)));\n      $methods = $rc->getMethods($filter);\n      $props = $rc->getProperties($filter);\n      $statprops = $rc->getStaticProperties();\n      $constants = $rc->getConstants();\n      $parent = $rc->getParentClass();\n      \/*$tokens = token_get_all(file_get_contents($rc->getFileName()), TOKEN_PARSE);\n      foreach ($tokens as $token) {\n        if (is_array($token)) {\n            echo htmlentities(\"Line {$token[2]}: \". token_name($token[0]). \" ('{$token[1]}')\". PHP_EOL).'<br>';\n        }\n      }\n      die();\n      X::ddump($rc->getDocComment());*\/\n      $res = [\n        'doc' => $this->parseClassComments($rc->getDocComment()),\n        'name' => $rc->getName(),\n        'namespace' => $rc->getNamespaceName(),\n        'realName' => $name,\n        'realNamespace' => $namespace,\n        'traits' => $rc->getTraitNames(),\n        'interfaces' => $rc->getInterfaces(),\n        \/\/'isInstantiable' => $rc->isInstantiable(),\n        \/\/'cloneable' =>  $rc->isCloneable(),\n        'fileName' => substr($rc->getFileName(), strlen($path)),\n        'startLine' => $rc->getStartLine(),\n        'endLine' => $rc->getEndLine(),\n        'numMethods' => $methods ? count($methods) : 0,\n        'numProperties' => $props ? count($props) : 0,\n        'numConstants' => $constants ? count($constants) : 0,\n        'numStaticProperties' => $statprops ? count($statprops) : 0,\n        'interfaces' => $rc->getInterfaces(),\n        'interfaceNames' => $rc->getInterfaceNames(),\n        'isInterface' => $rc->isInterface(),\n        'traitAliases' => $rc->getTraitAliases(),\n        'isTrait' => $rc->isTrait(),\n        'isAbstract' => $rc->isAbstract(),\n        'isFinal' => $rc->isFinal(),\n        'modifiers' => $rc->getModifiers(),\n        'parentClass' => $parent ? $parent->name : null,\n        'isSubclassOf' => $rc->isSubclassOf($cls),\n        'defaultProperties' => $rc->getDefaultProperties(),\n        'isIterable' => $rc->isIterable(),\n        \/\/'implementsInterface' => $rc->implementsInterface(),\n        'extensionName' => $rc->getExtensionName(),\n        'namespace' => $rc->inNamespace(),\n        'namespaceName' => $rc->getNamespaceName(),\n        'shortName' => $rc->getShortName(),\n        'contentConstructor' => !empty($constructor) ? array_filter(\n          $this->analyzeMethod($constructor->name, $rc),\n          function ($m, $i) {\n            return in_array($i, ['file', 'returns']);\n          },\n          ARRAY_FILTER_USE_BOTH\n        ) : null,\n        'methods' => $methods ? $this->orderElement($methods, 'methods', $rc) : null,\n        'properties' => $props ? $this->orderElement($props, 'properties', $rc) : null,\n        'staticProperties' => $statprops,\n        'constants' => !empty($constants) ? $this->orderElement($constants, 'constants', $rc) : null\n      ];\n      if (!file_exists($path . '\/' . $res['fileName'])) {\n        throw new Exception(\"No file name for $res[fileName] {$rc->getName()}\");\n      }\n      $code = file_get_contents($path . '\/' . $res['fileName']);\n      \/\/X::ddump($code);\n      try {\n        $res['uses'] = $this->getUses($code);\n        $res['dummyComments'] = $this->getDummyComments($code);\n      }\n      catch(Exception $e) {\n        throw new Exception(\"Problem getting uses in $cls\");\n      }\n      if (!empty($res['traits'])) {\n      \n      }\n      if (\n        $res['doc']\n        && ($extracted = $this->_extract_description($res['doc']['description']))\n      ) {\n        $res = X::mergeArrays($res, $extracted);\n      }\n      \n      return $res;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 239,
+            "endLine": 334,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -224,16 +408,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "analyzeClass",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cls",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -243,6 +432,11 @@
                     "name": "path",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -251,10 +445,92 @@
                 {
                     "name": "level",
                     "position": 2,
-                    "type": "",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": "public",
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Function that analyzes the desired class by returning the information belonging to it\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$cls"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function that analyzes the desired class by returning the information belonging to it\n   *\n   * @param string $cls\n   * @param string $path\n   * @return array|null\n   *\/"
+        },
+        "getLibraryClasses": {
+            "name": "getLibraryClasses",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getLibraryClasses(string $path, string $namespace = ''): ?array\n  {\n    if (!empty($namespace)) {\n      if (substr($namespace, -1) !== '\\\\') {\n        $namespace = '\\\\' . $namespace;\n      }\n    }\n    if (!empty($path)) {\n      $fs = new System();\n      if ($fs->cd($path)) {\n        $files = $fs->scan('.', '.php', false);\n        $arr = [];\n        if (is_array($files) && count($files)) {\n          foreach ($files as $file) {\n            $bits = X::split($file, '\/');\n            $name = X::basename(array_pop($bits), '.php');\n            $class = $namespace . '\\\\' . (empty($bits) ? '' : X::join($bits, '\\\\') . '\\\\') . $name;\n            $res = [\n              'name' => $name,\n              'file' => $file,\n              'class' => $class\n            ];\n            if (class_exists($class, true)) {\n              $res['type'] = 'class';\n            } elseif (interface_exists($class, true)) {\n              $res['type'] = 'interface';\n            } elseif (trait_exists($class, true)) {\n              $res['type'] = 'trait';\n            }\n            if (!empty($res['type'])) {\n              $arr[] = $res;\n            }\n          }\n        }\n      }\n      \n      return $arr;\n    }\n    \n    return null;\n    \n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 337,
+            "endLine": 378,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getLibraryClasses",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "namespace",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
                     "default_name": ""
                 }
             ]
@@ -264,13 +540,16 @@
             "summary": "Function that analyzes the whole library with the same name space returning all the information of all the classes making part of it",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $namespace = '')\n  {\n    if (\n        !empty($path)\n        && !empty($namespace)\n    ) {\n      $fs = new System();\n      if ($fs->cd($path)) {\n        $files = $fs->scan('.', '.php', false);\n        $arr   = [];\n        if (is_array($files) && count($files)) {\n          foreach ($files as $file) {\n            $bits  = X::split($file, '\/');\n            $name  = X::basename(array_pop($bits), '.php');\n            $class = $namespace . '\\\\' . (empty($bits) ? '' : X::join($bits, '\\\\') . '\\\\') . $name;\n            if (class_exists($class, true) || interface_exists($class, true) || trait_exists($class, true)) {\n              try {\n                $arr[$file] = $this->analyzeCLass($class, $path);\n              }\n              catch (\\Exception $e) {\n                die(var_dump($file, $e));\n                if (isset($arr[$file])) {\n                  unset($arr[$file]);\n                }\n              }\n            }\n          }\n        }\n      }\n\n      return $arr;\n    }\n\n    return null;\n  }",
-            "startLine": 225,
-            "endLine": 259,
+            "code": "  public function analyzeLibrary(string $path, string $namespace = ''): ?array\n  {\n    if ($files = $this->getLibraryClasses($path, $namespace)) {\n      $arr = [];\n      foreach ($files as $file) {\n        try {\n          $arr[$file['file']] = $this->analyzeCLass($file['class'], $path);\n        } catch (Exception $e) {\n          die(var_dump($file, $e));\n          if (isset($arr[$file])) {\n            unset($arr[$file]);\n          }\n        }\n        \n      }\n      \n      return $arr;\n    }\n    \n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 387,
+            "endLine": 407,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -279,16 +558,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "analyzeLibrary",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -299,26 +583,53 @@
                     "name": "namespace",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": "",
                     "description": "of the class"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Function that analyzes the whole library with the same name space returning all the information of all the classes making part of it\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "of the library"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$namespace",
+                        "description": "of the class"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function that analyzes the whole library with the same name space returning all the information of all the classes making part of it\n   *\n   * @param string $path of the library\n   * @param string $namespace of the class\n   * @return array|null\n   *\/"
         },
         "iparse": {
             "name": "iparse",
             "summary": "Generally analyzes a docBLock returning the information in a structured way",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $text)\n  {\n    if ($text) {\n      $docblock = $this->docParser->create($text);\n      $res      = [\n        'summary' => $docblock->getSummary(),\n        'tags' => [],\n        'description' => (string)$docblock->getDescription()\n      ];\n      $tags     = $docblock->getTags();\n      \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n      $res['description_obj'] = $docblock->getDescription();\n      foreach ($tags as $i => $t) {\n        $desc          = $t->getDescription() ?: false;\n        $res['tags'][] = [\n          'index' => $i,\n          'type' => method_exists($t, 'getType') ? $t->getType() : null,\n          'varname' => method_exists($t, 'getVariableName') ? $t->getVariableName() : null,\n          'isVariadic' => method_exists($t, 'isVariadic') ? $t->isVariadic() : null,\n          'name' => $t->getName(),\n          'desc0' => (string)$desc,\n          'desc1' => $desc ? $t->getDescription()->getTags() : '',\n          'desc2' => $desc ? $t->getDescription()->render() : ''\n        ];\n      }\n\n      return $res;\n    }\n\n    return false;\n  }",
-            "startLine": 268,
-            "endLine": 298,
+            "code": "  public function iparse(string $text)\n  {\n    if ($text) {\n      $docblock = $this->docParser->create($text);\n      $res = [\n        'summary' => $docblock->getSummary(),\n        'tags' => [],\n        'description' => (string)$docblock->getDescription()\n      ];\n      $tags = $docblock->getTags();\n      \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n      $res['description_obj'] = $docblock->getDescription();\n      foreach ($tags as $i => $t) {\n        $desc = $t->getDescription() ?: false;\n        $res['tags'][] = [\n          'index' => $i,\n          'type' => method_exists($t, 'getType') ? $t->getType() : null,\n          'varname' => method_exists($t, 'getVariableName') ? $t->getVariableName() : null,\n          'isVariadic' => method_exists($t, 'isVariadic') ? $t->isVariadic() : null,\n          'name' => $t->getName(),\n          'desc0' => (string)$desc,\n          'desc1' => $desc ? $t->getDescription()->getTags() : '',\n          'desc2' => $desc ? $t->getDescription()->render() : ''\n        ];\n      }\n      \n      return $res;\n    }\n    \n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 416,
+            "endLine": 446,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -327,32 +638,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "iparse",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "text",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Generally analyzes a docBLock returning the information in a structured way\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generally analyzes a docBLock returning the information in a structured way\n   *\n   * @param string $text\n   * @return void\n   *\/"
         },
         "parse": {
             "name": "parse",
             "summary": "Function that analyzes the class by returning the information in detail",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $class_name)\n  {\n    $rc = new \\ReflectionClass($class_name);\n    \/\/die(var_dump($rc->hasConstant('PARAM_BOOL')));\n    $constants        = $rc->getConstants();\n    $parent           = $rc->getParentClass();\n    $parent_constants = [];\n    if ($parent) {\n      $parent_constants = $parent->getConstants();\n    }\n\n    $cparser =& $this;\n    $cls     = [\n      'doc' => [\n        'title' => $this->iparse($rc->getDocComment()),\n      ],\n      'name' => $rc->getName(),\n      'constants' => array_map(\n          function ($a) use ($constants, $parent_constants) {\n            return [\n            'name' => $a->name,\n            'value' => $constants[$a->name]\n            ];\n          },\n          array_filter(\n              $rc->getReflectionConstants(),\n              function ($a) use ($parent_constants, $constants) {\n                return !array_key_exists($a->name, $parent_constants) || ($parent_constants[$a->name] !== $constants[$a->name]);\n              }\n          )\n      ),\n      'namespace' => $rc->getNamespaceName(),\n      'traits' => $rc->getTraits(),\n      'interfaces' => $rc->getInterfaces(),\n      'parent' => $parent ? $parent->getName() : null,\n      'properties' => array_map(\n          function ($m) use ($cparser) {\n            \/\/$m->setAccessible(true);\n            return [\n            'name' => $m->getName(),\n            \/\/'value' => $m->getValue(),\n            'static' => $m->isStatic(),\n            'private' => $m->isPrivate(),\n            'protected' => $m->isProtected(),\n            'public' => $m->isPublic(),\n            'doc' => $cparser->iparse($m->getDocComment())\n            ];\n          },\n          $rc->getProperties()\n      ),\n      'methods' => array_map(\n          function ($m) use ($cparser) {\n            $ret = null;\n            if ($m->hasReturnType()) {\n              $type = $m->getReturnType();\n              $ret  = [(string)$type];\n              if ($type->allowsNull()) {\n                $ret[] = null;\n              }\n            }\n\n            return [\n            'name' => $m->getName(),\n            'static' => $m->isStatic(),\n            'private' => $m->isPrivate(),\n            'protected' => $m->isProtected(),\n            'public' => $m->isPublic(),\n            'final' => $m->isFinal(),\n            'code' => $this->_closureSource($m),\n            'doc' => $cparser->iparse($m->getDocComment()),\n            'returns' => $ret,\n            'arguments' => array_map(\n                function ($p) use ($m) {\n                  return [\n                  'name' => $p->getName(),\n                  'position' => $p->getPosition(),\n                  'type' => $p->getType(),\n                  'required' => !$p->isOptional(),\n                  'has_default' => $p->isDefaultValueAvailable(),\n                  'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',\n                  'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''\n                  ];\n                },\n                $m->getParameters()\n            )\n            ];\n          },\n          $rc->getMethods()\n      )\n    ];\n\n    \/*\n    try {\n      $obj = $parser->parse($code);\n      $arr = json_decode(json_encode($obj), true);\n      foreach ( $arr[0]['stmts'] as $node ){\n        if ( $node['nodeType'] === 'Stmt_Class' ){\n          $res['class'] = $node['name']['name'];\n          $res['elements'] = [];\n          foreach ( $node['stmts'] as $stmts ){\n            if ( isset($stmts['attributes'], $stmts['attributes']['comments']) ){\n              foreach ( $stmts['attributes']['comments'] as $c ){\n                $docblock = $doc_parser->create($c['text']);\n\n                \/\/ Contains the summary for this DocBlock\n                $res['summary'] = $docblock->getSummary();\n\n                $tags = $docblock->getTags();\n                \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n                $res['description_obj'] = $docblock->getDescription();\n                foreach ( $tags as $i => $t ){\n                  X::hdump($i, (string)$t->getType(), $t->getName);\n                  $desc = $t->getDescription()->render();\n                  var_dump($desc);\n                }\n                echo '<pre>';\n                var_dump($summary, $description, $tags);\n                echo '<\/pre>';\n              }\n            }\n          }\n          X::hdump(\"HEY??\", count($node['stmts']));\n        }\n      }\n      X::hdump(count($arr[0]['stmts']));\n      X::hdump($arr[0]['stmts']);\n    }\n    catch (PhpParser\\Error $e) {\n        echo 'Parse Error: ', $e->getMessage();\n    }\n    *\/\n    return $cls;\n  }",
-            "startLine": 307,
-            "endLine": 439,
+            "code": "  public function parse(string $class_name)\n  {\n    $rc = new ReflectionClass($class_name);\n    \/\/die(var_dump($rc->hasConstant('PARAM_BOOL')));\n    $constants = $rc->getConstants();\n    $parent = $rc->getParentClass();\n    $parent_constants = [];\n    if ($parent) {\n      $parent_constants = $parent->getConstants();\n    }\n    \n    $cparser =& $this;\n    $full_name = $rc->getName();\n    $name = basename(str_replace(\"\\\\\", \"\/\", $fullname));\n    $namespace = str_replace(\"\/\", \"\\\\\", dirname(str_replace(\"\\\\\", \"\/\", $fullname)));\n    $cls = [\n      'doc' => [\n        'title' => $this->iparse($rc->getDocComment()),\n      ],\n      'name' => $name,\n      'constants' => array_map(\n        function ($a) use ($constants, $parent_constants) {\n          return [\n            'name' => $a->name,\n            'value' => $constants[$a->name]\n          ];\n        },\n        array_filter(\n          $rc->getReflectionConstants(),\n          function ($a) use ($parent_constants, $constants) {\n            return !array_key_exists($a->name, $parent_constants) || ($parent_constants[$a->name] !== $constants[$a->name]);\n          }\n        )\n      ),\n      'namespace' => $namespace,\n      'traits' => $rc->getTraits(),\n      'interfaces' => $rc->getInterfaces(),\n      'parent' => $parent ? $parent->getName() : null,\n      'properties' => array_map(\n        function ($m) use ($cparser) {\n          \/\/$m->setAccessible(true);\n          return [\n            'name' => $m->getName(),\n            \/\/'value' => $m->getValue(),\n            'static' => $m->isStatic(),\n            'private' => $m->isPrivate(),\n            'protected' => $m->isProtected(),\n            'promoted' => $m->isPromoted(),\n            'public' => $m->isPublic(),\n            'doc' => $cparser->iparse($m->getDocComment())\n          ];\n        },\n        $rc->getProperties()\n      ),\n      'methods' => array_map(\n        function ($m) use ($cparser) {\n          $ret = null;\n          if ($m->hasReturnType()) {\n            $type = $m->getReturnType();\n            $ret = [(string)$type];\n            if ($type->allowsNull()) {\n              $ret[] = null;\n            }\n          }\n          \n          return [\n            'name' => $m->getName(),\n            'static' => $m->isStatic(),\n            'private' => $m->isPrivate(),\n            'protected' => $m->isProtected(),\n            'public' => $m->isPublic(),\n            'final' => $m->isFinal(),\n            'code' => $this->_closureSource($m),\n            'doc' => $cparser->iparse($m->getDocComment()),\n            'returns' => $ret,\n            'arguments' => array_map(\n              function ($p) use ($m) {\n                $types = [];\n                $type = $p->getType();\n                if (is_object($type)) {\n                  if (method_exists($type, 'getTypes')) {\n                    $types = $type->getTypes();\n                  } else {\n                    $types = [$type];\n                  }\n                }\n                \n                $type_st = '';\n                foreach ($types as $i => $tp) {\n                  $type_st .= $tp->getName() . ($i ? '|' : '');\n                }\n                return [\n                  'name' => $p->getName(),\n                  'position' => $p->getPosition(),\n                  'type' => $type_st,\n                  'required' => !$p->isOptional(),\n                  'has_default' => $p->isDefaultValueAvailable(),\n                  'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',\n                  'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''\n                ];\n              },\n              $m->getParameters()\n            )\n          ];\n        },\n        $rc->getMethods()\n      )\n    ];\n    \n    \/*\n    try {\n      $obj = $parser->parse($code);\n      $arr = json_decode(json_encode($obj), true);\n      foreach ( $arr[0]['stmts'] as $node ){\n        if ( $node['nodeType'] === 'Stmt_Class' ){\n          $res['class'] = $node['name']['name'];\n          $res['elements'] = [];\n          foreach ( $node['stmts'] as $stmts ){\n            if ( isset($stmts['attributes'], $stmts['attributes']['comments']) ){\n              foreach ( $stmts['attributes']['comments'] as $c ){\n                $docblock = $doc_parser->create($c['text']);\n\n                \/\/ Contains the summary for this DocBlock\n                $res['summary'] = $docblock->getSummary();\n\n                $tags = $docblock->getTags();\n                \/\/ Contains \\phpDocumentor\\Reflection\\DocBlock\\Description object\n                $res['description_obj'] = $docblock->getDescription();\n                foreach ( $tags as $i => $t ){\n                  X::hdump($i, (string)$t->getType(), $t->getName);\n                  $desc = $t->getDescription()->render();\n                  var_dump($desc);\n                }\n                echo '<pre>';\n                var_dump($summary, $description, $tags);\n                echo '<\/pre>';\n              }\n            }\n          }\n          X::hdump(\"HEY??\", count($node['stmts']));\n        }\n      }\n      X::hdump(count($arr[0]['stmts']));\n      X::hdump($arr[0]['stmts']);\n    }\n    catch (PhpParser\\Error $e) {\n        echo 'Parse Error: ', $e->getMessage();\n    }\n    *\/\n    return $cls;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 455,
+            "endLine": 605,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -361,33 +692,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "parse",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "class_name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Function that analyzes the class by returning the information in detail\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$class",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function that analyzes the class by returning the information in detail\n   *\n   * @param string $class_name\n   * @return void\n   *\/"
         },
         "analyze": {
             "name": "analyze",
             "summary": "Function that analyzes the class by returning the non-detailed information",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $class, $type = false)\n  {\n    $ok = true;\n    try {\n      $ref = new \\ReflectionClass($class);\n    }\n    catch (\\Exception $e) {\n      throw new \\Exception($e->getMessage());\n    }\n\n    if ($ok) {\n      $fs   = new System();\n      $tmp  = $ref->getFileName();\n      $file = $tmp && $fs->isFile($tmp) ? $tmp : null;\n      $arr  = [\n        'name' => $class,\n        'file' => $file,\n        'parents' => [],\n        'isAnonymous' => $ref->isAnonymous(),\n        'isCloneable' => $ref->isCloneable(),\n        'isFinal' => $ref->isFinal(),\n        'isInstantiable' => $ref->isInstantiable(),\n        'isInternal' => $ref->isInternal(),\n        'isIterateable' => $ref->isIterateable(),\n        'isUserDefined' => $ref->isUserDefined(),\n        'methods' => $this->addMethods($ref, $type, $file),\n        'properties' => [],\n        'traits' => [],\n        'unused' => []\n      ];\n\n      $props = $ref->getProperties();\n      if (!empty($props)) {\n        foreach ($props as $prop) {\n          $type_prop = false;\n          if ($prop->isPublic()) {\n            $type_prop = 'public';\n          }\n          elseif ($prop->isPrivate()) {\n            $type_prop = 'private';\n          }\n          elseif ($prop->isProtected()) {\n            $type_prop = 'protected';\n          }\n          elseif ($prop->isStatic()) {\n            $type_prop = 'static';\n          }\n\n          if (!empty($type_prop)) {\n            $arr['properties'][$type_prop][] = $prop->getName();\n          }\n        }\n      }\n\n      \/\/for parents\n      $parents = $ref->getParentClass();\n      if (!empty($parents)) {\n        foreach ($parents as $parent) {\n          $arr['parents'][$parent] = $this->analyze($parent, 'parent');\n\n          foreach ($arr['parents'][$parent]['methods'] as $i => $m) {\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($m, $arr['methods'][$i]);\n            }\n          }\n        }\n      }\n\n      \/\/for traits\n      $traits = $ref->getTraitNames();\n      if (!empty($traits)) {\n        foreach ($traits as $trait) {\n          $arr['traits'][$trait] = $this->analyze($trait, 'trait');\n\n          foreach ($arr['traits'][$trait]['methods'] as $i => $m) {\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($arr['methods'][$i], $m);\n            }\n          }\n        }\n      }\n\n      \/\/for interfaces\n      if ($interfaces = $ref->getInterfaceNames()) {\n        foreach ($interfaces as $interface) {\n          $arr['interfaces'][$interface] = $this->analyze($interface, 'interface');\n          foreach (array_keys($arr['interfaces'][$interface]['methods']) as $i) {\n            if (isset($arr['methods'][$i]['interfaces'])) {\n              $arr['methods'][$i]['interfaces'][] = $interface;\n            }\n            else {\n              $arr['methods'][$i]['interfaces'] = [$interface];\n            }\n          }\n        }\n      }\n\n      if (!empty($arr['methods']['private'])) {\n        foreach ($arr['methods']['private'] as $name => $priv) {\n          $str = ($priv['static'] ? '::' : '->') . $name;\n          if (X::indexOf($fs->getContents($arr['file']), $str) === -1) {\n            $arr['unused'][] = $arr['name'] . '::' . $priv['name'];\n          }\n        }\n      }\n\n      return $arr;\n    }\n\n    return null;\n  }",
-            "startLine": 449,
-            "endLine": 559,
+            "code": "  public function analyze(string $class, $type = false): ?array\n  {\n    $ok = true;\n    try {\n      $ref = new ReflectionClass($class);\n    } catch (Exception $e) {\n      throw new Exception($e->getMessage());\n    }\n    \n    if ($ok) {\n      $fs = new System();\n      $tmp = $ref->getFileName();\n      $file = $tmp && $fs->isFile($tmp) ? $tmp : null;\n      $arr = [\n        'name' => $class,\n        'file' => $file,\n        'parents' => [],\n        'isAnonymous' => $ref->isAnonymous(),\n        'isCloneable' => $ref->isCloneable(),\n        'isFinal' => $ref->isFinal(),\n        'isInstantiable' => $ref->isInstantiable(),\n        'isInternal' => $ref->isInternal(),\n        'isIterateable' => $ref->isIterateable(),\n        'isUserDefined' => $ref->isUserDefined(),\n        'methods' => $this->addMethods($ref, $type, $file),\n        'properties' => [],\n        'traits' => [],\n        'unused' => []\n      ];\n      \n      $props = $ref->getProperties();\n      if (!empty($props)) {\n        foreach ($props as $prop) {\n          $type_prop = false;\n          if ($prop->isPublic()) {\n            $type_prop = 'public';\n          } elseif ($prop->isPrivate()) {\n            $type_prop = 'private';\n          } elseif ($prop->isProtected()) {\n            $type_prop = 'protected';\n          } elseif ($prop->isStatic()) {\n            $type_prop = 'static';\n          }\n          \n          if (!empty($type_prop)) {\n            $arr['properties'][$type_prop][] = $prop->getName();\n          }\n        }\n      }\n      \n      \/\/for parents\n      $parents = $ref->getParentClass();\n      if (!empty($parents)) {\n        foreach ($parents as $parent) {\n          $arr['parents'][$parent] = $this->analyze($parent, 'parent');\n          \n          foreach ($arr['parents'][$parent]['methods'] as $i => $m) {\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($m, $arr['methods'][$i]);\n            }\n          }\n        }\n      }\n      \n      \/\/for traits\n      $traits = $ref->getTraitNames();\n      if (!empty($traits)) {\n        foreach ($traits as $trait) {\n          $arr['traits'][$trait] = $this->analyze($trait, 'trait');\n          \n          foreach ($arr['traits'][$trait]['methods'] as $i => $m) {\n            if (count($m)) {\n              $arr['methods'][$i] = array_merge($arr['methods'][$i], $m);\n            }\n          }\n        }\n      }\n      \n      \/\/for interfaces\n      if ($interfaces = $ref->getInterfaceNames()) {\n        foreach ($interfaces as $interface) {\n          $arr['interfaces'][$interface] = $this->analyze($interface, 'interface');\n          foreach (array_keys($arr['interfaces'][$interface]['methods']) as $i) {\n            if (isset($arr['methods'][$i]['interfaces'])) {\n              $arr['methods'][$i]['interfaces'][] = $interface;\n            } else {\n              $arr['methods'][$i]['interfaces'] = [$interface];\n            }\n          }\n        }\n      }\n      \n      if (!empty($arr['methods']['private'])) {\n        foreach ($arr['methods']['private'] as $name => $priv) {\n          $str = ($priv['static'] ? '::' : '->') . $name;\n          if (X::indexOf($fs->getContents($arr['file']), $str) === -1) {\n            $arr['unused'][] = $arr['name'] . '::' . $priv['name'];\n          }\n        }\n      }\n      \n      return $arr;\n    }\n    \n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 615,
+            "endLine": 720,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -396,16 +748,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "analyze",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "class",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -415,25 +772,48 @@
                     "name": "type",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Function that analyzes the class by returning the non-detailed information\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$class"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function that analyzes the class by returning the non-detailed information\n   *\n   * @param string $class\n   * @param boolean $type\n   * @return array|null\n   *\/"
         },
         "addMethods": {
             "name": "addMethods",
             "summary": "This function returns all the information of the methods cataloged by type",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Php",
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($class_object, $origin = false, $file = NULL)\n  {\n    $methods = [\n      'private' => [],\n      'protected' => [],\n      'public' => []\n    ];\n\n    foreach ($class_object->getMethods() as $m) {\n      $idx = 'public';\n      if ($m->isPrivate()) {\n        $idx = 'private';\n      }\n      elseif ($m->isProtected()) {\n        $idx = 'protected';\n      }\n\n      if ($m->getDeclaringClass()->getName() === $class_object->getName()) {\n        $doc = is_null($file) ? false : $m->getDocComment();\n        $ret = null;\n        if ($m->hasReTurnType()) {\n          $type = $m->getReturnType();\n          $ret  = [(string)$type];\n          if ($type->allowsNull()) {\n            $ret[] = null;\n          }\n        }\n\n        $methods[$idx][$m->getName()] = [\n          'static' => $m->isStatic(),\/\/ ? 'static' : 'non-static',\n          'returns' => $ret,\n          'doc' => is_null($file) ? false : $doc,\n          'parsed' => is_null($file) ? false : $this->parser->parseDocblock($doc),\n          'line' => is_null($file) ? false : $m->getStartLine(),\n          'type' => $origin !== false ? $origin : 'origin',\n          'file' => $m->getDeclaringClass()->getName()\n        ];\n      }\n    }\n\n    if ($origin === 'parent') {\n      unset($methods['private']);\n    }\n\n    return $methods;\n  }",
-            "startLine": 570,
-            "endLine": 615,
+            "code": "  public function addMethods($class_object, $origin = false, $file = null)\n  {\n    $methods = [\n      'private' => [],\n      'protected' => [],\n      'public' => []\n    ];\n    \n    foreach ($class_object->getMethods() as $m) {\n      $idx = 'public';\n      if ($m->isPrivate()) {\n        $idx = 'private';\n      } elseif ($m->isProtected()) {\n        $idx = 'protected';\n      }\n      \n      if ($m->getDeclaringClass()->getName() === $class_object->getName()) {\n        $doc = is_null($file) ? false : $m->getDocComment();\n        $ret = null;\n        if ($m->hasReTurnType()) {\n          $type = $m->getReturnType();\n          $ret = [(string)$type];\n          if ($type->allowsNull()) {\n            $ret[] = null;\n          }\n        }\n        \n        $methods[$idx][$m->getName()] = [\n          'static' => $m->isStatic(),\/\/ ? 'static' : 'non-static',\n          'returns' => $ret,\n          'doc' => is_null($file) ? false : $doc,\n          'parsed' => is_null($file) ? false : $this->parser->parseDocblock($doc),\n          'line' => is_null($file) ? false : $m->getStartLine(),\n          'type' => $origin !== false ? $origin : 'origin',\n          'file' => $m->getDeclaringClass()->getName()\n        ];\n      }\n    }\n    \n    if ($origin === 'parent') {\n      unset($methods['private']);\n    }\n    \n    return $methods;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 731,
+            "endLine": 775,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -442,13 +822,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "addMethods",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "class_object",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -459,6 +842,9 @@
                     "name": "origin",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -468,9 +854,721 @@
                     "name": "file",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "This function returns all the information of the methods cataloged by type\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$class",
+                        "description": "object"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$origin"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This function returns all the information of the methods cataloged by type\n   *\n   * @param object $class_object\n   * @param boolean $origin\n   * @param $file\n   * @return void\n   *\/"
+        },
+        "parseMethodComments": {
+            "name": "parseMethodComments",
+            "summary": "This function analyzes the docblock of a method by returning the information in a structured way",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function parseMethodComments(string $txt): ?array\n  {\n    if (!empty($txt)) {\n      $arr = $this->parser->parseDocblock($txt);\n      try {\n        $docBlock = $this->docParser->create($txt);\n      } catch (Exception $e) {\n        $this->log($e->getMessage() . PHP_EOL . PHP_EOL . $txt);\n        return null;\n      }\n      \n      if (count($arr['tags'])) {\n        $tags = $arr['tags'];\n        unset($arr['tags']);\n        $arr['params'] = [];\n        $arr['return'] = '';\n        foreach ($tags as $tag) {\n          if ($tag['tag'] === 'param') {\n            $arr['params'][] = $tag;\n          } elseif ($tag['tag'] === 'return') {\n            $arr['return'] = isset($tag['description']) ? $tag['description'] : '';\n          } else {\n            $arr[$tag['tag']] = $tag;\n          }\n        }\n      }\n      \n      if ($arr['description']) {\n        $start_example = stripos($arr['description'], \"* ```php\");\n        $end_example = strpos($arr['description'], \"```\");\n        if (($start_example !== false) && ($end_example !== false)) {\n          $arr['example_method'] = (string)$docBlock->getDescription(); \/\/substr($arr['description'], $start_example+1,);\n          $arr['description'] = $this->parser->parseDocblock($txt);\/\/$docBlock->getSummary();\n        }\n      }\n    }\n    \n    return (isset($arr) && is_array($arr)) ? $arr : null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 784,
+            "endLine": 822,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "parseMethodComments",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "txt",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "docBlock"
+                }
+            ],
+            "doc": {
+                "description": "This function analyzes the docblock of a method by returning the information in a structured way\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$txt",
+                        "description": "docBlock"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This function analyzes the docblock of a method by returning the information in a structured way\n   *\n   * @param string $txt docBlock\n   * @return array|null\n   *\/"
+        },
+        "parsePropertyComments": {
+            "name": "parsePropertyComments",
+            "summary": "This function analyzes the docblock of a property by returning the information in a structured way",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function parsePropertyComments(string $txt): ?array\n  {\n    if (is_string($txt)) {\n      $arr = $this->parser->parseDocblock($txt);\n    }\n    \n    return (isset($arr) && is_array($arr)) ? $arr : null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 831,
+            "endLine": 838,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "parsePropertyComments",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "txt",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "docblock"
+                }
+            ],
+            "doc": {
+                "description": "This function analyzes the docblock of a property by returning the information in a structured way\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$txt",
+                        "description": "docblock"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This function analyzes the docblock of a property by returning the information in a structured way\n   *\n   * @param string $txt docblock\n   * @return array|null\n   *\/"
+        },
+        "parseClassComments": {
+            "name": "parseClassComments",
+            "summary": "his function analyzes the docblock of a class by returning the information in a structured way",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function parseClassComments(string $txt): ?array\n  {\n    if (is_string($txt)) {\n      $arr = $this->parser->parseDocblock($txt);\n      if (is_array($arr)) {\n        if (count($arr['tags'])) {\n          $tags = $arr['tags'];\n          $arr['tags'] = [];\n          foreach ($tags as $tag) {\n            $arr['tags'][$tag['tag']] = $tag['text'];\n          }\n        }\n      }\n    }\n    \n    return (isset($arr) && is_array($arr)) ? $arr : null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 847,
+            "endLine": 863,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "parseClassComments",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "txt",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "dockBlock"
+                }
+            ],
+            "doc": {
+                "description": "his function analyzes the docblock of a class by returning the information in a structured way\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$txt",
+                        "description": "dockBlock"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   *This function analyzes the docblock of a class by returning the information in a structured way\n   *\n   * @param string $txt dockBlock\n   * @return array|null\n   *\/"
+        },
+        "_closureSource": {
+            "name": "_closureSource",
+            "summary": "Function that returns the content of an element of a class",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _closureSource(ReflectionMethod $rfx)\n  {\n    $args = [];\n    $default = '88888888888888888888888888888888';\n    $i = 0;\n    foreach ($rfx->getParameters() as $p) {\n      $arg = '';\n      if ($type = $p->getType()) {\n        if (method_exists($type, 'getName')) {\n          $arg .= $type->getName() . ' ';\n        } elseif (method_exists($type, 'getTypes') && ($types = $type->getTypes())) {\n          $tmp = [];\n          foreach ($types as $t) {\n            $tmp[] = $t->getName();\n          }\n          \n          $arg .= X::join($tmp, '|') . ' ';\n        }\n      }\n      \n      $args[] = $arg . ($p->isPassedByReference() ? '&' : '') . '$' . $p->name;\n      if ($p->isOptional()) {\n        try {\n          $default = $p->getDefaultValue();\n          if ($default !== '88888888888888888888888888888888') {\n            $args[$i] .= ' = ' . ($default === [] ? '[]' : var_export($default, true));\n          }\n        } catch (ReflectionException $e) {\n          \/\/ No default\n          X::log([$rfx->getName(), $e->getMessage()], 'phpParser');\n        }\n      }\n      \n      $i++;\n    }\n    \n    if ($filename = $rfx->getFileName()) {\n      $content = file($filename);\n      $s = $rfx->getStartLine();\n      while (strpos(trim($content[$s - 1]), '{') === false) {\n        $s++;\n      }\n      \n      return 'function(' . implode(', ', $args) . ')' . PHP_EOL . '  {' . PHP_EOL\n        . implode('', array_slice($content, $s, $rfx->getEndLine() - $s - 1)) . '  }';\n    }\n    \n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 872,
+            "endLine": 920,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_closureSource",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "rfx",
+                    "position": 0,
+                    "type": "ReflectionMethod",
+                    "type_arr": [
+                        "ReflectionMethod"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Function that returns the content of an element of a class\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "ReflectionMethod",
+                        "name": "$rfx"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Function that returns the content of an element of a class\n   *\n   * @param ReflectionMethod $rfx\n   * @return void\n   *\/"
+        },
+        "orderElement": {
+            "name": "orderElement",
+            "summary": "Order the elements (methods, porperties and costant of the class) used and the functions analyze",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function orderElement(array $elements, string $typeEle, ReflectionClass $rc): ?array\n  {\n    if (is_array($elements) && is_string($typeEle)) {\n      $arr = [];\n      foreach ($elements as $ele) {\n        if ($typeEle === 'methods') {\n          $ret = null;\n          if ($ele->hasReTurnType()) {\n            $type = $ele->getReturnType();\n            \/\/  $ret  = [$type->getName()];\n            if ($type->allowsNull()) {\n              $ret[] = null;\n            }\n          }\n          \n          \/*$arr[$idx][$ele->getName()] = [\n            'static' => $ele->isStatic(),\n            'returns' => $ret\n          ];*\/\n          $arr[$ele->getName()] = $this->analyzeMethod($ele->getName(), $rc);\n        } elseif ($typeEle === 'properties') {\n          $arr[$ele->name] = array_filter(\n            $this->analyzeProperty($ele->name, $rc),\n            function ($p, $i) {\n              return $i !== 'name';\n            },\n            ARRAY_FILTER_USE_BOTH\n          );\n        } elseif ($typeEle === 'constants') {\n          foreach (array_keys($elements) as $constant) {\n            $arr[$constant] = $this->analyzeConstant($constant, $rc);\n          }\n        }\n      }\n    }\n    \n    return isset($arr) ? $arr : null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 931,
+            "endLine": 968,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "orderElement",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "elements",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "typeEle",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "le"
+                },
+                {
+                    "name": "rc",
+                    "position": 2,
+                    "type": "ReflectionClass",
+                    "type_arr": [
+                        "ReflectionClass"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Order the elements (methods, porperties and costant of the class) used and the functions analyze\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$elements"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "le"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "ReflectionClass",
+                        "name": "$rc"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Order the elements (methods, porperties and costant of the class) used and the functions analyze\n   *\n   * @param array $elements\n   * @param string $typeEle\n   * @param ReflectionClass $rc\n   * @return array|null\n   *\/"
+        },
+        "_get_method_code": {
+            "name": "_get_method_code",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_method_code(ReflectionMethod $method)\n  {\n    $file = $method->getFileName();\n    \/\/ Native functions have no file name\n    if (empty($file)) {\n      return '';\n    }\n\n    $st = file_get_contents($file);\n    $ar = X::split($st, PHP_EOL);\n    return X::join(array_splice($ar, $method->getStartLine()-1, ($method->getEndLine() - $method->getStartLine() + 1)), PHP_EOL);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 970,
+            "endLine": 981,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_get_method_code",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "method",
+                    "position": 0,
+                    "type": "ReflectionMethod",
+                    "type_arr": [
+                        "ReflectionMethod"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_get_method_info": {
+            "name": "_get_method_info",
+            "summary": "Return an array of information about a method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_method_info(ReflectionMethod $method, ReflectionClass $cls)\n  {\n    $ret = [];\n    $refCls = $method->getDeclaringClass();\n    if ($method->hasReturnType()) {\n      $type = $method->getReturnType();\n      if ($type->allowsNull()) {\n        $ret[] = null;\n      }\n      \n      if (method_exists($type, 'getTypes')) {\n        foreach ($type->getTypes() as $stype) {\n          if (method_exists($type, 'getName')) {\n            if (!in_array($stype->getName(), $ret)) {\n              $ret[] = $stype->getName();\n            }\n          }\n        }\n      } else {\n        $ret[] = $type->getName();\n      }\n    }\n    \n    if ($method->isPrivate() || $method->isProtected()) {\n      $method->setAccessible(true);\n    }\n    \/\/die(var_dump($method->getParameters()[0]->getType()->getName()));\n\n    $ar = [\n      'name' => $method->getName(),\n      'summary' => '',\n      'description' => '',\n      'description_parts' => [],\n      'class' => $refCls->getName(),\n      'filename' => $method->getFileName(),\n      'static' => $method->isStatic(),\n      'visibility' => $method->isPrivate() ? 'private' : ($method->isProtected() ? 'protected' : 'public'),\n      'final' => $method->isFinal(),\n      'code' => $this->_get_method_code($method),\n      'parent' => false,\n      'trait' => false,\n      'startLine' => $method->getStartLine(),\n      'endLine' => $method->getEndLine(),\n      \/\/ 'isClosure' => $method->isClousure(),\n      'isDeprecated' => $method->isDeprecated(),\n      'isGenerator' => $method->isGenerator(),\n      'isInternal' => $method->isInternal(),\n      'isUserDefined' => $method->isUserDefined(),\n      'isVariadic' => $method->isVariadic(),\n      'returnsReference' => $method->returnsReference(),\n      'numberOfParameters' => $method->getNumberOfParameters(),\n      'numberOfRequiredParameters' => $method->getNumberOfRequiredParameters(),\n      'shortName' => $method->getShortName(),\n      'returns' => $ret,\n      'arguments' => array_map(\n        function ($p) {\n          $types = [];\n          $type = $p->getType();\n          \n          if (is_object($type)) {\n            if ($type->allowsNull()) {\n              $types[] = 'null';\n            }\n            if (method_exists($type, 'getTypes')) {\n              $types = $type->getTypes();\n              foreach ($type->getTypes() as $stype) {\n                if (method_exists($type, 'getName')) {\n                  if (!in_array($stype->getName(), $types)) {\n                    $types[] = $stype->getName();\n                  }\n                }\n              }\n            } else {\n              $types[] = $type->getName();\n            }\n          }\n          \n          $type_st = '';\n          foreach ($types as $i => $tp) {\n            $k = ($i < (count($types) - 1)) ? '|' : '';\n            $type_st .= $tp . $k;\n          }\n          \n          return [\n            'name' => $p->getName(),\n            'position' => $p->getPosition(),\n            'type' => $type_st,\n            'type_arr' => $types,\n            'variadic' => $p->isVariadic(),\n            'reference' => $p->isPassedByReference(),\n            'required' => !$p->isOptional(),\n            'has_default' => $p->isDefaultValueAvailable(),\n            'default' => $p->isDefaultValueAvailable() ? $p->getDefaultValue() : '',\n            'default_name' => $p->isDefaultValueAvailable() && $p->isDefaultValueConstant() ? $p->getDefaultValueConstantName() : ''\n          ];\n        },\n        $method->getParameters()\n      )\n    ];\n\n    if ($ar['name'] === '__construct') {\n      foreach ($ar['arguments'] as $index => $arg) {\n        $prop = $this->_get_property_info($arg['name'], $cls);\n        \/\/$props = $props ? $this->orderElement($props, 'properties', $rc) : null;\n        if ($prop && $prop['promoted']) {   \n          $ar['arguments'][$index]['promoted'] = $prop['visibility'];\n        }\n      }\n    }\n    \n    if ($ar['filename'] !== $refCls->getFileName()) {\n      if ($traits = $refCls->getTraits()) {\n        foreach ($traits as $trait) {\n          if ($trait->getFileName() === $ar['filename']) {\n            $ar['trait'] = $trait->getName();\n          }\n        }\n      }\n      if (!$ar['trait']) {\n        $cls = $refCls;\n        while ($cls = $cls->getParentClass()) {\n          if ($cls->getFileName() === $ar['filename']) {\n            $ar['parent'] = $cls->getName();\n            break;\n          }\n        }\n      }\n    }\n    \n    $comments = $method->getDocComment();\n    if (\n      ($doc = $this->parseMethodComments($comments))\n      && ($extracted = $this->_extract_description(is_array($doc['description']) ? $doc['description']['description'] : $doc['description']))\n    ) {\n      $ar = X::mergeArrays($ar, $extracted);\n      $ar['doc'] = $doc;\n      $ar['comments'] = \"  \" . $comments;\n    }\n    \n    if ($doc && !empty($doc['params'])) {\n      foreach ($doc['params'] as $i => $a) {\n        if (!empty($a['description']) && isset($ar['arguments'][$i])) {\n          $ar['arguments'][$i]['description'] = $a['description'];\n        }\n      }\n      \n      unset($a);\n    }\n    \n    return $ar;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 990,
+            "endLine": 1140,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_get_method_info",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "method",
+                    "position": 0,
+                    "type": "ReflectionMethod",
+                    "type_arr": [
+                        "ReflectionMethod"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The method object"
+                },
+                {
+                    "name": "cls",
+                    "position": 1,
+                    "type": "ReflectionClass",
+                    "type_arr": [
+                        "ReflectionClass"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return an array of information about a method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "ReflectionMethod",
+                        "name": "$method",
+                        "description": "The method object"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array of information about a method.\n   *\n   * @param ReflectionMethod $method The method object\n   * @return array\n   *\/"
+        },
+        "_extract_description": {
+            "name": "_extract_description",
+            "summary": "Makes an array of information out of a description string.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _extract_description(string $desc): array\n  {\n    $ar = [];\n    $bits = X::split($desc, PHP_EOL);\n    if (!empty($bits)) {\n      $ar['summary'] = trim(array_shift($bits));\n      $ar['description'] = '';\n      $ar['description_parts'] = [];\n      if (!empty($bits)) {\n        $description = trim(X::join($bits, PHP_EOL));\n        $num_matches = preg_match_all('\/```(?:php)?(.+)```\/s', $description, $matches, PREG_OFFSET_CAPTURE);\n        $len = strlen($description);\n        $start = 0;\n        \n        if ($num_matches) {\n          foreach ($matches[0] as $i => $m) {\n            if (isset($m[1])) {\n              if (\n                ($i === 0)\n                && ($m[1] !== 0)\n                && $tmp = trim(substr($description, $start, $m[1]))\n              ) {\n                \/\/$content = trim(Str::markdown2html($tmp));\n                $content = $tmp;\n                if ($content) {\n                  $ar['description_parts'][] = [\n                    'type' => 'text',\n                    'content' => $content\n                  ];\n                }\n              }\n              \n              $ar['description_parts'][] = [\n                'type' => 'code',\n                'content' => trim($matches[1][$i][0])\n              ];\n              $start = $m[1] + strlen($m[0]);\n              $end = isset($matches[0][$i + 1]) ? $matches[0][$i + 1][1] : $len;\n              if (\n                ($start < $len)\n                && ($tmp = trim(substr($description, $start, $end - $start)))\n              ) {\n                $ar['description_parts'][] = [\n                  'type' => 'text',\n                  'content' => $tmp\n                ];\n              }\n            }\n          }\n        } else {\n          \/\/$content = trim(Str::markdown2html($description));\n          $content = $description;\n          if ($content) {\n            $ar['description_parts'][] = [\n              'type' => 'text',\n              'content' => $content\n            ];\n          }\n        }\n        foreach ($ar['description_parts'] as $p) {\n          if ($p['type'] === 'text') {\n            $ar['description'] = $p['content'];\n            break;\n          }\n        }\n      }\n    }\n    \n    return $ar;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1148,
+            "endLine": 1217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_extract_description",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "desc",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The description string"
+                }
+            ],
+            "doc": {
+                "description": "Makes an array of information out of a description string.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$desc",
+                        "description": "The description string"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Makes an array of information out of a description string.\n   *\n   * @param string $desc The description string\n   *\/"
+        },
+        "getDeclaringTraitForProperty": {
+            "name": "getDeclaringTraitForProperty",
+            "summary": "Finds the trait that declares $className::$propertyName",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getDeclaringTraitForProperty($className, $propertyName) {\n    $reflectionClass = new ReflectionClass($className);\n    \n    \/\/ Let's scan all traits\n    $trait = $this->deepScanTraitsForProperty($reflectionClass->getTraits(), $propertyName);\n    if ($trait != null) {\n        return $trait;\n    }\n    \/\/ The property is not part of the traits, let's find in which parent it is part of.\n    if ($reflectionClass->getParentClass()) {\n        $declaringClass = $this->getDeclaringTraitForProperty($reflectionClass->getParentClass()->getName(), $propertyName);\n        if ($declaringClass != null) {\n            return $declaringClass;\n        }\n    }\n    if ($reflectionClass->hasProperty($propertyName)) {\n        return $reflectionClass;\n    }\n    \n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1223,
+            "endLine": 1243,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getDeclaringTraitForProperty",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "className",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "propertyName",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Finds the trait that declares $className::$propertyName",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Finds the trait that declares $className::$propertyName\n   *\/"
+        },
+        "deepScanTraitsForProperty": {
+            "name": "deepScanTraitsForProperty",
+            "summary": "Recursive method called to detect a method into a nested array of traits.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function deepScanTraitsForProperty(array $traits, $propertyName) {\n    foreach ($traits as $trait) {\n        \/\/ If the trait has a property, it's a win!\n        $result = $this->deepScanTraitsForProperty($trait->getTraits(), $propertyName);\n        if ($result != null) {\n            return $result;\n        } else {\n            if ($trait->hasProperty($propertyName)) {\n                return $trait;\n            }\n        }\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1252,
+            "endLine": 1265,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "deepScanTraitsForProperty",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "traits",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ReflectionClass[]"
+                },
+                {
+                    "name": "propertyName",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                }
+            ],
+            "doc": {
+                "description": "Recursive method called to detect a method into a nested array of traits.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$traits",
+                        "description": "ReflectionClass[]"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$propertyName",
+                        "description": "string"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n  * Recursive method called to detect a method into a nested array of traits.\n  * \n  * @param $traits ReflectionClass[]\n  * @param $propertyName string\n  * @return ReflectionClass|null\n  *\/"
+        },
+        "_get_property_info": {
+            "name": "_get_property_info",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Php",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Php.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_property_info(string $prop, ReflectionClass $cls): ?array\n  {\n    $arr = null;\n    if (\n      !empty($prop)\n      && !empty($cls)\n      && $cls->hasProperty($prop)\n    ) {\n      $property = $cls->getProperty($prop);\n      $defaults = $cls->getDefaultProperties();\n      $propType = $property->hasType() ? $property->getType() : null;\n      if ($propType && method_exists($propType, 'getTypes')) {\n        $types = $propType->getTypes();\n      } else {\n        $types = [$propType];\n      }\n\n      $arr = [\n        'name' => $property->getName(),\n        'trait' => false,\n        'static' => $property->isStatic(),\n        'readonly' => $property->isReadOnly(),\n        'type' => X::join(array_map(function($b) {\n          if ($b) {\n            return $b->getName();\n          }\n\n          return '';\n        }, $types), '|'),\n        'declaring' => $property->getDeclaringClass(),\n        'declaring_trait' => $this->getDeclaringTraitForProperty($cls->getName(), $property->getName())->name,\n        'promoted' => $property->isPromoted(),\n        'visibility' => $property->isPrivate() ? 'private' : ($property->isProtected() ? 'protected' : 'public'),\n        'doc' => empty($property->getDocComment()) ? '' : $this->parsePropertyComments($property->getDocComment()),\n        'parent' => false,\n        'value' => $defaults[$prop] ?? null\n      ];\n    }\n    \n    return $arr ?: null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1268,
+            "endLine": 1308,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_get_property_info",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "prop",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cls",
+                    "position": 1,
+                    "type": "ReflectionClass",
+                    "type_arr": [
+                        "ReflectionClass"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 }
             ]
@@ -480,34 +1578,27 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -516,45 +1607,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -563,24 +1672,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -589,160 +1693,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -750,63 +1736,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -815,17 +1859,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -836,43 +2056,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -883,36 +2121,356 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\File\\System": "System",
+        "Exception": "Exception",
+        "ReflectionClass": "ReflectionClass",
+        "ReflectionMethod": "ReflectionMethod",
+        "ReflectionException": "ReflectionException",
+        "phpDocumentor\\Reflection\\DocBlockFactory": "DocBlockFactory"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

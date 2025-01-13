@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Api\\GitLab\\Event",
     "namespace": true,
+    "realName": "Event",
+    "realNamespace": "bbn\\Api\\GitLab",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/GitLab\/Event.php",
@@ -16,7 +18,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -36,11 +37,14 @@
             "summary": "Gets the events of the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Event",
+            "class": "bbn\\Api\\GitLab\\Event",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/Event.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL);\n  }",
+            "code": "  public function getEvents($project): array\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 12,
             "endLine": 15,
             "isDeprecated": false,
@@ -51,33 +55,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ID or URL-encoded path of the project"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the events of the given project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$project",
+                        "description": "ID or URL-encoded path of the project"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the events of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/"
         },
         "getUsersEvents": {
             "name": "getUsersEvents",
             "summary": "Gets the users events of the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Event",
+            "class": "bbn\\Api\\GitLab\\Event",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/Event.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL, ['action' => 'joined']);\n  }",
+            "code": "  public function getUsersEvents($project): array\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL, ['action' => 'joined']);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 23,
             "endLine": 26,
             "isDeprecated": false,
@@ -88,33 +111,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUsersEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ID or URL-encoded path of the project"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the users events of the given project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$project",
+                        "description": "ID or URL-encoded path of the project"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the users events of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/"
         },
         "getCommitsEvents": {
             "name": "getCommitsEvents",
             "summary": "Gets the commits events of the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\Event",
+            "class": "bbn\\Api\\GitLab\\Event",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/Event.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL, ['action' => 'pushed']);\n  }",
+            "code": "  public function getCommitsEvents($project): array\n  {\n    return $this->request($this->projectURL . $project . '\/' . $this->eventURL, ['action' => 'pushed']);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 34,
             "endLine": 37,
             "isDeprecated": false,
@@ -125,27 +167,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getCommitsEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ID or URL-encoded path of the project"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the commits events of the given project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$project",
+                        "description": "ID or URL-encoded path of the project"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the commits events of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Gets the events of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/",
+        "\/**\n   * Gets the users events of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/",
+        "\/**\n   * Gets the commits events of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

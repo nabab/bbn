@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Api\\Permissions\\MollieManager",
     "namespace": true,
+    "realName": "MollieManager",
+    "realNamespace": "bbn\\Api\\Permissions",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Permissions\/MollieManager.php",
     "startLine": 8,
     "endLine": 608,
-    "numMethods": 32,
-    "numProperties": 0,
+    "numMethods": 35,
+    "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -30,7 +31,6 @@
     "namespaceName": "bbn\\Api\\Permissions",
     "shortName": "MollieManager",
     "contentConstructor": {
-        "file": "bbn\\Api\\Permissions\\MollieManager",
         "returns": []
     },
     "methods": {
@@ -39,11 +39,14 @@
             "summary": "MollieManager constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $accessCode, string $accessMode = 'token')\n  {\n    $this->mollie = new MollieApiClient();\n    switch ($accessMode) {\n      case 'token':\n        $this->mollie->setAccessToken($accessCode);\n        break;\n      case 'key':\n        $this->mollie->setApiKey($accessCode);\n        break;\n      default:\n        $this->mollie->setAccessToken($accessCode);\n        break;\n    }\n  }",
+            "code": "  public function __construct(string $accessCode, string $accessMode = 'token')\n  {\n    $this->mollie = new MollieApiClient();\n    switch ($accessMode) {\n      case 'token':\n        $this->mollie->setAccessToken($accessCode);\n        break;\n      case 'key':\n        $this->mollie->setApiKey($accessCode);\n        break;\n      default:\n        $this->mollie->setAccessToken($accessCode);\n        break;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 20,
             "endLine": 34,
             "isDeprecated": false,
@@ -54,13 +57,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "accessCode",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -71,24 +79,55 @@
                     "name": "accessMode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "token",
                     "default_name": "",
                     "description": "ode 'token' or 'key'"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "MollieManager constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$access",
+                        "description": "ode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$access",
+                        "description": "ode 'token' or 'key'"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * MollieManager constructor.\n   *\n   * @param string $accessCode\n   * @param string $accessMode 'token' or 'key'\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getProvider": {
             "name": "getProvider",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->mollie;\n  }",
+            "code": "  public function getProvider()\n  {\n    return $this->mollie;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 40,
             "endLine": 43,
             "isDeprecated": false,
@@ -99,20 +138,73 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProvider",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return MollieApiClient\n   *\/"
+        },
+        "getOnboardingObject": {
+            "name": "getOnboardingObject",
+            "summary": "https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/get-onboarding-status",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getOnboardingObject(): \\Mollie\\Api\\Resources\\Onboarding\n  {\n    return $this->mollie->onboarding->get();\n  }",
             "parent": false,
-            "arguments": []
+            "trait": false,
+            "startLine": 52,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOnboardingObject",
+            "returns": [
+                "Mollie\\Api\\Resources\\Onboarding"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/get-onboarding-status\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$access_token"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/get-onboarding-status\n   *\n   * @param $access_token\n   * @return \\Mollie\\Api\\Resources\\Onboarding\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "canReceivePayments": {
             "name": "canReceivePayments",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->canReceivePayments;\n  }",
+            "code": "  public function canReceivePayments(): bool\n  {\n    return $this->getOnboardingObject()->canReceivePayments;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 61,
             "endLine": 64,
             "isDeprecated": false,
@@ -123,22 +215,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "canReceivePayments",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "canReceiveSettlements": {
             "name": "canReceiveSettlements",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->canReceiveSettlements;\n  }",
+            "code": "  public function canReceiveSettlements(): bool\n  {\n    return $this->getOnboardingObject()->canReceiveSettlements;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 70,
             "endLine": 73,
             "isDeprecated": false,
@@ -149,22 +254,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "canReceiveSettlements",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "onboardingIsInReview": {
             "name": "onboardingIsInReview",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->isInReview();\n  }",
+            "code": "  public function onboardingIsInReview(): bool\n  {\n    return $this->getOnboardingObject()->isInReview();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 79,
             "endLine": 82,
             "isDeprecated": false,
@@ -175,22 +293,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "onboardingIsInReview",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "onboardingIsCompleted": {
             "name": "onboardingIsCompleted",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->isCompleted();\n  }",
+            "code": "  public function onboardingIsCompleted(): bool\n  {\n    return $this->getOnboardingObject()->isCompleted();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 88,
             "endLine": 91,
             "isDeprecated": false,
@@ -201,22 +332,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "onboardingIsCompleted",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "onboardingNeedsData": {
             "name": "onboardingNeedsData",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->needsData();\n  }",
+            "code": "  public function onboardingNeedsData(): bool\n  {\n    return $this->getOnboardingObject()->needsData();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 97,
             "endLine": 100,
             "isDeprecated": false,
@@ -227,22 +371,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "onboardingNeedsData",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getDashboardLink": {
             "name": "getDashboardLink",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->_links->dashboard->href;\n  }",
+            "code": "  public function getDashboardLink(): string\n  {\n    return $this->getOnboardingObject()->_links->dashboard->href;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 106,
             "endLine": 109,
             "isDeprecated": false,
@@ -253,22 +410,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getDashboardLink",
             "returns": [
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return string\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getOnboardingStatus": {
             "name": "getOnboardingStatus",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getOnboardingObject()->status;\n  }",
+            "code": "  public function getOnboardingStatus(): string\n  {\n    return $this->getOnboardingObject()->status;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 115,
             "endLine": 118,
             "isDeprecated": false,
@@ -279,11 +449,21 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOnboardingStatus",
             "returns": [
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return string\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "submitOnboardingData": {
             "name": "submitOnboardingData",
@@ -292,14 +472,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data\">https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data)\n  {\n    $this->mollie->onboarding->submit($data);\n  }",
+            "code": "  public function submitOnboardingData(array $data): void\n  {\n    $this->mollie->onboarding->submit($data);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 129,
             "endLine": 132,
             "isDeprecated": false,
@@ -310,21 +493,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "submitOnboardingData",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "data",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Submits onboarding data.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Submits onboarding data.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/onboarding-api\/submit-onboarding-data\n   *\n   * @param array $data\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "createPayment": {
             "name": "createPayment",
@@ -333,14 +537,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data, string $customer_id = NULL, string $mandate_id = NULL)\n  {\n    if ($customer_id) {\n      $data = array_merge($data, ['customerId' => $customer_id]);\n    }\n\n    if ($mandate_id) {\n      $data = array_merge($data, ['mandateId' => $mandate_id]);\n    }\n\n    $payment = $this->mollie->payments->create($data);\n    return X::toArray($payment);\n  }",
+            "code": "  public function createPayment(array $data, ?string $customer_id = null, ?string $mandate_id = null): array\n  {\n    if ($customer_id) {\n      $data = array_merge($data, ['customerId' => $customer_id]);\n    }\n\n    if ($mandate_id) {\n      $data = array_merge($data, ['mandateId' => $mandate_id]);\n    }\n\n    $payment = $this->mollie->payments->create($data);\n    return X::toArray($payment);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 144,
             "endLine": 156,
             "isDeprecated": false,
@@ -351,15 +558,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "createPayment",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "data",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -368,7 +580,13 @@
                 {
                     "name": "customer_id",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -378,13 +596,41 @@
                 {
                     "name": "mandate_id",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$mandate",
+                        "description": "id"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/create-payment\n   *\n   * @param array $data\n   * @param string|null $mandate_id\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "createPaymentFirstTime": {
             "name": "createPaymentFirstTime",
@@ -393,14 +639,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']<\/p>\n<p>This will return the <code>customerId<\/code> and <code>mandateId<\/code> in the response.<\/p>"
+                    "content": "Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n\nThis will return the `customerId` and `mandateId` in the response."
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($customer, array $payment_data)\n  {\n    $customer = \\is_array($customer) ? $this->mollie->customers->create($customer)->id : $customer;\n    $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);\n    try {\n      return $this->createPayment($payment_data, $customer);\n    }\n    catch (\\Exception $e) {\n      throw new \\Exception($e->getMessage());\n    }\n  }",
+            "code": "  public function createPaymentFirstTime($customer, array $payment_data): array\n  {\n    $customer = \\is_array($customer) ? $this->mollie->customers->create($customer)->id : $customer;\n    $payment_data = array_merge($payment_data, ['sequenceType' => 'first']);\n    try {\n      return $this->createPayment($payment_data, $customer);\n    }\n    catch (\\Exception $e) {\n      throw new \\Exception($e->getMessage());\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 169,
             "endLine": 179,
             "isDeprecated": false,
@@ -411,15 +660,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "createPaymentFirstTime",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "customer",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -430,13 +682,41 @@
                     "name": "payment_data",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "data"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Create a payment for the first time for the user.\nOnce you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n\nThis will return the `customerId` and `mandateId` in the response.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$customer",
+                        "description": "data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$payment",
+                        "description": "data"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Create a payment for the first time for the user.\n   * Once you have created a payment, you should redirect your customer to the URL in the $payment['_links']['checkout']['href']\n   *\n   * This will return the `customerId` and `mandateId` in the response.\n   *\n   * @param array $customer_data\n   * @param array $payment_data\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "createOnDemandPayment": {
             "name": "createOnDemandPayment",
@@ -445,14 +725,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand\">https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $payment_data, string $customer_id, string $mandate_id)\n  {\n    if (!$this->customerHasValidMandate(\n      $customer_id,\n      $mandate_id,\n      array_key_exists('testmode', $payment_data) ? ['testmode' => $payment_data['testmode']] : [])\n    ) {\n      \/\/ If the mandate is not valid then creates a new one by having\n      \/\/ The customer performs a first payment: createPaymentFirstTime()\n      \/\/ Then update the new customer and mandate id in database.\n      return null;\n    }\n    $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);\n    return $this->createPayment($payment_data, $customer_id, $mandate_id);\n  }",
+            "code": "  public function createOnDemandPayment(array $payment_data, string $customer_id, string $mandate_id): ?array\n  {\n    if (!$this->customerHasValidMandate(\n      $customer_id,\n      $mandate_id,\n      array_key_exists('testmode', $payment_data) ? ['testmode' => $payment_data['testmode']] : [])\n    ) {\n      \/\/ If the mandate is not valid then creates a new one by having\n      \/\/ The customer performs a first payment: createPaymentFirstTime()\n      \/\/ Then update the new customer and mandate id in database.\n      return null;\n    }\n    $payment_data = array_merge($payment_data, ['sequenceType' => 'recurring']);\n    return $this->createPayment($payment_data, $customer_id, $mandate_id);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 192,
             "endLine": 206,
             "isDeprecated": false,
@@ -463,16 +746,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "createOnDemandPayment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "payment_data",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -483,6 +771,11 @@
                     "name": "customer_id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -493,13 +786,149 @@
                     "name": "mandate_id",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "id"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Charging immediately on-demand.\n\nhttps:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$payment",
+                        "description": "data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mandate",
+                        "description": "id"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Charging immediately on-demand.\n   *\n   * https:\/\/docs.mollie.com\/payments\/recurring#payments-recurring-charging-on-demand\n   *\n   * @param array $payment_data\n   * @param string $customer_id\n   * @param string $mandate_id\n   * @return array|null\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
+        },
+        "customerHasValidMandate": {
+            "name": "customerHasValidMandate",
+            "summary": "Checks if the provided mandate is valid.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function customerHasValidMandate(string $customer_id, string $mandate_id, array $params = []): bool\n  {\n    $mandate = $this->getMandate($customer_id, $mandate_id, $params);\n\n    return $mandate['status'] === 'valid';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 217,
+            "endLine": 222,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "customerHasValidMandate",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "customer_id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "mandate_id",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "params",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks if the provided mandate is valid.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mandate",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Checks if the provided mandate is valid.\n   *\n   * @param string $customer_id\n   * @param string $mandate_id\n   * @param array $params\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getMandate": {
             "name": "getMandate",
@@ -508,14 +937,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $customer_id, string $mandate_id, array $params = [])\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandate = $customer->getMandate($mandate_id, $params);\n\n    return X::toArray($mandate);\n  }",
+            "code": "  public function getMandate(string $customer_id, string $mandate_id, array $params = []): array\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandate = $customer->getMandate($mandate_id, $params);\n\n    return X::toArray($mandate);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 235,
             "endLine": 242,
             "isDeprecated": false,
@@ -526,15 +958,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "getMandate",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "customer_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -545,6 +982,11 @@
                     "name": "mandate_id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -555,12 +997,45 @@
                     "name": "params",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve a mandate by its ID and its customer\u2019s ID.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mandate",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve a mandate by its ID and its customer\u2019s ID.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/get-mandate\n   *\n   * @param string $customer_id\n   * @param string $mandate_id\n   * @param array $params\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "listMandates": {
             "name": "listMandates",
@@ -569,14 +1044,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $customer_id, array $params = [])\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandates = $customer->mandates();\n\n    return X::toArray($mandates);\n  }",
+            "code": "  public function listMandates(string $customer_id, array $params = []): array\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandates = $customer->mandates();\n\n    return X::toArray($mandates);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 254,
             "endLine": 261,
             "isDeprecated": false,
@@ -587,15 +1065,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "listMandates",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "customer_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -606,12 +1089,39 @@
                     "name": "params",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve all mandates for the given customerId, ordered from newest to oldest.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve all mandates for the given customerId, ordered from newest to oldest.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/list-mandates\n   *\n   * @param string $customer_id\n   * @param array $params\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "revokeMandate": {
             "name": "revokeMandate",
@@ -620,14 +1130,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>You will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.<\/p>\n<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate\">https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate<\/a><\/p>"
+                    "content": "You will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $customer_id, string $mandate_id, array $params = [])\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandate = $customer->getMandate($mandate_id);\n\n    $mandate->revoke();\n  }",
+            "code": "  public function revokeMandate(string $customer_id, string $mandate_id, array $params = []): void\n  {\n    $customer = $this->getCustomerFromId($customer_id, $params);\n\n    $mandate = $customer->getMandate($mandate_id);\n\n    $mandate->revoke();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 277,
             "endLine": 284,
             "isDeprecated": false,
@@ -638,15 +1151,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "revokeMandate",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "customer_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -657,6 +1175,11 @@
                     "name": "mandate_id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -667,12 +1190,45 @@
                     "name": "params",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Revoke a customer\u2019s mandate.\n\nYou will no longer be able to charge the consumer\u2019s bank account or credit card\nwith this mandate and all connected subscriptions will be canceled.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mandate",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Revoke a customer\u2019s mandate.\n   *\n   * You will no longer be able to charge the consumer\u2019s bank account or credit card\n   * with this mandate and all connected subscriptions will be canceled.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/mandates-api\/revoke-mandate\n   *\n   * @param string $customer_id\n   * @param string $mandate_id\n   * @param array $params\n   * @return void\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getCustomer": {
             "name": "getCustomer",
@@ -681,14 +1237,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\">https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $customer_id, array $params = [])\n  {\n    return X::toArray(\n      $this->getCustomerFromId($customer_id, $params)\n    );\n  }",
+            "code": "  public function getCustomer(string $customer_id, array $params = []): array\n  {\n    return X::toArray(\n      $this->getCustomerFromId($customer_id, $params)\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 296,
             "endLine": 301,
             "isDeprecated": false,
@@ -699,15 +1258,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getCustomer",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "customer_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -718,12 +1282,125 @@
                     "name": "params",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve a single customer by its ID.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve a single customer by its ID.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\n   *\n   * @param string $customer_id\n   * @param array $params\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
+        },
+        "getCustomerFromId": {
+            "name": "getCustomerFromId",
+            "summary": "Retrieve a single customer by its ID.",
+            "description": "https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer"
+                }
+            ],
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getCustomerFromId(string $customer_id, array $params = []): \\Mollie\\Api\\Resources\\Customer\n  {\n    return $this->mollie->customers->get($customer_id, $params);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 313,
+            "endLine": 316,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getCustomerFromId",
+            "returns": [
+                "Mollie\\Api\\Resources\\Customer"
+            ],
+            "arguments": [
+                {
+                    "name": "customer_id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "id"
+                },
+                {
+                    "name": "params",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieve a single customer by its ID.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$customer",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve a single customer by its ID.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/customers-api\/get-customer\n   *\n   * @param string $customer_id\n   * @param array $params\n   * @return \\Mollie\\Api\\Resources\\Customer\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "refundPayment": {
             "name": "refundPayment",
@@ -732,14 +1409,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund\">https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $payment_id, string $amount, array $params = [])\n  {\n    $payment = $this->mollie->payments->get($payment_id, ['testmode' => !empty($params['testmode'])]);\n    $params = array_merge([\n      \"amount\" => [\n        \"currency\" => $payment->amount->currency,\n        \"value\"    => $amount\n      ]\n    ], $params);\n    $refund = $payment->refund($params);\n    return X::toArray($refund);\n  }",
+            "code": "  public function refundPayment(string $payment_id, string $amount, array $params = []): array\n  {\n    $payment = $this->mollie->payments->get($payment_id, ['testmode' => !empty($params['testmode'])]);\n    $params = array_merge([\n      \"amount\" => [\n        \"currency\" => $payment->amount->currency,\n        \"value\"    => $amount\n      ]\n    ], $params);\n    $refund = $payment->refund($params);\n    return X::toArray($refund);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 328,
             "endLine": 339,
             "isDeprecated": false,
@@ -750,15 +1430,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "refundPayment",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "payment_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -769,6 +1454,11 @@
                     "name": "amount",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -778,12 +1468,39 @@
                     "name": "params",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Creates a Refund on the Payment. The refunded amount is credited to your customer.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$payment",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$amount"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Creates a Refund on the Payment. The refunded amount is credited to your customer.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/refunds-api\/create-refund\n   *\n   * @param string $payment_id\n   * @param string $amount\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getOrganization": {
             "name": "getOrganization",
@@ -792,14 +1509,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization\">https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $organization =  $this->mollie->organizations->current();\n\n    return X::toArray($organization);\n  }",
+            "code": "  public function getOrganization(): array\n  {\n    $organization =  $this->mollie->organizations->current();\n\n    return X::toArray($organization);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 349,
             "endLine": 354,
             "isDeprecated": false,
@@ -810,22 +1530,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOrganization",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Return the currently authenticated organization object.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Return the currently authenticated organization object.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/organizations-api\/current-organization\n   *\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getOrganizationId": {
             "name": "getOrganizationId",
             "summary": "Return the currently authenticated organization id.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->mollie->organizations->current()->id;\n  }",
+            "code": "  public function getOrganizationId() :string\n  {\n    return $this->mollie->organizations->current()->id;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 362,
             "endLine": 365,
             "isDeprecated": false,
@@ -836,11 +1569,21 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOrganizationId",
             "returns": [
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Return the currently authenticated organization id.\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Return the currently authenticated organization id.\n   *\n   * @return string\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "createProfile": {
             "name": "createProfile",
@@ -849,14 +1592,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data)\n  {\n    $profile = $this->mollie->profiles->create($data);\n\n    return X::toArray($profile);\n  }",
+            "code": "  public function createProfile(array $data): array\n  {\n    $profile = $this->mollie->profiles->create($data);\n\n    return X::toArray($profile);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 376,
             "endLine": 381,
             "isDeprecated": false,
@@ -867,21 +1613,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "createProfile",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "data",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Create a profile in order to process payments.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Create a profile in order to process payments.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/create-profile\n   * \n   * @param array $data\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "updateProfile": {
             "name": "updateProfile",
@@ -890,14 +1657,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProfile, array $data)\n  {\n    $profile = $this->mollie->profiles->get($idProfile);\n    foreach ($data as $k => $d) {\n      $profile->{$k} = $d;\n    }\n    $updatedProfile = $profile->update();\n    return X::toArray($updatedProfile);\n  }",
+            "code": "  public function updateProfile(string $idProfile, array $data): array\n  {\n    $profile = $this->mollie->profiles->get($idProfile);\n    foreach ($data as $k => $d) {\n      $profile->{$k} = $d;\n    }\n    $updatedProfile = $profile->update();\n    return X::toArray($updatedProfile);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 392,
             "endLine": 400,
             "isDeprecated": false,
@@ -908,15 +1678,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "updateProfile",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProfile",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -927,12 +1702,34 @@
                     "name": "data",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Update a profile\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "rofile"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Update a profile\n   * \n   * https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/update-profile\n   * \n   * @param string $idProfile\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getProfiles": {
             "name": "getProfiles",
@@ -941,14 +1738,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $profiles = $this->mollie->profiles->page();\n\n    return X::toArray($profiles);\n  }",
+            "code": "  public function getProfiles(): array\n  {\n    $profiles = $this->mollie->profiles->page();\n\n    return X::toArray($profiles);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 411,
             "endLine": 416,
             "isDeprecated": false,
@@ -959,22 +1759,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProfiles",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Retrieve all profiles available on the account.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve all profiles available on the account.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/list-profiles\n   *\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "hasProfiles": {
             "name": "hasProfiles",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return (bool)$this->mollie->profiles->page()->count;\n  }",
+            "code": "  public function hasProfiles(): bool\n  {\n    return (bool)$this->mollie->profiles->page()->count;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 423,
             "endLine": 426,
             "isDeprecated": false,
@@ -985,11 +1798,21 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "hasProfiles",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getActivePaymentMethods": {
             "name": "getActivePaymentMethods",
@@ -998,14 +1821,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $profile_id)\n  {\n    $methods = $this->mollie->methods->allActive([\n      'profileId' => $profile_id\n    ]);\n\n    return X::toArray($methods);\n  }",
+            "code": "  public function getActivePaymentMethods(string $profile_id): array\n  {\n    $methods = $this->mollie->methods->allActive([\n      'profileId' => $profile_id\n    ]);\n\n    return X::toArray($methods);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 437,
             "endLine": 444,
             "isDeprecated": false,
@@ -1016,22 +1842,44 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getActivePaymentMethods",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "profile_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "id"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve all active payment methods.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$profile",
+                        "description": "id"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve all active payment methods.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\n   *\n   * @param string $profile_id\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getAllPaymentMethods": {
             "name": "getAllPaymentMethods",
@@ -1040,14 +1888,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $profile_id)\n  {\n    $methods = $this->mollie->methods->allAvailable([\n      'profileId' => $profile_id\n    ]);\n\n    return X::toArray($methods);\n  }",
+            "code": "  public function getAllPaymentMethods(string $profile_id): array\n  {\n    $methods = $this->mollie->methods->allAvailable([\n      'profileId' => $profile_id\n    ]);\n\n    return X::toArray($methods);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 455,
             "endLine": 462,
             "isDeprecated": false,
@@ -1058,33 +1909,58 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getAllPaymentMethods",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "profile_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "id"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve all enabled payment methods.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$profile",
+                        "description": "id"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve all enabled payment methods.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\n   *\n   * @param string $profile_id\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "hasActivePaymentMethods": {
             "name": "hasActivePaymentMethods",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $profile_id)\n  {\n    return (bool)$this->mollie->methods->allActive([\n      'profileId' => $profile_id\n    ])\n      ->count;\n  }",
+            "code": "  public function hasActivePaymentMethods(string $profile_id): bool\n  {\n    return (bool)$this->mollie->methods->allActive([\n      'profileId' => $profile_id\n    ])\n      ->count;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 469,
             "endLine": 475,
             "isDeprecated": false,
@@ -1095,22 +1971,44 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "hasActivePaymentMethods",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "profile_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "id"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$profile",
+                        "description": "id"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * @param string $profile_id\n   * @return bool\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "enablePaymentMethod": {
             "name": "enablePaymentMethod",
@@ -1119,14 +2017,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method\">https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method<\/a>#<\/p>\n<p>List of payment methods: <a href=\"https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\">https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method#\n\nList of payment methods: https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $profile_id, string $payment_method_id)\n  {\n    $profile = $this->mollie->profiles->get($profile_id);\n\n    $method = $profile->enableMethod($payment_method_id);\n\n    return X::toArray($method);\n  }",
+            "code": "  public function enablePaymentMethod(string $profile_id, string $payment_method_id): array\n  {\n    $profile = $this->mollie->profiles->get($profile_id);\n\n    $method = $profile->enableMethod($payment_method_id);\n\n    return X::toArray($method);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 489,
             "endLine": 496,
             "isDeprecated": false,
@@ -1137,15 +2038,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "enablePaymentMethod",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "profile_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1156,22 +2062,50 @@
                     "name": "payment_method_id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "method_id"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Enable a payment method on a specific or authenticated profile to use it with payments.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method#\n\nList of payment methods: https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$profile",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$payment",
+                        "description": "method_id"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Enable a payment method on a specific or authenticated profile to use it with payments.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/profiles-api\/enable-method#\n   *\n   * List of payment methods: https:\/\/docs.mollie.com\/reference\/v2\/methods-api\/list-methods\n   *\n   * @param string $profile_id\n   * @param string $payment_method_id\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "listPayments": {
             "name": "listPayments",
             "summary": "Retrieve all payments created ordered from newest to oldest.",
-            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n\n```php\n$client_payments = $mollie_manager->listPayments([\n 'testmode' => true,\n]);\nforeach ($client_payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
+            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:<\/p>"
+                    "content": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:"
                 },
                 {
                     "type": "code",
@@ -1182,11 +2116,14 @@
                     "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $params = [], string $from = NULL, int $limit = 250)\n  {\n    $payments = $this->mollie->payments->page($from, $limit, $params);\n\n    return X::toArray($payments);\n  }",
+            "code": "  public function listPayments(array $params = [], string $from = null, int $limit = 250): array\n  {\n    $payments = $this->mollie->payments->page($from, $limit, $params);\n\n    return X::toArray($payments);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 524,
             "endLine": 529,
             "isDeprecated": false,
@@ -1197,15 +2134,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
+            "shortName": "listPayments",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "params",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1214,7 +2156,13 @@
                 {
                     "name": "from",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1225,13 +2173,46 @@
                     "name": "limit",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 250,
                     "default_name": "",
                     "description": "The number of payments to return (with a maximum of 250)."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve all payments created ordered from newest to oldest.\nThis will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n\n```php\n$client_payments = $mollie_manager->listPayments([\n 'testmode' => true,\n]);\nforeach ($client_payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$from",
+                        "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The number of payments to return (with a maximum of 250)."
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve all payments created ordered from newest to oldest.\n   * This will list all payments not only the paid ones\n   * so when looping through results you can check if a payment is paid:\n   *\n   * ```php\n   * $client_payments = $mollie_manager->listPayments([\n   *  'testmode' => true,\n   * ]);\n   * foreach ($client_payments as $payment) {\n   *  if (!empty($payment['paidAt'])) {\n   *    echo \"ID: $payment['id'] <br>\";\n   *    echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   *    echo \"Status: {$payment['status']} <br><br>\";\n   *  }\n   * }\n   * ```\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments\n   *\n   * @param array $params\n   * @param string|null $from Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well.\n   * @param int $limit The number of payments to return (with a maximum of 250).\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getPayment": {
             "name": "getPayment",
@@ -1240,14 +2221,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $payment_id, array $params = [])\n  {\n    $payment = $this->mollie->payments->get($payment_id, $params);\n\n    return X::toArray($payment);\n  }",
+            "code": "  public function getPayment(string $payment_id, array $params = []): array\n  {\n    $payment = $this->mollie->payments->get($payment_id, $params);\n\n    return X::toArray($payment);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 541,
             "endLine": 546,
             "isDeprecated": false,
@@ -1258,15 +2242,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getPayment",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "payment_id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1277,21 +2266,48 @@
                     "name": "params",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve a single payment object by it's id.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$payment",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve a single payment object by it's id.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\n   *\n   * @param string $payment_id\n   * @param array $params\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "listMainAccountPayments": {
             "name": "listMainAccountPayments",
             "summary": "Retrieve all main account payments created ordered from newest to oldest.",
-            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n\n```php\n$_payments = $mollie_manager->listMainAccountPayments();\nforeach ($payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments",
+            "description": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:<\/p>"
+                    "content": "This will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:"
                 },
                 {
                     "type": "code",
@@ -1302,11 +2318,14 @@
                     "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $api_key, array $params = [], string $from = NULL, int $limit = 250)\n  {\n    array $params = [],\n    string $from = null,\n    int $limit = 250\n  ): array\n  {\n    $mollie = new MollieApiClient();\n    $mollie->setApiKey($api_key);\n\n    $payments = $mollie->payments->page($from, $limit, $params);\n\n    return X::toArray($payments);\n  }",
+            "code": "  public function listMainAccountPayments(\n    string $api_key,\n    array $params = [],\n    string $from = null,\n    int $limit = 250\n  ): array\n  {\n    $mollie = new MollieApiClient();\n    $mollie->setApiKey($api_key);\n\n    $payments = $mollie->payments->page($from, $limit, $params);\n\n    return X::toArray($payments);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 573,
             "endLine": 586,
             "isDeprecated": false,
@@ -1317,15 +2336,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "listMainAccountPayments",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "api_key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1336,6 +2360,11 @@
                     "name": "params",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1344,7 +2373,13 @@
                 {
                     "name": "from",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1355,13 +2390,52 @@
                     "name": "limit",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 250,
                     "default_name": "",
                     "description": "The number of payments to return (with a maximum of 250)."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve all main account payments created ordered from newest to oldest.\nThis will list all payments not only the paid ones\nso when looping through results you can check if a payment is paid:\n\n```php\n$_payments = $mollie_manager->listMainAccountPayments();\nforeach ($payments as $payment) {\n if (!empty($payment['paidAt'])) {\n   echo \"ID: $payment['id'] <br>\";\n   echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   echo \"Status: {$payment['status']} <br><br>\";\n }\n}\n```\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$api",
+                        "description": "key"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$from",
+                        "description": "Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The number of payments to return (with a maximum of 250)."
+                    }
+                ],
+                "return": "return array of \\Mollie\\Api\\Resources\\Payment objects",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve all main account payments created ordered from newest to oldest.\n   * This will list all payments not only the paid ones\n   * so when looping through results you can check if a payment is paid:\n   *\n   * ```php\n   * $_payments = $mollie_manager->listMainAccountPayments();\n   * foreach ($payments as $payment) {\n   *  if (!empty($payment['paidAt'])) {\n   *    echo \"ID: $payment['id'] <br>\";\n   *    echo \"Amount: {$payment['amount']['value']} {$payment['amount']['currency']} <br>\";\n   *    echo \"Status: {$payment['status']} <br><br>\";\n   *  }\n   * }\n   * ```\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/list-payments\n   *\n   * @param string $api_key\n   * @param array $params\n   * @param string|null $from Used for pagination. Offset the result set to the payment with this ID. The payment with this ID is included in the result set as well.\n   * @param int $limit The number of payments to return (with a maximum of 250).\n   * @return array return array of \\Mollie\\Api\\Resources\\Payment objects\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   *\/"
         },
         "getMainAccountPayment": {
             "name": "getMainAccountPayment",
@@ -1370,14 +2444,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><a href=\"https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\">https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment<\/a><\/p>"
+                    "content": "https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment"
                 }
             ],
-            "file": "bbn\\Api\\Permissions\\MollieManager",
+            "class": "bbn\\Api\\Permissions\\MollieManager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Permissions\/MollieManager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $api_key, string $payment_id, array $params = [])\n  {\n    $mollie = new MollieApiClient();\n    $mollie->setApiKey($api_key);\n\n    $payment = $mollie->payments->get($payment_id, $params);\n\n    return X::toArray($payment);\n  }",
+            "code": "  public function getMainAccountPayment(string $api_key, string $payment_id, array $params = []): array\n  {\n    $mollie = new MollieApiClient();\n    $mollie->setApiKey($api_key);\n\n    $payment = $mollie->payments->get($payment_id, $params);\n\n    return X::toArray($payment);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 599,
             "endLine": 607,
             "isDeprecated": false,
@@ -1388,15 +2465,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "getMainAccountPayment",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "api_key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1407,6 +2489,11 @@
                     "name": "payment_id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1417,17 +2504,72 @@
                     "name": "params",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieve a single payment object by it's id.\n\nhttps:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$api",
+                        "description": "key"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$payment",
+                        "description": "id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Mollie\\Api\\Exceptions\\ApiException",
+                    "description": "`"
+                }
+            },
+            "comments": "  \/**\n   * Retrieve a single payment object by it's id.\n   *\n   * https:\/\/docs.mollie.com\/reference\/v2\/payments-api\/get-payment\n   *\n   * @param string $api_key\n   * @param string $payment_id\n   * @param array $params\n   * @return array\n   * @throws \\Mollie\\Api\\Exceptions\\ApiException\n   `*\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "mollie": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "Mollie\\Api\\MollieApiClient",
+            "declaring": {
+                "name": "bbn\\Api\\Permissions\\MollieManager"
+            },
+            "declaring_trait": "bbn\\Api\\Permissions\\MollieManager",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "Mollie\\Api\\MollieApiClient": "MollieApiClient"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

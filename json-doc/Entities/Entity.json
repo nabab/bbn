@@ -5,22 +5,21 @@
     },
     "name": "bbn\\Entities\\Entity",
     "namespace": true,
+    "realName": "Entity",
+    "realNamespace": "bbn\\Entities",
     "traits": [
-        "bbn\\Models\\Tts\\Dbconfig"
+        "bbn\\Models\\Tts\\Cache"
     ],
     "interfaces": [],
     "fileName": "\/Entities\/Entity.php",
-    "startLine": 7,
-    "endLine": 189,
-    "numMethods": 18,
-    "numProperties": 0,
+    "startLine": 16,
+    "endLine": 340,
+    "numMethods": 38,
+    "numProperties": 14,
     "numConstants": 0,
-    "numStaticProperties": 1,
+    "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -29,30 +28,17 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
-        "default_class_cfg": {
-            "table": "bbn_entities",
-            "tables": {
-                "entities": "bbn_entities"
-            },
-            "arch": {
-                "entities": {
-                    "id": "id",
-                    "name": "name"
-                }
-            }
-        },
-        "_is_init_class_cfg": false,
-        "fields": null,
-        "class_cfg": null,
-        "class_table": null,
-        "class_table_index": null
+        "checked": null,
+        "info": [],
+        "easyId": null,
+        "_cache_prefix": null,
+        "cache_engine": null
     },
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Entities",
     "shortName": "Entity",
     "contentConstructor": {
-        "file": "bbn\\Entities\\Entity",
         "returns": []
     },
     "methods": {
@@ -61,56 +47,197 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $cfg = NULL)\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->_init_class_cfg($cfg);\n\n  }",
-            "startLine": 33,
-            "endLine": 40,
+            "code": "  public function __construct(protected Db $db, string $id, protected Entities $entities)\n  {\n    $this->class_cfg = $this->entities->getClassCfg();\n    $this->table = $this->class_cfg['table'];\n    $this->fields = $this->class_cfg['arch']['entities'];\n    $this->props = $this->class_cfg['props']['entities'];\n    if ($this->fields['easy_id']) {\n      if (Str::isInteger($id)) {\n        $this->easyId = $id;\n        $this->id = $this->entities->selectOne($this->fields['id'], [$this->fields['easy_id'] => $id]);\n      }\n      elseif ($this->entities->exists($id)) {\n        $this->easyId = $this->entities->selectOne($this->fields['easy_id'], [$this->fields['id'] => $id]);\n        $this->id = $id;\n      }\n      else {\n        throw new Exception(X::_(\"The entity %s does not exist\", $id));\n      }\n    }\n    elseif ($this->entities->exists($id)) {\n      $this->id = $id;\n    }\n    else {\n      throw new Exception(X::_(\"The entity does not exist\"));\n    }\n\n\n    $this->where = [\n      $this->db->cfn($this->fields['id'], $this->table) => $this->id\n    ];\n\n    $this->cacheInit();\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 47,
+            "endLine": 79,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "promoted": "protected"
+                },
+                {
+                    "name": "id",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "cfg",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
+                    "name": "entities",
+                    "position": 2,
+                    "type": "bbn\\Entities\\Models\\Entities",
+                    "type_arr": [
+                        "bbn\\Entities\\Models\\Entities"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "promoted": "protected"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\n   * @param Db    $db\n   * @param array $cfg\n   * @param array $params\n   *\/"
         },
-        "search": {
-            "name": "search",
+        "check": {
+            "name": "check",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($fn, $cp = NULL)\n  {\n\t\t\t$fn = ['adresse' => $fn, 'cp' => $cp];\n\t\t}\n\t\telse if ( !is_array($fn) ){\n\t\t\t$fn = $this->set_adresse($fn);\n\t\t}\n\t\tif ( !empty($fn['adresse']) && !empty($fn['cp']) ){\n\t\t\treturn $this->db->selectOne('bbn_addresses', 'id', [\n\t\t\t  'cp' => $fn['cp'],\n\t\t\t  'adresse' => $fn['adresse']\n      ]);\n\t\t}\n\t\treturn false;\n  }",
-            "startLine": 42,
-            "endLine": 56,
+            "code": "  public function check(): bool\n  {\n    if ($this->checked === null) {\n      $this->checked = (bool)$this->db->count($this->class_cfg['tables']['entities'], $this->where);\n    }\n\n    return $this->checked;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 81,
+            "endLine": 88,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "check",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        },
+        "getId": {
+            "name": "getId",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getId(): string\n  {\n    return $this->id;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 91,
+            "endLine": 94,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getId",
+            "returns": [
+                "string"
+            ],
+            "arguments": []
+        },
+        "getWhere": {
+            "name": "getWhere",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getWhere(): array\n  {\n    return $this->where;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 96,
+            "endLine": 99,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getWhere",
+            "returns": [
+                "array"
+            ],
+            "arguments": []
+        },
+        "getField": {
+            "name": "getField",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getField(string $field, bool $force = false): ?string\n  {\n    if ($force || !array_key_exists($field, $this->info)) {\n      if (!in_array($field, $this->fields)) {\n        if (isset($this->fields['identity'])) {\n          $identityCfg = array_flip($this->identity()->getClassCfg()['arch']['identities']);\n          if (isset($identityCfg[$field])) {\n            $identity = $this->identity()->get($this->getField($this->fields['identity']));\n            X::extendOut($this->info, $identity);\n            if (isset($identity[$field])) {\n              return $identity[$field];\n            }\n          }\n          else if ($this->entities->getClassCfg()['classes']['uauth']) {\n            try {\n              $uauth = $this->identity()->retrieveUauth($this->getField($this->fields['identity']), $field);\n              return $uauth[$field];\n            }\n            catch (Exception $e) {\n              throw new Exception(X::_(\"The field %s does not exist\", $field));\n            }\n          }\n        }\n\n        throw new Exception(X::_(\"The field %s does not exist\", $field));\n      }\n\n      $this->info[$field] = $this->db->selectOne(\n        $this->class_cfg['table'],\n        $field,\n        $this->where\n      );\n    }\n\n    return $this->info[$field];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 102,
+            "endLine": 137,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -119,405 +246,35 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "fn",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "cp",
-                    "position": 1,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "seek": {
-            "name": "seek",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($p, int $start = 0, int $limit = 100)\n  {\n        !empty($p['email']) ||\n        !empty($p['tel']) ||\n        !empty($p['fax']) )\n    ){\n      $cond = [];\n      \n      if ( !empty($p['email']) && \\bbn\\Str::isEmail($p['email']) ){\n        array_push($cond, ['email', 'LIKE', $p['email']]);\n      }\n      if ( !empty($p['adresse']) && strlen($p['adresse']) > 7 ){\n        array_push($cond, ['adresse', 'LIKE', '%'.$p['adresse'].'%']);\n      }\n      if ( !empty($p['tel']) && (strlen($p['tel']) >= 6) ){\n        if ( strlen($p['tel']) !== 10 ){\n          array_push($cond, ['tel', 'LIKE', $p['tel'].'%']);\n        }\n        else{\n          array_push($cond, ['tel', 'LIKE', $p['tel']]);\n        }\n      }\n      if ( !empty($p['fax']) && (strlen($p['fax']) >= 6) ){\n        if ( strlen($p['fax']) !== 10 ){\n          array_push($cond, ['fax', 'LIKE', $p['fax'].'%']);\n        }\n        else{\n          array_push($cond, ['fax', 'LIKE', $p['fax']]);\n        }\n      }\n      if ( !empty($p['ville']) ){\n        array_push($cond, ['ville', 'LIKE', $p['ville']]);\n      }\n      if ( !empty($p['cp']) ){\n        array_push($cond, ['cp', 'LIKE', $p['cp']]);\n      }\n      return $this->db->getColumnValues(\"bbn_addresses\", 'id', $cond, ['adresse', 'ville'], $limit, $start);\n    }\n\t\treturn false;\n  }",
-            "startLine": 59,
-            "endLine": 98,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "p",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 1,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 100,
-                    "default_name": ""
-                }
-            ]
-        },
-        "fullSearch": {
-            "name": "fullSearch",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($p, $start = 0, $limit = 0)\n  {\n    $res = \\bbn\\Str::isUid($p) ? [$p] : $this->seek($p, $start, $limit);\n    return $r;\n  }",
-            "startLine": 101,
-            "endLine": 105,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "p",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 1,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                }
-            ]
-        },
-        "relations": {
-            "name": "relations",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($id)\n  {\n\n\n\n  \/*\n   * Fusionne l'historique de diff\u00e9rents lieux et les supprime tous sauf le premier\n   *\n   * @var mixed $ids Un tableau d'IDs ou une liste d'arguments\n   *\/\n  public function fusion($ids){\n    $args = is_array($ids) ? $ids : func_get_args();\n    if ( count($args) > 1 ){\n      $id = array_shift($args);\n      $creation = [$this->db->selectOne('bbn_history', 'tst', [\n        'uid' => $id,\n        'opr' => 'INSERT'\n      ])];\n      foreach ( $args as $a ){\n        if ( $fn = $this->get_info($a) ){\n          $creation[] = $this->db->selectOne('bbn_history', 'tst', [\n            'uid' => $a\n          ]);\n          $cols = $this->db->getFieldsList('apst_liens');\n          $cols['creation'] = 'tst';\n          $links = $this->db->rselectAll([\n            'tables' => ['apst_liens'],\n            'fields' => $cols,\n            'join' => [\n              [\n                'table' => 'bbn_history',\n                'on' => [\n                  'conditions' => [\n                    [\n                      'field' => 'bbn_history.uid',\n                      'operator' => 'eq',\n                      'exp' => 'apst_liens.id'\n                    ]\n                  ],\n                  'logic' => 'AND'\n                ]\n              ]\n            ],\n            'where' => [\n              'id_lieu' => $a\n            ]\n          ]);\n          foreach ( $links as $link ){\n            $this->db->update('apst_liens', ['id_lieu' => $id], ['id' => $link['id']]);\n          }\n          $this->db->query(\"\n            UPDATE bbn_history\n            SET uid = ?\n            WHERE uid = ?\n            AND opr LIKE 'UPDATE'\",\n            hex2bin($id),\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_history\n            WHERE uid = ?\",\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_addresses\n            WHERE id = ?\",\n            hex2bin($a)\n          );\n        }\n      }\n      $this->db->query(\"\n        UPDATE bbn_history\n        SET tst = ?\n        WHERE uid = ?\n        AND opr LIKE 'INSERT'\",\n        min($creation),\n        hex2bin($id)\n      );\n    }\n    return 1;\n  }\n  }",
-            "startLine": 108,
-            "endLine": 109,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "fusion": {
-            "name": "fusion",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($ids)\n  {\n    if ( count($args) > 1 ){\n      $id = array_shift($args);\n      $creation = [$this->db->selectOne('bbn_history', 'tst', [\n        'uid' => $id,\n        'opr' => 'INSERT'\n      ])];\n      foreach ( $args as $a ){\n        if ( $fn = $this->get_info($a) ){\n          $creation[] = $this->db->selectOne('bbn_history', 'tst', [\n            'uid' => $a\n          ]);\n          $cols = $this->db->getFieldsList('apst_liens');\n          $cols['creation'] = 'tst';\n          $links = $this->db->rselectAll([\n            'tables' => ['apst_liens'],\n            'fields' => $cols,\n            'join' => [\n              [\n                'table' => 'bbn_history',\n                'on' => [\n                  'conditions' => [\n                    [\n                      'field' => 'bbn_history.uid',\n                      'operator' => 'eq',\n                      'exp' => 'apst_liens.id'\n                    ]\n                  ],\n                  'logic' => 'AND'\n                ]\n              ]\n            ],\n            'where' => [\n              'id_lieu' => $a\n            ]\n          ]);\n          foreach ( $links as $link ){\n            $this->db->update('apst_liens', ['id_lieu' => $id], ['id' => $link['id']]);\n          }\n          $this->db->query(\"\n            UPDATE bbn_history\n            SET uid = ?\n            WHERE uid = ?\n            AND opr LIKE 'UPDATE'\",\n            hex2bin($id),\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_history\n            WHERE uid = ?\",\n            hex2bin($a)\n          );\n          $this->db->query(\"\n            DELETE FROM bbn_addresses\n            WHERE id = ?\",\n            hex2bin($a)\n          );\n        }\n      }\n      $this->db->query(\"\n        UPDATE bbn_history\n        SET tst = ?\n        WHERE uid = ?\n        AND opr LIKE 'INSERT'\",\n        min($creation),\n        hex2bin($id)\n      );\n    }\n    return 1;\n  }",
-            "startLine": 118,
-            "endLine": 188,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "ids",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "exists": {
-            "name": "exists",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter)\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (is_string($filter)) {\n      $cfg = [$f['id'] => $filter];\n    }\n    elseif (is_array($filter)) {\n      $cfg = $filter;\n    }\n\n    if (!empty($cfg) && $arr = $this->db->count(\n      $this->class_table,\n      $cfg\n    )) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 37,
-            "endLine": 59,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "getClassCfg": {
-            "name": "getClassCfg",
-            "summary": "Returns the class configuration.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
-            "startLine": 67,
-            "endLine": 70,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getFields": {
-            "name": "getFields",
-            "summary": "Returns the fields of the main table.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->fields;\n  }",
-            "startLine": 78,
-            "endLine": 81,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "insert": {
-            "name": "insert",
-            "summary": "Inserts a new row in the table.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $data)\n  {\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if ($this->db->insert($ccfg['table'], $data)) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 91,
-            "endLine": 101,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "shortName": "getField",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "data",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "delete": {
-            "name": "delete",
-            "summary": "Deletes a single row from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 111,
-            "endLine": 120,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
+                    "name": "field",
                     "position": 0,
                     "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "update": {
-            "name": "update",
-            "summary": "Updates a single row in the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->rselect($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 131,
-            "endLine": 148,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "data",
+                    "name": "force",
                     "position": 1,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "addCfg",
-                    "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -525,70 +282,21 @@
                 }
             ]
         },
-        "selectOne": {
-            "name": "selectOne",
-            "summary": "Retrieves a row as an object from the table through its id.",
+        "getFields": {
+            "name": "getFields",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $field, $filter, array $order = [])\n  {\n    if ($res = $this->dbConfigSingleSelection($filter, $order, false, [$field])) {\n      return $res[$field] ?? null;\n    }\n\n    return null;\n  }",
-            "startLine": 159,
-            "endLine": 166,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
+            "code": "  public function getFields(array $fields, bool $force = false): array\n  {\n    $res = [];\n    foreach ($fields as $f) {\n      $res[$f] = $this->getField($f, $force);\n    }\n\n    return $res;\n  }",
             "parent": false,
-            "arguments": [
-                {
-                    "name": "field",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "filter",
-                    "position": 1,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 2,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "select": {
-            "name": "select",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, true);\n  }",
-            "startLine": 177,
-            "endLine": 180,
+            "trait": false,
+            "startLine": 140,
+            "endLine": 148,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -597,90 +305,112 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getFields",
             "returns": [
-                null,
-                "stdClass"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "rselect": {
-            "name": "rselect",
-            "summary": "Retrieves a row as an array from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, false);\n  }",
-            "startLine": 191,
-            "endLine": 194,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "fields",
                     "position": 0,
-                    "type": "",
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "order",
+                    "name": "force",
                     "position": 1,
-                    "type": "array",
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": [],
+                    "default": false,
                     "default_name": ""
                 }
             ]
         },
-        "count": {
-            "name": "count",
-            "summary": "Returns the number of rows from the table for the given conditions.",
+        "getFromTable": {
+            "name": "getFromTable",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $filter = [])\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    return $this->db->count($this->class_table, $filter);\n  }",
-            "startLine": 204,
-            "endLine": 211,
+            "code": "  public function getFromTable()\n  {\n    $table = $this->class_cfg['tables']['entities'];\n\n    $cfg = [\n      'tables' => [$table],\n      'fields' => array_values($this->getFieldsList()),\n      'where' => $this->where\n    ];\n\n    $data = $this->db->rselect($cfg);\n    return $data;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 151,
+            "endLine": 163,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getFromTable",
+            "returns": [],
+            "arguments": []
+        },
+        "getBasicInfo": {
+            "name": "getBasicInfo",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getBasicInfo(): array\n  {\n    $arc = $this->class_cfg['arch']['entities'];\n    $fields = [$arc['id'], $arc['identity']];\n    if (!empty($arc['easy_id'])) {\n      $fields[] = $arc['easy_id'];\n    }\n\n    $res = $this->db->rselect(\n      $this->class_cfg['table'],\n      $fields,\n      $this->where\n    );\n\n    if (!empty($res[$arc['identity']])) {\n      $res = X::mergeArrays($this->identity()->get($res[$arc['identity']]), $res);\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 165,
+            "endLine": 184,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getBasicInfo",
+            "returns": [
+                "array"
+            ],
+            "arguments": []
+        },
+        "getMinimalInfo": {
+            "name": "getMinimalInfo",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getMinimalInfo(?array $fields = null): array\n  {\n    $arc = $this->class_cfg['arch']['entities'];\n    if (!$fields) {\n      $fields = [$arc['id'], $arc['identity']];\n      if (!empty($arc['easy_id'])) {\n        $fields[] = $arc['easy_id'];\n      }\n    }\n\n    $res = $this->db->rselect(\n      $this->class_cfg['table'],\n      $fields,\n      $this->where\n    );\n\n    if (!empty($res[$arc['identity']])) {\n      $res = X::mergeArrays($this->identity()->get($res[$arc['identity']]), $res);\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 187,
+            "endLine": 208,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -689,95 +419,172 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getMinimalInfo",
             "returns": [
-                "int"
+                "array"
             ],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "fields",
                     "position": 0,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": [],
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "selectAll": {
-            "name": "selectAll",
-            "summary": "Returns an array of rows as objects from the table for the given conditions.",
+        "getFieldsList": {
+            "name": "getFieldsList",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, true);\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  protected function getFieldsList(): array\n  {\n    $fields = $this->fields;\n    $props = $this->props;\n    $db = $this->db;\n    $table = $this->class_cfg['tables']['entities'];\n    return array_map(function ($a) use (&$db, $table) {\n      return $db->cfn($a, $table);\n    }, array_filter($fields, function($k) use (&$props) {\n      return !isset($props[$k]) || !array_key_exists('showable', $props[$k]) || $props[$k]['showable'];\n    }, ARRAY_FILTER_USE_KEY));\n\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 211,
+            "endLine": 223,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getFieldsList",
             "returns": [
                 "array"
             ],
+            "arguments": []
+        },
+        "getEntities": {
+            "name": "getEntities",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getEntities(): Entities\n  {\n    return $this->entities;\n  }",
             "parent": false,
+            "trait": false,
+            "startLine": 225,
+            "endLine": 228,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getEntities",
+            "returns": [
+                "bbn\\Entities\\Models\\Entities"
+            ],
+            "arguments": []
+        },
+        "getLink": {
+            "name": "getLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getLink(string $linkCls): Link\n  {\n    return $this->entities->getLink($linkCls, $this);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 230,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getLink",
+            "returns": [
+                "bbn\\Entities\\Tables\\Link"
+            ],
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "linkCls",
                     "position": 0,
-                    "type": "array",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
                 }
             ]
         },
-        "rselectAll": {
-            "name": "rselectAll",
-            "summary": "Returns an array of rows as arrays from the table for the given conditions.",
+        "identity": {
+            "name": "identity",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Entities\\Entity",
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, false);\n  }",
+            "code": "  public function identity(): Identity\n  {\n    return $this->entities->identity();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 235,
+            "endLine": 238,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "identity",
+            "returns": [
+                "bbn\\Entities\\Identity"
+            ],
+            "arguments": []
+        },
+        "uauth": {
+            "name": "uauth",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function uauth(): Uauth\n  {\n    return $this->entities->uauth();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 240,
             "endLine": 243,
             "isDeprecated": false,
@@ -786,68 +593,1745 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "uauth",
+            "returns": [
+                "bbn\\Appui\\Uauth"
+            ],
+            "arguments": []
+        },
+        "address": {
+            "name": "address",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function address(): Address\n  {\n    return $this->entities->address();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 245,
+            "endLine": 248,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "address",
+            "returns": [
+                "bbn\\Entities\\Address"
+            ],
+            "arguments": []
+        },
+        "links": {
+            "name": "links",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function links(): Link\n  {\n    if (!isset($this->links)) {\n      $this->links = $this->entities->getGlobalLink($this);\n    }\n\n    return $this->links;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 250,
+            "endLine": 257,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "links",
+            "returns": [
+                "bbn\\Entities\\Tables\\Link"
+            ],
+            "arguments": []
+        },
+        "options": {
+            "name": "options",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function options(): Option\n  {\n    return $this->entities->options();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 259,
+            "endLine": 262,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "options",
+            "returns": [
+                "bbn\\Appui\\Option"
+            ],
+            "arguments": []
+        },
+        "entityOptions": {
+            "name": "entityOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function entityOptions(): EntityOptions\n  {\n    return $this->entities->entityOptions($this);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 264,
+            "endLine": 267,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "entityOptions",
+            "returns": [
+                "bbn\\Entities\\Tables\\Options"
+            ],
+            "arguments": []
+        },
+        "getParent": {
+            "name": "getParent",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParent(): ?Entity\n  {\n    if ($this->check()\n        && !empty($this->fields['id_parent'])\n        && ($id_parent = $this->getField($this->fields['id_parent']))\n    ) {\n      return $this->entities->get($id_parent);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 269,
+            "endLine": 279,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getParent",
+            "returns": [
+                null,
+                "bbn\\Entities\\Entity"
+            ],
+            "arguments": []
+        },
+        "getParentInfo": {
+            "name": "getParentInfo",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParentInfo(): ?array\n  {\n    if ($parent = $this->getParent()) {\n      return $parent->getMinimalInfo();\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 281,
+            "endLine": 288,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getParentInfo",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": []
+        },
+        "getSisters": {
+            "name": "getSisters",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSisters(): array\n  {\n    $res = [];\n    if ($this->check()\n        && !empty($this->fields['id_parent'])\n        && ($id_parent = $this->getField($this->fields['id_parent']))\n    ) {\n      $tmp = $this->db->getColumnValues(\n        $this->table,\n        $this->fields['id'],\n        [$this->fields['id_parent'] => $id_parent]\n      );\n      foreach ($tmp as $sis) {\n        if ($sis !== $this->id) {\n          $ent = $this->entities->get($sis);\n          $res[] = $ent->getMinimalInfo();\n        }\n      }\n\n    }\n    \n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 290,
+            "endLine": 312,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getSisters",
             "returns": [
                 "array"
             ],
+            "arguments": []
+        },
+        "countChildren": {
+            "name": "countChildren",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function countChildren(): int\n  {\n    return $this->entities->count([\n      $this->fields['id_parent'] => $this->id\n    ]);\n  }",
             "parent": false,
+            "trait": false,
+            "startLine": 314,
+            "endLine": 319,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "countChildren",
+            "returns": [
+                "int"
+            ],
+            "arguments": []
+        },
+        "getChildren": {
+            "name": "getChildren",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Entities\/Entity.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getChildren(): array\n  {\n    $tmp = $this->db->getColumnValues(\n      $this->table,\n      $this->fields['id'],\n      [$this->fields['id_parent'] => $this->id]\n    );\n    $res = [];\n    foreach ($tmp as $e) {\n      if ($e !== $this->id) {\n        $ent = $this->entities->get($e);\n        $res[] = $ent->getMinimalInfo();\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 322,
+            "endLine": 338,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getChildren",
+            "returns": [
+                "array"
+            ],
+            "arguments": []
+        },
+        "cacheInit": {
+            "name": "cacheInit",
+            "summary": "Initializes the cache object, must be called in __construct",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheInit(): void\n  {\n    if ( \\is_null($this->cache_engine) ){\n      $this->cache_engine = CacheCls::getEngine();\n      $this->_cache_prefix = Str::encodeFilename(str_replace('\\\\', '\/', \\get_class($this)), true).'\/';\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 27,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Initializes the cache object, must be called in __construct\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initializes the cache object, must be called in __construct\n   *\n   * @return void\n   *\/"
+        },
+        "cacheCheck": {
+            "name": "cacheCheck",
+            "summary": "Throws an exception if the cache has not been initialized",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheCheck(): void\n  {\n    if (!$this->cache_engine) {\n      throw new Exception(X::_(\"The cache object has not been initialized\"));\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 41,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheCheck",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Throws an exception if the cache has not been initialized\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Throws an exception if the cache has not been initialized\n   *\n   * @return void\n   *\/"
+        },
+        "_cache_name": {
+            "name": "_cache_name",
+            "summary": "Generates a name for the cache based on the class name and the method called - or a gievn string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function _cache_name($uid, $method = '', string $locale = ''): string\n  {\n    $uid  = (string)$uid;\n    $path = Str::isUid($uid) ? substr($uid, 0, 3).'\/'.substr($uid, 3, 3).'\/'.substr($uid, 6) : $uid;\n    return $this->_cache_prefix.$path.(empty($method) ? '' : '\/'.(string)$method).(empty($locale) ? '' : \"-$locale\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 57,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_cache_name",
+            "returns": [
+                "string"
+            ],
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "uid",
                     "position": 0,
-                    "type": "array",
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "order",
+                    "name": "method",
                     "position": 1,
-                    "type": "array",
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": [],
+                    "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "limit",
+                    "name": "locale",
                     "position": 2,
-                    "type": "int",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
-                    "default": 0,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Generates a name for the cache based on the class name and the method called - or a gievn string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a name for the cache based on the class name and the method called - or a gievn string\n   *\n   * @param [type] $uid\n   * @param string $method\n   * @param string $locale\n   * @return string\n   *\/"
+        },
+        "cacheDeleteAll": {
+            "name": "cacheDeleteAll",
+            "summary": "Deletes all the cache related to the current class",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteAll(): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_prefix);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 70,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheDeleteAll",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the cache related to the current class\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the cache related to the current class\n   *\n   * @return self\n   *\/"
+        },
+        "cacheDelete": {
+            "name": "cacheDelete",
+            "summary": "Deletes the given cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDelete(string $uid, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 85,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheDelete",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "start",
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheDeleteLocale": {
+            "name": "cacheDeleteLocale",
+            "summary": "Deletes the given cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 101,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheDeleteLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheGet": {
+            "name": "cacheGet",
+            "summary": "Gets the cached data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGet(string $uid, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 116,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheGet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data\n   *\n   * @param string $uid\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheGetLocale": {
+            "name": "cacheGetLocale",
+            "summary": "Gets the cached data for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 131,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheSet": {
+            "name": "cacheSet",
+            "summary": "Sets the cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 147,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheSet",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": ""
                 }
-            ]
-        }
-    },
-    "properties": null,
-    "staticProperties": {
-        "default_class_cfg": {
-            "table": "bbn_entities",
-            "tables": {
-                "entities": "bbn_entities"
+            ],
+            "doc": {
+                "description": "Sets the cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
             },
-            "arch": {
-                "entities": {
-                    "id": "id",
-                    "name": "name"
+            "comments": "  \/**\n   * Sets the cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheSetLocale": {
+            "name": "cacheSetLocale",
+            "summary": "Sets the cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 165,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheSetLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
                 }
-            }
+            ],
+            "doc": {
+                "description": "Sets the cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheGetSet": {
+            "name": "cacheGetSet",
+            "summary": "Gets the cache or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 182,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetSet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheGetSetLocale": {
+            "name": "cacheGetSetLocale",
+            "summary": "Gets the cache for a specific locale or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSetLocale(callable $fn, string $uid, string $locale, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method, $locale), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 199,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "shortName": "cacheGetSetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache for a specific locale or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache for a specific locale or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheHas": {
+            "name": "cacheHas",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHas(string $uid, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGet($uid, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 213,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheHas",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "cacheHasLocale": {
+            "name": "cacheHasLocale",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHasLocale(string $uid, string $locale, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGetLocale($uid, $locale, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 227,
+            "endLine": 231,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheHasLocale",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "serializeFunction": {
+            "name": "serializeFunction",
+            "summary": "Transforms a function in a cacheable string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Entities\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 241,
+            "endLine": 245,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "serializeFunction",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "function",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Transforms a function in a cacheable string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
         }
     },
+    "properties": {
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "fields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "props": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "where": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "checked": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var null|bool Adherent verification status.",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "info": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "id": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "links": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Entities\\Tables\\Link",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "easyId": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Db",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": true,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "entities": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Entities\\Models\\Entities",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Entities\\Entity",
+            "promoted": true,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "_cache_prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "cache_engine": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Entities\\Entity"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": [],
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Db": "Db",
+        "bbn\\Entities\\Models\\Entities": "Entities",
+        "bbn\\Entities\\Tables\\Link": "Link",
+        "bbn\\Entities\\Tables\\Options": "EntityOptions",
+        "bbn\\Appui\\Option": "Option",
+        "bbn\\Appui\\Uauth": "Uauth",
+        "bbn\\Models\\Tts\\Cache": "Cache"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

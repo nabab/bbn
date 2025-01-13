@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Api\\GitLab\\User",
     "namespace": true,
+    "realName": "User",
+    "realNamespace": "bbn\\Api\\GitLab",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/GitLab\/User.php",
     "startLine": 4,
     "endLine": 85,
     "numMethods": 6,
-    "numProperties": 0,
+    "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -38,11 +39,14 @@
             "summary": "Gets the users list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "class": "bbn\\Api\\GitLab\\User",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/User.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->request($this->userURL, ['per_page' => 5000]);\n  }",
+            "code": "  public function getUsers(): array\n  {\n    return $this->request($this->userURL, ['per_page' => 5000]);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 14,
             "endLine": 17,
             "isDeprecated": false,
@@ -53,22 +57,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the users list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the users list\n   * @return array\n   *\/"
         },
         "getUser": {
             "name": "getUser",
             "summary": "Gets a user info.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "class": "bbn\\Api\\GitLab\\User",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/User.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $id = NULL)\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
+            "code": "  public function getUser(int $id = null): array\n  {\n    return $this->request(!empty($id) ? $this->userURL . $id : 'user');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 25,
             "endLine": 28,
             "isDeprecated": false,
@@ -79,33 +92,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "The user id"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets a user info.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The user id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets a user info.\n   * @param int $id The user id\n   * @return array\n   *\/"
         },
         "getUserID": {
             "name": "getUserID",
             "summary": "Gets the current user ID",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "class": "bbn\\Api\\GitLab\\User",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/User.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (empty($this->userID)\n      && ($r = $this->request('user'))\n    ) {\n      $this->userID = $r['id'];\n    }\n    return $this->userID;\n  }",
+            "code": "  public function getUserID(): int\n  {\n    if (empty($this->userID)\n      && ($r = $this->request('user'))\n    ) {\n      $this->userID = $r['id'];\n    }\n    return $this->userID;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 35,
             "endLine": 43,
             "isDeprecated": false,
@@ -116,22 +151,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUserID",
             "returns": [
                 "int"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the current user ID\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the current user ID\n   * @return int\n   *\/"
         },
         "getProjectUsers": {
             "name": "getProjectUsers",
             "summary": "Gets the users list of the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "class": "bbn\\Api\\GitLab\\User",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/User.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project)\n  {\n    return $this->request($this->projectURL . $project . '\/members\/all');\n  }",
+            "code": "  public function getProjectUsers($project): array\n  {\n    return $this->request($this->projectURL . $project . '\/members\/all');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 51,
             "endLine": 54,
             "isDeprecated": false,
@@ -142,33 +186,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ID or URL-encoded path of the project"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the users list of the given project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$project",
+                        "description": "ID or URL-encoded path of the project"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the users list of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/"
         },
         "insertProjectUser": {
             "name": "insertProjectUser",
             "summary": "Inserts an user into the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "class": "bbn\\Api\\GitLab\\User",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/User.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, int $user, int $role)\n  {\n    return $this->post($this->projectURL . $project . '\/members', [\n      'user_id' => $user,\n      'access_level' => $role\n    ]);\n  }",
+            "code": "  public function insertProjectUser($project, int $user, int $role): array\n  {\n    return $this->post($this->projectURL . $project . '\/members', [\n      'user_id' => $user,\n      'access_level' => $role\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 64,
             "endLine": 70,
             "isDeprecated": false,
@@ -179,15 +242,18 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -198,6 +264,11 @@
                     "name": "user",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -208,24 +279,57 @@
                     "name": "role",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The user role ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Inserts an user into the given project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$project",
+                        "description": "ID or URL-encoded path of the project"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$user",
+                        "description": "The user ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$role",
+                        "description": "The user role ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Inserts an user into the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @param int $user The user ID\n   * @param int $role The user role ID\n   * @return bool\n   *\/"
         },
         "removeProjectUser": {
             "name": "removeProjectUser",
             "summary": "Removes an user from the given project",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\GitLab\\User",
+            "class": "bbn\\Api\\GitLab\\User",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/GitLab\/User.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($project, int $user)\n  {\n    return $this->delete($this->projectURL . $project . '\/members\/' . $user);\n  }",
+            "code": "  public function removeProjectUser($project, int $user): bool\n  {\n    return $this->delete($this->projectURL . $project . '\/members\/' . $user);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 79,
             "endLine": 82,
             "isDeprecated": false,
@@ -236,15 +340,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "removeProjectUser",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -255,18 +362,70 @@
                     "name": "user",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The user ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Removes an user from the given project\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$project",
+                        "description": "ID or URL-encoded path of the project"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "description": "The user ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Removes an user from the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @param int The user ID\n   * @return bool\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "userID": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\GitLab\\User"
+            },
+            "declaring_trait": "bbn\\Api\\GitLab\\User",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string The current user ID",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/** @var string The current user ID *\/",
+        "\/**\n   * Gets the users list\n   * @return array\n   *\/",
+        "\/**\n   * Gets a user info.\n   * @param int $id The user id\n   * @return array\n   *\/",
+        "\/**\n   * Gets the current user ID\n   * @return int\n   *\/",
+        "\/**\n   * Gets the users list of the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @return array\n   *\/",
+        "\/**\n   * Inserts an user into the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @param int $user The user ID\n   * @param int $role The user role ID\n   * @return bool\n   *\/",
+        "\/**\n   * Removes an user from the given project\n   * @param int|string $project ID or URL-encoded path of the project\n   * @param int The user ID\n   * @return bool\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

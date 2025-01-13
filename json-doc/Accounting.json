@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Accounting",
     "namespace": true,
+    "realName": "Accounting",
+    "realNamespace": "bbn",
     "traits": [
         "bbn\\Models\\Tts\\Cache",
         "bbn\\Models\\Tts\\Optional"
@@ -13,16 +15,12 @@
     "fileName": "\/Accounting.php",
     "startLine": 10,
     "endLine": 43,
-    "numMethods": 27,
-    "numProperties": 0,
+    "numMethods": 40,
+    "numProperties": 15,
     "numConstants": 0,
-    "numStaticProperties": 5,
+    "numStaticProperties": 4,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Cache",
-        "bbn\\Models\\Tts\\Optional"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -35,12 +33,13 @@
         "public_root": "permissions|access",
         "optional_is_init": false,
         "option_root_id": null,
-        "option_appui_id": null,
         "options": null,
         "pref": null,
         "perm": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
         "_cache_prefix": null,
@@ -51,7 +50,6 @@
     "namespaceName": "bbn",
     "shortName": "Accounting",
     "contentConstructor": {
-        "file": "bbn\\Accounting",
         "returns": []
     },
     "methods": {
@@ -60,11 +58,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Accounting.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->options = Option::getInstance();\n    $this->cacheInit();\n    self::optionalInit();\n  }",
+            "code": "  public function __construct()\n  {\n    $this->options = Option::getInstance();\n    $this->cacheInit();\n    self::optionalInit();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 33,
             "endLine": 38,
             "isDeprecated": false,
@@ -75,8 +76,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "test": {
@@ -84,34 +85,27 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -120,45 +114,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -167,24 +179,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -193,160 +200,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -354,63 +243,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -419,17 +366,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -440,43 +563,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -487,118 +628,94 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
-        },
-        "getOptionRoot": {
-            "name": "getOptionRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
-            "startLine": 150,
-            "endLine": 154,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getAppuiRoot": {
-            "name": "getAppuiRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_appui_id;\n  }",
-            "startLine": 157,
-            "endLine": 161,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsObject": {
-            "name": "getOptionsObject",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
-            "startLine": 164,
-            "endLine": 172,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "bbn\\Appui\\Option"
             ],
-            "parent": false,
-            "arguments": []
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         },
-        "getOptionId": {
-            "name": "getOptionId",
-            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
+        "cacheInit": {
+            "name": "cacheInit",
+            "summary": "Initializes the cache object, must be called in __construct",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 181,
-            "endLine": 184,
+            "code": "  protected function cacheInit(): void\n  {\n    if ( \\is_null($this->cache_engine) ){\n      $this->cache_engine = CacheCls::getEngine();\n      $this->_cache_prefix = Str::encodeFilename(str_replace('\\\\', '\/', \\get_class($this)), true).'\/';\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 27,
+            "endLine": 33,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -607,21 +724,885 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "shortName": "cacheInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Initializes the cache object, must be called in __construct\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initializes the cache object, must be called in __construct\n   *\n   * @return void\n   *\/"
         },
-        "getOptionsIds": {
-            "name": "getOptionsIds",
-            "summary": "Undocumented function",
+        "cacheCheck": {
+            "name": "cacheCheck",
+            "summary": "Throws an exception if the cache has not been initialized",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 193,
+            "code": "  protected function cacheCheck(): void\n  {\n    if (!$this->cache_engine) {\n      throw new Exception(X::_(\"The cache object has not been initialized\"));\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 41,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheCheck",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Throws an exception if the cache has not been initialized\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Throws an exception if the cache has not been initialized\n   *\n   * @return void\n   *\/"
+        },
+        "_cache_name": {
+            "name": "_cache_name",
+            "summary": "Generates a name for the cache based on the class name and the method called - or a gievn string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function _cache_name($uid, $method = '', string $locale = ''): string\n  {\n    $uid  = (string)$uid;\n    $path = Str::isUid($uid) ? substr($uid, 0, 3).'\/'.substr($uid, 3, 3).'\/'.substr($uid, 6) : $uid;\n    return $this->_cache_prefix.$path.(empty($method) ? '' : '\/'.(string)$method).(empty($locale) ? '' : \"-$locale\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 57,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_cache_name",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Generates a name for the cache based on the class name and the method called - or a gievn string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a name for the cache based on the class name and the method called - or a gievn string\n   *\n   * @param [type] $uid\n   * @param string $method\n   * @param string $locale\n   * @return string\n   *\/"
+        },
+        "cacheDeleteAll": {
+            "name": "cacheDeleteAll",
+            "summary": "Deletes all the cache related to the current class",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteAll(): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_prefix);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 70,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheDeleteAll",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the cache related to the current class\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the cache related to the current class\n   *\n   * @return self\n   *\/"
+        },
+        "cacheDelete": {
+            "name": "cacheDelete",
+            "summary": "Deletes the given cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDelete(string $uid, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 85,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheDelete",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheDeleteLocale": {
+            "name": "cacheDeleteLocale",
+            "summary": "Deletes the given cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 101,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheDeleteLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheGet": {
+            "name": "cacheGet",
+            "summary": "Gets the cached data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGet(string $uid, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 116,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheGet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data\n   *\n   * @param string $uid\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheGetLocale": {
+            "name": "cacheGetLocale",
+            "summary": "Gets the cached data for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 131,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheSet": {
+            "name": "cacheSet",
+            "summary": "Sets the cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 147,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheSet",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheSetLocale": {
+            "name": "cacheSetLocale",
+            "summary": "Sets the cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 165,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheSetLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheGetSet": {
+            "name": "cacheGetSet",
+            "summary": "Gets the cache or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 182,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetSet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheGetSetLocale": {
+            "name": "cacheGetSetLocale",
+            "summary": "Gets the cache for a specific locale or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSetLocale(callable $fn, string $uid, string $locale, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method, $locale), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 199,
             "endLine": 203,
             "isDeprecated": false,
             "isGenerator": false,
@@ -629,169 +1610,294 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "shortName": "cacheGetSetLocale",
             "returns": [
-                "array"
+                null,
+                "mixed"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache for a specific locale or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache for a specific locale or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
         },
-        "getOptionsTree": {
-            "name": "getOptionsTree",
-            "summary": "",
+        "cacheHas": {
+            "name": "cacheHas",
+            "summary": "Checks whether the cache exists and is valid",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 206,
-            "endLine": 209,
+            "code": "  protected function cacheHas(string $uid, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGet($uid, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 213,
+            "endLine": 217,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheHas",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
         },
-        "getOptionsTreeRef": {
-            "name": "getOptionsTreeRef",
-            "summary": "",
+        "cacheHasLocale": {
+            "name": "cacheHasLocale",
+            "summary": "Checks whether the cache exists and is valid",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 212,
-            "endLine": 215,
+            "code": "  protected function cacheHasLocale(string $uid, string $locale, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGetLocale($uid, $locale, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 227,
+            "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheHasLocale",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
         },
-        "getOptions": {
-            "name": "getOptions",
-            "summary": "",
+        "serializeFunction": {
+            "name": "serializeFunction",
+            "summary": "Transforms a function in a cacheable string",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 218,
-            "endLine": 221,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
             "parent": false,
-            "arguments": []
-        },
-        "getOptionsRef": {
-            "name": "getOptionsRef",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 224,
-            "endLine": 227,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getOption": {
-            "name": "getOption",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 230,
-            "endLine": 233,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValue": {
-            "name": "getOptionsTextValue",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 236,
-            "endLine": 239,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValueRef": {
-            "name": "getOptionsTextValueRef",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Accounting",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
-            "startLine": 242,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 241,
             "endLine": 245,
             "isDeprecated": false,
             "isGenerator": false,
@@ -799,10 +1905,271 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "serializeFunction",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "function",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Transforms a function in a cacheable string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      $justDefined = false;\n      if (!\\defined(\"BBN_APPUI\")) {\n        $justDefined = true;\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = strtolower(end($tmp));\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        if (!$cls) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!\\defined(\"BBN_APPUI\")) {\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');\n          return;\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n            if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 85,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 120,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
+        },
+        "getOptionRoot": {
+            "name": "getOptionRoot",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 131,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
             "returns": [],
+            "arguments": []
+        },
+        "getOptionsObject": {
+            "name": "getOptionsObject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
             "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 138,
+            "endLine": 146,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
+            "returns": [
+                "bbn\\Appui\\Option"
+            ],
             "arguments": []
         },
         "getOptionId": {
@@ -810,13 +2177,16 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 254,
-            "endLine": 257,
+            "code": "  public static function getOptionId()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -825,25 +2195,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": []
+            "shortName": "getOptionId",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
-            "summary": "",
+            "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 260,
-            "endLine": 272,
+            "code": "  public static function getOptionsIds(): array\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 167,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -852,24 +2234,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
         },
         "getOptionsTree": {
             "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 275,
-            "endLine": 278,
+            "code": "  public static function getOptionsTree()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -878,10 +2273,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
+            "shortName": "getOptionsTree",
+            "returns": [],
+            "arguments": []
+        },
+        "getOptionsTreeRef": {
+            "name": "getOptionsTreeRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTreeRef()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
             "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 186,
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
+            "returns": [],
             "arguments": []
         },
         "getOptions": {
@@ -889,13 +2309,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 281,
-            "endLine": 284,
+            "code": "  public static function getOptions()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -904,11 +2327,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
+            "shortName": "getOptions",
+            "returns": [],
+            "arguments": []
+        },
+        "getOptionsRef": {
+            "name": "getOptionsRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsRef()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
             "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 198,
+            "endLine": 201,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
+            "returns": [],
             "arguments": []
         },
         "getOption": {
@@ -916,13 +2363,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 287,
-            "endLine": 290,
+            "code": "  public static function getOption()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -931,11 +2381,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
+            "shortName": "getOption",
+            "returns": [],
             "arguments": []
         },
         "getOptionsTextValue": {
@@ -943,13 +2390,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Accounting",
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 293,
-            "endLine": 296,
+            "code": "  public static function getOptionsTextValue()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -958,20 +2408,540 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValue",
             "returns": [],
-            "parent": false,
             "arguments": []
+        },
+        "getOptionsTextValueRef": {
+            "name": "getOptionsTextValueRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function getOptionsTextValueRef()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 216,
+            "endLine": 219,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValueRef",
+            "returns": [],
+            "arguments": []
+        },
+        "_treat_args": {
+            "name": "_treat_args",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Accounting",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function _treat_args(array $args, $appui = false): array\n  {\n    $hasUid = Str::isUid(end($args));\n    if (count($args) && !$hasUid) {\n      self::optionalInit();\n      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {\n        $args[] = 'options';\n      }\n    }\n\n    if (!$hasUid) {\n      $args[] = self::$option_root_id;\n    }\n\n    return $args;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 223,
+            "endLine": 238,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_treat_args",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "appui",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "id_public_root": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Accounting",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var int The ID of the option's for the root path \/",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "public_root": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Accounting",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string path where the permissions and real path are",
+                "tags": []
+            },
+            "parent": false,
+            "value": "permissions|access"
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var bbn\\Appui\\Option The options object",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "pref": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Accounting",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var bbn\\User\\Preferences The preferences object",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "perm": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Accounting",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var bbn\\User\\Permissions The permissions object",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "_cache_prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "cache_engine": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Accounting"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "id_public_root": null,
         "public_root": "permissions|access",
         "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "option_root_id": null
     },
     "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Models\\Cls\\Basic": "Basic",
+        "bbn\\Models\\Tts\\Cache": "Cache",
+        "bbn\\Models\\Tts\\Optional": "Optional",
+        "bbn\\Appui\\Option": "Option"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

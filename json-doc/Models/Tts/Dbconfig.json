@@ -3,20 +3,21 @@
         "description": "",
         "tags": []
     },
-    "name": "bbn\\Models\\Tts\\Dbconfig",
+    "name": "bbn\\Models\\Tts\\DbConfig",
     "namespace": true,
+    "realName": "DbConfig",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
-    "fileName": "\/Models\/Tts\/Dbconfig.php",
-    "startLine": 15,
-    "endLine": 444,
-    "numMethods": 12,
-    "numProperties": 0,
+    "fileName": "\/Models\/Tts\/DbConfig.php",
+    "startLine": 14,
+    "endLine": 122,
+    "numMethods": 4,
+    "numProperties": 5,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -25,7 +26,7 @@
     "parentClass": null,
     "isSubclassOf": false,
     "defaultProperties": {
-        "_is_init_class_cfg": false,
+        "_isInitClassCfg": false,
         "fields": null,
         "class_cfg": null,
         "class_table": null,
@@ -34,57 +35,24 @@
     "isIterable": false,
     "extensionName": false,
     "namespaceName": "bbn\\Models\\Tts",
-    "shortName": "Dbconfig",
+    "shortName": "DbConfig",
     "contentConstructor": null,
     "methods": {
-        "exists": {
-            "name": "exists",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter)\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (is_string($filter)) {\n      $cfg = [$f['id'] => $filter];\n    }\n    elseif (is_array($filter)) {\n      $cfg = $filter;\n    }\n\n    if (!empty($cfg) && $arr = $this->db->count(\n      $this->class_table,\n      $cfg\n    )) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 37,
-            "endLine": 59,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
         "getClassCfg": {
             "name": "getClassCfg",
             "summary": "Returns the class configuration.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
+            "class": "bbn\\Models\\Tts\\DbConfig",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
-            "startLine": 67,
-            "endLine": 70,
+            "code": "  public function getClassCfg()\n  {\n    return $this->class_cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 37,
+            "endLine": 40,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -93,22 +61,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getClassCfg",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the class configuration.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the class configuration.\n   * \n   * @return mixed\n   *\/"
         },
         "getFields": {
             "name": "getFields",
             "summary": "Returns the fields of the main table.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
+            "class": "bbn\\Models\\Tts\\DbConfig",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->fields;\n  }",
-            "startLine": 78,
-            "endLine": 81,
+            "code": "  public function getFields()\n  {\n    return $this->fields;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 48,
+            "endLine": 51,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -117,22 +94,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFields",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the fields of the main table.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the fields of the main table.\n   *\n   * @return array\n   *\/"
         },
-        "insert": {
-            "name": "insert",
-            "summary": "Inserts a new row in the table.",
+        "initClassCfg": {
+            "name": "initClassCfg",
+            "summary": "Sets the class configuration as defined in self::default_class_cfg",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
+            "class": "bbn\\Models\\Tts\\DbConfig",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(array $data)\n  {\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if ($this->db->insert($ccfg['table'], $data)) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 91,
-            "endLine": 101,
+            "code": "  protected function initClassCfg(array $cfg = null)\n  {\n$arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n    foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 59,
+            "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -140,35 +126,53 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initClassCfg",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "data",
+                    "name": "cfg",
                     "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the class configuration as defined in self::default_class_cfg\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the class configuration as defined in self::default_class_cfg\n   * @param array $cfg\n   * @return $this\n   *\/"
         },
-        "delete": {
-            "name": "delete",
-            "summary": "Deletes a single row from the table through its id.",
+        "isInitClassCfg": {
+            "name": "isInitClassCfg",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
+            "class": "bbn\\Models\\Tts\\DbConfig",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 111,
+            "code": "  protected function isInitClassCfg(): bool\n  {\n    return $this->_isInitClassCfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 117,
             "endLine": 120,
             "isDeprecated": false,
             "isGenerator": false,
@@ -176,388 +180,120 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "update": {
-            "name": "update",
-            "summary": "Updates a single row in the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->rselect($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 131,
-            "endLine": 148,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "data",
-                    "position": 1,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "addCfg",
-                    "position": 2,
-                    "type": "bool",
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
-                }
-            ]
-        },
-        "selectOne": {
-            "name": "selectOne",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $field, $filter, array $order = [])\n  {\n    if ($res = $this->dbConfigSingleSelection($filter, $order, false, [$field])) {\n      return $res[$field] ?? null;\n    }\n\n    return null;\n  }",
-            "startLine": 159,
-            "endLine": 166,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "field",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "filter",
-                    "position": 1,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 2,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "select": {
-            "name": "select",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, true);\n  }",
-            "startLine": 177,
-            "endLine": 180,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "stdClass"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "rselect": {
-            "name": "rselect",
-            "summary": "Retrieves a row as an array from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, false);\n  }",
-            "startLine": 191,
-            "endLine": 194,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "count": {
-            "name": "count",
-            "summary": "Returns the number of rows from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter = [])\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    return $this->db->count($this->class_table, $filter);\n  }",
-            "startLine": 204,
-            "endLine": 211,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isInitClassCfg",
             "returns": [
-                "int"
+                "bool"
             ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "selectAll": {
-            "name": "selectAll",
-            "summary": "Returns an array of rows as objects from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, true);\n  }",
-            "startLine": 224,
-            "endLine": 227,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                }
-            ]
-        },
-        "rselectAll": {
-            "name": "rselectAll",
-            "summary": "Returns an array of rows as arrays from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Dbconfig",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, false);\n  }",
-            "startLine": 240,
-            "endLine": 243,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                }
-            ]
+            "arguments": []
         }
     },
-    "properties": null,
+    "properties": {
+        "_isInitClassCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbConfig"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "fields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbConfig"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbConfig"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "class_table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbConfig"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_table_index": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbConfig"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "Exception": "Exception"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 05\/11\/2016\n * Time: 02:47\n *\/",
+        "\/** @var bool *\/",
+        "\/** @var array *\/",
+        "\/** @var string *\/",
+        "\/** @var string *\/",
+        "\/**\n   * Returns the class configuration.\n   * \n   * @return mixed\n   *\/",
+        "\/**\n   * Returns the fields of the main table.\n   *\n   * @return array\n   *\/",
+        "\/**\n   * Sets the class configuration as defined in self::default_class_cfg\n   * @param array $cfg\n   * @return $this\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

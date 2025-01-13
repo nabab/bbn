@@ -12,18 +12,19 @@
     },
     "name": "bbn\\Api\\Paybox",
     "namespace": true,
+    "realName": "Paybox",
+    "realNamespace": "bbn\\Api",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Paybox.php",
     "startLine": 18,
     "endLine": 122,
-    "numMethods": 2,
-    "numProperties": 1,
+    "numMethods": 4,
+    "numProperties": 20,
     "numConstants": 0,
     "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -71,7 +72,6 @@
     "namespaceName": "bbn\\Api",
     "shortName": "Paybox",
     "contentConstructor": {
-        "file": "bbn\\Api\\Paybox",
         "returns": []
     },
     "methods": {
@@ -80,11 +80,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Paybox",
+            "class": "bbn\\Api\\Paybox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Paybox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, $price, $email, $ref, $currency = 'EUR')\n  {\n\t\tif ( isset($cfg['site'],$cfg['rang'],$cfg['id'],$cfg['key'],$cfg['pass'])\n\t\t&& is_numeric($price)\n\t\t&& $price > 0\n\t\t&& bbn\\Str::isEmail($email)\n\t\t&& $this->checkServer() )\n\t\t{\n\t\t\tif ( isset(self::$currencies[$currency]) )\n\t\t\t{\n\t\t\t\t$this->currency = self::$currencies[$currency];\n\t\t\t\t$this->price = $price * 100;\n\t\t\t\t$this->email = $email;\n\t\t\t\t$this->binkey = pack(\"H*\",$cfg['key']);\n\t\t\t\t$this->ref = $ref;\n\t\t\t\t$this->cfg = $cfg;\n\t\t\t\t$this->enc = self::$encryptions[array_rand(self::$encryptions)];\n\t\t\t\t$this->time = date('c');\n\t\t\t\t$this->params = [\n\t\t\t\t\t'PBX_SITE' => $this->cfg['site'],\n\t\t\t\t\t'PBX_RANG' => $this->cfg['rang'],\n\t\t\t\t\t'PBX_IDENTIFIANT' => $this->cfg['id'],\n\t\t\t\t\t'PBX_TOTAL' => $this->price,\n\t\t\t\t\t'PBX_DEVISE' => $this->currency,\n\t\t\t\t\t'PBX_CMD' => $this->ref,\n\t\t\t\t\t'PBX_PORTEUR' => $this->email,\n\t\t\t\t\t'PBX_RETOUR' => 'Total:M;nomSession:R;NumAutorisation:A;NumTransaction:T;TypeCarte:C;Erreur:E',\n\t\t\t\t\t'PBX_REPONDRE_A' => self::$url_reponse,\n\t\t\t\t\t'PBX_HASH' => $this->enc,\n\t\t\t\t\t'PBX_TIME' => $this->time\n\t\t\t\t];\n\t\t\t\t$this->process();\n\t\t\t\t$this->online = 1;\n\t\t\t}\n\t\t}\n  }",
+            "code": "\tpublic function __construct(array $cfg, $price, $email, $ref, $currency = 'EUR')\n\t{\n\t\tif ( isset($cfg['site'],$cfg['rang'],$cfg['id'],$cfg['key'],$cfg['pass'])\n\t\t&& is_numeric($price)\n\t\t&& $price > 0\n\t\t&& bbn\\Str::isEmail($email)\n\t\t&& $this->checkServer() )\n\t\t{\n\t\t\tif ( isset(self::$currencies[$currency]) )\n\t\t\t{\n\t\t\t\t$this->currency = self::$currencies[$currency];\n\t\t\t\t$this->price = $price * 100;\n\t\t\t\t$this->email = $email;\n\t\t\t\t$this->binkey = pack(\"H*\",$cfg['key']);\n\t\t\t\t$this->ref = $ref;\n\t\t\t\t$this->cfg = $cfg;\n\t\t\t\t$this->enc = self::$encryptions[array_rand(self::$encryptions)];\n\t\t\t\t$this->time = date('c');\n\t\t\t\t$this->params = [\n\t\t\t\t\t'PBX_SITE' => $this->cfg['site'],\n\t\t\t\t\t'PBX_RANG' => $this->cfg['rang'],\n\t\t\t\t\t'PBX_IDENTIFIANT' => $this->cfg['id'],\n\t\t\t\t\t'PBX_TOTAL' => $this->price,\n\t\t\t\t\t'PBX_DEVISE' => $this->currency,\n\t\t\t\t\t'PBX_CMD' => $this->ref,\n\t\t\t\t\t'PBX_PORTEUR' => $this->email,\n\t\t\t\t\t'PBX_RETOUR' => 'Total:M;nomSession:R;NumAutorisation:A;NumTransaction:T;TypeCarte:C;Erreur:E',\n\t\t\t\t\t'PBX_REPONDRE_A' => self::$url_reponse,\n\t\t\t\t\t'PBX_HASH' => $this->enc,\n\t\t\t\t\t'PBX_TIME' => $this->time\n\t\t\t\t];\n\t\t\t\t$this->process();\n\t\t\t\t$this->online = 1;\n\t\t\t}\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 40,
             "endLine": 75,
             "isDeprecated": false,
@@ -95,13 +98,18 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -111,6 +119,9 @@
                     "name": "price",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -120,6 +131,9 @@
                     "name": "email",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -129,6 +143,9 @@
                     "name": "ref",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -138,23 +155,95 @@
                     "name": "currency",
                     "position": 4,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "EUR",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
+        },
+        "checkServer": {
+            "name": "checkServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Paybox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Paybox.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate function checkServer()\n\t{\n\t\tif ( !isset($this->server) )\n\t\t{\n\t\t\tforeach( self::$servers as $s )\n\t\t\t{\n\t\t\t\t$doc = new \\DOMDocument();\n\t\t\t\t$doc->loadHTMLFile('https:\/\/'.$s.'\/load.html');\n\t\t\t\t$element = $doc->getElementById('server_status');\n\t\t\t\tif ( $element && $element->textContent === 'OK' )\n\t\t\t\t{\n\t\t\t\t\t$this->server = $s;\n\t\t\t\t\treturn 1;\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 80,
+            "endLine": 98,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "checkServer",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
+        },
+        "process": {
+            "name": "process",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Paybox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Paybox.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate function process()\n\t{\n\t\tif ( !isset($this->query) )\n\t\t{\n\t\t\t$this->query = urldecode(http_build_query($this->params));\n\t\t\t$this->hmac = strtoupper(hash_hmac(strtolower($this->enc),$this->query,$this->binkey));\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 99,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "process",
+            "returns": [],
+            "arguments": []
         },
         "getForm": {
             "name": "getForm",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Paybox",
+            "class": "bbn\\Api\\Paybox",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Paybox.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($button_title = 'Paiement Paybox')\n  {\n\t\t$form = '';\n\t\tif ( isset($this->server, $this->hmac) )\n\t\t{\n\t\t\t$form .= '<form method=\"post\" action=\"https:\/\/'.$this->server.self::$url.'\">'.PHP_EOL;\n\t\t\tforeach ( $this->params as $k => $p ){\n\t\t\t\t$form .= '<input type=\"hidden\" name=\"'.$k.'\" value=\"'.$p.'\">'.PHP_EOL;\n\t\t\t}\n\t\t\t$form .= '<input type=\"hidden\" name=\"PBX_HMAC\" value=\"'.$this->hmac.'\">'.PHP_EOL;\n\t\t\t$form .= '<input type=\"submit\" value=\"'.$button_title.'\">'.PHP_EOL.'<\/form>';\n\t\t\t\n\t\t}\n\t\treturn $form;\n  }",
+            "code": "\tpublic function getForm($button_title='Paiement Paybox')\n\t{\n\t\t$form = '';\n\t\tif ( isset($this->server, $this->hmac) )\n\t\t{\n\t\t\t$form .= '<form method=\"post\" action=\"https:\/\/'.$this->server.self::$url.'\">'.PHP_EOL;\n\t\t\tforeach ( $this->params as $k => $p ){\n\t\t\t\t$form .= '<input type=\"hidden\" name=\"'.$k.'\" value=\"'.$p.'\">'.PHP_EOL;\n\t\t\t}\n\t\t\t$form .= '<input type=\"hidden\" name=\"PBX_HMAC\" value=\"'.$this->hmac.'\">'.PHP_EOL;\n\t\t\t$form .= '<input type=\"submit\" value=\"'.$button_title.'\">'.PHP_EOL.'<\/form>';\n\t\t\t\n\t\t}\n\t\treturn $form;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 107,
             "endLine": 121,
             "isDeprecated": false,
@@ -165,13 +254,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getForm",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "button_title",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "Paiement Paybox",
@@ -181,8 +273,326 @@
         }
     },
     "properties": {
+        "servers": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                "tpeweb.paybox.com",
+                "tpeweb1.paybox.com"
+            ]
+        },
+        "url_reponse": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": "http:\/\/www.atlantica.fr\/paybox"
+        },
+        "url": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": "\/cgi\/MYchoix_pagepaiement.cgi"
+        },
+        "currencies": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": {
+                "EUR": "978",
+                "USD": "840",
+                "CFA": "952"
+            }
+        },
+        "encryptions": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": [
+                "SHA512",
+                "SHA256",
+                "RIPEMD160",
+                "SHA224",
+                "SHA384"
+            ]
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "server": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "price": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "enc": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "time": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "form": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "params": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "query": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "binkey": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "currency": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "hmac": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "email": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "ref": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "processed": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": false
+        },
         "online": {
-            "visibility": "public"
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Paybox"
+            },
+            "declaring_trait": "bbn\\Api\\Paybox",
+            "promoted": false,
+            "visibility": "public",
+            "doc": "",
+            "parent": false,
+            "value": false
         }
     },
     "staticProperties": {
@@ -206,6 +616,13 @@
         ]
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * @package api\n *\/",
+        "\/**\n * A class for Paybox\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Utilities\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
     "summary": "A class for Paybox",
     "description": "",
     "description_parts": []

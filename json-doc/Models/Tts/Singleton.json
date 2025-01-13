@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\Singleton",
     "namespace": true,
+    "realName": "Singleton",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/Singleton.php",
     "startLine": 17,
     "endLine": 65,
-    "numMethods": 2,
-    "numProperties": 0,
+    "numMethods": 3,
+    "numProperties": 2,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -34,16 +35,75 @@
     "shortName": "Singleton",
     "contentConstructor": null,
     "methods": {
+        "singletonInit": {
+            "name": "singletonInit",
+            "summary": "Initialize the singleton by putting its own instance as static property.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Singleton",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function singletonInit(self $instance)\n  {\n    if (self::singletonExists()) {\n      throw new \\Exception(X::_(\"Impossible to create a new instance of\").' '.\\get_class($instance));\n    }\n\n    self::$singleton_exists = 1;\n    self::$singleton_instance = $instance;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 35,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "singletonInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "instance",
+                    "position": 0,
+                    "type": "self",
+                    "type_arr": [
+                        "self"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The instance object."
+                }
+            ],
+            "doc": {
+                "description": "Initialize the singleton by putting its own instance as static property.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "self",
+                        "name": "$instance",
+                        "description": "The instance object."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initialize the singleton by putting its own instance as static property.\n   *\n   * @param self $instance The instance object.\n   * @return void\n   *\/"
+        },
         "getInstance": {
             "name": "getInstance",
             "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Singleton",
+            "class": "bbn\\Models\\Tts\\Singleton",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::singletonExists() ? self::$singleton_instance : null;\n  }",
+            "code": "  public static function getInstance(): ?self\n  {\n    return self::singletonExists() ? self::$singleton_instance : null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 50,
             "endLine": 53,
             "isDeprecated": false,
@@ -54,23 +114,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getInstance",
             "returns": [
                 null,
                 "self"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the instance of the singleton or null.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the instance of the singleton or null.\n   * \n   * @return self\n   *\/"
         },
         "singletonExists": {
             "name": "singletonExists",
             "summary": "Returns true if the instance as been initiated.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Singleton",
+            "class": "bbn\\Models\\Tts\\Singleton",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Singleton.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$singleton_exists ? true : false;\n  }",
+            "code": "  public static function singletonExists(): bool\n  {\n    return self::$singleton_exists ? true : false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 60,
             "endLine": 63,
             "isDeprecated": false,
@@ -81,19 +150,86 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "singletonExists",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if the instance as been initiated.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the instance as been initiated.\n   *\n   * @return bool\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "singleton_instance": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Singleton"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Singleton",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "self",
+                        "description": "An instance of the current class."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "singleton_exists": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Singleton"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Singleton",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Will be true from the moment the instance exists."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        }
+    },
     "staticProperties": {
         "singleton_instance": null,
         "singleton_exists": false
     },
     "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 01\/11\/2016\n * Time: 17:57\n *\/",
+        "\/**\n * Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.\n *\/",
+        "\/**\n   * @var self An instance of the current class.\n   *\/",
+        "\/**\n   * @var bool Will be true from the moment the instance exists.\n   *\/",
+        "\/**\n   * Initialize the singleton by putting its own instance as static property.\n   *\n   * @param self $instance The instance object.\n   * @return void\n   *\/",
+        "\/**\n   * Returns the instance of the singleton or null.\n   * \n   * @return self\n   *\/",
+        "\/**\n   * Returns true if the instance as been initiated.\n   *\n   * @return bool\n   *\/"
+    ],
     "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
     "description": "",
     "description_parts": []

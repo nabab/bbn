@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Mail",
     "namespace": true,
+    "realName": "Mail",
+    "realNamespace": "bbn",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Mail.php",
     "startLine": 47,
-    "endLine": 533,
-    "numMethods": 15,
-    "numProperties": 1,
+    "endLine": 528,
+    "numMethods": 18,
+    "numProperties": 19,
     "numConstants": 0,
     "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -44,6 +45,8 @@
         "imap": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": []
     },
@@ -52,20 +55,109 @@
     "namespaceName": "bbn",
     "shortName": "Mail",
     "contentConstructor": {
-        "file": "bbn\\Mail",
         "returns": []
     },
     "methods": {
+        "setContent": {
+            "name": "setContent",
+            "summary": "Sets the static variable content and hash_content with the given string with CSS transformed in inline style.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function setContent(string $content){\n    $md5 = md5($content);\n    if ( $md5 !== self::$_hash_content ){\n      self::$_hash_content = $md5;\n      \/\/$inliner = new \\TijsVerkoyen\\CssToInlineStyles\\CssToInlineStyles();\n      \/\/self::$_content = $inliner->convert($content);\n      self::$_content = $content;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 156,
+            "endLine": 164,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setContent",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "content",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the static variable content and hash_content with the given string with CSS transformed in inline style.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$content"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the static variable content and hash_content with the given string with CSS transformed in inline style.\n   * \n   * @param string $content\n   * @return void\n   *\/"
+        },
+        "getDefaultTemplate": {
+            "name": "getDefaultTemplate",
+            "summary": "Gets once the default template in default prop or filesystem, sets props, and returns it.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function getDefaultTemplate(){\n    if (!self::$_template_checked) {\n      self::$_template_checked = true;\n      if (($dir = \\bbn\\Mvc::getContentPath()) && file_exists($dir.'mails\/template.html')) {\n        self::$_default_template = file_get_contents($dir.'mails\/template.html');\n      }\n    }\n    return self::$_default_template;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 171,
+            "endLine": 179,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getDefaultTemplate",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Gets once the default template in default prop or filesystem, sets props, and returns it.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets once the default template in default prop or filesystem, sets props, and returns it.\n   *\n   * @return string\n   *\/"
+        },
         "__construct": {
             "name": "__construct",
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg = [])\n  {\n    if ( !\\defined('BBN_ADMIN_EMAIL') || !\\defined('BBN_IS_DEV') ){\n      die(\"You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...\");\n    }\n\n    if ( !isset($cfg['from']) && isset($cfg['user']) ){\n      $cfg['from'] = $cfg['user'];\n    }\n\n    if (!isset($cfg['from'])) {\n      $cfg['from'] = BBN_ADMIN_EMAIL;\n    }\n\n    if (!PHPMailer::validateAddress($cfg['from'])) {\n      X::logError(0, \"A \\\"From\\\" eMail address must be provided\", __FILE__, __LINE__);\n      $this->error(\"A \\\"From\\\" eMail address must be provided\");\n    }\n\n    $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);\n    $this->mailer = new PHPMailer(true);\n\n    try {\n      $this->mailer->CharSet = $cfg['charset'] ?? 'UTF-8';\n      $this->mailer->Encoding = $cfg['encoding'] ?? \"quoted-printable\";\n      \/\/$this->mailer->AllowCharsetEncoding = false;\n      if ( isset($cfg['user'], $cfg['pass']) ){\n        \/\/ SMTP connection will not close after each email sent, reduces SMTP overhead\n        $this->mailer->isSMTP();\n        if ( !empty($cfg['ssl']) ){\n          if ( \\is_array($cfg['ssl']) ){\n            $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];\n          }\n          else{\n            $this->mailer->SMTPOptions = [\n              'verify_peer' => false,\n              'verify_peer_name' => false,\n              'verify_host' => false,\n              'allow_self_signed' => false\n            ];\n          }\n        }\n        else{\n          $this->mailer->SMTPSecure = 'tls';\n        }\n\n        $this->mailer->Host = $has_host ? $cfg['host'] : 'localhost';\n        $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;\n        $this->mailer->SMTPKeepAlive = true;\n        $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;\n        $this->mailer->Debugoutput = 'error_log';\n        $this->mailer->SMTPAuth = true;\n        $this->mailer->Username = $cfg['user'];\n        $this->mailer->Password = $cfg['pass'];\n        if ( !empty($cfg['imap']) ){\n          $this->setImap($cfg);\n        }\n      }\n\n      $this->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);\n      if ($cfg['reply-to'] ?? false) {\n        $this->setReplyTo($cfg['reply-to']);\n      }\n\n      $this->setTemplate(isset($cfg['template']) ? $cfg['template'] : self::getDefaultTemplate());\n    }\n    catch (\\Exception $e) {\n      $this->log($this->mailer->ErrorInfo);\n      $this->log($e->getMessage());\n      $this->mailer = false;\n    }\n  }",
+            "code": "  public function __construct($cfg = [])\n  {\n    if ( !\\defined('BBN_ADMIN_EMAIL') || !\\defined('BBN_IS_DEV') ){\n      die(\"You must provide the constants BBN_ADMIN_EMAIL and BBN_IS_DEV to use the mail class...\");\n    }\n\n    if ( !isset($cfg['from']) && isset($cfg['user']) ){\n      $cfg['from'] = $cfg['user'];\n    }\n\n    if (!isset($cfg['from'])) {\n      $cfg['from'] = BBN_ADMIN_EMAIL;\n    }\n\n    if (!PHPMailer::validateAddress($cfg['from'])) {\n      X::logError(0, \"A \\\"From\\\" eMail address must be provided\", __FILE__, __LINE__);\n      $this->error(\"A \\\"From\\\" eMail address must be provided\");\n    }\n\n    $has_host = !empty($cfg['host']) && Str::isDomain($cfg['host']);\n    $this->mailer = new PHPMailer(true);\n\n    try {\n      $this->mailer->CharSet = $cfg['charset'] ?? 'UTF-8';\n      $this->mailer->Encoding = $cfg['encoding'] ?? \"quoted-printable\";\n      \/\/$this->mailer->AllowCharsetEncoding = false;\n      if ( isset($cfg['user'], $cfg['pass']) ){\n        \/\/ SMTP connection will not close after each email sent, reduces SMTP overhead\n        $this->mailer->isSMTP();\n        if ( !empty($cfg['ssl']) ){\n          if ( \\is_array($cfg['ssl']) ){\n            $this->mailer->SMTPOptions = ['ssl' => $cfg['ssl']];\n          }\n          else{\n            $this->mailer->SMTPOptions = [\n              'verify_peer' => false,\n              'verify_peer_name' => false,\n              'verify_host' => false,\n              'allow_self_signed' => false\n            ];\n          }\n        }\n        else{\n          $this->mailer->SMTPSecure = 'tls';\n        }\n\n        $this->mailer->Host = $has_host ? $cfg['host'] : 'localhost';\n        $this->mailer->Port = isset($cfg['port']) ? $cfg['port'] : 587;\n        $this->mailer->SMTPKeepAlive = true;\n        $this->mailer->SMTPDebug = empty($cfg['debug']) ? false : 3;\n        $this->mailer->Debugoutput = 'error_log';\n        $this->mailer->SMTPAuth = true;\n        $this->mailer->Username = $cfg['user'];\n        $this->mailer->Password = $cfg['pass'];\n        if ( !empty($cfg['imap']) ){\n          $this->setImap($cfg);\n        }\n      }\n\n      $this->setFrom($cfg['from'], isset($cfg['name']) ? $cfg['name'] : 0);\n      if ($cfg['reply-to'] ?? false) {\n        $this->setReplyTo($cfg['reply-to']);\n      }\n\n      $this->setTemplate(isset($cfg['template']) ? $cfg['template'] : self::getDefaultTemplate());\n    }\n    catch (\\Exception $e) {\n      $this->log($this->mailer->ErrorInfo);\n      $this->log($e->getMessage());\n      $this->mailer = false;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 186,
             "endLine": 257,
             "isDeprecated": false,
@@ -76,30 +168,48 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\n   * @param array $cfg\n   *\/"
         },
         "__destruct": {
             "name": "__destruct",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->mailer ){\n      try {\n        $this->mailer->smtpClose();\n      }\n      catch(Exception $e) {\n        $this->log(\"Impossible to close the connection\");\n\n      }\n    }\n  }",
+            "code": "  public function __destruct()\n  {\n    if ( $this->mailer ){\n      try {\n        $this->mailer->smtpClose();\n      }\n      catch(Exception $e) {\n        $this->log(\"Impossible to close the connection\");\n\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 260,
             "endLine": 271,
             "isDeprecated": false,
@@ -110,8 +220,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "__destruct",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "setImap": {
@@ -119,11 +229,14 @@
             "summary": "Sets the IMAP configuration.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    if (!isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass'])) {\n      die(\"You need to provide user and password for IMAP connection\");\n    }\n    $imap_host = isset($cfg['imap_host']) ? $cfg['imap_host'] : $cfg['host'];\n    $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];\n    $this->imap_pass = isset($cfg['imap_pass']) ? $cfg['imap_pass'] : $cfg['pass'];\n    $this->imap_sent = isset($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';\n    if (isset($cfg['imap_port'])) {\n      $imap_port = $cfg['imap_port'];\n    }\n    if (!empty($cfg['imap_ssl'])) {\n      if (!isset($cfg['imap_port'])) {\n        $imap_port = 993;\n      }\n      $this->imap_string = \"{\".$imap_host.\":\".$imap_port.\"\/ssl\";\n    }\n    else {\n      if (!isset($cfg['imap_port'])) {\n        $imap_port = 143;\n      }\n      $this->imap_string = \"{\".$imap_host.\":\".$imap_port.\"\/tls\";\n    }\n    if (empty($cfg['valid'])) {\n      $this->imap_string .= \"\/novalidate-cert\";\n    }\n    $this->imap_string .= \"}\";\n    return $this;\n  }",
+            "code": "  public function setImap(array $cfg): self\n  {\n    if (!isset($cfg['imap_user'], $cfg['imap_pass']) && !isset($cfg['user'], $cfg['pass'])) {\n      die(\"You need to provide user and password for IMAP connection\");\n    }\n    $imap_host = isset($cfg['imap_host']) ? $cfg['imap_host'] : $cfg['host'];\n    $this->imap_user = isset($cfg['imap_user']) ? $cfg['imap_user'] : $cfg['user'];\n    $this->imap_pass = isset($cfg['imap_pass']) ? $cfg['imap_pass'] : $cfg['pass'];\n    $this->imap_sent = isset($cfg['imap_sent']) ? $cfg['imap_sent'] : 'Sent';\n    if (isset($cfg['imap_port'])) {\n      $imap_port = $cfg['imap_port'];\n    }\n    if (!empty($cfg['imap_ssl'])) {\n      if (!isset($cfg['imap_port'])) {\n        $imap_port = 993;\n      }\n      $this->imap_string = \"{\".$imap_host.\":\".$imap_port.\"\/ssl\";\n    }\n    else {\n      if (!isset($cfg['imap_port'])) {\n        $imap_port = 143;\n      }\n      $this->imap_string = \"{\".$imap_host.\":\".$imap_port.\"\/tls\";\n    }\n    if (empty($cfg['valid'])) {\n      $this->imap_string .= \"\/novalidate-cert\";\n    }\n    $this->imap_string .= \"}\";\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 279,
             "endLine": 308,
             "isDeprecated": false,
@@ -134,33 +247,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setImap",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The configuration"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the IMAP configuration.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The configuration"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the IMAP configuration.\n   *\n   * @param array $cfg The configuration\n   * @return self\n   *\/"
         },
         "unsetImap": {
             "name": "unsetImap",
             "summary": "Unset the IMAP configuration",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    unset($this->imap_string, $this->imap_user, $this->imap_pass);\n    return $this;\n  }",
+            "code": "  public function unsetImap(): self\n  {\n    unset($this->imap_string, $this->imap_user, $this->imap_pass);\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 315,
             "endLine": 319,
             "isDeprecated": false,
@@ -171,22 +305,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "unsetImap",
             "returns": [
                 "self"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Unset the IMAP configuration\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Unset the IMAP configuration\n   *\n   * @return self\n   *\/"
         },
         "setFrom": {
             "name": "setFrom",
             "summary": "Set the From header together with the replyTo.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $email, string $name = NULL)\n  {\n    if (!PHPMailer::validateAddress($email)) {\n      die(\"The From eMail address is not valid\");\n    }\n    if (!$name) {\n      $name = $email;\n    }\n    $this->mailer->setFrom($email, $name);\n    return $this;\n  }",
+            "code": "  public function setFrom(string $email, string $name = null): self\n  {\n    if (!PHPMailer::validateAddress($email)) {\n      die(\"The From eMail address is not valid\");\n    }\n    if (!$name) {\n      $name = $email;\n    }\n    $this->mailer->setFrom($email, $name);\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 328,
             "endLine": 338,
             "isDeprecated": false,
@@ -197,15 +340,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "setFrom",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "email",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -214,24 +362,50 @@
                 {
                     "name": "name",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Set the From header together with the replyTo.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$email"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Set the From header together with the replyTo.\n   *\n   * @param string $email\n   * @param string $name\n   * @return self\n   *\/"
         },
         "setTemplate": {
             "name": "setTemplate",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $file)\n  {\n    if (is_file($file)) {\n      $this->template = file_get_contents($file);\n      $this->path = X::dirname($file);\n    }\n    else {\n      $this->template = $file;\n      $this->path = BBN_DATA_PATH;\n    }\n    return $this;\n  }",
+            "code": "  public function setTemplate(string $file): self\n  {\n    if (is_file($file)) {\n      $this->template = file_get_contents($file);\n      $this->path = X::dirname($file);\n    }\n    else {\n      $this->template = $file;\n      $this->path = Mvc::getDataPath();\n    }\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 340,
             "endLine": 351,
             "isDeprecated": false,
@@ -242,15 +416,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setTemplate",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "file",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -263,11 +442,40 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
+            "code": "  public function getError(){\n    return $this->mailer->ErrorInfo;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
             "startLine": 353,
             "endLine": 355,
             "isDeprecated": false,
@@ -278,31 +486,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
             "arguments": []
         },
         "send": {
@@ -310,13 +495,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mail",
+            "class": "bbn\\Mail",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mail.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg)\n  {\n    $r = false;\n\n    if (!defined('BBN_IS_PROD') || !BBN_IS_PROD) {\n      $cfg['to'] = BBN_ADMIN_EMAIL;\n      $cfg['cc'] = '';\n      $cfg['bcc'] = '';\n      $this->mailer->AddAddress(BBN_ADMIN_EMAIL);\n      $valid = 1;\n    }\n    else {\n      foreach (self::$_dest_fields as $dest_field) {\n        if (isset($cfg[$dest_field])) {\n          if (!\\is_array($cfg[$dest_field])) {\n            $cfg[$dest_field] = array_map(\n              function ($a) {\n                return trim($a);\n              },\n              explode(\";\", $cfg[$dest_field])\n            );\n          }\n\n          foreach ($cfg[$dest_field] as $dest) {\n            if (PHPMailer::validateAddress($dest)) {\n              switch ($dest_field) {\n                case \"to\":\n                  $this->mailer->AddAddress($dest);\n                  break;\n                case \"cc\":\n                  $this->mailer->AddCC($dest);\n                  break;\n                case \"bcc\":\n                  $this->mailer->AddBCC($dest);\n                  break;\n              }\n              $valid = 1;\n            }\n            else {\n              X::log(\"Adresse email invalide: \".$dest);\n              $valid = false;\n            }\n          }\n        }\n      }\n    }\n    if ($valid) {\n      if (!empty($cfg['from'])) {\n        $this->setFrom($cfg['from']);\n      }\n\n      if (!empty($cfg['references'])) {\n        \/\/ check if each reference have chevrons around the message id and remove them\n        $refs = [];\n        $cfg['references'] = explode(' ', $cfg['references']);\n        foreach ($cfg['references'] as $ref) {\n          if (preg_match('\/^<(.*)>$\/', $ref, $m)) {\n            $mailbox = explode('@', $m[1])[0];\n            $hostname = explode('@', $m[1])[1];\n            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);\n          }\n          else {\n            $mailbox = explode('@', $ref)[0];\n            $hostname = explode('@', $ref)[1];\n            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);\n          }\n        }\n        \/\/ for each ref add '<' and '>' around the message id if not present\n        for ($i = 0; $i < count($refs); $i++) {\n          if (!preg_match('\/^<(.*)>$\/', $refs[$i])) {\n            $refs[$i] = '<' . $refs[$i] . '>';\n          }\n        }\n\n        $cfg['references'] = implode(' ', $refs);\n        $this->mailer->addCustomHeader('References:' . $cfg['references']);\n      }\n\n      if (!empty($cfg['in_reply_to'])) {\n        # check if the in-reply-to have chevrons around the message id and remove them\n        if (preg_match('\/^<(.*)>$\/', $cfg['in_reply_to'], $m)) {\n          $mailbox = explode('@', $m[1])[0];\n          $hostname = explode('@', $m[1])[1];\n          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);\n        } else {\n          $mailbox = explode('@', $cfg['in_reply_to'])[0];\n          $hostname = explode('@', $cfg['in_reply_to'])[1];\n          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);\n        }\n        \/\/ add '<' and '>' around the message id if not present\n        if (!preg_match('\/^<(.*)>$\/', $cfg['in_reply_to'])) {\n          $cfg['in_reply_to'] = '<' . $cfg['in_reply_to'] . '>';\n        }\n\n        $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));\n      }\n\n      $ar  = [\n        'title' => $cfg['subject'] ?? ($cfg['title'] ?? '')\n      ];\n      $enc = mb_detect_encoding($ar['title']);\n      if ($enc !== $this->mailer->CharSet) {\n        $ar['title'] = mb_convert_encoding($ar['title'], $this->mailer->CharSet, $enc);\n      }\n\n      $this->mailer->Subject = $ar['title'];\n\n      \n      if (empty($cfg['text'])) {\n        $ar['text'] = '';\n      }\n      else {\n        $ar['text'] = $cfg['text'];\n        $enc = mb_detect_encoding($ar['text']);\n        \/\/X::ddump($enc, $this->mailer->CharSet);\n        if ($enc !== $this->mailer->CharSet) {\n          $ar['text'] = mb_convert_encoding($ar['text'], $this->mailer->CharSet, $enc);\n        }\n      }\n\n      if (isset($cfg['attachments'])) {\n        if (\\is_string($cfg['attachments'])) {\n          $cfg['attachments'] = [$cfg['attachments']];\n        }\n\n        foreach ($cfg['attachments'] as $name => $att) {\n          if (is_file($att)) {\n            \/\/ 2nd parameter is the file's name in the mail\n            $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);\n          }\n        }\n      }\n\n      if (!isset($renderer)) {\n        $renderer = Tpl::renderer($this->template);\n      }\n\n      $ar['url'] = \\defined('BBN_URL') ? BBN_URL : '';\n      $text = $renderer($ar);\n      self::setContent($text);\n      $this->mailer->msgHTML(self::$_content, $this->path);\n\n      try {\n        $r = $this->mailer->send();\n      }\n      catch (\\Exception $e) {\n        $this->log($e->getMessage());\n      }\n\n      if ($r && !empty($this->imap_string)) {\n        $mail_string = $this->mailer->getSentMIMEMessage();\n        if (!\\is_resource($this->imap)\n          && !($this->imap instanceof \\IMAP\\Connection)\n        ) {\n          $this->imap = \\imap_open($this->imap_string, $this->imap_user, $this->imap_pass);\n        }\n\n        if ((!\\is_resource($this->imap)\n            && !($this->imap instanceof \\IMAP\\Connection))\n          || !\\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, \"\\\\Seen\")\n        ) {\n          $this->log(\\imap_errors());\n        }\n      }\n\n      if (!$r) {\n        $err = \\imap_last_error();\n        $this->log($err);\n        X::log($err);\n      }\n    }\n\n    $this->mailer->ClearAllRecipients();\n    $this->mailer->ClearAttachments();\n    return $r;\n  }",
+            "code": "  public function send($cfg){\n    $valid = false;\n    $r = false;\n\n    if (!defined('BBN_IS_PROD') || !constant('BBN_IS_PROD')) {\n      $cfg['to'] = constant('BBN_ADMIN_EMAIL');\n      $cfg['cc'] = '';\n      $cfg['bcc'] = '';\n      $this->mailer->AddAddress(constant('BBN_ADMIN_EMAIL'));\n      $valid = 1;\n    }\n    else {\n      foreach (self::$_dest_fields as $dest_field) {\n        if (isset($cfg[$dest_field])) {\n          if (!\\is_array($cfg[$dest_field])) {\n            $cfg[$dest_field] = array_map(\n              function ($a) {\n                return trim($a);\n              },\n              explode(\";\", $cfg[$dest_field])\n            );\n          }\n\n          foreach ($cfg[$dest_field] as $dest) {\n            if (PHPMailer::validateAddress($dest)) {\n              switch ($dest_field) {\n                case \"to\":\n                  $this->mailer->AddAddress($dest);\n                  break;\n                case \"cc\":\n                  $this->mailer->AddCC($dest);\n                  break;\n                case \"bcc\":\n                  $this->mailer->AddBCC($dest);\n                  break;\n              }\n              $valid = 1;\n            }\n            else {\n              X::log(\"Adresse email invalide: \".$dest);\n              $valid = false;\n            }\n          }\n        }\n      }\n    }\n    if ($valid) {\n      if (!empty($cfg['from'])) {\n        $this->setFrom($cfg['from']);\n      }\n\n      if (!empty($cfg['references'])) {\n        \/\/ check if each reference have chevrons around the message id and remove them\n        $refs = [];\n        $cfg['references'] = explode(' ', $cfg['references']);\n        foreach ($cfg['references'] as $ref) {\n          if (preg_match('\/^<(.*)>$\/', $ref, $m)) {\n            $mailbox = explode('@', $m[1])[0];\n            $hostname = explode('@', $m[1])[1];\n            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);\n          }\n          else {\n            $mailbox = explode('@', $ref)[0];\n            $hostname = explode('@', $ref)[1];\n            $refs[] = imap_rfc822_write_address($mailbox, $hostname, null);\n          }\n        }\n        \/\/ for each ref add '<' and '>' around the message id if not present\n        for ($i = 0; $i < count($refs); $i++) {\n          if (!preg_match('\/^<(.*)>$\/', $refs[$i])) {\n            $refs[$i] = '<' . $refs[$i] . '>';\n          }\n        }\n\n        $cfg['references'] = implode(' ', $refs);\n        $this->mailer->addCustomHeader('References:' . $cfg['references']);\n      }\n\n      if (!empty($cfg['in_reply_to'])) {\n        # check if the in-reply-to have chevrons around the message id and remove them\n        if (preg_match('\/^<(.*)>$\/', $cfg['in_reply_to'], $m)) {\n          $mailbox = explode('@', $m[1])[0];\n          $hostname = explode('@', $m[1])[1];\n          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);\n        } else {\n          $mailbox = explode('@', $cfg['in_reply_to'])[0];\n          $hostname = explode('@', $cfg['in_reply_to'])[1];\n          $cfg['in_reply_to'] = imap_rfc822_write_address($mailbox, $hostname, null);\n        }\n        \/\/ add '<' and '>' around the message id if not present\n        if (!preg_match('\/^<(.*)>$\/', $cfg['in_reply_to'])) {\n          $cfg['in_reply_to'] = '<' . $cfg['in_reply_to'] . '>';\n        }\n\n        $this->mailer->AddCustomHeader('In-Reply-To:' . mb_encode_mimeheader($cfg['in_reply_to']));\n      }\n\n      $ar  = [\n        'title' => $cfg['subject'] ?? ($cfg['title'] ?? '')\n      ];\n      $enc = mb_detect_encoding($ar['title']);\n      if ($enc !== $this->mailer->CharSet) {\n        $ar['title'] = mb_convert_encoding($ar['title'], $this->mailer->CharSet, $enc);\n      }\n\n      $this->mailer->Subject = $ar['title'];\n\n      \n      if (empty($cfg['text'])) {\n        $ar['text'] = '';\n      }\n      else {\n        $ar['text'] = $cfg['text'];\n        $enc = mb_detect_encoding($ar['text']);\n        \/\/X::ddump($enc, $this->mailer->CharSet);\n        if ($enc !== $this->mailer->CharSet) {\n          $ar['text'] = mb_convert_encoding($ar['text'], $this->mailer->CharSet, $enc);\n        }\n      }\n\n      if (isset($cfg['attachments'])) {\n        if (\\is_string($cfg['attachments'])) {\n          $cfg['attachments'] = [$cfg['attachments']];\n        }\n\n        foreach ($cfg['attachments'] as $name => $att) {\n          if (is_file($att)) {\n            \/\/ 2nd parameter is the file's name in the mail\n            $this->mailer->AddAttachment($att, is_int($name) ? '' : $name);\n          }\n        }\n      }\n\n      if (!isset($renderer)) {\n        $renderer = Tpl::renderer($this->template);\n      }\n\n      $ar['url'] = \\defined('BBN_URL') ? BBN_URL : '';\n      $text = $renderer($ar);\n      self::setContent($text);\n      $this->mailer->msgHTML(self::$_content, $this->path);\n\n      try {\n        $r = $this->mailer->send();\n      }\n      catch (\\Exception $e) {\n        $this->log($e->getMessage());\n        $this->log(\\imap_last_error());\n      }\n\n      if ($r && !empty($this->imap_string)) {\n        $mail_string = $this->mailer->getSentMIMEMessage();\n        if (!\\is_resource($this->imap)\n          && !($this->imap instanceof \\IMAP\\Connection)\n        ) {\n          $this->imap = \\imap_open($this->imap_string, $this->imap_user, $this->imap_pass);\n        }\n\n        if ((!\\is_resource($this->imap)\n            && !($this->imap instanceof \\IMAP\\Connection))\n          || !\\imap_append($this->imap, $this->imap_string.$this->imap_sent, $mail_string, \"\\\\Seen\")\n        ) {\n          $this->log(\\imap_errors());\n        }\n      }\n    }\n\n    $this->mailer->ClearAllRecipients();\n    $this->mailer->ClearAttachments();\n    return $r;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 357,
-            "endLine": 532,
+            "endLine": 527,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -325,13 +513,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "send",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -344,34 +535,27 @@
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -380,45 +564,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -427,24 +629,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getErrors": {
-            "name": "getErrors",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -453,113 +650,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getErrors",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "log": {
-            "name": "log",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "log",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -567,63 +693,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getErrorCode": {
+            "name": "getErrorCode",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -632,17 +816,140 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
             "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -653,43 +960,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -700,35 +1025,214 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         }
     },
     "properties": {
+        "_dest_fields": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The destination fields.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                "to",
+                "cc",
+                "bcc"
+            ]
+        },
+        "_default_template": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The default HTML template.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "<!DOCTYPE html>\n<html>\n<head>\n<title>{{title}}<\/title>\n<meta http-equiv=\"Content-Type\" content=\"text\/html; charset=UTF-8\">\n<\/head>\n<body>\n<div>{{{text}}}<\/div>\n<\/body>\n<\/html>"
+        },
+        "_template_checked": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "_content": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The content currently set for sending by the class.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "_hash_content": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The hash of the last content sent by the class.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
         "mailer": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "",
@@ -742,7 +1246,458 @@
                         "type": "PHPMailer"
                     }
                 ]
-            }
+            },
+            "parent": false,
+            "value": null
+        },
+        "template": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "imap_user": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "imap_pass": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "imap_sent": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "imap_string": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "imap": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mail"
+            },
+            "declaring_trait": "bbn\\Mail",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "document\n"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
         }
     },
     "staticProperties": {
@@ -757,6 +1712,14 @@
         "_hash_content": null
     },
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "PHPMailer\\PHPMailer\\PHPMailer": "PHPMailer"
+    },
+    "dummyComments": [
+        "\/**\n * Class for sending mails\n *\n * This class uses PHPMailer but adds the possibility to append the sent emails to the Sent (or another) folder\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Database\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\n * Here is an example with gMail\n * <code>\n * $mail = new Mail([\n *   'port' => 465,\n *   'host' => 'imap.gmail.com',\n *   'user' => 'myemail@gmail.com',\n *   'name' => 'My real name',\n *   'pass' => 'mypassword',\n *   'imap' => true,\n *   'ssl' => true\n * ]);\n * <\/code>\n *\n * Here is an example with classic\n * <code>\n * $mail = new Mail([\n *   'host' => 'mail.m3l.co',\n *   'user' => 'myrealemail@babna.com',\n *   'from' => 'myniceemail@babna.com',\n *   'name' => 'My real name',\n *   'pass' => 'mypassword',\n *   'imap' => true\n * ]);\n * <\/code>\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

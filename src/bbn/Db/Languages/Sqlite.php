@@ -4,6 +4,7 @@
  */
 namespace bbn\Db\Languages;
 
+use Exception;
 use PDO;
 use PDOException;
 use bbn\Str;
@@ -102,12 +103,12 @@ class Sqlite extends Sql
   /**
    * Constructor
    * @param array $cfg
-   * @throws \Exception
+   * @throws Exception
    */
   public function __construct(array $cfg = [])
   {
     if (!\extension_loaded('pdo_sqlite')) {
-      throw new \Exception('The SQLite driver for PDO is not installed...');
+      throw new Exception('The SQLite driver for PDO is not installed...');
     }
 
     $cfg = $this->getConnection($cfg);
@@ -129,7 +130,7 @@ class Sqlite extends Sql
       $err = X::_("Impossible to create the connection").
         " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
         .X::_("with the following error").$e->getMessage();
-      throw new \Exception($err);
+      throw new Exception($err);
     }
   }
 
@@ -146,7 +147,7 @@ class Sqlite extends Sql
     }
 
     if (empty($cfg['db']) || !\is_string($cfg['db'])) {
-      throw new \Exception('Database name is not specified');
+      throw new Exception('Database name is not specified');
     }
 
     if (is_file($cfg['db'])) {
@@ -174,9 +175,12 @@ class Sqlite extends Sql
     }
 
     if (!isset($cfg['host'])) {
-      throw new \Exception('Db file could not be located');
+      throw new Exception('Db file could not be located');
     }
 
+    if (!is_file($cfg['host'].$cfg['db'])) {
+      X::ddump("jjjj");
+    }
     $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];
     $cfg['db']   = 'main';
 
@@ -312,7 +316,7 @@ class Sqlite extends Sql
    * Return databases' names as an array.
    *
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getDatabases(): ?array
   {
@@ -338,7 +342,7 @@ class Sqlite extends Sql
    *
    * @param string $database Database name
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getTables(string $database = ''): ?array
   {
@@ -378,7 +382,7 @@ class Sqlite extends Sql
    *
    * @param null|string $table The table's name
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getColumns(string $table): ?array
   {
@@ -460,7 +464,7 @@ class Sqlite extends Sql
    *
    * @param string $table The table's name
    * @return null|array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getKeys(string $table): ?array
   {
@@ -637,7 +641,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateTable(string $table, array $model = null): string
   {
@@ -679,7 +683,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getCreateKeys(string $table, ?array $model = null): string
   {
@@ -807,12 +811,12 @@ class Sqlite extends Sql
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterTable(string $table, array $cfg): string
   {
     if (empty($cfg['fields'])) {
-      throw new \Exception(X::_('Fields are not specified'));
+      throw new Exception(X::_('Fields are not specified'));
     }
 
     if ($this->check() && Str::checkName($table)) {
@@ -838,7 +842,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param array $cfg
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   public function getAlterColumn(string $table, array $cfg): string
   {
@@ -937,7 +941,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param string $key
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function deleteIndex(string $table, string $key): bool
   {
@@ -1081,7 +1085,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param string $database
    * @return array|false|null
-   * @throws \Exception
+   * @throws Exception
    */
   public function status(string $table = '', string $database = '')
   {
@@ -1180,7 +1184,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param array|null $model
    * @return string
-   * @throws \Exception
+   * @throws Exception
    * TODO-testing: ALTER TABLE ADD CONSTRAINT is not supported:
    * https://www.sqlite.org/omitted.html
    */
@@ -1223,7 +1227,7 @@ class Sqlite extends Sql
    * @param string $table
    * @param array|null $model
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function createConstraintsSqlite(string $table, array $model = null): bool
   {
@@ -1240,7 +1244,7 @@ class Sqlite extends Sql
    *
    * @param string $table
    * @return array
-   * @throws \Exception
+   * @throws Exception
    */
   public function getPrimary(string $table): array
   {
@@ -1257,7 +1261,7 @@ class Sqlite extends Sql
    * @param string $column
    * @param array $col
    * @return bool
-   * @throws \Exception
+   * @throws Exception
    */
   public function createColumn(string $table, string $column, array $col): bool
   {
@@ -1276,7 +1280,7 @@ class Sqlite extends Sql
    * @param string $name
    * @param array $col
    * @return string
-   * @throws \Exception
+   * @throws Exception
    */
   protected function getColumnDefinitionStatement(string $name, array $col): string
   {

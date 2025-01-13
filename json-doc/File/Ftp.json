@@ -12,18 +12,19 @@
     },
     "name": "bbn\\File\\Ftp",
     "namespace": true,
+    "realName": "Ftp",
+    "realNamespace": "bbn\\File",
     "traits": [],
     "interfaces": [],
     "fileName": "\/File\/Ftp.php",
     "startLine": 21,
     "endLine": 407,
-    "numMethods": 22,
-    "numProperties": 1,
+    "numMethods": 23,
+    "numProperties": 11,
     "numConstants": 1,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -39,6 +40,8 @@
         "cn": null,
         "error": null,
         "errors": [],
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": []
     },
@@ -47,7 +50,6 @@
     "namespaceName": "bbn\\File",
     "shortName": "Ftp",
     "contentConstructor": {
-        "file": "bbn\\File\\Ftp",
         "returns": []
     },
     "methods": {
@@ -56,11 +58,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($cfg = [])\n  {\n\t\tif ( \\is_array($cfg) )\n\t\t{\n\t\t\t$this->dir = $cfg['dir'] ?? '';\n\t\t\tif ( isset($cfg['host']) ){\n\t\t\t\t$host = $cfg['host'];\n\t\t\t}\n\t\t\telse if ( \\defined('BBN_FTP_HOST') ){\n\t\t\t\t$host = BBN_FTP_HOST;\n\t\t\t}\n\t\t\tif ( isset($cfg['user']) ){\n\t\t\t\t$login = $cfg['user'];\n\t\t\t}\n\t\t\telse if ( \\defined('BBN_FTP_USER') ){\n\t\t\t\t$login = BBN_FTP_LOGIN;\n\t\t\t}\n\t\t\tif ( isset($cfg['pass']) ){\n\t\t\t\t\/\/ $this->pass = bbn\\Util\\Enc::decrypt($cfg['pass']);\n        $pass = $cfg['pass'];\n\t\t\t}\n\t\t\telse if ( \\defined('BBN_FTP_PASS') ){\n\t\t\t\t$pass = bbn\\Util\\Enc::decrypt(BBN_FTP_PASS);\n\t\t\t}\n\t\t\tif (\n\t\t\t  isset($this->dir, $host, $login, $pass) &&\n\t\t\t\t($this->dir = $this->checkPath($this->dir))\n      ){\n\t\t\t  if ( empty($cfg['ssl']) ){\n          $this->cn = ftp_connect($host, $cfg['port'] ?? 21, $cfg['timeout'] ?? self::TIMEOUT);\n        }\n        else{\n          $this->cn = ftp_ssl_connect($host, $cfg['port'] ?? 21, $cfg['timeout'] ?? self::TIMEOUT);\n        }\n        if ( $this->cn ){\n          if ( ftp_login($this->cn, $login, $pass) )\n          {\n            if ( @ftp_chdir($this->cn, $this->dir) )\n            {\n              ftp_pasv($this->cn,TRUE);\n              return;\n            }\n            else {\n              $this->error = \\defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?\n                BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';\n            }\n          }\n          else {\n            $this->cn = false;\n            $this->error = \\defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?\n              BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';\n          }\n        }\n        else {\n          $this->error = \\defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?\n            BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';\n        }\n      }\n\t\t}\n  }",
+            "code": "\tpublic function __construct($cfg=array())\n\t{\n\t\tif ( \\is_array($cfg) )\n\t\t{\n\t\t\t$this->dir = $cfg['dir'] ?? '';\n\t\t\tif ( isset($cfg['host']) ){\n\t\t\t\t$host = $cfg['host'];\n\t\t\t}\n\t\t\telse if ( \\defined('BBN_FTP_HOST') ){\n\t\t\t\t$host = BBN_FTP_HOST;\n\t\t\t}\n\t\t\tif ( isset($cfg['user']) ){\n\t\t\t\t$login = $cfg['user'];\n\t\t\t}\n\t\t\telse if ( \\defined('BBN_FTP_USER') ){\n\t\t\t\t$login = BBN_FTP_LOGIN;\n\t\t\t}\n\t\t\tif ( isset($cfg['pass']) ){\n\t\t\t\t\/\/ $this->pass = bbn\\Util\\Enc::decrypt($cfg['pass']);\n        $pass = $cfg['pass'];\n\t\t\t}\n\t\t\telse if ( \\defined('BBN_FTP_PASS') ){\n\t\t\t\t$pass = bbn\\Util\\Enc::decrypt(BBN_FTP_PASS);\n\t\t\t}\n\t\t\tif (\n\t\t\t  isset($this->dir, $host, $login, $pass) &&\n\t\t\t\t($this->dir = $this->checkPath($this->dir))\n      ){\n\t\t\t  if ( empty($cfg['ssl']) ){\n          $this->cn = ftp_connect($host, $cfg['port'] ?? 21, $cfg['timeout'] ?? self::TIMEOUT);\n        }\n        else{\n          $this->cn = ftp_ssl_connect($host, $cfg['port'] ?? 21, $cfg['timeout'] ?? self::TIMEOUT);\n        }\n        if ( $this->cn ){\n          if ( ftp_login($this->cn, $login, $pass) )\n          {\n            if ( @ftp_chdir($this->cn, $this->dir) )\n            {\n              ftp_pasv($this->cn,TRUE);\n              return;\n            }\n            else {\n              $this->error = \\defined('BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER') ?\n                BBN_IMPOSSIBLE_TO_FIND_THE_SPECIFIED_FOLDER : 'Impossible to find the specified folder';\n            }\n          }\n          else {\n            $this->cn = false;\n            $this->error = \\defined('BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST') ?\n              BBN_IMPOSSIBLE_TO_CONNECT_TO_THE_FTP_HOST : 'Impossible to connect to the FTP host';\n          }\n        }\n        else {\n          $this->error = \\defined('BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST') ?\n            BBN_IMPOSSIBLE_TO_FIND_THE_FTP_HOST : 'Unable to find the FTP host';\n        }\n      }\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 59,
             "endLine": 118,
             "isDeprecated": false,
@@ -71,30 +76,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "listFiles": {
             "name": "listFiles",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path = '.', bool $fast = false)\n  {\n    $res = [];\n\t\tif ( $this->cn &&\n            ftp_chdir($this->cn, $path) &&\n            ($files = ftp_nlist($this->cn, $path)) ){\n      foreach ( $files as $file )\n      {\n        $ele = [\n          'name' => $file,\n          'basename' => X::basename($file),\n        ];\n        if ( @ftp_chdir($this->cn, $path.'\/'.$ele['basename']) ){\n          $num = ftp_nlist($this->cn, '.');\n          $ele['num'] = \\count($num);\n          $ele['type'] = 'dir';\n          @ftp_cdup($this->cn);\n        }\n        else{\n          $ele['type'] = Str::fileExt($file);\n        }\n        $res[] = $ele;\n      }\n    }\n    return $res;\n  }",
+            "code": "\tpublic function listFiles($path='.', bool $fast = false):? array\n\t{\n    $res = [];\n\t\tif ( $this->cn &&\n            ftp_chdir($this->cn, $path) &&\n            ($files = ftp_nlist($this->cn, $path)) ){\n      foreach ( $files as $file )\n      {\n        $ele = [\n          'name' => $file,\n          'basename' => X::basename($file),\n        ];\n        if ( @ftp_chdir($this->cn, $path.'\/'.$ele['basename']) ){\n          $num = ftp_nlist($this->cn, '.');\n          $ele['num'] = \\count($num);\n          $ele['type'] = 'dir';\n          @ftp_cdup($this->cn);\n        }\n        else{\n          $ele['type'] = Str::fileExt($file);\n        }\n        $res[] = $ele;\n      }\n    }\n    return $res;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 125,
             "endLine": 150,
             "isDeprecated": false,
@@ -105,16 +122,19 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "listFiles",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": ".",
@@ -124,12 +144,34 @@
                     "name": "fast",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$fast"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $path\n   * @param bool $fast\n   * @return array|null\n   *\/"
         },
         "scan": {
             "name": "scan",
@@ -138,14 +180,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p><code>\nbbn\\File\\Dir::scan(&quot;\/home\/me&quot;);\nbbn\\File\\Dir::delete(&quot;C:\\Documents\\Test&quot;);\n<\/code><\/p>"
+                    "content": "<code>\nbbn\\File\\Dir::scan(\"\/home\/me\");\nbbn\\File\\Dir::delete(\"C:\\Documents\\Test\");\n<\/code>"
                 }
             ],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir, string $type = NULL, &$res = [], int $timeout = 0)\n  {\n    $res = [];\n    if ( $dirs = $this->listFiles($dir) ){\n      foreach ( $dirs as $d ){\n        if ( $type &&\n                (strpos($type, 'file') === 0) &&\n                !isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else if ( $type &&\n                ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&\n                isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else{\n          $res[] = $d['name'];\n        }\n        if ( isset($d['num']) ){\n          $this->scan($d['name'], $type, $res);\n        }\n      }\n    }\n    return $res;\n  }",
+            "code": "\tpublic function scan(string $dir, string $type = null, &$res = [], int $timeout = 0): array\n  {\n    $res = [];\n    if ( $dirs = $this->listFiles($dir) ){\n      foreach ( $dirs as $d ){\n        if ( $type &&\n                (strpos($type, 'file') === 0) &&\n                !isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else if ( $type &&\n                ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) &&\n                isset($d['num']) ){\n          $res[] = $d['name'];\n        }\n        else{\n          $res[] = $d['name'];\n        }\n        if ( isset($d['num']) ){\n          $this->scan($d['name'], $type, $res);\n        }\n      }\n    }\n    return $res;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 165,
             "endLine": 189,
             "isDeprecated": false,
@@ -156,15 +201,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "scan",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -174,7 +224,13 @@
                 {
                     "name": "type",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -185,6 +241,9 @@
                     "name": "res",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": true,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -194,23 +253,50 @@
                     "name": "timeout",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Scans all the content from a directory, including the subdirectories\n\n<code>\nbbn\\File\\Dir::scan(\"\/home\/me\");\nbbn\\File\\Dir::delete(\"C:\\Documents\\Test\");\n<\/code>\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory path."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type of item to return ('file', 'dir', default is both)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Scans all the content from a directory, including the subdirectories\n\t *\n   * <code>\n   * bbn\\File\\Dir::scan(\"\/home\/me\");\n   * bbn\\File\\Dir::delete(\"C:\\Documents\\Test\");\n   * <\/code>\n   * \n\t * @param string $dir The directory path.\n\t * @param string $type The type of item to return ('file', 'dir', default is both)\n   * \n\t * @return array\n\t *\/"
         },
         "checkPath": {
             "name": "checkPath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    if ( empty($path) ){\n      return '\/';\n    }\n\t\t$new = explode('..\/',$path);\n\t\t$nnew = \\count($new);\n\t\tif ( $nnew > 1 )\n\t\t{\n\t\t\t$cur = explode('\/',$this->dir);\n\t\t\t$ncur = \\count($cur);\n\t\t\tif ( $cur[$ncur-1] == '' )\n\t\t\t{\n\t\t\t\tarray_pop($cur);\n\t\t\t\t$ncur--;\n\t\t\t}\n\t\t\tfor ( $i = 1; $nnew < $i; $i++ )\n\t\t\t{\n\t\t\t\tif ( $new[$i-1] == '' )\n\t\t\t\t{\n\t\t\t\t\t$ncur--;\n\t\t\t\t\tif ( $ncur == 1 )\n\t\t\t\t\t\treturn false;\n\t\t\t\t\telse\n\t\t\t\t\t\tarray_pop($cur);\n\t\t\t\t}\n\t\t\t\telse\n\t\t\t\t{\n\t\t\t\t\t$add = $new[$i-1];\n\t\t\t\t\tif ( substr($add,-1) != '\/' )\n\t\t\t\t\t\t$add .= '\/';\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\t$new_path = implode('\/',$cur).'\/';\n\t\t\tif ( isset($add) )\n\t\t\t\t$new_path .= $add;\n\t\t\treturn $new_path;\n\t\t}\n\t\telse if ( strpos($path,'\/') === 0 )\n\t\t\treturn $path;\n\t\telse if ( $path == '.' )\n\t\t\treturn $this->dir;\n\t\telse if ( \\strlen($path) > 0 )\n\t\t{\n\t\t\tif ( substr($path,-1) != '\/' )\n\t\t\t\t$path .= '\/';\n\t\t\t$path = $this->dir.$path;\n\t\t\tif ( substr($path,0,1) != '\/' )\n\t\t\t\t$path = '\/'.$path;\n\t\t\treturn $path;\n\t\t}\n  }",
+            "code": "\tpublic function checkPath($path)\n\t{\n    if ( empty($path) ){\n      return '\/';\n    }\n\t\t$new = explode('..\/',$path);\n\t\t$nnew = \\count($new);\n\t\tif ( $nnew > 1 )\n\t\t{\n\t\t\t$cur = explode('\/',$this->dir);\n\t\t\t$ncur = \\count($cur);\n\t\t\tif ( $cur[$ncur-1] == '' )\n\t\t\t{\n\t\t\t\tarray_pop($cur);\n\t\t\t\t$ncur--;\n\t\t\t}\n\t\t\tfor ( $i = 1; $nnew < $i; $i++ )\n\t\t\t{\n\t\t\t\tif ( $new[$i-1] == '' )\n\t\t\t\t{\n\t\t\t\t\t$ncur--;\n\t\t\t\t\tif ( $ncur == 1 )\n\t\t\t\t\t\treturn false;\n\t\t\t\t\telse\n\t\t\t\t\t\tarray_pop($cur);\n\t\t\t\t}\n\t\t\t\telse\n\t\t\t\t{\n\t\t\t\t\t$add = $new[$i-1];\n\t\t\t\t\tif ( substr($add,-1) != '\/' )\n\t\t\t\t\t\t$add .= '\/';\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\t$new_path = implode('\/',$cur).'\/';\n\t\t\tif ( isset($add) )\n\t\t\t\t$new_path .= $add;\n\t\t\treturn $new_path;\n\t\t}\n\t\telse if ( strpos($path,'\/') === 0 )\n\t\t\treturn $path;\n\t\telse if ( $path == '.' )\n\t\t\treturn $this->dir;\n\t\telse if ( \\strlen($path) > 0 )\n\t\t{\n\t\t\tif ( substr($path,-1) != '\/' )\n\t\t\t\t$path .= '\/';\n\t\t\t$path = $this->dir.$path;\n\t\t\tif ( substr($path,0,1) != '\/' )\n\t\t\t\t$path = '\/'.$path;\n\t\t\treturn $path;\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 194,
             "endLine": 246,
             "isDeprecated": false,
@@ -221,30 +307,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "checkPath",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "checkFilePath": {
             "name": "checkFilePath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file)\n  {\n\t\tif ( ($slash !== false) &&\n                ($dir = $this->checkPath(substr($file, 0, $slash))) ){\n      return $dir.substr($file, $slash);\n\t\t}\n\t\telse if ( $slash === false ){\n\t\t\treturn $this->dir.$file;\n    }\n\t\treturn false;\n  }",
+            "code": "\tpublic function checkFilePath($file){\n\t\t$slash = strrpos($file, '\/');\n\t\tif ( ($slash !== false) &&\n                ($dir = $this->checkPath(substr($file, 0, $slash))) ){\n      return $dir.substr($file, $slash);\n\t\t}\n\t\telse if ( $slash === false ){\n\t\t\treturn $this->dir.$file;\n    }\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 251,
             "endLine": 261,
             "isDeprecated": false,
@@ -255,30 +353,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "checkFilePath",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "file",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return false|string\n\t *\/"
         },
         "cdDir": {
             "name": "cdDir",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($dir)\n  {\n\t\t{\n\t\t\tif ( @ftp_chdir($this->cn, $dir) )\n\t\t\t{\n\t\t\t\t$this->dir = $dir;\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function cdDir($dir){\n\t\tif ( $dir = $this->checkPath($dir) )\n\t\t{\n\t\t\tif ( @ftp_chdir($this->cn, $dir) )\n\t\t\t{\n\t\t\t\t$this->dir = $dir;\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 266,
             "endLine": 276,
             "isDeprecated": false,
@@ -289,30 +399,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "cdDir",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return boolean\n\t *\/"
         },
         "checkDir": {
             "name": "checkDir",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $create = 0)\n  {\n\t\t{\n\t\t\t$path = $this->dir;\n\t\t\tif ( $this->cdDir($dir) ){\n\t\t\t\t$this->cdDir($path);\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_EXISTS') ?\n\t\t\t\t\tBBN_DIRECTORY_EXISTS : 'The directory exists';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t\telse if ( $create == 1 && $this->mkDir($dir) ){\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_CREATED') ?\n\t\t\t\t\tBBN_DIRECTORY_CREATED : 'The directory has been created';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function checkDir($dir, $create=0){\n\t\tif ( $dir = $this->checkPath($dir) )\n\t\t{\n\t\t\t$path = $this->dir;\n\t\t\tif ( $this->cdDir($dir) ){\n\t\t\t\t$this->cdDir($path);\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_EXISTS') ?\n\t\t\t\t\tBBN_DIRECTORY_EXISTS : 'The directory exists';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t\telse if ( $create == 1 && $this->mkDir($dir) ){\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_CREATED') ?\n\t\t\t\t\tBBN_DIRECTORY_CREATED : 'The directory has been created';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 281,
             "endLine": 298,
             "isDeprecated": false,
@@ -323,13 +445,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "checkDir",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -339,23 +464,35 @@
                     "name": "create",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "mkDir": {
             "name": "mkDir",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($dir)\n  {\n\t\t\tif ( $this->checkDir($dir) ){\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_EXISTS') ?\n\t\t\t\t\tBBN_DIRECTORY_EXISTS : 'The directory exists';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t\telse if ( ftp_mkdir($this->cn, $dir) ){\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_CREATED') ?\n\t\t\t\t\tBBN_DIRECTORY_CREATED : 'The directory has been created';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function mkDir($dir){\n\t\tif ( $dir = $this->checkPath($dir) ){\n\t\t\tif ( $this->checkDir($dir) ){\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_EXISTS') ?\n\t\t\t\t\tBBN_DIRECTORY_EXISTS : 'The directory exists';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t\telse if ( ftp_mkdir($this->cn, $dir) ){\n\t\t\t\t$this->error = \\defined('BBN_DIRECTORY_CREATED') ?\n\t\t\t\t\tBBN_DIRECTORY_CREATED : 'The directory has been created';\n\t\t\t\treturn $this->error;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 303,
             "endLine": 317,
             "isDeprecated": false,
@@ -366,30 +503,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "mkDir",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return false|string \n\t *\/"
         },
         "delete": {
             "name": "delete",
             "summary": "Deletes a file from the server",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($item)\n  {\n\t\tif ( $this->checkFilePath($item) &&\n            ftp_delete($this->cn,$item) ){\n      return true;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function delete($item){\n\t\tself::log('delete:'.$item);\n\t\tif ( $this->checkFilePath($item) &&\n            ftp_delete($this->cn,$item) ){\n      return true;\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 324,
             "endLine": 331,
             "isDeprecated": false,
@@ -400,30 +549,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "delete",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "item",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Deletes a file from the server\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes a file from the server\n   * \n\t * @return boolean\n\t *\/"
         },
         "put": {
             "name": "put",
             "summary": "Puts a file on the server",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($src, $dest)\n  {\n            ($dest = $this->checkFilePath($dest)) &&\n            ftp_put($this->cn,$dest,$src,FTP_BINARY) ){\n      return true;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function put($src, $dest){\n\t\tif ( file_exists($src) &&\n            ($dest = $this->checkFilePath($dest)) &&\n            ftp_put($this->cn,$dest,$src,FTP_BINARY) ){\n      return true;\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 338,
             "endLine": 345,
             "isDeprecated": false,
@@ -434,13 +595,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "put",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "src",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -450,23 +614,35 @@
                     "name": "dest",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Puts a file on the server\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Puts a file on the server\n   * \n\t * @return boolean\n\t *\/"
         },
         "get": {
             "name": "get",
             "summary": "Gets a file from the server",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($src, $dest)\n  {\n            ftp_get($this->cn, $dest, $src, FTP_BINARY) ){\n      return true;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function get($src, $dest){\n\t\tif ( $src = $this->checkFilePath($src) &&\n            ftp_get($this->cn, $dest, $src, FTP_BINARY) ){\n      return true;\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 352,
             "endLine": 358,
             "isDeprecated": false,
@@ -477,13 +653,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "get",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "src",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -493,23 +672,35 @@
                     "name": "dest",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets a file from the server\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets a file from the server\n   * \n\t * @return boolean\n\t *\/"
         },
         "close": {
             "name": "close",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
+            "code": "\tpublic function close(){\n\t\tftp_close($this->cn);\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 363,
             "endLine": 365,
             "isDeprecated": false,
@@ -520,20 +711,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "close",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "move": {
             "name": "move",
             "summary": "Moves or renames a file on the server",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $old, string $new)\n  {\n      !empty($old) &&\n      !empty($new) &&\n      ($old = $this->checkFilePath($old)) &&\n      ftp_rename($this->cn, $old, $new)\n    ){\n      return true;\n    }\n    return false;\n  }",
+            "code": "  public function move(string $old, string $new){\n    if (\n      !empty($old) &&\n      !empty($new) &&\n      ($old = $this->checkFilePath($old)) &&\n      ftp_rename($this->cn, $old, $new)\n    ){\n      return true;\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 374,
             "endLine": 384,
             "isDeprecated": false,
@@ -544,13 +744,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "move",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "old",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -561,24 +766,51 @@
                     "name": "new",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The new file full path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Moves or renames a file on the server\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$old",
+                        "description": "The old file full path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$new",
+                        "description": "The new file full path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Moves or renames a file on the server\n   *\n   * @param string $old The old file full path\n   * @param string $new The new file full path\n   * @return bool\n   *\/"
         },
         "exists": {
             "name": "exists",
             "summary": "Checks if a file is present in a folder on the server",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Ftp",
+            "class": "bbn\\File\\Ftp",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Ftp.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path)\n  {\n      $dir = X::dirname($path);\n      $ext = Str::fileExt($path);\n      $file = X::basename($path);\n      if ( \\is_array($files = $this->listFiles($dir)) ){\n        foreach ( $files as $f ){\n          if ( $f['basename'] === $file ){\n            return true;\n          }\n        }\n      }\n    }\n    return false;\n  }",
+            "code": "  public function exists(string $path){\n    if ( !empty($path) ){\n      $dir = X::dirname($path);\n      $ext = Str::fileExt($path);\n      $file = X::basename($path);\n      if ( \\is_array($files = $this->listFiles($dir)) ){\n        foreach ( $files as $f ){\n          if ( $f['basename'] === $file ){\n            return true;\n          }\n        }\n      }\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 392,
             "endLine": 406,
             "isDeprecated": false,
@@ -589,54 +821,65 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "exists",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The file or dir relative or full path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks if a file is present in a folder on the server\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The file or dir relative or full path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if a file is present in a folder on the server\n   *\n   * @param string $path The file or dir relative or full path\n   * @return bool\n   *\/"
         },
         "test": {
             "name": "test",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -645,45 +888,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -692,24 +953,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -718,160 +974,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -879,63 +1017,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -944,17 +1140,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -965,43 +1337,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -1012,35 +1402,206 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         }
     },
     "properties": {
+        "dir": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\File\\Ftp"
+            },
+            "declaring_trait": "bbn\\File\\Ftp",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "host": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\File\\Ftp"
+            },
+            "declaring_trait": "bbn\\File\\Ftp",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "login": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\File\\Ftp"
+            },
+            "declaring_trait": "bbn\\File\\Ftp",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "pass": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\File\\Ftp"
+            },
+            "declaring_trait": "bbn\\File\\Ftp",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "cn": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\File\\Ftp"
+            },
+            "declaring_trait": "bbn\\File\\Ftp",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
         "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\File\\Ftp"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "",
@@ -1053,7 +1614,15 @@
             },
             "parent": {
                 "name": "error",
+                "trait": false,
                 "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
                 "visibility": "protected",
                 "doc": {
                     "description": "",
@@ -1066,11 +1635,250 @@
                 },
                 "parent": false,
                 "value": false
-            }
+            },
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
         }
     },
     "staticProperties": [],
-    "constants": [],
+    "constants": {
+        "TIMEOUT": {
+            "name": "TIMEOUT",
+            "value": 20,
+            "class": "bbn\\File\\Ftp",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "",
+                "tags": []
+            }
+        }
+    },
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n * @package file\n *\/",
+        "\/**\n * File Transfer Protocol Class\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Files ressources\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
     "summary": "File Transfer Protocol Class",
     "description": "",
     "description_parts": []

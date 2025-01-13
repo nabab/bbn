@@ -1,0 +1,259 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Tree",
+    "namespace": true,
+    "realName": "Tree",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Tree.php",
+    "startLine": 7,
+    "endLine": 144,
+    "numMethods": 3,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Tree",
+    "contentConstructor": null,
+    "methods": {
+        "treeIds": {
+            "name": "treeIds",
+            "summary": "Returns a flat array of all IDs found in a hierarchical structure (except the top one)",
+            "description": "The second parameter is private and should be left blank",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "The second parameter is private and should be left blank"
+                },
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->treeIds(12));\n\/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Tree.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function treeIds($id, &$res = []): ?array\n  {\n    if ($this->check() && $this->exists($id)) {\n      $res[] = $id;\n      if ($its = $this->items($id)) {\n        foreach ($its as $it){\n          $this->treeIds($it, $res);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 22,
+            "endLine": 36,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "treeIds",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The end\/target of the path"
+                },
+                {
+                    "name": "res",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": true,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The resulting array"
+                }
+            ],
+            "doc": {
+                "description": "Returns a flat array of all IDs found in a hierarchical structure (except the top one)\nThe second parameter is private and should be left blank\n\n```php\nX::dump($opt->treeIds(12));\n\/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The end\/target of the path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$res",
+                        "description": "The resulting array"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a flat array of all IDs found in a hierarchical structure (except the top one)\n   * The second parameter is private and should be left blank\n   *\n   * ```php\n   * X::dump($opt->treeIds(12));\n   * \/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]\n   * ```\n   *\n   * @param int   $id  The end\/target of the path\n   * @param array $res The resulting array\n   * @return array|null\n   *\/"
+        },
+        "tree": {
+            "name": "tree",
+            "summary": "Returns a simple hierarchical structure with just text, id and items",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->tree(12));\n\/*\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Tree.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function tree($code = null): ?array\n  {\n    $id = $this->fromCode(\\func_get_args());\n    if (Str::isUid($id) && ($text = $this->text($id))) {\n      $res = [\n        'id' => $id,\n        'text' => $text\n      ];\n      if ($opts = $this->items($id)) {\n        $res['items'] = [];\n        foreach ($opts as $o){\n          if ($t = $this->tree($o)) {\n            $res['items'][] = $t;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "tree",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns a simple hierarchical structure with just text, id and items\n\n```php\nX::dump($opt->tree(12));\n\/*\narray [\n ['id' => 1, 'text' => 'Hello', 'items' => [\n   ['id' => 7, 'text' => 'Hello from inside'],\n   ['id' => 8, 'text' => 'Hello 2 from inside']\n ],\n[\n  ['id' => 1, 'text' => 'World']\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a simple hierarchical structure with just text, id and items\n   *\n   * ```php\n   * X::dump($opt->tree(12));\n   * \/*\n   * array [\n   *  ['id' => 1, 'text' => 'Hello', 'items' => [\n   *    ['id' => 7, 'text' => 'Hello from inside'],\n   *    ['id' => 8, 'text' => 'Hello 2 from inside']\n   *  ],\n   * [\n   *   ['id' => 1, 'text' => 'World']\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null\n   *\/"
+        },
+        "fullTree": {
+            "name": "fullTree",
+            "summary": "Returns a full hierarchical structure of options from a given option",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->fullTree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Tree",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Tree.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullTree($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($res = $this->option($id))\n    ) {\n      if ($opts = $this->items($id)) {\n        $res['items'] = [];\n        foreach ($opts as $o){\n          if ($t = $this->fullTree($o)) {\n            $res['items'][] = $t;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 125,
+            "endLine": 143,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullTree",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns a full hierarchical structure of options from a given option\n\n```php\nX::dump($opt->fullTree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'myProperty' => \"My property's value\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'myProperty' => \"My property's value\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'myProperty' => \"My property's value\",\n        ]\n      ]\n    ],\n  ]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Tree's array or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns a full hierarchical structure of options from a given option\n   *\n   * ```php\n   * X::dump($opt->fullTree(12));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'myProperty' => \"My property's value\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'myProperty' => \"My property's value\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'myProperty' => \"My property's value\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'myProperty' => \"My property's value\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns a flat array of all IDs found in a hierarchical structure (except the top one)\n   * The second parameter is private and should be left blank\n   *\n   * ```php\n   * X::dump($opt->treeIds(12));\n   * \/\/ array [12, 21, 22, 25, 27, 31, 32, 35, 37, 40, 41, 42, 44, 45, 43, 46, 47]\n   * ```\n   *\n   * @param int   $id  The end\/target of the path\n   * @param array $res The resulting array\n   * @return array|null\n   *\/",
+        "\/**\n   * Returns a simple hierarchical structure with just text, id and items\n   *\n   * ```php\n   * X::dump($opt->tree(12));\n   * \/*\n   * array [\n   *  ['id' => 1, 'text' => 'Hello', 'items' => [\n   *    ['id' => 7, 'text' => 'Hello from inside'],\n   *    ['id' => 8, 'text' => 'Hello 2 from inside']\n   *  ],\n   * [\n   *   ['id' => 1, 'text' => 'World']\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null\n   *\/",
+        "\/**\n   * Returns a full hierarchical structure of options from a given option\n   *\n   * ```php\n   * X::dump($opt->fullTree(12));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'myProperty' => \"My property's value\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'myProperty' => \"My property's value\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'myProperty' => \"My property's value\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'myProperty' => \"My property's value\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

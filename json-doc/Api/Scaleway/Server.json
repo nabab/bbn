@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Api\\Scaleway\\Server",
     "namespace": true,
+    "realName": "Server",
+    "realNamespace": "bbn\\Api\\Scaleway",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Scaleway\/Server.php",
@@ -16,7 +18,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -36,11 +37,14 @@
             "summary": "Gets the servers list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('server');\n  }",
+            "code": "  public function getServers(): array\n  {\n    return $this->_callCommand('server');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 17,
             "endLine": 20,
             "isDeprecated": false,
@@ -51,22 +55,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getServers",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the servers list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the servers list\n   * @return array\n   *\/"
         },
         "getServer": {
             "name": "getServer",
             "summary": "Gets the server info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/$id\" : $id);\n  }",
+            "code": "  public function getServer($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 28,
             "endLine": 31,
             "isDeprecated": false,
@@ -77,33 +90,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getServer",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The server ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the server info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The server ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the server info\n   * @param int|string $id The server ID\n   * @return array\n   *\/"
         },
         "getFailoverIps": {
             "name": "getFailoverIps",
             "summary": "Gets the failover IPs list",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_callCommand('server\/failover');\n  }",
+            "code": "  public function getFailoverIps(): array\n  {\n    return $this->_callCommand('server\/failover');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 38,
             "endLine": 41,
             "isDeprecated": false,
@@ -114,22 +146,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFailoverIps",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the failover IPs list\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the failover IPs list\n   * @return array\n   *\/"
         },
         "getIpInfo": {
             "name": "getIpInfo",
             "summary": "Gets the IP info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $ip)\n  {\n    return $this->_callCommand(\"server\/ip\/$ip\");\n  }",
+            "code": "  public function getIpInfo(string $ip): array\n  {\n    return $this->_callCommand(\"server\/ip\/$ip\");\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 49,
             "endLine": 52,
             "isDeprecated": false,
@@ -140,33 +181,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getIpInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "ip",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The IP address"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the IP info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$ip",
+                        "description": "The IP address"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the IP info\n   * @param string $ip The IP address\n   * @return array\n   *\/"
         },
         "getDiskInfo": {
             "name": "getDiskInfo",
             "summary": "Gets information on a server's disk",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/disk\/$id\" : $id);\n  }",
+            "code": "  public function getDiskInfo($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/disk\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 60,
             "endLine": 63,
             "isDeprecated": false,
@@ -177,33 +239,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDiskInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The disk ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets information on a server's disk\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The disk ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets information on a server's disk\n   * @param int|string $id The disk ID\n   * @return array\n   *\/"
         },
         "getRaidInfo": {
             "name": "getRaidInfo",
             "summary": "Gets information on a server's RAID controller",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/raidController\/$id\" : $id);\n  }",
+            "code": "  public function getRaidInfo($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/hardware\/raidController\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 71,
             "endLine": 74,
             "isDeprecated": false,
@@ -214,33 +295,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getRaidInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The disk ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets information on a server's RAID controller\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The disk ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets information on a server's RAID controller\n   * @param int|string $id The disk ID\n   * @return array\n   *\/"
         },
         "getProductInfo": {
             "name": "getProductInfo",
             "summary": "Gets server product info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Server",
+            "class": "bbn\\Api\\Scaleway\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/product\/$id\" : $id);\n  }",
+            "code": "  public function getProductInfo($id): array\n  {\n    return $this->_callCommand(Str::isInteger($id) ? \"server\/product\/$id\" : $id);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 82,
             "endLine": 85,
             "isDeprecated": false,
@@ -251,27 +351,56 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProductInfo",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The server ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets server product info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The server ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets server product info\n   * @param int|string $id The server ID\n   * @return array\n   *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n * Scaleway Server trait\n *\/",
+        "\/**\n   * Gets the servers list\n   * @return array\n   *\/",
+        "\/**\n   * Gets the server info\n   * @param int|string $id The server ID\n   * @return array\n   *\/",
+        "\/**\n   * Gets the failover IPs list\n   * @return array\n   *\/",
+        "\/**\n   * Gets the IP info\n   * @param string $ip The IP address\n   * @return array\n   *\/",
+        "\/**\n   * Gets information on a server's disk\n   * @param int|string $id The disk ID\n   * @return array\n   *\/",
+        "\/**\n   * Gets information on a server's RAID controller\n   * @param int|string $id The disk ID\n   * @return array\n   *\/",
+        "\/**\n   * Gets server product info\n   * @param int|string $id The server ID\n   * @return array\n   *\/"
+    ],
     "summary": "Scaleway Server trait",
     "description": "",
     "description_parts": []

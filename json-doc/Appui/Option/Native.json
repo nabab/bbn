@@ -1,0 +1,585 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Native",
+    "namespace": true,
+    "realName": "Native",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Native.php",
+    "startLine": 8,
+    "endLine": 376,
+    "numMethods": 8,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Native",
+    "contentConstructor": null,
+    "methods": {
+        "nativeOption": {
+            "name": "nativeOption",
+            "summary": "Returns an option's row as stored in its original form in the database",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->nativeOption(25));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function nativeOption($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $originalLocale = $this->findI18nById($id);\n      $locale = $this->getTranslatingLocale($id);\n      if (\n        !empty($locale)\n        && ($opt = $this->cacheGetLocale($id, $locale, __FUNCTION__))\n      ) {\n        return $opt;\n      } else if (\n        empty($locale)\n        && ($opt = $this->cacheGet($id, __FUNCTION__))\n      ) {\n        return $opt;\n      }\n      $tab = $this->db->tsn($this->class_cfg['table']);\n      $cfn = $this->db->cfn($this->fields['id'], $tab);\n      $opt = $this->getRow([$cfn => $id]);\n      if (!empty($opt['code']) && Str::isInteger($opt['code'])) {\n        $opt['code'] = (int)$opt['code'];\n      }\n      if ($opt) {\n        if (\n          !empty($locale)\n          && \\class_exists('\\bbn\\Appui\\I18n')\n          && !empty($opt[$this->fields['text']])\n        ) {\n          $i18nCls = new I18n($this->db);\n          if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {\n            $opt[$this->fields['text']] = $trans;\n          }\n        }\n        if (empty($locale)) {\n          $this->cacheSet($id, __FUNCTION__, $opt);\n        } else {\n          $this->cacheSetLocale($id, $locale, __FUNCTION__, $opt);\n        }\n        return $opt;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 28,
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "nativeOption",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's row as stored in its original form in the database\n\n```php\nX::dump($opt->nativeOption(25));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Row or null if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns an option's row as stored in its original form in the database\n   *\n   * ```php\n   * X::dump($opt->nativeOption(25));\n   * \/*\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Row or null if the option cannot be found\n   *\/"
+        },
+        "nativeOptions": {
+            "name": "nativeOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function nativeOptions($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $res = [];\n      if ($its = $this->items($id)) {\n        foreach ($its as $it) {\n          $res[] = $this->nativeOption($it);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 78,
+            "endLine": 92,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "nativeOptions",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string|null $code\n   * @return array|null\n   *\/"
+        },
+        "rawOption": {
+            "name": "rawOption",
+            "summary": "Returns an option's row as stored in its original form in the database, including cfg",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->rawOption('database', 'appui'));\n\/*\narray [\n  'id' => \"77cea323f0ce11e897fd525400007196\",\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'cfg' => null,\n  'id_alias' => null,\n  'value' => \"{\\\"num\\\":1}\"\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rawOption($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      return $this->db->rselect($this->class_cfg['table'], [], [$this->fields['id'] => $id]);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 114,
+            "endLine": 121,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "rawOption",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's row as stored in its original form in the database, including cfg\n\n```php\nX::dump($opt->rawOption('database', 'appui'));\n\/*\narray [\n  'id' => \"77cea323f0ce11e897fd525400007196\",\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'cfg' => null,\n  'id_alias' => null,\n  'value' => \"{\\\"num\\\":1}\"\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Row or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns an option's row as stored in its original form in the database, including cfg\n   *\n   * ```php\n   * X::dump($opt->rawOption('database', 'appui'));\n   * \/*\n   * array [\n   *   'id' => \"77cea323f0ce11e897fd525400007196\",\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'cfg' => null,\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"num\\\":1}\"\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Row or false if the option cannot be found\n   *\/"
+        },
+        "rawOptions": {
+            "name": "rawOptions",
+            "summary": "Returns an option's items as stored in its original form in the database, including cfg",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->rawOptions('database', 'appui'));\n\/*\n[\n  [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ], [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rawOptions($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $res = [];\n      if ($its = $this->items($id)) {\n        foreach ($its as $it) {\n          $res[] = $this->db->rselect($this->class_cfg['table'], [], [$this->fields['id'] => $it]);\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 151,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "rawOptions",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's items as stored in its original form in the database, including cfg\n\n```php\nX::dump($opt->rawOptions('database', 'appui'));\n\/*\n[\n  [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ], [\n     'id' => \"77cea323f0ce11e897fd525400007196\",\n     'code' => \"bbn_ide\",\n     'text' => \"BBN's own IDE\",\n     'cfg' => null,\n     'id_alias' => null,\n     'value' => \"{\\\"num\\\":1}\"\n   ]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Row or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns an option's items as stored in its original form in the database, including cfg\n   *\n   * ```php\n   * X::dump($opt->rawOptions('database', 'appui'));\n   * \/*\n   * [\n   *   [\n   *      'id' => \"77cea323f0ce11e897fd525400007196\",\n   *      'code' => \"bbn_ide\",\n   *      'text' => \"BBN's own IDE\",\n   *      'cfg' => null,\n   *      'id_alias' => null,\n   *      'value' => \"{\\\"num\\\":1}\"\n   *    ], [\n   *      'id' => \"77cea323f0ce11e897fd525400007196\",\n   *      'code' => \"bbn_ide\",\n   *      'text' => \"BBN's own IDE\",\n   *      'cfg' => null,\n   *      'id_alias' => null,\n   *      'value' => \"{\\\"num\\\":1}\"\n   *    ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Row or false if the option cannot be found\n   *\/"
+        },
+        "rawTree": {
+            "name": "rawTree",
+            "summary": "Returns a hierarchical structure as stored in its original form in the database",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->rawTree('77cea323f0ce11e897fd525400007196'));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rawTree($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      if ($res = $this->rawOption($id)) {\n        if ($its = $this->items($id)) {\n          $res['items'] = [];\n          foreach ($its as $it){\n            $res['items'][] = $this->rawTree($it);\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 211,
+            "endLine": 227,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "rawTree",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns a hierarchical structure as stored in its original form in the database\n\n```php\nX::dump($opt->rawTree('77cea323f0ce11e897fd525400007196'));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Tree's array or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns a hierarchical structure as stored in its original form in the database\n   *\n   * ```php\n   * X::dump($opt->rawTree('77cea323f0ce11e897fd525400007196'));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/"
+        },
+        "nativeTree": {
+            "name": "nativeTree",
+            "summary": "Returns a hierarchical structure as stored in its original form in the database",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->nativeTree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function nativeTree($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      if ($res = $this->nativeOption($id)) {\n        $its = $this->items($id);\n        if (!empty($its)) {\n          $res['items'] = [];\n          foreach ($its as $it){\n            $res['items'][] = $this->nativeTree($it);\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 273,
+            "endLine": 290,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "nativeTree",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns a hierarchical structure as stored in its original form in the database\n\n```php\nX::dump($opt->nativeTree(12));\n\/*\narray [\n  'id' => 12,\n  'code' => \"bbn_ide\",\n  'text' => \"BBN's own IDE\",\n  'id_alias' => null,\n  'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n  'items' => [\n    [\n      'id' => 25,\n      'code' => \"test\",\n      'text' => \"Test\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n    ],\n    [\n      'id' => 26,\n      'code' => \"test2\",\n      'text' => \"Test 2\",\n      'id_alias' => null,\n      'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n      'items' => [\n        [\n          'id' => 42,\n          'code' => \"test8\",\n          'text' => \"Test 8\",\n          'id_alias' => null,\n          'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n        ]\n      ]\n    ],\n  ]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Tree's array or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns a hierarchical structure as stored in its original form in the database\n   *\n   * ```php\n   * X::dump($opt->nativeTree(12));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/"
+        },
+        "getRow": {
+            "name": "getRow",
+            "summary": "Gets the first row from a result",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getRow(array $where): ?array\n  {\n    if ($res = $this->getRows($where, 1)) {\n      return $res[0];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 299,
+            "endLine": 306,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getRow",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "where",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the first row from a result\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the first row from a result\n   *\n   * @param array $where\n   * @return array|null\n   *\/"
+        },
+        "getRows": {
+            "name": "getRows",
+            "summary": "Performs the actual query with a where parameter.",
+            "description": "Always returns the whole result without limit",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "Always returns the whole result without limit"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Native",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Native.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getRows(array $where = [], int $limit = 0, int $start = 0): ?array\n  {\n    $db  =& $this->db;\n    $tab = $this->class_cfg['table'];\n    $c   =& $this->fields;\n    \/** @todo Checkout *\/\n    $cols = [];\n    foreach ($c AS $k => $col){\n      \/\/ All the columns except cfg\n      if (!\\in_array($k, $this->non_selected, true)) {\n        $cols[] = $db->cfn($col, $tab);\n      }\n    }\n\n    $cols['num_children'] = 'COUNT('.$db->escape($db->cfn($c['id'], $tab.'2', true)).')';\n    $res = $this->db->rselectAll(\n      [\n      'tables' => [$tab],\n      'fields' => $cols,\n      'join' => [\n        [\n          'type' => 'left',\n          'table' => $tab,\n          'alias' => $tab.'2',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => $db->cfn($c['id_parent'], $tab.'2'),\n                'operator' => 'eq',\n                'exp' => $db->cfn($c['id'], $tab, true)\n              ]\n            ],\n            'logic' => 'AND'\n          ]\n        ]\n      ],\n      'where' => $where,\n      'group_by' => [$this->db->cfn($c['id'], $tab)],\n      'order' => [\n        $this->db->cfn($c['id'], $tab)\n      ],\n      'limit' => $limit,\n      'start' => $start\n      ]\n    );\n\n    if (!empty($res)) {\n      foreach ($res as $i => $r) {\n        if (!empty($r[$this->fields['code']])\n          && Str::isInteger($r[$this->fields['code']])\n        ) {\n          $res[$i][$this->fields['code']] = (int)$r[$this->fields['code']];\n        }\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 317,
+            "endLine": 373,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getRows",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "where",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The where config for the database query"
+                },
+                {
+                    "name": "limit",
+                    "position": 1,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "Max number of rows"
+                },
+                {
+                    "name": "start",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "Where to start the query (only if limit is > 1)"
+                }
+            ],
+            "doc": {
+                "description": "Performs the actual query with a where parameter.\nAlways returns the whole result without limit\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The where config for the database query"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "Max number of rows"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "Where to start the query (only if limit is > 1)"
+                    }
+                ],
+                "return": "An array of rows, empty if not found, null if there is an error in the where config"
+            },
+            "comments": "  \/**\n   * Performs the actual query with a where parameter.\n   * Always returns the whole result without limit\n   * @param array $where The where config for the database query\n   * @param int   $limit Max number of rows\n   * @param int   $start Where to start the query (only if limit is > 1)\n   * @return array|null An array of rows, empty if not found, null if there is an error in the where config\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str",
+        "bbn\\Appui\\I18n": "I18n"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns an option's row as stored in its original form in the database\n   *\n   * ```php\n   * X::dump($opt->nativeOption(25));\n   * \/*\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\"\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Row or null if the option cannot be found\n   *\/",
+        "\/**\n   * @param string|null $code\n   * @return array|null\n   *\/",
+        "\/**\n   * Returns an option's row as stored in its original form in the database, including cfg\n   *\n   * ```php\n   * X::dump($opt->rawOption('database', 'appui'));\n   * \/*\n   * array [\n   *   'id' => \"77cea323f0ce11e897fd525400007196\",\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'cfg' => null,\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"num\\\":1}\"\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Row or false if the option cannot be found\n   *\/",
+        "\/**\n   * Returns an option's items as stored in its original form in the database, including cfg\n   *\n   * ```php\n   * X::dump($opt->rawOptions('database', 'appui'));\n   * \/*\n   * [\n   *   [\n   *      'id' => \"77cea323f0ce11e897fd525400007196\",\n   *      'code' => \"bbn_ide\",\n   *      'text' => \"BBN's own IDE\",\n   *      'cfg' => null,\n   *      'id_alias' => null,\n   *      'value' => \"{\\\"num\\\":1}\"\n   *    ], [\n   *      'id' => \"77cea323f0ce11e897fd525400007196\",\n   *      'code' => \"bbn_ide\",\n   *      'text' => \"BBN's own IDE\",\n   *      'cfg' => null,\n   *      'id_alias' => null,\n   *      'value' => \"{\\\"num\\\":1}\"\n   *    ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Row or false if the option cannot be found\n   *\/",
+        "\/**\n   * Returns a hierarchical structure as stored in its original form in the database\n   *\n   * ```php\n   * X::dump($opt->rawTree('77cea323f0ce11e897fd525400007196'));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/",
+        "\/**\n   * Returns a hierarchical structure as stored in its original form in the database\n   *\n   * ```php\n   * X::dump($opt->nativeTree(12));\n   * \/*\n   * array [\n   *   'id' => 12,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"BBN's own IDE\",\n   *   'id_alias' => null,\n   *   'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *   'items' => [\n   *     [\n   *       'id' => 25,\n   *       'code' => \"test\",\n   *       'text' => \"Test\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *     ],\n   *     [\n   *       'id' => 26,\n   *       'code' => \"test2\",\n   *       'text' => \"Test 2\",\n   *       'id_alias' => null,\n   *       'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *       'items' => [\n   *         [\n   *           'id' => 42,\n   *           'code' => \"test8\",\n   *           'text' => \"Test 8\",\n   *           'id_alias' => null,\n   *           'value' => \"{\\\"myProperty\\\":\\\"My property's value\\\"}\",\n   *         ]\n   *       ]\n   *     ],\n   *   ]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null Tree's array or false if the option cannot be found\n   *\/",
+        "\/**\n   * Gets the first row from a result\n   *\n   * @param array $where\n   * @return array|null\n   *\/",
+        "\/**\n   * Performs the actual query with a where parameter.\n   * Always returns the whole result without limit\n   * @param array $where The where config for the database query\n   * @param int   $limit Max number of rows\n   * @param int   $start Where to start the query (only if limit is > 1)\n   * @return array|null An array of rows, empty if not found, null if there is an error in the where config\n   *\/",
+        "\/** @todo Checkout *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

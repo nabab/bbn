@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\Current",
     "namespace": true,
+    "realName": "Current",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/Current.php",
     "startLine": 13,
     "endLine": 42,
-    "numMethods": 2,
-    "numProperties": 0,
+    "numMethods": 3,
+    "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -33,16 +34,75 @@
     "shortName": "Current",
     "contentConstructor": null,
     "methods": {
+        "_set_current": {
+            "name": "_set_current",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Current",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Current.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _set_current(string $current): void\n  {\n    self::$current = $current;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 21,
+            "endLine": 24,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_current",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "current",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$current"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $current\n   *\/"
+        },
         "setCurrent": {
             "name": "setCurrent",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Current",
+            "class": "bbn\\Models\\Tts\\Current",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Current.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_option)\n  {\n    self::_set_current($id_option);\n  }",
+            "code": "  public function setCurrent(string $id_option): void\n  {\n    self::_set_current($id_option);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 29,
             "endLine": 32,
             "isDeprecated": false,
@@ -53,33 +113,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setCurrent",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_option",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "option"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id_option\n   *\/"
         },
         "getCurrent": {
             "name": "getCurrent",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Current",
+            "class": "bbn\\Models\\Tts\\Current",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Current.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$current;\n  }",
+            "code": "  public function getCurrent(): ?string\n  {\n    return self::$current;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 37,
             "endLine": 40,
             "isDeprecated": false,
@@ -90,19 +171,54 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCurrent",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|string\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "current": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Current"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Current",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string The current ID",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "current": null
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 05\/11\/2016\n * Time: 19:51\n *\/",
+        "\/** @var string The current ID *\/",
+        "\/**\n   * @param string $current\n   *\/",
+        "\/**\n   * @param string $id_option\n   *\/",
+        "\/**\n   * @return null|string\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

@@ -1,0 +1,994 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Models\\Tts\\DbUauth",
+    "namespace": true,
+    "realName": "DbUauth",
+    "realNamespace": "bbn\\Models\\Tts",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Models\/Tts\/DbUauth.php",
+    "startLine": 16,
+    "endLine": 460,
+    "numMethods": 15,
+    "numProperties": 5,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "dbUauth": null,
+        "_dbUauthIsInit": false,
+        "dbUauthSystem": null,
+        "dbUauthErrorCodes": [],
+        "dbUauthSystems": [
+            "one-to-one",
+            "one-to-many",
+            "many-to-one",
+            "many-to-many"
+        ]
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Models\\Tts",
+    "shortName": "DbUauth",
+    "contentConstructor": null,
+    "methods": {
+        "dbUauthSetup": {
+            "name": "dbUauthSetup",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function dbUauthSetup(Db $db, array $cfg = []) : void\n  {\n    if (!self::$dbUauth) {\n      self::$dbUauth = new Uauth($db, $cfg);\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 45,
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbUauthSetup",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthGetClass": {
+            "name": "dbUauthGetClass",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function dbUauthGetClass(): Uauth\n  {\n    return self::$dbUauth;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 52,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbUauthGetClass",
+            "returns": [
+                "bbn\\Appui\\Uauth"
+            ],
+            "arguments": []
+        },
+        "dbUauthInit": {
+            "name": "dbUauthInit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthInit(): void\n  {\n    if (!$this->_dbUauthIsInit) {\n      $this->_dbUauthIsInit = true;\n      if (!$this->db || !isset($this->class_cfg['uauth_system']) || !isset($this->class_cfg['arch']['uauth'])) {\n        throw new Exception(X::_(\"The uauth system is not defined\"));\n      }\n\n      if (!in_array($this->class_cfg['uauth_system'], $this->dbUauthSystems)) {\n        throw new Exception(X::_(\"The uauth system is not valid\"));\n      }\n\n      $this->dbUauthSystem = $this->class_cfg['uauth_system'];\n      $cfg = [];\n      if (!empty($this->class_cfg['uauth_phone_region'])) {\n        $cfg['uauth_phone_region'] = $this->class_cfg['uauth_phone_region'];\n      }\n\n      self::dbUauthSetup($this->db, $cfg);\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 57,
+            "endLine": 77,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbUauthInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": []
+        },
+        "dbUauthIsInit": {
+            "name": "dbUauthIsInit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthIsInit(): bool\n  {\n    return $this->_dbUauthIsInit;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 79,
+            "endLine": 82,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbUauthIsInit",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        },
+        "dbUauthInitCheck": {
+            "name": "dbUauthInitCheck",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthInitCheck(): void\n  {\n    if (!$this->_dbUauthIsInit) {\n      throw new Exception(X::_(\"The uauth system is not initialized\"));\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 84,
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbUauthInitCheck",
+            "returns": [
+                "void"
+            ],
+            "arguments": []
+        },
+        "dbUauthHas": {
+            "name": "dbUauthHas",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthHas(string $id, string $value, string $type): bool\n  {\n    $this->dbUauthInitCheck();\n    $arch = $this->class_cfg['arch']['uauth'];\n    $uauthCfg = self::$dbUauth->getClassCfg();\n    $uauthArch = $uauthCfg['arch']['uauth'];\n    if ($existing = self::$dbUauth->find($value, $type)) {\n      $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $type);\n      if ($this->db->count([\n        'tables' => [$this->class_cfg['tables']['uauth']],\n        'join' => [[\n          'table' => $uauthCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),\n              'exp' => $arch['id_uauth']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $arch['id_associate'] => $id,\n          $arch['id_uauth'] => $idUauth,\n          $uauthArch['typology'] => self::$dbUauth->getIdTypology($type)\n        ]\n      ])) {\n        return true;\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 91,
+            "endLine": 121,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "dbUauthHas",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthSet": {
+            "name": "dbUauthSet",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthSet(string $id, string $value, string $type, array $cfg = null): bool\n  {\n    $this->dbUauthInitCheck();\n    $arch = $this->class_cfg['arch']['uauth'];\n    $uauthCfg = self::$dbUauth->getClassCfg();\n    $uauthArch = $uauthCfg['arch']['uauth'];\n    if (!($id_type = self::$dbUauth->getIdTypology($type))) {\n      throw new Exception(X::_(\"The typology is not valid\"));\n    }\n\n    $existing = self::$dbUauth->find($value, $id_type);\n    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $id_type);\n    if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [\n        $arch['id_associate'] => $id,\n        $arch['id_uauth'] => $idUauth,\n        $arch['typology'] => $id_type\n    ])) {\n      return false;\n    }\n\n    if (in_array($this->dbUauthSystem, ['one-to-one', 'one-to-many'])) {\n      if ($this->db->getOne([\n        'tables' => [$this->class_cfg['tables']['uauth']],\n        'join' => [[\n          'table' => $uauthCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),\n              'exp' => $arch['id_uauth']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $arch['id_uauth'] => $idUauth,\n          $uauthArch['typology'] => $id_type\n        ]\n      ])) {\n        $this->dbUauthRemoveAll($id, $type);\n      }\n    }\n\n    if (in_array($this->dbUauthSystem, ['one-to-one', 'many-to-one'])) {\n      if ($this->db->count([\n        'tables' => [$this->class_cfg['tables']['uauth']],\n        'join' => [[\n          'table' => $uauthCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),\n              'exp' => $arch['id_uauth']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $arch['id_associate'] => $id,\n          $uauthArch['typology'] => $id_type\n        ]\n      ])) {\n        $this->dbUauthRemoveAll($id, $id_type);\n      }\n    }\n\n    $data = [\n      $arch['id_associate'] => $id,\n      $arch['id_uauth'] => $idUauth\n    ];\n    if ($cfg) {\n      $data[$arch['cfg']] = json_encode($cfg);\n    }\n\n    if ($this->db->insert($this->class_cfg['tables']['uauth'], $data)) {\n      return true;\n    }\n\n    return false;\n\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 123,
+            "endLine": 199,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "shortName": "dbUauthSet",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 3,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthAdd": {
+            "name": "dbUauthAdd",
+            "summary": "Adds a new uauth to the associate, creating it if needed.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string\n  {\n    $this->dbUauthInitCheck();\n    $arch = $this->class_cfg['arch']['uauth'];\n    $uauthCfg = self::$dbUauth->getClassCfg();\n    $uauthArch = $uauthCfg['arch']['uauth'];\n    if (!($id_type = self::$dbUauth->getIdTypology($type))) {\n      throw new Exception(X::_(\"The typology is not valid\"));\n    }\n\n    $existing = self::$dbUauth->find($value, $id_type);\n    $idUauth = $existing ? $existing['id'] : self::$dbUauth->insert($value, $type);\n    \n    if ($existing && $this->db->count($this->class_cfg['tables']['uauth'], [\n        $arch['id_associate'] => $id,\n        $arch['id_uauth'] => $idUauth\n    ])) {\n      throw new Exception(X::_(\"The association already exists\"));\n    }\n\n    if (in_array($this->dbUauthSystem, ['one-to-one', 'one-to-many'])) {\n      if ($this->db->count([\n        'tables' => [$this->class_cfg['tables']['uauth']],\n        'join' => [[\n          'table' => $uauthCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),\n              'exp' => $arch['id_uauth']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $arch['id_uauth'] => $idUauth,\n          $uauthArch['typology'] => $id_type\n        ]\n      ])) {\n        throw new Exception(X::_(\"%s is already used\", $value));\n      }\n    }\n    else if (in_array($this->dbUauthSystem, ['one-to-one', 'many-to-one'])) {\n      if ($this->db->count([\n        'tables' => [$this->class_cfg['tables']['uauth']],\n        'join' => [[\n          'table' => $uauthCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),\n              'exp' => $arch['id_uauth']\n            ]]\n          ]\n        ]],\n        'where' => [\n          $arch['id_associate'] => $id,\n          $uauthArch['typology'] => $id_type\n        ]\n      ])) {\n        throw new Exception(X::_(\"%s is already used\", $value));\n      }\n    }\n\n    $data = [\n      $arch['id_associate'] => $id,\n      $arch['id_uauth'] => $idUauth\n    ];\n    if ($cfg) {\n      $data[$arch['cfg']] = json_encode($cfg);\n    }\n\n    if ($this->db->insert($this->class_cfg['tables']['uauth'], $data)) {\n      return $idUauth;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 211,
+            "endLine": 285,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "shortName": "dbUauthAdd",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cfg",
+                    "position": 3,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Adds a new uauth to the associate, creating it if needed.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$value"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * Adds a new uauth to the associate, creating it if needed.\n   * \n   * @param string $id\n   * @param string $value\n   * @param string $type\n   * @param array $cfg\n   * @throws \\Exception\n   * @return mixed\n   *\/"
+        },
+        "dbUauthRemove": {
+            "name": "dbUauthRemove",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthRemove(string $id, string $value, string $type): ?string\n  {\n    $this->dbUauthInitCheck();\n    $existing = self::$dbUauth->find($value, $type);\n    if (!$existing) {\n      throw new Exception(X::_(\"The uauth does not exist\"));\n    }\n    \n    $arch = $this->class_cfg['arch']['uauth'];\n    return $this->db->delete($this->class_cfg['tables']['uauth'], [\n      $arch['id_associate'] => $id,\n      $arch['id_uauth'] => $existing['id']\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 287,
+            "endLine": 300,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "dbUauthRemove",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "value",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthRemoveAll": {
+            "name": "dbUauthRemoveAll",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthRemoveAll(string $id, string $type): int\n  {\n    $this->dbUauthInitCheck();\n    $id_type = self::$dbUauth->getIdTypology($type);\n    $arch = $this->class_cfg['arch']['uauth'];\n    $uauthCfg = self::$dbUauth->getClassCfg();\n    $uauthArch = $uauthCfg['arch']['uauth'];\n    $all = $this->db->getColumnValues([\n      'table' => $this->class_cfg['tables']['uauth'],\n      'fields' => $arch['id'],\n      'join' => [\n        [\n          'table' => $uauthCfg['table'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($uauthArch['id'], $uauthCfg['table']),\n              'exp' => $arch['id_uauth']\n            ]]\n          ]\n        ]\n      ],\n      'where' => [\n        $arch['id_associate'] => $id,\n        $uauthArch['typology'] => $id_type\n      ]\n    ]);\n\n    $res = 0;\n    foreach ($all as $id_uauth) {\n      $res += $this->db->delete($this->class_cfg['tables']['uauth'], [\n        $arch['id'] => $id_uauth\n      ]);\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 302,
+            "endLine": 337,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "dbUauthRemoveAll",
+            "returns": [
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthRetrieve": {
+            "name": "dbUauthRetrieve",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthRetrieve(string $id_associate, string $type): ?array\n  {\n    $this->dbUauthInitCheck();\n    $arch = $this->class_cfg['arch']['uauth'];\n    $uauthCfg = self::$dbUauth->getClassCfg();\n\n    $res = $this->db->rselectAll([\n      'tables' => $this->class_cfg['tables']['uauth'],\n      'fields' => [$arch['id_uauth'], $arch['id_associate'], $type => $uauthCfg['arch']['uauth']['value']],\n      'join' => [[\n        'table' => $uauthCfg['table'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($uauthCfg['arch']['uauth']['id'], $uauthCfg['table']),\n            'exp' => $arch['id_uauth']\n          ]]\n        ]\n      ]],\n      'where' => [\n        $arch['id_associate'] => $id_associate,\n        $uauthCfg['arch']['uauth']['typology'] => self::$dbUauth->getIdTypology($type)\n      ]\n    ]);\n\n    if (in_array($this->dbUauthSystem, ['one-to-one', 'many-to-one'])) {\n      if (count($res) > 1) {\n        throw new Exception(X::_(\"The record is associated to more than one uauth\"));\n      }\n\n      return $res[0] ?? null;\n    }\n    else {\n      return $res;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 389,
+            "endLine": 423,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "dbUauthRetrieve",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id_associate",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthGet": {
+            "name": "dbUauthGet",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthGet(string $id_auth): ?array\n  {\n    $this->dbUauthInitCheck();\n    return self::$dbUauth->get($id_auth);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 425,
+            "endLine": 429,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbUauthGet",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id_auth",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthGetValue": {
+            "name": "dbUauthGetValue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthGetValue($id_auth): ?string\n  {\n    $this->dbUauthInitCheck();\n    \n    return self::$dbUauth->getValue($id_auth);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 432,
+            "endLine": 437,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbUauthGetValue",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id_auth",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthFind": {
+            "name": "dbUauthFind",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthFind(string $value, string $type = null): ?array\n  {\n    $this->dbUauthInitCheck();\n    return self::$dbUauth->find($value, $type);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 440,
+            "endLine": 444,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbUauthFind",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "value",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbUauthGetByUauth": {
+            "name": "dbUauthGetByUauth",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbUauth",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbUauth.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbUauthGetByUauth(string $id_uauth): ?array\n  {\n    $this->dbUauthInitCheck();\n    if (self::$dbUauth->exists($id_uauth)) {\n      return $this->db->getColumnValues(\n        $this->class_cfg['tables']['uauth'],\n        $this->class_cfg['arch']['uauth']['id_associate'],\n        [$this->class_cfg['arch']['uauth']['id_uauth'] => $id_uauth]\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 446,
+            "endLine": 456,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbUauthGetByUauth",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id_uauth",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "_dbUauthIsInit": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbUauth"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbUauth",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "dbUauthSystem": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbUauth"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbUauth",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "dbUauthErrorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbUauth"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbUauth",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "dbUauthSystems": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbUauth"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbUauth",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": [
+                "one-to-one",
+                "one-to-many",
+                "many-to-one",
+                "many-to-many"
+            ]
+        },
+        "dbUauth": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbUauth"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbUauth",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Uauth"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": {
+        "dbUauth": null
+    },
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Db": "Db",
+        "bbn\\Appui\\Uauth": "Uauth"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 05\/11\/2016\n * Time: 02:47\n *\/",
+        "\/** @var bool *\/",
+        "\/**\n   * \n   * @var Uauth\n   *\/",
+        "\/**\n   * Adds a new uauth to the associate, creating it if needed.\n   * \n   * @param string $id\n   * @param string $value\n   * @param string $type\n   * @param array $cfg\n   * @throws \\Exception\n   * @return mixed\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

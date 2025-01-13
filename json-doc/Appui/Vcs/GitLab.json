@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Appui\\Vcs\\GitLab",
     "namespace": true,
+    "realName": "GitLab",
+    "realNamespace": "bbn\\Appui\\Vcs",
     "traits": [
         "bbn\\Appui\\Vcs\\Common"
     ],
@@ -22,17 +24,14 @@
     "fileName": "\/Appui\/Vcs\/GitLab.php",
     "startLine": 19,
     "endLine": 811,
-    "numMethods": 46,
-    "numProperties": 0,
+    "numMethods": 48,
+    "numProperties": 8,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [
         "bbn\\Appui\\Vcs\\Server"
     ],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Appui\\Vcs\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -55,7 +54,6 @@
     "namespaceName": "bbn\\Appui\\Vcs",
     "shortName": "GitLab",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Vcs\\GitLab",
         "returns": []
     },
     "methods": {
@@ -64,11 +62,14 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, string $idServer)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->idServer = $idServer;\n    $this->server = $this->getServer();\n    $this->checkServerHost($this->server->host);\n    $this->userConnection = new bbn\\Api\\GitLab($this->server->userAccessToken, $this->server->host);\n    $this->adminConnection = new bbn\\Api\\GitLab($this->getAdminAccessToken(), $this->server->host);\n  }",
+            "code": "  public function __construct(bbn\\Db $db, string $idServer)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->idServer = $idServer;\n    $this->server = $this->getServer();\n    $this->checkServerHost($this->server->host);\n    $this->userConnection = new bbn\\Api\\GitLab($this->server->userAccessToken, $this->server->host);\n    $this->adminConnection = new bbn\\Api\\GitLab($this->getAdminAccessToken(), $this->server->host);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 47,
             "endLine": 57,
             "isDeprecated": false,
@@ -79,13 +80,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -95,24 +101,50 @@
                     "name": "idServer",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "erver"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\Db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "erver"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   * @param bbn\\Db $db\n   * @param string $idServer\n   *\/"
         },
         "getConnection": {
             "name": "getConnection",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $asAdmin = false)\n  {\n    return $asAdmin ? $this->adminConnection : $this->userConnection;\n  }",
+            "code": "  public function getConnection(bool $asAdmin = false): object\n  {\n    return $asAdmin ? $this->adminConnection : $this->userConnection;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 64,
             "endLine": 67,
             "isDeprecated": false,
@@ -123,33 +155,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getConnection",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "asAdmin",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "dmin"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$as",
+                        "description": "dmin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param bool $asAdmin\n   * @return object\n   *\/"
         },
         "getCurrentUser": {
             "name": "getCurrentUser",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getConnection()->getUser();\n  }",
+            "code": "  public function getCurrentUser(): array\n  {\n    return $this->getConnection()->getUser();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 73,
             "endLine": 76,
             "isDeprecated": false,
@@ -160,22 +213,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCurrentUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "getProjectsList": {
             "name": "getProjectsList",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $page = 1, int $perPage = 25)\n  {\n    $list = $this->getConnection()->getProjectsList($page, $perPage) ?: [];\n    $list['data'] = \\array_map([$this, 'normalizeProject'], $list['data']);\n    return $list;\n  }",
+            "code": "  public function getProjectsList(int $page = 1, int $perPage = 25): array\n  {\n    $list = $this->getConnection()->getProjectsList($page, $perPage) ?: [];\n    $list['data'] = \\array_map([$this, 'normalizeProject'], $list['data']);\n    return $list;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 84,
             "endLine": 89,
             "isDeprecated": false,
@@ -186,15 +248,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectsList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "page",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
@@ -204,24 +271,50 @@
                     "name": "perPage",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 25,
                     "default_name": "",
                     "description": "age"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$page"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$per",
+                        "description": "age"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $page\n   * @param int $perPage\n   * @return array\n   *\/"
         },
         "getProject": {
             "name": "getProject",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    if ($proj = $this->getConnection(true)->getProject($idProject, true)) {\n      return $this->normalizeProject((object)$proj);\n    }\n    return null;\n  }",
+            "code": "  public function getProject(string $idProject): ?array\n  {\n    if ($proj = $this->getConnection(true)->getProject($idProject, true)) {\n      return $this->normalizeProject((object)$proj);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 96,
             "endLine": 102,
             "isDeprecated": false,
@@ -232,34 +325,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProject",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return null|array\n   *\/"
         },
         "getProjectBranches": {
             "name": "getProjectBranches",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return X::sortBy(\n      \\array_map(\n        [$this, 'normalizeBranch'],\n        $this->getConnection()->getBranches($idProject) ?: []\n      ),\n      'created',\n      'desc'\n    );\n  }",
+            "code": "  public function getProjectBranches(string $idProject): array\n  {\n    return X::sortBy(\n      \\array_map(\n        [$this, 'normalizeBranch'],\n        $this->getConnection()->getBranches($idProject) ?: []\n      ),\n      'created',\n      'desc'\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 109,
             "endLine": 119,
             "isDeprecated": false,
@@ -270,33 +384,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectBranches",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectTags": {
             "name": "getProjectTags",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return $this->getConnection()->getTags($idProject) ?: [];\n  }",
+            "code": "  public function getProjectTags(string $idProject): array\n  {\n    return $this->getConnection()->getTags($idProject) ?: [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 126,
             "endLine": 129,
             "isDeprecated": false,
@@ -307,33 +442,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectTags",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectUsers": {
             "name": "getProjectUsers",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return \\array_map([$this, 'normalizeMember'], $this->getConnection(true)->getProjectUsers($idProject) ?: []);\n  }",
+            "code": "  public function getProjectUsers(string $idProject): array\n  {\n    return \\array_map([$this, 'normalizeMember'], $this->getConnection(true)->getProjectUsers($idProject) ?: []);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 136,
             "endLine": 139,
             "isDeprecated": false,
@@ -344,33 +500,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectUsersRoles": {
             "name": "getProjectUsersRoles",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return bbn\\Api\\GitLab::$accessLevels;\n  }",
+            "code": "  public function getProjectUsersRoles(): array\n  {\n    return bbn\\Api\\GitLab::$accessLevels;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 145,
             "endLine": 148,
             "isDeprecated": false,
@@ -381,22 +558,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectUsersRoles",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "getProjectUsersEvents": {
             "name": "getProjectUsersEvents",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return \\array_map([$this, 'normalizeEvent'], $this->getConnection()->getUsersEvents($idProject) ?: []);\n  }",
+            "code": "  public function getProjectUsersEvents(string $idProject): array\n  {\n    return \\array_map([$this, 'normalizeEvent'], $this->getConnection()->getUsersEvents($idProject) ?: []);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 155,
             "endLine": 158,
             "isDeprecated": false,
@@ -407,33 +593,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsersEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectEvents": {
             "name": "getProjectEvents",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return \\array_map([$this, 'normalizeEvent'], $this->getConnection()->getEvents($idProject) ?: []);\n  }",
+            "code": "  public function getProjectEvents(string $idProject): array\n  {\n    return \\array_map([$this, 'normalizeEvent'], $this->getConnection()->getEvents($idProject) ?: []);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 165,
             "endLine": 168,
             "isDeprecated": false,
@@ -444,33 +651,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectCommitsEvents": {
             "name": "getProjectCommitsEvents",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return \\array_values(\n      \\array_filter(\n        \\array_map(\n          [$this, 'normalizeEvent'],\n          $this->getConnection()->getCommitsEvents($idProject) ?: []\n        ),\n        function($e){\n          return $e['type'] === 'commit';\n        }\n      )\n    );\n  }",
+            "code": "  public function getProjectCommitsEvents(string $idProject): array\n  {\n    return \\array_values(\n      \\array_filter(\n        \\array_map(\n          [$this, 'normalizeEvent'],\n          $this->getConnection()->getCommitsEvents($idProject) ?: []\n        ),\n        function($e){\n          return $e['type'] === 'commit';\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 175,
             "endLine": 188,
             "isDeprecated": false,
@@ -481,33 +709,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectCommitsEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectLabels": {
             "name": "getProjectLabels",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return X::sortBy(\\array_map(\n      [$this, 'normalizeLabel'],\n      $this->getConnection()->getProjectLabels($idProject) ?: []\n    ), 'name', 'asc');\n  }",
+            "code": "  public function getProjectLabels(string $idProject): array\n  {\n    return X::sortBy(\\array_map(\n      [$this, 'normalizeLabel'],\n      $this->getConnection()->getProjectLabels($idProject) ?: []\n    ), 'name', 'asc');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 195,
             "endLine": 201,
             "isDeprecated": false,
@@ -518,33 +767,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectLabels",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getUsers": {
             "name": "getUsers",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return \\array_map([$this, 'normalizeUser'], $this->getConnection(true)->getUsers() ?: []);\n  }",
+            "code": "  public function getUsers(): array\n  {\n    return \\array_map([$this, 'normalizeUser'], $this->getConnection(true)->getUsers() ?: []);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 207,
             "endLine": 210,
             "isDeprecated": false,
@@ -555,22 +825,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "normalizeBranch": {
             "name": "normalizeBranch",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $branch)\n  {\n    return [\n      'id' => $branch->commit->id,\n      'ref' => $branch->commit->short_id,\n      'name' => $branch->name,\n      'created' => Date::format($branch->commit->created_at, 'dbdate'),\n      'default' => $branch->default,\n      'author' => [\n        'id' => '',\n        'name' => $branch->commit->author_name,\n        'username' => '',\n        'email' => $branch->commit->author_email\n      ],\n      'url' => $branch->web_url\n    ];\n  }",
+            "code": "  public function normalizeBranch(object $branch): array\n  {\n    return [\n      'id' => $branch->commit->id,\n      'ref' => $branch->commit->short_id,\n      'name' => $branch->name,\n      'created' => Date::format($branch->commit->created_at, 'dbdate'),\n      'default' => $branch->default,\n      'author' => [\n        'id' => '',\n        'name' => $branch->commit->author_name,\n        'username' => '',\n        'email' => $branch->commit->author_email\n      ],\n      'url' => $branch->web_url\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 217,
             "endLine": 233,
             "isDeprecated": false,
@@ -581,32 +860,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeBranch",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "branch",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$branch"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $branch\n   * @return array\n   *\/"
         },
         "normalizeEvent": {
             "name": "normalizeEvent",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $event)\n  {\n    $data = [\n      'id' => $event->id,\n      'created' => Date::format($event->created_at, 'dbdate'),\n      'author' => $this->normalizeUser($event->author),\n      'type' => '',\n      'title' => '',\n      'text' => '',\n      'originalEvent' => $event\n    ];\n    switch ($event->action_name) {\n      case 'pushed to':\n        $data = X::mergeArrays($data, [\n          'type' => 'commit',\n          'text' => $event->push_data->commit_title,\n          'branch' => $event->push_data->ref\n        ]);\n        break;\n      case 'pushed new':\n        $data = X::mergeArrays($data, [\n          'type' => 'branch',\n          'text' => X::_('Branch created'),\n          'branch' => $event->push_data->ref\n        ]);\n        break;\n      case 'imported':\n        $data = X::mergeArrays($data, [\n          'type' => 'import',\n          'title' => X::_('Project imported')\n        ]);\n        break;\n      case 'removed':\n      case 'deleted':\n        if (isset($event->push_data)) {\n          $data = X::mergeArrays($data, [\n            'type' => 'branch',\n            'title' => X::_('Branch removed'),\n            'branch' => $event->push_data->ref\n          ]);\n        }\n        break;\n      case 'accepted':\n        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {\n          $data = X::mergeArrays($data, [\n            'type' => 'merge',\n            'title' => X::_('Merge request accepted'),\n            'text' => $event->target_title ?: ''\n          ]);\n        }\n        break;\n      case 'opened':\n        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {\n          $data = X::mergeArrays($data, [\n            'type' => 'merge',\n            'title' => X::_('Merge request created'),\n            'text' => $event->target_title ?: ''\n          ]);\n        }\n        break;\n      case 'joined':\n        $data = X::mergeArrays($data, [\n          'type' => 'user',\n          'title' => X::_('Has been included among the users of the project')\n        ]);\n        break;\n      case 'left':\n        $data = X::mergeArrays($data, [\n          'type' => 'user',\n          'title' => X::_('Has been removed from project users')\n        ]);\n        break;\n    }\n    return $data;\n  }",
+            "code": "  public function normalizeEvent(object $event): array\n  {\n    $data = [\n      'id' => $event->id,\n      'created' => Date::format($event->created_at, 'dbdate'),\n      'author' => $this->normalizeUser($event->author),\n      'type' => '',\n      'title' => '',\n      'text' => '',\n      'originalEvent' => $event\n    ];\n    switch ($event->action_name) {\n      case 'pushed to':\n        $data = X::mergeArrays($data, [\n          'type' => 'commit',\n          'text' => $event->push_data->commit_title,\n          'branch' => $event->push_data->ref\n        ]);\n        break;\n      case 'pushed new':\n        $data = X::mergeArrays($data, [\n          'type' => 'branch',\n          'text' => X::_('Branch created'),\n          'branch' => $event->push_data->ref\n        ]);\n        break;\n      case 'imported':\n        $data = X::mergeArrays($data, [\n          'type' => 'import',\n          'title' => X::_('Project imported')\n        ]);\n        break;\n      case 'removed':\n      case 'deleted':\n        if (isset($event->push_data)) {\n          $data = X::mergeArrays($data, [\n            'type' => 'branch',\n            'title' => X::_('Branch removed'),\n            'branch' => $event->push_data->ref\n          ]);\n        }\n        break;\n      case 'accepted':\n        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {\n          $data = X::mergeArrays($data, [\n            'type' => 'merge',\n            'title' => X::_('Merge request accepted'),\n            'text' => $event->target_title ?: ''\n          ]);\n        }\n        break;\n      case 'opened':\n        if (isset($event->target_type) && ($event->target_type === 'MergeRequest')) {\n          $data = X::mergeArrays($data, [\n            'type' => 'merge',\n            'title' => X::_('Merge request created'),\n            'text' => $event->target_title ?: ''\n          ]);\n        }\n        break;\n      case 'joined':\n        $data = X::mergeArrays($data, [\n          'type' => 'user',\n          'title' => X::_('Has been included among the users of the project')\n        ]);\n        break;\n      case 'left':\n        $data = X::mergeArrays($data, [\n          'type' => 'user',\n          'title' => X::_('Has been removed from project users')\n        ]);\n        break;\n    }\n    return $data;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 240,
             "endLine": 314,
             "isDeprecated": false,
@@ -617,32 +916,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeEvent",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "event",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$event"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $event\n   * @return array\n   *\/"
         },
         "normalizeUser": {
             "name": "normalizeUser",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $user)\n  {\n    return [\n      'id' => $user->id,\n      'name' => $user->name,\n      'username' => $user->username,\n      'email' => $user->email ?? '',\n      'avatar' => $user->avatar_url,\n      'url' => $user->web_url\n    ];\n  }",
+            "code": "  public function normalizeUser(object $user): array\n  {\n    return [\n      'id' => $user->id,\n      'name' => $user->name,\n      'username' => $user->username,\n      'email' => $user->email ?? '',\n      'avatar' => $user->avatar_url,\n      'url' => $user->web_url\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 321,
             "endLine": 331,
             "isDeprecated": false,
@@ -653,32 +972,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "user",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$user"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $user\n   * @return array\n   *\/"
         },
         "normalizeMember": {
             "name": "normalizeMember",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $member)\n  {\n    return X::mergeArrays([\n      'created' => Date::format($member->created_at, 'dbdate'),\n      'author' => !empty($member->created_by) ? $this->normalizeUser($member->created_by) : [],\n      'expire' => !empty($member->expires_at) ? Date::format($member->expires_at, 'dbdate') : '',\n      'role' => $this->getProjectUsersRoles()[$member->access_level]\n    ], $this->normalizeUser($member));\n  }",
+            "code": "  public function normalizeMember(object $member): array\n  {\n    return X::mergeArrays([\n      'created' => Date::format($member->created_at, 'dbdate'),\n      'author' => !empty($member->created_by) ? $this->normalizeUser($member->created_by) : [],\n      'expire' => !empty($member->expires_at) ? Date::format($member->expires_at, 'dbdate') : '',\n      'role' => $this->getProjectUsersRoles()[$member->access_level]\n    ], $this->normalizeUser($member));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 338,
             "endLine": 346,
             "isDeprecated": false,
@@ -689,32 +1028,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeMember",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "member",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$member"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $member\n   * @return array\n   *\/"
         },
         "normalizeLabel": {
             "name": "normalizeLabel",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $label)\n  {\n    return [\n      'id' => $label->id,\n      'name' => $label->name,\n      'description' => $label->description ?: '',\n      'backgroundColor' => $label->color,\n      'fontColor' => $label->text_color,\n      'openedIssues' => $label->open_issues_count,\n      'closedIssues' => $label->closed_issues_count\n    ];\n  }",
+            "code": "  public function normalizeLabel(object $label): array\n  {\n    return [\n      'id' => $label->id,\n      'name' => $label->name,\n      'description' => $label->description ?: '',\n      'backgroundColor' => $label->color,\n      'fontColor' => $label->text_color,\n      'openedIssues' => $label->open_issues_count,\n      'closedIssues' => $label->closed_issues_count\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 353,
             "endLine": 364,
             "isDeprecated": false,
@@ -725,32 +1084,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeLabel",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "label",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$user"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $user\n   * @return array\n   *\/"
         },
         "normalizeProject": {
             "name": "normalizeProject",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $project)\n  {\n    return [\n      'id' => $project->id,\n      'type' => 'git',\n      'name' => $project->name,\n      'fullname' => $project->name_with_namespace,\n      'description' => $project->description ?: '',\n      'path' => $project->path,\n      'fullpath' => $project->path_with_namespace,\n      'url' => $project->web_url,\n      'urlGit' => $project->http_url_to_repo,\n      'urlSsh' => $project->ssh_url_to_repo,\n      'namespace' => (object)[\n        'id' => $project->namespace->id,\n        'idParent' => $project->namespace->parent_id,\n        'name' => $project->namespace->name,\n        'path' => $project->namespace->path,\n        'fullpath' => $project->namespace->full_path,\n        'url' => $project->namespace->web_url\n      ],\n      'created' => Date::format($project->created_at, 'dbdate'),\n      'creator' => $project->creator_id,\n      'private' => !empty($project->owner),\n      'visibility' => $project->visibility,\n      'defaultBranch' => $project->default_branch,\n      'archived' => $project->archived,\n      'avatar' => $project->avatar_url,\n      'license' => (object)[\n        'name' => $project->license->name,\n        'code' => $project->license->nickname\n      ],\n      'noCommits' => $project->statistics['commit_count'],\n      'size' => $project->statistics['repository_size'],\n      'noForks' => $project->forks_count,\n      'noStars' => $project->star_count\n    ];\n  }",
+            "code": "  public function normalizeProject(object $project): array\n  {\n    return [\n      'id' => $project->id,\n      'type' => 'git',\n      'name' => $project->name,\n      'fullname' => $project->name_with_namespace,\n      'description' => $project->description ?: '',\n      'path' => $project->path,\n      'fullpath' => $project->path_with_namespace,\n      'url' => $project->web_url,\n      'urlGit' => $project->http_url_to_repo,\n      'urlSsh' => $project->ssh_url_to_repo,\n      'namespace' => (object)[\n        'id' => $project->namespace->id,\n        'idParent' => $project->namespace->parent_id,\n        'name' => $project->namespace->name,\n        'path' => $project->namespace->path,\n        'fullpath' => $project->namespace->full_path,\n        'url' => $project->namespace->web_url\n      ],\n      'created' => Date::format($project->created_at, 'dbdate'),\n      'creator' => $project->creator_id,\n      'private' => !empty($project->owner),\n      'visibility' => $project->visibility,\n      'defaultBranch' => $project->default_branch,\n      'archived' => $project->archived,\n      'avatar' => $project->avatar_url,\n      'license' => (object)[\n        'name' => $project->license->name,\n        'code' => $project->license->nickname\n      ],\n      'noCommits' => $project->statistics['commit_count'],\n      'size' => $project->statistics['repository_size'],\n      'noForks' => $project->forks_count,\n      'noStars' => $project->star_count\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 371,
             "endLine": 408,
             "isDeprecated": false,
@@ -761,32 +1140,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeProject",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$project"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $project\n   * @return array\n   *\/"
         },
         "normalizeIssue": {
             "name": "normalizeIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $issue)\n  {\n    return [\n      'id' => $issue->id,\n      'iid' => $issue->iid,\n      'title' => $issue->title,\n      'description' => $issue->description ?: '',\n      'url' => $issue->web_url,\n      'author' => $this->normalizeUser((object)$issue->author),\n      'created' => Date::format($issue->created_at, 'dbdate'),\n      'updated' => !empty($issue->updated_at) ?\n        Date::format($issue->updated_at, 'dbdate') :\n        Date::format($issue->created_at, 'dbdate'),\n      'closed' => !empty($issue->closed_at) ? Date::format($issue->closed_at, 'dbdate') : '',\n      'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser((object)$issue->closed_by) : [],\n      'assigned' => !empty($issue->assignees) ? $this->normalizeUser((object)$issue->assignees[0]) : [],\n      'private' => $issue->confidential,\n      'labels' => $issue->labels,\n      'state' => $issue->state,\n      'notes' => $issue->user_notes_count,\n      'tasks' => [\n        'count' => $issue->task_completion_status->count ?: 0,\n        'completed' => $issue->task_completion_status->completed_count ?: 0,\n      ],\n      'originalIssue' => $issue\n    ];\n  }",
+            "code": "  public function normalizeIssue(object $issue): array\n  {\n    return [\n      'id' => $issue->id,\n      'iid' => $issue->iid,\n      'title' => $issue->title,\n      'description' => $issue->description ?: '',\n      'url' => $issue->web_url,\n      'author' => $this->normalizeUser((object)$issue->author),\n      'created' => Date::format($issue->created_at, 'dbdate'),\n      'updated' => !empty($issue->updated_at) ?\n        Date::format($issue->updated_at, 'dbdate') :\n        Date::format($issue->created_at, 'dbdate'),\n      'closed' => !empty($issue->closed_at) ? Date::format($issue->closed_at, 'dbdate') : '',\n      'closedBy' => !empty($issue->closed_by) ? $this->normalizeUser((object)$issue->closed_by) : [],\n      'assigned' => !empty($issue->assignees) ? $this->normalizeUser((object)$issue->assignees[0]) : [],\n      'private' => $issue->confidential,\n      'labels' => $issue->labels,\n      'state' => $issue->state,\n      'notes' => $issue->user_notes_count,\n      'tasks' => [\n        'count' => $issue->task_completion_status->count ?: 0,\n        'completed' => $issue->task_completion_status->completed_count ?: 0,\n      ],\n      'originalIssue' => $issue\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 415,
             "endLine": 441,
             "isDeprecated": false,
@@ -797,32 +1196,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeIssue",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "issue",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$issue"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $issue\n   * @return array\n   *\/"
         },
         "insertBranch": {
             "name": "insertBranch",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch, string $fromBranch)\n  {\n    return $this->getConnection()->insertBranch($idProject, $branch, $fromBranch);\n  }",
+            "code": "  public function insertBranch(string $idProject, string $branch, string $fromBranch): array\n  {\n    return $this->getConnection()->insertBranch($idProject, $branch, $fromBranch);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 450,
             "endLine": 453,
             "isDeprecated": false,
@@ -833,15 +1252,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertBranch",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -852,6 +1276,11 @@
                     "name": "branch",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -861,24 +1290,56 @@
                     "name": "fromBranch",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ranch"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$branch"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$from",
+                        "description": "ranch"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param string $branch\n   * @param string $fromBranch\n   * @return array\n   *\/"
         },
         "deleteBranch": {
             "name": "deleteBranch",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch)\n  {\n    return $this->getConnection()->deleteBranch($idProject, $branch);\n  }",
+            "code": "  public function deleteBranch(string $idProject, string $branch): bool\n  {\n    return $this->getConnection()->deleteBranch($idProject, $branch);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 461,
             "endLine": 464,
             "isDeprecated": false,
@@ -889,15 +1350,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "deleteBranch",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -908,23 +1374,49 @@
                     "name": "branch",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$branch"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param string $branch\n   * @return bool\n   *\/"
         },
         "insertProjectUser": {
             "name": "insertProjectUser",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser, int $idRole)\n  {\n    return $this->getConnection()->insertProjectUser($idProject, $idUser, $idRole);\n  }",
+            "code": "  public function insertProjectUser(string $idProject, int $idUser, int $idRole): array\n  {\n    return $this->getConnection()->insertProjectUser($idProject, $idUser, $idRole);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 473,
             "endLine": 476,
             "isDeprecated": false,
@@ -935,15 +1427,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -954,6 +1451,11 @@
                     "name": "idUser",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -964,24 +1466,57 @@
                     "name": "idRole",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ols"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ser"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ols"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idUser\n   * @param int $idRols\n   * @return array\n   *\/"
         },
         "removeProjectUser": {
             "name": "removeProjectUser",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser)\n  {\n    return $this->getConnection()->removeProjectUser($idProject, $idUser);\n  }",
+            "code": "  public function removeProjectUser(string $idProject, int $idUser): bool\n  {\n    return $this->getConnection()->removeProjectUser($idProject, $idUser);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 484,
             "endLine": 487,
             "isDeprecated": false,
@@ -992,15 +1527,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "removeProjectUser",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1011,24 +1551,51 @@
                     "name": "idUser",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ser"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ser"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idUser\n   * @return bool\n   *\/"
         },
         "getProjectIssues": {
             "name": "getProjectIssues",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return \\array_map(\n      [$this, 'normalizeIssue'],\n      $this->getConnection()->getIssues($idProject)\n    );\n  }",
+            "code": "  public function getProjectIssues(string $idProject): array\n  {\n    return \\array_map(\n      [$this, 'normalizeIssue'],\n      $this->getConnection()->getIssues($idProject)\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 494,
             "endLine": 500,
             "isDeprecated": false,
@@ -1039,33 +1606,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectIssues",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "roject"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "getProjectIssue": {
             "name": "getProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return $this->normalizeIssue((object)$this->getConnection(true)->getIssue($idIssue));\n  }",
+            "code": "  public function getProjectIssue(string $idProject, int $idIssue): array\n  {\n    return $this->normalizeIssue((object)$this->getConnection(true)->getIssue($idIssue));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 507,
             "endLine": 510,
             "isDeprecated": false,
@@ -1076,15 +1664,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getProjectIssue",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1095,23 +1688,44 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @return array\n   *\/"
         },
         "createProjectIssue": {
             "name": "createProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    if ($issue = $this->getConnection()->createIssue($idProject, $title, $description, $labels, $assigned, $private, $date)) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "code": "  public function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    if ($issue = $this->getConnection()->createIssue($idProject, $title, $description, $labels, $assigned, $private, $date)) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 523,
             "endLine": 537,
             "isDeprecated": false,
@@ -1122,16 +1736,21 @@
             "returnsReference": false,
             "numberOfParameters": 7,
             "numberOfRequiredParameters": 2,
+            "shortName": "createProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1142,6 +1761,11 @@
                     "name": "title",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1151,6 +1775,11 @@
                     "name": "description",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1160,6 +1789,11 @@
                     "name": "labels",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1168,7 +1802,13 @@
                 {
                     "name": "assigned",
                     "position": 4,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1178,6 +1818,11 @@
                     "name": "private",
                     "position": 5,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1187,23 +1832,74 @@
                     "name": "date",
                     "position": 6,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$description"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$labels"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$assigned"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$private"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$date"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param string $title\n   * @param string $description\n   * @param array $labels\n   * @param int $assigned\n   * @param bool $private\n   * @param string $date\n   * @return array|null\n   *\/"
         },
         "editProjectIssue": {
             "name": "editProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false)\n  {\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->editIssue($idProject, $i['iid'], $title, $description, $labels, $assigned, $private))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "code": "  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->editIssue($idProject, $i['iid'], $title, $description, $labels, $assigned, $private))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 549,
             "endLine": 566,
             "isDeprecated": false,
@@ -1214,16 +1910,21 @@
             "returnsReference": false,
             "numberOfParameters": 7,
             "numberOfRequiredParameters": 3,
+            "shortName": "editProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1234,6 +1935,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1243,6 +1949,11 @@
                     "name": "title",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1252,6 +1963,11 @@
                     "name": "description",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1261,6 +1977,11 @@
                     "name": "labels",
                     "position": 4,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1269,7 +1990,13 @@
                 {
                     "name": "assigned",
                     "position": 5,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1279,23 +2006,69 @@
                     "name": "private",
                     "position": 6,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$title"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$description"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$labels"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$assigned"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$private"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param string $title\n   * @param string $description\n   * @param array $labels\n   * @param int $assigned\n   * @param bool $private\n   * @return array|null\n   *\/"
         },
         "closeProjectIssue": {
             "name": "closeProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->closeIssue($idProject, $i['iid']))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "code": "  public function closeProjectIssue(string $idProject, int $idIssue): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->closeIssue($idProject, $i['iid']))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 574,
             "endLine": 583,
             "isDeprecated": false,
@@ -1306,16 +2079,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "closeProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1326,24 +2104,51 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ssue"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @return null|array\n   *\/"
         },
         "reopenProjectIssue": {
             "name": "reopenProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->reopenIssue($idProject, $i['iid']))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "code": "  public function reopenProjectIssue(string $idProject, int $idIssue): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->reopenIssue($idProject, $i['iid']))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 591,
             "endLine": 600,
             "isDeprecated": false,
@@ -1354,16 +2159,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "reopenProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1374,24 +2184,51 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ssue"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @return null|array\n   *\/"
         },
         "assignProjectIssue": {
             "name": "assignProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idUser)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->assignIssue($idProject, $i['iid'], $idUser))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "code": "  public function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($issue = $this->getConnection()->assignIssue($idProject, $i['iid'], $idUser))\n    ) {\n      return $this->normalizeIssue((object)$issue);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 609,
             "endLine": 618,
             "isDeprecated": false,
@@ -1402,16 +2239,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "assignProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1422,6 +2264,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1432,24 +2279,57 @@
                     "name": "idUser",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ser"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ser"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @param int $idUser\n   * @return null|array\n   *\/"
         },
         "getProjectIssueComment": {
             "name": "getProjectIssueComment",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->getIssueNote($idProject, $i['iid'], $idComment))\n    ){\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return [];\n  }",
+            "code": "  public function getProjectIssueComment(string $idProject, int $idIssue, int $idComment): array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->getIssueNote($idProject, $i['iid'], $idComment))\n    ){\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 626,
             "endLine": 635,
             "isDeprecated": false,
@@ -1460,15 +2340,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "getProjectIssueComment",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1479,6 +2364,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1489,23 +2379,50 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @return array\n   *\/"
         },
         "getProjectIssueComments": {
             "name": "getProjectIssueComments",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return \\array_map(\n        [$this, 'normalizeIssueComment'],\n        $this->getConnection()->getIssueNotes($idProject, $i['iid'])\n      );\n    }\n    return [];\n  }",
+            "code": "  public function getProjectIssueComments(string $idProject, int $idIssue): array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return \\array_map(\n        [$this, 'normalizeIssueComment'],\n        $this->getConnection()->getIssueNotes($idProject, $i['iid'])\n      );\n    }\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 643,
             "endLine": 654,
             "isDeprecated": false,
@@ -1516,15 +2433,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getProjectIssueComments",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1535,24 +2457,51 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "ssue"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @return array\n   *\/"
         },
         "normalizeIssueComment": {
             "name": "normalizeIssueComment",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $comment)\n  {\n    return [\n      'id' => $comment->id,\n      'author' => $this->normalizeUser((object)$comment->author),\n      'created' => Date::format($comment->created_at, 'dbdate'),\n      'updated' => !empty($comment->updated_at) ?\n        Date::format($comment->updated_at, 'dbdate') :\n        Date::format($comment->created_at, 'dbdate'),\n      'content' => $comment->body,\n      'auto' => $comment->system,\n      'private' => $comment->internal,\n      'attachment' => $comment->attachment,\n      'originalComment' => $comment\n    ];\n  }",
+            "code": "  public function normalizeIssueComment(object $comment): array\n  {\n    return [\n      'id' => $comment->id,\n      'author' => $this->normalizeUser((object)$comment->author),\n      'created' => Date::format($comment->created_at, 'dbdate'),\n      'updated' => !empty($comment->updated_at) ?\n        Date::format($comment->updated_at, 'dbdate') :\n        Date::format($comment->created_at, 'dbdate'),\n      'content' => $comment->body,\n      'auto' => $comment->system,\n      'private' => $comment->internal,\n      'attachment' => $comment->attachment,\n      'originalComment' => $comment\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 661,
             "endLine": 676,
             "isDeprecated": false,
@@ -1563,32 +2512,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeIssueComment",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "comment",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "object",
+                        "name": "$issue"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param object $issue\n   * @return array\n   *\/"
         },
         "insertProjectIssueComment": {
             "name": "insertProjectIssueComment",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = '')\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->createIssueNote($idProject, $i['iid'], $content, $pvt, $date))\n    ) {\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return null;\n  }",
+            "code": "  public function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->createIssueNote($idProject, $i['iid'], $content, $pvt, $date))\n    ) {\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 687,
             "endLine": 696,
             "isDeprecated": false,
@@ -1599,16 +2568,21 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectIssueComment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1619,6 +2593,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1629,6 +2608,11 @@
                     "name": "content",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1638,6 +2622,11 @@
                     "name": "pvt",
                     "position": 3,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1647,23 +2636,65 @@
                     "name": "date",
                     "position": 4,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$content"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$pvt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$date"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @param string $content\n   * @param bool $pvt\n   * @param string $date\n   * @return null|array\n   *\/"
         },
         "editProjectIssueComment": {
             "name": "editProjectIssueComment",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->editIssueNote($idProject, $i['iid'], $idComment, $content, $pvt))\n    ) {\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return null;\n  }",
+            "code": "  public function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n      && ($comment = $this->getConnection()->editIssueNote($idProject, $i['iid'], $idComment, $content, $pvt))\n    ) {\n      return $this->normalizeIssueComment((object)$comment);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 707,
             "endLine": 716,
             "isDeprecated": false,
@@ -1674,16 +2705,21 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
+            "shortName": "editProjectIssueComment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1694,6 +2730,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1704,6 +2745,11 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1714,6 +2760,11 @@
                     "name": "content",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1723,23 +2774,66 @@
                     "name": "pvt",
                     "position": 4,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "omment"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$content"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$pvt"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @param int $idComment\n   * @param string $content\n   * @param bool $pvt\n   * @return null|array\n   *\/"
         },
         "deleteProjectIssueComment": {
             "name": "deleteProjectIssueComment",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->deleteIssueNote($idProject, $i['iid'], $idComment);\n    }\n    return false;\n  }",
+            "code": "  public function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->deleteIssueNote($idProject, $i['iid'], $idComment);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 725,
             "endLine": 733,
             "isDeprecated": false,
@@ -1750,15 +2844,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "deleteProjectIssueComment",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1769,6 +2868,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1779,24 +2883,57 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "omment"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "omment"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @param int $idComment\n   * @return bool\n   *\/"
         },
         "createProjectLabel": {
             "name": "createProjectLabel",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $name, string $color)\n  {\n    if ($label = $this->getConnection()->createProjectLabel($idProject, $name, $color)) {\n      return $this->normalizeLabel((object)$label);\n    }\n    return null;\n  }",
+            "code": "  public function createProjectLabel(string $idProject, string $name, string $color): ?array\n  {\n    if ($label = $this->getConnection()->createProjectLabel($idProject, $name, $color)) {\n      return $this->normalizeLabel((object)$label);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 742,
             "endLine": 748,
             "isDeprecated": false,
@@ -1807,16 +2944,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "createProjectLabel",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1827,6 +2969,11 @@
                     "name": "name",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1836,23 +2983,54 @@
                     "name": "color",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$color"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param string $name\n   * @param string $color\n   * @return null|array\n  *\/"
         },
         "addLabelToProjectIssue": {
             "name": "addLabelToProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->addLabelToProjectIssue($idProject, $i['iid'], $label);\n    }\n    return false;\n  }",
+            "code": "  public function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->addLabelToProjectIssue($idProject, $i['iid'], $label);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 757,
             "endLine": 765,
             "isDeprecated": false,
@@ -1863,15 +3041,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "addLabelToProjectIssue",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1882,6 +3065,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1892,23 +3080,55 @@
                     "name": "label",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$label"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @param string $label\n   * @return bool\n   *\/"
         },
         "removeLabelFromProjectIssue": {
             "name": "removeLabelFromProjectIssue",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->removeLabelFromProjectIssue($idProject, $i['iid'], $label);\n    }\n    return false;\n  }",
+            "code": "  public function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool\n  {\n    if (($i = $this->getConnection(true)->getIssue($idIssue))\n      && !empty($i['iid'])\n    ){\n      return $this->getConnection()->removeLabelFromProjectIssue($idProject, $i['iid'], $label);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 774,
             "endLine": 782,
             "isDeprecated": false,
@@ -1919,15 +3139,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "removeLabelFromProjectIssue",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1938,6 +3163,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1948,23 +3178,55 @@
                     "name": "label",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "roject"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "ssue"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$label"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $idProject\n   * @param int $idIssue\n   * @param string $label\n   * @return bool\n   *\/"
         },
         "analyzeWebhook": {
             "name": "analyzeWebhook",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/GitLab.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data)\n  {\n    $d = [\n      'idProject' => $data['project_id'] ?? null,\n      'idUser' => $data['user_id'] ?? (!empty($data['user']) ? $data['user']['id'] : null),\n    ];\n    switch ($data['event_type']) {\n      case 'note':\n        if (empty($data['object_attributes']['system'])) {\n          $d = X::mergeArrays($d, [\n            'type' => 'comment',\n            'action' => 'insert',\n            'idIssue' => $data['issue']['id'],\n            'idComment' => $data['object_attributes']['id'],\n            'text' => $data['object_attributes']['note'],\n            'created' => Date::format($data['object_attributes']['created_at'], 'dbdate'),\n            'updated' => !empty($data['object_attributes']['updated_at']) ?\n              Date::format($data['object_attributes']['updated_at'], 'dbdate') :\n              Date::format($data['object_attributes']['created_at'], 'dbdate')\n          ]);\n        }\n        break;\n    }\n    return $d;\n  }",
+            "code": "  public function analyzeWebhook(array $data): array\n  {\n    $d = [\n      'idProject' => $data['project_id'] ?? null,\n      'idUser' => $data['user_id'] ?? (!empty($data['user']) ? $data['user']['id'] : null),\n    ];\n    switch ($data['event_type']) {\n      case 'note':\n        if (empty($data['object_attributes']['system'])) {\n          $d = X::mergeArrays($d, [\n            'type' => 'comment',\n            'action' => 'insert',\n            'idIssue' => $data['issue']['id'],\n            'idComment' => $data['object_attributes']['id'],\n            'text' => $data['object_attributes']['note'],\n            'created' => Date::format($data['object_attributes']['created_at'], 'dbdate'),\n            'updated' => !empty($data['object_attributes']['updated_at']) ?\n              Date::format($data['object_attributes']['updated_at'], 'dbdate') :\n              Date::format($data['object_attributes']['created_at'], 'dbdate')\n          ]);\n        }\n        break;\n    }\n    return $d;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 785,
             "endLine": 809,
             "isDeprecated": false,
@@ -1975,15 +3237,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "analyzeWebhook",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "data",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1996,11 +3263,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "code": "  public function hasAdminAccessToken(string $id = ''): bool\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 24,
             "endLine": 27,
             "isDeprecated": false,
@@ -2011,15 +3281,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "hasAdminAccessToken",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -2032,11 +3307,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "code": "  public function getAdminAccessToken(string $id = ''): ?string\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 30,
             "endLine": 33,
             "isDeprecated": false,
@@ -2047,16 +3325,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getAdminAccessToken",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -2069,11 +3352,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "code": "  public function getUserAccessToken(string $id = ''): string\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 36,
             "endLine": 67,
             "isDeprecated": false,
@@ -2084,15 +3370,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUserAccessToken",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -2105,11 +3396,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\GitLab",
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "code": "  public function getServer(string $id = ''): object\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 70,
             "endLine": 76,
             "isDeprecated": false,
@@ -2120,26 +3414,269 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getServer",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "normalizeServer": {
+            "name": "normalizeServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function normalizeServer(array $server): object\n  {\n    try {\n      $ut = $this->getUserAccessToken($server['id']);\n    }\n    catch(\\Exception $e) {\n      $ut = '';\n    }\n    return (object)[\n      'id' => $server['id'],\n      'name' => $server['text'],\n      'host' => 'https:\/\/' . $server['code'],\n      'type' => $server['type'],\n      'engine' => $server['engine'],\n      'userAccessToken' => $ut,\n      'hasAdminAccessToken' => $this->hasAdminAccessToken($server['id']),\n      'hasUserAccessToken'=> !empty($ut)\n    ];\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
+            "startLine": 79,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "normalizeServer",
+            "returns": [
+                "object"
+            ],
+            "arguments": [
+                {
+                    "name": "server",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "checkServerHost": {
+            "name": "checkServerHost",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Vcs\\GitLab",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function checkServerHost(string $host)\n  {\n    if (!str_starts_with($host, 'http')) {\n      $host = 'https:\/\/' . $host;\n    }\n    if (!Str::isUrl($host)) {\n      throw new \\Exception(X::_('No valid host URL: %s', $host));\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
+            "startLine": 100,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "checkServerHost",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Db The bbn\\Db class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "pwd": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Appui\\Passwords The bbn\\Appui\\Passwords class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "idServer": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\GitLab",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string The server ID",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "server": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\GitLab",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var object The server info",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "userConnection": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\GitLab",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Api\\GitLab The GitLab class instance for normal user",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "adminConnection": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\GitLab",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Api\\GitLab The GitLab class instance for admin user",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "opt": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Appui\\Option The bbn\\Appui\\Option class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "idUser": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\GitLab"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\Appui\\Passwords": "Passwords",
+        "bbn\\Appui\\Option": "Option",
+        "bbn\\X": "X",
+        "bbn\\Date": "Date"
+    },
+    "dummyComments": [
+        "\/**\n * VCS\\Git class\n * @category Appui\n * @package Appui\\Vcs\n * @author Mirko Argentino <mirko@bbn.solutions>\n * @license http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License\n * @link https:\/\/bbn.io\/bbn-php\/doc\/class\/Appui\/Vcs\/Git\n *\/"
+    ],
     "summary": "VCS\\Git class",
     "description": "",
     "description_parts": []

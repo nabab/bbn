@@ -13,6 +13,8 @@
     },
     "name": "bbn\\Db\\Query",
     "namespace": true,
+    "realName": "Query",
+    "realNamespace": "bbn\\Db",
     "traits": [],
     "interfaces": {
         "IteratorAggregate": {
@@ -26,10 +28,10 @@
         }
     },
     "fileName": "\/Db\/Query.php",
-    "startLine": 22,
-    "endLine": 364,
-    "numMethods": 30,
-    "numProperties": 1,
+    "startLine": 24,
+    "endLine": 371,
+    "numMethods": 32,
+    "numProperties": 7,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [
@@ -38,7 +40,6 @@
         "bbn\\Db\\Actions"
     ],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -59,22 +60,111 @@
     "namespaceName": "bbn\\Db",
     "shortName": "Query",
     "contentConstructor": {
-        "file": "bbn\\Db\\Query",
         "returns": []
     },
     "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function __construct(SqlEngines $db)\n  {\n    if (!empty($this->queryString)) {\n      $this->db        = $db;\n      $last            = $this->db->getRealLastParams();\n      $this->values    = $last['values'] ?? [];\n      $this->write     = $last['write'] ?? false;\n      $this->structure = $last['structure'] ?? [];\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 62,
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "db",
+                    "position": 0,
+                    "type": "bbn\\Db\\SqlEngines",
+                    "type_arr": [
+                        "bbn\\Db\\SqlEngines"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "SqlEngines",
+                        "name": "$db"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param SqlEngines $db\n   * @throws \\Exception\n   *\/"
+        },
+        "isWrite": {
+            "name": "isWrite",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isWrite(): bool\n  {\n    return $this->write;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 73,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isWrite",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        },
         "init": {
             "name": "init",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $values = [])\n  {\n    $this->values = $values;\n    $this->res    = null;\n    return $this;\n  }",
-            "startLine": 76,
-            "endLine": 81,
+            "code": "  public function init(array $values = []): self\n  {\n    $this->values = $values;\n    $this->res    = null;\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 83,
+            "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -83,55 +173,63 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "init",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "values",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$values"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $values\n   * @return self\n   *\/"
         },
         "execute": {
             "name": "execute",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $args = NULL)\n  {\n    if (($this->res === null) || ($args !== null)) {\n      $this->res = 1;\n      if (\\is_array($args)) {\n        try{\n          return parent::execute($args);\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      elseif ($args !== null) {\n        $args = \\func_get_args();\n        try{\n          return parent::execute(...$args);\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      else{\n        if ($this->values && \\is_array($this->values) && count($this->values)) {\n          foreach ($this->values as $i => $v){\n            if (bbn\\Str::isBuid($v)) {\n              if ($this->db->getEngine() === 'pgsql') {\n                $this->bindValue($i + 1, $v, \\PDO::PARAM_LOB);\n              } else {\n                $this->bindValue($i + 1, $v);\n              }\n            }\n            else{\n              if (\\is_int($v)) {\n                $param = \\PDO::PARAM_INT;\n              }\n              elseif (\\is_bool($v)) {\n                $param = \\PDO::PARAM_BOOL;\n              }\n              elseif ($v === null) {\n                $param = \\PDO::PARAM_NULL;\n              }\n              else {\n                $param = \\PDO::PARAM_STR;\n              }\n\n              $this->bindValue($i + 1, $v, $param);\n            }\n          }\n        }\n\n        try{\n          return parent::execute();\n        }\n        catch (\\PDOException $e){\n          $this->db->error($e);\n        }\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 88,
-            "endLine": 148,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "bool"
-            ],
+            "code": "  public function execute(?array $args = null): bool\n  {\n    if (($this->res === null) || ($args !== null)) {\n      $this->res = 1;\n      if (\\is_array($args)) {\n        try{\n          return parent::execute($args);\n        }\n        catch (PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      elseif ($args !== null) {\n        $args = \\func_get_args();\n        try{\n          return parent::execute(...$args);\n        }\n        catch (PDOException $e){\n          $this->db->error($e);\n        }\n      }\n      else{\n        if ($this->values && \\is_array($this->values) && count($this->values)) {\n          foreach ($this->values as $i => $v){\n            if (Str::isBuid($v)) {\n              if ($this->db->getEngine() === 'pgsql') {\n                $this->bindValue($i + 1, $v, PDO::PARAM_LOB);\n              } else {\n                $this->bindValue($i + 1, $v);\n              }\n            }\n            else{\n              if (\\is_int($v)) {\n                $param = PDO::PARAM_INT;\n              }\n              elseif (\\is_bool($v)) {\n                $param = PDO::PARAM_BOOL;\n              }\n              elseif ($v === null) {\n                $param = PDO::PARAM_NULL;\n              }\n              else {\n                $param = PDO::PARAM_STR;\n              }\n\n              $this->bindValue($i + 1, $v, $param);\n            }\n          }\n        }\n\n        try{\n          return parent::execute();\n        }\n        catch (PDOException $e){\n          $this->db->error($e);\n        }\n      }\n    }\n\n    return false;\n  }",
             "parent": {
                 "name": "execute",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -142,13 +240,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
+                "shortName": "execute",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "params",
                         "position": 0,
-                        "type": "array",
+                        "type": "null|array",
+                        "type_arr": [
+                            "null",
+                            "array"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -156,51 +260,75 @@
                     }
                 ]
             },
-            "arguments": [
-                {
-                    "name": "args",
-                    "position": 0,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "columnCount": {
-            "name": "columnCount",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Query",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    $this->execute();\n    return parent::columnCount();\n  }",
-            "startLine": 154,
-            "endLine": 158,
+            "trait": false,
+            "startLine": 95,
+            "endLine": 155,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "execute",
             "returns": [
-                "int"
+                "bool"
             ],
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$args"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array|null $args\n   * @return bool\n   *\/"
+        },
+        "columnCount": {
+            "name": "columnCount",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function columnCount(): int\n  {\n    $this->execute();\n    return parent::columnCount();\n  }",
             "parent": {
                 "name": "columnCount",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -211,46 +339,57 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "columnCount",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
-            "arguments": []
-        },
-        "fetch": {
-            "name": "fetch",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Query",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(int $mode = 4, int $orientation = 0, int $offset = 0)\n  {\n    $this->execute();\n    return $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));\n  }",
-            "startLine": 167,
-            "endLine": 171,
+            "trait": false,
+            "startLine": 161,
+            "endLine": 165,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "columnCount",
             "returns": [
-                null,
-                "mixed"
+                "int"
             ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int\n   *\/"
+        },
+        "fetch": {
+            "name": "fetch",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fetch(int $mode = PDO::FETCH_BOTH, int $orientation = PDO::FETCH_ORI_NEXT, int $offset = 0): mixed\n  {\n    $this->execute();\n    return $this->db->correctTypes(parent::fetch($mode, $orientation, $offset));\n  }",
             "parent": {
                 "name": "fetch",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -261,13 +400,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 0,
+                "shortName": "fetch",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "mode",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -277,6 +421,11 @@
                         "name": "cursorOrientation",
                         "position": 1,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -286,6 +435,11 @@
                         "name": "cursorOffset",
                         "position": 2,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -293,11 +447,32 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 174,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fetch",
+            "returns": [
+                null,
+                "mixed"
+            ],
             "arguments": [
                 {
                     "name": "mode",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 4,
@@ -307,6 +482,11 @@
                     "name": "orientation",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -316,25 +496,55 @@
                     "name": "offset",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$orientation"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$offset"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $mode\n   * @param int $orientation\n   * @param int $offset\n   * @return mixed\n   *\/"
         },
         "_fetchAll": {
             "name": "_fetchAll",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($fetch_style = 4, $fetch_argument = false, $ctor_args = false)\n  {\n    $this->execute();\n    if ($ctor_args) {\n      $res = parent::fetchAll($fetch_style, $fetch_argument, $ctor_args);\n    }\n    elseif ($fetch_argument) {\n      $res = parent::fetchAll($fetch_style, $fetch_argument);\n    }\n    else{\n      $res = parent::fetchAll($fetch_style);\n    }\n\n    return $this->db->correctTypes($res);\n  }",
-            "startLine": 180,
-            "endLine": 194,
+            "code": "  public function _fetchAll($fetch_style = PDO::FETCH_BOTH, $fetch_argument = false, $ctor_args = false)\n  {\n    $this->execute();\n    if ($ctor_args) {\n      $res = parent::fetchAll($fetch_style, $fetch_argument, $ctor_args);\n    }\n    elseif ($fetch_argument) {\n      $res = parent::fetchAll($fetch_style, $fetch_argument);\n    }\n    else{\n      $res = parent::fetchAll($fetch_style);\n    }\n\n    return $this->db->correctTypes($res);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 187,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -343,13 +553,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
+            "shortName": "_fetchAll",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "fetch_style",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 4,
@@ -360,6 +573,9 @@
                     "name": "fetch_argument",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -370,48 +586,66 @@
                     "name": "ctor_args",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "args"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$fetch",
+                        "description": "style"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$fetch",
+                        "description": "argument"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$ctor",
+                        "description": "args"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int  $fetch_style\n   * @param bool $fetch_argument\n   * @param bool $ctor_args\n   * @return bool|array\n   *\/"
         },
         "fetchColumn": {
             "name": "fetchColumn",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $column_number = 0)\n  {\n    $this->execute();\n    return $this->db->correctTypes(parent::fetchColumn($column_number));\n  }",
-            "startLine": 201,
-            "endLine": 205,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "mixed"
-            ],
+            "code": "  public function fetchColumn(int $column_number = 0): mixed\n  {\n    $this->execute();\n    return $this->db->correctTypes(parent::fetchColumn($column_number));\n  }",
             "parent": {
                 "name": "fetchColumn",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -422,13 +656,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 0,
+                "shortName": "fetchColumn",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "column",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -436,52 +675,77 @@
                     }
                 ]
             },
-            "arguments": [
-                {
-                    "name": "column_number",
-                    "position": 0,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": "",
-                    "description": "number"
-                }
-            ]
-        },
-        "fetchObject": {
-            "name": "fetchObject",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Query",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $class_name = 'stdClass', array $ctor_args = [])\n  {\n    $this->execute();\n    return $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));\n  }",
-            "startLine": 213,
-            "endLine": 217,
+            "trait": false,
+            "startLine": 208,
+            "endLine": 212,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "fetchColumn",
             "returns": [
-                "stdClass"
+                null,
+                "mixed"
             ],
+            "arguments": [
+                {
+                    "name": "column_number",
+                    "position": 0,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "number"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$column",
+                        "description": "number"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $column_number\n   * @return mixed\n   *\/"
+        },
+        "fetchObject": {
+            "name": "fetchObject",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fetchObject(?string $class_name = 'stdClass', array $ctor_args = []): \\stdClass\n  {\n    $this->execute();\n    return $this->db->correctTypes(parent::fetchObject($class_name,$ctor_args));\n  }",
             "parent": {
                 "name": "fetchObject",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -492,13 +756,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 0,
+                "shortName": "fetchObject",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "class",
                         "position": 0,
-                        "type": "string",
+                        "type": "null|string",
+                        "type_arr": [
+                            "null",
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": "stdClass",
@@ -508,6 +778,11 @@
                         "name": "constructorArgs",
                         "position": 1,
                         "type": "array",
+                        "type_arr": [
+                            "array"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": [],
@@ -515,11 +790,32 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 220,
+            "endLine": 224,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fetchObject",
+            "returns": [
+                "stdClass"
+            ],
             "arguments": [
                 {
                     "name": "class_name",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "stdClass",
@@ -530,47 +826,62 @@
                     "name": "ctor_args",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": "",
                     "description": "args"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$class",
+                        "description": "name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$ctor",
+                        "description": "args"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $class_name\n   * @param array  $ctor_args\n   * @return mixed\n   *\/"
         },
         "rowCount": {
             "name": "rowCount",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->execute();\n    return parent::rowCount();\n  }",
-            "startLine": 223,
-            "endLine": 227,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "int"
-            ],
+            "code": "  public function rowCount(): int\n  {\n    $this->execute();\n    return parent::rowCount();\n  }",
             "parent": {
                 "name": "rowCount",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -581,45 +892,57 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "rowCount",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
-            "arguments": []
-        },
-        "getColumnMeta": {
-            "name": "getColumnMeta",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Query",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($column = 0)\n  {\n    $this->execute();\n    return parent::getColumnMeta($column);\n  }",
-            "startLine": 234,
-            "endLine": 238,
+            "trait": false,
+            "startLine": 230,
+            "endLine": 234,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "rowCount",
             "returns": [
-                "array"
+                "int"
             ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int\n   *\/"
+        },
+        "getColumnMeta": {
+            "name": "getColumnMeta",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getColumnMeta($column=0): array\n  {\n    $this->execute();\n    return parent::getColumnMeta($column);\n  }",
             "parent": {
                 "name": "getColumnMeta",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -630,13 +953,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "getColumnMeta",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "column",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -644,51 +972,72 @@
                     }
                 ]
             },
-            "arguments": [
-                {
-                    "name": "column",
-                    "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                }
-            ]
-        },
-        "nextRowset": {
-            "name": "nextRowset",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Db\\Query",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    $this->execute();\n    return parent::nextRowset();\n  }",
-            "startLine": 244,
-            "endLine": 248,
+            "trait": false,
+            "startLine": 241,
+            "endLine": 245,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
+            "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getColumnMeta",
             "returns": [
-                "bool"
+                "array"
             ],
+            "arguments": [
+                {
+                    "name": "column",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$column"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $column\n   * @return array\n   *\/"
+        },
+        "nextRowset": {
+            "name": "nextRowset",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function nextRowset(): bool\n  {\n    $this->execute();\n    return parent::nextRowset();\n  }",
             "parent": {
                 "name": "nextRowset",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -699,24 +1048,48 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "nextRowset",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 251,
+            "endLine": 255,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "nextRowset",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return bool\n   *\/"
         },
         "getRow": {
             "name": "getRow",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetch(\\PDO::FETCH_ASSOC) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 254,
-            "endLine": 261,
+            "code": "  public function getRow(): ?array\n  {\n    if (!$this->write) {\n      return $this->fetch(PDO::FETCH_ASSOC) ?: null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 261,
+            "endLine": 268,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -725,25 +1098,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRow",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array|boolean\n   *\/"
         },
         "getRows": {
             "name": "getRows",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      $r = $this->_fetchAll(\\PDO::FETCH_ASSOC);\n      return $r === false ? null : $r;\n    }\n\n    return null;\n  }",
-            "startLine": 267,
-            "endLine": 275,
+            "code": "  public function getRows(): ?array\n  {\n    if (!$this->write) {\n      $r = $this->_fetchAll(PDO::FETCH_ASSOC);\n      return $r === false ? null : $r;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 274,
+            "endLine": 282,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -752,25 +1134,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRows",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|array\n   *\/"
         },
         "getIrow": {
             "name": "getIrow",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetch(\\PDO::FETCH_NUM) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 281,
-            "endLine": 288,
+            "code": "  public function getIrow(): ?array\n  {\n    if (!$this->write) {\n      return $this->fetch(PDO::FETCH_NUM) ?: null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 288,
+            "endLine": 295,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -779,25 +1170,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getIrow",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|array\n   *\/"
         },
         "getIrows": {
             "name": "getIrows",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(\\PDO::FETCH_NUM);\n    }\n\n    return null;\n  }",
-            "startLine": 294,
-            "endLine": 301,
+            "code": "  public function getIrows(): ?array\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(PDO::FETCH_NUM);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 301,
+            "endLine": 308,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -806,25 +1206,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getIrows",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|array\n   *\/"
         },
         "getByColumns": {
             "name": "getByColumns",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      $r  = [];\n      $ds = $this->_fetchAll(\\PDO::FETCH_ASSOC);\n      foreach ($ds as $d){\n        foreach ($d as $k => $v){\n          if (!isset($r[$k])) {\n            $r[$k] = [];\n          }\n\n          $r[$k][] = $v;\n        }\n      }\n\n      return $r;\n    }\n\n    return null;\n  }",
-            "startLine": 307,
-            "endLine": 326,
+            "code": "  public function getByColumns(): ?array\n  {\n    if (!$this->write) {\n      $r  = [];\n      $ds = $this->_fetchAll(PDO::FETCH_ASSOC);\n      foreach ($ds as $d){\n        foreach ($d as $k => $v){\n          if (!isset($r[$k])) {\n            $r[$k] = [];\n          }\n\n          $r[$k][] = $v;\n        }\n      }\n\n      return $r;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 314,
+            "endLine": 333,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -833,25 +1242,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getByColumns",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|array\n   *\/"
         },
         "getObj": {
             "name": "getObj",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getObject(...\\func_get_args());\n  }",
-            "startLine": 332,
-            "endLine": 335,
+            "code": "  public function getObj(): ?\\stdClass\n  {\n    return $this->getObject(...\\func_get_args());\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 339,
+            "endLine": 342,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -860,25 +1278,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getObj",
             "returns": [
                 null,
                 "stdClass"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|\\stdClass\n   *\/"
         },
         "getObject": {
             "name": "getObject",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->fetch(\\PDO::FETCH_OBJ) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 341,
-            "endLine": 348,
+            "code": "  public function getObject(): ?\\stdClass\n  {\n    if (!$this->write) {\n      return $this->fetch(PDO::FETCH_OBJ) ?: null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 348,
+            "endLine": 355,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -887,25 +1314,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getObject",
             "returns": [
                 null,
                 "stdClass"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|\\stdClass\n   *\/"
         },
         "getObjects": {
             "name": "getObjects",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Query",
+            "class": "bbn\\Db\\Query",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Query.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(\\PDO::FETCH_OBJ);\n    }\n\n    return null;\n  }",
-            "startLine": 354,
-            "endLine": 361,
+            "code": "  public function getObjects(): ?array\n  {\n    if (!$this->write) {\n      return $this->_fetchAll(PDO::FETCH_OBJ);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 361,
+            "endLine": 368,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -914,44 +1350,43 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getObjects",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return null|array\n   *\/"
         },
         "bindColumn": {
             "name": "bindColumn",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 5,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
             "parent": {
                 "name": "bindColumn",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -962,13 +1397,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 5,
                 "numberOfRequiredParameters": 2,
+                "shortName": "bindColumn",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "column",
                         "position": 0,
-                        "type": "stringint|",
+                        "type": "string|int",
+                        "type_arr": [
+                            {},
+                            {}
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -977,7 +1418,13 @@
                     {
                         "name": "var",
                         "position": 1,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": false,
+                        "reference": true,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -987,6 +1434,11 @@
                         "name": "type",
                         "position": 2,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 2,
@@ -996,6 +1448,11 @@
                         "name": "maxLength",
                         "position": 3,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -1004,7 +1461,13 @@
                     {
                         "name": "driverOptions",
                         "position": 4,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -1012,11 +1475,30 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "bindColumn",
+            "returns": [],
             "arguments": [
                 {
                     "name": "column",
                     "position": 0,
-                    "type": "stringint|",
+                    "type": "string|int",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1025,7 +1507,13 @@
                 {
                     "name": "var",
                     "position": 1,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": true,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1035,6 +1523,11 @@
                     "name": "type",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 2,
@@ -1044,6 +1537,11 @@
                     "name": "maxLength",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1052,7 +1550,13 @@
                 {
                     "name": "driverOptions",
                     "position": 4,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1065,32 +1569,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 5,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
             "parent": {
                 "name": "bindParam",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1101,13 +1598,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 5,
                 "numberOfRequiredParameters": 2,
+                "shortName": "bindParam",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "param",
                         "position": 0,
-                        "type": "stringint|",
+                        "type": "string|int",
+                        "type_arr": [
+                            {},
+                            {}
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1116,7 +1619,13 @@
                     {
                         "name": "var",
                         "position": 1,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": false,
+                        "reference": true,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1126,6 +1635,11 @@
                         "name": "type",
                         "position": 2,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 2,
@@ -1135,6 +1649,11 @@
                         "name": "maxLength",
                         "position": 3,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -1143,7 +1662,13 @@
                     {
                         "name": "driverOptions",
                         "position": 4,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": null,
@@ -1151,11 +1676,30 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "bindParam",
+            "returns": [],
             "arguments": [
                 {
                     "name": "param",
                     "position": 0,
-                    "type": "stringint|",
+                    "type": "string|int",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1164,7 +1708,13 @@
                 {
                     "name": "var",
                     "position": 1,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": true,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1174,6 +1724,11 @@
                     "name": "type",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 2,
@@ -1183,6 +1738,11 @@
                     "name": "maxLength",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1191,7 +1751,13 @@
                 {
                     "name": "driverOptions",
                     "position": 4,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1204,32 +1770,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
             "parent": {
                 "name": "bindValue",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1240,13 +1799,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 3,
                 "numberOfRequiredParameters": 2,
+                "shortName": "bindValue",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "param",
                         "position": 0,
-                        "type": "stringint|",
+                        "type": "string|int",
+                        "type_arr": [
+                            {},
+                            {}
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1255,7 +1820,13 @@
                     {
                         "name": "value",
                         "position": 1,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1265,6 +1836,11 @@
                         "name": "type",
                         "position": 2,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 2,
@@ -1272,11 +1848,30 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "bindValue",
+            "returns": [],
             "arguments": [
                 {
                     "name": "param",
                     "position": 0,
-                    "type": "stringint|",
+                    "type": "string|int",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1285,7 +1880,13 @@
                 {
                     "name": "value",
                     "position": 1,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1295,6 +1896,11 @@
                     "name": "type",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 2,
@@ -1307,32 +1913,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
             "parent": {
                 "name": "closeCursor",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1343,10 +1942,23 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "closeCursor",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "closeCursor",
+            "returns": [],
             "arguments": []
         },
         "debugDumpParams": {
@@ -1354,32 +1966,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
             "parent": {
                 "name": "debugDumpParams",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1390,10 +1995,23 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "debugDumpParams",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "debugDumpParams",
+            "returns": [],
             "arguments": []
         },
         "errorCode": {
@@ -1401,32 +2019,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
             "parent": {
                 "name": "errorCode",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1437,10 +2048,23 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "errorCode",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "errorCode",
+            "returns": [],
             "arguments": []
         },
         "errorInfo": {
@@ -1448,32 +2072,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
             "parent": {
                 "name": "errorInfo",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1484,10 +2101,23 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "errorInfo",
                 "returns": [],
-                "parent": false,
                 "arguments": []
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "errorInfo",
+            "returns": [],
             "arguments": []
         },
         "fetchAll": {
@@ -1495,32 +2125,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": true,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
             "parent": {
                 "name": "fetchAll",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1531,13 +2154,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 0,
+                "shortName": "fetchAll",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "mode",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": false,
                         "has_default": true,
                         "default": 0,
@@ -1546,7 +2174,13 @@
                     {
                         "name": "args",
                         "position": 1,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": true,
+                        "reference": false,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1554,11 +2188,29 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fetchAll",
+            "returns": [],
             "arguments": [
                 {
                     "name": "mode",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1567,7 +2219,13 @@
                 {
                     "name": "args",
                     "position": 1,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": true,
+                    "reference": false,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1580,32 +2238,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
             "parent": {
                 "name": "getAttribute",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1616,13 +2267,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "getAttribute",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "name",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1630,11 +2286,29 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getAttribute",
+            "returns": [],
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1647,32 +2321,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
             "parent": {
                 "name": "setAttribute",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1683,13 +2350,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 2,
+                "shortName": "setAttribute",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "attribute",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1698,7 +2370,13 @@
                     {
                         "name": "value",
                         "position": 1,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1706,11 +2384,29 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "setAttribute",
+            "returns": [],
             "arguments": [
                 {
                     "name": "attribute",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1719,7 +2415,13 @@
                 {
                     "name": "value",
                     "position": 1,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1732,32 +2434,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": true,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
             "parent": {
                 "name": "setFetchMode",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1768,13 +2463,18 @@
                 "returnsReference": false,
                 "numberOfParameters": 2,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setFetchMode",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "mode",
                         "position": 0,
                         "type": "int",
+                        "type_arr": [
+                            "int"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
@@ -1783,7 +2483,13 @@
                     {
                         "name": "args",
                         "position": 1,
-                        "type": "mixed",
+                        "type": "null|mixed",
+                        "type_arr": [
+                            "null",
+                            "mixed"
+                        ],
+                        "variadic": true,
+                        "reference": false,
                         "required": false,
                         "has_default": false,
                         "default": "",
@@ -1791,11 +2497,29 @@
                     }
                 ]
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setFetchMode",
+            "returns": [],
             "arguments": [
                 {
                     "name": "mode",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1804,7 +2528,13 @@
                 {
                     "name": "args",
                     "position": 1,
-                    "type": "mixed",
+                    "type": "null|mixed",
+                    "type_arr": [
+                        "null",
+                        "mixed"
+                    ],
+                    "variadic": true,
+                    "reference": false,
                     "required": false,
                     "has_default": false,
                     "default": "",
@@ -1817,34 +2547,25 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "PDOStatement",
+            "class": "PDOStatement",
+            "filename": false,
             "static": false,
             "visibility": "public",
             "final": false,
             "code": "",
-            "startLine": false,
-            "endLine": false,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": true,
-            "isUserDefined": false,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "Iterator"
-            ],
             "parent": {
                 "name": "getIterator",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "PDOStatement",
+                "class": "PDOStatement",
+                "filename": false,
                 "static": false,
                 "visibility": "public",
                 "final": false,
                 "code": "",
+                "parent": false,
+                "trait": false,
                 "startLine": false,
                 "endLine": false,
                 "isDeprecated": false,
@@ -1855,30 +2576,212 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "getIterator",
                 "returns": [
                     "Iterator"
                 ],
-                "parent": false,
                 "arguments": []
             },
+            "trait": false,
+            "startLine": false,
+            "endLine": false,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": true,
+            "isUserDefined": false,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getIterator",
+            "returns": [
+                "Iterator"
+            ],
             "arguments": []
         }
     },
     "properties": {
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Query"
+            },
+            "declaring_trait": "bbn\\Db\\Query",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "res": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Query"
+            },
+            "declaring_trait": "bbn\\Db\\Query",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "values": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Query"
+            },
+            "declaring_trait": "bbn\\Db\\Query",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "write": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Query"
+            },
+            "declaring_trait": "bbn\\Db\\Query",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "structure": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Query"
+            },
+            "declaring_trait": "bbn\\Db\\Query",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "union": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Query"
+            },
+            "declaring_trait": "bbn\\Db\\Query",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
         "queryString": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "PDOStatement"
+            },
+            "declaring_trait": "PDOStatement",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
             "parent": {
                 "name": "queryString",
+                "trait": false,
                 "static": false,
+                "readonly": false,
+                "type": "string",
+                "declaring": {
+                    "name": "PDOStatement"
+                },
+                "declaring_trait": "PDOStatement",
+                "promoted": false,
                 "visibility": "public",
                 "doc": "",
                 "parent": false,
                 "value": null
-            }
+            },
+            "value": null
         }
     },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\Str": "Str",
+        "PDO": "PDO",
+        "PDOException": "PDOException",
+        "PDOStatement": "PDOStatement"
+    },
+    "dummyComments": [
+        "\/**\n * @package db\n *\/",
+        "\/**\n * An extended approach of the PDOStatement object\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category      Database\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n * @todo Get the count function to work with query with \"HAVING\"\n *\/"
+    ],
     "summary": "An extended approach of the PDOStatement object",
     "description": "",
     "description_parts": []

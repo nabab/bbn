@@ -13,18 +13,19 @@
     },
     "name": "bbn\\Date",
     "namespace": true,
+    "realName": "Date",
+    "realNamespace": "bbn",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Date.php",
-    "startLine": 18,
-    "endLine": 232,
-    "numMethods": 9,
-    "numProperties": 0,
+    "startLine": 22,
+    "endLine": 304,
+    "numMethods": 10,
+    "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -46,13 +47,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      self::$windows = X::isWindows();\n    }\n    return self::$windows;\n  }",
-            "startLine": 22,
-            "endLine": 27,
+            "code": "  public static function isWindows(){\n    if ( \\is_null(self::$windows) ){\n      self::$windows = X::isWindows();\n    }\n    return self::$windows;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 26,
+            "endLine": 31,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -61,8 +65,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isWindows",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "lastDayOfMonth": {
@@ -70,13 +74,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($date, $format = false)\n  {\n      $m = false;\n      if ( Str::isNumber($date) ){\n        if ( $date <= 12 ){\n          $m = $date;\n          $y = date('Y');\n        }\n        else{\n          $m = (int)date('m', $date);\n          $y = date('Y', $date);\n        }\n      }\n      else if ( $d = strtotime($date) ){\n        $m = (int)date('m', $d);\n        $y = date('Y', $d);\n      }\n      if ( $m ){\n        $r = mktime(0, 0, -1, $m+1, 1, $y);\n        return $format ? date($format, $r) : $r;\n      }\n    }\n    \n  }",
-            "startLine": 29,
-            "endLine": 52,
+            "code": "  public static function lastDayOfMonth($date, $format = false){\n    if ( $date ){\n      $m = false;\n      if ( Str::isNumber($date) ){\n        if ( $date <= 12 ){\n          $m = $date;\n          $y = date('Y');\n        }\n        else{\n          $m = (int)date('m', $date);\n          $y = date('Y', $date);\n        }\n      }\n      else if ( $d = strtotime($date) ){\n        $m = (int)date('m', $d);\n        $y = date('Y', $d);\n      }\n      if ( $m ){\n        $r = mktime(0, 0, -1, $m+1, 1, $y);\n        return $format ? date($format, $r) : $r;\n      }\n    }\n    \n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 33,
+            "endLine": 56,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -85,13 +92,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "lastDayOfMonth",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "date",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -101,6 +111,9 @@
                     "name": "format",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -113,13 +126,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($date, $format = 'Y-m-d H:i:s')\n  {\n    return $d && $d->format($format) == $date;\n  }",
-            "startLine": 54,
-            "endLine": 57,
+            "code": "  public static function validate($date, string $format = 'Y-m-d H:i:s'){\n    if (!is_string($date)) {\n      return false;\n    }\n\n    $d = DateTime::createFromFormat($format, $date);\n    return $d && $d->format($format) == $date;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 65,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -128,13 +144,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "validate",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "date",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -143,7 +162,12 @@
                 {
                     "name": "format",
                     "position": 1,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "Y-m-d H:i:s",
@@ -156,13 +180,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($date)\n  {\n  }",
-            "startLine": 59,
-            "endLine": 61,
+            "code": "  public static function validateSQL($date){\n    return self::validate($date, 'Y-m-d H:i:s') || self::validate($date, 'Y-m-d');\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 67,
+            "endLine": 69,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -171,13 +198,16 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "validateSQL",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "date",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -190,13 +220,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($date = '', $mode = '', string $locale = NULL)\n  {\n\t\t\/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time *\/\n\t\tif ( empty($date) ){\n\t\t\t$idate = time();\n    }\n\t\telse if ( is_numeric($date) ){\n\t\t\t$idate = $date;\n    }\n\t\telse{\n\t\t\t$idate = strtotime($date);\n    }\n\n\t\tif ( $idate )\n\t\t{\n\t\t\t\/* Getting the time difference *\/\n\t\t\t$t = time();\n      \/\/if ( ($date('h') == 0) && ($date('i') == 0) && ($date('s', $ida) == 0) ){\n\t\t\t$h = localtime($idate, 1);\n\t\t\t$start_today = mktime(0, 0, 0);\n\t\t\t$end_today = $start_today + ( 24 * 3600 );\n\t\t\t$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;\n\t\t\t$only_date = ($mode === 'date') || ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;\n\t\t\tif ( $mode === 'idate' ){\n        $date_ok = $idate;\n      }\n\t\t\telse if ( $mode === 'dbdate' ){\n        $date_ok = date('Y-m-d H:i:s', $idate);\n      }\n      else if ( $mode === 'm' ){\n        $date_ok = self::intlDateFormat('MMMM', $idate, $locale);\n      }\n      else if ( $mode === 'my' ){\n        $date_ok = self::intlDateFormat('MMMM yyyy', $idate, $locale);\n      }\n\t\t\telse if ( $mode === 'wsdate' || $mode === 's' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n\t\t\t\telse{\n          $date_ok = self::intlDateFormat('dd\/MM\/yyyy', $idate, $locale);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'r' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n\t\t\t\telse{\n          $date_ok = self::intlDateFormat('d MMM yyyy', $idate, $locale);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'js' ){\n        $date_ok = date('D M d Y H:i:s O', $idate);\n\t\t\t}\n      else if ( ($mode === 'wdate') || ($mode === 'wdate') ){\n        $date_ok = self::intlDateFormat('EEEE d MMMM yyyy', $idate, $locale);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n      }\n      else {\n        $date_ok = self::intlDateFormat('d MMMM yyyy', $idate, $locale);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);;\n        }\n      }\n\t\t\treturn $date_ok;\n\t\t}\n  }",
-            "startLine": 68,
-            "endLine": 136,
+            "code": "  public static function format($date='', $mode='', ?string $locale = null)\n\t{\n    if (!$locale && defined('BBN_LOCALE')) {\n      $locale = BBN_LOCALE;\n    }\n\n    \/* Formatting: idate is the timestamp, and date[0] and date[1] the SQL date and time *\/\n\t\tif ( empty($date) ){\n\t\t\t$idate = time();\n    }\n\t\telse if ( is_numeric($date) ){\n\t\t\t$idate = $date;\n    }\n\t\telse{\n\t\t\t$idate = strtotime($date);\n    }\n\n\t\tif ( $idate )\n\t\t{\n\t\t\t\/* Getting the time difference *\/\n\t\t\t$t = time();\n      \/\/if ( ($date('h') == 0) && ($date('i') == 0) && ($date('s', $ida) == 0) ){\n\t\t\t$h = localtime($idate, 1);\n\t\t\t$start_today = mktime(0, 0, 0);\n\t\t\t$end_today = $start_today + ( 24 * 3600 );\n\t\t\t$is_today = ( ($idate >= $start_today) && ($idate < $end_today) ) ? 1 : false;\n\t\t\t$only_date = ($mode === 'date') || ( $h['tm_hour'] + $h['tm_min'] + $h['tm_sec'] == 0 ) ? 1 : false;\n\t\t\tif ( $mode === 'idate' ){\n        $date_ok = $idate;\n      }\n\t\t\telse if ( $mode === 'dbdate' ){\n        $date_ok = date('Y-m-d H:i:s', $idate);\n      }\n      else if ( $mode === 'm' ){\n        $date_ok = self::intlDateFormat('MMMM', $idate, $locale);\n      }\n      else if ( $mode === 'my' ){\n        $date_ok = self::intlDateFormat('MMMM yyyy', $idate, $locale);\n      }\n\t\t\telse if ( $mode === 'wsdate' || $mode === 's' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n\t\t\t\telse{\n          $date_ok = self::intlDateFormat('dd\/MM\/yyyy', $idate, $locale);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'r' ){\n\t\t\t\tif ( $is_today && !$only_date ){\n          $date_ok = self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n\t\t\t\telse{\n          $date_ok = self::intlDateFormat('d MMM yyyy', $idate, $locale);\n        }\n\t\t\t}\n\t\t\telse if ( $mode == 'js' ){\n        $date_ok = date('D M d Y H:i:s O', $idate);\n\t\t\t}\n      else if ( ($mode === 'wdate') || ($mode === 'wdate') ){\n        $date_ok = self::intlDateFormat('EEEE d MMMM yyyy', $idate, $locale);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);\n        }\n      }\n      else {\n        $date_ok = self::intlDateFormat('d MMMM yyyy', $idate, $locale);\n        if ( !$only_date && ($mode !== 'notime') ){\n          $date_ok .= ', '. self::intlDateFormat('kk:mm', $idate, $locale);;\n        }\n      }\n\t\t\treturn $date_ok;\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 76,
+            "endLine": 148,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -205,13 +238,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
+            "shortName": "format",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "date",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -221,6 +257,9 @@
                     "name": "mode",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -229,26 +268,52 @@
                 {
                     "name": "locale",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$date"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $date\n   * @param string $mode\n   * @return false|int|string\n   *\/"
         },
         "monthpickerOptions": {
             "name": "monthpickerOptions",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($val = '', string $local = NULL)\n  {\n    $arr = [];\n    for ( $i = 1; $i <= 12; $i++ ) {\n      $arr[$i] = self::monthName($i, $local);\n    }\n\n    return X::buildOptions($arr, $val);\n  }",
-            "startLine": 144,
-            "endLine": 152,
+            "code": "  public static function monthpickerOptions($val = '', ?string $locale = null)\n  {\n    $arr = [];\n    if (!$locale && defined('BBN_LOCALE')) {\n      $locale = BBN_LOCALE;\n    }\n\n    for ( $i = 1; $i <= 12; $i++ ) {\n      $arr[$i] = self::monthName($i, $locale);\n    }\n\n    return X::buildOptions($arr, $val);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 156,
+            "endLine": 168,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -257,41 +322,69 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "monthpickerOptions",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "val",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "local",
+                    "name": "locale",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$val"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$local"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $val\n   * @param string|null $local\n   *\n   * @return string\n   *\/"
         },
         "monthName": {
             "name": "monthName",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($m, string $local = NULL)\n  {\n    return self::intlDateFormat('MMMM', strtotime(\"2012-$m-01\"), $local);\n  }",
-            "startLine": 160,
-            "endLine": 163,
+            "code": "  public static function monthName($m, ?string $local = null)\n  {\n    return self::intlDateFormat('MMMM', strtotime(\"2012-$m-01\"), $local);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 176,
+            "endLine": 179,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -300,13 +393,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "monthName",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "m",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -315,26 +411,51 @@
                 {
                     "name": "local",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$m"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$local"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $m\n   * @param string|null $local\n   *\n   * @return false|string\n   *\/"
         },
         "intlDateFormat": {
             "name": "intlDateFormat",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $format, int $timestamp, string $local = NULL)\n  {\n    if (!extension_loaded('intl')) {\n      $formats_map = [\n        'MMMM' => 'F', \/\/ January\n        'd MMMM yyyy' => 'j F Y', \/\/ 8 December 2021\n        'EEEE d MMMM yyyy' => 'l j F Y', \/\/ Wednesday 8 December 2021\n        'd MMM yyyy' => 'j M Y', \/\/ 8 Dec 2021\n        'MMMM yyyy' => 'F Y', \/\/ December 2021\n        'dd\/MM\/yyyy' => 'd\/m\/Y', \/\/ 08\/09\/2021\n        'kk:mm' => 'H:i' \/\/ 09:09 or 14:10\n      ];\n\n      if (array_key_exists($format, $formats_map)) {\n        $format = $formats_map[$format];\n      }\n\n      return date($format, $timestamp);\n    }\n\n    if (!$local && defined('BBN_LOCALE')) {\n      $local = BBN_LOCALE;\n    }\n\n    $formatter = new \\IntlDateFormatter(\n      $local,\n      \\IntlDateFormatter::LONG,\n      \\IntlDateFormatter::LONG,\n      null,\n      null,\n      $format\n    );\n\n    return $formatter->format($timestamp);\n  }",
-            "startLine": 171,
-            "endLine": 205,
+            "code": "  public static function intlDateFormat(string $format, int $timestamp, ?string $locale = null)\n  {\n    if (!extension_loaded('intl')) {\n      $formats_map = [\n        'MMMM' => 'F', \/\/ January\n        'd MMMM yyyy' => 'j F Y', \/\/ 8 December 2021\n        'EEEE d MMMM yyyy' => 'l j F Y', \/\/ Wednesday 8 December 2021\n        'd MMM yyyy' => 'j M Y', \/\/ 8 Dec 2021\n        'MMMM yyyy' => 'F Y', \/\/ December 2021\n        'dd\/MM\/yyyy' => 'd\/m\/Y', \/\/ 08\/09\/2021\n        'kk:mm' => 'H:i' \/\/ 09:09 or 14:10\n      ];\n\n      if (array_key_exists($format, $formats_map)) {\n        $format = $formats_map[$format];\n      }\n\n      return date($format, $timestamp);\n    }\n\n    if (!$locale && defined('BBN_LOCALE')) {\n      $locale = BBN_LOCALE;\n    }\n\n    if (!$locale) {\n      $locale = setlocale(LC_ALL, 0);\n    }\n\n    if (!$locale) {\n      $locale = 'en_US';\n    }\n\n    $formatter = new \\IntlDateFormatter(\n      $locale,\n      \\IntlDateFormatter::LONG,\n      \\IntlDateFormatter::LONG,\n      null,\n      null,\n      $format\n    );\n\n    return $formatter->format($timestamp);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 187,
+            "endLine": 229,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -343,13 +464,18 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "intlDateFormat",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "format",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -359,34 +485,70 @@
                     "name": "timestamp",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "local",
+                    "name": "locale",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$format"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$timestamp"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$local"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $format\n   * @param int $timestamp\n   * @param string|null $local\n   * @return false|string\n   *\/"
         },
         "getMonthWeek": {
             "name": "getMonthWeek",
             "summary": "Gets the month's week of the given date.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Date",
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $date, string $firstweekday = 'monday')\n  {\n    $cut = substr($date, 0, 8);\n    $daylen = 86400;\n    $timestamp = strtotime($date);\n    $first = strtotime($cut . \"00\");\n    $elapsed = ($timestamp - $first) \/ $daylen;\n    $weeks = 1;\n    for ( $i = 1; $i <= $elapsed; $i++ ){\n      $dayfind = $cut . (strlen($i) < 2 ? '0' . $i : $i);\n      $daytimestamp = strtotime($dayfind);\n      $day = strtolower(date(\"l\", $daytimestamp));\n      if ( $day === strtolower($firstweekday) ){\n        $weeks++;\n      }\n    }\n    return $weeks;\n  }",
-            "startLine": 213,
-            "endLine": 230,
+            "code": "  public static function getMonthWeek(string $date, string $firstweekday = 'monday'): int\n  {\n    $cut = substr($date, 0, 8);\n    $daylen = 86400;\n    $timestamp = strtotime($date);\n    $first = strtotime($cut . \"00\");\n    $elapsed = ($timestamp - $first) \/ $daylen;\n    $weeks = 1;\n    for ( $i = 1; $i <= $elapsed; $i++ ){\n      $dayfind = $cut . (strlen($i) < 2 ? '0' . $i : $i);\n      $daytimestamp = strtotime($dayfind);\n      $day = strtolower(date(\"l\", $daytimestamp));\n      if ( $day === strtolower($firstweekday) ){\n        $weeks++;\n      }\n    }\n    return $weeks;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 237,
+            "endLine": 254,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -395,15 +557,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getMonthWeek",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "date",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -413,19 +580,130 @@
                     "name": "firstweekday",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "monday",
                     "default_name": ""
                 }
+            ],
+            "doc": {
+                "description": "Gets the month's week of the given date.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$date"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$firstweekday"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the month's week of the given date.\n   * @param string $date\n   * @param string $firstweekday\n   * @return int\n   *\/"
+        },
+        "diff": {
+            "name": "diff",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Date",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Date.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function diff($date1, $date2, $unit = 's')\n  {\n    if (is_int($date1)) {\n      $date1 = date('Y-m-d H:i:s', $date1);\n    }\n    if (is_int($date2)) {\n      $date2 = date('Y-m-d H:i:s', $date2);\n    }\n\n    if (!Str::isDateSql($date1, $date2)) {\n      throw new Exception(X::_(\"The given dates $date1 and $date2 are not valid\"));\n    }\n    $format = 'Y-m-d';\n    if (strlen($date1) > 10) {\n      $format .= ' H:i:s';\n    }\n    $d1 = DateTimeImmutable::createFromFormat($format, $date1);\n    $d2 = DateTimeImmutable::createFromFormat($format, $date2);\n    $diff = $d1->diff($d2);\n    $sign = $diff->format('%R');\n    $mult = $sign === '-' ? -1 : 1;\n    switch ( $unit ){\n      case 's':\n        $res = $diff->s + ($diff->h * 60) + ($diff->days * 24 * 3600);\n        break;\n      case 'i':\n        $res = $diff->i + ($diff->h * 60) + ($diff->days * 24 * 60);\n        break;\n      case 'h':\n        $res = $diff->h + ($diff->days * 24);\n        break;\n      case 'd':\n        $res = $diff->days;\n        break;\n      case 'm':\n        $res = $diff->m + ($diff->y * 12);\n        break;\n      case 'y':\n        $res = $diff->y;\n        break;\n      default:\n        $res = $diff->days;\n    }\n\n    return $res * $mult;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 257,
+            "endLine": 302,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "diff",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "date1",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "date2",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "unit",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "s",
+                    "default_name": ""
+                }
             ]
         }
     },
-    "properties": null,
+    "properties": {
+        "windows": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Date"
+            },
+            "declaring_trait": "bbn\\Date",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "windows": null
     },
     "constants": null,
+    "uses": {
+        "DateTime": "DateTime",
+        "DateTimeImmutable": "DateTimeImmutable",
+        "Exception": "Exception"
+    },
+    "dummyComments": [
+        "\/**\n * @package time\n *\/",
+        "\/**\n * Deals with date manipulation.\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Time and Date\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n * @todo Plenty of stuff!\n *\/"
+    ],
     "summary": "Deals with date manipulation.",
     "description": "",
     "description_parts": []

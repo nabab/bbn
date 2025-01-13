@@ -13,18 +13,19 @@
     },
     "name": "bbn\\User\\Profile",
     "namespace": true,
+    "realName": "Profile",
+    "realNamespace": "bbn\\User",
     "traits": [],
     "interfaces": [],
     "fileName": "\/User\/Profile.php",
     "startLine": 22,
     "endLine": 84,
     "numMethods": 3,
-    "numProperties": 0,
+    "numProperties": 5,
     "numConstants": 0,
     "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -51,7 +52,6 @@
     "namespaceName": "bbn\\User",
     "shortName": "Profile",
     "contentConstructor": {
-        "file": "bbn\\User\\Profile",
         "returns": []
     },
     "methods": {
@@ -60,11 +60,14 @@
             "summary": "connection constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Profile",
+            "class": "bbn\\User\\Profile",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Profile.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, bbn\\User $user, array $cfg = [])\n  {\n    if ($tmp = $user->get_profile()) {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\X::mergeArrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
+            "code": "  public function __construct(bbn\\Db $db, bbn\\User $user, array $cfg = [])\n  {\n    if ($tmp = $user->get_profile()) {\n      $this->id = $tmp['id'];\n      $this->id_group = $tmp['id_group'];\n      $this->id_user = $tmp['id_user'];\n      $this->db = $db;\n      $this->user = $user;\n      $this->cfg = bbn\\X::mergeArrays(self::$default_class_cfg, $cfg);\n    }\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 54,
             "endLine": 65,
             "isDeprecated": false,
@@ -75,13 +78,18 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -91,6 +99,11 @@
                     "name": "user",
                     "position": 1,
                     "type": "bbn\\User",
+                    "type_arr": [
+                        "bbn\\User"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -100,23 +113,58 @@
                     "name": "cfg",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "connection constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "session",
+                        "name": "$session"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$credentials"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * connection constructor.\n   * @param db      $db\n   * @param session $session\n   * @param array   $cfg\n   * @param string  $credentials\n   *\/"
         },
         "getId": {
             "name": "getId",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Profile",
+            "class": "bbn\\User\\Profile",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Profile.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n  }",
+            "code": "  public function getId()\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 70,
             "endLine": 75,
             "isDeprecated": false,
@@ -127,20 +175,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getId",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Profile",
+            "class": "bbn\\User\\Profile",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Profile.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n      return $this->auth;\n  }",
+            "code": "  public function check()\n  {\n      return $this->auth;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 80,
             "endLine": 83,
             "isDeprecated": false,
@@ -151,12 +208,116 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n     * @return boolean\n     *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "default_class_cfg": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Profile"
+            },
+            "declaring_trait": "bbn\\User\\Profile",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": {
+                "table": "bbn_users_profiles",
+                "cols": {
+                    "id": "id",
+                    "id_group": "id_group",
+                    "id_user": "id_user"
+                }
+            }
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Profile"
+            },
+            "declaring_trait": "bbn\\User\\Profile",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var db",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "id": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Profile"
+            },
+            "declaring_trait": "bbn\\User\\Profile",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var int",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Profile"
+            },
+            "declaring_trait": "bbn\\User\\Profile",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "user": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Profile"
+            },
+            "declaring_trait": "bbn\\User\\Profile",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "default_class_cfg": {
             "table": "bbn_users_profiles",
@@ -168,6 +329,13 @@
         }
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * @package user\n *\/",
+        "\/**\n * A user authentication Class\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Authentication\n * @license   http:\/\/opensource.org\/licenses\/MIT MIT\n * @version 0.2r89\n * @todo Groups and hotlinks features\n * @todo Implement Cache for session requests' results?\n *\/"
+    ],
     "summary": "A user authentication Class",
     "description": "",
     "description_parts": []

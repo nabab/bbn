@@ -12,18 +12,19 @@
     },
     "name": "bbn\\Util\\Timer",
     "namespace": true,
+    "realName": "Timer",
+    "realNamespace": "bbn\\Util",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Util\/Timer.php",
     "startLine": 21,
     "endLine": 203,
     "numMethods": 10,
-    "numProperties": 0,
+    "numProperties": 1,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -45,11 +46,14 @@
             "summary": "Starts a timer for a given key",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default', $from = NULL)\n  {\n    if (!isset($this->_measures[$key])) {\n      $this->_measures[$key] = [\n        'num' => 0,\n        'sum' => 0,\n        'start' => $from ?: microtime(1)\n      ];\n    }\n    else {\n      $this->_measures[$key]['start'] = $from ?: microtime(1);\n    }\n\n    return true;\n  }",
+            "code": "  public function start(string $key = 'default', $from = null): bool\n  {\n    if (!isset($this->_measures[$key])) {\n      $this->_measures[$key] = [\n        'num' => 0,\n        'sum' => 0,\n        'start' => $from ?: microtime(1)\n      ];\n    }\n    else {\n      $this->_measures[$key]['start'] = $from ?: microtime(1);\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 33,
             "endLine": 47,
             "isDeprecated": false,
@@ -60,15 +64,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "start",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
@@ -78,23 +87,46 @@
                     "name": "from",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Starts a timer for a given key\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null",
+                        "name": "$from"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Starts a timer for a given key\n   *\n   * @param string $key\n   * @param null $from\n   * @return bool\n   *\/"
         },
         "hasStarted": {
             "name": "hasStarted",
             "summary": "Returns true is the timer has started for the given key",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    return isset($this->_measures[$key], $this->_measures[$key]['start']) &&\n      ($this->_measures[$key]['start'] > 0);\n  }",
+            "code": "  public function hasStarted(string $key = 'default'): bool\n  {\n    return isset($this->_measures[$key], $this->_measures[$key]['start']) &&\n      ($this->_measures[$key]['start'] > 0);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 56,
             "endLine": 60,
             "isDeprecated": false,
@@ -105,32 +137,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "hasStarted",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns true is the timer has started for the given key\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true is the timer has started for the given key\n   *\n   * @param string $key\n   * @return bool\n   *\/"
         },
         "reset": {
             "name": "reset",
             "summary": "Resets the timer for the given key.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      $this->_measures[$key] = [\n        'num' => 0,\n        'sum' => 0\n      ];\n    }\n  }",
+            "code": "  public function reset(string $key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      $this->_measures[$key] = [\n        'num' => 0,\n        'sum' => 0\n      ];\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 69,
             "endLine": 77,
             "isDeprecated": false,
@@ -141,30 +193,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "reset",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Resets the timer for the given key.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Resets the timer for the given key.\n   *\n   * @param string $key\n   * @return void\n   *\/"
         },
         "stop": {
             "name": "stop",
             "summary": "Stops a timer for a given key",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      $this->_measures[$key]['num']++;\n      $time                          = $this->measure($key);\n      $this->_measures[$key]['sum'] += $time;\n      unset($this->_measures[$key]['start']);\n      return $time;\n    }\n\n    throw new \\Exception(X::_(\"Missing a start declaration for timer\").\" $key\");\n  }",
+            "code": "  public function stop(string $key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      $this->_measures[$key]['num']++;\n      $time                          = $this->measure($key);\n      $this->_measures[$key]['sum'] += $time;\n      unset($this->_measures[$key]['start']);\n      return $time;\n    }\n\n    throw new \\Exception(X::_(\"Missing a start declaration for timer\").\" $key\");\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 87,
             "endLine": 98,
             "isDeprecated": false,
@@ -175,30 +247,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "stop",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Stops a timer for a given key\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * Stops a timer for a given key\n   *\n   * @param string $key\n   * @return float\n   * @throws \\Exception\n   *\/"
         },
         "measure": {
             "name": "measure",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      return microtime(1) - $this->_measures[$key]['start'];\n    }\n  }",
+            "code": "  public function measure(string $key = 'default')\n  {\n    if ($this->hasStarted($key)) {\n      return microtime(1) - $this->_measures[$key]['start'];\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 105,
             "endLine": 110,
             "isDeprecated": false,
@@ -209,30 +305,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "measure",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $key\n   * @return mixed|void\n   *\/"
         },
         "current": {
             "name": "current",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    if (isset($this->_measures[$key])) {\n      return \\array_merge(\n        ['current' => $this->hasStarted($key) ? $this->measure($key) : 0],\n        $this->_measures[$key]\n      );\n    }\n\n    return [];\n  }",
+            "code": "  public function current(string $key = 'default'): array\n  {\n    if (isset($this->_measures[$key])) {\n      return \\array_merge(\n        ['current' => $this->hasStarted($key) ? $this->measure($key) : 0],\n        $this->_measures[$key]\n      );\n    }\n\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 117,
             "endLine": 127,
             "isDeprecated": false,
@@ -243,32 +359,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "current",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $key\n   * @return array\n   *\/"
         },
         "currents": {
             "name": "currents",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $currents = [];\n    foreach ($this->_measures as $key => $val){\n      $currents[$key] = \\array_merge(\n        [\n        'current' => $this->hasStarted($key) ? $this->measure($key) : 0\n        ], $val\n      );\n    }\n\n    return $currents;\n  }",
+            "code": "  public function currents(): array\n  {\n    $currents = [];\n    foreach ($this->_measures as $key => $val){\n      $currents[$key] = \\array_merge(\n        [\n        'current' => $this->hasStarted($key) ? $this->measure($key) : 0\n        ], $val\n      );\n    }\n\n    return $currents;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 133,
             "endLine": 145,
             "isDeprecated": false,
@@ -279,22 +415,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "currents",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "result": {
             "name": "result",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    if (isset($this->_measures[$key])) {\n      if ($this->hasStarted($key)) {\n        $this->stop($key);\n      }\n\n      return [\n        'num' => $this->_measures[$key]['num'],\n        'total' => number_format($this->_measures[$key]['sum'], 10, '.', ''),\n        'average' => number_format(\n          $this->_measures[$key]['num'] != 0\n            ? $this->_measures[$key]['sum'] \/ $this->_measures[$key]['num']\n            : 0, 10, '.', ''\n        )\n      ];\n    }\n  }",
+            "code": "  public function result(string $key = 'default')\n  {\n    if (isset($this->_measures[$key])) {\n      if ($this->hasStarted($key)) {\n        $this->stop($key);\n      }\n\n      return [\n        'num' => $this->_measures[$key]['num'],\n        'total' => number_format($this->_measures[$key]['sum'], 10, '.', ''),\n        'average' => number_format(\n          $this->_measures[$key]['num'] != 0\n            ? $this->_measures[$key]['sum'] \/ $this->_measures[$key]['num']\n            : 0, 10, '.', ''\n        )\n      ];\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 153,
             "endLine": 170,
             "isDeprecated": false,
@@ -305,30 +450,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "result",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param string $key\n   * @return array\n   * @throws \\Exception\n   *\/"
         },
         "results": {
             "name": "results",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $r = [];\n    foreach ($this->_measures as $key => $val){\n      $r[$key] = $this->result($key);\n    }\n\n    return $r;\n  }",
+            "code": "  public function results(): array\n  {\n    $r = [];\n    foreach ($this->_measures as $key => $val){\n      $r[$key] = $this->result($key);\n    }\n\n    return $r;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 177,
             "endLine": 185,
             "isDeprecated": false,
@@ -339,22 +508,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "results",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return array\n   * @throws \\Exception\n   *\/"
         },
         "remove": {
             "name": "remove",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Timer",
+            "class": "bbn\\Util\\Timer",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Timer.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key = 'default')\n  {\n    if (isset($this->_measures[$key])) {\n      unset($this->_measures[$key]);\n      return true;\n    }\n\n    return false;\n  }",
+            "code": "  public function remove(string $key = 'default'): bool\n  {\n    if (isset($this->_measures[$key])) {\n      unset($this->_measures[$key]);\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 192,
             "endLine": 200,
             "isDeprecated": false,
@@ -365,26 +547,66 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "remove",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "default",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $key\n   * @return bool\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "_measures": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Util\\Timer"
+            },
+            "declaring_trait": "bbn\\Util\\Timer",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": []
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * @package util\n *\/",
+        "\/**\n * Encryption Class\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since July 11, 2013, 13:08:00 +01:00\n * @category  Utilities\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.1\n *\/"
+    ],
     "summary": "Encryption Class",
     "description": "",
     "description_parts": []

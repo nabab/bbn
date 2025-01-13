@@ -1,0 +1,298 @@
+{
+    "doc": {
+        "description": "Deals with date manipulation.\n",
+        "tags": {
+            "author": "Thomas Nabet <thomas.nabet@gmail.com>",
+            "copyright": "BBN Solutions",
+            "since": "Apr 4, 2011, 23:23:55 +0000",
+            "category": "Time and Date",
+            "license": "http:\/\/www.opensource.org\/licenses\/mit-license.php MIT",
+            "version": "0.2r89",
+            "todo": "Plenty of stuff!"
+        }
+    },
+    "name": "bbn\\Phone",
+    "namespace": true,
+    "realName": "Phone",
+    "realNamespace": "bbn",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Phone.php",
+    "startLine": 23,
+    "endLine": 57,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn",
+    "shortName": "Phone",
+    "contentConstructor": null,
+    "methods": {
+        "parse": {
+            "name": "parse",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Phone",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Phone.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function parse(string $phone, ?string $region = null): ?PhoneNumber\n  {\n    try {\n      return PhoneNumber::parse($phone, $region);\n    }\n    catch (PhoneNumberParseException $e) {\n      return null;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 25,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "parse",
+            "returns": [
+                null,
+                "Brick\\PhoneNumber\\PhoneNumber"
+            ],
+            "arguments": [
+                {
+                    "name": "phone",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "region",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "format": {
+            "name": "format",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Phone",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Phone.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function format(string $phone, ?string $region = null): ?string\n  {\n    $ph = self::parse($phone, $region);\n    if ($ph) {\n      return $ph->format(PhoneNumberFormat::E164);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 35,
+            "endLine": 43,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "format",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "phone",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "region",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "isPhone": {
+            "name": "isPhone",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Phone",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Phone.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function isPhone(string $phone, ?string $region = null): bool\n  {\n    $ph = self::parse($phone, $region ?: (defined('BBN_LOCALE') ? strtoupper(substr(explode('.', BBN_LOCALE)[0], -2)) : null));\n    return $ph ? $ph->isPossibleNumber() : false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 45,
+            "endLine": 49,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isPhone",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "phone",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "region",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "isValid": {
+            "name": "isValid",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Phone",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Phone.php",
+            "static": true,
+            "visibility": "public",
+            "final": false,
+            "code": "  public static function isValid(string $phone, ?string $region = null): bool\n  {\n    $ph = self::parse($phone, $region ?: (defined('BBN_LOCALE') ? strtoupper(substr(explode('.', BBN_LOCALE)[0], -2)) : null));\n    return $ph ? $ph->isValidNumber() : false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 51,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isValid",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "phone",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "region",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Brick\\PhoneNumber\\PhoneNumber": "PhoneNumber",
+        "Brick\\PhoneNumber\\PhoneNumberFormat": "PhoneNumberFormat",
+        "Brick\\PhoneNumber\\PhoneNumberParseException": "PhoneNumberParseException",
+        "Exception": "Exception"
+    },
+    "dummyComments": [
+        "\/**\n * @package time\n *\/",
+        "\/**\n * Deals with date manipulation.\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Time and Date\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n * @todo Plenty of stuff!\n *\/"
+    ],
+    "summary": "Deals with date manipulation.",
+    "description": "",
+    "description_parts": []
+}

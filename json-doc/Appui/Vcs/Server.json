@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Appui\\Vcs\\Server",
     "namespace": true,
+    "realName": "Server",
+    "realNamespace": "bbn\\Appui\\Vcs",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Appui\/Vcs\/Server.php",
@@ -16,7 +18,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": true,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": true,
@@ -30,7 +31,6 @@
     "namespaceName": "bbn\\Appui\\Vcs",
     "shortName": "Server",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Vcs\\Server",
         "returns": []
     },
     "methods": {
@@ -39,11 +39,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, string $idServer)\n  {\n  function hasAdminAccessToken(string $id): bool;\n\n  function getAdminAccessToken(string $id): ?string;\n\n  function getUserAccessToken(string $id): string;\n\n  function getConnection(bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(): array;\n\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function __construct(\\bbn\\Db $db, string $idServer);",
+            "parent": false,
+            "trait": false,
             "startLine": 14,
             "endLine": 14,
             "isDeprecated": false,
@@ -54,13 +57,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -70,6 +78,11 @@
                     "name": "idServer",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -82,11 +95,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n  function getAdminAccessToken(string $id): ?string;\n\n  function getUserAccessToken(string $id): string;\n\n  function getConnection(bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(): array;\n\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function hasAdminAccessToken(string $id): bool;",
+            "parent": false,
+            "trait": false,
             "startLine": 16,
             "endLine": 16,
             "isDeprecated": false,
@@ -97,15 +113,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "hasAdminAccessToken",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -118,11 +139,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n  function getUserAccessToken(string $id): string;\n\n  function getConnection(bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(): array;\n\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getAdminAccessToken(string $id): ?string;",
+            "parent": false,
+            "trait": false,
             "startLine": 18,
             "endLine": 18,
             "isDeprecated": false,
@@ -133,16 +157,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getAdminAccessToken",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -155,11 +184,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n  function getConnection(bool $asAdmin = false): object;\n\n  function getServer(string $id): object;\n\n  function getCurrentUser(): array;\n\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getUserAccessToken(string $id): string;",
+            "parent": false,
+            "trait": false,
             "startLine": 20,
             "endLine": 20,
             "isDeprecated": false,
@@ -170,15 +202,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUserAccessToken",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -191,11 +228,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $asAdmin = false)\n  {\n  function getServer(string $id): object;\n\n  function getCurrentUser(): array;\n\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getConnection(bool $asAdmin = false): object;",
+            "parent": false,
+            "trait": false,
             "startLine": 22,
             "endLine": 22,
             "isDeprecated": false,
@@ -206,15 +246,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getConnection",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "asAdmin",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -227,11 +272,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n  function getCurrentUser(): array;\n\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getServer(string $id): object;",
+            "parent": false,
+            "trait": false,
             "startLine": 24,
             "endLine": 24,
             "isDeprecated": false,
@@ -242,15 +290,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getServer",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -263,11 +316,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  function getProjectsList(int $page = 1, int $perPage = 25): array;\n\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getCurrentUser(): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 26,
             "endLine": 26,
             "isDeprecated": false,
@@ -278,10 +334,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCurrentUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getProjectsList": {
@@ -289,11 +345,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $page = 1, int $perPage = 25)\n  {\n  function getProject(string $idProject): ?array;\n\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectsList(int $page = 1, int $perPage = 25): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 28,
             "endLine": 28,
             "isDeprecated": false,
@@ -304,15 +363,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectsList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "page",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
@@ -322,6 +386,11 @@
                     "name": "perPage",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 25,
@@ -334,11 +403,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectBranches(string $idProject): array;\n\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProject(string $idProject): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 30,
             "endLine": 30,
             "isDeprecated": false,
@@ -349,16 +421,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProject",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -371,11 +448,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectTags(string $idProject): array;\n\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectBranches(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 32,
             "endLine": 32,
             "isDeprecated": false,
@@ -386,15 +466,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectBranches",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -407,11 +492,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectUsers(string $idProject): array;\n\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectTags(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 34,
             "endLine": 34,
             "isDeprecated": false,
@@ -422,15 +510,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectTags",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -443,11 +536,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectUsersRoles(): array;\n\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectUsers(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 36,
             "endLine": 36,
             "isDeprecated": false,
@@ -458,15 +554,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -479,11 +580,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  function getProjectUsersEvents(string $idProject): array;\n\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectUsersRoles(): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 38,
             "endLine": 38,
             "isDeprecated": false,
@@ -494,10 +598,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectUsersRoles",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getProjectUsersEvents": {
@@ -505,11 +609,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectEvents(string $idProject): array;\n\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectUsersEvents(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 40,
             "endLine": 40,
             "isDeprecated": false,
@@ -520,15 +627,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsersEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -541,11 +653,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectCommitsEvents(string $idProject): array;\n\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectEvents(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 42,
             "endLine": 42,
             "isDeprecated": false,
@@ -556,15 +671,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -577,11 +697,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectLabels(string $idProject): array;\n\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectCommitsEvents(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 44,
             "endLine": 44,
             "isDeprecated": false,
@@ -592,15 +715,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectCommitsEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -613,11 +741,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function normalizeBranch(object $branch): array;\n\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectLabels(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 46,
             "endLine": 46,
             "isDeprecated": false,
@@ -628,15 +759,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectLabels",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -649,11 +785,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $branch)\n  {\n  function normalizeEvent(object $event): array;\n\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function normalizeBranch(object $branch): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 48,
             "endLine": 48,
             "isDeprecated": false,
@@ -664,15 +803,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeBranch",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "branch",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -685,11 +829,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $event)\n  {\n  function normalizeUser(object $user): array;\n\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function normalizeEvent(object $event): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 50,
             "endLine": 50,
             "isDeprecated": false,
@@ -700,15 +847,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeEvent",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "event",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -721,11 +873,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $user)\n  {\n  function normalizeMember(object $member): array;\n\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function normalizeUser(object $user): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 52,
             "endLine": 52,
             "isDeprecated": false,
@@ -736,15 +891,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "user",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -757,11 +917,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $member)\n  {\n  function normalizeLabel(object $label): array;\n\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function normalizeMember(object $member): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 54,
             "endLine": 54,
             "isDeprecated": false,
@@ -772,15 +935,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeMember",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "member",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -793,11 +961,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $label)\n  {\n  function normalizeProject(object $project): array;\n\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function normalizeLabel(object $label): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 56,
             "endLine": 56,
             "isDeprecated": false,
@@ -808,15 +979,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeLabel",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "label",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -829,11 +1005,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $project)\n  {\n  function insertBranch(string $idProject, string $branch, string $fromBranch): array;\n\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function normalizeProject(object $project): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 58,
             "endLine": 58,
             "isDeprecated": false,
@@ -844,15 +1023,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeProject",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -865,11 +1049,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch, string $fromBranch)\n  {\n  function deleteBranch(string $idProject, string $branch): bool;\n\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function insertBranch(string $idProject, string $branch, string $fromBranch): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 60,
             "endLine": 60,
             "isDeprecated": false,
@@ -880,15 +1067,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertBranch",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -898,6 +1090,11 @@
                     "name": "branch",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -907,6 +1104,11 @@
                     "name": "fromBranch",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -919,11 +1121,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch)\n  {\n  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;\n\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function deleteBranch(string $idProject, string $branch): bool;",
+            "parent": false,
+            "trait": false,
             "startLine": 62,
             "endLine": 62,
             "isDeprecated": false,
@@ -934,15 +1139,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "deleteBranch",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -952,6 +1162,11 @@
                     "name": "branch",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -964,11 +1179,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser, int $idRole)\n  {\n  function removeProjectUser(string $idProject, int $idUser): bool;\n\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function insertProjectUser(string $idProject, int $idUser, int $idRole): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 64,
             "endLine": 64,
             "isDeprecated": false,
@@ -979,15 +1197,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -997,6 +1220,11 @@
                     "name": "idUser",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1006,6 +1234,11 @@
                     "name": "idRole",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1018,11 +1251,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser)\n  {\n  function getProjectIssues(string $idProject): array;\n\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function removeProjectUser(string $idProject, int $idUser): bool;",
+            "parent": false,
+            "trait": false,
             "startLine": 66,
             "endLine": 66,
             "isDeprecated": false,
@@ -1033,15 +1269,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "removeProjectUser",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1051,6 +1292,11 @@
                     "name": "idUser",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1063,11 +1309,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n  function getProjectIssue(string $idProject, int $idIssue): array;\n\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectIssues(string $idProject): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 68,
             "endLine": 68,
             "isDeprecated": false,
@@ -1078,15 +1327,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectIssues",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1099,11 +1353,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;\n\n  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;\n\n  function closeProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectIssue(string $idProject, int $idIssue): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 70,
             "endLine": 70,
             "isDeprecated": false,
@@ -1114,15 +1371,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getProjectIssue",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1132,6 +1394,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1144,11 +1411,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  }",
+            "code": "  function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 72,
             "endLine": 80,
             "isDeprecated": false,
@@ -1159,16 +1429,21 @@
             "returnsReference": false,
             "numberOfParameters": 7,
             "numberOfRequiredParameters": 2,
+            "shortName": "createProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1178,6 +1453,11 @@
                     "name": "title",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1187,6 +1467,11 @@
                     "name": "description",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1196,6 +1481,11 @@
                     "name": "labels",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1204,7 +1494,13 @@
                 {
                     "name": "assigned",
                     "position": 4,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1214,6 +1510,11 @@
                     "name": "private",
                     "position": 5,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1223,6 +1524,11 @@
                     "name": "date",
                     "position": 6,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1235,11 +1541,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false)\n  {\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  }",
+            "code": "  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 82,
             "endLine": 90,
             "isDeprecated": false,
@@ -1250,16 +1559,21 @@
             "returnsReference": false,
             "numberOfParameters": 7,
             "numberOfRequiredParameters": 3,
+            "shortName": "editProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1269,6 +1583,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1278,6 +1597,11 @@
                     "name": "title",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1287,6 +1611,11 @@
                     "name": "description",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1296,6 +1625,11 @@
                     "name": "labels",
                     "position": 4,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1304,7 +1638,13 @@
                 {
                     "name": "assigned",
                     "position": 5,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1314,6 +1654,11 @@
                     "name": "private",
                     "position": 6,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1326,11 +1671,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n  function reopenProjectIssue(string $idProject, int $idIssue): ?array;\n\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function closeProjectIssue(string $idProject, int $idIssue): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 92,
             "endLine": 92,
             "isDeprecated": false,
@@ -1341,16 +1689,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "closeProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1360,6 +1713,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1372,11 +1730,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;\n\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function reopenProjectIssue(string $idProject, int $idIssue): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 94,
             "endLine": 94,
             "isDeprecated": false,
@@ -1387,16 +1748,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "reopenProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1406,6 +1772,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1418,11 +1789,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idUser)\n  {\n  function getProjectIssueComments(string $idProject, int $idIssue): array;\n\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 96,
             "endLine": 96,
             "isDeprecated": false,
@@ -1433,16 +1807,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "assignProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1452,6 +1831,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1461,6 +1845,11 @@
                     "name": "idUser",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1473,11 +1862,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;\n\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function getProjectIssueComments(string $idProject, int $idIssue): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 98,
             "endLine": 98,
             "isDeprecated": false,
@@ -1488,15 +1880,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getProjectIssueComments",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1506,6 +1903,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1518,11 +1920,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = '')\n  {\n  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;\n\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 100,
             "endLine": 100,
             "isDeprecated": false,
@@ -1533,16 +1938,21 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectIssueComment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1552,6 +1962,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1561,6 +1976,11 @@
                     "name": "content",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1570,6 +1990,11 @@
                     "name": "pvt",
                     "position": 3,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1579,6 +2004,11 @@
                     "name": "date",
                     "position": 4,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1591,11 +2021,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false)\n  {\n  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;\n\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 102,
             "endLine": 102,
             "isDeprecated": false,
@@ -1606,16 +2039,21 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
+            "shortName": "editProjectIssueComment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1625,6 +2063,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1634,6 +2077,11 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1643,6 +2091,11 @@
                     "name": "content",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1652,6 +2105,11 @@
                     "name": "pvt",
                     "position": 4,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1664,11 +2122,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n  function createProjectLabel(string $idProject, string $name, string $color): ?array;\n\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool;",
+            "parent": false,
+            "trait": false,
             "startLine": 104,
             "endLine": 104,
             "isDeprecated": false,
@@ -1679,15 +2140,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "deleteProjectIssueComment",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1697,6 +2163,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1706,6 +2177,11 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1718,11 +2194,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $name, string $color)\n  {\n  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function createProjectLabel(string $idProject, string $name, string $color): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 106,
             "endLine": 106,
             "isDeprecated": false,
@@ -1733,16 +2212,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "createProjectLabel",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1752,6 +2236,11 @@
                     "name": "name",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1761,6 +2250,11 @@
                     "name": "color",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1773,11 +2267,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;\n\n  function getUsers(): array;\n  }",
+            "code": "  function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool;",
+            "parent": false,
+            "trait": false,
             "startLine": 108,
             "endLine": 108,
             "isDeprecated": false,
@@ -1788,15 +2285,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "addLabelToProjectIssue",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1806,6 +2308,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1815,6 +2322,11 @@
                     "name": "label",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1827,11 +2339,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n  function getUsers(): array;\n  }",
+            "code": "  function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool;",
+            "parent": false,
+            "trait": false,
             "startLine": 110,
             "endLine": 110,
             "isDeprecated": false,
@@ -1842,15 +2357,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "removeLabelFromProjectIssue",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1860,6 +2380,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1869,6 +2394,11 @@
                     "name": "label",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1881,11 +2411,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Server",
+            "class": "bbn\\Appui\\Vcs\\Server",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Server.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
+            "code": "  function getUsers(): array;",
+            "parent": false,
+            "trait": false,
             "startLine": 112,
             "endLine": 112,
             "isDeprecated": false,
@@ -1896,16 +2429,20 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 31\/12\/2014\n * Time: 15:33\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

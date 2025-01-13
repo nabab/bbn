@@ -1,0 +1,519 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Parents",
+    "namespace": true,
+    "realName": "Parents",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Parents.php",
+    "startLine": 9,
+    "endLine": 219,
+    "numMethods": 7,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Parents",
+    "contentConstructor": null,
+    "methods": {
+        "siblings": {
+            "name": "siblings",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function siblings(): ?array\n  {\n    if ($id = $this->fromCode(...func_get_args())) {\n      if (($id_parent = $this->getIdParent($id)) && ($full_options = $this->fullOptions($id_parent))) {\n        return array_filter(\n          $full_options, function ($a) use ($id) {\n            return $a[$this->fields['id']] !== $id;\n          }\n        );\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 15,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "siblings",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @return array|null\n   * @throws Exception\n   *\/"
+        },
+        "parents": {
+            "name": "parents",
+            "summary": "Returns an array of id_parents from the option selected to root",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->parents(48));\n\/\/ array [25, 12, 0]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function parents($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $res = [];\n      while (Str::isUid($id_parent = $this->getIdParent($id))){\n        if (\\in_array($id_parent, $res, true)) {\n          break;\n        }\n        else{\n          if ($id === $id_parent) {\n            break;\n          }\n          else{\n            $res[] = $id_parent;\n            $id    = $id_parent;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 42,
+            "endLine": 65,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "parents",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of id_parents from the option selected to root\n\n```php\nX::dump($opt->parents(48));\n\/\/ array [25, 12, 0]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option"
+            },
+            "comments": "  \/**\n   * Returns an array of id_parents from the option selected to root\n   *\n   * ```php\n   * X::dump($opt->parents(48));\n   * \/\/ array [25, 12, 0]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option\n   *\/"
+        },
+        "sequence": {
+            "name": "sequence",
+            "summary": "Returns an array of id_parents from the selected root to the given id_option",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->parents(48));\n\/\/ array [0, 12, 25, 48]\nX::dump($opt->parents(48, 12));\n\/\/ array [12, 25, 48]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function sequence(string $id_option, string $id_root = null): ?array\n  {\n    if ($this->check()) {\n      if (null === $id_root) {\n        $id_root = $this->getRoot();\n      }\n\n      if ($this->exists($id_root) && ($parents = $this->parents($id_option))) {\n        $res = [$id_option];\n        foreach ($parents as $p){\n          array_unshift($res, $p);\n          if ($p === $id_root) {\n            return $res;\n          }\n        }\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 82,
+            "endLine": 101,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "sequence",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id_option",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "option"
+                },
+                {
+                    "name": "id_root",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "root"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of id_parents from the selected root to the given id_option\n\n```php\nX::dump($opt->parents(48));\n\/\/ array [0, 12, 25, 48]\nX::dump($opt->parents(48, 12));\n\/\/ array [12, 25, 48]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "root"
+                    }
+                ],
+                "return": "The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option"
+            },
+            "comments": "  \/**\n   * Returns an array of id_parents from the selected root to the given id_option\n   *\n   * ```php\n   * X::dump($opt->parents(48));\n   * \/\/ array [0, 12, 25, 48]\n   * X::dump($opt->parents(48, 12));\n   * \/\/ array [12, 25, 48]\n   * ```\n   *\n   * @param string      $id_option\n   * @param string|null $id_root\n   * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option\n   *\/"
+        },
+        "getIdParent": {
+            "name": "getIdParent",
+            "summary": "Returns the parent option's ID",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->getIdParent(48));\n\/\/ (int)25"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getIdParent($code = null): ?string\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      if ($opt = $this->cacheGet($id, 'nativeOption')) {\n        return $opt[$this->fields['id_parent']];\n      }\n      else {\n        return $this->db->selectOne($this->class_table, $this->fields['id_parent'], [$this->fields['id'] => $id]);\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 115,
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getIdParent",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns the parent option's ID\n\n```php\nX::dump($opt->getIdParent(48));\n\/\/ (int)25\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "The parent's ID, null if no parent or if option cannot be found."
+            },
+            "comments": "  \/**\n   * Returns the parent option's ID\n   *\n   * ```php\n   * X::dump($opt->getIdParent(48));\n   * \/\/ (int)25\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return string|null The parent's ID, null if no parent or if option cannot be found.\n   *\/"
+        },
+        "parent": {
+            "name": "parent",
+            "summary": "Returns the parent's option as {@link option()}",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::hdump($opt->parent(42));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function parent($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($id_parent = $this->getIdParent($id))\n    ) {\n      return $this->option($id_parent);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 149,
+            "endLine": 158,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "parent",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns the parent's option as {@link option()}\n\n```php\nX::hdump($opt->parent(42));\n\/*\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the parent's option as {@link option()}\n   *\n   * ```php\n   * X::hdump($opt->parent(42));\n   * \/*\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|false\n   *\/"
+        },
+        "isParent": {
+            "name": "isParent",
+            "summary": "Return true if row with ID $id_parent is parent at any level of row with ID $id",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->isParent(42, 12));\n\/\/ (bool) true\nX::dump($opt->isParent(42, 13));\n\/\/ (bool) false"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isParent($id, $id_parent): bool\n  {\n    \/\/ Preventing infinite loop\n    $done = [$id];\n    if (Str::isUid($id) && Str::isUid($id_parent)) {\n      while ($id = $this->getIdParent($id)){\n        if ($id === $id_parent) {\n          return true;\n        }\n\n        if (\\in_array($id, $done, true)) {\n          break;\n        }\n\n        $done[] = $id;\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 175,
+            "endLine": 194,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "isParent",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "id_parent",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return true if row with ID $id_parent is parent at any level of row with ID $id\n\n```php\nX::dump($opt->isParent(42, 12));\n\/\/ (bool) true\nX::dump($opt->isParent(42, 13));\n\/\/ (bool) false\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$id_parent"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return true if row with ID $id_parent is parent at any level of row with ID $id\n   *\n   * ```php\n   * X::dump($opt->isParent(42, 12));\n   * \/\/ (bool) true\n   * X::dump($opt->isParent(42, 13));\n   * \/\/ (bool) false\n   * ```\n   *\n   * @param $id\n   * @param $id_parent\n   * @return bool\n   *\/"
+        },
+        "closest": {
+            "name": "closest",
+            "summary": "Gets the closest parent which has either the given id_alias or",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Parents",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Parents.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function closest(string $id, string|array $target): ?string\n  {\n    $ids = $this->parents($id);\n    if (!\\is_array($target)) {\n      $target = [Str::isUid($target) ? 'id_alias' : 'code' => $target];\n    }\n\n    foreach ($ids as $i) {\n      $opt = $this->option($i);\n      if (X::getRow([$opt], $target)) {\n        return $i;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 203,
+            "endLine": 218,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "closest",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "target",
+                    "position": 1,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the closest parent which has either the given id_alias or\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$target"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the closest parent which has either the given id_alias or \n   * @param mixed $id\n   * @param mixed $target\n   * @return mixed\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\Str": "Str",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n   * @return array|null\n   * @throws Exception\n   *\/",
+        "\/**\n   * Returns an array of id_parents from the option selected to root\n   *\n   * ```php\n   * X::dump($opt->parents(48));\n   * \/\/ array [25, 12, 0]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option\n   *\/",
+        "\/**\n   * Returns an array of id_parents from the selected root to the given id_option\n   *\n   * ```php\n   * X::dump($opt->parents(48));\n   * \/\/ array [0, 12, 25, 48]\n   * X::dump($opt->parents(48, 12));\n   * \/\/ array [12, 25, 48]\n   * ```\n   *\n   * @param string      $id_option\n   * @param string|null $id_root\n   * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option\n   *\/",
+        "\/**\n   * Returns the parent option's ID\n   *\n   * ```php\n   * X::dump($opt->getIdParent(48));\n   * \/\/ (int)25\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return string|null The parent's ID, null if no parent or if option cannot be found.\n   *\/",
+        "\/**\n   * Returns the parent's option as {@link option()}\n   *\n   * ```php\n   * X::hdump($opt->parent(42));\n   * \/*\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|false\n   *\/",
+        "\/**\n   * Return true if row with ID $id_parent is parent at any level of row with ID $id\n   *\n   * ```php\n   * X::dump($opt->isParent(42, 12));\n   * \/\/ (bool) true\n   * X::dump($opt->isParent(42, 13));\n   * \/\/ (bool) false\n   * ```\n   *\n   * @param $id\n   * @param $id_parent\n   * @return bool\n   *\/",
+        "\/**\n   * Gets the closest parent which has either the given id_alias or \n   * @param mixed $id\n   * @param mixed $target\n   * @return mixed\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

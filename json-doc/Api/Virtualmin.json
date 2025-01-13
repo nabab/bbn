@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Api\\Virtualmin",
     "namespace": true,
+    "realName": "Virtualmin",
+    "realNamespace": "bbn\\Api",
     "traits": [
         "bbn\\Models\\Tts\\Cache",
         "bbn\\Api\\CloudminVirtualmin\\Common"
@@ -13,16 +15,12 @@
     "fileName": "\/Api\/Virtualmin.php",
     "startLine": 17,
     "endLine": 212,
-    "numMethods": 14,
-    "numProperties": 3,
+    "numMethods": 34,
+    "numProperties": 11,
     "numConstants": 1,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Cache",
-        "bbn\\Api\\CloudminVirtualmin\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -67,7 +65,6 @@
     "namespaceName": "bbn\\Api",
     "shortName": "Virtualmin",
     "contentConstructor": {
-        "file": "bbn\\Api\\Virtualmin",
         "returns": []
     },
     "methods": {
@@ -76,11 +73,14 @@
             "summary": "Re-collect info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Virtualmin.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $connection = ssh2_connect($this->hostname, 22);\n    ssh2_auth_password($connection, $this->user, $this->pass);\n    $cmd       = \"echo '\" . $this->pass . \"' | sudo -S virtualmin collectinfo\";\n    $stream    = ssh2_exec($connection, $cmd);\n    $errStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);\n    stream_set_blocking($errStream, true);\n    return stream_get_contents($errStream);\n  }",
+            "code": "  public function collectInfo()\n  {\n    $connection = ssh2_connect($this->hostname, 22);\n    ssh2_auth_password($connection, $this->user, $this->pass);\n    $cmd       = \"echo '\" . $this->pass . \"' | sudo -S virtualmin collectinfo\";\n    $stream    = ssh2_exec($connection, $cmd);\n    $errStream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);\n    stream_set_blocking($errStream, true);\n    return stream_get_contents($errStream);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 51,
             "endLine": 60,
             "isDeprecated": false,
@@ -91,20 +91,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "collectInfo",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Re-collect info\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Re-collect info\n   * @return string|false\n   *\/"
         },
         "info": {
             "name": "info",
             "summary": "Gets server info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Virtualmin.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $arguments = [])\n  {\n    $infoStr = $this->__call('info', [$arguments]);\n    $info    = [];\n    if (strlen($infoStr)) {\n      preg_match_all('\/^[a-z|_]*\\:\\h{1}\/m', $infoStr, $delimiters, PREG_OFFSET_CAPTURE);\n      $delimiters = \\array_map(\n          function ($m) {\n            return [\n              'name' => \\trim(str_replace(':', '', $m[0])),\n              'pos' => $m[1]\n            ];\n          },\n          $delimiters[0]\n      );\n      foreach ($delimiters as $i => $d) {\n        $pos1 = $d['pos'];\n        $pos2 = isset($delimiters[$i + 1]) ? ($delimiters[$i + 1]['pos'] - $pos1) : null;\n        $st   = \\is_null($pos2) ? \\trim(substr($infoStr, $pos1)) : \\trim(substr($infoStr, $pos1, $pos2));\n        if (strlen($st)) {\n          $info[$d['name']] = [];\n          switch ($d['name']) {\n            case 'disk_fs':\n            case 'poss':\n            case 'status':\n            case 'vposs':\n              $info[$d['name']] = explode('*', $st);\n              unset($info[$d['name']][0]);\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                if ($str = explode(\"\\n\", \\trim($str))) {\n                  $tmp = [];\n                  foreach ($str as $is => $s) {\n                    if ($s = explode(':', $s)) {\n                      $tmp[\\trim($s[0])] = \\trim($s[1]);\n                    }\n                  }\n\n                  $str = $tmp;\n                }\n\n                $info[$d['name']][$istr] = $str;\n              }\n              break;\n\n            case 'progs':\n              $info[$d['name']] = explode('*', $st);\n              unset($info[$d['name']][0]);\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                $info[$d['name']][$istr] = \\trim(str_replace(\"\\n\", '', $str));\n                if (!strlen($info[$d['name']][$istr])) {\n                  unset($info[$d['name']][$istr]);\n                }\n              }\n\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                if ($istr % 2 === 0) {\n                  $info[$d['name']][$str] = $info[$d['name']][$istr + 1];\n                  unset($info[$d['name']][$istr], $info[$d['name']][$istr + 1]);\n                }\n              }\n              break;\n\n            default:\n              if (substr_count($st, '*')) {\n                $info[$d['name']] = explode('*', $st);\n                unset($info[$d['name']][0]);\n                $info[$d['name']] = array_values($info[$d['name']]);\n                foreach ($info[$d['name']] as $istr => $str) {\n                  $str = str_replace(\"\\n\", '', $str);\n                  $info[$d['name']][$istr] = \\trim($str);\n                }\n              }\n              elseif (substr_count($st, ':')) {\n                $fields = array_filter(\n                  explode(\"\\n\", $st),\n                  function ($val) {\n                    return $val !== '';\n                  }\n                );\n                foreach ($fields as $y => $field) {\n                  if (($pos = strpos($field, ':')) !== false) {\n                    $idx   = str_replace(' ', '', substr($field, 0, $pos));\n                    $value = substr($field, $pos, strlen($field) - $pos);\n                    $value = str_replace(': ', '', $value);\n                    if (count($fields) > 1) {\n                      $info[$d['name']][$idx] = $value;\n                      if (($idx === $d['name'])\n                          && ($info[$d['name']][$idx] === '')\n                      ) {\n                        unset($info[$d['name']][$idx]);\n                      }\n                    }\n                    else {\n                      $info[$d['name']] = $value;\n                    }\n                  }\n                }\n              }\n              break;\n          }\n        }\n      }\n    }\n\n    return $info;\n  }",
+            "code": "  public function info(array $arguments = []): array\n  {\n    $infoStr = $this->__call('info', [$arguments]);\n    $info    = [];\n    if (strlen($infoStr)) {\n      preg_match_all('\/^[a-z|_]*\\:\\h{1}\/m', $infoStr, $delimiters, PREG_OFFSET_CAPTURE);\n      $delimiters = \\array_map(\n          function ($m) {\n            return [\n              'name' => \\trim(str_replace(':', '', $m[0])),\n              'pos' => $m[1]\n            ];\n          },\n          $delimiters[0]\n      );\n      foreach ($delimiters as $i => $d) {\n        $pos1 = $d['pos'];\n        $pos2 = isset($delimiters[$i + 1]) ? ($delimiters[$i + 1]['pos'] - $pos1) : null;\n        $st   = \\is_null($pos2) ? \\trim(substr($infoStr, $pos1)) : \\trim(substr($infoStr, $pos1, $pos2));\n        if (strlen($st)) {\n          $info[$d['name']] = [];\n          switch ($d['name']) {\n            case 'disk_fs':\n            case 'poss':\n            case 'status':\n            case 'vposs':\n              $info[$d['name']] = explode('*', $st);\n              unset($info[$d['name']][0]);\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                if ($str = explode(\"\\n\", \\trim($str))) {\n                  $tmp = [];\n                  foreach ($str as $is => $s) {\n                    if ($s = explode(':', $s)) {\n                      $tmp[\\trim($s[0])] = \\trim($s[1]);\n                    }\n                  }\n\n                  $str = $tmp;\n                }\n\n                $info[$d['name']][$istr] = $str;\n              }\n              break;\n\n            case 'progs':\n              $info[$d['name']] = explode('*', $st);\n              unset($info[$d['name']][0]);\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                $info[$d['name']][$istr] = \\trim(str_replace(\"\\n\", '', $str));\n                if (!strlen($info[$d['name']][$istr])) {\n                  unset($info[$d['name']][$istr]);\n                }\n              }\n\n              $info[$d['name']] = array_values($info[$d['name']]);\n              foreach ($info[$d['name']] as $istr => $str) {\n                if ($istr % 2 === 0) {\n                  $info[$d['name']][$str] = $info[$d['name']][$istr + 1];\n                  unset($info[$d['name']][$istr], $info[$d['name']][$istr + 1]);\n                }\n              }\n              break;\n\n            default:\n              if (substr_count($st, '*')) {\n                $info[$d['name']] = explode('*', $st);\n                unset($info[$d['name']][0]);\n                $info[$d['name']] = array_values($info[$d['name']]);\n                foreach ($info[$d['name']] as $istr => $str) {\n                  $str = str_replace(\"\\n\", '', $str);\n                  $info[$d['name']][$istr] = \\trim($str);\n                }\n              }\n              elseif (substr_count($st, ':')) {\n                $fields = array_filter(\n                  explode(\"\\n\", $st),\n                  function ($val) {\n                    return $val !== '';\n                  }\n                );\n                foreach ($fields as $y => $field) {\n                  if (($pos = strpos($field, ':')) !== false) {\n                    $idx   = str_replace(' ', '', substr($field, 0, $pos));\n                    $value = substr($field, $pos, strlen($field) - $pos);\n                    $value = str_replace(': ', '', $value);\n                    if (count($fields) > 1) {\n                      $info[$d['name']][$idx] = $value;\n                      if (($idx === $d['name'])\n                          && ($info[$d['name']][$idx] === '')\n                      ) {\n                        unset($info[$d['name']][$idx]);\n                      }\n                    }\n                    else {\n                      $info[$d['name']] = $value;\n                    }\n                  }\n                }\n              }\n              break;\n          }\n        }\n      }\n    }\n\n    return $info;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 69,
             "endLine": 177,
             "isDeprecated": false,
@@ -115,32 +124,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "info",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "arguments",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets server info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets server info\n   *\n   * @param array $arguments\n   * @return array\n   *\/"
         },
         "isInfoProp": {
             "name": "isInfoProp",
             "summary": "Checks if the given property is part of the info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Virtualmin.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $prop)\n  {\n    return \\in_array($prop, $this->infoProps, true);\n  }",
+            "code": "  public function isInfoProp(string $prop): bool\n  {\n    return \\in_array($prop, $this->infoProps, true);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 185,
             "endLine": 188,
             "isDeprecated": false,
@@ -151,33 +180,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "isInfoProp",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "prop",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The property to check"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks if the given property is part of the info\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$prop",
+                        "description": "The property to check"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if the given property is part of the info\n   * @param string $prop The property to check\n   * @return bool\n   *\/"
         },
         "deleteCache": {
             "name": "deleteCache",
             "summary": "This function allows the cancellation of the cache of the used commands",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Virtualmin.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($command_name = '', $arguments = false)\n  {\n    $uid = $this->hostname;\n    if (!empty($arguments)) {\n      $uid .= md5(json_encode($arguments));\n    }\n\n    if (!empty($this->cacheDelete($uid, $command_name))) {\n      X::log([$uid, $command_name], 'cache_delete');\n      return true;\n    }\n\n    return false;\n  }",
+            "code": "  public function deleteCache($command_name = '', $arguments = false)\n  {\n    $uid = $this->hostname;\n    if (!empty($arguments)) {\n      $uid .= md5(json_encode($arguments));\n    }\n\n    if (!empty($this->cacheDelete($uid, $command_name))) {\n      X::log([$uid, $command_name], 'cache_delete');\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 198,
             "endLine": 211,
             "isDeprecated": false,
@@ -188,13 +238,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "deleteCache",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "command_name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -205,24 +258,1284 @@
                     "name": "arguments",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "This function allows the cancellation of the cache of the used commands\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$uid",
+                        "description": "file cache"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$method",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This function allows the cancellation of the cache of the used commands\n   *\n   * @param $uid file cache\n   * @param $method name\n   * @return bool\n   *\/"
+        },
+        "cacheInit": {
+            "name": "cacheInit",
+            "summary": "Initializes the cache object, must be called in __construct",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheInit(): void\n  {\n    if ( \\is_null($this->cache_engine) ){\n      $this->cache_engine = CacheCls::getEngine();\n      $this->_cache_prefix = Str::encodeFilename(str_replace('\\\\', '\/', \\get_class($this)), true).'\/';\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 27,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Initializes the cache object, must be called in __construct\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initializes the cache object, must be called in __construct\n   *\n   * @return void\n   *\/"
+        },
+        "cacheCheck": {
+            "name": "cacheCheck",
+            "summary": "Throws an exception if the cache has not been initialized",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheCheck(): void\n  {\n    if (!$this->cache_engine) {\n      throw new Exception(X::_(\"The cache object has not been initialized\"));\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 41,
+            "endLine": 46,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheCheck",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Throws an exception if the cache has not been initialized\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Throws an exception if the cache has not been initialized\n   *\n   * @return void\n   *\/"
+        },
+        "_cache_name": {
+            "name": "_cache_name",
+            "summary": "Generates a name for the cache based on the class name and the method called - or a gievn string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function _cache_name($uid, $method = '', string $locale = ''): string\n  {\n    $uid  = (string)$uid;\n    $path = Str::isUid($uid) ? substr($uid, 0, 3).'\/'.substr($uid, 3, 3).'\/'.substr($uid, 6) : $uid;\n    return $this->_cache_prefix.$path.(empty($method) ? '' : '\/'.(string)$method).(empty($locale) ? '' : \"-$locale\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 57,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_cache_name",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Generates a name for the cache based on the class name and the method called - or a gievn string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a name for the cache based on the class name and the method called - or a gievn string\n   *\n   * @param [type] $uid\n   * @param string $method\n   * @param string $locale\n   * @return string\n   *\/"
+        },
+        "cacheDeleteAll": {
+            "name": "cacheDeleteAll",
+            "summary": "Deletes all the cache related to the current class",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteAll(): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_prefix);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 70,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "cacheDeleteAll",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Deletes all the cache related to the current class\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes all the cache related to the current class\n   *\n   * @return self\n   *\/"
+        },
+        "cacheDelete": {
+            "name": "cacheDelete",
+            "summary": "Deletes the given cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDelete(string $uid, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 85,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheDelete",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheDeleteLocale": {
+            "name": "cacheDeleteLocale",
+            "summary": "Deletes the given cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheDeleteLocale(string $uid, string $locale, string $method = ''): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->deleteAll($this->_cache_name($uid, $method, $locale));\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 101,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheDeleteLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the given cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the given cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return self\n   *\/"
+        },
+        "cacheGet": {
+            "name": "cacheGet",
+            "summary": "Gets the cached data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGet(string $uid, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 116,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheGet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data\n   *\n   * @param string $uid\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheGetLocale": {
+            "name": "cacheGetLocale",
+            "summary": "Gets the cached data for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetLocale(string $uid, string $locale, string $method = ''): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->get($this->_cache_name($uid, $method, $locale));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 131,
+            "endLine": 135,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cached data for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cached data for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @return mixed\n   *\/"
+        },
+        "cacheSet": {
+            "name": "cacheSet",
+            "summary": "Sets the cache",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSet(string $uid, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 147,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheSet",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache\n   *\n   * @param string $uid\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheSetLocale": {
+            "name": "cacheSetLocale",
+            "summary": "Sets the cache for a specific locale",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheSetLocale(string $uid, string $locale, string $method = '', $data = null, int $ttl = 0): self\n  {\n    $this->cacheCheck();\n    $this->cache_engine->set($this->_cache_name($uid, $method, $locale), $data, $ttl);\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 165,
+            "endLine": 170,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheSetLocale",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache for a specific locale\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache for a specific locale\n   *\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param array|null $data\n   * @param integer $ttl\n   * @return self\n   *\/"
+        },
+        "cacheGetSet": {
+            "name": "cacheGetSet",
+            "summary": "Gets the cache or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSet(callable $fn, string $uid, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 182,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheGetSet",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheGetSetLocale": {
+            "name": "cacheGetSetLocale",
+            "summary": "Gets the cache for a specific locale or creates it if needs to",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheGetSetLocale(callable $fn, string $uid, string $locale, $method = '', int $ttl = 0): mixed\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->getSet($fn, $this->_cache_name($uid, $method, $locale), $ttl);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 199,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 3,
+            "shortName": "cacheGetSetLocale",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "fn",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "uid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ttl",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the cache for a specific locale or creates it if needs to\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$fn"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$locale"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$ttl"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the cache for a specific locale or creates it if needs to\n   *\n   * @param callable $fn\n   * @param string $uid\n   * @param string $locale\n   * @param string $method\n   * @param integer $ttl\n   * @return mixed\n   *\/"
+        },
+        "cacheHas": {
+            "name": "cacheHas",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHas(string $uid, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGet($uid, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 213,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "cacheHas",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "cacheHasLocale": {
+            "name": "cacheHasLocale",
+            "summary": "Checks whether the cache exists and is valid",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function cacheHasLocale(string $uid, string $locale, string $method = ''): bool\n  {\n    $this->cacheCheck();\n    return $this->cacheGetLocale($uid, $locale, $method) ? true : false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 227,
+            "endLine": 231,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "cacheHasLocale",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "uid",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "locale",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "method",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether the cache exists and is valid\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$uid"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the cache exists and is valid\n   *\n   * @param string $uid\n   * @param string $method\n   * @return boolean\n   *\/"
+        },
+        "serializeFunction": {
+            "name": "serializeFunction",
+            "summary": "Transforms a function in a cacheable string",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Cache.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function serializeFunction(callable $function)\n  {\n    $this->cacheCheck();\n    return $this->cache_engine->serializeFunction($function);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Cache",
+            "startLine": 241,
+            "endLine": 245,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "serializeFunction",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "function",
+                    "position": 0,
+                    "type": "callable",
+                    "type_arr": [
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Transforms a function in a cacheable string\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$function"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Transforms a function in a cacheable string\n   *\n   * @param callable $function\n   * @return void\n   *\/"
         },
         "__construct": {
             "name": "__construct",
             "summary": "Virtualmin constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    if (isset($cfg['user'], $cfg['pass'])) {\n      $this->cacheInit();\n      $this->user     = $cfg['user'];\n      $this->pass     = $cfg['pass'];\n      $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n      $this->checked  = true;\n      if (class_exists('\\\\bbn\\\\Cache')) {\n        if (!$this->cacheHas('list_commands')) {\n          $this->fetchCommands();\n        }\n\n        $this->commands = $this->cacheGet('list_commands');\n      }\n      else {\n        $this->commands = $this->fetchCommands();\n      }\n    }\n  }",
+            "code": "  public function __construct(array $cfg)\n  {\n    if (isset($cfg['user'], $cfg['pass'])) {\n      $this->cacheInit();\n      $this->user     = $cfg['user'];\n      $this->pass     = $cfg['pass'];\n      $this->hostname = isset($cfg['host']) ? $cfg['host'] : 'localhost';\n      $this->checked  = true;\n      if (class_exists('\\\\bbn\\\\Cache')) {\n        if (!$this->cacheHas('list_commands')) {\n          $this->fetchCommands();\n        }\n\n        $this->commands = $this->cacheGet('list_commands');\n      }\n      else {\n        $this->commands = $this->fetchCommands();\n      }\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 39,
             "endLine": 58,
             "isDeprecated": false,
@@ -233,30 +1546,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Virtualmin constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Virtualmin constructor.\n   * @param array $cfg\n   *\/"
         },
         "__call": {
             "name": "__call",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $arguments)\n  {\n    if ($this->checked) {\n      $cmdName = str_replace('_', '-', $name);\n      if (\\is_array($this->commands) && isset($this->commands[$cmdName])) {\n        \/\/Setting the last action performed\n        $this->lastAction = $cmdName;\n        \/\/Defining  the $url_part and the command to be executed\n        $url_part = $cmdName;\n        $cmd      = $this->commands[$cmdName];\n        if (!empty($arguments[0])) {\n          \/\/Prepping, processing and validating the create user parameters\n          $args = $this->processParameters($arguments[0]);\n          if (!empty($cmd['args'])) {\n            foreach ($cmd['args'] as $k => $v) {\n              \/\/ We can't use this system to check the mandatory properties:\n              \/\/ Virtualmin also marks properties that are actually a choice between\n              \/\/ several \"mandatory\" properties as \"mandatory\"\n              \/*\n              if (!empty($v['mandatory']) && !isset($args[$k])) {\n                if (\n                    (strpos($k, 'pass') === false)\n                    && (!isset($args['pass']) && !isset($args['encpass'])\n                    && !isset($args['passfile']))\n                ) {\n                  var_dump(\"Parameter $k mandatory for $name!\");\n                  return false;\n                }\n              }\n              *\/\n              if (isset($args[$k])) {\n                if ($v['binary'] && ($args[$k] || $v['mandatory'])) {\n                  $url_part .= \"&$k=\";\n                }\n                elseif (\\is_array($v) && $v['multiple'] && \\is_array($args[$k])) {\n                  foreach ($args[$k] as $w) {\n                    $url_part .= \"&$k=$w\";\n                  }\n                }\n                else {\n                  $url_part .= \"&$k=\" . $args[$k];\n                }\n              }\n            }\n          }\n        }\n\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n      \/\/ We force even if we don't have the command in the list\n      else {\n        if (!empty($arguments)) {\n          $args = $this->processParameters($arguments[0]);\n        }\n        $url_part = $cmdName;\n        if (!empty($args)) {\n          foreach ($args as $k => $v) {\n            if (\\is_array($v)) {\n              foreach ($v as $w) {\n                $url_part .= \"&$k=$w\";\n              }\n            }\n            elseif ($v == 1) {\n              $url_part .= \"&$k=\";\n            }\n            else {\n              $url_part .= \"&$k=$v\";\n            }\n          }\n        }\n\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n    }\n    return false;\n  }",
+            "code": "  public function __call($name, $arguments)\n  {\n    if ($this->checked) {\n      $cmdName = str_replace('_', '-', $name);\n      if (\\is_array($this->commands) && isset($this->commands[$cmdName])) {\n        \/\/Setting the last action performed\n        $this->lastAction = $cmdName;\n        \/\/Defining  the $url_part and the command to be executed\n        $url_part = $cmdName;\n        $cmd      = $this->commands[$cmdName];\n        if (!empty($arguments[0])) {\n          \/\/Prepping, processing and validating the create user parameters\n          $args = $this->processParameters($arguments[0]);\n          if (!empty($cmd['args'])) {\n            foreach ($cmd['args'] as $k => $v) {\n              \/\/ We can't use this system to check the mandatory properties:\n              \/\/ Virtualmin also marks properties that are actually a choice between\n              \/\/ several \"mandatory\" properties as \"mandatory\"\n              \/*\n              if (!empty($v['mandatory']) && !isset($args[$k])) {\n                if (\n                    (strpos($k, 'pass') === false)\n                    && (!isset($args['pass']) && !isset($args['encpass'])\n                    && !isset($args['passfile']))\n                ) {\n                  var_dump(\"Parameter $k mandatory for $name!\");\n                  return false;\n                }\n              }\n              *\/\n              if (isset($args[$k])) {\n                if ($v['binary'] && ($args[$k] || $v['mandatory'])) {\n                  $url_part .= \"&$k=\";\n                }\n                elseif (\\is_array($v) && $v['multiple'] && \\is_array($args[$k])) {\n                  foreach ($args[$k] as $w) {\n                    $url_part .= \"&$k=$w\";\n                  }\n                }\n                else {\n                  $url_part .= \"&$k=\" . $args[$k];\n                }\n              }\n            }\n          }\n        }\n\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n      \/\/ We force even if we don't have the command in the list\n      else {\n        if (!empty($arguments)) {\n          $args = $this->processParameters($arguments[0]);\n        }\n        $url_part = $cmdName;\n        if (!empty($args)) {\n          foreach ($args as $k => $v) {\n            if (\\is_array($v)) {\n              foreach ($v as $w) {\n                $url_part .= \"&$k=$w\";\n              }\n            }\n            elseif ($v == 1) {\n              $url_part .= \"&$k=\";\n            }\n            else {\n              $url_part .= \"&$k=$v\";\n            }\n          }\n        }\n\n        \/\/Concatenating the header url and $url_part to create the full url to be executed\n        $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n        \/\/Calling shell_exec and returning the result array\n        return $this->callShellExec($url_part);\n      }\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 66,
             "endLine": 147,
             "isDeprecated": false,
@@ -267,13 +1600,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__call",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -283,23 +1619,44 @@
                     "name": "arguments",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $name\n   * @param $arguments\n   * @return array|bool\n   *\/"
         },
         "getCommands": {
             "name": "getCommands",
             "summary": "Returns an array containing all the commands and their parameters",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->checked) {\n      return $this->commands;\n    }\n  }",
+            "code": "  public function getCommands()\n  {\n    if ($this->checked) {\n      return $this->commands;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 154,
             "endLine": 159,
             "isDeprecated": false,
@@ -310,20 +1667,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCommands",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns an array containing all the commands and their parameters\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array containing all the commands and their parameters\n   * @return array\n   *\/"
         },
         "getArgs": {
             "name": "getArgs",
             "summary": "Returns the arguments description of a given command",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name)\n  {\n    if ($this->checked) {\n      $cmdName = str_replace('_', '-', $name);\n      return isset($this->commands[$cmdName], $this->commands[$cmdName]['args']) ? $this->commands[$cmdName]['args'] : [];\n    }\n  }",
+            "code": "  public function getArgs($name)\n  {\n    if ($this->checked) {\n      $cmdName = str_replace('_', '-', $name);\n      return isset($this->commands[$cmdName], $this->commands[$cmdName]['args']) ? $this->commands[$cmdName]['args'] : [];\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 167,
             "endLine": 173,
             "isDeprecated": false,
@@ -334,31 +1700,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getArgs",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The command name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the arguments description of a given command\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$name",
+                        "description": "The command name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the arguments description of a given command\n   * @param $name The command name\n   * @return array\n   *\/"
         },
         "getCommand": {
             "name": "getCommand",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($command)\n  {\n    $command = str_replace('_', '-', $command);\n    \/\/Setting the last action performed\n    $this->lastAction = \"get-command\";\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\" . $this->sanitize($command);\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n    \/\/Calling shell_exec and returning the result array\n    return $this->callShellExec($url_part);\n  }",
+            "code": "  public function getCommand($command)\n  {\n    $command = str_replace('_', '-', $command);\n    \/\/Setting the last action performed\n    $this->lastAction = \"get-command\";\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"get-command&command=\" . $this->sanitize($command);\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n    \/\/Calling shell_exec and returning the result array\n    return $this->callShellExec($url_part);\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 180,
             "endLine": 191,
             "isDeprecated": false,
@@ -369,30 +1753,47 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getCommand",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "command",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$command"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $command\n   * @return array\n   *\/"
         },
         "generate": {
             "name": "generate",
             "summary": "Returns a string of PHP code for executing a given command with all its possible parameters pre-populated",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($command)\n  {\n    $perlCmd = str_replace('_', '-', $command);\n    if (isset($this->commands[$perlCmd])) {\n      $cmd = $this->commands[$perlCmd];\n      $st  = '$vm->' . $command . '([' . PHP_EOL;\n      foreach ($cmd['args'] as $k => $v) {\n        $st .= \"'$k' => \" . ($v['binary'] ? '0' : \"''\") . PHP_EOL;\n      }\n\n      $st .= ']);';\n      return $st;\n    }\n\n    return false;\n  }",
+            "code": "  public function generate($command)\n  {\n    $perlCmd = str_replace('_', '-', $command);\n    if (isset($this->commands[$perlCmd])) {\n      $cmd = $this->commands[$perlCmd];\n      $st  = '$vm->' . $command . '([' . PHP_EOL;\n      foreach ($cmd['args'] as $k => $v) {\n        $st .= \"'$k' => \" . ($v['binary'] ? '0' : \"''\") . PHP_EOL;\n      }\n\n      $st .= ']);';\n      return $st;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 199,
             "endLine": 214,
             "isDeprecated": false,
@@ -403,30 +1804,47 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "generate",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "command",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a string of PHP code for executing a given command with all its possible parameters pre-populated\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$command"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a string of PHP code for executing a given command with all its possible parameters pre-populated\n   * @param $command\n   * @return string|false\n   *\/"
         },
         "setJson": {
             "name": "setJson",
             "summary": "Sets the 'asJson' property as true",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->asJson = true;\n    return $this;\n  }",
+            "code": "  public function setJson()\n  {\n    $this->asJson = true;\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 221,
             "endLine": 225,
             "isDeprecated": false,
@@ -437,20 +1855,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "setJson",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Sets the 'asJson' property as true\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the 'asJson' property as true\n   * @return self\n   *\/"
         },
         "unsetJson": {
             "name": "unsetJson",
             "summary": "Sets the 'asJson' property as false",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->asJson = false;\n    return $this;\n  }",
+            "code": "  public function unsetJson()\n  {\n    $this->asJson = false;\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 232,
             "endLine": 236,
             "isDeprecated": false,
@@ -461,20 +1888,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "unsetJson",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Sets the 'asJson' property as false\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the 'asJson' property as false\n   * @return self\n   *\/"
         },
         "testConnection": {
             "name": "testConnection",
             "summary": "Test server connection",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return (bool)shell_exec($this->getHeaderUrl() . \"'\");\n  }",
+            "code": "  public function testConnection(): bool\n  {\n    return (bool)shell_exec($this->getHeaderUrl() . \"'\");\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 243,
             "endLine": 246,
             "isDeprecated": false,
@@ -485,22 +1921,259 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "testConnection",
             "returns": [
                 "bool"
             ],
+            "arguments": [],
+            "doc": {
+                "description": "Test server connection\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Test server connection\n   * @return bool\n   *\/"
+        },
+        "sanitize": {
+            "name": "sanitize",
+            "summary": "This function is used to sanitize the strings which are given as parameters",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function sanitize($st)\n  {\n    $st = trim((string)$st);\n    if (\n        (strpos($st, ';') !== false)\n        || (strpos($st, '<') !== false)\n        || (strpos($st, '\"') !== false)\n        || (strpos($st, \"'\") !== false)\n    ) {\n      return '';\n    }\n    return $st;\n  }",
             "parent": false,
-            "arguments": []
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "startLine": 254,
+            "endLine": 266,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "sanitize",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "This function is used to sanitize the strings which are given as parameters\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": "The the header url part to be executed"
+            },
+            "comments": "  \/**\n   * This function is used to sanitize the strings which are given as parameters\n   * @param string $st\n   * @return string The the header url part to be executed\n   *\/"
+        },
+        "getHeaderUrl": {
+            "name": "getHeaderUrl",
+            "summary": "This function is used to get the header url part to be executed",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getHeaderUrl()\n  {\n    $environment = strtolower(get_class($this));\n    return \"wget -O - --quiet --http-user='\" . $this->user . \"' --http-passwd=\" .\n      escapeshellarg($this->pass) . \" --no-check-certificate 'https:\/\/\" . $this->hostname . \":10000\/\" . (\n        $environment === 'cloudmin' ? 'server-manager' : 'virtual-server'\n      ) . \"\/remote.cgi?\" . ($this->asJson ? \"json=1&multiline=&\" : \"\") . \"program=\";\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "startLine": 273,
+            "endLine": 280,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getHeaderUrl",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "This function is used to get the header url part to be executed\n",
+                "params": [],
+                "return": "The the header url part to be executed"
+            },
+            "comments": "  \/**\n   * This function is used to get the header url part to be executed\n   * @return string The the header url part to be executed\n   *\/"
+        },
+        "callShellExec": {
+            "name": "callShellExec",
+            "summary": "Executes the $request using shell_exec",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function callShellExec($request)\n  {\n    \/\/\\bbn\\X::log($request, 'virtualminCloudmin');\n    \/\/Executing the shell_exec\n    $result = shell_exec($request);\n    \/\/\\bbn\\X::log($result, 'virtualminCloudmin');\n    if ($result && $this->asJson && \\bbn\\Str::isJson($result)) {\n      \/\/Decoding the json result into an array\n      $result = json_decode($result, true);\n      if (isset($result['error'])) {\n        $this->error = $result['error'];\n      }\n\n      if (isset($result['status']) && ($result['status'] === 'success')) {\n        if (isset($result['data'])) {\n          if (\n              isset($result['data'][0], $result['data'][0]['name'])\n              && ($result['data'][0]['name'] === 'Warning')\n          ) {\n            $result['data'] = \\array_slice($result['data'], 1);\n          }\n\n          return $result['data'];\n        }\n        elseif (isset($result['output'])) {\n          return $result['output'];\n        }\n      }\n    }\n    elseif ($result && !$this->asJson) {\n      return $result;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "startLine": 288,
+            "endLine": 322,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "callShellExec",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "request",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "the command to be excecuted"
+                }
+            ],
+            "doc": {
+                "description": "Executes the $request using shell_exec\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$request",
+                        "description": "the command to be excecuted"
+                    }
+                ],
+                "return": "an array with the execution status and message"
+            },
+            "comments": "  \/**\n   * Executes the $request using shell_exec\n   * @param string $request the command to be excecuted\n   * @return array an array with the execution status and message\n   *\/"
+        },
+        "processParameters": {
+            "name": "processParameters",
+            "summary": "Sanitize each parameter",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function processParameters(array $param)\n  {\n    foreach ($param as $key => $val) {\n      if (\\is_array($val)) {\n        $param[$key] = $this->processParameters($val);\n      }\n      else {\n        $param[$key] = $this->sanitize($val);\n      }\n    }\n\n    return $param;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "startLine": 330,
+            "endLine": 342,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "processParameters",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "param",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "the raw parameters"
+                }
+            ],
+            "doc": {
+                "description": "Sanitize each parameter\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$param",
+                        "description": "the raw parameters"
+                    }
+                ],
+                "return": "the processed parameters"
+            },
+            "comments": "  \/**\n   * Sanitize each parameter\n   * @param array $param the raw parameters\n   * @return array the processed parameters\n   *\/"
+        },
+        "fetchCommands": {
+            "name": "fetchCommands",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function fetchCommands()\n  {\n    if ($this->checked) {\n      $raw_commands = $this->listCommands();\n      $commands     = [];\n      foreach ($raw_commands as $com) {\n        if ($cmd = $this->getCommand($com['name'])) {\n          array_shift($cmd)['value'];\n          $args = [];\n          foreach ($cmd as $cm) {\n            $args[$cm['name']] = [\n              'desc' => !empty($cm['values']['value']) ? $cm['values']['value'][0] : '',\n              'binary' => $cm['values']['binary'][0] === 'No' ? false : true,\n              'multiple' => $cm['values']['repeats'][0] === 'No' ? false : true,\n              'mandatory' => $cm['values']['optional'][0] === 'No' ? true : false,\n            ];\n          }\n\n          ksort($args);\n          $cm = [\n            'cat' => $com['values']['category'][0],\n            'desc' => $com['values']['description'][0],\n            'args' => $args,\n            'cmd' => $cmd\n          ];\n          $commands[$com['name']] = $cm;\n        }\n      }\n\n      ksort($commands);\n      $this->cacheSet('list_commands', '', $commands);\n      return $commands;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "startLine": 348,
+            "endLine": 381,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fetchCommands",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
         "listCommands": {
             "name": "listCommands",
             "summary": "Gets all the commands directly from the API",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/CloudminVirtualmin\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $param = [])\n  {\n    \/\/Prepping, processing and validating the create user parameters\n    $param = $this->processParameters($param);\n    \/\/Setting the last action performed\n    $this->lastAction = \"list-commands\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"list-commands\";\n    if (isset($param['short'])) {\/\/short parameter is set\n      $url_part .= \"&short\";\n    }\n\n    if (isset($param['nameonly'])) {\/\/nameonly parameter is set\n      $url_part .= \"&nameonly\";\n    }\n\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n\n    \/\/test\n    $uid = $this->hostname;\n    if (!empty($param)) {\n      $uid .= md5(json_encode($param));\n    }\n\n    if ($this->cacheHas($uid, 'list_commands')) {\n      $result_call = $this->cacheGet($uid, 'list_commands');\n    }\n    else {\n      $result_call = $this->callShellExec($url_part);\n      $this->cacheSet($uid, 'list_commands', $result_call);\n    }\n\n    return $result_call;\n  }",
+            "code": "  public function listCommands(array $param = [])\n  {\n    \/\/Prepping, processing and validating the create user parameters\n    $param = $this->processParameters($param);\n    \/\/Setting the last action performed\n    $this->lastAction = \"list-commands\";\n\n    \/\/Defining  the $url_part and the command to be executed\n    $url_part = \"list-commands\";\n    if (isset($param['short'])) {\/\/short parameter is set\n      $url_part .= \"&short\";\n    }\n\n    if (isset($param['nameonly'])) {\/\/nameonly parameter is set\n      $url_part .= \"&nameonly\";\n    }\n\n    \/\/Concatenating the header url and $url_part to create the full url to be executed\n    $url_part = $this->getHeaderUrl() . $url_part . \"'\";\n\n    \/\/test\n    $uid = $this->hostname;\n    if (!empty($param)) {\n      $uid .= md5(json_encode($param));\n    }\n\n    if ($this->cacheHas($uid, 'list_commands')) {\n      $result_call = $this->cacheGet($uid, 'list_commands');\n    }\n    else {\n      $result_call = $this->callShellExec($url_part);\n      $this->cacheSet($uid, 'list_commands', $result_call);\n    }\n\n    return $result_call;\n  }",
+            "parent": false,
+            "trait": "bbn\\Api\\CloudminVirtualmin\\Common",
             "startLine": 389,
             "endLine": 424,
             "isDeprecated": false,
@@ -511,28 +2184,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "listCommands",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "param",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets all the commands directly from the API\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$param"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets all the commands directly from the API\n   * @param array $param\n   * @return array\n   *\/"
         }
     },
     "properties": {
         "infoProps": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\Virtualmin",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var array Info properties",
                 "tags": []
             },
+            "parent": false,
             "value": [
                 "cpu",
                 "disk_free",
@@ -554,23 +2254,205 @@
                 "vposs"
             ]
         },
+        "_cache_prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "cache_engine": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Cache",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "user": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string The username",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "pass": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string The password",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "checked": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool Check instance existence",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "commands": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var array Array of all commands",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "cacher": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Cache cache",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "asJson": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": true
+        },
         "lastAction": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var string The last action to have been performed",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": false
         },
         "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Api\\Virtualmin"
+            },
+            "declaring_trait": "bbn\\Api\\CloudminVirtualmin\\Common",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": false
         }
     },
     "staticProperties": [],
-    "constants": [],
+    "constants": {
+        "CACHE_NAME": {
+            "name": "CACHE_NAME",
+            "value": "bbn\/Api\/Virtualmin",
+            "class": "bbn\\Api\\Virtualmin",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "",
+                "tags": []
+            }
+        }
+    },
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * Class virtualmin\n * @package api\n *\n * @author Edwin Mugendi <edwinmugendi@gmail.com>\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n *\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

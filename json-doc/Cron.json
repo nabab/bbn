@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Cron",
     "namespace": true,
+    "realName": "Cron",
+    "realNamespace": "bbn",
     "traits": [
         "bbn\\Cron\\Common"
     ],
@@ -18,15 +20,12 @@
     "fileName": "\/Cron.php",
     "startLine": 15,
     "endLine": 184,
-    "numMethods": 36,
-    "numProperties": 0,
+    "numMethods": 37,
+    "numProperties": 26,
     "numConstants": 0,
     "numStaticProperties": 4,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Cron\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -49,6 +48,8 @@
         "timer": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
         "prefix": "bbn_",
@@ -65,7 +66,6 @@
     "namespaceName": "bbn",
     "shortName": "Cron",
     "contentConstructor": {
-        "file": "bbn\\Cron",
         "returns": []
     },
     "methods": {
@@ -74,11 +74,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, bbn\\Mvc\\Controller $ctrl = NULL, array $cfg = [])\n  {\n    if ($db->check()) {\n      $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');\n      $this->db = $db;\n      $this->timer = new Util\\Timer();\n      $this->table = ($cfg['prefix'] ?? $this->prefix).'cron';\n      if (!empty($cfg['exe_path'])) {\n        $this->exe_path = $cfg['exe_path'];\n      }\n\n      if (!empty($cfg['log_file'])) {\n        $this->log_file = $cfg['log_file'];\n      }\n\n      if ($ctrl) {\n        if (empty($this->exe_path)) {\n          $this->exe_path = $ctrl->pluginUrl('appui-cron');\n          if ($this->exe_path) {\n            $this->exe_path .= '\/run';\n          }\n        }\n\n        $this->controller = $ctrl;\n      }\n    }\n  }",
+            "code": "  public function __construct(Db $db, Mvc\\Controller $ctrl = null, array $cfg = [])\n  {\n    if ($db->check()) {\n      $this->path = $cfg['data_path'] ?? Mvc::getDataPath('appui-cron');\n      $this->db = $db;\n      $this->timer = new Util\\Timer();\n      $this->table = ($cfg['prefix'] ?? $this->prefix).'cron';\n      if (!empty($cfg['exe_path'])) {\n        $this->exe_path = $cfg['exe_path'];\n      }\n\n      if (!empty($cfg['log_file'])) {\n        $this->log_file = $cfg['log_file'];\n      }\n\n      if ($ctrl) {\n        if (empty($this->exe_path)) {\n          $this->exe_path = $ctrl->pluginUrl('appui-cron');\n          if ($this->exe_path) {\n            $this->exe_path .= '\/run';\n          }\n        }\n\n        $this->controller = $ctrl;\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 45,
             "endLine": 71,
             "isDeprecated": false,
@@ -89,13 +92,18 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -104,7 +112,13 @@
                 {
                     "name": "ctrl",
                     "position": 1,
-                    "type": "bbn\\Mvc\\Controller",
+                    "type": "null|bbn\\Mvc\\Controller",
+                    "type_arr": [
+                        "null",
+                        "bbn\\Mvc\\Controller"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -114,23 +128,53 @@
                     "name": "cfg",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Db",
+                        "name": "$db"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "Mvc\\Controller|null",
+                        "name": "$ctrl"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param Db $db\n   * @param Mvc\\Controller|null $ctrl\n   * @param array $cfg\n   *\/"
         },
         "getLauncher": {
             "name": "getLauncher",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {\n      $this->_launcher = new Cron\\Launcher($this);\n    }\n\n    return $this->_launcher;\n  }",
+            "code": "  public function getLauncher(): ?Cron\\Launcher\n  {\n    if (!$this->_launcher && $this->check() && $this->exe_path && $this->controller) {\n      $this->_launcher = new Cron\\Launcher($this);\n    }\n\n    return $this->_launcher;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 77,
             "endLine": 84,
             "isDeprecated": false,
@@ -141,23 +185,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getLauncher",
             "returns": [
                 null,
                 "bbn\\Cron\\Launcher"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return Cron\\Launcher|null\n   *\/"
         },
         "getRunner": {
             "name": "getRunner",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg = [])\n  {\n    X::log($cfg, 'cron');\n    if ($this->check() && $this->controller) {\n      return new Cron\\Runner($this, $cfg);\n    }\n\n    return null;\n  }",
+            "code": "  public function getRunner(array $cfg = []): ?Cron\\Runner\n  {\n    X::log($cfg, 'cron');\n    if ($this->check() && $this->controller) {\n      return new Cron\\Runner($this, $cfg);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 91,
             "endLine": 99,
             "isDeprecated": false,
@@ -168,33 +221,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRunner",
             "returns": [
                 null,
                 "bbn\\Cron\\Runner"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   * @return Cron\\Runner|null\n   *\/"
         },
         "getController": {
             "name": "getController",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg = [])\n  {\n    if ($this->check() && $this->controller) {\n      return $this->controller;\n    }\n\n    return null;\n  }",
+            "code": "  public function getController(array $cfg = []): ?Mvc\\Controller\n  {\n    if ($this->check() && $this->controller) {\n      return $this->controller;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 106,
             "endLine": 113,
             "isDeprecated": false,
@@ -205,33 +278,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getController",
             "returns": [
                 null,
                 "bbn\\Mvc\\Controller"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   * @return Mvc\\Controller|null\n   *\/"
         },
         "getManager": {
             "name": "getManager",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->_manager && $this->check() && $this->controller) {\n      $this->_manager = new Cron\\Manager($this->db);\n    }\n\n    return $this->_manager;\n  }",
+            "code": "  public function getManager(): ?Cron\\Manager\n  {\n    if (!$this->_manager && $this->check() && $this->controller) {\n      $this->_manager = new Cron\\Manager($this->db);\n    }\n\n    return $this->_manager;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 119,
             "endLine": 126,
             "isDeprecated": false,
@@ -242,23 +335,64 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getManager",
             "returns": [
                 null,
                 "bbn\\Cron\\Manager"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return Cron\\Manager|null\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->db->check();\n  }",
+            "code": "  public function check(): bool\n  {\n    return $this->db->check();\n  }",
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "check",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
             "startLine": 132,
             "endLine": 135,
             "isDeprecated": false,
@@ -269,45 +403,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [
                 "bool"
             ],
-            "parent": {
-                "name": "check",
-                "summary": "Checks whether the error property has been set (so an error happened).",
+            "arguments": [],
+            "doc": {
                 "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * @return bool\n   *\/"
         },
         "getExePath": {
             "name": "getExePath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->exe_path;\n  }",
+            "code": "  public function getExePath()\n  {\n    return $this->exe_path;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 140,
             "endLine": 143,
             "isDeprecated": false,
@@ -318,20 +438,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getExePath",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
         },
         "getLogFile": {
             "name": "getLogFile",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->log_file;\n  }",
+            "code": "  public function getLogFile()\n  {\n    return $this->log_file;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 148,
             "endLine": 151,
             "isDeprecated": false,
@@ -342,20 +471,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getLogFile",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
         },
         "getPath": {
             "name": "getPath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->path;\n  }",
+            "code": "  public function getPath(): ?string\n  {\n    return $this->path;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 156,
             "endLine": 159,
             "isDeprecated": false,
@@ -366,23 +504,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
         },
         "launchPoll": {
             "name": "launchPoll",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($launcher = $this->getLauncher()) {\n      return $launcher->launch(['type' => 'poll']);\n    }\n\n    return null;\n  }",
+            "code": "  public function launchPoll()\n  {\n    if ($launcher = $this->getLauncher()) {\n      return $launcher->launch(['type' => 'poll']);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 164,
             "endLine": 171,
             "isDeprecated": false,
@@ -393,20 +540,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "launchPoll",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
         },
         "launchTaskSystem": {
             "name": "launchTaskSystem",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($launcher = $this->getLauncher()) {\n      return $launcher->launch(['type' => 'cron']);\n    }\n\n    return null;\n  }",
+            "code": "  public function launchTaskSystem()\n  {\n    if ($launcher = $this->getLauncher()) {\n      return $launcher->launch(['type' => 'cron']);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 176,
             "endLine": 183,
             "isDeprecated": false,
@@ -417,43 +573,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "launchTaskSystem",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
         },
         "test": {
             "name": "test",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -462,24 +617,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -488,160 +638,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "test",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -649,63 +681,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -714,17 +804,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -735,43 +1001,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -782,42 +1066,92 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         },
         "getCronTimeout": {
             "name": "getCronTimeout",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$cron_timeout;\n  }",
+            "code": "  public static function getCronTimeout(): int\n  {\n    return self::$cron_timeout;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 59,
             "endLine": 62,
             "isDeprecated": false,
@@ -828,22 +1162,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCronTimeout",
             "returns": [
                 "int"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int\n   *\/"
         },
         "setCronTimeout": {
             "name": "setCronTimeout",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(int $cron_timeout)\n  {\n    self::$cron_timeout = $cron_timeout;\n  }",
+            "code": "  public static function setCronTimeout(int $cron_timeout): void\n  {\n    self::$cron_timeout = $cron_timeout;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 67,
             "endLine": 70,
             "isDeprecated": false,
@@ -854,33 +1197,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setCronTimeout",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cron_timeout",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "timeout"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$cron",
+                        "description": "timeout"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $cron_timeout\n   *\/"
         },
         "getPollTimeout": {
             "name": "getPollTimeout",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$poll_timeout;\n  }",
+            "code": "  public static function getPollTimeout(): int\n  {\n    return self::$poll_timeout;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 75,
             "endLine": 78,
             "isDeprecated": false,
@@ -891,22 +1255,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPollTimeout",
             "returns": [
                 "int"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int\n   *\/"
         },
         "setPollTimeout": {
             "name": "setPollTimeout",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(int $poll_timeout)\n  {\n    self::$poll_timeout = $poll_timeout;\n  }",
+            "code": "  public static function setPollTimeout(int $poll_timeout): void\n  {\n    self::$poll_timeout = $poll_timeout;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 83,
             "endLine": 86,
             "isDeprecated": false,
@@ -917,33 +1290,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setPollTimeout",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "poll_timeout",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "timeout"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$poll",
+                        "description": "timeout"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $poll_timeout\n   *\/"
         },
         "getUserTimeout": {
             "name": "getUserTimeout",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$user_timeout;\n  }",
+            "code": "  public static function getUserTimeout(): int\n  {\n    return self::$user_timeout;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 91,
             "endLine": 94,
             "isDeprecated": false,
@@ -954,22 +1348,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUserTimeout",
             "returns": [
                 "int"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int\n   *\/"
         },
         "setUserTimeout": {
             "name": "setUserTimeout",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(int $user_timeout)\n  {\n    self::$user_timeout = $user_timeout;\n  }",
+            "code": "  public static function setUserTimeout(int $user_timeout): void\n  {\n    self::$user_timeout = $user_timeout;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 99,
             "endLine": 102,
             "isDeprecated": false,
@@ -980,33 +1383,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setUserTimeout",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "user_timeout",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "timeout"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$user",
+                        "description": "timeout"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $user_timeout\n   *\/"
         },
         "init": {
             "name": "init",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg = [])\n  {\n    $this->path = $cfg['data_path'] ?? bbn\\Mvc::getDataPath('appui-cron');\n  }",
+            "code": "  public function init(array $cfg = [])\n  {\n    $this->path = $cfg['data_path'] ?? bbn\\Mvc::getDataPath('appui-cron');\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 108,
             "endLine": 111,
             "isDeprecated": false,
@@ -1017,30 +1441,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "init",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   *\/"
         },
         "getStatusPath": {
             "name": "getStatusPath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($type)\n  {\n    return $this->path && $type ? $this->path.'status\/.'.$type : null;\n  }",
+            "code": "  public function getStatusPath($type): ?string\n  {\n    return $this->path && $type ? $this->path.'status\/.'.$type : null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 127,
             "endLine": 130,
             "isDeprecated": false,
@@ -1051,33 +1495,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getStatusPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "type",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $type\n   * @return string|null\n   *\/"
         },
         "getPidPath": {
             "name": "getPidPath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      return $this->path.'pid\/.'.($cfg['id'] ?? $cfg['type']);\n    }\n    return null;\n  }",
+            "code": "  public function getPidPath(array $cfg): ?string\n  {\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      return $this->path.'pid\/.'.($cfg['id'] ?? $cfg['type']);\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 136,
             "endLine": 142,
             "isDeprecated": false,
@@ -1088,33 +1549,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getPidPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   * @return string|null\n   *\/"
         },
         "getLogPath": {
             "name": "getLogPath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, bool $error = false, bool $no_path = false)\n  {\n    $path = null;\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      if ( $error ){\n        $path = $this->path.'error\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      else {\n        $path = $this->path.'log\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      if ($error || $no_path) {\n        $path .= '\/';\n      }\n      else {\n        $path = \\bbn\\X::makeStoragePath($path);\n      }\n    }\n\n    return $path;\n  }",
+            "code": "  public function getLogPath(array $cfg, bool $error = false, bool $no_path = false): ?string\n  {\n    $path = null;\n    if ($this->path && (isset($cfg['type']) || isset($cfg['id']))) {\n      if ( $error ){\n        $path = $this->path.'error\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      else {\n        $path = $this->path.'log\/'.(isset($cfg['id']) ? 'tasks\/'.$cfg['id'] : $cfg['type']);\n      }\n      if ($error || $no_path) {\n        $path .= '\/';\n      }\n      else {\n        $path = \\bbn\\X::makeStoragePath($path);\n      }\n    }\n\n    return $path;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 150,
             "endLine": 169,
             "isDeprecated": false,
@@ -1125,16 +1606,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "getLogPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1144,6 +1630,11 @@
                     "name": "error",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1153,24 +1644,55 @@
                     "name": "no_path",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$error"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$no",
+                        "description": "path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $cfg\n   * @param bool $error\n   * @param bool $no_path\n   * @return string|null\n   *\/"
         },
         "getLogTree": {
             "name": "getLogTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, bool $error = false)\n  {\n    $fs = new bbn\\File\\System();\n    $fpath = !empty($cfg['fpath']) ? $cfg['fpath'] . '\/' : '';\n    if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path.$fpath)) {\n      $fs->cd($path.$fpath);\n      $dirs = array_reverse($fs->getFiles('.\/', true, true, null, 'cts'));\n      foreach ( $dirs as &$t ){\n        $t['numChildren'] = $t['num'] ?? 0;\n        $t['fpath'] = $fpath . $t['name'];\n        if ( isset($t['num']) ){\n          unset($t['num']);\n        }\n      }\n      return $dirs;\n    }\n  }",
+            "code": "  public function getLogTree(array $cfg, bool $error = false)\n  {\n    $fs = new bbn\\File\\System();\n    $fpath = !empty($cfg['fpath']) ? $cfg['fpath'] . '\/' : '';\n    if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path.$fpath)) {\n      $fs->cd($path.$fpath);\n      $dirs = array_reverse($fs->getFiles('.\/', true, true, null, 'cts'));\n      foreach ( $dirs as &$t ){\n        $t['numChildren'] = $t['num'] ?? 0;\n        $t['fpath'] = $fpath . $t['name'];\n        if ( isset($t['num']) ){\n          unset($t['num']);\n        }\n      }\n      return $dirs;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 171,
             "endLine": 187,
             "isDeprecated": false,
@@ -1181,13 +1703,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getLogTree",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1197,6 +1724,11 @@
                     "name": "error",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1209,11 +1741,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    if ( bbn\\Str::isUid($cfg['id']) && bbn\\Str::isDateSql($cfg['day']) ){\n      $p = \\explode('-', $cfg['day']);\n      \\array_pop($p);\n      $p = \\implode('\/', $p).'\/';\n      if (\n        ($task = $this->getManager()->getCron($cfg['id'])) &&\n        !empty($task['file']) &&\n        ($path = $this->getLogPath($cfg, false, true)) &&\n        ($file = $path.$p.$cfg['day'].'.json') &&\n        \\is_file($file) &&\n        ($file = \\json_decode(\\file_get_contents($file), true))\n      ){\n        return array_reverse(array_filter($file, function($f) use($task){\n          return isset($f['file']) && ($f['file'] === $task['file']);\n        }));\n      }\n      return [];\n    }\n    return null;\n  }",
+            "code": "  public function getDayLogs(array $cfg): ?array\n  {\n    if ( bbn\\Str::isUid($cfg['id']) && bbn\\Str::isDateSql($cfg['day']) ){\n      $p = \\explode('-', $cfg['day']);\n      \\array_pop($p);\n      $p = \\implode('\/', $p).'\/';\n      if (\n        ($task = $this->getManager()->getCron($cfg['id'])) &&\n        !empty($task['file']) &&\n        ($path = $this->getLogPath($cfg, false, true)) &&\n        ($file = $path.$p.$cfg['day'].'.json') &&\n        \\is_file($file) &&\n        ($file = \\json_decode(\\file_get_contents($file), true))\n      ){\n        return array_reverse(array_filter($file, function($f) use($task){\n          return isset($f['file']) && ($f['file'] === $task['file']);\n        }));\n      }\n      return [];\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 189,
             "endLine": 210,
             "isDeprecated": false,
@@ -1224,16 +1759,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDayLogs",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1246,11 +1786,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    $fs = new bbn\\File\\System();\n    $fpath = $cfg['fpath'] ?: '';\n    if ( ($path = $this->getLogPath($cfg, false, true)) && $fs->isDir($path.$fpath) ){\n      $fs->cd($path.$fpath);\n      $files = array_reverse($fs->getFiles('.\/', true, true, null, 'cts'));\n      foreach ( $files as $i => $f ){\n        if ( $f['name'] === $cfg['filename'] ){\n          $tf = $files[$i + ($cfg['action'] === 'prev' ? 1 : -1)];\n          return $path . $fpath . (!empty($tf) ? $tf['name'] : $f['name']);\n        }\n      }\n    }\n    return null;\n  }",
+            "code": "  public function  get_log_prev_next(array $cfg): ?string\n  {\n    $fs = new bbn\\File\\System();\n    $fpath = $cfg['fpath'] ?: '';\n    if ( ($path = $this->getLogPath($cfg, false, true)) && $fs->isDir($path.$fpath) ){\n      $fs->cd($path.$fpath);\n      $files = array_reverse($fs->getFiles('.\/', true, true, null, 'cts'));\n      foreach ( $files as $i => $f ){\n        if ( $f['name'] === $cfg['filename'] ){\n          $tf = $files[$i + ($cfg['action'] === 'prev' ? 1 : -1)];\n          return $path . $fpath . (!empty($tf) ? $tf['name'] : $f['name']);\n        }\n      }\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 212,
             "endLine": 227,
             "isDeprecated": false,
@@ -1261,16 +1804,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "get_log_prev_next",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1283,11 +1831,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, bool $error = false, $start = 0, $num = 10)\n  {\n    $fs = new \\bbn\\File\\System();\n    if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path)) {\n      $res = [];\n      $fs->cd($path);\n      $years = array_reverse($fs->getDirs($path));\n      foreach ($years as $y) {\n        $months = array_reverse($fs->getDirs($y));\n        foreach ($months as $m) {\n          $days = array_reverse($fs->getDirs($m));\n          foreach ($days as $d) {\n            $nums = array_reverse($fs->getDirs($d));\n            foreach ($nums as $num) {\n              foreach (array_reverse($fs->getFiles($num)) as $f) {\n                if ($start) {\n                  $start--;\n                }\n                if (!$start) {\n                  $res[] = $f;\n                  if (count($res) >= $num) {\n                    return $res;\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "code": "  public function getLastLogs(array $cfg, bool $error = false, $start = 0, $num = 10): ?array\n  {\n    $fs = new \\bbn\\File\\System();\n    if (($path = $this->getLogPath($cfg, $error, true)) && $fs->isDir($path)) {\n      $res = [];\n      $fs->cd($path);\n      $years = array_reverse($fs->getDirs($path));\n      foreach ($years as $y) {\n        $months = array_reverse($fs->getDirs($y));\n        foreach ($months as $m) {\n          $days = array_reverse($fs->getDirs($m));\n          foreach ($days as $d) {\n            $nums = array_reverse($fs->getDirs($d));\n            foreach ($nums as $num) {\n              foreach (array_reverse($fs->getFiles($num)) as $f) {\n                if ($start) {\n                  $start--;\n                }\n                if (!$start) {\n                  $res[] = $f;\n                  if (count($res) >= $num) {\n                    return $res;\n                  }\n                }\n              }\n            }\n          }\n        }\n      }\n      return $res;\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 229,
             "endLine": 261,
             "isDeprecated": false,
@@ -1298,16 +1849,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "getLastLogs",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1317,6 +1873,11 @@
                     "name": "error",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1326,6 +1887,9 @@
                     "name": "start",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1335,6 +1899,9 @@
                     "name": "num",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 10,
@@ -1347,11 +1914,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, bool $error = false)\n  {\n    if ($tmp = $this->getLastLogs($cfg, $error, 0, 1)) {\n      return $tmp[0];\n    }\n    return null;\n\n  }",
+            "code": "  public function getLastLog(array $cfg, bool $error = false): ?string\n  {\n    if ($tmp = $this->getLastLogs($cfg, $error, 0, 1)) {\n      return $tmp[0];\n    }\n    return null;\n\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 263,
             "endLine": 270,
             "isDeprecated": false,
@@ -1362,16 +1932,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getLastLog",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1381,6 +1956,11 @@
                     "name": "error",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1393,11 +1973,14 @@
             "summary": "Returns true if the file data_folder\/.active exists, false otherwise.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->getStatusPath('active'));\n    }\n\n    return false;\n  }",
+            "code": "  public function isActive(): bool\n  {\n    if ( $this->check() ){\n      return file_exists($this->getStatusPath('active'));\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 286,
             "endLine": 293,
             "isDeprecated": false,
@@ -1408,22 +1991,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isActive",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if the file data_folder\/.active exists, false otherwise.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the file data_folder\/.active exists, false otherwise.\n   *\n   * @return bool\n   *\/"
         },
         "isCronActive": {
             "name": "isCronActive",
             "summary": "Returns true if the file data_folder\/.cron exists, false otherwise.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->getStatusPath('cron'));\n    }\n\n    return false;\n  }",
+            "code": "  public function isCronActive(): bool\n  {\n    if ( $this->check() ){\n      return file_exists($this->getStatusPath('cron'));\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 300,
             "endLine": 307,
             "isDeprecated": false,
@@ -1434,22 +2026,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isCronActive",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if the file data_folder\/.cron exists, false otherwise.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the file data_folder\/.cron exists, false otherwise.\n   *\n   * @return bool\n   *\/"
         },
         "isPollActive": {
             "name": "isPollActive",
             "summary": "Returns true if the file data_folder\/.poll exists, false otherwise.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cron",
+            "class": "bbn\\Cron",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cron\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ( $this->check() ){\n      return file_exists($this->getStatusPath('poll'));\n    }\n\n    return false;\n  }",
+            "code": "  public function isPollActive(): bool\n  {\n    if ( $this->check() ){\n      return file_exists($this->getStatusPath('poll'));\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cron\\Common",
             "startLine": 314,
             "endLine": 321,
             "isDeprecated": false,
@@ -1460,14 +2061,662 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isPollActive",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if the file data_folder\/.poll exists, false otherwise.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the file data_folder\/.poll exists, false otherwise.\n   *\n   * @return bool\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "_runner": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "_launcher": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "_manager": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "controller": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "exe_path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "log_file": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "timer": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Util\\Timer"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The tables' prefix (the tables will be called ?cron and ?journal)"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "bbn_"
+        },
+        "path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The full path to the plugin data folder where the actions and log files are\/will be located"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bbn\\Db",
+                        "description": "The DB connection"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "ctrl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bbn\\Mvc\\Controller",
+                        "description": "The controller"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "mail": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "todo",
+                        "text": "The class shouldn't send emails directly"
+                    },
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "data": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$ctrl"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "enabled": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": true
+        },
+        "timeout": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": 50
+        },
+        "cron_timeout": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 300
+        },
+        "poll_timeout": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 600
+        },
+        "user_timeout": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 480
+        },
+        "cron_check_timeout": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cron"
+            },
+            "declaring_trait": "bbn\\Cron\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 60
+        }
+    },
     "staticProperties": {
         "cron_timeout": 300,
         "poll_timeout": 600,
@@ -1475,6 +2724,12 @@
         "cron_check_timeout": 60
     },
     "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * (Static) content delivery system through requests using filesystem and internal DB for libraries.\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Jan 3, 2016, 12:24:36 +0000\n * @category  Cache\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n *\/"
+    ],
     "summary": "(Static) content delivery system through requests using filesystem and internal DB for libraries.",
     "description": "",
     "description_parts": []

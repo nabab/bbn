@@ -1,0 +1,343 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Options",
+    "namespace": true,
+    "realName": "Options",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Options.php",
+    "startLine": 9,
+    "endLine": 221,
+    "numMethods": 5,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Options",
+    "contentConstructor": null,
+    "methods": {
+        "fullOptions": {
+            "name": "fullOptions",
+            "summary": "Returns an array of full options arrays for a given parent",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->fullOptions(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Options",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Options.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullOptions($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $list = $this->items($id);\n      if (\\is_array($list)) {\n        $res = [];\n        foreach ($list as $i){\n          if ($tmp = $this->option($i)) {\n            $res[] = $tmp;\n          }\n          else {\n            throw new Exception(X::_(\"Impossible to find the ID\").' '.$i);\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 28,
+            "endLine": 48,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullOptions",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of full options arrays for a given parent\n\n```php\nX::dump($opt->fullOptions(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "A list of parent if option not found"
+            },
+            "comments": "  \/**\n   * Returns an array of full options arrays for a given parent\n   *\n   * ```php\n   * X::dump($opt->fullOptions(12));\n   * \/*\n   * array [\n   *   ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n   *   ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n   *   ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n   *   ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/"
+        },
+        "fullOptionsCfg": {
+            "name": "fullOptionsCfg",
+            "summary": "Returns an array of full options with the config in arrays for a given parent",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->fullOptionsCfg(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n  ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Options",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Options.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullOptionsCfg($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $o =& $this;\n      return $this->map(\n        function ($a) use ($o) {\n          $a[$this->fields['cfg']] = $o->getCfg($a[$this->fields['id']]);\n          return $a;\n        }, $id\n      );\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 67,
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullOptionsCfg",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of full options with the config in arrays for a given parent\n\n```php\nX::dump($opt->fullOptionsCfg(12));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n  ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n  ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "A list of parent if option not found"
+            },
+            "comments": "  \/**\n   * Returns an array of full options with the config in arrays for a given parent\n   *\n   * ```php\n   * X::dump($opt->fullOptionsCfg(12));\n   * \/*\n   * array [\n   *   ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n   *   ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n   *   ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n   *   ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/"
+        },
+        "options": {
+            "name": "options",
+            "summary": "Returns an array of options in the form id => text",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->options(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\"\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Options",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Options.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function options($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $locale = $this->getTranslatingLocale($id);\n      if ($r = $this->getCache($id, __FUNCTION__, $locale)) {\n        return $r;\n      }\n\n      $cf  =& $this->fields;\n      $opts = $this->db->rselectAll([\n        'tables' => [$this->class_cfg['table']],\n        'fields' => [\n          $this->db->cfn($cf['id'], $this->class_cfg['table']),\n          $this->db->cfn($cf['text'], $this->class_cfg['table']),\n          $this->db->cfn($cf['id_alias'], $this->class_cfg['table'])\n        ],\n        'join' => [\n          [\n            'table' => $this->class_cfg['table'],\n            'alias' => 'alias',\n            'type'  => 'LEFT',\n            'on'    => [\n              [\n                'field' => $this->db->cfn($cf['id_alias'], $this->class_cfg['table']),\n                'exp'   => 'alias.'.$cf['id']\n              ]\n            ]\n          ]\n        ],\n        'where' => [$this->db->cfn($cf['id_parent'], $this->class_cfg['table']) => $id],\n        'order' => ['text' => 'ASC']\n      ]);\n      $res = [];\n      foreach ($opts as $o) {\n        if (\\is_null($o[$cf['text']]) && !empty($o[$cf['id_alias']])) {\n          $o[$cf['text']] = $this->text($o[$cf['id_alias']]);\n        }\n        if (!empty($o[$cf['text']])\n          && !empty($locale)\n          && ($t = $this->getTranslation($o[$cf['id']], $locale))\n        ) {\n          $o[$cf['text']] = $t;\n        }\n        $res[$o[$cf['id']]] = $o[$cf['text']];\n      }\n\n      \\asort($res);\n      $this->setCache($id, __FUNCTION__, $res, $locale);\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 100,
+            "endLine": 152,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "options",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of options in the form id => text\n\n```php\nX::dump($opt->options(12));\n\/*\n[\n  21 => \"My option 21\",\n  22 => \"My option 22\",\n  25 => \"My option 25\",\n  27 => \"My option 27\"\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "An indexed array of id\/text options or false if option not found"
+            },
+            "comments": "  \/**\n   * Returns an array of options in the form id => text\n   *\n   * ```php\n   * X::dump($opt->options(12));\n   * \/*\n   * [\n   *   21 => \"My option 21\",\n   *   22 => \"My option 22\",\n   *   25 => \"My option 25\",\n   *   27 => \"My option 27\"\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null An indexed array of id\/text options or false if option not found\n   *\/"
+        },
+        "items": {
+            "name": "items",
+            "summary": "Returns an array of the children's IDs of the given option sorted by order or text",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->items(12));\n\/\/ array [40, 41, 42, 44, 45, 43, 46, 47]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Options",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Options.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function items($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      if (($res = $this->cacheGet($id, __FUNCTION__)) !== false) {\n        return $res;\n      }\n\n      $cfg = $this->getCfg($id) ?: [];\n      if ($cfg || $this->dbTraitExists($id)) {\n        \/\/ If not sortable returning an array ordered by text\n        $order = empty($cfg['sortable']) ? [\n            $this->fields['text'] => 'ASC',\n            $this->fields['code'] => 'ASC',\n            $this->fields['id'] => 'ASC',\n          ] : [\n            $this->fields['num'] => 'ASC',\n            $this->fields['text'] => 'ASC',\n            $this->fields['code'] => 'ASC',\n            $this->fields['id'] => 'ASC',\n          ];\n        $res   = $this->db->getColumnValues(\n          $this->class_cfg['table'],\n          $this->fields['id'], [\n          $this->fields['id_parent'] => $id,\n          ], $order\n        );\n        $this->cacheSet($id, __FUNCTION__, $res);\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 166,
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "items",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of the children's IDs of the given option sorted by order or text\n\n```php\nX::dump($opt->items(12));\n\/\/ array [40, 41, 42, 44, 45, 43, 46, 47]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "array of IDs, sorted or false if option not found"
+            },
+            "comments": "  \/**\n   * Returns an array of the children's IDs of the given option sorted by order or text\n   *\n   * ```php\n   * X::dump($opt->items(12));\n   * \/\/ array [40, 41, 42, 44, 45, 43, 46, 47]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null array of IDs, sorted or false if option not found\n   *\/"
+        },
+        "flatOptions": {
+            "name": "flatOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Options",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Options.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function flatOptions($code = null): array\n  {\n    if (!Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      throw new Exception(X::_(\"Impossible to find the option requested in flatOptions\"));\n    }\n\n    $res = [];\n    if ($ids = $this->treeIds($id)) {\n      foreach ($ids as $id) {\n        if ($o = $this->nativeOption($id)) {\n          $res[] = [\n            $this->fields['id'] => $o[$this->fields['id']],\n            $this->fields['text'] => $o[$this->fields['text']]\n          ];\n        }\n      }\n    }\n    X::sortBy($res, $this->class_cfg['arch']['options']['text'], 'asc');\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 201,
+            "endLine": 220,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "flatOptions",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns an array of full options arrays for a given parent\n   *\n   * ```php\n   * X::dump($opt->fullOptions(12));\n   * \/*\n   * array [\n   *   ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n   *   ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n   *   ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n   *   ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/",
+        "\/**\n   * Returns an array of full options with the config in arrays for a given parent\n   *\n   * ```php\n   * X::dump($opt->fullOptionsCfg(12));\n   * \/*\n   * array [\n   *   ['id' => 21, 'id_parent' => 12, 'num' => 1, 'title' => \"My option 21\", 'myProperty' =>  \"78%\", 'cfg' => ['sortable' => true, 'desc' => \"I am a description\"]],\n   *   ['id' => 22, 'id_parent' => 12, 'num' => 2, 'title' => \"My option 22\", 'myProperty' =>  \"26%\", 'cfg' => ['desc' => \"I am a description\"]],\n   *   ['id' => 25, 'id_parent' => 12, 'num' => 3, 'title' => \"My option 25\", 'myProperty' =>  \"50%\", 'cfg' => ['desc' => \"I am a description\"]],\n   *   ['id' => 27, 'id_parent' => 12, 'num' => 4, 'title' => \"My option 27\", 'myProperty' =>  \"40%\", 'cfg' => ['desc' => \"I am a description\"]]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/",
+        "\/**\n   * Returns an array of options in the form id => text\n   *\n   * ```php\n   * X::dump($opt->options(12));\n   * \/*\n   * [\n   *   21 => \"My option 21\",\n   *   22 => \"My option 22\",\n   *   25 => \"My option 25\",\n   *   27 => \"My option 27\"\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null An indexed array of id\/text options or false if option not found\n   *\/",
+        "\/**\n   * Returns an array of the children's IDs of the given option sorted by order or text\n   *\n   * ```php\n   * X::dump($opt->items(12));\n   * \/\/ array [40, 41, 42, 44, 45, 43, 46, 47]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null array of IDs, sorted or false if option not found\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

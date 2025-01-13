@@ -1,0 +1,406 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Path",
+    "namespace": true,
+    "realName": "Path",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Path.php",
+    "startLine": 5,
+    "endLine": 141,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Path",
+    "contentConstructor": null,
+    "methods": {
+        "getPathArray": {
+            "name": "getPathArray",
+            "summary": "Returns an array of codes for each option between $id and $root without $root's code",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->getPathArray(48, 12));\n\/\/ array [\"path\", \"to\", \"my\", \"option\"]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Path",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Path.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPathArray(string $id, $root = null): ?array\n  {\n    if (!isset($root)) {\n      $root = $this->getDefault();\n    }\n\n    if ($code = $this->code($id)) {\n      $parts = [];\n      while ($id && ($id !== $root)){\n        array_unshift($parts, $code);\n        if (!($id = $this->getIdParent($id))) {\n          return null;\n        }\n\n        $code = $this->code($id);\n      }\n\n      return $parts;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 19,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getPathArray",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The end\/target of the path"
+                },
+                {
+                    "name": "root",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The start\/origin of the path, {@link getDefault()} if is null"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of codes for each option between $id and $root without $root's code\n\n```php\nX::dump($opt->getPathArray(48, 12));\n\/\/ array [\"path\", \"to\", \"my\", \"option\"]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The end\/target of the path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$root",
+                        "description": "The start\/origin of the path, {@link getDefault()} if is null"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array of codes for each option between $id and $root without $root's code\n   *\n   * ```php\n   * X::dump($opt->getPathArray(48, 12));\n   * \/\/ array [\"path\", \"to\", \"my\", \"option\"]\n   * ```\n   *\n   * @param string $id The end\/target of the path\n   * @param null|string $root The start\/origin of the path, {@link getDefault()} if is null\n   * @return array|null\n   *\/"
+        },
+        "fromPath": {
+            "name": "fromPath",
+            "summary": "Returns the closest ID option from a _path_ of codes, with separator and optional id_parent",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump(\"bbn_ide|test1|test8\"));\n\/\/ (int) 36"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Path",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Path.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fromPath(string $path, string $sep = '|', $parent = null): ?string\n  {\n    if ($this->check()) {\n      if (!empty($sep)) {\n        $parts = explode($sep, $path);\n      }\n      else{\n        $parts = [$path];\n      }\n\n      if (null === $parent) {\n        $parent = $this->default;\n      }\n\n      foreach ($parts as $p){\n        if (!($parent = $this->fromCode($p, $parent))) {\n          break;\n        }\n      }\n\n      return $parent ?: null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 56,
+            "endLine": 80,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fromPath",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The path made of a concatenation of path and $sep until the target"
+                },
+                {
+                    "name": "sep",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "|",
+                    "default_name": "",
+                    "description": "The separator"
+                },
+                {
+                    "name": "parent",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "An optional id_parent, {@link fromCode()} otherwise"
+                }
+            ],
+            "doc": {
+                "description": "Returns the closest ID option from a _path_ of codes, with separator and optional id_parent\n\n```php\nX::dump(\"bbn_ide|test1|test8\"));\n\/\/ (int) 36\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path",
+                        "description": "The path made of a concatenation of path and $sep until the target"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$sep",
+                        "description": "The separator"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "null|string",
+                        "name": "$parent",
+                        "description": "An optional id_parent, {@link fromCode()} otherwise"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the closest ID option from a _path_ of codes, with separator and optional id_parent\n   *\n   * ```php\n   * X::dump(\"bbn_ide|test1|test8\"));\n   * \/\/ (int) 36\n   * ```\n   *\n   * @param string      $path   The path made of a concatenation of path and $sep until the target\n   * @param string      $sep    The separator\n   * @param null|string $parent An optional id_parent, {@link fromCode()} otherwise\n   * @return null|string\n   *\/"
+        },
+        "toPath": {
+            "name": "toPath",
+            "summary": "Concatenates the codes and separator $sep of a line of options",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->toPath(48, '|', 12)\n\/\/ (string) path|to|my|option"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Path",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Path.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function toPath(string $id, string $sep = '|', string $parent = null): ?string\n  {\n    if ($this->check() && ($parts = $this->getPathArray($id, $parent))) {\n      return implode($sep, $parts);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 96,
+            "endLine": 103,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "toPath",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The end\/target of the path"
+                },
+                {
+                    "name": "sep",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "|",
+                    "default_name": "",
+                    "description": "The separator"
+                },
+                {
+                    "name": "parent",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The start\/origin of the path"
+                }
+            ],
+            "doc": {
+                "description": "Concatenates the codes and separator $sep of a line of options\n\n```php\nX::dump($opt->toPath(48, '|', 12)\n\/\/ (string) path|to|my|option\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The end\/target of the path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$sep",
+                        "description": "The separator"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$parent",
+                        "description": "The start\/origin of the path"
+                    }
+                ],
+                "return": "The path concatenated with the separator or null if no path"
+            },
+            "comments": "  \/**\n   * Concatenates the codes and separator $sep of a line of options\n   *\n   * ```php\n   * X::dump($opt->toPath(48, '|', 12)\n   * \/\/ (string) path|to|my|option\n   * ```\n   *\n   * @param string $id The end\/target of the path\n   * @param string $sep The separator\n   * @param string|null $parent The start\/origin of the path\n   * @return string|null The path concatenated with the separator or null if no path\n   *\/"
+        },
+        "getCodePath": {
+            "name": "getCodePath",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Path",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Path.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCodePath($id, $fromRoot = false)\n  {\n    $res  = [];\n    while ($o = $this->nativeOption($id)) {\n      if ($o[$this->fields['code']]) {\n        $res[] = $o[$this->fields['code']];\n        if ($o[$this->fields['id_parent']] === ($fromRoot ? $this->root : $this->default)) {\n          break;\n        }\n\n        $id = $o[$this->fields['id_parent']];\n      }\n      elseif ($o[$this->fields['id_alias']] && ($code = $this->code($o[$this->fields['id_alias']]))) {\n        $res[] = $code;\n        if ($o[$this->fields['id_parent']] === ($fromRoot ? $this->root : $this->default)) {\n          break;\n        }\n\n        $id = $o[$this->fields['id_parent']];\n      }\n      else {\n        return null;\n      }\n    }\n\n    if (end($res) === 'root') {\n      array_pop($res);\n    }\n\n    return count($res) ? $res : null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 110,
+            "endLine": 140,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getCodePath",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "fromRoot",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $id\n   * @return array|null\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Returns an array of codes for each option between $id and $root without $root's code\n   *\n   * ```php\n   * X::dump($opt->getPathArray(48, 12));\n   * \/\/ array [\"path\", \"to\", \"my\", \"option\"]\n   * ```\n   *\n   * @param string $id The end\/target of the path\n   * @param null|string $root The start\/origin of the path, {@link getDefault()} if is null\n   * @return array|null\n   *\/",
+        "\/**\n   * Returns the closest ID option from a _path_ of codes, with separator and optional id_parent\n   *\n   * ```php\n   * X::dump(\"bbn_ide|test1|test8\"));\n   * \/\/ (int) 36\n   * ```\n   *\n   * @param string      $path   The path made of a concatenation of path and $sep until the target\n   * @param string      $sep    The separator\n   * @param null|string $parent An optional id_parent, {@link fromCode()} otherwise\n   * @return null|string\n   *\/",
+        "\/**\n   * Concatenates the codes and separator $sep of a line of options\n   *\n   * ```php\n   * X::dump($opt->toPath(48, '|', 12)\n   * \/\/ (string) path|to|my|option\n   * ```\n   *\n   * @param string $id The end\/target of the path\n   * @param string $sep The separator\n   * @param string|null $parent The start\/origin of the path\n   * @return string|null The path concatenated with the separator or null if no path\n   *\/",
+        "\/**\n   * @param $id\n   * @return array|null\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

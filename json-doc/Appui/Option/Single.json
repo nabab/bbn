@@ -1,0 +1,294 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Single",
+    "namespace": true,
+    "realName": "Single",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Single.php",
+    "startLine": 9,
+    "endLine": 173,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Single",
+    "contentConstructor": null,
+    "methods": {
+        "optionNoAlias": {
+            "name": "optionNoAlias",
+            "summary": "Returns an option's full content as an array without its values changed by id_alias",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->optionNoAlias(25));\nX::dump($opt->optionNoAlias('bbn_ide'));\nX::dump($opt->optionNoAlias('TEST', 58));\nX::dump($opt->optionNoAlias('test3', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 31,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'id_alias' => 16,\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Single",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Single.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function optionNoAlias($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($opt = $this->nativeOption($id))\n    ) {\n      $this->_set_value($opt);\n      return $opt;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 34,
+            "endLine": 44,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionNoAlias",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's full content as an array without its values changed by id_alias\n\n```php\nX::dump($opt->optionNoAlias(25));\nX::dump($opt->optionNoAlias('bbn_ide'));\nX::dump($opt->optionNoAlias('TEST', 58));\nX::dump($opt->optionNoAlias('test3', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 31,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'id_alias' => 16,\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "The option array or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns an option's full content as an array without its values changed by id_alias\n   *\n   * ```php\n   * X::dump($opt->optionNoAlias(25));\n   * X::dump($opt->optionNoAlias('bbn_ide'));\n   * X::dump($opt->optionNoAlias('TEST', 58));\n   * X::dump($opt->optionNoAlias('test3', 'users', 'bbn_ide'));\n   * \/* Each would return an array of this form\n   * array [\n   *   'id' => 31,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'id_alias' => 16,\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The option array or false if the option cannot be found\n   *\/"
+        },
+        "getValue": {
+            "name": "getValue",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Single",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Single.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getValue($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($opt = $this->nativeOption($id))\n        && !empty($opt[$this->fields['value']])\n        && Str::isJson($opt[$this->fields['value']])\n    ) {\n      return json_decode($opt[$this->fields['value']], true);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 51,
+            "endLine": 62,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getValue",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string|null $code\n   * @return array|null\n   *\/"
+        },
+        "option": {
+            "name": "option",
+            "summary": "Returns an option's full content as an array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->option(25));\nX::dump($opt->option('bbn_ide'));\nX::dump($opt->option('TEST', 58));\nX::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Single",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Single.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function option($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($opt = $this->nativeOption($id))\n    ) {\n      $this->_set_value($opt);\n      $c =& $this->fields;\n      if (Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {\n        $opt['alias'] = $alias;\n        if ($opt[$c['id_alias']] === $id) {\n          throw new Exception(X::_(\"Impossible to have the same ID as ALIAS, check out ID\").' '.$id);\n        }\n        else {\n          $this->_set_value($opt['alias']);\n        }\n      }\n\n      if ($schema = $this->getSchema($id)) {\n        foreach ($schema as $s) {\n          if (isset($s['field']) && !isset($opt[$s['field']])) {\n            $opt[$s['field']] = $s['default'] ?? null;\n          }\n        }\n      }\n\n      return $opt;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 87,
+            "endLine": 116,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "option",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's full content as an array.\n\n```php\nX::dump($opt->option(25));\nX::dump($opt->option('bbn_ide'));\nX::dump($opt->option('TEST', 58));\nX::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "The option array or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns an option's full content as an array.\n   *\n   * ```php\n   * X::dump($opt->option(25));\n   * X::dump($opt->option('bbn_ide'));\n   * X::dump($opt->option('TEST', 58));\n   * X::dump($opt->option('test', 'users', 'bbn_ide'));\n   * \/* Each would return an array of this form\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The option array or false if the option cannot be found\n   *\/"
+        },
+        "opAlias": {
+            "name": "opAlias",
+            "summary": "Returns the merge between an option and its alias as an array.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->option(25));\nX::dump($opt->option('bbn_ide'));\nX::dump($opt->option('TEST', 58));\nX::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Single",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Single.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function opAlias($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($opt = $this->nativeOption($id))\n    ) {\n      $this->_set_value($opt);\n      $c =& $this->fields;\n      if (Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {\n        if ($opt[$c['id_alias']] === $id) {\n          throw new Exception(X::_(\"Impossible to have the same ID as ALIAS, check out ID\").' '.$id);\n        }\n        else {\n          $this->_set_value($alias);\n          foreach ($alias as $n => $a) {\n            if (!empty($a)) {\n              $opt[$n] = $a;\n            }\n          }\n\n        }\n      }\n\n      return $opt;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 143,
+            "endLine": 169,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "opAlias",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns the merge between an option and its alias as an array.\n\n```php\nX::dump($opt->option(25));\nX::dump($opt->option('bbn_ide'));\nX::dump($opt->option('TEST', 58));\nX::dump($opt->option('test', 'users', 'bbn_ide'));\n\/* Each would return an array of this form\narray [\n  'id' => 25,\n  'code' => \"bbn_ide\",\n  'text' => \"This is BBN's IDE\",\n  'myIntProperty' => 56854,\n  'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n  'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "The option array or false if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns the merge between an option and its alias as an array.\n   *\n   * ```php\n   * X::dump($opt->option(25));\n   * X::dump($opt->option('bbn_ide'));\n   * X::dump($opt->option('TEST', 58));\n   * X::dump($opt->option('test', 'users', 'bbn_ide'));\n   * \/* Each would return an array of this form\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The option array or false if the option cannot be found\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns an option's full content as an array without its values changed by id_alias\n   *\n   * ```php\n   * X::dump($opt->optionNoAlias(25));\n   * X::dump($opt->optionNoAlias('bbn_ide'));\n   * X::dump($opt->optionNoAlias('TEST', 58));\n   * X::dump($opt->optionNoAlias('test3', 'users', 'bbn_ide'));\n   * \/* Each would return an array of this form\n   * array [\n   *   'id' => 31,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'id_alias' => 16,\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The option array or false if the option cannot be found\n   *\/",
+        "\/**\n   * @param string|null $code\n   * @return array|null\n   *\/",
+        "\/**\n   * Returns an option's full content as an array.\n   *\n   * ```php\n   * X::dump($opt->option(25));\n   * X::dump($opt->option('bbn_ide'));\n   * X::dump($opt->option('TEST', 58));\n   * X::dump($opt->option('test', 'users', 'bbn_ide'));\n   * \/* Each would return an array of this form\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The option array or false if the option cannot be found\n   *\/",
+        "\/**\n   * Returns the merge between an option and its alias as an array.\n   *\n   * ```php\n   * X::dump($opt->option(25));\n   * X::dump($opt->option('bbn_ide'));\n   * X::dump($opt->option('TEST', 58));\n   * X::dump($opt->option('test', 'users', 'bbn_ide'));\n   * \/* Each would return an array of this form\n   * array [\n   *   'id' => 25,\n   *   'code' => \"bbn_ide\",\n   *   'text' => \"This is BBN's IDE\",\n   *   'myIntProperty' => 56854,\n   *   'myTextProperty' => \"<h1>Hello\\nWorld<\/h1>\",\n   *   'myArrayProperty' => ['value1' => 1, 'value2' => 2]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null The option array or false if the option cannot be found\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

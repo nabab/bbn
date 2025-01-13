@@ -12,18 +12,19 @@
     },
     "name": "bbn\\Util\\Info",
     "namespace": true,
+    "realName": "Info",
+    "realNamespace": "bbn\\Util",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Util\/Info.php",
-    "startLine": 19,
-    "endLine": 78,
+    "startLine": 21,
+    "endLine": 80,
     "numMethods": 2,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -43,13 +44,16 @@
             "summary": "Add information to the $info array",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Info",
+            "class": "bbn\\Util\\Info",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Info.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($st)\n  {\n\t\tif ( !isset(self::$cli) )\n\t\t{\n\t\t\tglobal $argv;\n\t\t\tself::$cli = isset($argv) ? 1 : false;\n\t\t}\n\t\tif ( self::$cli )\n\t\t{\n\t\t\tif ( \\is_string($st) )\n\t\t\t\techo $st.\"\\n\";\n\t\t\telse\n\t\t\t\tvar_dump($st).\"\\n\";\n\t\t}\n\t\telse\n\t\t{\n\t\t\tif ( \\is_string($st) )\n\t\t\t\tarray_push(self::$info,$st);\n\t\t\telse\n\t\t\t\tarray_push(self::$info,print_r($st,true));\n\t\t}\n  }",
-            "startLine": 27,
-            "endLine": 48,
+            "code": "\tpublic static function report($st)\n\t{\n\t\tif ( !isset(self::$cli) )\n\t\t{\n\t\t\tglobal $argv;\n\t\t\tself::$cli = isset($argv) ? 1 : false;\n\t\t}\n\t\tif ( self::$cli )\n\t\t{\n\t\t\tif ( \\is_string($st) )\n\t\t\t\techo $st.\"\\n\";\n\t\t\telse\n\t\t\t\tvar_dump($st).\"\\n\";\n\t\t}\n\t\telse\n\t\t{\n\t\t\tif ( \\is_string($st) )\n\t\t\t\tarray_push(self::$info,$st);\n\t\t\telse\n\t\t\t\tarray_push(self::$info,print_r($st,true));\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 29,
+            "endLine": 50,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -58,32 +62,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "report",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "st",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Add information to the $info array\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Add information to the $info array\n\t *\n\t * @param string $st\n\t * @return null\n\t *\/"
         },
         "log": {
             "name": "log",
             "summary": "Add information to the $info array",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Info",
+            "class": "bbn\\Util\\Info",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Info.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($st, $file = 'misc')\n  {\n\t\tif ( \\defined('BBN_DATA_PATH') ){\n\t\t\t$log_file = BBN_DATA_PATH.'logs\/'.$file.'.log';\n\t\t\t$i = debug_backtrace()[0];\n\t\t\t$r = \"[\".date('d\/m\/Y H:i:s').\"]\\t\".$i['file'].\" - line \".$i['line'].\"\\n\";\n\t\t\tif ( !\\is_string($st) )\n\t\t\t\t$r .= print_r($st,true);\n\t\t\telse\n\t\t\t\t$r .= $st;\n\t\t\t$r .= \"\\n\\n\";\n\t\t\t$s = ( file_exists($log_file) ) ? filesize($log_file) : 0;\n\t\t\tif ( $s > 1048576 )\n\t\t\t{\n\t\t\t\tfile_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);\n\t\t\t\tfile_put_contents($log_file,$r);\n\t\t\t}\n\t\t\telse\n\t\t\t\tfile_put_contents($log_file,$r,FILE_APPEND);\n\t\t}\n  }",
-            "startLine": 56,
-            "endLine": 76,
+            "code": "\tpublic static function log($st,$file='misc')\n\t{\n\t\tif ( is_dir(Mvc::getTmpPath() . 'logs') ){\n\t\t\t$log_file = Mvc::getTmpPath() . 'logs\/'.$file.'.log';\n\t\t\t$i = debug_backtrace()[0];\n\t\t\t$r = \"[\".date('d\/m\/Y H:i:s').\"]\\t\".$i['file'].\" - line \".$i['line'].\"\\n\";\n\t\t\tif ( !\\is_string($st) )\n\t\t\t\t$r .= print_r($st,true);\n\t\t\telse\n\t\t\t\t$r .= $st;\n\t\t\t$r .= \"\\n\\n\";\n\t\t\t$s = ( file_exists($log_file) ) ? filesize($log_file) : 0;\n\t\t\tif ( $s > 1048576 )\n\t\t\t{\n\t\t\t\tfile_put_contents($log_file.'.old',file_get_contents($log_file),FILE_APPEND);\n\t\t\t\tfile_put_contents($log_file,$r);\n\t\t\t}\n\t\t\telse\n\t\t\t\tfile_put_contents($log_file,$r,FILE_APPEND);\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -92,13 +114,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "log",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "st",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -108,23 +133,51 @@
                     "name": "file",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "misc",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Add information to the $info array\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Add information to the $info array\n\t *\n\t * @param string $st\n\t * @param string $file\n\t * @return null\n\t *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\Mvc": "Mvc"
+    },
+    "dummyComments": [
+        "\/**\n * A few recurrent functions\n *\n *\n * These functions are basically creating a database reference and logging functions.\n * In order to implement this trait, the following private static variables should be declared:\n *\t* $cli\n *\t* $info = array()\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Traits\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/",
+        "\/**\n\t * Add information to the $info array\n\t *\n\t * @param string $st\n\t * @return null\n\t *\/",
+        "\/**\n\t * Add information to the $info array\n\t *\n\t * @param string $st\n\t * @param string $file\n\t * @return null\n\t *\/"
+    ],
     "summary": "A few recurrent functions",
     "description": "These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n* $cli\n* $info = array()",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:<\/p>\n<ul>\n<li>$cli<\/li>\n<li>$info = array()<\/li>\n<\/ul>"
+            "content": "These functions are basically creating a database reference and logging functions.\nIn order to implement this trait, the following private static variables should be declared:\n* $cli\n* $info = array()"
         }
     ]
 }

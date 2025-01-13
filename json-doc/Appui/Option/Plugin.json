@@ -1,0 +1,534 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Plugin",
+    "namespace": true,
+    "realName": "Plugin",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Plugin.php",
+    "startLine": 8,
+    "endLine": 284,
+    "numMethods": 10,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Plugin",
+    "contentConstructor": null,
+    "methods": {
+        "updatePlugins": {
+            "name": "updatePlugins",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function updatePlugins(): ?int\n  {\n    if (($pluginAlias = $this->getMagicPluginTemplateId())\n      && ($export = $this->export($pluginAlias, 'sfull'))\n    ) {\n      $res = 0;\n      \/*\n      $codePath = $this->getCodePath($pluginAlias);\n      $items = X::map(function($a) use ($pluginAlias) {\n        $a['id_alias'] = $pluginAlias;\n        return $a;\n      }, $export['items'], 'items');\n      $idPlugins = $this->getAliasItems($pluginAlias);\n      foreach ($idPlugins as $idPlugin) {\n        foreach ($this->import($items, $idPlugin) as $num) {\n          $res += $num;\n        }\n      }\n      *\/\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 13,
+            "endLine": 37,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "updatePlugins",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return int|null\n   *\/"
+        },
+        "getParentSubplugin": {
+            "name": "getParentSubplugin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParentSubplugin(...$codes): ?string\n  {\n    if ($id = $this->fromCode(...$codes)) {\n      return ($r = $this->getClosest($id, 'subplugin')) ? $r['id'] : null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 43,
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getParentSubplugin",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
+        },
+        "getParentPlugin": {
+            "name": "getParentPlugin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParentPlugin(...$codes): ?string\n  {\n    if ($id = $this->fromCode(...$codes)) {\n      return ($r = $this->getClosest($id, 'plugin')) ? $r['id'] : null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 56,
+            "endLine": 63,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getParentPlugin",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
+        },
+        "getParentApp": {
+            "name": "getParentApp",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParentApp(...$codes): ?string\n  {\n    if ($id = $this->fromCode(...$codes)) {\n      return ($r = $this->getClosest($id, 'app')) ? $r['id'] : null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 69,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getParentApp",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return string|null\n   *\/"
+        },
+        "getClosest": {
+            "name": "getClosest",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getClosest($id, $type): ?array\n  {\n    $subpluginAlias = $this->getMagicSubpluginTemplateId();\n    $pluginAlias = $this->getMagicPluginTemplateId();\n\n    if ($subpluginAlias && $pluginAlias) {\n      $ids = $this->parents($id);\n      $num = count($ids);\n      foreach ($ids as $i => $id) {\n        if ($this->getIdAlias($id) === $subpluginAlias) {\n          if (!$type || ($type === 'subplugin')) {\n            return ['type' => 'subplugin', 'id' => $id];\n          }\n        }\n        elseif ($this->getIdAlias($id) === $pluginAlias) {\n          if ($num < 3) {\n            if (!$type || ($type === 'app')) {\n              return ['type' => 'app', 'id' => $id];\n            }\n\n            break;\n          }\n          else {\n            if (!$type || ($type === 'plugin')) {\n              return ['type' => 'plugin', 'id' => $id];\n            }\n          }\n        }\n\n        $num--;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 79,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getClosest",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getPluginName": {
+            "name": "getPluginName",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPluginName($id): ?string\n  {\n    $pluginAlias = $this->getMagicPluginTemplateId();\n    $pluginsAlias = $this->getMagicPluginsTemplateId();\n    $o = $this->option($id);\n    if ($pluginAlias && ($o['id_alias'] === $pluginAlias)) {\n      $st = '';\n      while ($o && ($o['id_alias'] !== $pluginsAlias)) {\n        $st = $o['code'] . ($st ? '-' . $st : '');\n        $o = $this->option($o['id_parent']);\n      }\n\n      return $st;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 116,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getPluginName",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getSubpluginName": {
+            "name": "getSubpluginName",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSubpluginName($id): ?string\n  {\n    $subpluginAlias = $this->getMagicSubpluginTemplateId();\n    $pluginsAlias = $this->getMagicPluginsTemplateId();\n    $o = $this->option($id);\n    if ($subpluginAlias && ($o['id_alias'] === $subpluginAlias)) {\n      $st = '';\n      while ($o && ($o['id_alias'] !== $pluginsAlias)) {\n        $st = $o['code'] . ($st ? '-' . $st : '');\n        $o = $this->option($o['id_parent']);\n      }\n\n      return $st;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 134,
+            "endLine": 150,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getSubpluginName",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isPlugin": {
+            "name": "isPlugin",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isPlugin($id): bool\n  {\n    if ($this->alias($id) === $this->getMagicPluginTemplateId()) {\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 152,
+            "endLine": 159,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isPlugin",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getPlugins": {
+            "name": "getPlugins",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPlugins($root = null, bool $full = false, bool $withSubs = false): ?array\n  {\n    $pluginAlias = $this->getMagicPluginTemplateId();\n    $pluginsAlias = $this->getMagicPluginsTemplateId();\n    $plugins = $this->fromCode('plugins', $root ?: $this->getDefault());\n    $res = [];\n    if ($pluginAlias && $pluginsAlias && $plugins) {\n      foreach ($this->fullOptions($plugins) as $p) {\n        if (empty($p['code'])) {\n          throw new Exception(X::_(\"The plugin option must have a code\"));\n        }\n\n        $code = $p['code'];\n        if ($p['id_alias'] === $pluginAlias) {\n          $item = [\n            'id' => $p['id'],\n            'code' => $code,\n            'text' => $p['text'],\n            'icon' => $p['icon'] ?? '',\n          ];\n          if ($full) {\n            $item = array_merge($item, [\n              'rootPlugins' => $this->fromCode('plugins', $p['id']),\n              'rootOptions' => $this->fromCode('options', $p['id']),\n              'rootTemplates' => $this->fromCode('templates', $p['id']),\n              'rootPermissions' => $this->fromCode('permissions', $p['id'])\n            ]);\n          }\n\n          if ($withSubs) {\n            $item['subplugins'] = $this->getSubplugins($p['id']);\n          }\n\n          $res[] = $item;\n        }\n        else {\n          foreach ($this->fullOptions($p['id']) as $p2) {\n            if (empty($p2['code'])) {\n              throw new Exception(X::_(\"The plugin option must have a code\"));\n            }\n\n            if ($p2['id_alias'] === $pluginAlias) {\n              $item = [\n                'id' => $p2['id'],\n                'code' => $code . '-' . $p2['code'],\n                'text' => $p2['text'],\n                'icon' => $p2['icon'] ?? '',\n              ];\n              if ($full) {\n                $item = array_merge($item, [\n                  'rootPlugins' => $this->fromCode('plugins', $p2['id']),\n                  'rootOptions' => $this->fromCode('options', $p2['id']),\n                  'rootTemplates' => $this->fromCode('templates', $p2['id']),\n                  'rootPermissions' => $this->fromCode('permissions', $p2['id'])\n                ]);\n              }\n\n              if ($withSubs) {\n                $item['subplugins'] = $this->getSubplugins($p2['id']);\n              }\n\n              $res[] = $item;\n            }\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 162,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPlugins",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "root",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "full",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                },
+                {
+                    "name": "withSubs",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getSubplugins": {
+            "name": "getSubplugins",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Plugin",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Plugin.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSubplugins(string $id_plugin): ?array\n  {\n    $subpluginAlias = $this->getMagicSubpluginTemplateId();\n    $pluginAlias = $this->getMagicPluginTemplateId();\n    $pluginsAlias = $this->getMagicPluginsTemplateId();\n    $plugins = $this->fromCode('plugins', $id_plugin);\n    $res = [];\n    if ($pluginAlias && $pluginsAlias && $plugins) {\n      foreach ($this->fullOptions($plugins) as $p) {\n        $code = $p['code'] ?: $p['alias']['code'];\n        if (empty($code)) {\n          throw new Exception(X::_(\"The plugin option must have a code\"));\n        }\n\n        if ($p['id_alias'] === $subpluginAlias) {\n          $res[] = [\n            'id' => $p['id'],\n            'code' => $code,\n            'text' => $p['text'],\n            'icon' => $p['icon'] ?? '',\n            'rootOptions' => $this->fromCode('options', $p['id']),\n            'rootPermissions' => $this->fromCode('permissions', $p['id'])\n          ];\n        } else {\n          foreach ($this->fullOptions($p['id']) as $p2) {\n            if (empty($p2['code'])) {\n              throw new Exception(X::_(\"The plugin option must have a code\"));\n            }\n\n            if ($p2['id_alias'] === $subpluginAlias) {\n              $res[] = [\n                'id' => $p2['id'],\n                'code' => $code . '-' . $p2['code'],\n                'text' => $p2['text'],\n                'icon' => $p2['icon'] ?? '',\n                'rootOptions' => $this->fromCode('options', $p2['id']),\n                'rootPermissions' => $this->fromCode('permissions', $p2['id'])\n              ];\n            }\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 236,
+            "endLine": 283,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getSubplugins",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id_plugin",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n   * @return int|null\n   *\/",
+        "\/**\n   * @return string|null\n   *\/",
+        "\/**\n   * @return string|null\n   *\/",
+        "\/**\n   * @return string|null\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

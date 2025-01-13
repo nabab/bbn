@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Cdn\\Config",
     "namespace": true,
+    "realName": "Config",
+    "realNamespace": "bbn\\Cdn",
     "traits": [
         "bbn\\Cdn\\Common"
     ],
@@ -18,15 +20,12 @@
     "fileName": "\/Cdn\/Config.php",
     "startLine": 26,
     "endLine": 471,
-    "numMethods": 12,
-    "numProperties": 1,
+    "numMethods": 24,
+    "numProperties": 12,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Cdn\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -58,6 +57,8 @@
         "cfg": [],
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
         "prefix": "",
@@ -69,7 +70,6 @@
     "namespaceName": "bbn\\Cdn",
     "shortName": "Config",
     "contentConstructor": {
-        "file": "bbn\\Cdn\\Config",
         "returns": []
     },
     "methods": {
@@ -78,11 +78,14 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Config",
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $request = NULL, bbn\\Db $db = NULL)\n  {\n    \/\/ Need to be in a bbn environment, this is the absolute path of the server's root directory\n    if (!defined('BBN_PUBLIC')) {\n      $this->error('You must define the constant BBN_PUBLIC as the root of your public document');\n    }\n    $this->_set_prefix();\n    if (!$db) {\n      $db = bbn\\Db::getInstance();\n    }\n    if (!$db) {\n      die(X::_('Impossible to initialize the CDN without a DB connection'));\n    }\n    $this->db = $db;\n    if ($request) {\n      $this->setCfgFromRequest($request);\n    }\n  }",
+            "code": "  public function __construct(string $request = null, bbn\\Db $db = null)\n  {\n    \/\/ Need to be in a bbn environment, this is the absolute path of the server's root directory\n    if (!defined('BBN_PUBLIC')) {\n      $this->error('You must define the constant BBN_PUBLIC as the root of your public document');\n    }\n    $this->_set_prefix();\n    if (!$db) {\n      $db = bbn\\Db::getInstance();\n    }\n    if (!$db) {\n      die(X::_('Impossible to initialize the CDN without a DB connection'));\n    }\n    $this->db = $db;\n    if ($request) {\n      $this->setCfgFromRequest($request);\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 52,
             "endLine": 69,
             "isDeprecated": false,
@@ -93,13 +96,19 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "request",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -109,25 +118,57 @@
                 {
                     "name": "db",
                     "position": 1,
-                    "type": "bbn\\Db",
+                    "type": "null|bbn\\Db",
+                    "type_arr": [
+                        "null",
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "A DB connection to the libraries' tables (if needed)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$request",
+                        "description": "A request string"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bbn\\Db|null",
+                        "name": "$db",
+                        "description": "A DB connection to the libraries' tables (if needed)"
+                    }
+                ],
+                "return": "",
+                "example": {
+                    "tag": "example",
+                    "text": "```php\n\/\/ @var bbn\\Db $db\n$cfg = new \\bbn\\Cdn\\Config('\/lib?lib=moment,vuejs', $db);\n```\n"
+                }
+            },
+            "comments": "  \/**\n   * Constructor.\n   * \n   * @example\n   * ```php\n   * \/\/ @var bbn\\Db $db\n   * $cfg = new \\bbn\\Cdn\\Config('\/lib?lib=moment,vuejs', $db);\n   * ```\n   * \n   * @param string      $request A request string\n   * @param bbn\\Db|null $db      A DB connection to the libraries' tables (if needed)\n   *\/"
         },
         "getDefaultLanguage": {
             "name": "getDefaultLanguage",
             "summary": "Gets the default language of the libraries requested.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Config",
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$default_language;\n  }",
+            "code": "  public static function getDefaultLanguage(): string\n  {\n    return self::$default_language;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 76,
             "endLine": 79,
             "isDeprecated": false,
@@ -138,22 +179,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getDefaultLanguage",
             "returns": [
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the default language of the libraries requested.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the default language of the libraries requested.\n   * \n   * @return string\n   *\/"
         },
         "setDefaultLanguage": {
             "name": "setDefaultLanguage",
             "summary": "Sets the default language of the libraries requested.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Config",
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $default_language)\n  {\n    self::$default_language = $default_language;\n  }",
+            "code": "  public static function setDefaultLanguage(string $default_language): void\n  {\n    self::$default_language = $default_language;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 87,
             "endLine": 90,
             "isDeprecated": false,
@@ -164,33 +214,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setDefaultLanguage",
             "returns": [
                 "void"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "default_language",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "language The default language"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the default language of the libraries requested.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$default",
+                        "description": "language The default language"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the default language of the libraries requested.\n   * \n   * @param string $default_language The default language\n   * @return void\n   *\/"
         },
         "get": {
             "name": "get",
             "summary": "Returns the configuration array.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Config",
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->cfg;\n  }",
+            "code": "  public function get(): array\n  {\n    return $this->cfg;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 144,
             "endLine": 147,
             "isDeprecated": false,
@@ -201,24 +272,104 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "get",
             "returns": [
                 "array"
             ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the configuration array.\n\n",
+                "params": [],
+                "return": "",
+                "example": {
+                    "tag": "example",
+                    "text": "```php\n\/\/ @var bbn\\Cdn\\Config $cfg\nX::hdump($cfg->get());\n\/\/ {\n\/\/     \"url\": \"lib\",\n\/\/     \"params\": {\n\/\/         \"lib\": \"jquery\",\n\/\/     },\n\/\/     \"hash\": \"34b6416f721c044661972951310895a8\",\n\/\/     \"cache_file\": \"\/home\/thomas\/domains\/apstapp.thomas.lan\/public_html\/cache\/34b6416f721c044661972951310895a8.cache\",\n\/\/     \"ext\": \"\",\n\/\/     \"grouped\": false,\n\/\/     \"test\": false,\n\/\/     \"lang\": \"en\",\n\/\/     \"nocompil\": false,\n\/\/     \"has_css\": true,\n\/\/     \"has_dep\": true,\n\/\/     \"latest\": false,\n\/\/     \"is_component\": false,\n\/\/     \"components\": false,\n\/\/     \"content\": {\n\/\/         \"libraries\": {\n\/\/             \"jquery\": \"3.3.1\",\n\/\/         },\n\/\/         \"prepend\": [\n\/\/         ],\n\/\/         \"includes\": [\n\/\/             {\n\/\/                 \"version\": \"3.3.1\",\n\/\/                 \"prepend\": [\n\/\/                 ],\n\/\/                 \"name\": \"jquery\",\n\/\/                 \"path\": \"lib\/jquery\/3.3.1\/\",\n\/\/                 \"js\": [\n\/\/                     \"dist\/jquery.min.js\",\n\/\/                 ],\n\/\/             },\n\/\/         ],\n\/\/         \"js\": [\n\/\/             \"lib\/jquery\/3.3.1\/dist\/jquery.min.js\",\n\/\/         ],\n\/\/     },\n\/\/     \"num\": 2,\n\/\/ }\n```\n"
+                }
+            },
+            "comments": "  \/**\n   * Returns the configuration array.\n   * \n   * @example\n   * ```php\n   * \/\/ @var bbn\\Cdn\\Config $cfg\n   * X::hdump($cfg->get());\n   * \/\/ {\n   * \/\/     \"url\": \"lib\",\n   * \/\/     \"params\": {\n   * \/\/         \"lib\": \"jquery\",\n   * \/\/     },\n   * \/\/     \"hash\": \"34b6416f721c044661972951310895a8\",\n   * \/\/     \"cache_file\": \"\/home\/thomas\/domains\/apstapp.thomas.lan\/public_html\/cache\/34b6416f721c044661972951310895a8.cache\",\n   * \/\/     \"ext\": \"\",\n   * \/\/     \"grouped\": false,\n   * \/\/     \"test\": false,\n   * \/\/     \"lang\": \"en\",\n   * \/\/     \"nocompil\": false,\n   * \/\/     \"has_css\": true,\n   * \/\/     \"has_dep\": true,\n   * \/\/     \"latest\": false,\n   * \/\/     \"is_component\": false,\n   * \/\/     \"components\": false,\n   * \/\/     \"content\": {\n   * \/\/         \"libraries\": {\n   * \/\/             \"jquery\": \"3.3.1\",\n   * \/\/         },\n   * \/\/         \"prepend\": [\n   * \/\/         ],\n   * \/\/         \"includes\": [\n   * \/\/             {\n   * \/\/                 \"version\": \"3.3.1\",\n   * \/\/                 \"prepend\": [\n   * \/\/                 ],\n   * \/\/                 \"name\": \"jquery\",\n   * \/\/                 \"path\": \"lib\/jquery\/3.3.1\/\",\n   * \/\/                 \"js\": [\n   * \/\/                     \"dist\/jquery.min.js\",\n   * \/\/                 ],\n   * \/\/             },\n   * \/\/         ],\n   * \/\/         \"js\": [\n   * \/\/             \"lib\/jquery\/3.3.1\/dist\/jquery.min.js\",\n   * \/\/         ],\n   * \/\/     },\n   * \/\/     \"num\": 2,\n   * \/\/ }\n   * ```\n   * \n   * @return array\n   *\/"
+        },
+        "setCfgFromRequest": {
+            "name": "setCfgFromRequest",
+            "summary": "Sets the config based on a URL.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function setCfgFromRequest(string $request): self\n  {\n    $parsed = parse_url($request);\n    \/\/ URL without the root slash\n    $this->cfg['url'] = empty($parsed['path']) ? '' : substr($parsed['path'], 1 + strlen($this->prefix));\n    if (!empty($parsed['query'])) {\n      parse_str($parsed['query'], $params);\n    }\n    \/\/ contains the parameters sent by the query\n    $this->cfg['params'] = $params ?? [];\n    \/\/ The hash is an md5 of URL + parameters\n    $this->cfg['hash'] = md5($this->cfg['url'].serialize($this->cfg['params']));\n    \/\/ The cache file is in the cache directory and has the hash as name\n    $this->cfg['cache_file'] = $this->fpath.'cache\/'.$this->cfg['hash'].'.cache';\n    \/\/ If a specific file is pointed to, ext will be its extension\n    $this->cfg['ext'] = bbn\\Str::fileExt($this->cfg['url']);\n    \/\/ Grouped\n    $this->cfg['grouped'] = !empty($this->cfg['params']['grouped']);\n    \/\/ Processing the config\n    $this->_setCfg();\n    \/\/ Setting the list of needed files \n    $this->setFiles();\n    $file = false;\n    \/\/ We give the number already when it's components\n    if (empty($this->cfg['num'])) {\n      $this->cfg['num'] = 0;\n      foreach ($this->cfg['content'] as $type => $content) {\n        if (($type !== 'libraries') && \\is_array($content)) {\n          if (\\count($content)) {\n            $this->cfg['num'] += \\count($content);\n            \/\/ For a sole file\n            if ($this->cfg['num'] === 1) {\n              $file = $content[0];\n            }\n          }\n        }\n      }\n    }\n    \/\/ If there are javascript files, mode is js\n    if (!empty($this->cfg['content']['js']) || $this->cfg['is_component']) {\n      $this->mode = 'js';\n    }\n    \/\/ Otherwise if there are css files, mode is css\n    elseif (!empty($this->cfg['content']['css'])) {\n      $this->mode = 'css';\n    }\n    \/\/ Otherwise if a single file is pointed to we define the property file\n    elseif ($file && ($this->cfg['num'] === 1)) {\n      $this->cfg['file'] = $file;\n    }\n    return $this;\n  }",
             "parent": false,
-            "arguments": []
+            "trait": false,
+            "startLine": 160,
+            "endLine": 211,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setCfgFromRequest",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "request",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The requested URL"
+                }
+            ],
+            "doc": {
+                "description": "Sets the config based on a URL.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$request",
+                        "description": "The requested URL"
+                    }
+                ],
+                "return": "",
+                "example": {
+                    "tag": "example",
+                    "text": "```php\n$this->setCfgFromRequest('https:\/\/example.com\/?lib=bbn-vue|latest|dark');\n```\n"
+                }
+            },
+            "comments": "  \/**\n   * Sets the config based on a URL.\n   * \n   * @example\n   * ```php\n   * $this->setCfgFromRequest('https:\/\/example.com\/?lib=bbn-vue|latest|dark');\n   * ```\n   * \n   * @param string $request The requested URL\n   * @return self\n   *\/"
         },
-        "test": {
-            "name": "test",
-            "summary": "Checks whether the error property has been set (so an error happened).",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+        "setFiles": {
+            "name": "setFiles",
+            "summary": "Returns an array of arrays of types and files.",
+            "description": "It will use one of the different methods for retrieving files depending on the params sent.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "It will use one of the different methods for retrieving files depending on the params sent."
+                }
+            ],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
+            "code": "  protected function setFiles(): self\n  {\n    \/\/ Shortcuts for files and dir\n    if (X::hasProp($this->cfg['params'], 'f', true)) {\n      $this->cfg['params']['files'] = $this->cfg['params']['f'];\n      unset($this->cfg['params']['f']);\n    }\n    if (X::hasProp($this->cfg['params'], 'd', true)) {\n      $this->cfg['params']['dir'] = $this->cfg['params']['d'];\n      unset($this->cfg['params']['d']);\n    }\n    \/\/ File\n    if (!empty($this->cfg['ext']) && is_file($this->fpath.$this->cfg['url'])) {\n      $res = $this->getFile();\n    }\n    \/\/ Preconfigured\n    elseif (X::hasProp($this->cfg['params'], 'id', true)) {\n      $res = $this->getPreconfig();\n    }\n    \/\/ List of files\n    elseif (X::hasProp($this->cfg['params'], 'files', true) && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = $this->getFiles();\n    }\n    \/\/ Directory content\n    \/\/ Vue component\n    elseif (!empty($this->cfg['params']['dir']) && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = $this->getDir();\n    }\n    elseif ($this->cfg['is_component'] && is_dir($this->fpath.$this->cfg['url'])) {\n      $res = [];\n      $this->cfg['num'] = 0;\n      foreach ($this->cfg['components'] as $cp) {\n        if (!isset($res[$cp])) {\n          $res[$cp] = $this->getDir($this->cfg['url'].$cp);\n          if ($res[$cp]) {\n            $dir = false;\n            foreach ($res[$cp] as $type => $files) {\n              if (!$dir && count($files)) {\n                $dir = $this->fpath.X::dirname($files[0]);\n              }\n              $this->cfg['num'] += \\count($files);\n            }\n            \/*\n            if ( $dir && is_file($dir.'\/bbn.json') ){\n              $json = json_decode(file_get_contents($dir.'\/bbn.json'));\n              if ( isset($json->components) ){\n                foreach ( $json->components as $tmp ){\n                  if ( !isset($res[$tmp]) && !\\in_array($tmp, $this->cfg['components'], true) ){\n                    $this->cfg['components'][] = $tmp;\n                    goto cpStart;\n                    break;\n                  }\n                }\n              }\n            }\n            *\/\n          }\n        }\n      }\n    }\n    \/\/ Last but not least, libraries!\n    elseif (X::hasProp($this->cfg['params'], 'lib', true)) {\n      $res = $this->getLibraries();\n      \/\/ Adding dirs to config\n      if (!empty($this->cfg['params']['dirs'])) {\n        $dirs = explode(',', $this->cfg['params']['dirs']);\n        foreach ($dirs as $d) {\n          if ($r = $this->getDir($d)) {\n            $this->add($res, $r);\n          }\n        }\n      }\n    }\n    $this->cfg['content'] = $res ?? [];\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 220,
+            "endLine": 295,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -227,233 +378,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "test",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "shortName": "setFiles",
+            "returns": [
+                "self"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns an array of arrays of types and files.\n\nIt will use one of the different methods for retrieving files depending on the params sent.\n\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Returns an array of arrays of types and files.\n   * \n   * It will use one of the different methods for retrieving files depending on the params sent.\n   * \n   * @return self\n   *\/"
         },
-        "check": {
-            "name": "check",
-            "summary": "Checks whether the error property has been set (so an error happened).",
+        "add": {
+            "name": "add",
+            "summary": "Adds a configuration to an existing one (combine them).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "check",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "getErrors": {
-            "name": "getErrors",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "getErrors",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
+            "code": "  protected function add(array &$r1, array $r2): array\n  {\n    foreach ($r2 as $i => $r) {\n      if (!isset($r1[$i])) {\n        $r1[$i] = $r;\n      }\n      else{\n        foreach ($r as $f) {\n          if (!in_array($f, $r1[$i])) {\n            $r1[$i][] = $f;\n          }\n        }\n      }\n    }\n    return $r1;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 304,
+            "endLine": 319,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -462,83 +413,135 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
-                "returns": [],
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "name",
-                        "position": 0,
-                        "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "arguments",
-                        "position": 1,
-                        "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
+            "shortName": "add",
+            "returns": [
+                "array"
+            ],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "r1",
                     "position": 0,
-                    "type": "",
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The original configuration"
                 },
                 {
-                    "name": "arguments",
+                    "name": "r2",
                     "position": 1,
-                    "type": "",
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The configuration to add"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Adds a configuration to an existing one (combine them).\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$r",
+                        "description": "The original configuration"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$r",
+                        "description": "The configuration to add"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Adds a configuration to an existing one (combine them).\n   * \n   * @param array $r1 The original configuration\n   * @param array $r2 The configuration to add\n   * @return array\n   *\/"
         },
-        "isDebug": {
-            "name": "isDebug",
+        "sanitize": {
+            "name": "sanitize",
+            "summary": "Sanitizes a URL.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function sanitize(string $url): string\n  {\n    $url = str_replace('\/\/', '\/', $url);\n    $url = str_replace('..', '', $url);\n    return $url;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 327,
+            "endLine": 332,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "sanitize",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "A URL"
+                }
+            ],
+            "doc": {
+                "description": "Sanitizes a URL.\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url",
+                        "description": "A URL"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sanitizes a URL.\n   * \n   * @param string $url A URL\n   * @return mixed|string\n   *\/"
+        },
+        "getFile": {
+            "name": "getFile",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  protected function getFile(): array\n  {\n    $supported = false;\n    $res = [\n      'js' => [],\n      'css' => [],\n      'html' => []\n    ];\n    foreach ( self::$types as $type => $extensions ){\n      if ( in_array($this->cfg['ext'], $extensions, true) ){\n        $res[$type][] = $this->cfg['url'];\n        $supported = 1;\n        break;\n      }\n    }\n    if ( !$supported && strpos($this->cfg['url'], 'cache\/') !== 0 ){\n      $this->cfg['cache_file'] = $this->fpath.$this->cfg['url'];\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 337,
+            "endLine": 356,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -547,17 +550,687 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFile",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
+        },
+        "getPreconfig": {
+            "name": "getPreconfig",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getPreconfig(): array\n  {\n    $lib = new Library($this->db, $this->cfg['params']['id']);\n    $cfg = $lib->getConfig();\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 361,
+            "endLine": 366,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPreconfig",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
+        },
+        "getFiles": {
+            "name": "getFiles",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getFiles(): array\n  {\n    $res = [\n      'js' => [],\n      'css' => [],\n      'html' => []\n    ];\n    $files = explode(\",\", $this->cfg['params']['files']);\n    foreach ($files as $f) {\n      if (is_file($this->fpath.$this->cfg['url'].'\/'.$f)) {\n        $ext = bbn\\Str::fileExt($f);\n        foreach (self::$types as $type => $extensions) {\n          if (in_array($ext, $extensions, true)) {\n            $res[$type][] = $this->sanitize($this->cfg['url'].'\/'.$f);\n          }\n        }\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 371,
+            "endLine": 390,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getFiles",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
+        },
+        "getDir": {
+            "name": "getDir",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getDir(string $dir = ''): array\n  {\n    if (!$dir) {\n      $dir = $this->cfg['url'];\n    }\n    if (!empty($dir) && (substr($dir, -1) !== '\/')) {\n      $dir .= '\/';\n    }\n    $res = [\n      'js' => [],\n      'css' => [],\n      'html' => [],\n      'lang' => []\n    ];\n    $files = bbn\\File\\Dir::getFiles($this->fpath.$dir);\n    foreach ($files as $f) {\n      if (is_file($f)) {\n        $ext = bbn\\Str::fileExt($f);\n        $file = X::basename($f);\n        if ($file !== '_def.less') {\n          foreach (self::$types as $type => $extensions) {\n            if (\\in_array($ext, $extensions, true) ){\n              $res[$type][] = $this->sanitize($dir.$file);\n            }\n          }\n        }\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 396,
+            "endLine": 425,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getDir",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "dir",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The directory name"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $dir The directory name\n   * @return array\n   *\/"
+        },
+        "getLibraries": {
+            "name": "getLibraries",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getLibraries(): array\n  {\n    if (!empty($this->cfg['params']['lib'])) {\n      $lib = new Library($this->db, $this->cfg['lang']);\n      $libs = explode(',', $this->cfg['params']['lib']);\n      foreach ($libs as $l) {\n        $lib->add($l, $this->cfg['has_dep']);\n      }\n      return $lib->getConfig();\n    }\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 430,
+            "endLine": 441,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getLibraries",
+            "returns": [
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
+        },
+        "_setCfg": {
+            "name": "_setCfg",
+            "summary": "Sets the config array with all the - default or no - config parameters.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Config.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _setCfg()\n  {\n    if (\\is_array($this->cfg)) {\n      $p =& $this->cfg['params'];\n      $components = false;\n      if (!empty($p['components'])) {\n        $components = explode(',', $p['components']);\n      }\n      $this->cfg = X::mergeArrays(\n        $this->cfg, [\n        'test' => !empty($p['test']),\n        'lang' => empty($p['lang']) ? self::$default_language : $p['lang'],\n        'nocompil' => !empty($p['nocompil']),\n        'has_css' => !isset($p['css']) || $p['css'],\n        'has_dep' => !isset($p['dep']) || $p['dep'],\n        'latest' => isset($p['latest']) ? 1 : false,\n        'is_component' => !empty($p['components']),\n        'components' => $components\n        ]\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 448,
+            "endLine": 469,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_setCfg",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Sets the config array with all the - default or no - config parameters.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the config array with all the - default or no - config parameters.\n   * \n   * @return void\n   *\/"
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "test",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+        },
+        "check": {
+            "name": "check",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "check",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "check",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+        },
+        "setError": {
+            "name": "setError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
+            "parent": {
+                "name": "setError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "protected",
+                "final": false,
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
+                "returns": [],
+                "arguments": [
+                    {
+                        "name": "err",
+                        "position": 0,
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "code",
+                        "position": 1,
+                        "type": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "err",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getError": {
+            "name": "getError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getError",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -568,43 +1241,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -615,37 +1306,498 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
+        },
+        "_set_prefix": {
+            "name": "_set_prefix",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Config",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_prefix(){\n    if ( defined('BBN_SHARED_PATH') && (strpos(BBN_SHARED_PATH, '\/') === 0) ){\n      $this->prefix = substr(BBN_SHARED_PATH, 1);\n      $this->furl = '\/'.$this->prefix;\n    }\n    else{\n      $this->furl = BBN_URL;\n      $parsed = parse_url(BBN_SHARED_PATH);\n      if ( $parsed['path'] && ($parsed['path'] !== '\/') ){\n        $this->prefix = substr($parsed['path'], 1);\n        $this->furl .= $this->prefix;\n      }\n    }\n    $this->fpath = BBN_PUBLIC.$this->prefix;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cdn\\Common",
+            "startLine": 37,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_set_prefix",
+            "returns": [],
+            "arguments": []
         }
     },
     "properties": {
-        "types": {
+        "default_language": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Config"
+            },
+            "declaring_trait": "bbn\\Cdn\\Config",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The default language for the libraries"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "en"
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Config"
+            },
+            "declaring_trait": "bbn\\Cdn\\Config",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The configuration array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Config"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "fpath": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Config"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "furl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Config"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "types": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Config"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
+            "parent": false,
             "value": {
                 "js": [
                     "js",
@@ -690,6 +1842,14 @@
         }
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * PHP version 7\n *\n * @category CDN\n * @package  BBN\n * @author   Theomas Nabet <thomas.nabet@gmail.com>\n * @license  https:\/\/opensource.org\/licenses\/mit-license.php MIT\n * @version  \"GIT: <git_id>\"\n * @link     https:\/\/www.bbn.io\/bbn-php\n *\/",
+        "\/**\n * Makes a usable configuration array out of a request string.\n * \n * @category CDN\n * @package  BBN\n * @author   Theomas Nabet <thomas.nabet@gmail.com>\n * @license  https:\/\/opensource.org\/licenses\/mit-license.php MIT\n * @link     https:\/\/bbnio2.thomas.lan\/bbn-php\/doc\/class\/cdn\/library\n *\/"
+    ],
     "summary": "Makes a usable configuration array out of a request string.",
     "description": "",
     "description_parts": []

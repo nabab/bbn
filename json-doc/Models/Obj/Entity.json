@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Obj\\Entity",
     "namespace": true,
+    "realName": "Entity",
+    "realNamespace": "bbn\\Models\\Obj",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Obj\/Entity.php",
     "startLine": 7,
     "endLine": 29,
     "numMethods": 2,
-    "numProperties": 0,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": true,
@@ -35,7 +36,6 @@
     "namespaceName": "bbn\\Models\\Obj",
     "shortName": "Entity",
     "contentConstructor": {
-        "file": "bbn\\Models\\Obj\\Entity",
         "returns": []
     },
     "methods": {
@@ -44,11 +44,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Obj\\Entity",
+            "class": "bbn\\Models\\Obj\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Obj\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, $id)\n  {\n    if ( $this->table_name && $db->count($this->table_name, [$this->id_field => $id]) ){\n      $this->is_checked = true;\n      $this->db = $db;\n    }\n  }",
+            "code": "  public function __construct(\\bbn\\Db $db, $id)\n  {\n    if ( $this->table_name && $db->count($this->table_name, [$this->id_field => $id]) ){\n      $this->is_checked = true;\n      $this->db = $db;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 17,
             "endLine": 23,
             "isDeprecated": false,
@@ -59,13 +62,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -75,6 +83,9 @@
                     "name": "id",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -87,11 +98,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Obj\\Entity",
+            "class": "bbn\\Models\\Obj\\Entity",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Obj\/Entity.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->is_checked;\n  }",
+            "code": "  public function check(): boolean\n  {\n    return $this->is_checked;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 25,
             "endLine": 28,
             "isDeprecated": false,
@@ -102,16 +116,81 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [
                 "bbn\\Models\\Obj\\boolean"
             ],
-            "parent": false,
             "arguments": []
         }
     },
-    "properties": null,
+    "properties": {
+        "is_checked": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Obj\\Entity"
+            },
+            "declaring_trait": "bbn\\Models\\Obj\\Entity",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": false
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Obj\\Entity"
+            },
+            "declaring_trait": "bbn\\Models\\Obj\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "table_name": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Obj\\Entity"
+            },
+            "declaring_trait": "bbn\\Models\\Obj\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "id_field": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Obj\\Entity"
+            },
+            "declaring_trait": "bbn\\Models\\Obj\\Entity",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "id"
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

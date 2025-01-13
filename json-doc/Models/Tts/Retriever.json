@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\Retriever",
     "namespace": true,
+    "realName": "Retriever",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/Retriever.php",
     "startLine": 13,
     "endLine": 67,
-    "numMethods": 3,
-    "numProperties": 0,
+    "numMethods": 4,
+    "numProperties": 2,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -33,20 +34,80 @@
     "namespaceName": "bbn\\Models\\Tts",
     "shortName": "Retriever",
     "contentConstructor": {
-        "file": "bbn\\Models\\Tts\\Retriever",
         "returns": []
     },
     "methods": {
+        "retrieverInit": {
+            "name": "retrieverInit",
+            "summary": "Initialize the retriever by putting its own instance as static property.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Retriever",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function retrieverInit(self $instance): void\n  {\n    self::$retriever_exists = true;\n    if (!self::$retriever_instance) {\n      self::$retriever_instance = $instance;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 31,
+            "endLine": 37,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "retrieverInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "instance",
+                    "position": 0,
+                    "type": "self",
+                    "type_arr": [
+                        "self"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The instance object."
+                }
+            ],
+            "doc": {
+                "description": "Initialize the retriever by putting its own instance as static property.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "self",
+                        "name": "$instance",
+                        "description": "The instance object."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initialize the retriever by putting its own instance as static property.\n   *\n   * @param self $instance The instance object.\n   * @return void\n   *\/"
+        },
         "getInstance": {
             "name": "getInstance",
             "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Retriever",
+            "class": "bbn\\Models\\Tts\\Retriever",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$retriever_instance;\n  }",
+            "code": "  public static function getInstance(): ?self\n  {\n    return self::$retriever_instance;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 44,
             "endLine": 47,
             "isDeprecated": false,
@@ -57,23 +118,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getInstance",
             "returns": [
                 null,
                 "self"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the instance of the singleton or null.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the instance of the singleton or null.\n   * \n   * @return self\n   *\/"
         },
         "retrieverExists": {
             "name": "retrieverExists",
             "summary": "Returns true if an instance as been initiated.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Retriever",
+            "class": "bbn\\Models\\Tts\\Retriever",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$retriever_exists;\n  }",
+            "code": "  public static function retrieverExists(): bool\n  {\n    return self::$retriever_exists;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 54,
             "endLine": 57,
             "isDeprecated": false,
@@ -84,22 +154,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "retrieverExists",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if an instance as been initiated.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if an instance as been initiated.\n   *\n   * @return bool\n   *\/"
         },
         "__construct": {
             "name": "__construct",
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Retriever",
+            "class": "bbn\\Models\\Tts\\Retriever",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::retrieverInit($this);\n  }",
+            "code": "  public function __construct()\n  {\n    self::retrieverInit($this);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 62,
             "endLine": 65,
             "isDeprecated": false,
@@ -110,17 +189,82 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Constructor.",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "retriever_instance": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Retriever"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Retriever",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "self",
+                        "description": "An instance of the current class."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "retriever_exists": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Retriever"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Retriever",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Will be true from the moment an instance exists."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        }
+    },
     "staticProperties": {
         "retriever_instance": null,
         "retriever_exists": false
     },
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 01\/11\/2016\n * Time: 17:41\n *\/",
+        "\/**\n * Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.\n *\/",
+        "\/**\n   * @var self An instance of the current class.\n   *\/",
+        "\/**\n   * @var bool Will be true from the moment an instance exists.\n   *\/",
+        "\/**\n   * Initialize the retriever by putting its own instance as static property.\n   *\n   * @param self $instance The instance object.\n   * @return void\n   *\/",
+        "\/**\n   * Returns the instance of the singleton or null.\n   * \n   * @return self\n   *\/",
+        "\/**\n   * Returns true if an instance as been initiated.\n   *\n   * @return bool\n   *\/",
+        "\/**\n   * Constructor.\n   *\/"
+    ],
     "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
     "description": "",
     "description_parts": []

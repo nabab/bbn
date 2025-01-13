@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\References",
     "namespace": true,
+    "realName": "References",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/References.php",
     "startLine": 14,
     "endLine": 63,
-    "numMethods": 1,
-    "numProperties": 0,
+    "numMethods": 2,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -36,16 +37,46 @@
     "shortName": "References",
     "contentConstructor": null,
     "methods": {
+        "_get_references": {
+            "name": "_get_references",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\References",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/References.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_references(){\n    if ( \\is_null($this->references) ){\n      if ( $refs = $this->db->findRelations('bbn_tasks.id') ){\n        $this->references = array_filter($refs, function($a, $k){\n          return strpos($k, 'bbn_tasks') !== 0;\n        }, ARRAY_FILTER_USE_BOTH);\n      }\n      if ( empty($this->references) ){\n        $this->references = false;\n      }\n      else{\n        foreach ( $this->references as $table => $ref ){\n          foreach ( $ref['refs'] as $j => $r ){\n            $this->references_select = empty($this->references_select) ?\n              $this->db->cfn($j, $table, 1) :\n              \"IFNULL(\".$this->references_select.\", \".$this->db->cfn($j, $table, 1).\")\";\n\n            $this->references_join .= \"LEFT JOIN \".$this->db->tfn($table, 1).PHP_EOL.\n              \"ON \".$this->db->cfn($ref['column'], $table, 1).\" = bbn_tasks.id\".PHP_EOL;\n          }\n        }\n        if ( !empty($this->references_select) ){\n          $this->references_select .= \" AS reference,\".PHP_EOL;\n        }\n      }\n    }\n    return $this->references;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 26,
+            "endLine": 53,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_get_references",
+            "returns": [],
+            "arguments": []
+        },
         "getReferences": {
             "name": "getReferences",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\References",
+            "class": "bbn\\Models\\Tts\\References",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/References.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [\n      'select' => $this->references_select,\n      'join' => $this->references_join\n    ];\n  }",
+            "code": "  public function getReferences(){\n    $this->_get_references();\n    return [\n      'select' => $this->references_select,\n      'join' => $this->references_join\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 55,
             "endLine": 61,
             "isDeprecated": false,
@@ -56,14 +87,90 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getReferences",
             "returns": [],
-            "parent": false,
             "arguments": []
         }
     },
-    "properties": null,
+    "properties": {
+        "references": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\References"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\References",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "references_select": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\References"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\References",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": ""
+        },
+        "references_join": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\References"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\References",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": ""
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\References"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\References",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bbn\\Db"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 05\/11\/2016\n * Time: 02:39\n *\/",
+        "\/**\n   * @var bbn\\Db\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

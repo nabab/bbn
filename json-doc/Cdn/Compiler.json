@@ -11,22 +11,21 @@
     },
     "name": "bbn\\Cdn\\Compiler",
     "namespace": true,
+    "realName": "Compiler",
+    "realNamespace": "bbn\\Cdn",
     "traits": [
         "bbn\\Cdn\\Common"
     ],
     "interfaces": [],
     "fileName": "\/Cdn\/Compiler.php",
     "startLine": 33,
-    "endLine": 634,
-    "numMethods": 17,
-    "numProperties": 1,
+    "endLine": 638,
+    "numMethods": 19,
+    "numProperties": 12,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Cdn\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -63,6 +62,8 @@
         "cfg": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
         "prefix": "",
@@ -74,7 +75,6 @@
     "namespaceName": "bbn\\Cdn",
     "shortName": "Compiler",
     "contentConstructor": {
-        "file": "bbn\\Cdn\\Compiler",
         "returns": []
     },
     "methods": {
@@ -83,11 +83,14 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    $this->_set_prefix();\n    $this->cfg = $cfg;\n  }",
+            "code": "  public function __construct(array $cfg)\n  {\n    $this->_set_prefix();\n    $this->cfg = $cfg;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 55,
             "endLine": 59,
             "isDeprecated": false,
@@ -98,31 +101,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The configuration array"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The configuration array"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\n   * @param array $cfg The configuration array\n   *\/"
         },
         "minify": {
             "name": "minify",
             "summary": "Minify the given string in the given lang (js or css).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $st, string $lang)\n  {\n    $tmp = false;\n    $st  = trim($st);\n    if ($st) {\n      try {\n        if ($lang === 'js') {\n          $tmp = Minifier::minify($st, ['flaggedComments' => false]);\n        }\n        elseif ($lang === 'css') {\n          \/** @todo Minification makes var() statements disappear! *\/\n          $tmp = Str::cleanSpaces($st);\/\/CssMin::minify($st);\n        }\n      }\n      catch (\\Exception $e) {\n        $this->setError(\"Error during $lang minification with string - {$e->getMessage()}\");\n        \/\/die('Error during $lang minification with string - '.$e->getMessage());\n      }\n    }\n\n    return $tmp ?: $st;\n  }",
+            "code": "  public function minify(string $st, string $lang): string\n  {\n    $tmp = false;\n    $st  = trim($st);\n    if ($st) {\n      try {\n        if ($lang === 'js') {\n          $tmp = Minifier::minify($st, ['flaggedComments' => false]);\n        }\n        elseif ($lang === 'css') {\n          \/** @todo Minification makes var() statements disappear! *\/\n          $tmp = Str::cleanSpaces($st);\/\/CssMin::minify($st);\n        }\n      }\n      catch (\\Exception $e) {\n        $this->setError(\"Error during $lang minification with string - {$e->getMessage()}\");\n        \/\/die('Error during $lang minification with string - '.$e->getMessage());\n      }\n    }\n\n    return $tmp ?: $st;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 69,
             "endLine": 90,
             "isDeprecated": false,
@@ -133,15 +157,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "minify",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "st",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -152,13 +181,37 @@
                     "name": "lang",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The language used by the string"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Minify the given string in the given lang (js or css).\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st",
+                        "description": "The string to minify"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$lang",
+                        "description": "The language used by the string"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Minify the given string in the given lang (js or css).\n   *\n   * @param string $st   The string to minify\n   * @param string $lang The language used by the string\n   * @return void\n   *\/"
         },
         "getContent": {
             "name": "getContent",
@@ -167,14 +220,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>after having compiled it if needed, and minified if test is false.<\/p>"
+                    "content": "after having compiled it if needed, and minified if test is false."
                 }
             ],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file, $test = false)\n  {\n    if (is_array($file)) {\n      $ext      = Str::fileExt($file[0]);\n      $minified = false;\n      $c        = '';\n      foreach ($file as $f) {\n        $has_content = false;\n        if (!is_file($this->fpath . $f)) {\n          throw new \\Exception(X::_(\"Impossible to find the file\") . ' ' . $this->fpath . $f);\n          return false;\n        }\n\n        foreach (self::$_min_suffixes as $s) {\n          if (strpos($f, $s . '.')) {\n            $minified = true;\n            if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $f))) {\n              $c          .= PHP_EOL . file_get_contents($this->fpath . str_replace($s . '.', '.', $f));\n              $has_content = true;\n            }\n\n            break;\n          }\n        }\n\n        if (!$has_content) {\n          $c .= PHP_EOL . file_get_contents($this->fpath . $f);\n        }\n\n        if (!empty($c)) {\n          $c = trim($c);\n        }\n      }\n\n      $file = $file[0];\n    }\n    else {\n      $ext      = Str::fileExt($file);\n      $minified = false;\n      if (!is_file($this->fpath . $file)) {\n        throw new \\Exception(X::_(\"Impossible to find the file\") . ' ' . $this->fpath . $file);\n        return false;\n      }\n\n      foreach (self::$_min_suffixes as $s) {\n        if (strpos($file, $s . '.')) {\n          $minified = true;\n          if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $file))) {\n            $c = file_get_contents($this->fpath . str_replace($s . '.', '.', $file));\n          }\n\n          break;\n        }\n      }\n\n      if (!isset($c)) {\n        $c = file_get_contents($this->fpath . $file);\n      }\n\n      if (\\is_string($c)) {\n        $c = trim($c);\n      }\n    }\n\n    if ($c) {\n      switch ($ext) {\n        case 'js':\n          if (!$test && !$minified) {\n            $c = $this->minify($c, 'js');\n          }\n              break;\n\n        case 'css':\n          if (!$test && !$minified) {\n            $c = $this->minify($c, 'css');\n          }\n              break;\n\n        case 'less':\n          $less = new Less();\n          $less->setImportDir([X::dirname($this->fpath . $file)]);\n          try {\n            $c = $less->compile($c);\n          }\n          catch (\\Exception $e) {\n            X::log(\"Error during LESS compilation with file $file :\" . $e->getMessage(), 'cdn_err');\n            $this->setError(\"Error during LESS compilation with file $file :\" . $e->getMessage());\n            throw $e;\n          }\n\n          if ($c && !$test) {\n            try {\n              $c = $this->minify($c, 'css');\n            }\n            catch (\\Exception $e) {\n              $this->setError(\"Error during LESS compilation with file $file :\" . $e->getMessage());\n              throw $e;\n            }\n          }\n              break;\n\n        case 'scss':\n          try {\n            $scss = new \\ScssPhp\\ScssPhp\\Compiler();\n            $scss->setImportPaths([X::dirname($this->fpath . $file)]);\n            if (is_file(X::dirname($this->fpath . $file) . '\/_def.scss')) {\n              $c = file_get_contents((X::dirname($this->fpath . $file) . '\/_def.scss')) . $c;\n            }\n\n            $c = $scss->compile($c);\n            if ($c && !$test) {\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch (\\Exception $e) {\n            $this->setError(\"Error during SCSS compilation with file $file :\" . $e->getMessage());\n            die($e->getMessage());\n          }\n              break;\n\n        case 'sass':\n          $sass = new \\SassParser(\n              [\n              'cache' => false,\n              'syntax' => 'sass'\n              ]\n          );\n          try {\n            $c = $sass->toCss($c, false);\n            if ($c && !$test) {\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch (\\Exception $e) {\n            $this->setError(\"Error during SASS compilation with file $file :\" . $e->getMessage());\n            die($e->getMessage());\n          }\n              break;\n      }\n\n      if (!$this->check()) {\n        die(\"File $file \\n{$this->getError()}\");\n      }\n\n      return $c;\n    }\n\n    return false;\n  }",
+            "code": "  public function getContent($file, $test = false)\n  {\n    if (is_array($file)) {\n      $ext      = Str::fileExt($file[0]);\n      $minified = false;\n      $c        = '';\n      foreach ($file as $f) {\n        $has_content = false;\n        if (!is_file($this->fpath . $f)) {\n          throw new \\Exception(X::_(\"Impossible to find the file\") . ' ' . $this->fpath . $f);\n          return false;\n        }\n\n        foreach (self::$_min_suffixes as $s) {\n          if (strpos($f, $s . '.')) {\n            $minified = true;\n            if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $f))) {\n              $c          .= PHP_EOL . file_get_contents($this->fpath . str_replace($s . '.', '.', $f));\n              $has_content = true;\n            }\n\n            break;\n          }\n        }\n\n        if (!$has_content) {\n          $c .= PHP_EOL . file_get_contents($this->fpath . $f);\n        }\n\n        if (!empty($c)) {\n          $c = trim($c);\n        }\n      }\n\n      $file = $file[0];\n    }\n    else {\n      $ext      = Str::fileExt($file);\n      $minified = false;\n      if (!is_file($this->fpath . $file)) {\n        throw new \\Exception(X::_(\"Impossible to find the file\") . ' ' . $this->fpath . $file);\n        return false;\n      }\n\n      foreach (self::$_min_suffixes as $s) {\n        if (strpos($file, $s . '.')) {\n          $minified = true;\n          if ($test && file_exists($this->fpath . str_replace($s . '.', '.', $file))) {\n            $c = file_get_contents($this->fpath . str_replace($s . '.', '.', $file));\n          }\n\n          break;\n        }\n      }\n\n      if (!isset($c)) {\n        $c = file_get_contents($this->fpath . $file);\n      }\n\n      if (\\is_string($c)) {\n        $c = trim($c);\n      }\n    }\n\n    if ($c) {\n      switch ($ext) {\n        case 'js':\n          if (!$test && !$minified) {\n            $c = $this->minify($c, 'js');\n          }\n              break;\n\n        case 'css':\n          if (!$test && !$minified) {\n            $c = $this->minify($c, 'css');\n          }\n              break;\n\n        case 'less':\n          $less = new Less();\n          $less->setImportDir([X::dirname($this->fpath . $file)]);\n          try {\n            $c = $less->compile($c);\n          }\n          catch (\\Exception $e) {\n            X::log(\"Error during LESS compilation with file $file :\" . $e->getMessage(), 'cdn_err');\n            $this->setError(\"Error during LESS compilation with file $file :\" . $e->getMessage());\n            throw $e;\n          }\n\n          if ($c && !$test) {\n            try {\n              $c = $this->minify($c, 'css');\n            }\n            catch (\\Exception $e) {\n              $this->setError(\"Error during LESS compilation with file $file :\" . $e->getMessage());\n              throw $e;\n            }\n          }\n              break;\n\n        case 'scss':\n          try {\n            $scss = new \\ScssPhp\\ScssPhp\\Compiler();\n            $scss->setImportPaths([X::dirname($this->fpath . $file)]);\n            if (is_file(X::dirname($this->fpath . $file) . '\/_def.scss')) {\n              $c = file_get_contents((X::dirname($this->fpath . $file) . '\/_def.scss')) . $c;\n            }\n\n            $c = $scss->compile($c);\n            if ($c && !$test) {\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch (\\Exception $e) {\n            $this->setError(\"Error during SCSS compilation with file $file :\" . $e->getMessage());\n            die($e->getMessage());\n          }\n              break;\n\n        case 'sass':\n          $sass = new \\SassParser(\n              [\n              'cache' => false,\n              'syntax' => 'sass'\n              ]\n          );\n          try {\n            $c = $sass->toCss($c, false);\n            if ($c && !$test) {\n              $c = $this->minify($c, 'css');\n            }\n          }\n          catch (\\Exception $e) {\n            $this->setError(\"Error during SASS compilation with file $file :\" . $e->getMessage());\n            die($e->getMessage());\n          }\n              break;\n      }\n\n      if (!$this->check()) {\n        die(\"File $file \\n{$this->getError()}\");\n      }\n\n      return $c;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 101,
             "endLine": 249,
             "isDeprecated": false,
@@ -185,13 +241,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getContent",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "file",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -202,26 +261,51 @@
                     "name": "test",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If true the content will not be minified"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the content of a file or a group of files,\nafter having compiled it if needed, and minified if test is false.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$file",
+                        "description": "The file or list of files"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$test",
+                        "description": "If true the content will not be minified"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the content of a file or a group of files,\n   * after having compiled it if needed, and minified if test is false.\n   *\n   * @param string|array $file The file or list of files\n   * @param boolean      $test If true the content will not be minified\n   * @return void\n   *\/"
         },
         "jsLinks": {
             "name": "jsLinks",
             "summary": "Returns a javascript string invoking other javascript files.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $files, $test = false)\n  {\n    $code      = '';\n    $num_files = \\count($files);\n    if ($num_files) {\n      $url    = $this->furl . '?files=%s&';\n      $params = [];\n      \/\/ The v parameter is passed between requests (to refresh)\n      if (!empty($this->cfg['params']['v'])) {\n        $params['v'] = $this->cfg['params']['v'];\n      }\n\n      \/\/ The test parameter also (for minification)\n      if ($test) {\n        $params['test'] = 1;\n      }\n\n      $url        .= http_build_query($params);\n      $files_json  = json_encode($files);\n            $code .= <<<JAVASCRIPT\n  .then(function(){\n    return new Promise(function(bbn_resolve, bbn_reject){\n      let files = $files_json;\n      let rFiles = [];\n      for (let i = 0; i < files.length; i++) {\n        if ( bbnLoadFile(files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        bbn_resolve();\n        return;\n      }\n      let script = document.createElement(\"script\");\n      script.type = \"text\/javascript\";\n      script.src = \"$url\".replace(\"%s\", rFiles.join(\",\"));\n      script.onload = function(){\n        bbn_resolve();\n      };\n      script.onerror = function(){\n        bbn_reject();\n      };\n      document.getElementsByTagName(\"head\")[0].appendChild(script);\n    })\n  })\nJAVASCRIPT;\n    }\n\n    return $code;\n  }",
+            "code": "  public function jsLinks(array $files, $test = false): string\n  {\n    $code      = '';\n    $num_files = \\count($files);\n    if ($num_files) {\n      $url    = $this->furl . '?files=%s&';\n      $params = [];\n      \/\/ The v parameter is passed between requests (to refresh)\n      if (!empty($this->cfg['params']['v'])) {\n        $params['v'] = $this->cfg['params']['v'];\n      }\n\n      \/\/ The test parameter also (for minification)\n      if ($test) {\n        $params['test'] = 1;\n      }\n\n      $url        .= http_build_query($params);\n      $files_json  = json_encode($files);\n            $code .= <<<JAVASCRIPT\n  .then(function(){\n    return new Promise(function(bbn_resolve2, bbn_reject2){\n      let files = $files_json;\n      let rFiles = [];\n      for (let i = 0; i < files.length; i++) {\n        if ( bbnLoadFile(files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        \/\/ Adding a timeout in case the lib is requested twice at the same time\n        \/\/ @todo Can do better\n        setTimeout(() => {\n          bbn_resolve2();\n        }, 125);\n        return;\n      }\n      let script = document.createElement(\"script\");\n      script.type = \"text\/javascript\";\n      script.onload = function(){\n        bbn_resolve2()\n      };\n      script.onerror = function(){\n        bbn_reject2();\n      };\n      script.src = \"$url\".replace(\"%s\", rFiles.join(\",\"));\n      document.getElementsByTagName(\"body\")[0].appendChild(script);\n    })\n  })\nJAVASCRIPT;\n    }\n\n    return $code;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 259,
-            "endLine": 308,
+            "endLine": 312,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -230,15 +314,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "jsLinks",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "files",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -249,26 +338,51 @@
                     "name": "test",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If true minification will not be applied"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a javascript string invoking other javascript files.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$files",
+                        "description": "A list of files to be invoked"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$test",
+                        "description": "If true minification will not be applied"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a javascript string invoking other javascript files.\n   *\n   * @param array   $files A list of files to be invoked\n   * @param boolean $test  If true minification will not be applied\n   * @return string\n   *\/"
         },
         "hasLinks": {
             "name": "hasLinks",
-            "summary": "",
+            "summary": "Returns true if the given css code contains url parameters.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $css)\n  {\n    return strpos($css, 'url(') || (strpos($css, '@import') !== false);\n  }",
-            "startLine": 317,
-            "endLine": 320,
+            "code": "  public function hasLinks(string $css)\n  {\n    return strpos($css, 'url(') || (strpos($css, '@import') !== false);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 321,
+            "endLine": 324,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -277,32 +391,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "hasLinks",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "css",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns true if the given css code contains url parameters.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$css"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the given css code contains url parameters.\n   *\n   * @param [type] $css\n   * @return boolean\n   *\/"
         },
         "cssLinks": {
             "name": "cssLinks",
             "summary": "Returns a javascript string including css files.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $files, $test = false, $prepend_files = [], $root = '')\n  {\n    $code      = '';\n    $num_files = \\count($files);\n    if ($num_files) {\n      $dirs        = [];\n      $prepended   = [];\n      $unprepended = [];\n      $dir         = null;\n      foreach ($files as $f) {\n        if (!is_file($this->fpath . $f)) {\n          throw new \\Exception(X::_(\"Impossible to find the file %s\", $this->fpath . $f));\n        }\n        $tmp = X::dirname($f);\n        if (is_null($dir)) {\n          $dir = $tmp . '\/';\n        }\n        elseif (strpos($dir, $tmp) !== 0) {\n          $old_tmp = null;\n          while ($tmp = X::dirname($tmp) && ($tmp !== $old_tmp)) {\n            $old_tmp = $tmp;\n            if ($tmp === $dir) {\n              break;\n            }\n          }\n\n          if ($tmp !== $dir) {\n            $bits    = \\bbn\\X::split(X::dirname($f), '\/');\n            $new_dir = '';\n            foreach ($bits as $b) {\n              if (!empty($b)) {\n                if (strpos($dir, $new_dir . $b) === 0) {\n                  $new_dir .= $b . '\/';\n                }\n                else {\n                  $dir = $new_dir ?: '.';\n                  break;\n                }\n              }\n            }\n          }\n        }\n\n        if (isset($prepend_files[$f])) {\n          foreach ($prepend_files[$f] as $p) {\n            if (!in_array($p, $prepended)) {\n              $prepended[] = $p;\n            }\n          }\n        }\n      }\n\n      if (count($prepended)) {\n        foreach (array_reverse($prepended) as $p) {\n          array_unshift($files, $p);\n        }\n      }\n\n      foreach ($files as $ar) {\n        $files_json[] = str_replace($dir, '', $ar);\n      }\n\n      $files_json = json_encode($files_json);\n      $url        = $this->furl . '~~~BBN~~~';\n      $params     = [];\n      \/\/ The v parameter is passed between requests (to refresh)\n      if (!empty($this->cfg['params']['v'])) {\n        $params['v'] = $this->cfg['params']['v'];\n      }\n\n      \/\/ The test parameter also (for minification)\n      if ($test) {\n        $params['test'] = 1;\n      }\n\n      $url  .= http_build_query($params);\n      $jsdir = $dir;\n      $code .= <<<JAVASCRIPT\n.then(function(){\n  return new Promise(function(bbn_resolve, bbn_reject){\n    let dir = \"$jsdir\";\n    let files = $files_json;\n    let url = \"$url\";\n    let rFiles = [];\n    for ( var i = 0; i < files.length; i++ ){\n      if ( bbnLoadFile(dir + files[i]) ){\n        rFiles.push(files[i]);\n      }\n    }\n    if ( !rFiles.length ){\n      bbn_resolve();\n      return;\n    }\n    let css = document.createElement(\"link\");\n    css.rel = \"stylesheet\";\n    css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(\",\") + '&');\n    css.onload = function(){\n      bbn_resolve();\n    };\n    css.onerror = function(){\n      bbn_reject();\n    };\n    document.getElementsByTagName(\"head\")[0].appendChild(css);\n  })\n})\nJAVASCRIPT;\n      foreach ($unprepended as $file) {\n        $css = $this->getContent($file, false);\n        if ($this->hasLinks($css)) {\n          if ($root) {\n            if (!isset($dirs[$root])) {\n              $dirs[$root] = [];\n            }\n\n            $dirs[$root][] = substr($file, strlen($root));\n          }\n          else {\n            if (!isset($dirs[X::dirname($file)])) {\n              $dirs[X::dirname($file)] = [];\n            }\n\n            $dirs[X::dirname($file)][] = X::basename($file);\n          }\n        }\n        else {\n          if (!isset($dirs['.'])) {\n            $dirs['.'] = [];\n          }\n\n          $dirs['.'][] = $file;\n        }\n      }\n\n      if (\\count($dirs)) {\n        foreach ($dirs as $dir => $dfiles) {\n          if (\\count($dfiles)) {\n            $files_json = json_encode($dfiles);\n\n            $url = $this->furl . '~~~BBN~~~';\n\n            $params = [];\n            \/\/ The v parameter is passed between requests (to refresh)\n            if (!empty($this->cfg['params']['v'])) {\n              $params['v'] = $this->cfg['params']['v'];\n            }\n\n            \/\/ The test parameter also (for minification)\n            if ($test) {\n              $params['test'] = 1;\n            }\n\n            $url  .= http_build_query($params);\n            $jsdir = $dir === '.' ? '' : $dir . '\/';\n            $code .= <<<JAVASCRIPT\n\n  .then(function(){\n    return new Promise(function(bbn_resolve, bbn_reject){\n      let dir = \"$jsdir\";\n      let files = $files_json;\n      let url = \"$url\";\n      let rFiles = [];\n      for (let i = 0; i < files.length; i++) {\n        if ( bbnLoadFile(dir + files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        bbn_resolve();\n        return;\n      }\n      let css = document.createElement(\"link\");\n      css.rel = \"stylesheet\";\n      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(\",\") + '&');\n      css.onload = function(){\n        bbn_resolve();\n      };\n      css.onerror = function(){\n        bbn_reject();\n      };\n      document.getElementsByTagName(\"head\")[0].appendChild(css);\n    })\n  })\nJAVASCRIPT;\n          }\n        }\n\n        \/\/$code .= \";\\nreturn promise;\\n})()\";\n        if (!$test) {\n          $code = $this->minify($code, 'js');\n        }\n      }\n    }\n\n    return $code;\n  }",
-            "startLine": 330,
-            "endLine": 524,
+            "code": "  public function cssLinks(array $files, $test = false, $prepend_files = [], $root = '')\n  {\n    $code      = '';\n    $num_files = \\count($files);\n    if ($num_files) {\n      $dirs        = [];\n      $prepended   = [];\n      $unprepended = [];\n      $dir         = null;\n      foreach ($files as $f) {\n        if (!is_file($this->fpath . $f)) {\n          throw new \\Exception(X::_(\"Impossible to find the file %s\", $this->fpath . $f));\n        }\n        $tmp = X::dirname($f);\n        if (is_null($dir)) {\n          $dir = $tmp . '\/';\n        }\n        elseif (strpos($dir, $tmp) !== 0) {\n          $old_tmp = null;\n          while ($tmp = X::dirname($tmp) && ($tmp !== $old_tmp)) {\n            $old_tmp = $tmp;\n            if ($tmp === $dir) {\n              break;\n            }\n          }\n\n          if ($tmp !== $dir) {\n            $bits    = \\bbn\\X::split(X::dirname($f), '\/');\n            $new_dir = '';\n            foreach ($bits as $b) {\n              if (!empty($b)) {\n                if (strpos($dir, $new_dir . $b) === 0) {\n                  $new_dir .= $b . '\/';\n                }\n                else {\n                  $dir = $new_dir ?: '.';\n                  break;\n                }\n              }\n            }\n          }\n        }\n\n        if (isset($prepend_files[$f])) {\n          foreach ($prepend_files[$f] as $p) {\n            if (!in_array($p, $prepended)) {\n              $prepended[] = $p;\n            }\n          }\n        }\n      }\n\n      if (count($prepended)) {\n        foreach (array_reverse($prepended) as $p) {\n          array_unshift($files, $p);\n        }\n      }\n\n      foreach ($files as $ar) {\n        $files_json[] = str_replace($dir, '', $ar);\n      }\n\n      $files_json = json_encode($files_json);\n      $url        = $this->furl . '~~~BBN~~~';\n      $params     = [];\n      \/\/ The v parameter is passed between requests (to refresh)\n      if (!empty($this->cfg['params']['v'])) {\n        $params['v'] = $this->cfg['params']['v'];\n      }\n\n      \/\/ The test parameter also (for minification)\n      if ($test) {\n        $params['test'] = 1;\n      }\n\n      $url  .= http_build_query($params);\n      $jsdir = $dir;\n      $code .= <<<JAVASCRIPT\n.then(function(){\n  return new Promise(function(bbn_resolve2, bbn_reject2){\n    let dir = \"$jsdir\";\n    let files = $files_json;\n    let url = \"$url\";\n    let rFiles = [];\n    for ( var i = 0; i < files.length; i++ ){\n      if ( bbnLoadFile(dir + files[i]) ){\n        rFiles.push(files[i]);\n      }\n    }\n    if ( !rFiles.length ){\n      bbn_resolve2();\n      return;\n    }\n    let css = document.createElement(\"link\");\n    css.rel = \"stylesheet\";\n    css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(\",\") + '&');\n    css.onload = function(){\n      bbn_resolve2();\n    };\n    css.onerror = function(){\n      bbn_reject2();\n    };\n    document.getElementsByTagName(\"head\")[0].appendChild(css);\n  })\n})\nJAVASCRIPT;\n      foreach ($unprepended as $file) {\n        $css = $this->getContent($file, false);\n        if ($this->hasLinks($css)) {\n          if ($root) {\n            if (!isset($dirs[$root])) {\n              $dirs[$root] = [];\n            }\n\n            $dirs[$root][] = substr($file, strlen($root));\n          }\n          else {\n            if (!isset($dirs[X::dirname($file)])) {\n              $dirs[X::dirname($file)] = [];\n            }\n\n            $dirs[X::dirname($file)][] = X::basename($file);\n          }\n        }\n        else {\n          if (!isset($dirs['.'])) {\n            $dirs['.'] = [];\n          }\n\n          $dirs['.'][] = $file;\n        }\n      }\n\n      if (\\count($dirs)) {\n        foreach ($dirs as $dir => $dfiles) {\n          if (\\count($dfiles)) {\n            $files_json = json_encode($dfiles);\n\n            $url = $this->furl . '~~~BBN~~~';\n\n            $params = [];\n            \/\/ The v parameter is passed between requests (to refresh)\n            if (!empty($this->cfg['params']['v'])) {\n              $params['v'] = $this->cfg['params']['v'];\n            }\n\n            \/\/ The test parameter also (for minification)\n            if ($test) {\n              $params['test'] = 1;\n            }\n\n            $url  .= http_build_query($params);\n            $jsdir = $dir === '.' ? '' : $dir . '\/';\n            $code .= <<<JAVASCRIPT\n\n  .then(function(){\n    return new Promise(function(bbn_resolve2, bbn_reject2){\n      let dir = \"$jsdir\";\n      let files = $files_json;\n      let url = \"$url\";\n      let rFiles = [];\n      for (let i = 0; i < files.length; i++) {\n        if ( bbnLoadFile(dir + files[i]) ){\n          rFiles.push(files[i]);\n        }\n      }\n      if ( !rFiles.length ){\n        bbn_resolve2();\n        return;\n      }\n      let css = document.createElement(\"link\");\n      css.rel = \"stylesheet\";\n      css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(\",\") + '&');\n      css.onload = function(){\n        bbn_resolve2();\n      };\n      css.onerror = function(){\n        bbn_reject2();\n      };\n      document.getElementsByTagName(\"head\")[0].appendChild(css);\n    })\n  })\nJAVASCRIPT;\n          }\n        }\n\n        \/\/$code .= \";\\nreturn promise;\\n})()\";\n        if (!$test) {\n          $code = $this->minify($code, 'js');\n        }\n      }\n    }\n\n    return $code;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 334,
+            "endLine": 528,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -311,13 +445,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "cssLinks",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "files",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -328,6 +467,9 @@
                     "name": "test",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -338,6 +480,9 @@
                     "name": "prepend_files",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -347,25 +492,50 @@
                     "name": "root",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a javascript string including css files.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$files",
+                        "description": "A list of files to be included"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$test",
+                        "description": "If true minification will not be applied"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a javascript string including css files.\n   *\n   * @param array   $files A list of files to be included\n   * @param boolean $test  If true minification will not be applied\n   * @return string\n   *\/"
         },
         "cssContent": {
             "name": "cssContent",
             "summary": "Returns a string with javascript including the given CSS content in the head of the document.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $css)\n  {\n    $css = str_replace('`', '\\\\``', str_replace('\\\\', '\\\\\\\\', $css));\n    \/\/$css = Str::escapeSquotes($css);\n    $code  = Str::genpwd(25, 20);\n    $head  = $code . '2';\n    $style = $code . '3';\n    return <<<JAVASCRIPT\n  let $code = `$css`;\n  let $head = document.head || document.getElementsByTagName('head')[0];\n  let $style = document.createElement('style');\n  $style.type = 'text\/css';\n  if ( $style.styleSheet ){\n    $style.styleSheet.cssText = $code;\n  }\n  else {\n    $style.appendChild(document.createTextNode($code));\n  }\n  return $head.appendChild($style);\nJAVASCRIPT;\n  }",
-            "startLine": 533,
-            "endLine": 553,
+            "code": "  public function cssContent(string $css): string\n  {\n    $css = str_replace('`', '\\\\``', str_replace('\\\\', '\\\\\\\\', $css));\n    \/\/$css = Str::escapeSquotes($css);\n    $code  = Str::genpwd(25, 20);\n    $head  = $code . '2';\n    $style = $code . '3';\n    return <<<JAVASCRIPT\n  let $code = `$css`;\n  let $head = document.head || document.getElementsByTagName('head')[0];\n  let $style = document.createElement('style');\n  $style.type = 'text\/css';\n  if ( $style.styleSheet ){\n    $style.styleSheet.cssText = $code;\n  }\n  else {\n    $style.appendChild(document.createTextNode($code));\n  }\n  return $head.appendChild($style);\nJAVASCRIPT;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 537,
+            "endLine": 557,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -374,35 +544,56 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "cssContent",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "css",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "A CSS string"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a string with javascript including the given CSS content in the head of the document.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$css",
+                        "description": "A CSS string"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a string with javascript including the given CSS content in the head of the document.\n   *\n   * @param string $css A CSS string\n   * @return string\n   *\/"
         },
         "compile": {
             "name": "compile",
             "summary": "Returns an array of compiled codes based on a list of files.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $files, bool $test = false)\n  {\n    \/** @var array $codes Will contain the raw content of each files *\/\n    $codes = [];\n    if (!empty($files)) {\n      \/\/ Mix of CSS and javascript: the JS adds the CSS to the head before executing\n      foreach ($files as $f) {\n        if ($c = $this->getContent($f, $test)) {\n          $e = Str::fileExt($f);\n          foreach (self::$types as $type => $exts) {\n            foreach ($exts as $ext) {\n              if ($ext === $e) {\n                $mode = $type;\n                break;\n              }\n            }\n          }\n\n          $codes[$mode ?? $e][] = [\n            'code' => $c,\n            'file' => X::basename($f),\n            'dir' => X::dirname($f)\n          ];\n        }\n        else {\n          \/\/die(\"I can't find the file $f !\");\n        }\n      }\n    }\n\n    return $codes;\n  }",
-            "startLine": 563,
-            "endLine": 594,
+            "code": "  public function compile(array $files, bool $test = false): array\n  {\n    \/** @var array $codes Will contain the raw content of each files *\/\n    $codes = [];\n    if (!empty($files)) {\n      \/\/ Mix of CSS and javascript: the JS adds the CSS to the head before executing\n      foreach ($files as $f) {\n        if ($c = $this->getContent($f, $test)) {\n          $e = Str::fileExt($f);\n          foreach (self::$types as $type => $exts) {\n            foreach ($exts as $ext) {\n              if ($ext === $e) {\n                $mode = $type;\n                break;\n              }\n            }\n          }\n\n          $codes[$mode ?? $e][] = [\n            'code' => $c,\n            'file' => X::basename($f),\n            'dir' => X::dirname($f)\n          ];\n        }\n        else {\n          \/\/die(\"I can't find the file $f !\");\n        }\n      }\n    }\n\n    return $codes;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 567,
+            "endLine": 598,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -411,15 +602,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "compile",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "files",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -430,26 +626,53 @@
                     "name": "test",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If true files will not be minified"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns an array of compiled codes based on a list of files.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$files",
+                        "description": "A list of files to add"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$test",
+                        "description": "If true files will not be minified"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array of compiled codes based on a list of files.\n   *\n   * @param array   $files A list of files to add\n   * @param boolean $test  If true files will not be minified\n   * @return array\n   *\/"
         },
         "groupCompile": {
             "name": "groupCompile",
             "summary": "Compiles together a group of files and returns the result as an array.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Cdn\\Compiler",
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Compiler.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $files, bool $test = false)\n  {\n    $codes = [];\n    if (!empty($files)) {\n      \/** @var array $codes Will contain the raw content of each files *\/\n      \/\/ Mix of CSS and javascript: the JS adds the CSS to the head before executing\n      if ($c = $this->getContent($files, $test)) {\n        $e = Str::fileExt($files[0]);\n        foreach (self::$types as $type => $exts) {\n          foreach ($exts as $ext) {\n            if ($ext === $e) {\n              $mode = $type;\n              break;\n            }\n          }\n        }\n\n        $codes[$mode ?? $e][] = [\n          'code' => $c,\n          'file' => X::basename(end($files)),\n          'dir' => X::dirname(end($files))\n        ];\n      }\n      else {\n        throw new \\Exception(\"Impossible to get content from $f\");\n      }\n    }\n\n    return $codes;\n  }",
-            "startLine": 604,
-            "endLine": 633,
+            "code": "  public function groupCompile(array $files, bool $test = false): array\n  {\n    $codes = [];\n    if (!empty($files)) {\n      \/** @var array $codes Will contain the raw content of each files *\/\n      \/\/ Mix of CSS and javascript: the JS adds the CSS to the head before executing\n      if ($c = $this->getContent($files, $test)) {\n        $e = Str::fileExt($files[0]);\n        foreach (self::$types as $type => $exts) {\n          foreach ($exts as $ext) {\n            if ($ext === $e) {\n              $mode = $type;\n              break;\n            }\n          }\n        }\n\n        $codes[$mode ?? $e][] = [\n          'code' => $c,\n          'file' => X::basename(end($files)),\n          'dir' => X::dirname(end($files))\n        ];\n      }\n      else {\n        throw new \\Exception(\"Impossible to get content from $f\");\n      }\n    }\n\n    return $codes;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 608,
+            "endLine": 637,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -458,15 +681,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "groupCompile",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "files",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -477,47 +705,64 @@
                     "name": "test",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If true files will not be minified"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Compiles together a group of files and returns the result as an array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$files",
+                        "description": "A list of files to add"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$test",
+                        "description": "If true files will not be minified"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Compiles together a group of files and returns the result as an array.\n   *\n   * @param array   $files A list of files to add\n   * @param boolean $test  If true files will not be minified\n   * @return array\n   *\/"
         },
         "test": {
             "name": "test",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -526,45 +771,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -573,24 +836,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -599,160 +857,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -760,63 +900,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -825,17 +1023,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -846,43 +1220,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -893,37 +1285,501 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
+        },
+        "_set_prefix": {
+            "name": "_set_prefix",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Compiler",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_prefix(){\n    if ( defined('BBN_SHARED_PATH') && (strpos(BBN_SHARED_PATH, '\/') === 0) ){\n      $this->prefix = substr(BBN_SHARED_PATH, 1);\n      $this->furl = '\/'.$this->prefix;\n    }\n    else{\n      $this->furl = BBN_URL;\n      $parsed = parse_url(BBN_SHARED_PATH);\n      if ( $parsed['path'] && ($parsed['path'] !== '\/') ){\n        $this->prefix = substr($parsed['path'], 1);\n        $this->furl .= $this->prefix;\n      }\n    }\n    $this->fpath = BBN_PUBLIC.$this->prefix;\n  }",
+            "parent": false,
+            "trait": "bbn\\Cdn\\Common",
+            "startLine": 37,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_set_prefix",
+            "returns": [],
+            "arguments": []
         }
     },
     "properties": {
-        "types": {
+        "_min_suffixes": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Compiler"
+            },
+            "declaring_trait": "bbn\\Cdn\\Compiler",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The suffixes used by minified packaged content\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                ".min",
+                "-min",
+                ".pack",
+                ".prod"
+            ]
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Compiler"
+            },
+            "declaring_trait": "bbn\\Cdn\\Compiler",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Compiler"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "fpath": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Compiler"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "furl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Compiler"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "types": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Compiler"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
+            "parent": false,
             "value": {
                 "js": [
                     "js",
@@ -973,6 +1829,18 @@
         }
     },
     "constants": null,
+    "uses": {
+        "bbn\\Models\\Cls\\Basic": "Basic",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "JShrink\\Minifier": "Minifier",
+        "CssMin": "CssMin",
+        "bbn\\Compilers\\Less": "Less"
+    },
+    "dummyComments": [
+        "\/**\n * PHP version 7\n *\n * @category CDN\n * @package  BBN\n * @author   Theomas Nabet <thomas.nabet@gmail.com>\n * @license  https:\/\/opensource.org\/licenses\/mit-license.php MIT\n * @version  \"GIT: <git_id>\"\n * @link     https:\/\/www.bbn.io\/bbn-php\n *\/",
+        "\/**\n * Compile files into single files, using javascript to call CSS when needed.\n *\n *\n * @category CDN\n * @package  BBN\n * @author   Theomas Nabet <thomas.nabet@gmail.com>\n * @license  https:\/\/opensource.org\/licenses\/mit-license.php MIT\n * @link     https:\/\/bbnio2.thomas.lan\/bbn-php\/doc\/class\/cdn\/compiler\n *\/"
+    ],
     "summary": "Compile files into single files, using javascript to call CSS when needed.",
     "description": "",
     "description_parts": []

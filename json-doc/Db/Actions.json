@@ -12,6 +12,8 @@
     },
     "name": "bbn\\Db\\Actions",
     "namespace": true,
+    "realName": "Actions",
+    "realNamespace": "bbn\\Db",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Db\/Actions.php",
@@ -23,7 +25,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": true,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": true,
@@ -43,11 +44,14 @@
             "summary": "Fetches the database and returns an array of a single row text-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows text-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getRows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of a single row num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getIrow(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getIrows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getByColumns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function getObj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function getObject(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getRow(): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 29,
             "endLine": 29,
             "isDeprecated": false,
@@ -58,23 +62,36 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRow",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an array of a single row text-indexed\n",
+                "params": [
+                    {
+                        "tag": "param"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an array of a single row text-indexed\n\t *\n\t * @params \n\t * @return false|array\n\t *\/"
         },
         "getRows": {
             "name": "getRows",
             "summary": "Fetches the database and returns an array of several arrays of rows text-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of a single row num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getIrow(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getIrows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getByColumns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function getObj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function getObject(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getRows(): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 36,
             "endLine": 36,
             "isDeprecated": false,
@@ -85,23 +102,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRows",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an array of several arrays of rows text-indexed\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an array of several arrays of rows text-indexed\n\t *\n\t * @return false|array\n\t *\/"
         },
         "getIrow": {
             "name": "getIrow",
             "summary": "Fetches the database and returns an array of a single row num-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getIrows(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getByColumns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function getObj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function getObject(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getIrow(): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 43,
             "endLine": 43,
             "isDeprecated": false,
@@ -112,23 +138,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getIrow",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an array of a single row num-indexed\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an array of a single row num-indexed\n\t *\n\t * @return false|array\n\t *\/"
         },
         "getIrows": {
             "name": "getIrows",
             "summary": "Fetches the database and returns an array of several arrays of rows num-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/\n\tpublic function getByColumns(): ?array;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function getObj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function getObject(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getIrows(): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 50,
             "endLine": 50,
             "isDeprecated": false,
@@ -139,23 +174,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getIrows",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an array of several arrays of rows num-indexed\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/"
         },
         "getByColumns": {
             "name": "getByColumns",
             "summary": "Fetches the database and returns an array of arrays, one per column, each having each column's values",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/\n\tpublic function getObj(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function getObject(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getByColumns(): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 57,
             "endLine": 57,
             "isDeprecated": false,
@@ -166,23 +210,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getByColumns",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an array of arrays, one per column, each having each column's values\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/"
         },
         "getObj": {
             "name": "getObj",
             "summary": "Fetches the database and returns an object of a single row, alias of get_object",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/\n\tpublic function getObject(): ?\\stdClass;\n\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getObj(): ?\\stdClass;",
+            "parent": false,
+            "trait": false,
             "startLine": 64,
             "endLine": 64,
             "isDeprecated": false,
@@ -193,23 +246,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getObj",
             "returns": [
                 null,
                 "stdClass"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an object of a single row, alias of get_object\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/"
         },
         "getObject": {
             "name": "getObject",
             "summary": "Fetches the database and returns an object of a single row",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/\n  }",
+            "code": "\tpublic function getObject(): ?\\stdClass;",
+            "parent": false,
+            "trait": false,
             "startLine": 71,
             "endLine": 71,
             "isDeprecated": false,
@@ -220,23 +282,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getObject",
             "returns": [
                 null,
                 "stdClass"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an object of a single row\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/"
         },
         "getObjects": {
             "name": "getObjects",
             "summary": "Fetches the database and returns an array of objects",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Actions",
+            "class": "bbn\\Db\\Actions",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Actions.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n  }",
+            "code": "\tpublic function getObjects(): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 78,
             "endLine": 78,
             "isDeprecated": false,
@@ -247,23 +318,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getObjects",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Fetches the database and returns an array of objects\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * @package db\n *\/",
+        "\/**\n * DB Interface\n *\n *\n * These methods have to be implemented on both database and query.\n * Most methods usable on query should be also usable directly through database, which will create the query apply its method.\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Database\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/",
+        "\/**\n\t * Fetches the database and returns an array of a single row text-indexed\n\t *\n\t * @params \n\t * @return false|array\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an array of several arrays of rows text-indexed\n\t *\n\t * @return false|array\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an array of a single row num-indexed\n\t *\n\t * @return false|array\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an array of several arrays of rows num-indexed\n\t *\n\t * @return false|array\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an array of arrays, one per column, each having each column's values\n\t *\n\t * @return false|array\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an object of a single row, alias of get_object\n\t *\n\t * @return null|\\stdClass\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an object of a single row\n\t *\n   * @return null|\\stdClass\n\t *\/",
+        "\/**\n\t * Fetches the database and returns an array of objects \n\t *\n\t * @return null|array\n\t *\/"
+    ],
     "summary": "DB Interface",
     "description": "These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method.<\/p>"
+            "content": "These methods have to be implemented on both database and query.\nMost methods usable on query should be also usable directly through database, which will create the query apply its method."
         }
     ]
 }

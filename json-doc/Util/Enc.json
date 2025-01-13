@@ -12,18 +12,19 @@
     },
     "name": "bbn\\Util\\Enc",
     "namespace": true,
+    "realName": "Enc",
+    "realNamespace": "bbn\\Util",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Util\/Enc.php",
     "startLine": 20,
     "endLine": 242,
-    "numMethods": 8,
-    "numProperties": 0,
+    "numMethods": 11,
+    "numProperties": 3,
     "numConstants": 0,
     "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -47,11 +48,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $s, string $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::encryptOpenssl($s, $key);\n  }",
+            "code": "  public static function crypt(string $s, string $key=''): ?string\n  {\n    $key = self::_get_key($key);\n    return self::encryptOpenssl($s, $key);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 34,
             "endLine": 38,
             "isDeprecated": false,
@@ -62,16 +66,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "crypt",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "s",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -81,23 +90,48 @@
                     "name": "key",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $s\n   * @param string $key\n   * @return string|null\n   *\/"
         },
         "decrypt": {
             "name": "decrypt",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $s, string $key = '')\n  {\n    $key = self::_get_key($key);\n    return self::decryptOpenssl($s, $key);\n  }",
+            "code": "  public static function decrypt(string $s, string $key=''): ?string\n  {\n    $key = self::_get_key($key);\n    return self::decryptOpenssl($s, $key);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 45,
             "endLine": 49,
             "isDeprecated": false,
@@ -108,16 +142,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "decrypt",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "s",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -127,23 +166,48 @@
                     "name": "key",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $s\n   * @param string $key\n   * @return string|null\n   *\/"
         },
         "crypt64": {
             "name": "crypt64",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $s, string $key = '')\n  {\n    return base64_encode(self::crypt($s, $key));\n  }",
+            "code": "  public static function crypt64(string $s, string $key=''): string\n  {\n    return base64_encode(self::crypt($s, $key));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 56,
             "endLine": 59,
             "isDeprecated": false,
@@ -154,15 +218,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "crypt64",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "s",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -172,23 +241,48 @@
                     "name": "key",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $s\n   * @param string $key\n   * @return string\n   *\/"
         },
         "decrypt64": {
             "name": "decrypt64",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $s, string $key = '')\n  {\n    return self::decrypt(base64_decode($s), $key);\n  }",
+            "code": "  public static function decrypt64(string $s, string $key=''): ?string\n  {\n    return self::decrypt(base64_decode($s), $key);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 66,
             "endLine": 69,
             "isDeprecated": false,
@@ -199,16 +293,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "decrypt64",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "s",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -218,23 +317,48 @@
                     "name": "key",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $s\n   * @param string $key\n   * @return string|null\n   *\/"
         },
         "encryptOpenssl": {
             "name": "encryptOpenssl",
             "summary": "Encrypt string using openSSL module",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $s, string $key = NULL, string $method = NULL, string $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try {\n        $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e) {\n        X::log(\"Impossible to decrypt\");\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "code": "  public static function encryptOpenssl(string $s,\n      string $key = null,\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      $res = null;\n      try {\n        $res = openssl_encrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e) {\n        X::log(\"Impossible to decrypt\");\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 80,
             "endLine": 102,
             "isDeprecated": false,
@@ -245,16 +369,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "encryptOpenssl",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "s",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -263,7 +392,13 @@
                 {
                     "name": "key",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -273,7 +408,13 @@
                 {
                     "name": "method",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -283,24 +424,61 @@
                     "name": "password",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": "",
                     "description": "User's optional password"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Encrypt string using openSSL module\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$key",
+                        "description": "Any random secure SALT string for your website"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$password",
+                        "description": "User's optional password"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Encrypt string using openSSL module\n   *\n   * @param string $s\n   * @param string|null $key Any random secure SALT string for your website\n   * @param string|null $method\n   * @param string $password User's optional password\n   * @return null|string\n   *\/"
         },
         "decryptOpenssl": {
             "name": "decryptOpenssl",
             "summary": "Decrypt string using openSSL module.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $s, string $key = NULL, string $method = NULL, string $password = '')\n  {\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e){\n        X::log($e->getMessage(), 'decryptOpenssl');\n      }\n\n      if (!empty($res)) {\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public static function decryptOpenssl(string $s,\n      string $key = null,\n      string $method = null,\n      string $password = ''\n  ): ?string {\n    if (!$key) {\n      $key = self::$salt;\n    }\n    if ($length = @openssl_cipher_iv_length($method ?: self::$method)) {\n      $iv = substr(md5(self::$prefix.$password), 0, $length);\n      try {\n        $res = openssl_decrypt($s, $method ?: self::$method, $key, true, $iv);\n      }\n      catch (\\Exception $e){\n        X::log($e->getMessage(), 'decryptOpenssl');\n      }\n\n      if (!empty($res)) {\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 113,
             "endLine": 136,
             "isDeprecated": false,
@@ -311,16 +489,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "decryptOpenssl",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "s",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -329,7 +512,13 @@
                 {
                     "name": "key",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -339,7 +528,13 @@
                 {
                     "name": "method",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -349,24 +544,61 @@
                     "name": "password",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": "",
                     "description": "User's optional password"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Decrypt string using openSSL module.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$s"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$key",
+                        "description": "Any random secure SALT string for your website"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$method"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$password",
+                        "description": "User's optional password"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Decrypt string using openSSL module.\n   *\n   * @param string $s\n   * @param string|null $key Any random secure SALT string for your website\n   * @param string|null $method\n   * @param string $password User's optional password\n   * @return null|string\n   *\/"
         },
         "generateCertFiles": {
             "name": "generateCertFiles",
             "summary": "Generates a private and a public SSL certificate files.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $algo = 'sha512', int $key_bits = 4096)\n  {\n    $res = false;\n    if (is_dir(X::dirname($path))\n        && !file_exists($path.'_rsa')\n        && in_array($algo, hash_algos(), true)\n        && ($key = self::generateCert($algo, $key_bits))\n    ) {\n      if (is_dir($path) && (substr($path, -1) !== '\/')) {\n        $path .= '\/';\n      }\n      $public = $path.'_rsa.pub';\n      $private = $path.'_rsa';\n      if (\\file_put_contents($public, $key['public'])\n          && \\file_put_contents($private, $key['private'])\n      ) {\n        $res = true;\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public static function generateCertFiles(string $path, string $algo = 'sha512', int $key_bits = 4096): bool\n  {\n    $res = false;\n    if (is_dir(X::dirname($path))\n        && !file_exists($path.'_rsa')\n        && in_array($algo, hash_algos(), true)\n        && ($key = self::generateCert($algo, $key_bits))\n    ) {\n      if (is_dir($path) && (substr($path, -1) !== '\/')) {\n        $path .= '\/';\n      }\n      $public = $path.'_rsa.pub';\n      $private = $path.'_rsa';\n      if (\\file_put_contents($public, $key['public'])\n          && \\file_put_contents($private, $key['private'])\n      ) {\n        $res = true;\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 147,
             "endLine": 168,
             "isDeprecated": false,
@@ -377,15 +609,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "generateCertFiles",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -395,6 +632,11 @@
                     "name": "algo",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "sha512",
@@ -404,24 +646,55 @@
                     "name": "key_bits",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 4096,
                     "default_name": "",
                     "description": "bits"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Generates a private and a public SSL certificate files.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$algo"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$key",
+                        "description": "bits"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a private and a public SSL certificate files.\n   *\n   * @param string $path\n   * @param string $algo\n   * @param int    $key_bits\n   *\n   * @return bool\n   *\/"
         },
         "generateCert": {
             "name": "generateCert",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Enc",
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $algo = 'sha512', int $key_bits = 4096)\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ) {\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
+            "code": "  public static function generateCert(string $algo = 'sha512', int $key_bits = 4096): ?array\n  {\n    $res = null;\n    $params = [\n      'digest_alg' => $algo,\n      'private_key_bits' => $key_bits,\n      'private_key_type' => OPENSSL_KEYTYPE_RSA\n    ];\n    $rsaKey = openssl_pkey_new($params);\n    \/\/openssl_pkey_export($rsaKey, $priv);\n    $umask = umask(0066);\n    $privKey = openssl_pkey_get_private($rsaKey);\n    $pubKey = openssl_pkey_get_details($rsaKey);\n    if (openssl_pkey_export($privKey, $priv)\n        && ($pub = $pubKey['key'])\n    ) {\n      $res = [\n        'private' => $priv,\n        'public' => $pub\n      ];\n    }\n    umask($umask);\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 175,
             "endLine": 198,
             "isDeprecated": false,
@@ -432,16 +705,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "generateCert",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "algo",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "sha512",
@@ -451,22 +729,254 @@
                     "name": "key_bits",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 4096,
                     "default_name": "",
                     "description": "bits"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$algo"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$key",
+                        "description": "bits"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $algo\n   * @param int $key_bits\n   * @return array|null\n   *\/"
+        },
+        "_get_key": {
+            "name": "_get_key",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _get_key(string $key = '')\n  {\n    if (empty($key)) {\n      $key = \\defined('BBN_ENCRYPTION_KEY') ? BBN_ENCRYPTION_KEY : self::$salt;\n    }\n\n    return hash('sha256', $key);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 204,
+            "endLine": 211,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_get_key",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "key",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $key\n   * @return false|string\n   *\/"
+        },
+        "_sshEncodePublicKey": {
+            "name": "_sshEncodePublicKey",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _sshEncodePublicKey($privKey)\n  {\n    $keyInfo = openssl_pkey_get_details($privKey);\n\n    $buffer  = pack(\"N\", 7) . \"ssh-rsa\" .\n      self::_sshEncodeBuffer($keyInfo['rsa']['e']) .\n      self::_sshEncodeBuffer($keyInfo['rsa']['n']);\n\n    return \"ssh-rsa \" . base64_encode($buffer);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 217,
+            "endLine": 226,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_sshEncodePublicKey",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "privKey",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$privKey"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $privKey\n   * @return string\n   *\/"
+        },
+        "_sshEncodeBuffer": {
+            "name": "_sshEncodeBuffer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\Enc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Enc.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "  private static function _sshEncodeBuffer($buffer)\n  {\n    $len = strlen($buffer);\n    if (ord($buffer[0]) & 0x80) {\n      $len++;\n      $buffer = \"\\x00\" . $buffer;\n    }\n\n    return pack(\"Na*\", $len, $buffer);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 232,
+            "endLine": 241,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_sshEncodeBuffer",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "buffer",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$buffer"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $buffer\n   * @return false|string\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "method": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Enc"
+            },
+            "declaring_trait": "bbn\\Util\\Enc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "AES-256-CFB"
+        },
+        "salt": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Enc"
+            },
+            "declaring_trait": "bbn\\Util\\Enc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "dsjfjsdvcb34YhXZLW"
+        },
+        "prefix": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Enc"
+            },
+            "declaring_trait": "bbn\\Util\\Enc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": "bbn-"
+        }
+    },
     "staticProperties": {
         "method": "AES-256-CFB",
         "salt": "dsjfjsdvcb34YhXZLW",
         "prefix": "bbn-"
     },
     "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * @package util\n *\/",
+        "\/**\n * Encryption Class\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Utilities\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
     "summary": "Encryption Class",
     "description": "",
     "description_parts": []

@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Api\\Scaleway\\Failover",
     "namespace": true,
+    "realName": "Failover",
+    "realNamespace": "bbn\\Api\\Scaleway",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/Scaleway\/Failover.php",
@@ -16,7 +18,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -36,11 +37,14 @@
             "summary": "Gets the list of available failover ips",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\Scaleway\\Failover",
+            "class": "bbn\\Api\\Scaleway\\Failover",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/Scaleway\/Failover.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return X::sortBy($this->_callCommand('failover\/ips'), 'ip', 'asc');\n  }",
+            "code": "  public function getAvailableFailoverIps(): array\n  {\n    return X::sortBy($this->_callCommand('failover\/ips'), 'ip', 'asc');\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 17,
             "endLine": 20,
             "isDeprecated": false,
@@ -51,16 +55,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getAvailableFailoverIps",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets the list of available failover ips\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the list of available failover ips\n   * @return array\n   *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * Scaleway Failover trait\n *\/",
+        "\/**\n   * Gets the list of available failover ips\n   * @return array\n   *\/"
+    ],
     "summary": "Scaleway Failover trait",
     "description": "",
     "description_parts": []

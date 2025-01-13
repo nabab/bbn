@@ -1,0 +1,403 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Ref",
+    "namespace": true,
+    "realName": "Ref",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Ref.php",
+    "startLine": 7,
+    "endLine": 187,
+    "numMethods": 5,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Ref",
+    "contentConstructor": null,
+    "methods": {
+        "fullOptionsRef": {
+            "name": "fullOptionsRef",
+            "summary": "Returns each individual full option plus the children of options having this as alias.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->fullOptionsRef('type', 'media', 'note', 'appui'));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Ref",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Ref.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullOptionsRef($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $all = $this->fullOptions($id) ?? [];\n      if ($aliases = $this->getAliases($id)) {\n        foreach ($aliases as $a) {\n          if ($tmp = $this->fullOptions($a[$this->fields['id']])) {\n            array_push($all, ...$tmp);\n          }\n        }\n      }\n\n      return $all;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 26,
+            "endLine": 42,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullOptionsRef",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns each individual full option plus the children of options having this as alias.\n\n```php\nX::dump($opt->fullOptionsRef('type', 'media', 'note', 'appui'));\n\/*\narray [\n  ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n  ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n  ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n  ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "A list of parent if option not found"
+            },
+            "comments": "  \/**\n   * Returns each individual full option plus the children of options having this as alias.\n   *\n   * ```php\n   * X::dump($opt->fullOptionsRef('type', 'media', 'note', 'appui'));\n   * \/*\n   * array [\n   *   ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n   *   ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n   *   ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n   *   ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/"
+        },
+        "optionsRef": {
+            "name": "optionsRef",
+            "summary": "Returns each individual option plus the children of options having this as alias.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->optionsRef(12));\n\/*\narray [\n  [21 => \"My option 21\"],\n  [22 => \"My option 22\"],\n  [25 => \"My option 25\"],\n  [27 => \"My option 27\"]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Ref",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Ref.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function optionsRef($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $all = $this->options($id) ?? [];\n      if ($aliases = $this->getAliases($id)) {\n        foreach ($aliases as $a) {\n          if ($tmp = $this->options($a[$this->fields['id']])) {\n            $all = array_merge($all, $tmp);\n          }\n        }\n      }\n\n      return $all;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 62,
+            "endLine": 78,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionsRef",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns each individual option plus the children of options having this as alias.\n\n```php\nX::dump($opt->optionsRef(12));\n\/*\narray [\n  [21 => \"My option 21\"],\n  [22 => \"My option 22\"],\n  [25 => \"My option 25\"],\n  [27 => \"My option 27\"]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "A list of parent if option not found"
+            },
+            "comments": "  \/**\n   * Returns each individual option plus the children of options having this as alias.\n   *\n   * ```php\n   * X::dump($opt->optionsRef(12));\n   * \/*\n   * array [\n   *   [21 => \"My option 21\"],\n   *   [22 => \"My option 22\"],\n   *   [25 => \"My option 25\"],\n   *   [27 => \"My option 27\"]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/"
+        },
+        "itemsRef": {
+            "name": "itemsRef",
+            "summary": "Returns each individual item plus the children of items having this as alias.",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->itemsRef(12));\n\/*\narray [\n  [21],\n  [22],\n  [25],\n  [26]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Ref",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Ref.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function itemsRef($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      $all = $this->items($id) ?? [];\n      if ($aliases = $this->getAliases($id)) {\n        foreach ($aliases as $a) {\n          if ($items = $this->items($a)) {\n            array_push($all, ...$items);\n          }\n        }\n      }\n\n      return $all;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 98,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "itemsRef",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns each individual item plus the children of items having this as alias.\n\n```php\nX::dump($opt->itemsRef(12));\n\/*\narray [\n  [21],\n  [22],\n  [25],\n  [26]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "A list of parent if option not found"
+            },
+            "comments": "  \/**\n   * Returns each individual item plus the children of items having this as alias.\n   *\n   * ```php\n   * X::dump($opt->itemsRef(12));\n   * \/*\n   * array [\n   *   [21],\n   *   [22],\n   *   [25],\n   *   [26]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/"
+        },
+        "textValueOptionsRef": {
+            "name": "textValueOptionsRef",
+            "summary": "Returns an option's children array of id and text in a user-defined indexed array",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->textValueOptions(12, 'title'));\n\/* value comes from the default argument\narray [\n  ['title' => \"My option 21\", 'value' =>  21],\n  ['title' => \"My option 22\", 'value' =>  22],\n  ['title' => \"My option 25\", 'value' =>  25],\n  ['title' => \"My option 27\", 'value' =>  27]\n]"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Ref",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Ref.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function textValueOptionsRef($id, string $text = 'text', string $value = 'value'): ?array\n  {\n    $res = [];\n    if ($opts = $this->fullOptionsRef($id)) {\n      $cfg = $this->getCfg($id) ?: [];\n      $i   = 0;\n      foreach ($opts as $k => $o) {\n        if (!isset($is_array)) {\n          $is_array = \\is_array($o);\n        }\n\n        $res[$i] = [\n          $text => $is_array ? $o[$this->fields['text']] : $o,\n          $value => $is_array ? $o[$this->fields['id']] : $k\n        ];\n        if (!empty($cfg['show_code'])) {\n          $res[$i][$this->fields['code']] = $o[$this->fields['code']];\n        }\n\n        $i++;\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 137,
+            "endLine": 161,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "textValueOptionsRef",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option's ID or its code if it is children of {@link default}"
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": "",
+                    "description": "The text field name for text column"
+                },
+                {
+                    "name": "value",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": "",
+                    "description": "The value field name for id column"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's children array of id and text in a user-defined indexed array\n\n```php\nX::dump($opt->textValueOptions(12, 'title'));\n\/* value comes from the default argument\narray [\n  ['title' => \"My option 21\", 'value' =>  21],\n  ['title' => \"My option 22\", 'value' =>  22],\n  ['title' => \"My option 25\", 'value' =>  25],\n  ['title' => \"My option 27\", 'value' =>  27]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The option's ID or its code if it is children of {@link default}"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The text field name for text column"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$value",
+                        "description": "The value field name for id column"
+                    }
+                ],
+                "return": "Options' list in a text\/value indexed array"
+            },
+            "comments": "  \/**\n   * Returns an option's children array of id and text in a user-defined indexed array\n   *\n   * ```php\n   * X::dump($opt->textValueOptions(12, 'title'));\n   * \/* value comes from the default argument\n   * array [\n   *   ['title' => \"My option 21\", 'value' =>  21],\n   *   ['title' => \"My option 22\", 'value' =>  22],\n   *   ['title' => \"My option 25\", 'value' =>  25],\n   *   ['title' => \"My option 27\", 'value' =>  27]\n   * ]\n   * ```\n   *\n   * @param int|string $id    The option's ID or its code if it is children of {@link default}\n   * @param string     $text  The text field name for text column\n   * @param string     $value The value field name for id column\n   * @return array Options' list in a text\/value indexed array\n   *\/"
+        },
+        "fullTreeRef": {
+            "name": "fullTreeRef",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Ref",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Ref.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullTreeRef($code = null): ?array\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))\n        && ($res = $this->option($id))\n    ) {\n      if ($opts = $this->fullOptionsRef($id)) {\n        $res['items'] = [];\n        foreach ($opts as $o){\n          if ($t = $this->fullTreeRef($o)) {\n            $res['items'][] = $t;\n          }\n        }\n      }\n\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 168,
+            "endLine": 186,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullTreeRef",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "",
+                "returns": {
+                    "tag": "returns",
+                    "type": "array|null"
+                }
+            },
+            "comments": "  \/**\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @returns array|null\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns each individual full option plus the children of options having this as alias.\n   *\n   * ```php\n   * X::dump($opt->fullOptionsRef('type', 'media', 'note', 'appui'));\n   * \/*\n   * array [\n   *   ['id' => 21, 'id_parent' => 12, 'title' => \"My option 21\", 'myProperty' =>  \"78%\"],\n   *   ['id' => 22, 'id_parent' => 12, 'title' => \"My option 22\", 'myProperty' =>  \"26%\"],\n   *   ['id' => 25, 'id_parent' => 12, 'title' => \"My option 25\", 'myProperty' =>  \"50%\"],\n   *   ['id' => 27, 'id_parent' => 12, 'title' => \"My option 27\", 'myProperty' =>  \"40%\"]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/",
+        "\/**\n   * Returns each individual option plus the children of options having this as alias.\n   *\n   * ```php\n   * X::dump($opt->optionsRef(12));\n   * \/*\n   * array [\n   *   [21 => \"My option 21\"],\n   *   [22 => \"My option 22\"],\n   *   [25 => \"My option 25\"],\n   *   [27 => \"My option 27\"]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/",
+        "\/**\n   * Returns each individual item plus the children of items having this as alias.\n   *\n   * ```php\n   * X::dump($opt->itemsRef(12));\n   * \/*\n   * array [\n   *   [21],\n   *   [22],\n   *   [25],\n   *   [26]\n   * ]\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return array|null A list of parent if option not found\n   *\/",
+        "\/**\n   * Returns an option's children array of id and text in a user-defined indexed array\n   *\n   * ```php\n   * X::dump($opt->textValueOptions(12, 'title'));\n   * \/* value comes from the default argument\n   * array [\n   *   ['title' => \"My option 21\", 'value' =>  21],\n   *   ['title' => \"My option 22\", 'value' =>  22],\n   *   ['title' => \"My option 25\", 'value' =>  25],\n   *   ['title' => \"My option 27\", 'value' =>  27]\n   * ]\n   * ```\n   *\n   * @param int|string $id    The option's ID or its code if it is children of {@link default}\n   * @param string     $text  The text field name for text column\n   * @param string     $value The value field name for id column\n   * @return array Options' list in a text\/value indexed array\n   *\/",
+        "\/**\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @returns array|null\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

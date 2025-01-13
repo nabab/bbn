@@ -1,0 +1,317 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Prop",
+    "namespace": true,
+    "realName": "Prop",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Prop.php",
+    "startLine": 8,
+    "endLine": 161,
+    "numMethods": 4,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Prop",
+    "contentConstructor": null,
+    "methods": {
+        "getProp": {
+            "name": "getProp",
+            "summary": "Get an option's single property",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->getProp(12, 'myProperty'));\n\/\/ (int) 78\nX::dump($opt->setProp(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 1\nX::dump($opt->getProp(12, 'myProperty'));\n\/\/ (string) \"78%\""
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Prop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Prop.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getProp($id, string $prop)\n  {\n    if (!empty($id) && !empty($prop) && ($o = $this->option($id)) && isset($o[$prop])) {\n      return $o[$prop];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 26,
+            "endLine": 33,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getProp",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option from which getting the property"
+                },
+                {
+                    "name": "prop",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The property's name"
+                }
+            ],
+            "doc": {
+                "description": "Get an option's single property\n\n```php\nX::dump($opt->getProp(12, 'myProperty'));\n\/\/ (int) 78\nX::dump($opt->setProp(12, ['myProperty' => \"78%\"]));\n\/\/ (int) 1\nX::dump($opt->getProp(12, 'myProperty'));\n\/\/ (string) \"78%\"\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|int",
+                        "name": "$id",
+                        "description": "The option from which getting the property"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$prop",
+                        "description": "The property's name"
+                    }
+                ],
+                "return": "The property's value, false if not found"
+            },
+            "comments": "  \/**\n   * Get an option's single property\n   *\n   * ```php\n   * X::dump($opt->getProp(12, 'myProperty'));\n   * \/\/ (int) 78\n   * X::dump($opt->setProp(12, ['myProperty' => \"78%\"]));\n   * \/\/ (int) 1\n   * X::dump($opt->getProp(12, 'myProperty'));\n   * \/\/ (string) \"78%\"\n   * ```\n   *\n   * @param string|int    $id   The option from which getting the property\n   * @param string $prop The property's name\n   * @return mixed|false The property's value, false if not found\n   *\/"
+        },
+        "text": {
+            "name": "text",
+            "summary": "Returns an option's text",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->text(12));\n\/\/ (string) BBN's own IDE\nX::dump($opt->text('bbn_ide'));\n\/\/ (string) BBN's own IDE"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Prop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Prop.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function text($code = null): ?string\n  {\n    if ($opt = $this->nativeOption(\\func_get_args())) {\n      return $opt[$this->fields['text']];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 48,
+            "endLine": 55,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "text",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's text\n\n```php\nX::dump($opt->text(12));\n\/\/ (string) BBN's own IDE\nX::dump($opt->text('bbn_ide'));\n\/\/ (string) BBN's own IDE\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": "Text of the option"
+            },
+            "comments": "  \/**\n   * Returns an option's text\n   *\n   * ```php\n   * X::dump($opt->text(12));\n   * \/\/ (string) BBN's own IDE\n   * X::dump($opt->text('bbn_ide'));\n   * \/\/ (string) BBN's own IDE\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return string|null Text of the option\n   *\/"
+        },
+        "rawText": {
+            "name": "rawText",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Prop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Prop.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function rawText($code = null): ?string\n  {\n    if (Str::isUid($id = $this->fromCode(\\func_get_args()))) {\n      if ($this->cacheHas($id, __FUNCTION__)) {\n        return $this->getCache($id, __FUNCTION__);\n      }\n\n      $text = $this->db->selectOne(\n        $this->class_cfg['table'],\n        $this->fields['text'],\n        [\n          $this->fields['id'] => $id\n        ]\n      );\n      $this->setCache($id, __FUNCTION__, $text);\n      return $text;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 77,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "rawText",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "order": {
+            "name": "order",
+            "summary": "Returns the order of an option. Updates it if a position is given, and cascades",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->items(20));\n\/\/ [21, 22, 25, 27]\nX::dump($opt->order(25));\n\/\/ (int) 3\nX::dump($opt->order(25, 2));\n\/\/ (int) 2\nX::dump($opt->items(20));\n\/\/ [21, 25, 22, 27]\nX::dump($opt->order(25));\n\/\/ (int) 2"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Prop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Prop.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function order($id, int $pos = null)\n  {\n    if ($this->check()\n        && ($parent = $this->getIdParent($id))\n        && $this->isSortable($parent)\n    ) {\n      $cf  = $this->class_cfg;\n      $old = $this->db->selectOne(\n        $cf['table'], $this->fields['num'], [\n        $this->fields['id'] => $id\n        ]\n      );\n      if ($pos && ($old != $pos)) {\n        $its      = $this->items($parent);\n        $past_new = false;\n        $past_old = false;\n        $p        = 1;\n        foreach ($its as $id_option){\n          $upd = false;\n          \/\/ Fixing order problem\n          if ($past_old && !$past_new) {\n            $upd = [$this->fields['num'] => $p - 1];\n          }\n          elseif (!$past_old && $past_new) {\n            $upd = [$this->fields['num'] => $p + 1];\n          }\n\n          if ($id === $id_option) {\n            $upd      = [$this->fields['num'] => $pos];\n            $past_old = 1;\n          }\n          elseif ($p === $pos) {\n            $upd      = [$this->fields['num'] => $p + ($pos > $old ? -1 : 1)];\n            $past_new = 1;\n          }\n\n          if ($upd) {\n            $this->db->update(\n              $cf['table'], $upd, [\n              $this->fields['id'] => $id_option\n              ]\n            );\n          }\n\n          if ($past_new && $past_old) {\n            break;\n          }\n\n          $p++;\n        }\n\n        $this->deleteCache($parent, true);\n        $this->deleteCache($id);\n        return $pos;\n      }\n\n      return $old;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 100,
+            "endLine": 160,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "order",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The ID of the option to update"
+                },
+                {
+                    "name": "pos",
+                    "position": 1,
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The new position"
+                }
+            ],
+            "doc": {
+                "description": "Returns the order of an option. Updates it if a position is given, and cascades\n\n```php\nX::dump($opt->items(20));\n\/\/ [21, 22, 25, 27]\nX::dump($opt->order(25));\n\/\/ (int) 3\nX::dump($opt->order(25, 2));\n\/\/ (int) 2\nX::dump($opt->items(20));\n\/\/ [21, 25, 22, 27]\nX::dump($opt->order(25));\n\/\/ (int) 2\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "The ID of the option to update"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int|null",
+                        "name": "$pos",
+                        "description": "The new position"
+                    }
+                ],
+                "return": "The new or existing order of the option or null if not found or not sortable"
+            },
+            "comments": "  \/**\n   * Returns the order of an option. Updates it if a position is given, and cascades\n   *\n   * ```php\n   * X::dump($opt->items(20));\n   * \/\/ [21, 22, 25, 27]\n   * X::dump($opt->order(25));\n   * \/\/ (int) 3\n   * X::dump($opt->order(25, 2));\n   * \/\/ (int) 2\n   * X::dump($opt->items(20));\n   * \/\/ [21, 25, 22, 27]\n   * X::dump($opt->order(25));\n   * \/\/ (int) 2\n   * ```\n   *\n   * @param int $id  The ID of the option to update\n   * @param int|null $pos The new position\n   * @return int|null The new or existing order of the option or null if not found or not sortable\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Get an option's single property\n   *\n   * ```php\n   * X::dump($opt->getProp(12, 'myProperty'));\n   * \/\/ (int) 78\n   * X::dump($opt->setProp(12, ['myProperty' => \"78%\"]));\n   * \/\/ (int) 1\n   * X::dump($opt->getProp(12, 'myProperty'));\n   * \/\/ (string) \"78%\"\n   * ```\n   *\n   * @param string|int    $id   The option from which getting the property\n   * @param string $prop The property's name\n   * @return mixed|false The property's value, false if not found\n   *\/",
+        "\/**\n   * Returns an option's text\n   *\n   * ```php\n   * X::dump($opt->text(12));\n   * \/\/ (string) BBN's own IDE\n   * X::dump($opt->text('bbn_ide'));\n   * \/\/ (string) BBN's own IDE\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return string|null Text of the option\n   *\/",
+        "\/**\n   * Returns the order of an option. Updates it if a position is given, and cascades\n   *\n   * ```php\n   * X::dump($opt->items(20));\n   * \/\/ [21, 22, 25, 27]\n   * X::dump($opt->order(25));\n   * \/\/ (int) 3\n   * X::dump($opt->order(25, 2));\n   * \/\/ (int) 2\n   * X::dump($opt->items(20));\n   * \/\/ [21, 25, 22, 27]\n   * X::dump($opt->order(25));\n   * \/\/ (int) 2\n   * ```\n   *\n   * @param int $id  The ID of the option to update\n   * @param int|null $pos The new position\n   * @return int|null The new or existing order of the option or null if not found or not sortable\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

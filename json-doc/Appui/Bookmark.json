@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Appui\\Bookmark",
     "namespace": true,
+    "realName": "Bookmark",
+    "realNamespace": "bbn\\Appui",
     "traits": [
         "bbn\\Models\\Tts\\Optional"
     ],
@@ -12,15 +14,12 @@
     "fileName": "\/Appui\/Bookmark.php",
     "startLine": 14,
     "endLine": 69,
-    "numMethods": 19,
-    "numProperties": 0,
+    "numMethods": 16,
+    "numProperties": 8,
     "numConstants": 0,
-    "numStaticProperties": 3,
+    "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -31,7 +30,6 @@
     "defaultProperties": {
         "optional_is_init": false,
         "option_root_id": null,
-        "option_appui_id": null,
         "opt": null,
         "user": null,
         "perm": null,
@@ -44,7 +42,6 @@
     "namespaceName": "bbn\\Appui",
     "shortName": "Bookmark",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Bookmark",
         "returns": []
     },
     "methods": {
@@ -53,11 +50,14 @@
             "summary": "dashboard constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Bookmark.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    $this->opt      = bbn\\Appui\\Option::getInstance();\n    $this->user     = bbn\\User::getInstance();\n    $this->perm     = bbn\\User\\Permissions::getInstance();\n    $this->pref     = bbn\\User\\Preferences::getInstance();\n    $this->db       = bbn\\Db::getInstance();\n    $this->cfgPref  = $this->pref->getClassCfg();\n    $this->archOpt  = $this->opt->getClassCfg()['arch']['options'];\n    $this->archPref = $this->cfgPref['arch']['user_options'];\n    $this->archBits = $this->cfgPref['arch']['user_options_bits'];\n    self::optionalInit();\n    $this->widgetFields       = \\array_merge($this->nativeWidgetFields, \\array_values($this->archBits));\n    $this->nativeWidgetFields = \\array_merge($this->nativeWidgetFields, \\array_values($this->archOpt));\n    $this->idList             = $this->getOptionId('list');\n    if (!Str::isUid($this->idList)) {\n      throw new \\Exception(_(\"Unable to load the option 'list'\"));\n    }\n\n    $this->idWidgets = $this->getOptionId('widgets');\n    if (!Str::isUid($this->idWidgets)) {\n      throw new \\Exception(_(\"Unable to load the option 'widgets'\"));\n    }\n\n    if (!empty($id)) {\n      $this->setCurrent($id);\n    }\n  }",
+            "code": "  public function __construct(string $id = '')\n  {\n    $this->opt      = bbn\\Appui\\Option::getInstance();\n    $this->user     = bbn\\User::getInstance();\n    $this->perm     = bbn\\User\\Permissions::getInstance();\n    $this->pref     = bbn\\User\\Preferences::getInstance();\n    $this->db       = bbn\\Db::getInstance();\n    $this->cfgPref  = $this->pref->getClassCfg();\n    $this->archOpt  = $this->opt->getClassCfg()['arch']['options'];\n    $this->archPref = $this->cfgPref['arch']['user_options'];\n    $this->archBits = $this->cfgPref['arch']['user_options_bits'];\n    self::optionalInit();\n    $this->widgetFields       = \\array_merge($this->nativeWidgetFields, \\array_values($this->archBits));\n    $this->nativeWidgetFields = \\array_merge($this->nativeWidgetFields, \\array_values($this->archOpt));\n    $this->idList             = $this->getOptionId('list');\n    if (!Str::isUid($this->idList)) {\n      throw new \\Exception(_(\"Unable to load the option 'list'\"));\n    }\n\n    $this->idWidgets = $this->getOptionId('widgets');\n    if (!Str::isUid($this->idWidgets)) {\n      throw new \\Exception(_(\"Unable to load the option 'widgets'\"));\n    }\n\n    if (!empty($id)) {\n      $this->setCurrent($id);\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 39,
             "endLine": 66,
             "isDeprecated": false,
@@ -68,32 +68,223 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "dashboard constructor.",
+                "tags": []
+            },
+            "comments": "  \/**\n   * dashboard constructor.\n   *\/"
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      $justDefined = false;\n      if (!\\defined(\"BBN_APPUI\")) {\n        $justDefined = true;\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = strtolower(end($tmp));\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        if (!$cls) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!\\defined(\"BBN_APPUI\")) {\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');\n          return;\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n            if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 85,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 120,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
-            "startLine": 150,
-            "endLine": 154,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 131,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -102,32 +293,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
             "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getAppuiRoot": {
-            "name": "getAppuiRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_appui_id;\n  }",
-            "startLine": 157,
-            "endLine": 161,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsObject": {
@@ -135,13 +302,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
-            "startLine": 164,
-            "endLine": 172,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 138,
+            "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -150,10 +320,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
             "returns": [
                 "bbn\\Appui\\Option"
             ],
-            "parent": false,
             "arguments": []
         },
         "getOptionId": {
@@ -161,13 +331,16 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 181,
-            "endLine": 184,
+            "code": "  public static function getOptionId()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -176,22 +349,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
             "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 193,
-            "endLine": 203,
+            "code": "  public static function getOptionsIds(): array\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 167,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -200,24 +388,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
         },
         "getOptionsTree": {
             "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 206,
-            "endLine": 209,
+            "code": "  public static function getOptionsTree()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -226,8 +427,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTreeRef": {
@@ -235,13 +436,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 212,
-            "endLine": 215,
+            "code": "  public static function getOptionsTreeRef()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 186,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -250,8 +454,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptions": {
@@ -259,13 +463,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 218,
-            "endLine": 221,
+            "code": "  public static function getOptions()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -274,8 +481,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsRef": {
@@ -283,13 +490,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  public static function getOptionsRef()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 198,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -298,8 +508,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOption": {
@@ -307,13 +517,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 230,
-            "endLine": 233,
+            "code": "  public static function getOption()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -322,8 +535,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValue": {
@@ -331,13 +544,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 236,
-            "endLine": 239,
+            "code": "  public static function getOptionsTextValue()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -346,8 +562,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValue",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValueRef": {
@@ -355,13 +571,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
-            "startLine": 242,
-            "endLine": 245,
+            "code": "  public static function getOptionsTextValueRef()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -370,175 +589,245 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValueRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
-        "getOptionId": {
-            "name": "getOptionId",
-            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 254,
-            "endLine": 257,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsIds": {
-            "name": "getOptionsIds",
+        "_treat_args": {
+            "name": "_treat_args",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
+            "class": "bbn\\Appui\\Bookmark",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 260,
-            "endLine": 272,
+            "code": "  protected static function _treat_args(array $args, $appui = false): array\n  {\n    $hasUid = Str::isUid(end($args));\n    if (count($args) && !$hasUid) {\n      self::optionalInit();\n      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {\n        $args[] = 'options';\n      }\n    }\n\n    if (!$hasUid) {\n      $args[] = self::$option_root_id;\n    }\n\n    return $args;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 223,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_treat_args",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTree": {
-            "name": "getOptionsTree",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 275,
-            "endLine": 278,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptions": {
-            "name": "getOptions",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 281,
-            "endLine": 284,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOption": {
-            "name": "getOption",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 287,
-            "endLine": 290,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValue": {
-            "name": "getOptionsTextValue",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Bookmark",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 293,
-            "endLine": 296,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "appui",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "opt": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Appui\\Bookmark",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var \\bbn\\Appui\\Option",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "user": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Appui\\Bookmark",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var \\bbn\\User",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "perm": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Appui\\Bookmark",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var \\bbn\\User\\Permissions",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "pref": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Appui\\Bookmark",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var \\bbn\\User\\Preferences",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Appui\\Bookmark",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var \\bbn\\Db",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Bookmark"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "option_root_id": null
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "Exception": "Exception"
+    },
+    "dummyComments": [
+        "\/**\n * @package appui\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

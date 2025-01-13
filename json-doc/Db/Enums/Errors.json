@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Db\\Enums\\Errors",
     "namespace": true,
+    "realName": "Errors",
+    "realNamespace": "bbn\\Db\\Enums",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Db\/Enums\/Errors.php",
@@ -16,7 +18,6 @@
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -33,7 +34,80 @@
     "methods": null,
     "properties": null,
     "staticProperties": [],
-    "constants": [],
+    "constants": {
+        "E_EXCEPTION": {
+            "name": "E_EXCEPTION",
+            "value": "exception",
+            "class": "bbn\\Db\\Enums\\Errors",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "The error configuration for continuing after an error occurred",
+                "tags": []
+            }
+        },
+        "E_CONTINUE": {
+            "name": "E_CONTINUE",
+            "value": "continue",
+            "class": "bbn\\Db\\Enums\\Errors",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "The error configuration for continuing after an error occurred",
+                "tags": []
+            }
+        },
+        "E_DIE": {
+            "name": "E_DIE",
+            "value": "die",
+            "class": "bbn\\Db\\Enums\\Errors",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "The error configuration for dying after an error occurred",
+                "tags": []
+            }
+        },
+        "E_STOP_ALL": {
+            "name": "E_STOP_ALL",
+            "value": "stop_all",
+            "class": "bbn\\Db\\Enums\\Errors",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "The error configuration for stopping all requests on all connections after an error occurred",
+                "tags": []
+            }
+        },
+        "E_STOP": {
+            "name": "E_STOP",
+            "value": "stop",
+            "class": "bbn\\Db\\Enums\\Errors",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "The error configuration for stopping requests on the current connection after an error occurred",
+                "tags": []
+            }
+        }
+    },
+    "uses": [],
+    "dummyComments": [],
     "summary": "",
     "description": "",
     "description_parts": []

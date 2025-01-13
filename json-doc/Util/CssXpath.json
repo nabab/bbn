@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Util\\CssXpath",
     "namespace": true,
+    "realName": "CssXpath",
+    "realNamespace": "bbn\\Util",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Util\/CssXpath.php",
     "startLine": 21,
     "endLine": 265,
-    "numMethods": 1,
-    "numProperties": 0,
+    "numMethods": 2,
+    "numProperties": 3,
     "numConstants": 0,
     "numStaticProperties": 3,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -40,11 +41,14 @@
             "summary": "css -> xpath",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\CssXpath",
+            "class": "bbn\\Util\\CssXpath",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/CssXpath.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($selector)\n  {\n    if (isset(self::$cache[$selector])) {\n        return self::$cache[$selector];\n    }\n\n      $xpath = ' ' . $selector;\n    if (self::$clearStrings) {\n        self::$strings = array();\n    }\n\n      \/*\n          The order in which items are replaced is IMPORTANT!\n      *\/\n      $regexs = array(\n          \/*\n              First handle attributes and :contains()\n              these may contain \",\" \" \", \" > \", and other \"special\" strings\n          *\/\n          array('\/([\\s]?)\\[(.*?)\\]\/', array(\\get_called_class(), 'callbackAttribs')),\n          \/\/ :contains(foo)  \/\/ a jquery thing\n          array('\/:contains\\((.*?)\\)\/', function ($matches) {\n              self::$strings[] = '[contains(text(), \"' . $matches[1] . '\")]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/([\\s]?):not\\((.*?)\\)\/', function ($matches) {\n              \/\/ this currently works for simple :not(.classname)\n              \/\/ unsure of other selectors\n              self::$clearStrings = false;\n              $xpathNot = self::cssToXpath($matches[2]);\n              self::$clearStrings = true;\n              $xpathNot = \\preg_replace('#^\/\/\\*\\[(.+)\\]#', '$1', $xpathNot);\n              self::$strings[] = ($matches[1] ? '*' : '') . '[not(' . $xpathNot . ')]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          \/\/ All blocks of 2 or more spaces\n          array('\/\\s{2,}\/', function () {\n              return ' ';\n          }),\n          \/\/ additional selectors (comma seperated)\n          array('\/\\s*,\\s*\/', function () {\n              return '|\/\/';\n          }),\n          \/\/ input pseudo selectors\n          array(\n              '\/:(text|password|checkbox|radio|reset|file|hidden|image|datetime|datetime-local|date|month|time|week|number|range|email|url|search|tel|color)\/',\n              function ($matches) {\n                  return '[@type=\"' . $matches[1] . '\"]';\n              }\n          ),\n          array('\/([\\s]?):button\/', function ($matches) {\n              \/\/ button or input[@type=\"button\"]\n              self::$strings[] = ($matches[1] ? '*' : '') . '[self::button or @type=\"button\"]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/([\\s]?):input\/', function ($matches) {\n              self::$strings[] = ($matches[1] ? '*' : '') . '[self::input or self::select or self::textarea or self::button]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/([\\s]?):submit\/', function ($matches) {\n              \/\/ input[type=\"submit\"]   button[@type=\"submit\"]  button[not(@type)]\n              self::$strings[] = ($matches[1] ? '*' : '') . '[@type=\"submit\" or (self::button and not(@type))]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/:header\/', function () {\n              self::$strings[] = '*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/:(autofocus|checked|disabled|required|selected)\/', function ($matches) {\n              return '[@' . $matches[1] . ']';\n          }),\n          array('\/:autocomplete\/', function () {\n              return '[@autocomplete=\"on\"]';\n          }),\n          \/\/ :nth-child(n)\n          array('\/(\\S*):nth-child\\((\\d+)\\)\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[' . $matches[2] . ']';\n          }),\n          \/\/ :nth-last-child(n)\n          array('\/(\\S*):nth-last-child\\((\\d+)\\)\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[position()=(last()-(' . $matches[2] . '-1))]';\n          }),\n          \/\/ :last-child\n          array('\/(\\S*):last-child\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[last()]';\n          }),\n          \/\/ :first-child\n          array('\/(\\S*):first-child\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[1]';\n          }),\n          \/\/ Adjacent \"sibling\" selectors\n          array('\/\\s*\\+\\s*([^\\s]+)\/', function ($matches) {\n              return '\/following-sibling::' . $matches[1] . '[1]';\n          }),\n          \/\/ General \"sibling\" selectors\n          array('\/\\s*~\\s*([^\\s]+)\/', function ($matches) {\n              return '\/following-sibling::' . $matches[1];\n          }),\n          \/\/ \"child\" selectors\n          array('\/\\s*>\\s*\/', function () {\n              return '\/';\n          }),\n          \/\/ Remaining Spaces\n          array('\/\\s\/', function () {\n              return '\/\/';\n          }),\n          \/\/ #id\n          array('\/([a-z0-9\\]]?)#([a-z][-a-z0-9_]+)\/i', function ($matches) {\n              return $matches[1]\n                  . ($matches[1] ? '' : '*')\n                  . '[@id=\"' . $matches[2] . '\"]';\n          }),\n          \/\/ .className\n          \/\/ tricky.  without limiting the replacement, the first group will be empty for the 2nd class\n          \/\/ test case:\n          \/\/    foo.classa.classb\n          array('\/([a-z0-9\\]]?)\\.(-?[_a-z]+[_a-z0-9-]*)\/i', function ($matches) {\n              return $matches[1]\n                  . ($matches[1] ? '' : '*')\n                  . '[contains(concat(\" \", normalize-space(@class), \" \"), \" ' . $matches[2] . ' \")]';\n          }, 1),\n          array('\/:scope\/', function () {\n              return '\/\/';\n          }),\n          \/\/ The Relational Pseudo-class: :has()\n          \/\/ https:\/\/www.w3.org\/TR\/selectors-4\/#has-pseudo\n          \/\/ E! : https:\/\/www.w3.org\/TR\/selectors4\/\n          array('\/^.+!.+$\/', function ($matches) {\n              $subSelectors = \\explode(',', $matches[0]);\n            foreach ($subSelectors as $i => $subSelector) {\n                $parts = \\explode('!', $subSelector);\n                $subSelector = \\array_shift($parts);\n              if (\\preg_match_all('\/((?:[^\\\/]*\\\/?\\\/?)|$)\/', $parts[0], $matches)) {\n                  $results = $matches[0];\n                  $results[] = \\str_repeat('\/..', \\count($results) - 2);\n                  $subSelector .= \\implode('', $results);\n              }\n\n                $subSelectors[$i] = $subSelector;\n            }\n\n              return \\implode(',', $subSelectors);\n          }),\n          \/\/ Restore strings\n          array('\/\\[\\{(\\d+)\\}\\]\/', function ($matches) {\n              return self::$strings[$matches[1]];\n          }),\n      );\n      foreach ($regexs as $regCallback) {\n          $limit = isset($regCallback[2]) ? $regCallback[2] : -1;\n        if ($limit < 0) {\n            $xpath = \\preg_replace_callback($regCallback[0], $regCallback[1], $xpath);\n            continue;\n        }\n\n          $count = 0;\n        do {\n            $xpath = \\preg_replace_callback($regCallback[0], $regCallback[1], $xpath, $limit, $count);\n        } while ($count > 0);\n      }\n\n      $xpath                  = \\preg_match('\/^\\\/\\\/\/', $xpath) ? $xpath : '\/\/' . $xpath;\n      $xpath                  = \\preg_replace('#\/{4}#', '', $xpath);\n      self::$cache[$selector] = $xpath;\n      return $xpath;\n  }",
+            "code": "  public static function convert($selector)\n  {\n    if (isset(self::$cache[$selector])) {\n        return self::$cache[$selector];\n    }\n\n      $xpath = ' ' . $selector;\n    if (self::$clearStrings) {\n        self::$strings = array();\n    }\n\n      \/*\n          The order in which items are replaced is IMPORTANT!\n      *\/\n      $regexs = array(\n          \/*\n              First handle attributes and :contains()\n              these may contain \",\" \" \", \" > \", and other \"special\" strings\n          *\/\n          array('\/([\\s]?)\\[(.*?)\\]\/', array(\\get_called_class(), 'callbackAttribs')),\n          \/\/ :contains(foo)  \/\/ a jquery thing\n          array('\/:contains\\((.*?)\\)\/', function ($matches) {\n              self::$strings[] = '[contains(text(), \"' . $matches[1] . '\")]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/([\\s]?):not\\((.*?)\\)\/', function ($matches) {\n              \/\/ this currently works for simple :not(.classname)\n              \/\/ unsure of other selectors\n              self::$clearStrings = false;\n              $xpathNot = self::cssToXpath($matches[2]);\n              self::$clearStrings = true;\n              $xpathNot = \\preg_replace('#^\/\/\\*\\[(.+)\\]#', '$1', $xpathNot);\n              self::$strings[] = ($matches[1] ? '*' : '') . '[not(' . $xpathNot . ')]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          \/\/ All blocks of 2 or more spaces\n          array('\/\\s{2,}\/', function () {\n              return ' ';\n          }),\n          \/\/ additional selectors (comma seperated)\n          array('\/\\s*,\\s*\/', function () {\n              return '|\/\/';\n          }),\n          \/\/ input pseudo selectors\n          array(\n              '\/:(text|password|checkbox|radio|reset|file|hidden|image|datetime|datetime-local|date|month|time|week|number|range|email|url|search|tel|color)\/',\n              function ($matches) {\n                  return '[@type=\"' . $matches[1] . '\"]';\n              }\n          ),\n          array('\/([\\s]?):button\/', function ($matches) {\n              \/\/ button or input[@type=\"button\"]\n              self::$strings[] = ($matches[1] ? '*' : '') . '[self::button or @type=\"button\"]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/([\\s]?):input\/', function ($matches) {\n              self::$strings[] = ($matches[1] ? '*' : '') . '[self::input or self::select or self::textarea or self::button]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/([\\s]?):submit\/', function ($matches) {\n              \/\/ input[type=\"submit\"]   button[@type=\"submit\"]  button[not(@type)]\n              self::$strings[] = ($matches[1] ? '*' : '') . '[@type=\"submit\" or (self::button and not(@type))]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/:header\/', function () {\n              self::$strings[] = '*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6]';\n              return '[{' . (\\count(self::$strings) - 1) . '}]';\n          }),\n          array('\/:(autofocus|checked|disabled|required|selected)\/', function ($matches) {\n              return '[@' . $matches[1] . ']';\n          }),\n          array('\/:autocomplete\/', function () {\n              return '[@autocomplete=\"on\"]';\n          }),\n          \/\/ :nth-child(n)\n          array('\/(\\S*):nth-child\\((\\d+)\\)\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[' . $matches[2] . ']';\n          }),\n          \/\/ :nth-last-child(n)\n          array('\/(\\S*):nth-last-child\\((\\d+)\\)\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[position()=(last()-(' . $matches[2] . '-1))]';\n          }),\n          \/\/ :last-child\n          array('\/(\\S*):last-child\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[last()]';\n          }),\n          \/\/ :first-child\n          array('\/(\\S*):first-child\/', function ($matches) {\n              return ($matches[1] ? $matches[1] : '*')\n                  . '[1]';\n          }),\n          \/\/ Adjacent \"sibling\" selectors\n          array('\/\\s*\\+\\s*([^\\s]+)\/', function ($matches) {\n              return '\/following-sibling::' . $matches[1] . '[1]';\n          }),\n          \/\/ General \"sibling\" selectors\n          array('\/\\s*~\\s*([^\\s]+)\/', function ($matches) {\n              return '\/following-sibling::' . $matches[1];\n          }),\n          \/\/ \"child\" selectors\n          array('\/\\s*>\\s*\/', function () {\n              return '\/';\n          }),\n          \/\/ Remaining Spaces\n          array('\/\\s\/', function () {\n              return '\/\/';\n          }),\n          \/\/ #id\n          array('\/([a-z0-9\\]]?)#([a-z][-a-z0-9_]+)\/i', function ($matches) {\n              return $matches[1]\n                  . ($matches[1] ? '' : '*')\n                  . '[@id=\"' . $matches[2] . '\"]';\n          }),\n          \/\/ .className\n          \/\/ tricky.  without limiting the replacement, the first group will be empty for the 2nd class\n          \/\/ test case:\n          \/\/    foo.classa.classb\n          array('\/([a-z0-9\\]]?)\\.(-?[_a-z]+[_a-z0-9-]*)\/i', function ($matches) {\n              return $matches[1]\n                  . ($matches[1] ? '' : '*')\n                  . '[contains(concat(\" \", normalize-space(@class), \" \"), \" ' . $matches[2] . ' \")]';\n          }, 1),\n          array('\/:scope\/', function () {\n              return '\/\/';\n          }),\n          \/\/ The Relational Pseudo-class: :has()\n          \/\/ https:\/\/www.w3.org\/TR\/selectors-4\/#has-pseudo\n          \/\/ E! : https:\/\/www.w3.org\/TR\/selectors4\/\n          array('\/^.+!.+$\/', function ($matches) {\n              $subSelectors = \\explode(',', $matches[0]);\n            foreach ($subSelectors as $i => $subSelector) {\n                $parts = \\explode('!', $subSelector);\n                $subSelector = \\array_shift($parts);\n              if (\\preg_match_all('\/((?:[^\\\/]*\\\/?\\\/?)|$)\/', $parts[0], $matches)) {\n                  $results = $matches[0];\n                  $results[] = \\str_repeat('\/..', \\count($results) - 2);\n                  $subSelector .= \\implode('', $results);\n              }\n\n                $subSelectors[$i] = $subSelector;\n            }\n\n              return \\implode(',', $subSelectors);\n          }),\n          \/\/ Restore strings\n          array('\/\\[\\{(\\d+)\\}\\]\/', function ($matches) {\n              return self::$strings[$matches[1]];\n          }),\n      );\n      foreach ($regexs as $regCallback) {\n          $limit = isset($regCallback[2]) ? $regCallback[2] : -1;\n        if ($limit < 0) {\n            $xpath = \\preg_replace_callback($regCallback[0], $regCallback[1], $xpath);\n            continue;\n        }\n\n          $count = 0;\n        do {\n            $xpath = \\preg_replace_callback($regCallback[0], $regCallback[1], $xpath, $limit, $count);\n        } while ($count > 0);\n      }\n\n      $xpath                  = \\preg_match('\/^\\\/\\\/\/', $xpath) ? $xpath : '\/\/' . $xpath;\n      $xpath                  = \\preg_replace('#\/{4}#', '', $xpath);\n      self::$cache[$selector] = $xpath;\n      return $xpath;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 39,
             "endLine": 208,
             "isDeprecated": false,
@@ -55,29 +59,153 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "convert",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "selector",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "css selector"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "css -> xpath\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$selector",
+                        "description": "css selector"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n     * css -> xpath\n     *\n     * @param string $selector css selector\n     *\n     * @return string\n     *\/"
+        },
+        "callbackAttribs": {
+            "name": "callbackAttribs",
+            "summary": "Handle attributes reges",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\CssXpath",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/CssXpath.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function callbackAttribs($matches)\n  {\n      \/\/ Attribute selectors\n      $return       = '[@' . $matches[2] . ']';\n      $matchesInner = array();\n    if (\\preg_match('\/^(.*?)(=|~=|\\|=|\\^=|\\$=|\\*=|!=)[\\'\"]?(.*?)[\\'\"]?$\/', $matches[2], $matchesInner)) {\n        $name       = $matchesInner[1];\n        $comparison = $matchesInner[2];\n        $value      = $matchesInner[3];\n      switch ($comparison) {\n        case '=':\n          $return = '[@' . $name . '=\"' . $value . '\"]';\n          break;\n        case '~=':\n            \/\/ whitespace separated\n            $return = '[contains(concat(\" \", @' . $name . ', \" \"), \" ' . $value . ' \")]';\n          break;\n        case '|=':\n            \/\/ equals or begins with, followed by -\n            $return = '[starts-with(concat(@' . $name . ', \"-\"), \"' . $value . '-\")]';\n          break;\n        case '^=':\n            \/\/ begins with\n            $return = '[starts-with(@' . $name . ', \"' . $value . '\")]';\n          break;\n        case '$=':\n            \/\/ ends with\n            \/\/ $return = '[substring(@'.$name.',string-length(@'.$name.')-'.(strlen($value)-1).')=\"'.$value.'\"]';\n            $return = '[ends-with(@' . $name . ', \"' . $value . '\")]';\n          break;\n        case '*=':\n            \/\/ contains\n            $return = '[contains(@' . $name . ', \"' . $value . '\")]';\n          break;\n        case '!=':\n            \/\/ negate  (jquery)\n            \/\/ equivalent to :not([attr='value']).\n            $return = '[@' . $name . '!=\"' . $value . '\"]';\n          break;\n      }\n    }\n\n      self::$strings[] = ($matches[1] ? '*' : '') . $return;\n      return ($matches[1] ? ' ' : '') . '[{' . (\\count(self::$strings) - 1) . '}]';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 218,
+            "endLine": 262,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "callbackAttribs",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "matches",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "preg_match maches"
+                }
+            ],
+            "doc": {
+                "description": "Handle attributes reges\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$matches",
+                        "description": "preg_match maches"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Handle attributes reges\n   *\n   * @param array $matches preg_match maches\n   *\n   * @return string\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "cache": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\CssXpath"
+            },
+            "declaring_trait": "bbn\\Util\\CssXpath",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "strings": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\CssXpath"
+            },
+            "declaring_trait": "bbn\\Util\\CssXpath",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string[] attribute && :contains() substitutions",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "clearStrings": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\CssXpath"
+            },
+            "declaring_trait": "bbn\\Util\\CssXpath",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": true
+        }
+    },
     "staticProperties": {
         "cache": [],
         "strings": [],
         "clearStrings": true
     },
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * This file is part of CssXpath\n *\n * @package   CssXPath\n * @author    Brad Kent <bkfake-github@yahoo.com>\n * @license   http:\/\/opensource.org\/licenses\/MIT MIT\n * @copyright 2018 Brad Kent\n * @version   1.0\n *\n * @link http:\/\/www.github.com\/bkdotcom\/CssXpath\n *\/",
+        "\/**\n * Convert CSS selector to xpath selector\n *\n *\/"
+    ],
     "summary": "Convert CSS selector to xpath selector",
     "description": "",
     "description_parts": []

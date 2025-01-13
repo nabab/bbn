@@ -11,22 +11,21 @@
     },
     "name": "bbn\\Shop",
     "namespace": true,
+    "realName": "Shop",
+    "realNamespace": "bbn",
     "traits": [
-        "bbn\\Models\\Tts\\Dbconfig"
+        "bbn\\Models\\Tts\\DbConfig"
     ],
     "interfaces": [],
     "fileName": "\/Shop.php",
-    "startLine": 68,
-    "endLine": 407,
-    "numMethods": 27,
-    "numProperties": 0,
+    "startLine": 70,
+    "endLine": 581,
+    "numMethods": 21,
+    "numProperties": 24,
     "numConstants": 0,
     "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Dbconfig"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -44,12 +43,17 @@
         "opt": null,
         "lang": null,
         "type_note": null,
+        "cart": null,
+        "client": null,
+        "providers": null,
         "db": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
-        "_is_init_class_cfg": false,
+        "_isInitClassCfg": false,
         "fields": null,
         "class_cfg": null,
         "class_table": null,
@@ -60,7 +64,6 @@
     "namespaceName": "bbn",
     "shortName": "Shop",
     "contentConstructor": {
-        "file": "bbn\\Shop",
         "returns": []
     },
     "methods": {
@@ -71,35 +74,28 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Generates a configuration based on the given request and instantiate\na compiler for the response.\nIf <em>$db<\/em> is not not given the current instance if any will be used.<\/p>"
+                    "content": "Generates a configuration based on the given request and instantiate\na compiler for the response.\nIf *$db* is not not given the current instance if any will be used."
                 }
             ],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->opt       = Option::getInstance();\n    $this->note      = new Note($this->db);\n    $this->cms       = new Cms($this->db, $this->note);\n    $this->medias    = new Medias($this->db);\n    $this->product   = new Product($this->db, $cfg);\n    $this->sales     = new Sales($this->db);\n    $this->cart     = new Cart($this->db);\n    $this->client     = new Client($this->db);\n\n    $this->providers = new Provider($this->db, $cfg['providers'] ?? []);\n    \/\/$this->medias->setImageRoot('\/image\/');\n  }",
-            "startLine": 126,
-            "endLine": 142,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [],
+            "code": "  public function __construct(Db $db, array $cfg = [])\n  {\n    \/\/ The database connection\n    $this->db = $db;\n    \/\/ Setting up the class configuration\n    $this->opt       = Option::getInstance();\n    $this->note      = new Note($this->db);\n    $this->cms       = new Cms($this->db, $this->note);\n    $this->medias    = new Medias($this->db);\n    $this->product   = new Product($this->db, $cfg);\n    $this->sales     = new Sales($this->db);\n    $this->cart     = new Cart($this->db);\n    $this->client     = new Client($this->db);\n\n    $this->providers = new Provider($this->db, $cfg['providers'] ?? []);\n    \/\/$this->medias->setImageRoot('\/image\/');\n  }",
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Db",
+                "class": "bbn\\Models\\Cls\\Db",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Db.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\Db $db)\n  {\n    $this->db = $db;\n  }",
+                "code": "  public function __construct(dbClass $db)\n  {\n    $this->db = $db;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 37,
                 "endLine": 40,
                 "isDeprecated": false,
@@ -110,26 +106,62 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "__construct",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "db",
                         "position": 0,
                         "type": "bbn\\Db",
+                        "type_arr": [
+                            "bbn\\Db"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": "",
                         "description": "A database connection"
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "Constructor.\n",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "dbClass",
+                            "name": "$db",
+                            "description": "A database connection"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Constructor.\n   *\n   * @param dbClass $db A database connection\n   *\/"
             },
+            "trait": false,
+            "startLine": 143,
+            "endLine": 159,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
+            "returns": [],
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -140,26 +172,53 @@
                     "name": "cfg",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": "",
                     "description": "The DB connection with the libraries tables"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n\nGenerates a configuration based on the given request and instantiate\na compiler for the response.\nIf *$db* is not not given the current instance if any will be used.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$request",
+                        "description": "The original request sent to the server"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "db|null",
+                        "name": "$db",
+                        "description": "The DB connection with the libraries tables"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\n   * Generates a configuration based on the given request and instantiate\n   * a compiler for the response.\n   * If *$db* is not not given the current instance if any will be used.\n   *\n   * @param string  $request The original request sent to the server\n   * @param db|null $db      The DB connection with the libraries tables\n   *\/"
         },
         "getProductTypeNote": {
             "name": "getProductTypeNote",
             "summary": "Returns the product type used in the notes.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->product->getTypeNote();\n  }",
-            "startLine": 150,
-            "endLine": 153,
+            "code": "  public function getProductTypeNote(): string\n  {\n    return $this->product->getTypeNote();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 167,
+            "endLine": 170,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -168,24 +227,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProductTypeNote",
             "returns": [
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the product type used in the notes.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the product type used in the notes.\n   *\n   * @return string\n   *\/"
         },
         "getProvidersList": {
             "name": "getProvidersList",
             "summary": "Returns the list of the providers in an array",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $params = [])\n  {\n    $cfg  = $this->providers->getClassCfg();\n    $grid = new \\bbn\\Appui\\Grid($this->db, $params, [\n      'tables' => $cfg['table'],\n      'fields' => $cfg['arch']['providers'],\n      'limit' => 100\n    ]);\n\n    if ($grid->check()) {\n      $res = $grid->getDatatable();\n      foreach ($res['data'] as &$d) {\n        $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];\n      }\n\n      unset($d);\n      return $res;\n    }\n  }",
-            "startLine": 162,
-            "endLine": 180,
+            "code": "  public function getProvidersList(array $params = []): array\n  {\n    $cfg  = $this->providers->getClassCfg();\n    $fields = array_merge($cfg['arch']['providers'], ['emails' => \"GROUP_CONCAT(`email`)\"]);\n    $grid = new \\bbn\\Appui\\Grid($this->db, $params, [\n      'tables' => $cfg['table'],\n      'fields' => $fields,\n      'join' => [[\n        'table' => 'bbn_shop_providers_emails',\n        'type' => 'left',\n        'on' => [\n          'conditions' => [[\n            'field' => $cfg['arch']['emails']['id_provider'],\n            'exp' => $cfg['arch']['providers']['id']\n          ]]\n        ]\n      ]],\n      'group_by' =>  $cfg['arch']['providers']['id'],\n      'limit' => 100\n    ]);\n    if ($grid->check()) {\n      $res = $grid->getDatatable();\n      foreach ($res['data'] as &$d) {\n        $d['cfg'] = $d['cfg'] ? json_decode($d['cfg'], true) : [];\n      }\n\n      unset($d);\n      return $res;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 179,
+            "endLine": 208,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -194,34 +262,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProvidersList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "params",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the list of the providers in an array\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the list of the providers in an array\n   *\n   * @param array $params\n   * @return array\n   *\/"
         },
         "getTransactionsList": {
             "name": "getTransactionsList",
             "summary": "Returns the list of the providers in an array",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $params = [])\n  {\n    $cfg  = $this->sales->getClassCfg();\n    $transFields = $cfg['arch']['transactions'];\n    $grid = new \\bbn\\Appui\\Grid($this->db, $params, [\n      'tables' => $cfg['table'],\n      'fields' => \\array_values($transFields)\n    ]);\n    if ($grid->check()) {\n      $res = $grid->getDatatable();\n      foreach ($res['data'] as &$d) {\n        $d['shipping_address'] = $this->sales->getShippingAddress($d[$transFields['id']]);\n        $d['billing_address'] = $d['shipping_address'];\n        if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {\n          $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);\n        }\n        if ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']])) {\n          foreach ($d['products'] as $i => $p) {\n            $prod = $this->product->get($p['id_product']);\n            $d['products'][$i]['product'] = $prod;\n            $d['products'][$i]['product']['provider'] = '';\n            if (!empty($prod)) {\n              $provider = $this->providers->get($prod['id_provider']);\n              $d['products'][$i]['product']['provider'] = !empty($provider) ? $provider['name'] : '';\n            }\n          }\n        }\n        $d['client'] = $this->client->get($d[$transFields['id_client']]);\n      }\n      unset($d);\n      return $res;\n    }\n  }",
-            "startLine": 187,
-            "endLine": 219,
+            "code": "  public function getTransactionsList(array $params = []): array\n  {\n    if (!empty($params['excel'])) {\n      unset($params['fields']);\n      if (\n        !empty($params['filters'])\n        && !empty($params['filters']['logic'])\n        && empty($params['filters']['conditions'])\n      ) {\n        unset($params['filters']);\n      }\n    }\n    $cfg  = $this->sales->getClassCfg();\n    $transFields = $cfg['arch']['transactions'];\n    $grid = new \\bbn\\Appui\\Grid($this->db, $params, [\n      'tables' => $cfg['table'],\n      'fields' => \\array_values($transFields)\n    ]);\n    if ($grid->check()) {\n      $res = $grid->getDatatable();\n      foreach ($res['data'] as &$d) {\n        $d['shipping_address'] = $this->sales->getShippingAddress($d[$transFields['id']]);\n        $d['billing_address'] = $d['shipping_address'];\n        if ($d[$transFields['id_billing_address']] !==  $d[$transFields['id_shipping_address']]) {\n          $d['billing_address'] = $this->sales->getBillingAddress($d[$transFields['id']]);\n        }\n        if (\n          empty($params['excel'])\n          && ($d['products'] = $this->cart->getProducts($d[$transFields['id_cart']]))\n        ) {\n          foreach ($d['products'] as $i => $p) {\n            $prod = $this->product->get($p['id_product']);\n            $d['products'][$i]['product'] = $prod;\n            $d['products'][$i]['product']['provider'] = '';\n            if (!empty($prod)) {\n              $provider = $this->providers->get($prod['id_provider']);\n              $d['products'][$i]['product']['provider'] = !empty($provider) ? $provider['name'] : '';\n            }\n          }\n        }\n        $d['client'] = $this->client->get($d[$transFields['id_client']]);\n        if (\n          !empty($params['excel'])\n          && !empty($params['excel']['fields'])\n        ) {\n          $tmp = [];\n          foreach ($params['excel']['fields'] as $f) {\n            if (empty($f['hidden'])) {\n              if ($f['field'] === 'shipping_address') {\n                $tmp[$f['field']] = $d['shipping_address']['fulladdress'];\n              } elseif ($f['field'] === 'billing_address') {\n                $tmp[$f['field']] = $d['billing_address']['fulladdress'];\n              } elseif ($f['field'] === 'client.name') {\n                $tmp[$f['field']] = $d['client']['first_name'] . ' ' . $d['client']['last_name'];\n              } elseif ($f['field'] === 'payment_type') {\n                $tmp[$f['field']] = $this->opt->text($d['payment_type']);\n              } else {\n                $tmp[$f['field']] = $d[$f['field']];\n              }\n            }\n          }\n          $d = $tmp;\n        }\n      }\n      unset($d);\n      if (!empty($params['excel'])) {\n        $filename = BBN_USER_PATH . 'tmp\/transactions_' . date('d-m-Y_H-i-s') . '.xlsx';\n        if (\\bbn\\X::toExcel($res['data'], $filename, true, $params['excel'])) {\n          return ['file' => $filename];\n        }\n      }\n      return $res;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 215,
+            "endLine": 288,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -230,34 +318,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getTransactionsList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "params",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the list of the providers in an array\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the list of the providers in an array\n   *\n   * @param array $params\n   * @return array\n   *\/"
         },
         "getList": {
             "name": "getList",
             "summary": "Returns a list of the products for the shop (public)",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $params = [])\n  {\n    if (empty($params['limit'])) {\n      $params['limit'] = 10;\n    }\n    if (empty($params['order'])) {\n      $params['order'] = ['start' => 'DESC'];\n    }\n\n    $data = null;\n    $cfg     = $this->product->getClassCfg();\n    $noteCfg = $this->note->getClassCfg();\n    $fields  = $cfg['arch']['products'];\n    unset($fields['id_note']);\n\n    $dbCfg = $this->cms->getLastVersionCfg();\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n    $dbCfg['where']['conditions'][] = [\n      'field' => $noteCfg['arch']['notes']['id_type'],\n      'value' => $this->product->getTypeNote()\n    ];\n    $dbCfg['where']['conditions'][] = [\n      'field' => 'active',\n      'value' => 1\n    ];\n    $dbCfg['join'][] = [\n      'table' => $cfg['table'],\n      'on' => [\n        [\n          'field' => $this->db->cfn($noteCfg['arch']['notes']['id'], $noteCfg['table']),\n          'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n        ], [\n          'field' => $this->db->cfn($cfg['arch']['products']['active'], $cfg['table']),\n          'value' => 1\n        ]\n      ]\n    ];\n    $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);\n    $grid = new Grid($this->db, $params, $dbCfg);\n    $data = $grid->getDatatable();\n   \n    if ($data && $data['total']) {\n      $editions = $this->product->getEditions();\n      $types = $this->product->getTypes();\n      foreach ($data['data'] as &$d) {\n        $media = $d['front_img'] ? $this->medias->getMedia($d['front_img'], true) : [];\n        $d['image'] = $media['path'];\n        $d['edition'] = $editions[$d['id_edition']];\n        $d['type'] = $types[$d['product_type']];\n      }\n      unset($d);\n    }\n\n    return $data;\n  }",
-            "startLine": 227,
-            "endLine": 284,
+            "code": "  public function getList(array $params = []): ?array\n  {\n    if (empty($params['limit'])) {\n      $params['limit'] = 10;\n    }\n    if (empty($params['order'])) {\n      $params['order'] = ['start' => 'DESC'];\n    }\n\n    $data = null;\n    $cfg     = $this->product->getClassCfg();\n    $noteCfg = $this->note->getClassCfg();\n    $fields  = $cfg['arch']['products'];\n    unset($fields['id_note']);\n\n    $dbCfg = $this->cms->getLastVersionCfg();\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n    $dbCfg['where']['conditions'][] = [\n      'field' => $noteCfg['arch']['notes']['id_type'],\n      'value' => $this->product->getTypeNote()\n    ];\n    $dbCfg['where']['conditions'][] = [\n      'field' => 'active',\n      'value' => 1\n    ];\n    $dbCfg['join'][] = [\n      'table' => $cfg['table'],\n      'on' => [\n        [\n          'field' => $this->db->cfn($noteCfg['arch']['notes']['id'], $noteCfg['table']),\n          'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n        ], [\n          'field' => $this->db->cfn($cfg['arch']['products']['active'], $cfg['table']),\n          'value' => 1\n        ]\n      ]\n    ];\n    $dbCfg['fields'] = array_merge($dbCfg['fields'], $fields);\n    $grid = new Grid($this->db, $params, $dbCfg);\n    $data = $grid->getDatatable();\n\n    if ($data && $data['total']) {\n      $editions = $this->product->getEditions();\n      $types = $this->product->getTypes();\n      foreach ($data['data'] as &$d) {\n        $media = $d['front_img'] ? $this->medias->getMedia($d['front_img'], true) : [];\n        $d['image'] = $media['path'];\n        $d['edition'] = $editions[$d['id_edition']];\n        $d['type'] = $types[$d['product_type']];\n      }\n      unset($d);\n    }\n\n    return $data;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 296,
+            "endLine": 353,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -266,35 +374,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getList",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "params",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a list of the products for the shop (public)\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$params"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a list of the products for the shop (public)\n   *\n   * @param array $params\n   * @return array|null\n   *\/"
         },
         "getAdminList": {
             "name": "getAdminList",
-            "summary": "",
+            "summary": "Returns a list of the products for management.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($tableCfg)\n  {\n    $cfg      = $this->product->getClassCfg();\n    $dbCfg    = $this->cms->getLastVersionCfg(false, false);\n    $notesCfg = $this->note->getClassCfg();\n\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n\n    $dbCfg['tables'] = [$cfg['table']];\n    array_unshift(\n      $dbCfg['join'],\n      [\n        'table' => $notesCfg['table'],\n        'on' => [\n          [\n            'field' => $this->db->cfn($notesCfg['arch']['notes']['id'], $notesCfg['table']),\n            'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n          ]\n        ]\n      ],\n      [\n        'type' => 'left',\n        'table' => $notesCfg['tables']['notes_tags'],\n        'on' => [\n          [\n            'field' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table']),\n            'exp' => $this->db->cfn($notesCfg['arch']['notes_tags']['id_note'], $notesCfg['tables']['notes_tags'], true),\n          ]\n        ]\n      ]\n    );\n  \n    array_unshift(\n      $dbCfg['fields'],\n      ...$this->db->getFieldsList($cfg['table'])\n    );\n  \n    $dbCfg['fields']['num_tags'] = 'COUNT(DISTINCT '.$this->db->cfn($notesCfg['arch']['notes_tags']['id_tag'], $notesCfg['tables']['notes_tags'], true).')';\n    $dbCfg['group_by'] = [$this->db->cfn($cfg['arch']['products']['id'], $cfg['table'])];\n    $grid = new \\bbn\\Appui\\Grid($this->db, $tableCfg, $dbCfg);\n    if ($grid->check()) {\n      $tmp_grid = $grid->getDatatable();\n  \n      $cms   =& $this->cms;\n      $notes =& $this->note;\n      $tmp_grid['data'] = array_map(function($a) use (&$cms, &$notes) {\n        $a['medias'] = $notes->getMedias($a['id_note']);\n        $a['id_media'] = $cms->getDefaultMedia($a['id_note']);\n        $a['num_medias'] = count($a['medias']);\n        $a['tags'] = [];\/\/$a['num_tags'] ? $notes->getTags($a['id_note']) : [];\n        return $a;\n      }, $tmp_grid['data']);\n\n      return $tmp_grid;\n    }\n  }",
-            "startLine": 293,
-            "endLine": 351,
+            "code": "  public function getAdminList($tableCfg): array\n  {\n    $cfg      = $this->product->getClassCfg();\n    $dbCfg    = $this->cms->getLastVersionCfg(false, false);\n    $notesCfg = $this->note->getClassCfg();\n\n    $dbCfg['where']['conditions'][] = [\n      'field' => $this->db->cfn($cfg['arch']['products']['id_main'], $cfg['table']),\n      'operator' => 'isnull'\n    ];\n\n    $dbCfg['tables'] = [$cfg['table']];\n    array_unshift(\n      $dbCfg['join'],\n      [\n        'table' => $notesCfg['table'],\n        'on' => [\n          [\n            'field' => $this->db->cfn($notesCfg['arch']['notes']['id'], $notesCfg['table']),\n            'exp' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table'], true)\n          ]\n        ]\n      ],\n      [\n        'type' => 'left',\n        'table' => $notesCfg['tables']['notes_tags'],\n        'on' => [\n          [\n            'field' => $this->db->cfn($cfg['arch']['products']['id_note'], $cfg['table']),\n            'exp' => $this->db->cfn($notesCfg['arch']['notes_tags']['id_note'], $notesCfg['tables']['notes_tags'], true),\n          ]\n        ]\n      ]\n    );\n\n    array_unshift(\n      $dbCfg['fields'],\n      ...$this->db->getFieldsList($cfg['table'])\n    );\n\n    $dbCfg['fields']['num_tags'] = 'COUNT(DISTINCT ' . $this->db->cfn($notesCfg['arch']['notes_tags']['id_tag'], $notesCfg['tables']['notes_tags'], true) . ')';\n    $dbCfg['group_by'] = [$this->db->cfn($cfg['arch']['products']['id'], $cfg['table'])];\n    $grid = new \\bbn\\Appui\\Grid($this->db, $tableCfg, $dbCfg);\n    if ($grid->check()) {\n      $tmp_grid = $grid->getDatatable();\n\n      $cms   = &$this->cms;\n      $notes = &$this->note;\n      $tmp_grid['data'] = array_map(function ($a) use (&$cms, &$notes) {\n        $a['medias'] = $notes->getMedias($a['id_note']);\n        $a['id_media'] = $cms->getDefaultMedia($a['id_note']);\n        $a['num_medias'] = count($a['medias']);\n        $a['tags'] = []; \/\/$a['num_tags'] ? $notes->getTags($a['id_note']) : [];\n        return $a;\n      }, $tmp_grid['data']);\n\n      return $tmp_grid;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 362,
+            "endLine": 420,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -303,34 +431,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getAdminList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "tableCfg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "fg"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a list of the products for management.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$table",
+                        "description": "fg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a list of the products for management.\n   *\n   * @param [type] $tableCfg\n   * @return array\n   *\/"
         },
         "getFullProduct": {
             "name": "getFullProduct",
             "summary": "Returns all the informations about the given product",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    $prod = $this->product->get($id);\n    if ($prod && $prod['id_note']) {\n      $note = $this->cms->get($prod['id_note'], true);\n      if (!empty($prod['front_img'])) {\n        $prod['front_img'] = $this->medias->getMedia($prod['front_img'], true);\n        $prod['source'] = $prod['front_img']['path'];\n      }\n\n      if ($note) {\n        $cfg      = $this->product->getClassCfg();\n        if (empty($prod['id_main'])) {\n          $prod['variants'] = [];\n          if ($variants = $this->db->getColumnValues($cfg['table'], $cfg['arch']['products']['id'], [\n            $cfg['arch']['products']['id_main'] => $id\n          ]));\n          foreach ($variants as $v) {\n            $prod['variants'][] = $this->getFullProduct($v);\n          }\n        }\n        $cartCfg = $this->cart->getClassCfg();\n        $prod['cart_number'] = $this->db->count($cartCfg['tables']['cart_products'], [$cartCfg['arch']['cart_products']['id_product'] => $id]);\n        $prod['sales'] = [\n          'total' => $this->sales->getByProduct($id),\n          'y'     => ['total' => 0, 'num' => 0],\n          'm'     => ['total' => 0, 'num' => 0],\n          'w'     => ['total' => 0, 'num' => 0],\n          'd'     => ['total' => 0, 'num' => 0],\n        ];\n\n        $keys = array_keys($prod['sales']);\n        for ($i = 0; $i < count($keys) - 1; $i++) {\n          if ($prod['sales'][$keys[$i]]['total']) {\n            $prod['sales'][$keys[$i + 1]] = $this->sales->getByProduct($id, $keys[$i + 1]);\n          }\n        }\n\n        return X::mergeArrays($note, $prod);\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 361,
-            "endLine": 404,
+            "code": "  public function getFullProduct(string $id): ?array\n  {\n    $prod = $this->product->get($id);\n    if ($prod && $prod['id_note']) {\n      $note = $this->cms->get($prod['id_note'], true);\n      if (!empty($prod['front_img'])) {\n        $prod['front_img'] = $this->medias->getMedia($prod['front_img'], true);\n        $prod['source'] = $prod['front_img']['path'];\n      }\n\n      if ($note) {\n        $cfg      = $this->product->getClassCfg();\n        if (empty($prod['id_main'])) {\n          $prod['variants'] = [];\n          if ($variants = $this->db->getColumnValues($cfg['table'], $cfg['arch']['products']['id'], [\n            $cfg['arch']['products']['id_main'] => $id\n          ]));\n          foreach ($variants as $v) {\n            $prod['variants'][] = $this->getFullProduct($v);\n          }\n        }\n        $cartCfg = $this->cart->getClassCfg();\n        $prod['cart_number'] = $this->db->count($cartCfg['tables']['cart_products'], [$cartCfg['arch']['cart_products']['id_product'] => $id]);\n        $prod['sales'] = [\n          'total' => $this->sales->getByProduct($id),\n          'y'     => ['total' => 0, 'num' => 0],\n          'm'     => ['total' => 0, 'num' => 0],\n          'w'     => ['total' => 0, 'num' => 0],\n          'd'     => ['total' => 0, 'num' => 0],\n        ];\n\n        $keys = array_keys($prod['sales']);\n        for ($i = 0; $i < count($keys) - 1; $i++) {\n          if ($prod['sales'][$keys[$i]]['total']) {\n            $prod['sales'][$keys[$i + 1]] = $this->sales->getByProduct($id, $keys[$i + 1]);\n          }\n        }\n\n        return X::mergeArrays($note, $prod);\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 430,
+            "endLine": 473,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -339,56 +487,115 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getFullProduct",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns all the informations about the given product\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns all the informations about the given product\n   *\n   * @param string $id\n   * @return array|null\n   * \n   *\/"
+        },
+        "getAbandonedCarts": {
+            "name": "getAbandonedCarts",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Shop.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getAbandonedCarts(int $days): array\n  {\n    $salesCfg  = $this->sales->getClassCfg();\n    $cartCfg  = $this->cart->getClassCfg();\n    $today = new \\DateTime();\n    $my_date = date_sub(($today), date_interval_create_from_date_string(strval($days) . ' days'));\n    $date = $my_date->format('Y-m-d');\n    unset($salesCfg['arch']['transactions']['id']);\n    $salesCfg['arch']['transactions']['id_transaction'] = $salesCfg['table'] . '.' . 'id';\n\n\n    $grid = new \\bbn\\Appui\\Grid($this->db, ['limit' => 0], [\n      'table' => $cartCfg['table'],\n      'fields' => [\n        \"id\" => \"bbn_shop_cart.id\",\n        \"id_session\" => \"id_session\",\n        \"id_client\" => \"id_client\",\n        \"creation\" => \"creation\",\n        \"id_cart\" => \"id_cart\",\n        \"id_shipping_address\" => \"id_shipping_address\",\n        \"id_billing_address\" => \"id_billing_address\",\n        \"number\" => \"number\",\n        \"shipping_cost\" => \"shipping_cost\",\n        \"total\" => \"total\",\n        \"moment\" => \"moment\",\n        \"payment_type\" => \"payment_type\",\n        \"reference\" => \"reference\",\n        \"url\" => \"url\",\n        \"error_message\" => \"error_message\",\n        \"error_code\" => \"error_code\",\n        \"status\" => \"status\",\n        \"test\" => \"test\",\n        \"id_transaction\" => \"bbn_shop_transactions.id\"\n      ],\n      'join' => [\n        [\n          'table' => $salesCfg['table'],\n          'type' => 'left',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => $salesCfg['arch']['transactions']['id_cart'],\n                'operator' => 'eq',\n                'exp' => $cartCfg['table'] . '.' . $cartCfg['arch']['cart']['id']\n              ]\n            ]\n          ]\n        ], [\n          'table' => $cartCfg['table'],\n          'alias' => 'cart2',\n          'type' => 'left',\n          'on' => [\n            'conditions' => [\n              [\n                'field' => 'cart2.id_client',\n                'exp' => $cartCfg['table'] . '.id_client',\n              ], [\n                'field' => 'cart2.creation',\n                'operator' => '>',\n                'exp' => $cartCfg['table'] . '. creation',\n              ]\n            ]\n          ]\n        ]\n      ],\n      'where' => [\n        'logic' => 'AND',\n        'conditions' => [\n          [\n            'field' => $cartCfg['arch']['cart']['id_client'],\n            'operator' => 'isnotnull'\n          ], [\n            'field' => $cartCfg['arch']['cart']['creation'],\n            'operator' => '>=',\n            'value' => $date\n          ], [\n            'field' => 'cart2.id',\n            'operator' => 'isnull'\n          ], [\n            'logic' => 'OR',\n            'conditions' => [\n              [\n                'field' => $salesCfg['arch']['transactions']['id_cart'],\n                'operator' => 'isnull'\n              ], [\n                'field' => $salesCfg['arch']['transactions']['status'],\n                'operator' => '!=',\n                'value' => 'paid'\n              ]\n            ]\n          ]\n        ]\n      ],\n      'group_by' => [\n        $cartCfg['table'] . '.' . $cartCfg['arch']['cart']['id']\n      ]\n    ]);\n    if ($data = $grid->getDatatable()['data']) {\n      return array_filter($data, function ($a) {\n        return !$this->cart->isPaid($a['id']);\n      });\n    }\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 477,
+            "endLine": 580,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getAbandonedCarts",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "days",
+                    "position": 0,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "tags": []
+            },
+            "comments": "  \/**\n   * \n   *\/"
         },
         "test": {
             "name": "test",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -397,45 +604,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -444,24 +669,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -470,160 +690,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -631,63 +733,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -696,17 +856,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -717,43 +1053,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -764,44 +1118,40 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
-            "arguments": [
-                {
-                    "name": "debug",
-                    "position": 0,
-                    "type": "bool",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "exists": {
-            "name": "exists",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter)\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (is_string($filter)) {\n      $cfg = [$f['id'] => $filter];\n    }\n    elseif (is_array($filter)) {\n      $cfg = $filter;\n    }\n\n    if (!empty($cfg) && $arr = $this->db->count(\n      $this->class_table,\n      $cfg\n    )) {\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 37,
-            "endLine": 59,
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -810,34 +1160,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "filter",
+                    "name": "debug",
                     "position": 0,
-                    "type": "",
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         },
         "getClassCfg": {
             "name": "getClassCfg",
             "summary": "Returns the class configuration.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
-            "startLine": 67,
-            "endLine": 70,
+            "code": "  public function getClassCfg()\n  {\n    return $this->class_cfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 37,
+            "endLine": 40,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -846,22 +1214,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getClassCfg",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the class configuration.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the class configuration.\n   * \n   * @return mixed\n   *\/"
         },
         "getFields": {
             "name": "getFields",
             "summary": "Returns the fields of the main table.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->fields;\n  }",
-            "startLine": 78,
-            "endLine": 81,
+            "code": "  public function getFields()\n  {\n    return $this->fields;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 48,
+            "endLine": 51,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -870,22 +1247,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getFields",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the fields of the main table.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the fields of the main table.\n   *\n   * @return array\n   *\/"
         },
-        "insert": {
-            "name": "insert",
-            "summary": "Inserts a new row in the table.",
+        "initClassCfg": {
+            "name": "initClassCfg",
+            "summary": "Sets the class configuration as defined in self::default_class_cfg",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(array $data)\n  {\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if ($this->db->insert($ccfg['table'], $data)) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 91,
-            "endLine": 101,
+            "code": "  protected function initClassCfg(array $cfg = null)\n  {\n$arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n    foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 59,
+            "endLine": 114,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -893,35 +1279,53 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initClassCfg",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "data",
+                    "name": "cfg",
                     "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the class configuration as defined in self::default_class_cfg\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the class configuration as defined in self::default_class_cfg\n   * @param array $cfg\n   * @return $this\n   *\/"
         },
-        "delete": {
-            "name": "delete",
-            "summary": "Deletes a single row from the table through its id.",
+        "isInitClassCfg": {
+            "name": "isInitClassCfg",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Shop",
+            "class": "bbn\\Shop",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(string $id)\n  {\n    if ($data = $this->exists($id)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->delete($ccfg['table'], [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 111,
+            "code": "  protected function isInitClassCfg(): bool\n  {\n    return $this->_isInitClassCfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 117,
             "endLine": 120,
             "isDeprecated": false,
             "isGenerator": false,
@@ -929,396 +1333,716 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                }
-            ]
-        },
-        "update": {
-            "name": "update",
-            "summary": "Updates a single row in the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $id, array $data, bool $addCfg = false)\n  {\n    if (!$this->exists($id)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    if ($addCfg) {\n      $data = array_merge($this->rselect($id), $data);\n    }\n\n    if ($data = $this->prepare($data)) {\n      $ccfg = $this->getClassCfg();\n      $f = $ccfg['arch'][$this->class_table_index];\n      return (bool)$this->db->update($ccfg['table'], $data, [$f['id'] => $id]);\n    }\n\n    return false;\n  }",
-            "startLine": 131,
-            "endLine": 148,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [
-                "bool"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "id",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "data",
-                    "position": 1,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "addCfg",
-                    "position": 2,
-                    "type": "bool",
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
-                }
-            ]
-        },
-        "selectOne": {
-            "name": "selectOne",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(string $field, $filter, array $order = [])\n  {\n    if ($res = $this->dbConfigSingleSelection($filter, $order, false, [$field])) {\n      return $res[$field] ?? null;\n    }\n\n    return null;\n  }",
-            "startLine": 159,
-            "endLine": 166,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "field",
-                    "position": 0,
-                    "type": "string",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "filter",
-                    "position": 1,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 2,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "select": {
-            "name": "select",
-            "summary": "Retrieves a row as an object from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, true);\n  }",
-            "startLine": 177,
-            "endLine": 180,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "stdClass"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "rselect": {
-            "name": "rselect",
-            "summary": "Retrieves a row as an array from the table through its id.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($filter, array $order = [])\n  {\n    return $this->dbConfigSingleSelection($filter, $order, false);\n  }",
-            "startLine": 191,
-            "endLine": 194,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "count": {
-            "name": "count",
-            "summary": "Returns the number of rows from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter = [])\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    return $this->db->count($this->class_table, $filter);\n  }",
-            "startLine": 204,
-            "endLine": 211,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
+            "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isInitClassCfg",
             "returns": [
-                "int"
+                "bool"
             ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                }
-            ]
-        },
-        "selectAll": {
-            "name": "selectAll",
-            "summary": "Returns an array of rows as objects from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, true);\n  }",
-            "startLine": 224,
-            "endLine": 227,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                }
-            ]
-        },
-        "rselectAll": {
-            "name": "rselectAll",
-            "summary": "Returns an array of rows as arrays from the table for the given conditions.",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Shop",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(array $filter, array $order = [], int $limit = 0, int $start = 0)\n  {\n    return $this->dbConfigSelection($filter, $order, $limit, $start, false);\n  }",
-            "startLine": 240,
-            "endLine": 243,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 4,
-            "numberOfRequiredParameters": 1,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "filter",
-                    "position": 0,
-                    "type": "array",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "order",
-                    "position": 1,
-                    "type": "array",
-                    "required": false,
-                    "has_default": true,
-                    "default": [],
-                    "default_name": ""
-                },
-                {
-                    "name": "limit",
-                    "position": 2,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                },
-                {
-                    "name": "start",
-                    "position": 3,
-                    "type": "int",
-                    "required": false,
-                    "has_default": true,
-                    "default": 0,
-                    "default_name": ""
-                }
-            ]
+            "arguments": []
         }
     },
-    "properties": null,
+    "properties": {
+        "medias": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Medias"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "cms": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Cms"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "product": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Product"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "sales": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Sales"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "note": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Note"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "opt": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "lang": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "type_note": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "cart": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Cart"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "client": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Client"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "providers": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Provider"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "default_class_cfg": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Shop",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "Database structure"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Db"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Db",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "dbClass"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "db",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Db"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Db",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "dbClass"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            },
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "_isInitClassCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "fields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "class_table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_table_index": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Shop"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "default_class_cfg": []
     },
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\Appui\\Grid": "Grid",
+        "bbn\\Appui\\Medias": "Medias",
+        "bbn\\Appui\\Note": "Note",
+        "bbn\\Appui\\Cms": "Cms",
+        "bbn\\Appui\\Option": "Option",
+        "bbn\\Shop\\Product": "Product",
+        "bbn\\Shop\\Provider": "Provider",
+        "bbn\\Shop\\Sales": "Sales",
+        "bbn\\Shop\\Cart": "Cart",
+        "bbn\\Shop\\Client": "Client",
+        "bbn\\Models\\Tts\\DbConfig": "DbConfig",
+        "bbn\\Models\\Cls\\Db": "DbCls"
+    },
+    "dummyComments": [
+        "\/**\n * PHP version 8\n *\n * @category Shop\n * @package  BBN\n * @author   Theomas Nabet <thomas.nabet@gmail.com>\n * @license  https:\/\/opensource.org\/licenses\/mit-license.php MIT\n * @version  \"GIT: <git_id>\"\n * @link     https:\/\/www.bbn.io\/bbn-php\n *\/",
+        "\/**\n * Shopping system main class.\n *\n * ### Generates in a cache directory a javascript or CSS file based on the request received.\n *\n * The cdn class will be using all the classes in bbn\\Cdn in order to\n * treat a request URL, and return the appropriate content.\n *\n * - First it will parse the URL and make a first configuration array out of it,\n * from which a hash will be calculated\n * * Then it will serve a cache file if it exists and create one otherwise by:\n * * Making a full configuration array using libraries database with all the needed file(s)\n * * Then it will compile these files into a single file that will be put in cache\n * * This file should be of type js or css\n * * If files are both types the content returned will be JS which will call the css files\n *\n *\n *\n *\n * ### Request can have the following forms:\n * * https:\/\/mycdn.net\/lib=bbn-vue,jquery\n * * https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n * * https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n * * https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n *\n * ```php\n * $cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n * $cdn->process();\n * if ( $cdn->check() ){\n *   $cdn->output();\n * }\n * ```\n *\n * @category CDN\n * @package  BBN\n * @author   Theomas Nabet <thomas.nabet@gmail.com>\n * @license  https:\/\/opensource.org\/licenses\/mit-license.php MIT\n * @link     https:\/\/bbnio2.thomas.lan\/bbn-php\/doc\/class\/cdn\n *\/"
+    ],
     "summary": "Shopping system main class.",
-    "description": "### Generates in a cache directory a javascript or CSS file based on the request received.\n\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n\n\n\n\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\n\n```php\n$cdn = new \\bbn\\Cdn($_SERVER['REQUEST_URI']);\n$cdn->process();\nif ( $cdn->check() ){\n  $cdn->output();\n}\n```",
+    "description": "### Generates in a cache directory a javascript or CSS file based on the request received.\n\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n\n\n\n\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css",
     "description_parts": [
         {
             "type": "text",
-            "content": "<h3>Generates in a cache directory a javascript or CSS file based on the request received.<\/h3>\n<p>The cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.<\/p>\n<ul>\n<li>First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated<\/li>\n<li>Then it will serve a cache file if it exists and create one otherwise by:<\/li>\n<li>Making a full configuration array using libraries database with all the needed file(s)<\/li>\n<li>Then it will compile these files into a single file that will be put in cache<\/li>\n<li>This file should be of type js or css<\/li>\n<li>If files are both types the content returned will be JS which will call the css files<\/li>\n<\/ul>\n<h3>Request can have the following forms:<\/h3>\n<ul>\n<li><a href=\"https:\/\/mycdn.net\/lib=bbn-vue,jquery\">https:\/\/mycdn.net\/lib=bbn-vue,jquery<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\">https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib\/my_library\/?dir=true\">https:\/\/mycdn.net\/lib\/my_library\/?dir=true<\/a><\/li>\n<li><a href=\"https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css\">https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css<\/a><\/li>\n<\/ul>"
+            "content": "### Generates in a cache directory a javascript or CSS file based on the request received.\n\nThe cdn class will be using all the classes in bbn\\Cdn in order to\ntreat a request URL, and return the appropriate content.\n\n- First it will parse the URL and make a first configuration array out of it,\nfrom which a hash will be calculated\n* Then it will serve a cache file if it exists and create one otherwise by:\n* Making a full configuration array using libraries database with all the needed file(s)\n* Then it will compile these files into a single file that will be put in cache\n* This file should be of type js or css\n* If files are both types the content returned will be JS which will call the css files\n\n\n\n\n### Request can have the following forms:\n* https:\/\/mycdn.net\/lib=bbn-vue,jquery\n* https:\/\/mycdn.net\/lib=bbnjs|1.0.1|dark,bbn-vue|2.0.2\n* https:\/\/mycdn.net\/lib\/my_library\/?dir=true\n* https:\/\/mycdn.net\/lib\/my_library\/?f=file1.js,file2.js,file3.css"
         },
         {
             "type": "code",

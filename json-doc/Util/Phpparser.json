@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Util\\Phpparser",
     "namespace": true,
+    "realName": "Phpparser",
+    "realNamespace": "bbn\\Util",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Util\/Phpparser.php",
     "startLine": 11,
     "endLine": 91,
-    "numMethods": 1,
-    "numProperties": 0,
+    "numMethods": 2,
+    "numProperties": 5,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -42,11 +43,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Util\\Phpparser",
+            "class": "bbn\\Util\\Phpparser",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Phpparser.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($string)\n  {\n        if (!$string){\n            \/\/ no string, no data\n            return [];\n        }\n\n        if ($string[0] == '('){\n            \/\/ killer outer parens, as they're unnecessary\n            $string = substr($string, 1, -1);\n        }\n\n        $this->current = [];\n        $this->stack = [];\n\n        $this->string = $string;\n        $this->length = \\strlen($this->string);\n        \/\/ look at each character\n        for ($this->position=0; $this->position < $this->length; $this->position++){\n            switch ($this->string[$this->position]){\n                case '(':\n                    $this->push();\n                    \/\/ push current scope to the stack an begin a new scope\n                    array_push($this->stack, $this->current);\n                    $this->current = [];\n                    break;\n\n                case ')':\n                    $this->push();\n                    \/\/ save current scope\n                    $t = $this->current;\n                    \/\/ get the last scope from stack\n                    $this->current = array_pop($this->stack);\n                    \/\/ add just saved scope to current scope\n                    $this->current[] = $t;\n                    break;\n               \/* \n                case ' ':\n                    \/\/ make each word its own token\n                    $this->push();\n                    break;\n                *\/\n                default:\n                    \/\/ remember the offset to do a string capture later\n                    \/\/ could've also done $buffer .= $string[$position]\n                    \/\/ but that would just be wasting resources\u2026\n                    if ($this->buffer_start === null){\n                        $this->buffer_start = $this->position;\n                    }\n            }\n        }\n\n        return $this->current;\n  }",
+            "code": "    public function parse($string)\n    {\n        if (!$string){\n            \/\/ no string, no data\n            return [];\n        }\n\n        if ($string[0] == '('){\n            \/\/ killer outer parens, as they're unnecessary\n            $string = substr($string, 1, -1);\n        }\n\n        $this->current = [];\n        $this->stack = [];\n\n        $this->string = $string;\n        $this->length = \\strlen($this->string);\n        \/\/ look at each character\n        for ($this->position=0; $this->position < $this->length; $this->position++){\n            switch ($this->string[$this->position]){\n                case '(':\n                    $this->push();\n                    \/\/ push current scope to the stack an begin a new scope\n                    array_push($this->stack, $this->current);\n                    $this->current = [];\n                    break;\n\n                case ')':\n                    $this->push();\n                    \/\/ save current scope\n                    $t = $this->current;\n                    \/\/ get the last scope from stack\n                    $this->current = array_pop($this->stack);\n                    \/\/ add just saved scope to current scope\n                    $this->current[] = $t;\n                    break;\n               \/* \n                case ' ':\n                    \/\/ make each word its own token\n                    $this->push();\n                    break;\n                *\/\n                default:\n                    \/\/ remember the offset to do a string capture later\n                    \/\/ could've also done $buffer .= $string[$position]\n                    \/\/ but that would just be wasting resources\u2026\n                    if ($this->buffer_start === null){\n                        $this->buffer_start = $this->position;\n                    }\n            }\n        }\n\n        return $this->current;\n    }",
+            "parent": false,
+            "trait": false,
             "startLine": 25,
             "endLine": 78,
             "isDeprecated": false,
@@ -57,24 +61,134 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "parse",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "string",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "push": {
+            "name": "push",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Util\\Phpparser",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Util\/Phpparser.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "    protected function push()\n    {\n        if ($this->buffer_start !== null){\n            \/\/ extract string from buffer start to current position\n            $buffer = substr($this->string, $this->buffer_start, $this->position - $this->buffer_start);\n            \/\/ clean buffer\n            $this->buffer_start = null;\n            \/\/ throw token into current scope\n            $this->current[] = $buffer;\n        }\n    }",
+            "parent": false,
+            "trait": false,
+            "startLine": 80,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "push",
+            "returns": [],
+            "arguments": []
         }
     },
-    "properties": null,
+    "properties": {
+        "stack": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Phpparser"
+            },
+            "declaring_trait": "bbn\\Util\\Phpparser",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "current": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Phpparser"
+            },
+            "declaring_trait": "bbn\\Util\\Phpparser",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "string": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Phpparser"
+            },
+            "declaring_trait": "bbn\\Util\\Phpparser",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "position": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Phpparser"
+            },
+            "declaring_trait": "bbn\\Util\\Phpparser",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "buffer_start": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Util\\Phpparser"
+            },
+            "declaring_trait": "bbn\\Util\\Phpparser",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * @package util\n * \n * Parses an expression with parentheses into a multidimensional array\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

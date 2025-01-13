@@ -5,18 +5,19 @@
     },
     "name": "bbn\\User\\Common",
     "namespace": true,
+    "realName": "Common",
+    "realNamespace": "bbn\\User",
     "traits": [],
     "interfaces": [],
     "fileName": "\/User\/Common.php",
-    "startLine": 15,
-    "endLine": 789,
-    "numMethods": 29,
-    "numProperties": 1,
+    "startLine": 18,
+    "endLine": 797,
+    "numMethods": 43,
+    "numProperties": 13,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -45,18 +46,21 @@
     "shortName": "Common",
     "contentConstructor": null,
     "methods": {
-        "getData": {
-            "name": "getData",
-            "summary": "Retrieves data stored in the data property of the user, only if authenticated.",
+        "isVerifyPhoneNumberRequest": {
+            "name": "isVerifyPhoneNumberRequest",
+            "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function(string $idx)\n  {\n    if (!$this->auth) {\n      throw new Exception(X::_(\"Impossible to retrieve data for an authenticated user\"));\n    }\n\n    return $this->data[$idx] ?? null;\n  }",
-            "startLine": 97,
-            "endLine": 104,
+            "code": "  protected function isVerifyPhoneNumberRequest(array $params)\n  {\n    $f = $this->class_cfg['fields'];\n\n    return isset($params[$f['phone_number']], $params[$f['phone_verification_code']], $params[$f['device_uid']], $params[$f['token']])\n      && $params[$f['action']] === 'verifyCode';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 65,
+            "endLine": 71,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -65,32 +69,209 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "isVerifyPhoneNumberRequest",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "idx",
+                    "name": "params",
                     "position": 0,
-                    "type": "string",
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "isPhoneNumberCodeSendingRequest": {
+            "name": "isPhoneNumberCodeSendingRequest",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function isPhoneNumberCodeSendingRequest(array $params)\n  {\n    $f = $this->class_cfg['fields'];\n\n    return isset($params[$f['phone_number']], $params[$f['device_uid']], $params[$f['token']])\n      && $params[$f['action']] === 'sendSmsCode';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 73,
+            "endLine": 79,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isPhoneNumberCodeSendingRequest",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "params",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isTokenLoginRequest": {
+            "name": "isTokenLoginRequest",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function isTokenLoginRequest(array $params): bool\n  {\n    $f = $this->class_cfg['fields'];\n    return X::hasProps($params, [$f['token'], $f['device_uid']], true);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 81,
+            "endLine": 85,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "isTokenLoginRequest",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "params",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "isToken": {
+            "name": "isToken",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function isToken(): bool\n  {\n    return (bool)$this->class_cfg['tables']['api_tokens'];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 87,
+            "endLine": 90,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isToken",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        },
+        "getData": {
+            "name": "getData",
+            "summary": "Retrieves data stored in the data property of the user, only if authenticated.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getData(string $idx)\n  {\n    if (!$this->auth) {\n      throw new Exception(X::_(\"Impossible to retrieve data for an authenticated user\"));\n    }\n\n    return $this->data[$idx] ?? null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 100,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getData",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "idx",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieves data stored in the data property of the user, only if authenticated.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$idx"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves data stored in the data property of the user, only if authenticated.\n   *\n   * @param string $idx\n   *\n   * @return void\n   *\/"
         },
         "getPath": {
             "name": "getPath",
             "summary": "Returns the directory path for the user.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->path;\n  }",
-            "startLine": 112,
-            "endLine": 115,
+            "code": "  public function getPath(): ?string\n  {\n    return $this->path;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 115,
+            "endLine": 118,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -99,25 +280,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the directory path for the user.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the directory path for the user.\n   *\n   * @return string\n   *\/"
         },
         "getTmpDir": {
             "name": "getTmpDir",
             "summary": "Returns the tmp directory path for the user.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->tmp_path;\n  }",
-            "startLine": 123,
-            "endLine": 126,
+            "code": "  public function getTmpDir(): ?string\n  {\n    return $this->tmp_path;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 126,
+            "endLine": 129,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -126,25 +316,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getTmpDir",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the tmp directory path for the user.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the tmp directory path for the user.\n   *\n   * @return string\n   *\/"
         },
         "isAuth": {
             "name": "isAuth",
             "summary": "Returns true if authenticated false otherwise.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->auth;\n  }",
-            "startLine": 134,
-            "endLine": 137,
+            "code": "  public function isAuth()\n  {\n    return $this->auth;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 137,
+            "endLine": 140,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -153,22 +352,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "isAuth",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if authenticated false otherwise.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if authenticated false otherwise.\n   *\n   * @return bool\n   *\/"
         },
         "getId": {
             "name": "getId",
             "summary": "Returns the user's ID if there is no error.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n\n    return null;\n  }",
-            "startLine": 145,
-            "endLine": 152,
+            "code": "  public function getId(): ?string\n  {\n    if ($this->check()) {\n      return $this->id;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 148,
+            "endLine": 155,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -177,25 +385,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getId",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the user's ID if there is no error.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the user's ID if there is no error.\n   *\n   * @return null|string\n   *\/"
         },
         "getGroup": {
             "name": "getGroup",
             "summary": "Returns the user's group's ID if there is no error.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->check()) {\n      return $this->id_group;\n    }\n\n    return null;\n  }",
-            "startLine": 160,
-            "endLine": 167,
+            "code": "  public function getGroup(): ?string\n  {\n    if ($this->check()) {\n      return $this->id_group;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 163,
+            "endLine": 170,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -204,25 +421,34 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getGroup",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the user's group's ID if there is no error.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the user's group's ID if there is no error.\n   *\n   * @return null|string\n   *\/"
         },
         "expireHotlink": {
             "name": "expireHotlink",
             "summary": "Expires an hotlink by setting the expire column to now.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id)\n  {\n    if ($this->check()) {\n      return $this->db->update(\n        $this->class_cfg['tables']['hotlinks'],\n        [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],\n        [$this->class_cfg['arch']['hotlinks']['id'] => $id]\n      );\n    }\n\n    return 0;\n  }",
-            "startLine": 175,
-            "endLine": 186,
+            "code": "  public function expireHotlink($id): int\n  {\n    if ($this->check()) {\n      return $this->db->update(\n        $this->class_cfg['tables']['hotlinks'],\n        [$this->class_cfg['arch']['hotlinks']['expire'] => date('Y-m-d H:i:s')],\n        [$this->class_cfg['arch']['hotlinks']['id'] => $id]\n      );\n    }\n\n    return 0;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 178,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -231,34 +457,46 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "expireHotlink",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Expires an hotlink by setting the expire column to now.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Expires an hotlink by setting the expire column to now.\n   *\n   * @return int\n   *\/"
         },
         "getIdFromMagicString": {
             "name": "getIdFromMagicString",
             "summary": "Retrieves a user's ID from the hotlink's magic string.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, string $key)\n  {\n    if ($val = $this->db->rselect(\n      $this->class_cfg['tables']['hotlinks'], [\n      $this->class_cfg['arch']['hotlinks']['magic'],\n      $this->class_cfg['arch']['hotlinks']['id_user'],\n      ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id,\n      [$this->class_cfg['arch']['hotlinks']['expire'], '>', date('Y-m-d H:i:s')]\n      ]\n    )\n    ) {\n      if (self::isMagicString($key, $val[$this->class_cfg['arch']['hotlinks']['magic']])) {\n        return $val['id_user'];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 196,
-            "endLine": 214,
+            "code": "  public function getIdFromMagicString(string $id, string $key): ?string\n  {\n    if ($val = $this->db->rselect(\n      $this->class_cfg['tables']['hotlinks'], [\n      'magic' => $this->class_cfg['arch']['hotlinks']['magic'],\n      'id_user' => $this->class_cfg['arch']['hotlinks']['id_user'],\n      'expire' => $this->class_cfg['arch']['hotlinks']['expire'],\n      ],[\n      $this->class_cfg['arch']['hotlinks']['id'] => $id\n      ]\n    )\n    ) {\n      if ($val['expire'] < date('Y-m-d H:i:s')) {\n        if (method_exists($this, 'setError')) {\n          $this->setError(27);\n        }\n      }\n      elseif (self::isMagicString($key, $val['magic'])) {\n        return $val['id_user'];\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 199,
+            "endLine": 222,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -267,16 +505,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getIdFromMagicString",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -286,25 +529,50 @@
                     "name": "key",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieves a user's ID from the hotlink's magic string.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves a user's ID from the hotlink's magic string.\n   *\n   * @param string $id\n   * @param string $key\n   * @return null|string\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks if an error has been thrown or not.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->getError() ? false : true;\n  }",
-            "startLine": 222,
-            "endLine": 225,
+            "code": "  public function check()\n  {\n    return $this->getError() ? false : true;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 230,
+            "endLine": 233,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -313,22 +581,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks if an error has been thrown or not.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if an error has been thrown or not.\n   *\n   * @return bool\n   *\/"
         },
         "logout": {
             "name": "logout",
             "summary": "Unauthenticates, resets the config and destroys the session.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->auth = false;\n    $this->cfg  = [];\n    $this->closeSession();\n  }",
-            "startLine": 233,
-            "endLine": 238,
+            "code": "  public function logout()\n  {\n    $this->auth = false;\n    $this->cfg  = [];\n    $this->closeSession();\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 241,
+            "endLine": 246,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -337,22 +614,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "logout",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Unauthenticates, resets the config and destroys the session.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Unauthenticates, resets the config and destroys the session.\n   *\n   * @return void\n   *\/"
         },
         "getMailer": {
             "name": "getMailer",
             "summary": "Returns an instance of the mailer class.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->_mailer) {\n      if (class_exists($this->class_cfg['mailer'])) {\n        $this->_mailer = new $this->class_cfg['mailer']();\n      }\n      else {\n        throw new Exception(X::_(\"Impossible to find the mailer class %s\", (string)$this->class_cfg['mailer']));\n      }\n    }\n\n    return $this->_mailer;\n  }",
-            "startLine": 247,
-            "endLine": 259,
+            "code": "  public function getMailer()\n  {\n    if (!$this->_mailer) {\n      if (class_exists($this->class_cfg['mailer'])) {\n        $this->_mailer = new $this->class_cfg['mailer']();\n      }\n      else {\n        throw new Exception(X::_(\"Impossible to find the mailer class %s\", (string)$this->class_cfg['mailer']));\n      }\n    }\n\n    return $this->_mailer;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 255,
+            "endLine": 267,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -361,22 +647,35 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getMailer",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns an instance of the mailer class.\n",
+                "params": [],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Returns an instance of the mailer class.\n   *\n   * @return Mail\n   * @throws Exception\n   *\/"
         },
         "forcePassword": {
             "name": "forcePassword",
             "summary": "Changes the password in the database.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($pass)\n  {\n    if ($this->id) {\n      return (bool)$this->db->insert(\n        $this->class_cfg['tables']['passwords'], [\n        $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,\n        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 267,
-            "endLine": 280,
+            "code": "  public function forcePassword($pass): bool\n  {\n    if ($this->id) {\n      return (bool)$this->db->insert(\n        $this->class_cfg['tables']['passwords'], [\n        $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),\n        $this->class_cfg['arch']['passwords']['id_user'] => $this->id,\n        $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 275,
+            "endLine": 288,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -385,34 +684,46 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "forcePassword",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "pass",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Changes the password in the database.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Changes the password in the database.\n   *\n   * @return bool\n   *\/"
         },
         "getEmail": {
             "name": "getEmail",
             "summary": "Returns the email of the given user or the current one.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($usr = NULL)\n  {\n    if ($this->auth) {\n      if (\\is_null($usr)) {\n        $usr = $this->getSession();\n      }\n      elseif (str::isUid($usr) && ($mgr = $this->getManager())) {\n        $usr = $mgr->getUser($usr);\n      }\n\n      if (isset($this->fields['email'], $usr[$this->fields['email']])) {\n        return $usr[$this->fields['email']];\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 288,
-            "endLine": 304,
+            "code": "  public function getEmail($usr = null): ?string\n  {\n    if ($this->auth) {\n      if (\\is_null($usr)) {\n        $usr = $this->getSession();\n      }\n      elseif (str::isUid($usr) && ($mgr = $this->getManager())) {\n        $usr = $mgr->getUser($usr);\n      }\n\n      if (isset($this->fields['email'], $usr[$this->fields['email']])) {\n        return $usr[$this->fields['email']];\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 296,
+            "endLine": 312,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -421,35 +732,47 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getEmail",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "usr",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the email of the given user or the current one.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the email of the given user or the current one.\n   *\n   * @return string|null\n   *\/"
         },
         "addToTmp": {
             "name": "addToTmp",
             "summary": "Adds a file to the tmp folder of the user and returns its path.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $file, string $name = NULL, $move = true)\n  {\n    if ($this->auth) {\n      $fs   = new System();\n      $path = $this->getTmpDir().microtime(true).'\/';\n      if ($fs->isFile($file) && $fs->createPath($path)) {\n        $dest = $path.($name ?: X::basename($file));\n        if ($move) {\n          if ($fs->move($file, X::dirname($dest)) && $fs->rename(X::dirname($dest).'\/'.X::basename($file), X::basename($dest))) {\n            return $dest;\n          }\n        }\n        elseif ($fs->copy($file, $dest)) {\n          return $dest;\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 315,
-            "endLine": 334,
+            "code": "  public function addToTmp(string $file, string $name = null, $move = true):? string\n  {\n    if ($this->auth) {\n      $fs   = new System();\n      $path = $this->getTmpDir().microtime(true).'\/';\n      if ($fs->isFile($file) && $fs->createPath($path)) {\n        $dest = $path.($name ?: X::basename($file));\n        if ($move) {\n          if ($fs->move($file, X::dirname($dest)) && $fs->rename(X::dirname($dest).'\/'.X::basename($file), X::basename($dest))) {\n            return $dest;\n          }\n        }\n        elseif ($fs->copy($file, $dest)) {\n          return $dest;\n        }\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 323,
+            "endLine": 342,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -458,16 +781,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "addToTmp",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "file",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -476,7 +804,13 @@
                 {
                     "name": "name",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -486,25 +820,53 @@
                     "name": "move",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Adds a file to the tmp folder of the user and returns its path.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$file"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$move"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Adds a file to the tmp folder of the user and returns its path.\n   *\n   * @param string $file\n   * @param string $name\n   * @param bool   $move\n   * @return string|null\n   *\/"
         },
         "crypt": {
             "name": "crypt",
             "summary": "Encrypts the given string.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return Enc::crypt($st, $enckey) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 343,
-            "endLine": 350,
+            "code": "  public function crypt(string $st): ?string\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return Enc::crypt($st, $enckey) ?: null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 351,
+            "endLine": 358,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -513,35 +875,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "crypt",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "st",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Encrypts the given string.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Encrypts the given string.\n   *\n   * @param string $st\n   * @return string|null\n   *\/"
         },
         "decrypt": {
             "name": "decrypt",
             "summary": "Decrypts the given string.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $st)\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return Enc::decrypt($st, $enckey) ?: null;\n    }\n\n    return null;\n  }",
-            "startLine": 359,
-            "endLine": 366,
+            "code": "  public function decrypt(string $st): ?string\n  {\n    if ($enckey = $this->_get_encryption_key()) {\n      return Enc::decrypt($st, $enckey) ?: null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 367,
+            "endLine": 374,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -550,35 +932,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "decrypt",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "st",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Decrypts the given string.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Decrypts the given string.\n   *\n   * @param string $st\n   * @return string|null\n   *\/"
         },
         "makeFingerprint": {
             "name": "makeFingerprint",
             "summary": "Generates a random long string (16-32 chars) used as unique fingerprint.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return Str::genpwd(32, 16);\n  }",
-            "startLine": 373,
-            "endLine": 376,
+            "code": "  public static function makeFingerprint(): string\n  {\n    return Str::genpwd(32, 16);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 381,
+            "endLine": 384,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -587,24 +989,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "makeFingerprint",
             "returns": [
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Generates a random long string (16-32 chars) used as unique fingerprint.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Generates a random long string (16-32 chars) used as unique fingerprint.\n   * @return string\n   *\/"
         },
         "makeMagicString": {
             "name": "makeMagicString",
             "summary": "Returns an array with a key and a magic string used for making hotlinks.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $key = self::makeFingerprint();\n    return [\n      'key' => $key,\n      'hash' => hash('sha256', $key)\n    ];\n  }",
-            "startLine": 384,
-            "endLine": 391,
+            "code": "  public static function makeMagicString(): array\n  {\n    $key = self::makeFingerprint();\n    return [\n      'key' => $key,\n      'hash' => hash('sha256', $key)\n    ];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 392,
+            "endLine": 399,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -613,24 +1024,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "makeMagicString",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns an array with a key and a magic string used for making hotlinks.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array with a key and a magic string used for making hotlinks.\n   *\n   * @return array\n   *\/"
         },
         "isMagicString": {
             "name": "isMagicString",
             "summary": "Checks if a given string corresponds to the given hash.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key, string $hash)\n  {\n    return hash('sha256', $key) === $hash;\n  }",
-            "startLine": 401,
-            "endLine": 404,
+            "code": "  public static function isMagicString(string $key, string $hash): bool\n  {\n    return hash('sha256', $key) === $hash;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 409,
+            "endLine": 412,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -639,15 +1059,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "isMagicString",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -658,26 +1083,123 @@
                     "name": "hash",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The corresponding hash"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks if a given string corresponds to the given hash.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$key",
+                        "description": "The key"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$hash",
+                        "description": "The corresponding hash"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if a given string corresponds to the given hash.\n   *\n   * @param string $key  The key\n   * @param string $hash The corresponding hash\n   * @return bool\n   *\/"
+        },
+        "setError": {
+            "name": "setError",
+            "summary": "Sets the error property once and for all.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function setError(string $err, $code = null): self\n  {\n    $this->log([$err, $this->class_cfg['errors'][$err] ?? null]);\n    if (!$this->error) {\n      $this->error = $err;\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 421,
+            "endLine": 429,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "err",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "error code"
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the error property once and for all.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$err",
+                        "description": "error code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the error property once and for all.\n   *\n   * @param int $err error code\n   * @return self\n   *\/"
         },
         "getError": {
             "name": "getError",
             "summary": "Returns the first error in an array with the code and description.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return [\n        'code' => $this->error,\n        'text' => $this->class_cfg['errors'][$this->error]\n      ];\n    }\n\n    return null;\n  }",
-            "startLine": 429,
-            "endLine": 439,
+            "code": "  public function getError(): ?array\n  {\n    if ($this->error) {\n      return [\n        'code' => $this->error,\n        'text' => $this->class_cfg['errors'][$this->error]\n      ];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 437,
+            "endLine": 447,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -686,25 +1208,186 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [
                 null,
                 "array"
             ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the first error in an array with the code and description.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the first error in an array with the code and description.\n   *\n   * @return null|array\n   *\/"
+        },
+        "_get_encryption_key": {
+            "name": "_get_encryption_key",
+            "summary": "Retrieves the encryption key from database if not defined and saves it.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_encryption_key(): ?string\n  {\n    if (is_null($this->_encryption_key)) {\n      if ($this->auth) {\n        $this->_encryption_key = $this->db->selectOne(\n          $this->class_cfg['table'],\n          $this->class_cfg['arch']['users']['enckey'],\n          ['id' => $this->id]\n        );\n        if (!$this->_encryption_key) {\n          $this->_encryption_key = Str::genpwd(32, 16);\n          $this->db->update(\n            $this->class_cfg['table'],\n            [$this->class_cfg['arch']['users']['enckey'] => $this->_encryption_key],\n            ['id' => $this->id]\n          );\n        }\n      }\n    }\n\n    return $this->_encryption_key;\n  }",
             "parent": false,
-            "arguments": []
+            "trait": false,
+            "startLine": 454,
+            "endLine": 475,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_get_encryption_key",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Retrieves the encryption key from database if not defined and saves it.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves the encryption key from database if not defined and saves it.\n   *\n   * @return string|null\n   *\/"
+        },
+        "_hash": {
+            "name": "_hash",
+            "summary": "Use the configured hash function to encrypt a password string.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _hash(string $st): string\n  {\n    if (empty($this->class_cfg['encryption']) || !function_exists($this->class_cfg['encryption'])) {\n      return hash('sha256', $st);\n    }\n\n    return $this->class_cfg['encryption']($st);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 484,
+            "endLine": 491,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_hash",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The string to crypt"
+                }
+            ],
+            "doc": {
+                "description": "Use the configured hash function to encrypt a password string.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st",
+                        "description": "The string to crypt"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n    * Use the configured hash function to encrypt a password string.\n    *\n    * @param string $st The string to crypt\n    * @return string\n    *\/"
+        },
+        "_init_dir": {
+            "name": "_init_dir",
+            "summary": "Defines user's directory and constant BBN_USER_PATH if not done yet.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _init_dir(bool $create = false): self\n  {\n    if (\\defined('BBN_DATA_PATH') && $this->getId()) {\n      $this->path     = Mvc::getUserDataPath($this->getId());\n      $this->tmp_path = Mvc::getUserTmpPath($this->getId());\n      if (!\\defined('BBN_USER_PATH')) {\n        define('BBN_USER_PATH', $this->path);\n      }\n\n      if ($create && !empty($this->path) && !empty($this->tmp_path)) {\n        Dir::createPath($this->path);\n        Dir::createPath($this->tmp_path);\n        Dir::delete($this->tmp_path, false);\n      }\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 502,
+            "endLine": 519,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_init_dir",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "position": 0,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true creates it and remove temp files if any"
+                }
+            ],
+            "doc": {
+                "description": "Defines user's directory and constant BBN_USER_PATH if not done yet.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$create",
+                        "description": "If true creates it and remove temp files if any"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n    * Defines user's directory and constant BBN_USER_PATH if not done yet.\n    *\n    * @param bool $create If true creates it and remove temp files if any\n    * @return self\n    *\/"
         },
         "saveNewPermissionTokens": {
             "name": "saveNewPermissionTokens",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $access_token, string $refresh_token, int $expires_in, string $account_name)\n  {\n    if ($this->id) {\n      $account_exists = $this->db->count(\n        $this->class_cfg['tables']['permission_accounts'],\n        [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      );\n      \n      if ($account_exists > 0 ){\n        throw new Exception(X::_('Account already exists!'));\n      }\n      \n      if ($this->db->insert(\n          $this->class_cfg['tables']['permission_accounts'], [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      )) {\n        return (bool)$this->db->insert(\n          $this->class_cfg['tables']['permission_tokens'], [\n            $this->class_cfg['arch']['permission_tokens']['id_account']    => $this->db->lastId(),\n            $this->class_cfg['arch']['permission_tokens']['access_token']  => $access_token,\n            $this->class_cfg['arch']['permission_tokens']['refresh_token'] => $refresh_token,\n            $this->class_cfg['arch']['permission_tokens']['expire']        => time() + $expires_in,\n          ]\n        );\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 522,
-            "endLine": 555,
+            "code": "  public function saveNewPermissionTokens(string $access_token, string $refresh_token, int $expires_in, string $account_name): bool\n  {\n    if ($this->id) {\n      $account_exists = $this->db->count(\n        $this->class_cfg['tables']['permission_accounts'],\n        [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      );\n      \n      if ($account_exists > 0 ){\n        throw new Exception(X::_('Account already exists!'));\n      }\n      \n      if ($this->db->insert(\n          $this->class_cfg['tables']['permission_accounts'], [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      )) {\n        return (bool)$this->db->insert(\n          $this->class_cfg['tables']['permission_tokens'], [\n            $this->class_cfg['arch']['permission_tokens']['id_account']    => $this->db->lastId(),\n            $this->class_cfg['arch']['permission_tokens']['access_token']  => $access_token,\n            $this->class_cfg['arch']['permission_tokens']['refresh_token'] => $refresh_token,\n            $this->class_cfg['arch']['permission_tokens']['expire']        => time() + $expires_in,\n          ]\n        );\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 530,
+            "endLine": 563,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -713,15 +1396,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
+            "shortName": "saveNewPermissionTokens",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "access_token",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -732,6 +1420,11 @@
                     "name": "refresh_token",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -742,6 +1435,11 @@
                     "name": "expires_in",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -752,26 +1450,69 @@
                     "name": "account_name",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$access",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$refresh",
+                        "description": "token"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$expires",
+                        "description": "in"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$account",
+                        "description": "name"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param string $access_token\n   * @param string $refresh_token\n   * @param int $expires_in\n   * @param string $account_name\n   * @return bool\n   * @throws Exception\n   *\/"
         },
         "getPermissionAccountFromName": {
             "name": "getPermissionAccountFromName",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $account_name)\n  {\n    if ($this->id) {\n      return $this->db->rselect(\n        $this->class_cfg['tables']['permission_accounts'],\n        $this->class_cfg['arch']['permission_accounts'],\n        [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 557,
-            "endLine": 571,
+            "code": "  public function getPermissionAccountFromName(string $account_name)\n  {\n    if ($this->id) {\n      return $this->db->rselect(\n        $this->class_cfg['tables']['permission_accounts'],\n        $this->class_cfg['arch']['permission_accounts'],\n        [\n          $this->class_cfg['arch']['permission_accounts']['id_user'] => $this->id,\n          $this->class_cfg['arch']['permission_accounts']['name']    => $account_name,\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 565,
+            "endLine": 579,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -780,13 +1521,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getPermissionAccountFromName",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "account_name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -799,13 +1545,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $account_name)\n  {\n    if ($this->id) {\n      if ($account = $this->getPermissionAccountFromName($account_name)) {\n        return $this->db->rselect(\n          $this->class_cfg['tables']['permission_tokens'],\n          $this->class_cfg['arch']['permission_tokens'],\n          [\n            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']],\n          ]\n        ); \n      }\n    }\n    \n    return false;\n  }",
-            "startLine": 577,
-            "endLine": 592,
+            "code": "  public function getPermissionTokensFromAccountName(string $account_name)\n  {\n    if ($this->id) {\n      if ($account = $this->getPermissionAccountFromName($account_name)) {\n        return $this->db->rselect(\n          $this->class_cfg['tables']['permission_tokens'],\n          $this->class_cfg['arch']['permission_tokens'],\n          [\n            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']],\n          ]\n        ); \n      }\n    }\n    \n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 585,
+            "endLine": 600,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -814,33 +1563,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getPermissionTokensFromAccountName",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "account_name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$account",
+                        "description": "name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $account_name\n   * @return array|false|null\n   *\/"
         },
         "updatePermissionTokens": {
             "name": "updatePermissionTokens",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $account_name, string $access_token, string $refresh_token, int $expire_in)\n  {\n    if ($this->id && $account = $this->getPermissionAccountFromName($account_name)) {\n        return $this->db->update(\n          $this->class_cfg['tables']['permission_tokens'], [\n          $this->class_cfg['arch']['permission_tokens']['access_token']   => $access_token,\n          $this->class_cfg['arch']['permission_tokens']['refresh_token']  => $refresh_token,\n          $this->class_cfg['arch']['permission_tokens']['expire']         => time() + $expire_in,\n        ], [\n            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']]\n          ]\n        );\n    }\n\n    return false;\n  }",
-            "startLine": 594,
-            "endLine": 609,
+            "code": "  public function updatePermissionTokens(string $account_name, string $access_token, string $refresh_token, int $expire_in)\n  {\n    if ($this->id && $account = $this->getPermissionAccountFromName($account_name)) {\n        return $this->db->update(\n          $this->class_cfg['tables']['permission_tokens'], [\n          $this->class_cfg['arch']['permission_tokens']['access_token']   => $access_token,\n          $this->class_cfg['arch']['permission_tokens']['refresh_token']  => $refresh_token,\n          $this->class_cfg['arch']['permission_tokens']['expire']         => time() + $expire_in,\n        ], [\n            $this->class_cfg['arch']['permission_tokens']['id_account'] => $account[$this->class_cfg['arch']['permission_accounts']['id']]\n          ]\n        );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 602,
+            "endLine": 617,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -849,13 +1619,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
+            "shortName": "updatePermissionTokens",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "account_name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -865,6 +1640,11 @@
                     "name": "access_token",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -874,6 +1654,11 @@
                     "name": "refresh_token",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -883,8 +1668,394 @@
                     "name": "expire_in",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "findByPhoneNumber": {
+            "name": "findByPhoneNumber",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function findByPhoneNumber(string $phone_number)\n  {\n    try {\n      $phone = PhoneNumber::parse($phone_number);\n    }\n    catch (PhoneNumberParseException $e) {\n      return false;\n    }\n    $phone_number = $phone->format(PhoneNumberFormat::E164);\n    $user = $this->db->rselect(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users'],\n      [\n        $this->class_cfg['arch']['users']['login'] => $phone_number\n      ]\n    );\n    return !empty($user) && !$this->hasSkipVerification($user[$this->class_cfg['arch']['users']['id']]) && !$phone->isValidNumber() ? false : $user;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 623,
+            "endLine": 640,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "findByPhoneNumber",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "phone_number",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "number"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$phone",
+                        "description": "number"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $phone_number\n   * @return array|null\n   *\/"
+        },
+        "findUserByApiTokenAndDeviceUid": {
+            "name": "findUserByApiTokenAndDeviceUid",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function findUserByApiTokenAndDeviceUid(string $token, $device_uid)\n  {\n    if ($user_id = $this->getUserByTokenAndDeviceUid($token, $device_uid)) {\n\n      return $this->db->rselect(\n        $this->class_cfg['tables']['users'],\n        $this->class_cfg['arch']['users'],\n        [\n          $this->class_cfg['arch']['users']['id'] => $user_id\n        ]\n      );\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 647,
+            "endLine": 661,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "findUserByApiTokenAndDeviceUid",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "token",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "device_uid",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$token"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $token\n   * @return array|null\n   *\/"
+        },
+        "updatePhoneVerificationCode": {
+            "name": "updatePhoneVerificationCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function updatePhoneVerificationCode($phone_number, ?string $code): bool\n  {\n    if ($oldCfg = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['cfg'], [\n      $this->class_cfg['arch']['users']['id'] => $this->id\n    ])) {\n      $oldCfg = json_decode($oldCfg, true);\n    }\n    else {\n      $oldCfg = [];\n    }\n    $cfg = json_encode(\\array_merge($oldCfg, ['phone_verification_code' => $code]));\n    try {\n      $phone = PhoneNumber::parse($phone_number);\n    }\n    catch (PhoneNumberParseException $e) {\n      return false;\n    }\n    \n    if (!$this->hasSkipVerification() && !$phone->isValidNumber()) {\n      return false;\n    }\n\n\n    $number = $phone->format(PhoneNumberFormat::E164);\n\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['users'],\n      [\n        $this->class_cfg['arch']['users']['login'] => $number,\n        $this->class_cfg['arch']['users']['phone'] => $number,\n        $this->class_cfg['arch']['users']['cfg'] => $cfg\n      ],\n      [$this->class_cfg['arch']['users']['id'] => $this->id]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 667,
+            "endLine": 701,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "updatePhoneVerificationCode",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "phone_number",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string|null $code\n   * @return int|null\n   *\/"
+        },
+        "verifyTokenAndDeviceUid": {
+            "name": "verifyTokenAndDeviceUid",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function verifyTokenAndDeviceUid($device_uid, $token)\n  {\n    return $this->db->count(\n      $this->class_cfg['tables']['api_tokens'],\n      [\n        $this->class_cfg['arch']['api_tokens']['token']      => $token,\n        $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 705,
+            "endLine": 714,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "verifyTokenAndDeviceUid",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "device_uid",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "token",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "getUserByTokenAndDeviceUid": {
+            "name": "getUserByTokenAndDeviceUid",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function getUserByTokenAndDeviceUid($token, $device_uid)\n  {\n    return $this->db->selectOne(\n      $this->class_cfg['tables']['api_tokens'],\n      $this->class_cfg['arch']['api_tokens']['id_user'],\n      [\n        $this->class_cfg['arch']['api_tokens']['token']      => $token,\n        $this->class_cfg['arch']['api_tokens']['device_uid'] => $device_uid,\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 716,
+            "endLine": 726,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getUserByTokenAndDeviceUid",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "token",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "device_uid",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "updateApiTokenUserByTokenDevice": {
+            "name": "updateApiTokenUserByTokenDevice",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function updateApiTokenUserByTokenDevice(string $token, string $deviceUid, string $idUser, string $deviceLang = ''): bool\n  {\n    if (!empty($token) && !empty($deviceUid) && !empty($idUser)) {\n      return (bool)$this->db->update(\n        $this->class_cfg['tables']['api_tokens'],\n        [\n          $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser,\n          $this->class_cfg['arch']['api_tokens']['device_lang'] => $deviceLang\n        ],\n        [\n          $this->class_cfg['arch']['api_tokens']['token'] => $token,\n          $this->class_cfg['arch']['api_tokens']['device_uid'] => $deviceUid\n        ]\n      );\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 728,
+            "endLine": 744,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "shortName": "updateApiTokenUserByTokenDevice",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "token",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "deviceUid",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "idUser",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "deviceLang",
+                    "position": 3,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
@@ -895,13 +2066,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->api_request_output;\n  }",
-            "startLine": 738,
-            "endLine": 741,
+            "code": "  public function getApiRequestOutput()\n  {\n    return $this->api_request_output;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 746,
+            "endLine": 749,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -910,8 +2084,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getApiRequestOutput",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getApiNotificationsToken": {
@@ -919,13 +2093,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idUser = '')\n  {\n    return $this->db->selectOne([\n      'table' => $this->class_cfg['tables']['api_tokens'],\n      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],\n      'where' => [ \n        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id\n      ],\n      'order' => [[\n        'field' => $this->class_cfg['arch']['api_tokens']['last'],\n        'dir' => 'DESC'\n      ]]\n    ]);\n  }",
-            "startLine": 743,
-            "endLine": 756,
+            "code": "  public function getApiNotificationsToken(string $idUser = ''): ?string\n  {\n    return $this->db->selectOne([\n      'table' => $this->class_cfg['tables']['api_tokens'],\n      'fields' => $this->class_cfg['arch']['api_tokens']['notifications_token'],\n      'where' => [ \n        $this->class_cfg['arch']['api_tokens']['id_user'] => $idUser ?: $this->id\n      ],\n      'order' => [[\n        'field' => $this->class_cfg['arch']['api_tokens']['last'],\n        'dir' => 'DESC'\n      ]]\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 751,
+            "endLine": 764,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -934,16 +2111,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getApiNotificationsToken",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idUser",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -956,13 +2138,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idUser = '')\n  {\n    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [\n      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id\n    ]);\n  }",
-            "startLine": 758,
-            "endLine": 763,
+            "code": "  public function getPhoneNumber(string $idUser = ''): ?string\n  {\n    return $this->db->selectOne($this->class_cfg['table'], $this->class_cfg['arch']['users']['phone'], [\n      $this->class_cfg['arch']['users']['id'] => $idUser ?: $this->id\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 766,
+            "endLine": 771,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -971,16 +2156,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPhoneNumber",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idUser",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -993,13 +2183,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if ($cfg = $this->db->selectOne(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']['cfg'],\n      [\n        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id\n      ]\n    )) {\n      $cfg = json_decode($cfg);\n      return !empty($cfg->skip_verification);\n    }\n    return false;\n  }",
-            "startLine": 766,
-            "endLine": 779,
+            "code": "  public function hasSkipVerification(string $id = ''): bool\n  {\n    if ($cfg = $this->db->selectOne(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']['cfg'],\n      [\n        $this->class_cfg['arch']['users']['id'] => $id ?: $this->id\n      ]\n    )) {\n      $cfg = json_decode($cfg);\n      return !empty($cfg->skip_verification);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 774,
+            "endLine": 787,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1008,15 +2201,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "hasSkipVerification",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1029,13 +2227,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Common",
+            "class": "bbn\\User\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->db;\n  }",
-            "startLine": 784,
-            "endLine": 787,
+            "code": "  public function getDbInstance(): Db\n  {\n    return $this->db;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 792,
+            "endLine": 795,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1044,24 +2245,321 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getDbInstance",
             "returns": [
                 "bbn\\Db"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": "db"
+            },
+            "comments": "  \/**\n   * @return Db db\n   *\/"
         }
     },
     "properties": {
+        "_mailer": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "auth": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "tmp_path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "id": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "data": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": []
+        },
+        "id_group": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var int",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "alert": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var mixed",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var Db",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
         "prev_time": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var mixed",
                 "tags": []
-            }
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array $class_cfg",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "api_request_output": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Common"
+            },
+            "declaring_trait": "bbn\\User\\Common",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "An output string to be returned when in api requests.\nWill be mainly used to return tokens response in api request.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "mixed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
         }
     },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "bbn\\Mvc": "Mvc",
+        "bbn\\Db": "Db",
+        "bbn\\File\\Dir": "Dir",
+        "bbn\\File\\System": "System",
+        "bbn\\User\\Manager": "Manager",
+        "bbn\\Util\\Enc": "Enc",
+        "Brick\\PhoneNumber\\PhoneNumber": "PhoneNumber",
+        "Brick\\PhoneNumber\\PhoneNumberParseException": "PhoneNumberParseException",
+        "Brick\\PhoneNumber\\PhoneNumberFormat": "PhoneNumberFormat"
+    },
+    "dummyComments": [
+        "\/** @var string *\/",
+        "\/** @var bool *\/",
+        "\/** @var string *\/",
+        "\/** @var string *\/",
+        "\/** @var string *\/",
+        "\/** @var array *\/",
+        "\/** @var int *\/",
+        "\/** @var mixed *\/",
+        "\/** @var array *\/",
+        "\/** @var Db *\/",
+        "\/** @var mixed *\/",
+        "\/** @var array $class_cfg *\/",
+        "\/**\n   * An output string to be returned when in api requests.\n   * Will be mainly used to return tokens response in api request.\n   *\n   * @var mixed\n   *\/",
+        "\/**\n   * Retrieves data stored in the data property of the user, only if authenticated.\n   *\n   * @param string $idx\n   *\n   * @return void\n   *\/",
+        "\/**\n   * Returns the directory path for the user.\n   *\n   * @return string\n   *\/",
+        "\/**\n   * Returns the tmp directory path for the user.\n   *\n   * @return string\n   *\/",
+        "\/**\n   * Returns true if authenticated false otherwise.\n   *\n   * @return bool\n   *\/",
+        "\/**\n   * Returns the user's ID if there is no error.\n   *\n   * @return null|string\n   *\/",
+        "\/**\n   * Returns the user's group's ID if there is no error.\n   *\n   * @return null|string\n   *\/",
+        "\/**\n   * Expires an hotlink by setting the expire column to now.\n   *\n   * @return int\n   *\/",
+        "\/**\n   * Retrieves a user's ID from the hotlink's magic string.\n   *\n   * @param string $id\n   * @param string $key\n   * @return null|string\n   *\/",
+        "\/**\n   * Checks if an error has been thrown or not.\n   *\n   * @return bool\n   *\/",
+        "\/**\n   * Unauthenticates, resets the config and destroys the session.\n   *\n   * @return void\n   *\/",
+        "\/**\n   * Returns an instance of the mailer class.\n   *\n   * @return Mail\n   * @throws Exception\n   *\/",
+        "\/**\n   * Changes the password in the database.\n   *\n   * @return bool\n   *\/",
+        "\/**\n   * Returns the email of the given user or the current one.\n   *\n   * @return string|null\n   *\/",
+        "\/**\n   * Adds a file to the tmp folder of the user and returns its path.\n   *\n   * @param string $file\n   * @param string $name\n   * @param bool   $move\n   * @return string|null\n   *\/",
+        "\/**\n   * Encrypts the given string.\n   *\n   * @param string $st\n   * @return string|null\n   *\/",
+        "\/**\n   * Decrypts the given string.\n   *\n   * @param string $st\n   * @return string|null\n   *\/",
+        "\/**\n   * Generates a random long string (16-32 chars) used as unique fingerprint.\n   * @return string\n   *\/",
+        "\/**\n   * Returns an array with a key and a magic string used for making hotlinks.\n   *\n   * @return array\n   *\/",
+        "\/**\n   * Checks if a given string corresponds to the given hash.\n   *\n   * @param string $key  The key\n   * @param string $hash The corresponding hash\n   * @return bool\n   *\/",
+        "\/**\n   * Sets the error property once and for all.\n   *\n   * @param int $err error code\n   * @return self\n   *\/",
+        "\/**\n   * Returns the first error in an array with the code and description.\n   *\n   * @return null|array\n   *\/",
+        "\/**\n   * Retrieves the encryption key from database if not defined and saves it.\n   *\n   * @return string|null\n   *\/",
+        "\/**\n    * Use the configured hash function to encrypt a password string.\n    *\n    * @param string $st The string to crypt\n    * @return string\n    *\/",
+        "\/**\n    * Defines user's directory and constant BBN_USER_PATH if not done yet.\n    *\n    * @param bool $create If true creates it and remove temp files if any\n    * @return self\n    *\/",
+        "\/**\n   * @param string $access_token\n   * @param string $refresh_token\n   * @param int $expires_in\n   * @param string $account_name\n   * @return bool\n   * @throws Exception\n   *\/",
+        "\/**\n   * @param string $account_name\n   * @return array|false|null\n   *\/",
+        "\/**\n   * @param string $phone_number\n   * @return array|null\n   *\/",
+        "\/**\n   * @param string $token\n   * @return array|null\n   *\/",
+        "\/**\n   * @param string|null $code\n   * @return int|null\n   *\/",
+        "\/**\n   * @return Db db\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

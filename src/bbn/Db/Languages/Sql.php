@@ -2469,7 +2469,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $h = md5($this->getHost().X::dirname($this->getCurrent() ?? ''));
     }
     else {
-      $h = str_replace('/', '-', $this->getConnectionCode());
+      $h = str_replace('/', '-', $this->getConnectionCode() . '-' . $this->getCurrent());
     }
 
     switch ($mode){
@@ -2477,7 +2477,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $r = $this->getEngine().'/'.$h.'/'.str_replace('.', '/', $this->tableFullName($item));
         break;
       case 'tables':
-        $r = $this->getEngine().'/'.$h.'/'.($item ?: $this->getCurrent());
+        $r = $this->getEngine().'/'.$h.'/' . ($item ?: X::dirname($this->getCurrent()));
         break;
       case 'databases':
         $r = $this->getEngine().'/'.$h.'/_bbn-database';
@@ -2978,6 +2978,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           if (!isset($res['available_fields'][$col])) {
             //$this->log($res);
             //$this->log(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
+            X::hddump($this->tableFullName('versions'), $this->modelize('versions'), $this->getTables(), $this->getColumns('versions'));
             $this->error("Impossible to find the column $col", false);
             return null;
           }

@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Mvc\\Router",
     "namespace": true,
+    "realName": "Router",
+    "realNamespace": "bbn\\Mvc",
     "traits": [
         "bbn\\Mvc\\Common",
         "bbn\\Models\\Tts\\Retriever"
@@ -18,17 +20,13 @@
     "interfaces": [],
     "fileName": "\/Mvc\/Router.php",
     "startLine": 28,
-    "endLine": 1210,
-    "numMethods": 41,
-    "numProperties": 0,
+    "endLine": 1227,
+    "numMethods": 62,
+    "numProperties": 14,
     "numConstants": 0,
     "numStaticProperties": 6,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Mvc\\Common",
-        "bbn\\Models\\Tts\\Retriever"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -100,7 +98,6 @@
     "namespaceName": "bbn\\Mvc",
     "shortName": "Router",
     "contentConstructor": {
-        "file": "bbn\\Mvc\\Router",
         "returns": []
     },
     "methods": {
@@ -109,11 +106,14 @@
             "summary": "Checks whether The given string is a valid mode.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $mode)\n  {\n    return (bool)\\in_array($mode, self::$_modes, true);\n  }",
+            "code": "  public static function isMode(string $mode): bool\n  {\n    return (bool)\\in_array($mode, self::$_modes, true);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 125,
             "endLine": 128,
             "isDeprecated": false,
@@ -124,33 +124,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "isMode",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "mode",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The mode as defined in self::$_modes"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks whether The given string is a valid mode.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The mode as defined in self::$_modes"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether The given string is a valid mode.\n   *\n   * @param string $mode The mode as defined in self::$_modes\n   *\n   * @return bool\n   *\/"
         },
         "parse": {
             "name": "parse",
             "summary": "Removes trailing slashes.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path)\n  {\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    \/\/ case like my\/dir\/.\n    if ((strlen($path) > 0) && (X::basename($path) === '.')) {\n      $path = substr($path, 0, -1);\n    }\n\n    return $path ?: '.';\n  }",
+            "code": "  public static function parse(string $path): string\n  {\n    while (strpos($path, '\/\/') !== false){\n      $path = str_replace('\/\/', '\/', $path);\n    }\n\n    \/\/ case like my\/dir\/.\n    if ((strlen($path) > 0) && (X::basename($path) === '.')) {\n      $path = substr($path, 0, -1);\n    }\n\n    return $path ?: '.';\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 138,
             "endLine": 150,
             "isDeprecated": false,
@@ -161,32 +182,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "parse",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Removes trailing slashes.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Removes trailing slashes.\n   *\n   * @param string $path\n   *\n   * @return string\n   *\/"
         },
         "getCheckerFile": {
             "name": "getCheckerFile",
             "summary": "Gets the name that the checker file should have for the given known route.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    if (!empty($cfg['mode'])) {\n      if (\\in_array($cfg['mode'], self::$_controllers, true)) {\n        return '_ctrl.php';\n      }\n      if ($cfg['mode'] === 'model') {\n        return '_model.php';\n      }\n      if (!empty($cfg['ext']) && ($cfg['ext'] === 'less')) {\n        return '_mixins.less';\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public static function getCheckerFile(array $cfg): ?string\n  {\n    if (!empty($cfg['mode'])) {\n      if (\\in_array($cfg['mode'], self::$_controllers, true)) {\n        return '_super.php';\n      }\n      if ($cfg['mode'] === 'model') {\n        return '_super.php';\n      }\n      if (!empty($cfg['ext']) && ($cfg['ext'] === 'less')) {\n        return '_super.less';\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 159,
             "endLine": 174,
             "isDeprecated": false,
@@ -197,33 +238,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getCheckerFile",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets the name that the checker file should have for the given known route.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the name that the checker file should have for the given known route.\n   *\n   * @param array $cfg\n   * @return string|null\n   *\/"
         },
         "__construct": {
             "name": "__construct",
             "summary": "Router constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Mvc $mvc, array $routes = [])\n  {\n    self::retrieverInit($this);\n    $this->_mvc    = $mvc;\n    $this->_routes = $routes;\n    $this->_root   = $this->_mvc->appPath();\n    $this->_registerLocaleDomain();\n  }",
+            "code": "  public function __construct(bbn\\Mvc $mvc, array $routes = [])\n  {\n    self::retrieverInit($this);\n    $this->_mvc    = $mvc;\n    $this->_routes = $routes;\n    $this->_root   = $this->_mvc->appPath();\n    $this->_registerLocaleDomain();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 183,
             "endLine": 190,
             "isDeprecated": false,
@@ -234,13 +295,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "mvc",
                     "position": 0,
                     "type": "bbn\\Mvc",
+                    "type_arr": [
+                        "bbn\\Mvc"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -250,23 +316,48 @@
                     "name": "routes",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Router constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\Mvc",
+                        "name": "$mvc"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$routes"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Router constructor.\n   *\n   * @param bbn\\Mvc $mvc\n   * @param array $routes\n   *\/"
         },
         "reset": {
             "name": "reset",
             "summary": "Resets the full path in the mvc\/mode of an external app (plugin).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $this->alt_root = false;\n    return $this;\n  }",
+            "code": "  public function reset(): self\n  {\n    $this->alt_root = false;\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 198,
             "endLine": 202,
             "isDeprecated": false,
@@ -277,22 +368,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "reset",
             "returns": [
                 "self"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Resets the full path in the mvc\/mode of an external app (plugin).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Resets the full path in the mvc\/mode of an external app (plugin).\n   *\n   * @return self\n   *\/"
         },
         "setPrepath": {
             "name": "setPrepath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path)\n  {\n    if (!$this->checkPath($path)) {\n      throw new Exception(X::_(\"The prepath $path is not valid\"));\n    }\n\n    $this->_prepath = $path;\n    if (substr($this->_prepath, -1) !== '\/') {\n      $this->_prepath = $this->_prepath . '\/';\n    }\n\n    if ($this->_mode) {\n      $this->route($this->_mvc->getUrl(), $this->_mode);\n    }\n\n    return true;\n  }",
+            "code": "  public function setPrepath($path): bool\n  {\n    if (!$this->checkPath($path)) {\n      throw new Exception(X::_(\"The prepath $path is not valid\"));\n    }\n\n    $this->_prepath = $path;\n    if (substr($this->_prepath, -1) !== '\/') {\n      $this->_prepath = $this->_prepath . '\/';\n    }\n\n    if ($this->_mode) {\n      $this->route($this->_mvc->getUrl(), $this->_mode);\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 209,
             "endLine": 225,
             "isDeprecated": false,
@@ -303,32 +403,49 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setPrepath",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $path\n   * @return bool\n   *\/"
         },
         "getPrepath": {
             "name": "getPrepath",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($with_slash = 1)\n  {\n    if (!empty($this->_prepath)) {\n      return $with_slash ? $this->_prepath : substr($this->_prepath, 0, -1);\n    }\n\n    return '';\n  }",
+            "code": "  public function getPrepath($with_slash = 1): string\n  {\n    if (!empty($this->_prepath)) {\n      return $with_slash ? $this->_prepath : substr($this->_prepath, 0, -1);\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 231,
             "endLine": 238,
             "isDeprecated": false,
@@ -339,33 +456,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getPrepath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "with_slash",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
                     "default_name": "",
                     "description": "slash"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$with",
+                        "description": "slash"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $with_slash\n   * @return string\n   *\/"
         },
         "getLocaleDomain": {
             "name": "getLocaleDomain",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return $this->_textdomains[$plugin ?: 'main'] ?? null;\n  }",
+            "code": "  public function getLocaleDomain(string $plugin = null): ?string\n  {\n    return $this->_textdomains[$plugin ?: 'main'] ?? null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 245,
             "endLine": 248,
             "isDeprecated": false,
@@ -376,33 +512,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getLocaleDomain",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string|null $plugin\n   * @return string|null\n   *\/"
         },
         "getPluginFromComponent": {
             "name": "getPluginFromComponent",
             "summary": "Retrieves the plugin's name from the component's name if any.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $name)\n  {\n    foreach ($this->getPlugins() as $n => $p) {\n      if (X::indexOf($name, $n . '-') === 0) {\n        return $p;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function getPluginFromComponent(string $name): ?array\n  {\n    foreach ($this->getPlugins() as $n => $p) {\n      if (X::indexOf($name, $n . '-') === 0) {\n        return $p;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 257,
             "endLine": 266,
             "isDeprecated": false,
@@ -413,33 +570,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getPluginFromComponent",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Retrieves the plugin's name from the component's name if any.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves the plugin's name from the component's name if any.\n   *\n   * @param string $name\n   * @return array|null\n   *\/"
         },
         "routeComponent": {
             "name": "routeComponent",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $name)\n  {\n    if ($p = $this->getPluginFromComponent($name)) {\n      $root       = $p['path'] . 'src\/';\n      $prefix     = $p['name'] . '-';\n      $plugin     = $p['name'];\n      $plugin_url = $p['url'];\n    }\n    else {\n      $root       = $this->appPath();\n      $prefix     = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';\n      if (X::indexOf($name, $prefix) !== 0) {\n        $prefix = substr($name, 0, strpos($name, '-') + 1);\n      }\n      $plugin     = null;\n      $plugin_url = null;\n    }\n\n    if (!empty($root) && (X::indexOf($name, $prefix) === 0)) {\n      $local_name = substr($name, strlen($prefix));\n      $parts      = explode('-', $local_name);\n      $root      .= 'components\/';\n      $path       = implode('\/', $parts);\n      $dir        = $root . $path;\n      $this->_registerLocaleDomain($plugin);\n\n      if (is_dir($dir)) {\n        $res   = [\n          'js' => [],\n          'html' => [],\n          'css' => [],\n        ];\n        $fpath = $root . $path . '\/' . end($parts);\n        foreach ($res as $mode => $c) {\n          foreach (self::$_filetypes[$mode] as $f) {\n            if (is_file($fpath . '.' . $f)) {\n              $res[$mode] = $this->_set_known(\n                [\n                'file' => $fpath . '.' . $f,\n                'path' => str_replace('-', '\/', $local_name),\n                'plugin' => $plugin_url,\n                'plugin_name' => $plugin,\n                'component' => true,\n                'component_name' => $name,\n                'ext' => $f,\n                'mode' => $mode,\n                'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n                ], true\n              );\n              break;\n            }\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function routeComponent(string $name): ?array\n  {\n    if ($p = $this->getPluginFromComponent($name)) {\n      $root       = $p['path'] . 'src\/';\n      $prefix     = $p['name'] . '-';\n      $plugin     = $p['name'];\n      $plugin_url = $p['url'];\n    }\n    else {\n      $root       = $this->appPath();\n      $prefix     = (defined('BBN_APP_PREFIX') ? BBN_APP_PREFIX : BBN_APP_NAME) . '-';\n      if (X::indexOf($name, $prefix) !== 0) {\n        $prefix = substr($name, 0, strpos($name, '-') + 1);\n      }\n      $plugin     = null;\n      $plugin_url = null;\n    }\n\n    if (!empty($root) && (X::indexOf($name, $prefix) === 0)) {\n      $local_name = substr($name, strlen($prefix));\n      $parts      = explode('-', $local_name);\n      $root      .= 'components\/';\n      $path       = implode('\/', $parts);\n      $dir        = $root . $path;\n      $this->_registerLocaleDomain($plugin);\n\n      if (is_dir($dir)) {\n        $res   = [\n          'js' => [],\n          'html' => [],\n          'css' => [],\n        ];\n        $fpath = $root . $path . '\/' . end($parts);\n        foreach ($res as $mode => $c) {\n          foreach (self::$_filetypes[$mode] as $f) {\n            if (is_file($fpath . '.' . $f)) {\n              $res[$mode] = $this->_set_known(\n                [\n                'file' => $fpath . '.' . $f,\n                'path' => str_replace('-', '\/', $local_name),\n                'plugin' => $plugin_url,\n                'plugin_name' => $plugin,\n                'component' => true,\n                'component_name' => $name,\n                'ext' => $f,\n                'mode' => $mode,\n                'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n                ], true\n              );\n              break;\n            }\n          }\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 273,
             "endLine": 332,
             "isDeprecated": false,
@@ -450,33 +627,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "routeComponent",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $name\n   * @return array|null\n   *\/"
         },
         "routeCustomPlugin": {
             "name": "routeCustomPlugin",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $mode, string $plugin)\n  {\n    if ($root = $this->_get_custom_root($mode, $plugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n\n      if (!empty($file)) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $plugin,\n          'mode' => $mode,\n          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n          ], true\n        );\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function routeCustomPlugin(string $path, string $mode, string $plugin): ?array\n  {\n    if ($root = $this->_get_custom_root($mode, $plugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n\n      if (!empty($file)) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $plugin,\n          'mode' => $mode,\n          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n          ], true\n        );\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 341,
             "endLine": 366,
             "isDeprecated": false,
@@ -487,16 +684,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "routeCustomPlugin",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -506,6 +708,11 @@
                     "name": "mode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -515,23 +722,53 @@
                     "name": "plugin",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $path\n   * @param string $mode\n   * @param string $plugin\n   * @return array|null\n   *\/"
         },
         "routeSubplugin": {
             "name": "routeSubplugin",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $mode, string $pluginName, string $subplugin)\n  {\n    if ($root = $this->_get_subplugin_root($mode, $pluginName, $subplugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n\n      if (!empty($file)) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $this->pluginPath($pluginName),\n          'plugin_name' => $pluginName,\n          'mode' => $mode,\n          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n          ], false\n        );\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function routeSubplugin(string $path, string $mode, string $pluginName, string $subplugin): ?array\n  {\n    if ($root = $this->_get_subplugin_root($mode, $pluginName, $subplugin)) {\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n      }\n\n      if (!empty($file)) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'ext' => $t,\n          'plugin' => $this->pluginPath($pluginName),\n          'plugin_name' => $pluginName,\n          'mode' => $mode,\n          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n          ], false\n        );\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 376,
             "endLine": 402,
             "isDeprecated": false,
@@ -542,16 +779,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
+            "shortName": "routeSubplugin",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -561,6 +803,11 @@
                     "name": "mode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -570,6 +817,11 @@
                     "name": "pluginName",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -579,23 +831,58 @@
                     "name": "subplugin",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$subplugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $path\n   * @param string $mode\n   * @param string $plugin\n   * @param string $subplugin\n   * @return array|null\n   *\/"
         },
         "route": {
             "name": "route",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $mode)\n  {\n    if (self::isMode($mode)) {\n      \/\/ If there is a prepath defined we prepend it to the path\n      if ($this->_prepath && (strpos($path, '\/') !== 0) && (strpos($path, $this->_prepath) !== 0)) {\n        $path = $this->_prepath . $path;\n      }\n\n      \/\/ We only try to retrieve a file path through a whole URL for controllers\n      if (\\in_array($mode, self::$_controllers, true)) {\n        $this->_mode = $mode;\n        return $this->_find_controller($path, $mode);\n      }\n\n      return $this->_find_mv($path, $mode);\n    }\n\n    return null;\n  }",
+            "code": "  public function route(string $path, string $mode, bool $exact = false): ?array\n  {\n    if (self::isMode($mode)) {\n      \/\/ If there is a prepath defined we prepend it to the path\n      if ($this->_prepath && (strpos($path, '\/') !== 0) && (strpos($path, $this->_prepath) !== 0)) {\n        $path = $this->_prepath . $path;\n      }\n\n      \/\/ We only try to retrieve a file path through a whole URL for controllers\n      if (\\in_array($mode, self::$_controllers, true)) {\n        $this->_mode = $mode;\n        return $this->_find_controller($path, $mode, $exact);\n      }\n\n      return $this->_find_mv($path, $mode);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 411,
             "endLine": 429,
             "isDeprecated": false,
@@ -604,18 +891,23 @@
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 2,
+            "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "route",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -625,23 +917,62 @@
                     "name": "mode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
+                },
+                {
+                    "name": "exact",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $path\n   * @param string $mode\n   *\n   * @return array|mixed|null\n   *\/"
         },
         "fetchDir": {
             "name": "fetchDir",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path, $mode)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_root($mode);\n    $plugin = $this->_find_plugin($path);\n    if ($plugin && ($alt_path = $plugin['url'])) {\n      $alt_root = $this->_get_alt_root($mode, $alt_path);\n    }\n    elseif ($alt_root = $this->_get_alt_root($mode)) {\n      $alt_path = $this->alt_root;\n    }\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)\n        && is_dir($dir2)\n    ) {\n      $dir = $dir2;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n    $res   = [];\n    $files = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public function fetchDir($path, $mode): ?array\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_root($mode);\n    $plugin = $this->_find_plugin($path);\n    if ($plugin && ($alt_path = $plugin['url'])) {\n      $alt_root = $this->_get_alt_root($mode, $alt_path);\n    }\n    elseif ($alt_root = $this->_get_alt_root($mode)) {\n      $alt_path = $this->alt_root;\n    }\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n    elseif (!empty($alt_path) && !empty($alt_root) && ($dir2 = self::parse($alt_root . substr($path, \\strlen($alt_path) + 1))) && (strpos($dir2, $alt_root) === 0)\n        && is_dir($dir2)\n    ) {\n      $dir = $dir2;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n    $res   = [];\n    $files = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 437,
             "endLine": 491,
             "isDeprecated": false,
@@ -652,16 +983,19 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "fetchDir",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -671,23 +1005,44 @@
                     "name": "mode",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $path\n   * @param $mode\n   * @return array|null\n   *\/"
         },
         "fetchCustomDir": {
             "name": "fetchCustomDir",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $mode, string $plugin)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_custom_root($mode, $plugin);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public function fetchCustomDir(string $path, string $mode, string $plugin): array\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_custom_root($mode, $plugin);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 499,
             "endLine": 542,
             "isDeprecated": false,
@@ -698,15 +1053,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "fetchCustomDir",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -716,6 +1076,11 @@
                     "name": "mode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -725,23 +1090,46 @@
                     "name": "plugin",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $path\n   * @param $mode\n   * @return array|null\n   *\/"
         },
         "fetchSubpluginDir": {
             "name": "fetchSubpluginDir",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path, string $mode, string $plugin_from, string $plugin_for)\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_subplugin_root($mode, $plugin_from, $plugin_for);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n\n    if (!$dir) {\n      throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public function fetchSubpluginDir(string $path, string $mode, string $plugin_from, string $plugin_for): array\n  {\n    \/\/ Only for views and models\n    if (!self::isMode($mode) && !\\in_array($mode, self::$_controllers)) {\n      throw new \\Exception(X::_(\"The mode %s is invalid\", $mode));\n    }\n\n    \/\/ If there is a prepath defined we prepend it to the path\n    if ($this->_prepath\n        && (strpos($path, '\/') !== 0)\n        && (strpos($path, $this->_prepath) !== 0)\n    ) {\n      $path = $this->_prepath . $path;\n    }\n\n    \/** @var string $root Where the files will be searched for by default *\/\n    $root   = $this->_get_subplugin_root($mode, $plugin_from, $plugin_for);\n\n    $dir = false;\n    $dir1 = self::parse($root . $path);\n    if (is_dir($dir1) && (strpos($dir1, $root) === 0)) {\n      $dir = $dir1;\n    }\n\n    if (!$dir) {\n      return [];\n      \/\/throw new \\Exception(X::_(\"Impossible to find the directory for %s\", $path));\n    }\n\n    $res     = [];\n    $files   = bbn\\File\\Dir::getFiles($dir);\n    $prepath = $path && ($path !== '.') ? $path.'\/' : '';\n    if (!is_array($files)) {\n      throw new \\Exception(X::_(\"The directory %s doesn't exist\", $dir));\n    }\n\n    foreach ($files as $f) {\n      if (\\in_array(bbn\\Str::fileExt($f), self::$_filetypes[$mode], true)) {\n        $res[] = $prepath.bbn\\Str::fileExt($f, true)[0];\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 550,
             "endLine": 593,
             "isDeprecated": false,
@@ -752,15 +1140,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 4,
+            "shortName": "fetchSubpluginDir",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -770,6 +1163,11 @@
                     "name": "mode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -779,6 +1177,11 @@
                     "name": "plugin_from",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -788,23 +1191,46 @@
                     "name": "plugin_for",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $path\n   * @param $mode\n   * @return array|null\n   *\/"
         },
         "getRoutes": {
             "name": "getRoutes",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_routes;\n  }",
+            "code": "  public function getRoutes(): array\n  {\n    return $this->_routes;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 599,
             "endLine": 602,
             "isDeprecated": false,
@@ -815,109 +1241,33 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getRoutes",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return array\n   *\/"
         },
-        "log": {
-            "name": "log",
-            "summary": "",
+        "_get_root": {
+            "name": "_get_root",
+            "summary": "Get the full path in the mvc\/mode of the main app.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    if (Mvc::getDebug()) {\n      $ar = \\func_get_args();\n      X::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
-            "startLine": 64,
-            "endLine": 70,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  private function _get_root(string $mode): ?string\n  {\n    if (self::isMode($mode)) {\n      return $this->_root . $this->_get_mode_path($mode);\n    }\n\n    return null;\n  }",
             "parent": false,
-            "arguments": []
-        },
-        "pluginDataPath": {
-            "name": "pluginDataPath",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($plugin = NULL)\n  {\n    if (($this->_plugin || $plugin) && \\defined('BBN_DATA_PATH')) {\n      return BBN_DATA_PATH.'plugins\/'.$this->pluginName($plugin ?: $this->_plugin).'\/';\n    }\n\n    return null;\n  }",
-            "startLine": 73,
-            "endLine": 80,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "plugin",
-                    "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
-        },
-        "getPlugins": {
-            "name": "getPlugins",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getPlugins();\n  }",
-            "startLine": 83,
-            "endLine": 86,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "hasPlugin": {
-            "name": "hasPlugin",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($plugin)\n  {\n    return $this->_mvc->hasPlugin($plugin);\n  }",
-            "startLine": 89,
-            "endLine": 92,
+            "trait": false,
+            "startLine": 612,
+            "endLine": 619,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -926,32 +1276,57 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "returns": [],
-            "parent": false,
+            "shortName": "_get_root",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
-                    "name": "plugin",
+                    "name": "mode",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The mode as defined in self::$_modes"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Get the full path in the mvc\/mode of the main app.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The mode as defined in self::$_modes"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Get the full path in the mvc\/mode of the main app.\n   *\n   * @param string $mode The mode as defined in self::$_modes\n   *\n   * @return string\n   *\/"
         },
-        "isPlugin": {
-            "name": "isPlugin",
-            "summary": "",
+        "_get_mode_path": {
+            "name": "_get_mode_path",
+            "summary": "Returns the mode path.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function($plugin = NULL)\n  {\n    return $this->_mvc->isPlugin($plugin ?: $this->pluginName($this->_plugin));\n  }",
-            "startLine": 95,
-            "endLine": 98,
+            "code": "  private function _get_mode_path(string $mode)\n  {\n    if ($mode === 'dom') {\n      return 'mvc\/public\/';\n    }\n\n    if ($mode === 'cli') {\n      return 'cli\/';\n    }\n\n    if (in_array($mode, self::$_modes)) {\n      return 'mvc\/'.$mode.'\/';\n    }\n\n    throw new \\Exception(X::_(\"The mode $mode doesn't exist in router!\"));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 629,
+            "endLine": 644,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -959,33 +1334,57 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_get_mode_path",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "plugin",
+                    "name": "mode",
                     "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the mode path.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n   * Returns the mode path.\n   *\n   * @param string $mode\n   * @return string\n   * @throws Exception\n   *\/"
         },
-        "pluginPath": {
-            "name": "pluginPath",
-            "summary": "",
+        "_get_alt_root": {
+            "name": "_get_alt_root",
+            "summary": "Get the full path in the mvc\/mode of an external app (plugin).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function($plugin = NULL, $raw = false)\n  {\n    return $this->_mvc->pluginPath($plugin ?: $this->pluginName($this->_plugin), $raw);\n  }",
-            "startLine": 101,
-            "endLine": 104,
+            "code": "  private function _get_alt_root(string $mode, string $path = null): ?string\n  {\n    if (($path || $this->alt_root)\n        && self::isMode($mode)\n        && isset($this->_routes['root'][$path ?: $this->alt_root])\n    ) {\n      $res = bbn\\Str::parsePath($this->_routes['root'][$path ?: $this->alt_root]['path']) .\n        '\/src\/' . $this->_get_mode_path($mode);\n      return $res;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 654,
+            "endLine": 666,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -993,76 +1392,80 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 2,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_get_alt_root",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
-                    "name": "plugin",
+                    "name": "mode",
                     "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The mode as defined in self::$_modes"
                 },
                 {
-                    "name": "raw",
+                    "name": "path",
                     "position": 1,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": false,
-                    "default_name": ""
-                }
-            ]
-        },
-        "pluginUrl": {
-            "name": "pluginUrl",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($plugin = NULL)\n  {\n    return $this->_mvc->pluginUrl($plugin ?: $this->pluginName($this->_plugin));\n  }",
-            "startLine": 107,
-            "endLine": 110,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "plugin",
-                    "position": 0,
-                    "type": "",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The path of the plugin"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Get the full path in the mvc\/mode of an external app (plugin).\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The mode as defined in self::$_modes"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$path",
+                        "description": "The path of the plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Get the full path in the mvc\/mode of an external app (plugin).\n   *\n   * @param string $mode The mode as defined in self::$_modes\n   * @param string|null $path The path of the plugin\n   * @return string|null\n   *\/"
         },
-        "pluginName": {
-            "name": "pluginName",
-            "summary": "",
+        "_is_alias": {
+            "name": "_is_alias",
+            "summary": "Checks whether a path is part of the routes['alias'] array.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function($path = NULL)\n  {\n    return $this->_mvc->pluginName($path ?: $this->_path);\n  }",
-            "startLine": 113,
-            "endLine": 116,
+            "code": "  private function _is_alias(string $path): ?string\n  {\n    if (!empty($this->_routes['alias'])) {\n      $path = self::parse($path);\n      if (isset($this->_routes['alias'][$path])) {\n        return $path;\n      }\n\n      foreach (array_keys($this->_routes['alias']) as $p) {\n        if (strpos($path, $p . '\/') === 0) {\n          return $p;\n        }\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 676,
+            "endLine": 692,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1070,96 +1473,135 @@
             "isVariadic": false,
             "returnsReference": false,
             "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_is_alias",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks whether a path is part of the routes['alias'] array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a path is part of the routes['alias'] array.\n   *\n   * @param mixed $path\n   *\n   * @return string|null\n   *\/"
         },
-        "getCookie": {
-            "name": "getCookie",
-            "summary": "",
+        "_get_alias": {
+            "name": "_get_alias",
+            "summary": "Returns the alias of the given path if it is part of the routes['alias'] array.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getCookie();\n  }",
-            "startLine": 119,
-            "endLine": 122,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  private function _get_alias(string $path): ?string\n  {\n    $path = self::parse($path);\n    if (isset($this->_routes['alias'][$path])) {\n      return \\is_array($this->_routes['alias'][$path]) ? $this->_routes['alias'][$path][0] : $this->_routes['alias'][$path];\n    }\n\n    return null;\n  }",
             "parent": false,
-            "arguments": []
-        },
-        "getAliases": {
-            "name": "getAliases",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getRoutes('alias');\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "trait": false,
+            "startLine": 702,
+            "endLine": 710,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_get_alias",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the alias of the given path if it is part of the routes['alias'] array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the alias of the given path if it is part of the routes['alias'] array.\n   *\n   * @param mixed $path\n   *\n   * @return string|null\n   *\/"
+        },
+        "_is_known": {
+            "name": "_is_known",
+            "summary": "Checks whether a path is known for its corresponding mode.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _is_known(string $path, string $mode): bool\n  {\n    return self::isMode($mode) && isset(self::$_known[$mode][$path]);\n  }",
             "parent": false,
-            "arguments": []
-        },
-        "getRoute": {
-            "name": "getRoute",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($path, $mode, $root = NULL)\n  {\n    return $this->_mvc->getRoute($path, $mode, $root);\n  }",
-            "startLine": 137,
-            "endLine": 140,
+            "trait": false,
+            "startLine": 721,
+            "endLine": 724,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": false,
+            "shortName": "_is_known",
+            "returns": [
+                "bool"
+            ],
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1168,19 +1610,1505 @@
                 {
                     "name": "mode",
                     "position": 1,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Checks whether a path is known for its corresponding mode.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a path is known for its corresponding mode.\n   *\n   * @param string $path\n   * @param string $mode\n   *\n   * @return bool\n   *\/"
+        },
+        "_get_known": {
+            "name": "_get_known",
+            "summary": "Retrieves the route from a given path in a given mode.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_known(string $path, string $mode): ?array\n  {\n    if ($this->_is_known($path, $mode)) {\n      \/\/ If it's a controller based on an alias the original known array has to be retrieved\n      if (\\in_array($mode, self::$_controllers, true)\n          && \\is_string(self::$_known[$mode][$path])\n          && isset(self::$_known[$mode][self::$_known[$mode][$path]])\n      ) {\n        $path = self::$_known[$mode][$path];\n      }\n\n      return self::$_known[$mode][$path];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 735,
+            "endLine": 750,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_get_known",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "root",
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieves the route from a given path in a given mode.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves the route from a given path in a given mode.\n   *\n   * @param string $path\n   * @param string $mode\n   *\n   * @return array|null\n   *\/"
+        },
+        "_set_known": {
+            "name": "_set_known",
+            "summary": "Sets and stores a given route, adding the corresponding checkers.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_known(array $o, bool $save = true): ?array\n  {\n    \/\/ mode, path and file indexes are mandatory\n    if (!isset($o['mode'], $o['path'], $o['file']) || !self::isMode($o['mode']) || !\\is_string($o['path']) || !\\is_string($o['file'])) {\n      return null;\n    }\n\n    $mode = $o['mode'];\n    $path = $o['path'];\n    $index = $o['request'] ?? $o['path'];\n    \/\/ The root in the main application where to search in is defined according to the mode\n    $root = $this->_get_root($mode);\n    if (!empty($o['plugin'])) {\n      $this->_registerLocaleDomain($o['plugin']);\n      $plugin_root = $this->_get_alt_root($mode, $o['plugin']);\n      $plugin_path = substr($path, strlen($o['plugin']) + 1);\n    }\n\n    \/\/ About to define self::$_known[$mode][$path] so first check it has not already been defined\n    if (!isset(self::$_known[$mode][$index])) {\n      self::$_known[$mode][$index] = $o;\n      $s                          = &self::$_known[$mode][$index];\n      \/\/ Defining the checker files' name according to the mode (controllers, Models and CSS)\n      $checker_file = self::getCheckerFile($o);\n      if (!empty($checker_file)) {\n        \/\/ Looking for checker files in each parent directory\n        $s['checkers'] = [];\n        $tmp           = $path;\n        \/\/ There should be a new property fullPath\n        if ((X::basename($o['file']) === 'index.php') && (X::basename($o['path']) !== 'index')) {\n          $tmp .= '\/index';\n        }\n        \/\/ Going backwards in the tree, so adding reversely to the array (prepending)\n        while (\\strlen($tmp) > 0) {\n          $tmp     = self::parse(X::dirname($tmp));\n          $checker = ($tmp === '.' ? '' : $tmp . '\/') . $checker_file;\n          if (!empty($o['plugin'])) {\n            $plugin_path = self::parse(X::dirname($plugin_path));\n            $alt_ctrl    = $plugin_root . ($plugin_path === '.' ? '' : $plugin_path . '\/') . $checker_file;\n            if (is_file($alt_ctrl) && !\\in_array($alt_ctrl, $s['checkers'], true)) {\n              array_unshift($s['checkers'], $alt_ctrl);\n            }\n          }\n\n          if (is_file($root . $checker) && !\\in_array($root . $checker, $s['checkers'], true)) {\n            array_unshift($s['checkers'], $root . $checker);\n          }\n\n          if ($tmp === '.') {\n            $tmp = '';\n          }\n        }\n\n        \/\/ Particular case where it's CLI: we want the first _super to be executed\n        if (($mode === 'cli') && is_file($this->_get_root('public').$checker_file)) {\n          array_unshift($s['checkers'], $this->_get_root('public').$checker_file);\n        }\n      }\n    }\n\n    if (!$save) {\n      \/\/ If not saving the index is unset and the function will be relaunched in case the same request is done again\n      $o = self::$_known[$mode][$index];\n      unset(self::$_known[$mode][$index]);\n\n      return $o;\n    }\n\n    return self::$_known[$mode][$index];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 759,
+            "endLine": 828,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_known",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "o",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "save",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets and stores a given route, adding the corresponding checkers.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$o"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$save"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets and stores a given route, adding the corresponding checkers.\n   *\n   * @param array $o\n   * @param bool $save\n   *\/"
+        },
+        "_find_controller": {
+            "name": "_find_controller",
+            "summary": "Return the actual controller file corresponding to a given path.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _find_controller(string $path, string $mode, bool $exact = false): ?array\n  {\n    \/\/ Removing trailing slashes\n    $path = self::parse($path);\n    \/\/ If the result is already known we just return it\n    if ($path !== 'core\/poller') {\n      X::log([$path, $mode, $this->_is_known($path, $mode)], 'known');\n    }\n    if ($this->_is_known($path, $mode)) {\n      return $this->_get_known($path, $mode);\n    }\n\n    \/** @var string $root The directory corresponding to mode where the files will be searched for *\/\n    $root = $this->_get_root($mode);\n    \/** @var bool|string $file Once found, full path and filename *\/\n    $file = false;\n    \/** @var string $tmp Will contain the different states of the path along searching for the file *\/\n    $tmp = $path;\n    \/** @var array $args Each element of the URL outside the file path *\/\n    $args = [];\n    \/\/ Decomposing the path into parts\n    $parts = X::split($path, '\/');\n    \/\/ Checking first if the specific route exists (through $routes['alias'])\n    if ($alias_name = $this->_is_alias($tmp)) {\n      \/\/ Adding args accordingly\n      while (X::join($parts, '\/') !== $alias_name) {\n        array_unshift($args, array_pop($parts));\n        if (!count($parts)) {\n          break;\n        }\n      }\n\n      if ($alias = $this->_get_alias($alias_name)) {\n        $tmp = $alias;\n      }\n    }\n\n    \/** @var array|null $plugin Plugin info if it's inside one *\/\n    $plugin = $this->_find_plugin($tmp);\n    \/** @var string $root The alternative directory corresponding to mode where the files will be searched for *\/\n    $plugin_root = $plugin ? $this->_get_alt_root($mode, $plugin['url']) : null;\n    \/** The path parsed from this alternative root *\/\n    $plugin_path = $plugin ? substr($tmp, strlen($plugin['url']) + 1) : null;\n    \/** @var string $real_path The real application path (ie from root to the controller) *\/\n    $real_path = null;\n    \/\/ We go through the path, removing a bit each time until we find the corresponding file\n    while (\\strlen($tmp) > 0) {\n      \/\/ navigation (we are in dom and dom is default or we are not in dom, i.e. public)\n      if ((($mode === 'dom') && (BBN_DEFAULT_MODE === 'dom')) || ($mode !== 'dom')) {\n        \/\/ Then looks for a corresponding file in the regular MVC\n        if (file_exists($root . $tmp . '.php')) {\n          $real_path = $tmp;\n          $file      = $root . $tmp . '.php';\n          $plugin    = false;\n        }\n        \/\/ Then looks for a home.php file in the corresponding directory\n        elseif (is_dir($root . $tmp) && is_file($root . $tmp . '\/home.php')) {\n          $real_path = $tmp . '\/home';\n          $file      = $root . $tmp . '\/home.php';\n          $plugin    = false;\n        }\n        \/\/ If an alternative root exists (plugin), we look into it for the same\n        elseif ($plugin) {\n          \/\/ Corresponding file\n          if (file_exists($plugin_root . $plugin_path . '.php')) {\n            $real_path = $tmp;\n            $file      = $plugin_root . $plugin_path . '.php';\n            $root      = $plugin_root;\n          }\n          \/\/ home.php in corresponding dir\n          elseif (is_dir($plugin_root . $plugin_path) && is_file($plugin_root . ($plugin_path ? $plugin_path . '\/' : '') . 'home.php')) {\n            $real_path = $tmp . '\/home';\n            $file      = $plugin_root . $plugin_path . '\/home.php';\n            $root      = $plugin_root;\n          }\n        }\n      }\n\n      \/\/ Full DOM requested\n      if (!$file && ($mode === 'dom')) {\n        \/\/ Root index file (if $tmp is at the root level)\n        if (($tmp === '.') && !$plugin) {\n          \/\/ If file exists\n\n          if (file_exists($root . 'index.php')) {\n            $real_path = '.';\n            $file      = $root . 'index.php';\n          }\n          \/\/ Otherwise $file will remain undefined\n          else {\n            \/* @todo throw an alert as there is no default index *\/\n            $this->log(X::_('Impossible to find a route'));\n\n            return null;\n          }\n        }\n        \/\/ There is an index file in a subfolder\n        elseif (file_exists($root . ($tmp === '.' ? '' : $tmp . '\/') . 'index.php')) {\n          $real_path = $tmp;\n          $file      = $root . ($tmp === '.' ? '' : $tmp . '\/') . 'index.php';\n          $plugin    = false;\n        }\n        \/\/ An alternative root exists, we look into it\n        elseif ($plugin) {\n          \/\/ Corresponding file\n          $dir = $plugin_root . ($plugin_path ? $plugin_path . '\/' : '');\n          if (is_dir($dir) && file_exists($dir . 'index.php')) {\n            $real_path = $tmp;\n            $file      = $dir . 'index.php';\n            $root      = $plugin_root;\n          }\n\n          \/\/ home.php in corresponding dir\n        }\n      }\n\n      if ($file || $exact) {\n        break;\n      }\n\n      array_unshift($args, X::basename($tmp));\n      $tmp = strpos($tmp, '\/') === false ? '' : substr($tmp, 0, strrpos($tmp, '\/'));\n      if ($plugin) {\n        $plugin_path = strpos($plugin_path, '\/') === false ? '' : X::dirname($plugin_path);\n      }\n\n      if (empty($tmp) && ($mode === 'dom')) {\n        $tmp = '.';\n      } elseif ($tmp === '.') {\n        $tmp = '';\n      }\n    }\n\n    if (!$file && !$exact && !$plugin && !empty($this->_routes['force']) && ($this->_routes['force'] !== $path)) {\n      return $this->_find_controller(self::parse($this->_routes['force']), $mode);\n    }\n\n    \/**\n     * @todo Should there be a 404? If so, a real one or a default file? For which modes?\n     *\/\n    \/\/ Not found, sending the default controllers\n    \/*\n                if ( !$file && is_file($root.'404.php') ){\n                  $real_path = '404';\n                  $file = $root.'404.php';\n                }\n                *\/\n\n    if ($file) {\n      if ($path !== 'core\/poller') {\n        X::log([$path, $mode, $this->_is_known($path, $mode), [\n          'file' => $file,\n          'path' => $real_path,\n          'root' => X::dirname($root, 2) . '\/',\n          'request' => $path,\n          'mode' => $mode,\n          'plugin' => $plugin ? $plugin['url'] : false,\n          'plugin_name' => $plugin ? $plugin['name'] : false,\n          'args' => $args,\n          ]], 'known');\n      }\n\n      return $this->_set_known(\n        [\n        'file' => $file,\n        'path' => $real_path,\n        'root' => X::dirname($root, 2) . '\/',\n        'request' => $path,\n        'mode' => $mode,\n        'plugin' => $plugin ? $plugin['url'] : false,\n        'plugin_name' => $plugin ? $plugin['name'] : false,\n        'args' => $args,\n        ]\n      );\n    }\n\n    return null;\n    \/\/ Aaaargh!\n    \/\/die(X::dump(\"No default file defined for mode $mode $tmp (and no 404 file either)\"));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 839,
+            "endLine": 1018,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_find_controller",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "exact",
                     "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Return the actual controller file corresponding to a given path.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the actual controller file corresponding to a given path.\n   *\n   * @param string $path\n   * @param string $mode\n   *\n   * @return mixed\n   *\/"
+        },
+        "_find_plugin": {
+            "name": "_find_plugin",
+            "summary": "Returns Plugin info from the given path if exists.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _find_plugin($path): ?array\n  {\n    if ($plugins = $this->getPlugins()) {\n      foreach ($plugins as $p) {\n        if ((strpos($path, $p['url'] . '\/') === 0) || ($p['url'] === $path)) {\n          return $p;\n        }\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1027,
+            "endLine": 1038,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_find_plugin",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns Plugin info from the given path if exists.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns Plugin info from the given path if exists.\n   *\n   * @param $path\n   * @return array|null\n   *\/"
+        },
+        "_find_translation": {
+            "name": "_find_translation",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _find_translation(string $plugin = null): ?string\n  {\n    if ($locale = $this->getLocale()) {\n      $locale = strtolower(substr($locale, 0, 2));\n      $fpath = $plugin ? $this->pluginPath($plugin) : $this->_mvc->appPath();\n      if (file_exists($fpath.\"locale\/$locale\/$locale.json\")) {\n        return $fpath.\"locale\/$locale\/$locale.json\";\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1045,
+            "endLine": 1056,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_find_translation",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string|null $plugin\n   * @return string|null\n   *\/"
+        },
+        "_get_classic_root": {
+            "name": "_get_classic_root",
+            "summary": "Alias for _get_root() method",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_classic_root($mode): ?string\n  {\n    return $this->_get_root($mode);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1065,
+            "endLine": 1068,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_get_classic_root",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Alias for _get_root() method\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Alias for _get_root() method\n   *\n   * @param $mode\n   * @return string|null\n   *\/"
+        },
+        "_get_plugin_root": {
+            "name": "_get_plugin_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_plugin_root($mode, $plugin): ?string\n  {\n    if (self::isMode($mode)) {\n      return $this->pluginPath($plugin) . $this->_get_mode_path($mode);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1076,
+            "endLine": 1083,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_get_plugin_root",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $mode\n   * @param $plugin\n   * @return string|null\n   *\/"
+        },
+        "_get_subplugin_root": {
+            "name": "_get_subplugin_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_subplugin_root($mode, $plugin, $subplugin): ?string\n  {\n    if (isset(self::$_filetypes[$mode])) {\n      return $this->pluginPath($plugin) . 'plugins\/' . $subplugin . '\/' . $mode . '\/';\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1092,
+            "endLine": 1099,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "_get_subplugin_root",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "subplugin",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$plugin"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$subplugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $mode\n   * @param $plugin\n   * @param $subplugin\n   * @return string|null\n   *\/"
+        },
+        "_get_custom_root": {
+            "name": "_get_custom_root",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_custom_root($mode, $plugin): ?string\n  {\n    if (isset(self::$_filetypes[$mode])) {\n      return $this->_root . 'plugins\/' . $plugin . '\/' . $mode . '\/';\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1107,
+            "endLine": 1114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_get_custom_root",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "mode",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "plugin",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$mode"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param $mode\n   * @param $plugin\n   * @return string|null\n   *\/"
+        },
+        "_find_mv": {
+            "name": "_find_mv",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _find_mv(string $path, string $mode): ?array\n  {\n    \/\/ Mode exists\n    if (self::isMode($mode)) {\n      if ($this->_is_known($path, $mode)) {\n        return $this->_get_known($path, $mode);\n      }\n\n      $plugin      = $this->_find_plugin($path);\n      $plugin_url  = $plugin ? $plugin['url'] : false;\n      $plugin_name = $plugin ? $plugin['name'] : false;\n      $root        = $this->_get_classic_root($mode);\n      $file        = false;\n      $alt_root    = false;\n      if ($plugin_url) {\n        $p        = $this->_routes['root'][$plugin_url];\n        $plugin   = $p['name'];\n        $alt_path = substr($path, strlen($plugin_url) + 1);\n        $alt_root = $this->_get_plugin_root($mode, $plugin);\n      }\n\n      foreach (self::$_filetypes[$mode] as $t) {\n        if (is_file($root . $path . '.' . $t)) {\n          $file = $root . $path . '.' . $t;\n          break;\n        }\n        elseif ($alt_root) {\n          if (is_file($alt_root . $alt_path . '.' . $t)) {\n            $file = $alt_root . $alt_path . '.' . $t;\n            break;\n          }\n        }\n      }\n\n      if ($file) {\n        return $this->_set_known(\n          [\n          'file' => $file,\n          'path' => $path,\n          'plugin' => $plugin_url,\n          'plugin_name' => $plugin_name,\n          'ext' => $t,\n          'mode' => $mode,\n          'i18n' => ($mode === 'js') || ($mode === 'html') ? $this->_find_translation($plugin ?? null) : null,\n          ], true\n        );\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1122,
+            "endLine": 1172,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_find_mv",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $path\n   * @param string $mode\n   * @return array|null\n   *\/"
+        },
+        "_registerLocaleDomain": {
+            "name": "_registerLocaleDomain",
+            "summary": "Setting up the textdomain (locale) for the given plugin.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Router.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _registerLocaleDomain(string $plugin = null): ?string\n  {\n    if (empty($plugin)) {\n      if (is_dir($this->appPath().'locale')) {\n        $lang_path = $this->appPath().'locale';\n        $name      = 'main';\n      }\n    }\n    elseif (isset($this->_routes['root'][$plugin]['name'])\n        && is_dir($this->_routes['root'][$plugin]['path'] . 'src\/locale')\n    ) {\n      $lang_path = $this->_routes['root'][$plugin]['path'] . 'src\/locale';\n      $name      = $this->_routes['root'][$plugin]['name'];\n    }\n    if (isset($lang_path, $name)) {\n      if (!X::hasProp($this->_textdomains, $name)) {\n        $idx_file  = $lang_path.'\/index.txt';\n        if (!is_file($idx_file)) {\n          if (is_dir(X::dirname($idx_file))) {\n            $idx = '';\n          }\n          else {\n            return null;\n          }\n        }\n        else {\n          $idx = file_get_contents($idx_file);\n        }\n\n\n        $textdomain = $name.$idx;\n\n        bindtextdomain($textdomain, $lang_path);\n        bind_textdomain_codeset($textdomain, 'UTF-8');\n        $this->_textdomains[$name] = $textdomain;\n      }\n\n      \/\/$lang_path = X::dirname($this->_routes['root'][$plugin]['path']).'\/src\/locale';\n      return $this->_textdomains[$name];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1182,
+            "endLine": 1224,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_registerLocaleDomain",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Setting up the textdomain (locale) for the given plugin.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Setting up the textdomain (locale) for the given plugin.\n   *\n   * @param string $plugin\n   *\n   * @return string|null\n   *\/"
+        },
+        "checkPath": {
+            "name": "checkPath",
+            "summary": "This checks whether an argument used for getting controller, View or model - which are files - doesn't contain malicious content.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function checkPath()\n  {\n    $ar = \\func_get_args();\n    foreach ($ar as $a){\n      $b = Str::parsePath($a, true);\n      if (empty($b) && !empty($a)) {\n        $this->error(\"The path $a is not an acceptable value\");\n        return false;\n      }\n    }\n\n    return 1;\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 37,
+            "endLine": 49,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "checkPath",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "This checks whether an argument used for getting controller, View or model - which are files - doesn't contain malicious content.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$p",
+                        "description": "The request path <em>(e.g books\/466565 or html\/home)<\/em>"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This checks whether an argument used for getting controller, View or model - which are files - doesn't contain malicious content.\n   *\n   * @param string $p The request path <em>(e.g books\/466565 or html\/home)<\/em>\n   * @return bool\n   *\/"
+        },
+        "error": {
+            "name": "error",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function error($msg)\n  {\n    $msg = \"Error from \".\\get_class($this).\": \".$msg;\n    $this->log($msg, 'mvc');\n    throw new \\Exception(X::_($msg));\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 56,
+            "endLine": 61,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "error",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "msg",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$msg"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param $msg\n   * @throws \\Exception\n   *\/"
+        },
+        "log": {
+            "name": "log",
+            "summary": "Log to a specific log with debug info",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if (Mvc::getDebug()) {\n      $ar = \\func_get_args();\n      X::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 67,
+            "endLine": 73,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Log to a specific log with debug info",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Log to a specific log with debug info\n   *\/"
+        },
+        "pluginDataPath": {
+            "name": "pluginDataPath",
+            "summary": "Returns the path of a plugin in the data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginDataPath(string $plugin = null): ?string\n  {\n    if ($this->_plugin || $plugin) {\n      return $this->dataPath().'plugins\/'.$this->pluginName($plugin ?: $this->_plugin).'\/';\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 82,
+            "endLine": 89,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "pluginDataPath",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the path of a plugin in the data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the path of a plugin in the data\n   *\n   * @param string $plugin\n   * @return string|null\n   *\/"
+        },
+        "pluginTmpPath": {
+            "name": "pluginTmpPath",
+            "summary": "Returns the path of a plugin in the data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginTmpPath(string $plugin = null): ?string\n  {\n    if ($this->_plugin || $plugin) {\n      return $this->tmpPath().'plugins\/'.$this->pluginName($plugin ?: $this->_plugin).'\/';\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 98,
+            "endLine": 105,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "pluginTmpPath",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the path of a plugin in the data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the path of a plugin in the data\n   *\n   * @param string $plugin\n   * @return string|null\n   *\/"
+        },
+        "getPlugins": {
+            "name": "getPlugins",
+            "summary": "Returns all the plugins available with their name, path and url",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPlugins(): ?array\n  {\n    return $this->_mvc->getPlugins();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 112,
+            "endLine": 115,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPlugins",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns all the plugins available with their name, path and url\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns all the plugins available with their name, path and url\n   * @return array|null\n   *\/"
+        },
+        "hasPlugin": {
+            "name": "hasPlugin",
+            "summary": "Checks whether a plugin is available",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function hasPlugin(string $plugin): bool\n  {\n    return $this->_mvc->hasPlugin($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 124,
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "hasPlugin",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The plugin name"
+                }
+            ],
+            "doc": {
+                "description": "Checks whether a plugin is available\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a plugin is available\n   *\n   * @param string $plugin The plugin name\n   * @return boolean\n   *\/"
+        },
+        "isPlugin": {
+            "name": "isPlugin",
+            "summary": "Checks whether a plugin exists",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isPlugin(string $plugin = null): bool\n  {\n    return $this->_mvc->isPlugin($plugin ?: $this->pluginName($this->_plugin));\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 136,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isPlugin",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The plugin name"
+                }
+            ],
+            "doc": {
+                "description": "Checks whether a plugin exists\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a plugin exists\n   *\n   * @param string|null $plugin The plugin name\n   * @return boolean\n   *\/"
+        },
+        "pluginPath": {
+            "name": "pluginPath",
+            "summary": "Returns the path of a plugin from its root directory (app, lib...) based on its name",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginPath(string $plugin = null, $raw = false): ?string\n  {\n    return $this->_mvc->pluginPath($plugin ?: $this->pluginName($this->_plugin), $raw);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 150,
+            "endLine": 153,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "pluginPath",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The plugin name"
+                },
+                {
+                    "name": "raw",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true will not include `src`"
+                }
+            ],
+            "doc": {
+                "description": "Returns the path of a plugin from its root directory (app, lib...) based on its name\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$raw",
+                        "description": "If true will not include `src`"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the path of a plugin from its root directory (app, lib...) based on its name\n   *\n   * @param string|null $plugin The plugin name\n   * @param boolean $raw If true will not include `src`\n   * @return string|null\n   *\/"
+        },
+        "pluginUrl": {
+            "name": "pluginUrl",
+            "summary": "Returns the url of a plugin based on its name",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginUrl(string $plugin = null): ?string\n  {\n    return $this->_mvc->pluginUrl($plugin ?: $this->pluginName($this->_plugin));\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 162,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "pluginUrl",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The plugin name"
+                }
+            ],
+            "doc": {
+                "description": "Returns the url of a plugin based on its name\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the url of a plugin based on its name\n   *\n   * @param string|null $plugin The plugin name\n   * @return string|null\n   *\/"
+        },
+        "pluginName": {
+            "name": "pluginName",
+            "summary": "Returns the name of a plugin based on its path",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginName($path = null): ?string\n  {\n    return $this->_mvc->pluginName($path ?: $this->_path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 174,
+            "endLine": 177,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "pluginName",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The plugin path"
+                }
+            ],
+            "doc": {
+                "description": "Returns the name of a plugin based on its path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$path",
+                        "description": "The plugin path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the name of a plugin based on its path\n   *\n   * @param string|null $path The plugin path\n   * @return string|null\n   *\/"
+        },
+        "getCookie": {
+            "name": "getCookie",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCookie()\n  {\n    return $this->_mvc->getCookie();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 180,
+            "endLine": 183,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getCookie",
+            "returns": [],
+            "arguments": []
+        },
+        "getAliases": {
+            "name": "getAliases",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getAliases(): ?array\n  {\n    return $this->_mvc->getRoutes('alias');\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 192,
+            "endLine": 195,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getAliases",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": []
+        },
+        "getRoute": {
+            "name": "getRoute",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRoute(string $path, string $mode)\n  {\n    return $this->_mvc->getRoute($path, $mode);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 198,
+            "endLine": 201,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getRoute",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
                     "default_name": ""
                 }
             ]
@@ -1190,13 +3118,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $locale)\n  {\n    return $this->_mvc->setLocale($locale);\n  }",
-            "startLine": 143,
-            "endLine": 146,
+            "code": "  public function setLocale(string $locale)\n  {\n    return $this->_mvc->setLocale($locale);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1205,13 +3136,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setLocale",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "locale",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1224,13 +3160,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getLocale();\n  }",
-            "startLine": 149,
-            "endLine": 152,
+            "code": "  public function getLocale(): ?string\n  {\n    return $this->_mvc->getLocale();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1239,11 +3178,11 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getLocale",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": []
         },
         "appPath": {
@@ -1251,13 +3190,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($raw = false)\n  {\n    return Mvc::getAppPath($raw);\n  }",
-            "startLine": 155,
-            "endLine": 158,
+            "code": "  public function appPath($raw = false): string\n  {\n    return Mvc::getAppPath($raw);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1266,15 +3208,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "appPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "raw",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1287,13 +3232,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return Mvc::getLibPath();\n  }",
-            "startLine": 161,
-            "endLine": 164,
+            "code": "  public function libPath(): string\n  {\n    return Mvc::getLibPath();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 222,
+            "endLine": 225,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1302,10 +3250,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "libPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": []
         },
         "dataPath": {
@@ -1313,13 +3261,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getDataPath().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
-            "startLine": 167,
-            "endLine": 170,
+            "code": "  public function dataPath(string $plugin = null): string\n  {\n    return Mvc::getDataPath().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 228,
+            "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1328,15 +3279,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "dataPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1349,13 +3306,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getTmpPath($plugin);\n  }",
-            "startLine": 173,
-            "endLine": 176,
+            "code": "  public function tmpPath(string $plugin = null): string\n  {\n    return Mvc::getTmpPath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 234,
+            "endLine": 237,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1364,15 +3324,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "tmpPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1385,13 +3351,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getLogPath($plugin);\n  }",
-            "startLine": 179,
-            "endLine": 182,
+            "code": "  public function logPath(string $plugin = null): string\n  {\n    return Mvc::getLogPath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 240,
+            "endLine": 243,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1400,15 +3369,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "logPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1421,13 +3396,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getCachePath($plugin);\n  }",
-            "startLine": 185,
-            "endLine": 188,
+            "code": "  public function cachePath(string $plugin = null): string\n  {\n    return Mvc::getCachePath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 246,
+            "endLine": 249,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1436,15 +3414,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "cachePath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1457,13 +3441,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getContentPath($plugin);\n  }",
-            "startLine": 191,
-            "endLine": 194,
+            "code": "  public function contentPath(string $plugin = null): string\n  {\n    return Mvc::getContentPath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 252,
+            "endLine": 255,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1472,15 +3459,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "contentPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1493,13 +3486,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user = NULL, string $plugin = NULL)\n  {\n    return Mvc::getUserTmpPath($id_user, $plugin);\n  }",
-            "startLine": 197,
-            "endLine": 200,
+            "code": "  public function userTmpPath(string $id_user = null, string $plugin = null):? string\n  {\n    return Mvc::getUserTmpPath($id_user, $plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 258,
+            "endLine": 261,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1508,16 +3504,22 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "userTmpPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1526,7 +3528,13 @@
                 {
                     "name": "plugin",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1539,13 +3547,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user = NULL, string $plugin = NULL)\n  {\n    return Mvc::getUserDataPath($id_user, $plugin);\n  }",
-            "startLine": 203,
-            "endLine": 206,
+            "code": "  public function userDataPath(string $id_user = null, string $plugin = null):? string\n  {\n    return Mvc::getUserDataPath($id_user, $plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 264,
+            "endLine": 267,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1554,16 +3565,22 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "userDataPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1572,7 +3589,13 @@
                 {
                     "name": "plugin",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1580,16 +3603,77 @@
                 }
             ]
         },
+        "retrieverInit": {
+            "name": "retrieverInit",
+            "summary": "Initialize the retriever by putting its own instance as static property.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function retrieverInit(self $instance): void\n  {\n    self::$retriever_exists = true;\n    if (!self::$retriever_instance) {\n      self::$retriever_instance = $instance;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Retriever",
+            "startLine": 31,
+            "endLine": 37,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "retrieverInit",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "instance",
+                    "position": 0,
+                    "type": "self",
+                    "type_arr": [
+                        "self"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The instance object."
+                }
+            ],
+            "doc": {
+                "description": "Initialize the retriever by putting its own instance as static property.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "self",
+                        "name": "$instance",
+                        "description": "The instance object."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Initialize the retriever by putting its own instance as static property.\n   *\n   * @param self $instance The instance object.\n   * @return void\n   *\/"
+        },
         "getInstance": {
             "name": "getInstance",
             "summary": "Returns the instance of the singleton or null.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$retriever_instance;\n  }",
+            "code": "  public static function getInstance(): ?self\n  {\n    return self::$retriever_instance;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Retriever",
             "startLine": 44,
             "endLine": 47,
             "isDeprecated": false,
@@ -1600,23 +3684,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getInstance",
             "returns": [
                 null,
                 "self"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns the instance of the singleton or null.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the instance of the singleton or null.\n   * \n   * @return self\n   *\/"
         },
         "retrieverExists": {
             "name": "retrieverExists",
             "summary": "Returns true if an instance as been initiated.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Router",
+            "class": "bbn\\Mvc\\Router",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Retriever.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::$retriever_exists;\n  }",
+            "code": "  public static function retrieverExists(): bool\n  {\n    return self::$retriever_exists;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Retriever",
             "startLine": 54,
             "endLine": 57,
             "isDeprecated": false,
@@ -1627,14 +3720,399 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "retrieverExists",
             "returns": [
                 "bool"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns true if an instance as been initiated.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if an instance as been initiated.\n   *\n   * @return bool\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "_controllers": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The list of types of controllers.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                "cli",
+                "dom",
+                "content",
+                "public",
+                "private"
+            ]
+        },
+        "_filetypes": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The list of filetypes for each non controller element.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "model": [
+                    "php"
+                ],
+                "html": [
+                    "html",
+                    "php"
+                ],
+                "js": [
+                    "js"
+                ],
+                "css": [
+                    "css",
+                    "less",
+                    "scss"
+                ]
+            }
+        },
+        "_modes": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The list of types.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                "image",
+                "file",
+                "cli",
+                "private",
+                "dom",
+                "public",
+                "model",
+                "html",
+                "js",
+                "css"
+            ]
+        },
+        "_known": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "list of used routes with each original request to avoid looking for them again"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "cli": [],
+                "dom": [],
+                "public": [],
+                "private": [],
+                "model": [],
+                "html": [],
+                "js": [],
+                "css": [],
+                "component": []
+            }
+        },
+        "_textdomains": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "list of bound textdomains for gettext"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "_mode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The current mode as defined in self::$_modes"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_prepath": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The path to prepend to the given path"
+                    },
+                    {
+                        "tag": "todo",
+                        "text": "deprecated"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_root": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The path to the app root (where is .\/mvc)"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "alt_root": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "_routes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Router",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The list of known external controllers routes"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "_mvc": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The MVC class from which the controller is called\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bbn\\Mvc"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_plugin": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Mvc\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string",
+                        "description": "If the controller is inside a plugin this property will be set to its name"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "retriever_instance": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Retriever",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "self",
+                        "description": "An instance of the current class."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "retriever_exists": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\Router"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Retriever",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Will be true from the moment an instance exists."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        }
+    },
     "staticProperties": {
         "_controllers": [
             "cli",
@@ -1676,10 +4154,10 @@
             "cli": [],
             "dom": [],
             "public": {
-                "cdn\/publishing\/home": {
+                "cdn\/publishing\/gen-php": {
                     "file": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/publishing\/home.php",
                     "path": "cdn\/publishing\/home",
-                    "root": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/",
+                    "root": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/src\/mvc\/",
                     "request": "cdn\/publishing\/gen-php",
                     "mode": "public",
                     "plugin": "cdn",
@@ -1688,8 +4166,8 @@
                         "gen-php"
                     ],
                     "checkers": [
-                        "\/home\/nabab\/web\/domains\/apst-app\/app-ui\/src\/mvc\/public\/_ctrl.php",
-                        "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_ctrl.php"
+                        "\/home\/nabab\/web\/domains\/apst-app2\/app-ui\/src\/mvc\/public\/_super.php",
+                        "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/appui-cdn\/\/src\/mvc\/public\/_super.php"
                     ]
                 }
             },
@@ -1703,12 +4181,10 @@
                     "ext": "php",
                     "mode": "model",
                     "i18n": null,
-                    "checkers": [
-                        "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/appui-core\/\/src\/mvc\/model\/_model.php"
-                    ]
+                    "checkers": []
                 },
                 "_init": {
-                    "file": "\/home\/nabab\/web\/domains\/apst-app\/app-ui\/src\/mvc\/model\/_init.php",
+                    "file": "\/home\/nabab\/web\/domains\/apst-app2\/app-ui\/src\/mvc\/model\/_init.php",
                     "path": "_init",
                     "plugin": false,
                     "plugin_name": false,
@@ -1737,6 +4213,14 @@
         "retriever_exists": true
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * Manages the translations berween the URLs requested and the app filesystem.\n *\n * @category  MVC\n * @package MVC\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright 2015 BBN Solutions\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n *\n * @link https:\/\/bbn.io\/php\/doc\/bbn\/mvc\/router\n * @since May 12, 2015, 12:55:56 +0000\n *\/",
+        "\/**\n * @category MVC\n * @package MVC\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @link https:\/\/bbn.io\/php\/doc\/bbn\/mvc\/router\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

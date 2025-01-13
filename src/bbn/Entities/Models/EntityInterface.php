@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Entities;
+namespace bbn\Entities\Models;
 
 interface EntityInterface
 {

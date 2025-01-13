@@ -9,6 +9,8 @@
     },
     "name": "bbn\\Appui\\Feed",
     "namespace": true,
+    "realName": "Feed",
+    "realNamespace": "bbn\\Appui",
     "traits": [
         "bbn\\Models\\Tts\\Optional"
     ],
@@ -16,15 +18,12 @@
     "fileName": "\/Appui\/Feed.php",
     "startLine": 19,
     "endLine": 271,
-    "numMethods": 24,
-    "numProperties": 3,
+    "numMethods": 26,
+    "numProperties": 7,
     "numConstants": 0,
-    "numStaticProperties": 6,
+    "numStaticProperties": 5,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -38,7 +37,6 @@
         "userAgent": "FeedFetcher-Google",
         "optional_is_init": false,
         "option_root_id": null,
-        "option_appui_id": null,
         "xml": null,
         "options": null
     },
@@ -53,11 +51,14 @@
             "summary": "Loads RSS or Atom feed.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($url, $user = NULL, $pass = NULL)\n  {\n\t\t$xml = self::loadXml($url, $user, $pass);\n\t\tif ($xml->channel) {\n\t\t\treturn self::fromRss($xml);\n\t\t} else {\n\t\t\treturn self::fromAtom($xml);\n\t\t}\n  }",
+            "code": "\tpublic static function load($url, $user = null, $pass = null)\n\t{\n\t\t$xml = self::loadXml($url, $user, $pass);\n\t\tif ($xml->channel) {\n\t\t\treturn self::fromRss($xml);\n\t\t} else {\n\t\t\treturn self::fromAtom($xml);\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 44,
             "endLine": 52,
             "isDeprecated": false,
@@ -68,13 +69,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "load",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -85,6 +89,9 @@
                     "name": "user",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -95,24 +102,53 @@
                     "name": "pass",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "string"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Loads RSS or Atom feed.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n\t * Loads RSS or Atom feed.\n\t * @param  string\n\t * @param  string\n\t * @param  string\n\t * @return Feed\n\t * @throws Exception\n\t *\/"
         },
         "loadRss": {
             "name": "loadRss",
             "summary": "Loads RSS feed.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($url, $user = NULL, $pass = NULL)\n  {\n\t\treturn self::fromRss(self::loadXml($url, $user, $pass));\n  }",
+            "code": "\tpublic static function loadRss($url, $user = null, $pass = null)\n\t{\n\t\treturn self::fromRss(self::loadXml($url, $user, $pass));\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 63,
             "endLine": 66,
             "isDeprecated": false,
@@ -123,13 +159,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "loadRss",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -140,6 +179,9 @@
                     "name": "user",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -150,24 +192,53 @@
                     "name": "pass",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "string  optional password"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Loads RSS feed.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string  RSS feed URL"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string  optional user name"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string  optional password"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n\t * Loads RSS feed.\n\t * @param  string  RSS feed URL\n\t * @param  string  optional user name\n\t * @param  string  optional password\n\t * @return Feed\n\t * @throws Exception\n\t *\/"
         },
         "loadAtom": {
             "name": "loadAtom",
             "summary": "Loads Atom feed.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($url, $user = NULL, $pass = NULL)\n  {\n\t\treturn self::fromAtom(self::loadXml($url, $user, $pass));\n  }",
+            "code": "\tpublic static function loadAtom($url, $user = null, $pass = null)\n\t{\n\t\treturn self::fromAtom(self::loadXml($url, $user, $pass));\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 77,
             "endLine": 80,
             "isDeprecated": false,
@@ -178,13 +249,16 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "loadAtom",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -195,6 +269,9 @@
                     "name": "user",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -205,11 +282,121 @@
                     "name": "pass",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "string  optional password"
+                }
+            ],
+            "doc": {
+                "description": "Loads Atom feed.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string  Atom feed URL"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string  optional user name"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string  optional password"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n\t * Loads Atom feed.\n\t * @param  string  Atom feed URL\n\t * @param  string  optional user name\n\t * @param  string  optional password\n\t * @return Feed\n\t * @throws Exception\n\t *\/"
+        },
+        "fromRss": {
+            "name": "fromRss",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate static function fromRss(SimpleXMLElement $xml)\n\t{\n\t\tif (!$xml->channel) {\n\t\t\tthrow new Exception('Invalid feed.');\n\t\t}\n\n\t\tself::adjustNamespaces($xml);\n\n\t\tforeach ($xml->channel->item as $item) {\n\t\t\t\/\/ converts namespaces to dotted tags\n\t\t\tself::adjustNamespaces($item);\n\n\t\t\t\/\/ generate 'url' & 'timestamp' tags\n\t\t\t$item->url = (string) $item->link;\n\t\t\tif (isset($item->{'dc:date'})) {\n\t\t\t\t$item->timestamp = strtotime($item->{'dc:date'});\n\t\t\t} elseif (isset($item->pubDate)) {\n\t\t\t\t$item->timestamp = strtotime($item->pubDate);\n\t\t\t}\n\t\t}\n\t\t$feed = new self;\n\t\t$feed->xml = $xml->channel;\n\t\treturn $feed;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 83,
+            "endLine": 106,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fromRss",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "xml",
+                    "position": 0,
+                    "type": "SimpleXMLElement",
+                    "type_arr": [
+                        "SimpleXMLElement"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fromAtom": {
+            "name": "fromAtom",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate static function fromAtom(SimpleXMLElement $xml)\n\t{\n\t\tif (!in_array('http:\/\/www.w3.org\/2005\/Atom', $xml->getDocNamespaces(), true)\n\t\t\t&& !in_array('http:\/\/purl.org\/atom\/ns#', $xml->getDocNamespaces(), true)\n\t\t) {\n\t\t\tthrow new Exception('Invalid feed.');\n\t\t}\n\n\t\t\/\/ generate 'url' & 'timestamp' tags\n\t\tforeach ($xml->entry as $entry) {\n\t\t\t$entry->url = (string) $entry->link['href'];\n\t\t\t$entry->timestamp = strtotime($entry->updated);\n\t\t}\n\t\t$feed = new self;\n\t\t$feed->xml = $xml;\n\t\treturn $feed;\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 109,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "fromAtom",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "xml",
+                    "position": 0,
+                    "type": "SimpleXMLElement",
+                    "type_arr": [
+                        "SimpleXMLElement"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
                 }
             ]
         },
@@ -218,11 +405,14 @@
             "summary": "Returns property value. Do not call directly.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name)\n  {\n\t\treturn $this->xml->{$name};\n  }",
+            "code": "\tpublic function __get($name)\n\t{\n\t\treturn $this->xml->{$name};\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 133,
             "endLine": 136,
             "isDeprecated": false,
@@ -233,31 +423,48 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__get",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "string  tag name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns property value. Do not call directly.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string  tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Returns property value. Do not call directly.\n\t * @param  string  tag name\n\t * @return SimpleXMLElement\n\t *\/"
         },
         "__set": {
             "name": "__set",
             "summary": "Sets value of a property. Do not call directly.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($name, $value)\n  {\n\t\tthrow new Exception(\"Cannot assign to a read-only property '$name'.\");\n  }",
+            "code": "\tpublic function __set($name, $value)\n\t{\n\t\tthrow new Exception(\"Cannot assign to a read-only property '$name'.\");\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 145,
             "endLine": 148,
             "isDeprecated": false,
@@ -268,13 +475,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__set",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "name",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -285,24 +495,45 @@
                     "name": "value",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "mixed   property value"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets value of a property. Do not call directly.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string  property name"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "mixed   property value"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Sets value of a property. Do not call directly.\n\t * @param  string  property name\n\t * @param  mixed   property value\n\t * @return void\n\t *\/"
         },
         "toArray": {
             "name": "toArray",
             "summary": "Converts a SimpleXMLElement into an array.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(SimpleXMLElement $xml = NULL)\n  {\n\t\tif ($xml === null) {\n\t\t\t$xml = $this->xml;\n\t\t}\n\n\t\tif (!$xml->children()) {\n\t\t\treturn (string) $xml;\n\t\t}\n\n\t\t$arr = [];\n\t\tforeach ($xml->children() as $tag => $child) {\n\t\t\tif (count($xml->$tag) === 1) {\n\t\t\t\t$arr[$tag] = $this->toArray($child);\n\t\t\t} else {\n\t\t\t\t$arr[$tag][] = $this->toArray($child);\n\t\t\t}\n\t\t}\n\n\t\treturn $arr;\n  }",
+            "code": "\tpublic function toArray(SimpleXMLElement $xml = null)\n\t{\n\t\tif ($xml === null) {\n\t\t\t$xml = $this->xml;\n\t\t}\n\n\t\tif (!$xml->children()) {\n\t\t\treturn (string) $xml;\n\t\t}\n\n\t\t$arr = [];\n\t\tforeach ($xml->children() as $tag => $child) {\n\t\t\tif (count($xml->$tag) === 1) {\n\t\t\t\t$arr[$tag] = $this->toArray($child);\n\t\t\t} else {\n\t\t\t\t$arr[$tag][] = $this->toArray($child);\n\t\t\t}\n\t\t}\n\n\t\treturn $arr;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 156,
             "endLine": 176,
             "isDeprecated": false,
@@ -313,33 +544,463 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "toArray",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "xml",
                     "position": 0,
-                    "type": "SimpleXMLElement",
+                    "type": "null|SimpleXMLElement",
+                    "type_arr": [
+                        "null",
+                        "SimpleXMLElement"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "SimpleXMLElement"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Converts a SimpleXMLElement into an array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "SimpleXMLElement"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Converts a SimpleXMLElement into an array.\n\t * @param  SimpleXMLElement\n\t * @return array\n\t *\/"
+        },
+        "loadXml": {
+            "name": "loadXml",
+            "summary": "Load XML from cache or HTTP.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate static function loadXml($url, $user, $pass)\n\t{\n\t\t$e = self::$cacheExpire;\n\t\t$cacheFile = self::$cacheDir . '\/feed.' . md5(serialize(func_get_args())) . '.xml';\n\n\t\tif (self::$cacheDir\n\t\t\t&& (time() - @filemtime($cacheFile) <= (is_string($e) ? strtotime($e) - time() : $e))\n\t\t\t&& $data = @file_get_contents($cacheFile)\n\t\t) {\n\t\t\t\/\/ ok\n\t\t} elseif ($data = trim(self::httpRequest($url, $user, $pass))) {\n\t\t\tif (self::$cacheDir) {\n\t\t\t\tfile_put_contents($cacheFile, $data);\n\t\t\t}\n\t\t} elseif (self::$cacheDir && $data = @file_get_contents($cacheFile)) {\n\t\t\t\/\/ ok\n\t\t} else {\n\t\t\tthrow new Exception('Cannot load feed.');\n\t\t}\n\n\t\treturn new SimpleXMLElement($data, LIBXML_NOWARNING | LIBXML_NOERROR | LIBXML_NOCDATA);\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 187,
+            "endLine": 208,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "loadXml",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                },
+                {
+                    "name": "pass",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                }
+            ],
+            "doc": {
+                "description": "Load XML from cache or HTTP.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n\t * Load XML from cache or HTTP.\n\t * @param  string\n\t * @param  string\n\t * @param  string\n\t * @return SimpleXMLElement\n\t * @throws Exception\n\t *\/"
+        },
+        "httpRequest": {
+            "name": "httpRequest",
+            "summary": "Process HTTP request.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate static function httpRequest($url, $user, $pass)\n\t{\n\t\tif (extension_loaded('curl')) {\n\t\t\t$curl = curl_init();\n\t\t\tcurl_setopt($curl, CURLOPT_URL, $url);\n\t\t\tif ($user !== null || $pass !== null) {\n\t\t\t\tcurl_setopt($curl, CURLOPT_USERPWD, \"$user:$pass\");\n\t\t\t}\n\t\t\tcurl_setopt($curl, CURLOPT_USERAGENT, self::$userAgent); \/\/ some feeds require a user agent\n\t\t\tcurl_setopt($curl, CURLOPT_HEADER, false);\n\t\t\tcurl_setopt($curl, CURLOPT_TIMEOUT, 20);\n\t\t\tcurl_setopt($curl, CURLOPT_ENCODING, '');\n\t\t\tcurl_setopt($curl, CURLOPT_RETURNTRANSFER, true); \/\/ no echo, just return result\n\t\t\tif (!ini_get('open_basedir')) {\n\t\t\t\tcurl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); \/\/ sometime is useful :)\n\t\t\t}\n\t\t\t$result = curl_exec($curl);\n\t\t\treturn curl_errno($curl) === 0 && curl_getinfo($curl, CURLINFO_HTTP_CODE) === 200\n\t\t\t\t? $result\n\t\t\t\t: false;\n\n\t\t} else {\n\t\t\t$context = null;\n\t\t\tif ($user !== null && $pass !== null) {\n\t\t\t\t$options = [\n\t\t\t\t\t'http' => [\n\t\t\t\t\t\t'method' => 'GET',\n\t\t\t\t\t\t'header' => 'Authorization: Basic ' . base64_encode($user . ':' . $pass) . \"\\r\\n\",\n\t\t\t\t\t],\n\t\t\t\t];\n\t\t\t\t$context = stream_context_create($options);\n\t\t\t}\n\n\t\t\treturn file_get_contents($url, false, $context);\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 219,
+            "endLine": 254,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "httpRequest",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "url",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                },
+                {
+                    "name": "user",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                },
+                {
+                    "name": "pass",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "string"
+                }
+            ],
+            "doc": {
+                "description": "Process HTTP request.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    },
+                    {
+                        "tag": "param",
+                        "description": "string"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception"
+                }
+            },
+            "comments": "  \/**\n\t * Process HTTP request.\n\t * @param  string\n\t * @param  string\n\t * @param  string\n\t * @return string|false\n\t * @throws Exception\n\t *\/"
+        },
+        "adjustNamespaces": {
+            "name": "adjustNamespaces",
+            "summary": "Generates better accessible namespaced tags.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Feed.php",
+            "static": true,
+            "visibility": "private",
+            "final": false,
+            "code": "\tprivate static function adjustNamespaces($el)\n\t{\n\t\tforeach ($el->getNamespaces(true) as $prefix => $ns) {\n\t\t\t$children = $el->children($ns);\n\t\t\tforeach ($children as $tag => $content) {\n\t\t\t\t$el->{$prefix . ':' . $tag} = $content;\n\t\t\t}\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
+            "startLine": 262,
+            "endLine": 270,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "adjustNamespaces",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "el",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "SimpleXMLElement"
+                }
+            ],
+            "doc": {
+                "description": "Generates better accessible namespaced tags.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "description": "SimpleXMLElement"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Generates better accessible namespaced tags.\n\t * @param  SimpleXMLElement\n\t * @return void\n\t *\/"
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      $justDefined = false;\n      if (!\\defined(\"BBN_APPUI\")) {\n        $justDefined = true;\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = strtolower(end($tmp));\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        if (!$cls) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!\\defined(\"BBN_APPUI\")) {\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');\n          return;\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n            if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 85,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 120,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
-            "startLine": 150,
-            "endLine": 154,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 131,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -348,32 +1009,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
             "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getAppuiRoot": {
-            "name": "getAppuiRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_appui_id;\n  }",
-            "startLine": 157,
-            "endLine": 161,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsObject": {
@@ -381,13 +1018,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
-            "startLine": 164,
-            "endLine": 172,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 138,
+            "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -396,10 +1036,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
             "returns": [
                 "bbn\\Appui\\Option"
             ],
-            "parent": false,
             "arguments": []
         },
         "getOptionId": {
@@ -407,13 +1047,16 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 181,
-            "endLine": 184,
+            "code": "  public static function getOptionId()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -422,22 +1065,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
             "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 193,
-            "endLine": 203,
+            "code": "  public static function getOptionsIds(): array\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 167,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -446,24 +1104,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
         },
         "getOptionsTree": {
             "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 206,
-            "endLine": 209,
+            "code": "  public static function getOptionsTree()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -472,8 +1143,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTreeRef": {
@@ -481,13 +1152,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 212,
-            "endLine": 215,
+            "code": "  public static function getOptionsTreeRef()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 186,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -496,8 +1170,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptions": {
@@ -505,13 +1179,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 218,
-            "endLine": 221,
+            "code": "  public static function getOptions()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -520,8 +1197,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsRef": {
@@ -529,13 +1206,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  public static function getOptionsRef()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 198,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -544,8 +1224,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOption": {
@@ -553,13 +1233,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 230,
-            "endLine": 233,
+            "code": "  public static function getOption()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -568,8 +1251,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValue": {
@@ -577,13 +1260,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 236,
-            "endLine": 239,
+            "code": "  public static function getOptionsTextValue()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -592,8 +1278,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValue",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValueRef": {
@@ -601,13 +1287,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
-            "startLine": 242,
-            "endLine": 245,
+            "code": "  public static function getOptionsTextValueRef()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -616,194 +1305,211 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValueRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
-        "getOptionId": {
-            "name": "getOptionId",
-            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 254,
-            "endLine": 257,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsIds": {
-            "name": "getOptionsIds",
+        "_treat_args": {
+            "name": "_treat_args",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
+            "class": "bbn\\Appui\\Feed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 260,
-            "endLine": 272,
+            "code": "  protected static function _treat_args(array $args, $appui = false): array\n  {\n    $hasUid = Str::isUid(end($args));\n    if (count($args) && !$hasUid) {\n      self::optionalInit();\n      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {\n        $args[] = 'options';\n      }\n    }\n\n    if (!$hasUid) {\n      $args[] = self::$option_root_id;\n    }\n\n    return $args;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 223,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_treat_args",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTree": {
-            "name": "getOptionsTree",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 275,
-            "endLine": 278,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptions": {
-            "name": "getOptions",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 281,
-            "endLine": 284,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOption": {
-            "name": "getOption",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 287,
-            "endLine": 290,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValue": {
-            "name": "getOptionsTextValue",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Feed",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 293,
-            "endLine": 296,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "appui",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
         }
     },
     "properties": {
         "cacheExpire": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Appui\\Feed",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var int",
                 "tags": []
             },
+            "parent": false,
             "value": "1 day"
         },
         "cacheDir": {
+            "trait": false,
             "static": true,
-            "visibility": "public",
-            "doc": {
-                "description": "@var string",
-                "tags": []
-            }
-        },
-        "userAgent": {
-            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Appui\\Feed",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "@var string",
                 "tags": []
             },
+            "parent": false,
+            "value": null
+        },
+        "userAgent": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Appui\\Feed",
+            "promoted": false,
+            "visibility": "public",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
             "value": "FeedFetcher-Google"
+        },
+        "xml": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Appui\\Feed",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var SimpleXMLElement",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Feed"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
         }
     },
     "staticProperties": {
@@ -811,16 +1517,23 @@
         "cacheDir": null,
         "userAgent": "FeedFetcher-Google",
         "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "option_root_id": null
     },
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "SimpleXMLElement": "SimpleXMLElement",
+        "bbn\\Models\\Tts\\Optional": "Optional"
+    },
+    "dummyComments": [
+        "\/**\n * A RSS reader, writer and manager.\n * \n * Parser based on https:\/\/github.com\/dg\/rss-php\n * RSS for PHP - small and easy-to-use library for consuming an RSS Feed.\n *\n * @copyright  Copyright (c) 2008 David Grudl\n * @license    MIT\n * @version    1.5\n *\/"
+    ],
     "summary": "A RSS reader, writer and manager.",
     "description": "Parser based on https:\/\/github.com\/dg\/rss-php\nRSS for PHP - small and easy-to-use library for consuming an RSS Feed.",
     "description_parts": [
         {
             "type": "text",
-            "content": "<p>Parser based on <a href=\"https:\/\/github.com\/dg\/rss-php\">https:\/\/github.com\/dg\/rss-php<\/a>\nRSS for PHP - small and easy-to-use library for consuming an RSS Feed.<\/p>"
+            "content": "Parser based on https:\/\/github.com\/dg\/rss-php\nRSS for PHP - small and easy-to-use library for consuming an RSS Feed."
         }
     ]
 }

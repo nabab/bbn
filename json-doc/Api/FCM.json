@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Api\\FCM",
     "namespace": true,
+    "realName": "FCM",
+    "realNamespace": "bbn\\Api",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Api\/FCM.php",
     "startLine": 16,
     "endLine": 66,
-    "numMethods": 2,
-    "numProperties": 0,
+    "numMethods": 3,
+    "numProperties": 1,
     "numConstants": 1,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -32,7 +33,6 @@
     "namespaceName": "bbn\\Api",
     "shortName": "FCM",
     "contentConstructor": {
-        "file": "bbn\\Api\\FCM",
         "returns": []
     },
     "methods": {
@@ -41,11 +41,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\FCM",
+            "class": "bbn\\Api\\FCM",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/FCM.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $key)\n  {\n    $this->key = $key;\n  }",
+            "code": "  public function __construct(string $key)\n  {\n    $this->key = $key;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 23,
             "endLine": 26,
             "isDeprecated": false,
@@ -56,13 +59,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -75,11 +83,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Api\\FCM",
+            "class": "bbn\\Api\\FCM",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/FCM.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $deviceToken, string $title, string $body, array $data = [])\n  {\n    if (($res = $this->_send([\n        'to' => $deviceToken,\n        'notification' => [\n          'title' => $title,\n          'body' => $body,\n          'vibrate' => 1,\n          'sound' => 'default',\n        ],\n        'data' => $data\n      ]))\n      && !empty($res->success)\n      && !empty($res->results)\n      && \\is_array($res->results)\n      && !empty($res->results[0]->message_id)\n    ) {\n      return $res->results[0]->message_id;\n    }\n    return null;\n  }",
+            "code": "  public function sendMessage(string $deviceToken, string $title, string $body, array $data = []): ?string\n  {\n    if (($res = $this->_send([\n        'to' => $deviceToken,\n        'notification' => [\n          'title' => $title,\n          'body' => $body,\n          'vibrate' => 1,\n          'sound' => 'default',\n        ],\n        'data' => $data\n      ]))\n      && !empty($res->success)\n      && !empty($res->results)\n      && \\is_array($res->results)\n      && !empty($res->results[0]->message_id)\n    ) {\n      return $res->results[0]->message_id;\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 28,
             "endLine": 48,
             "isDeprecated": false,
@@ -90,16 +101,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
+            "shortName": "sendMessage",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "deviceToken",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -109,6 +125,11 @@
                     "name": "title",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -118,6 +139,11 @@
                     "name": "body",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -127,17 +153,105 @@
                     "name": "data",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": ""
                 }
             ]
+        },
+        "_send": {
+            "name": "_send",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Api\\FCM",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Api\/FCM.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _send(array $data): ?stdClass\n  {\n    if (($res = X::curl(self::API_URL, json_encode($data), [\n        'post' => true,\n        'httpheader' => [\n          'Content-Type: application\/json',\n          'Authorization: key=' . $this->key\n        ]\n      ])) \n      && ($res = json_decode($res))\n    ) {\n      return $res;\n    }\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 50,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_send",
+            "returns": [
+                null,
+                "stdClass"
+            ],
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "key": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Api\\FCM"
+            },
+            "declaring_trait": "bbn\\Api\\FCM",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": ""
+        }
+    },
     "staticProperties": [],
-    "constants": [],
+    "constants": {
+        "API_URL": {
+            "name": "API_URL",
+            "value": "https:\/\/fcm.googleapis.com\/fcm\/send",
+            "class": "bbn\\Api\\FCM",
+            "parent": false,
+            "private": false,
+            "protected": false,
+            "public": true,
+            "final": false,
+            "doc": {
+                "description": "",
+                "tags": []
+            }
+        }
+    },
+    "uses": {
+        "bbn\\X": "X",
+        "stdClass": "stdClass"
+    },
+    "dummyComments": [
+        "\/**\n * A class for use Firebase Cloud Messaging (FCM).\n *\n * @category Api\n * @author Mirko Argentino <mirko@bbn.solutions>\n * @license http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n *\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

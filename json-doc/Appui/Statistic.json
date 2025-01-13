@@ -5,22 +5,21 @@
     },
     "name": "bbn\\Appui\\Statistic",
     "namespace": true,
+    "realName": "Statistic",
+    "realNamespace": "bbn\\Appui",
     "traits": [
         "bbn\\Models\\Tts\\Optional"
     ],
     "interfaces": [],
     "fileName": "\/Appui\/Statistic.php",
     "startLine": 23,
-    "endLine": 1200,
-    "numMethods": 34,
-    "numProperties": 0,
+    "endLine": 1205,
+    "numMethods": 40,
+    "numProperties": 26,
     "numConstants": 1,
-    "numStaticProperties": 5,
+    "numStaticProperties": 4,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Models\\Tts\\Optional"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -41,7 +40,6 @@
         "_placeholder": "___BBN_TST___",
         "optional_is_init": false,
         "option_root_id": null,
-        "option_appui_id": null,
         "is_total": false,
         "db_cfg": null,
         "ocfg": null,
@@ -51,6 +49,8 @@
         "db": null,
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": [],
         "options": null
@@ -60,7 +60,6 @@
     "namespaceName": "bbn\\Appui",
     "shortName": "Statistic",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Statistic",
         "returns": []
     },
     "methods": {
@@ -69,32 +68,25 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, string $code, array $cfg = [])\n  {\n    \/\/ Parent constructors\n    parent::__construct($db);\n    self::optionalInit();\n    \/\/ Db ok\n    if (!$this->db->check()) {\n      throw new Exception(X::_(\"The database is in error mode\"));\n    }\n\n    \/\/ History ok\n    if (!History::isInit()) {\n      throw new Exception(X::_(\"History is disabled\"));\n    }\n\n    \/\/ Option found\n    if (!($this->id_option = self::getOptionId($code, 'active'))) {\n      throw new Exception(X::_(\"No id option corresponding to code in active statistics\"));\n    }\n\n    \/\/ Cfg retrieved\n    if (!($this->ocfg = self::getOption($this->id_option))) {\n      throw new Exception(X::_(\"No cfg option corresponding to id in active statistics\"));\n    }\n\n    $cfg = array_merge($cfg, $this->ocfg);\n    \/\/ Params ok\n    if (!X::hasProps($cfg, ['type', 'table'], true) || !X::is_string($cfg['type'], $cfg['table'])) {\n      X::log($cfg);\n      throw new Exception(X::_(\"Invalid configuration\"));\n    }\n    \/\/ Correcting case\n    $cfg['type'] = strtolower($cfg['type']);\n\n    \/\/ Type accepted\n    if (X::indexOf(self::$types, $cfg['type']) === -1) {\n      throw new Exception(X::_(\"Invalid type in configuration\"));\n    }\n\n    \/\/ History config retrieved\n    if ($this->hcfg = History::getTableCfg($cfg['table'])) {\n      \/\/ For sum and avg types field is mandatory\n      if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {\n        throw new Exception(X::_(\"The field parameter is mandatory for sum and avg types\"));\n      }\n\n      $this->code = $code;\n      $this->dbo  = new \\bbn\\Appui\\Database($this->db);\n      if (isset($cfg['field'])) {\n        if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {\n          throw new Exception(X::_(\"The field parameter must be a known field of the table (asked %s in %s)\", $cfg['field'], $cfg['table']));\n        }\n      }\n\n      if (($cfg['type'] === 'update') && empty($this->_id_field)) {\n        throw new Exception(X::_(\"The field parameter is mandatory for statistics of type update\"));\n      }\n\n      $this->type = $cfg['type'];\n      $this->cfg  = $cfg;\n      if (!empty($cfg['inserter']) && bbn\\Str::isUid($cfg['inserter'])) {\n        $this->inserter = $cfg['inserter'];\n      }\n\n      if (!empty($cfg['updater']) && bbn\\Str::isUid($cfg['updater'])) {\n        $this->updater = $cfg['updater'];\n      }\n\n      if (!empty($cfg['deleter']) && bbn\\Str::isUid($cfg['deleter'])) {\n        $this->deleter = $cfg['deleter'];\n      }\n\n      \/\/ Creating the configuration\n      $req          = $this->_set_request_cfg();\n      X::log([$cfg, $req], 'stat');\n      $this->db_cfg = $this->db->processCfg($req);\n    }\n    \/\/ Right props in cfg\n  }",
-            "startLine": 120,
-            "endLine": 198,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 3,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
+            "code": "  public function __construct(bbn\\Db $db, string $code, array $cfg = [])\n  {\n    \/\/ Parent constructors\n    parent::__construct($db);\n    self::optionalInit();\n    \/\/ Db ok\n    if (!$this->db->check()) {\n      throw new Exception(X::_(\"The database is in error mode\"));\n    }\n\n    \/\/ History ok\n    if (!History::isInit()) {\n      throw new Exception(X::_(\"History is disabled\"));\n    }\n\n    \/\/ Option found\n    if (!($this->id_option = self::getOptionId($code, 'active'))) {\n      throw new Exception(X::_(\"No id option corresponding to code in active statistics\"));\n    }\n\n    \/\/ Cfg retrieved\n    if (!($this->ocfg = self::getOption($this->id_option))) {\n      throw new Exception(X::_(\"No cfg option corresponding to id in active statistics\"));\n    }\n\n    $cfg = array_merge($cfg, $this->ocfg);\n    \/\/ Params ok\n    if (!X::hasProps($cfg, ['type', 'table'], true) || !X::is_string($cfg['type'], $cfg['table'])) {\n      X::log($cfg);\n      throw new Exception(X::_(\"Invalid configuration\"));\n    }\n    \/\/ Correcting case\n    $cfg['type'] = strtolower($cfg['type']);\n\n    \/\/ Type accepted\n    if (X::indexOf(self::$types, $cfg['type']) === -1) {\n      throw new Exception(X::_(\"Invalid type in configuration\"));\n    }\n\n    \/\/ History config retrieved\n    if ($this->hcfg = History::getTableCfg($cfg['table'])) {\n      \/\/ For sum and avg types field is mandatory\n      if ((X::indexOf(['sum', 'avg'], $cfg['type']) > -1) && !isset($cfg['field'])) {\n        throw new Exception(X::_(\"The field parameter is mandatory for sum and avg types\"));\n      }\n\n      $this->code = $code;\n      $this->dbo  = new \\bbn\\Appui\\Database($this->db);\n      if (isset($cfg['field'])) {\n        if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {\n          throw new Exception(X::_(\"The field parameter must be a known field of the table (asked %s in %s)\", $cfg['field'], $cfg['table']));\n        }\n      }\n\n      if (($cfg['type'] === 'update') && empty($this->_id_field)) {\n        throw new Exception(X::_(\"The field parameter is mandatory for statistics of type update\"));\n      }\n\n      $this->type = $cfg['type'];\n      $this->cfg  = $cfg;\n      if (!empty($cfg['inserter']) && bbn\\Str::isUid($cfg['inserter'])) {\n        $this->inserter = $cfg['inserter'];\n      }\n\n      if (!empty($cfg['updater']) && bbn\\Str::isUid($cfg['updater'])) {\n        $this->updater = $cfg['updater'];\n      }\n\n      if (!empty($cfg['deleter']) && bbn\\Str::isUid($cfg['deleter'])) {\n        $this->deleter = $cfg['deleter'];\n      }\n\n      \/\/ Creating the configuration\n      $req          = $this->_set_request_cfg();\n      X::log([$cfg, $req], 'stat');\n      $this->db_cfg = $this->db->processCfg($req);\n    }\n    \/\/ Right props in cfg\n  }",
             "parent": {
                 "name": "__construct",
                 "summary": "Constructor.",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Db",
+                "class": "bbn\\Models\\Cls\\Db",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Db.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bbn\\Db $db)\n  {\n    $this->db = $db;\n  }",
+                "code": "  public function __construct(dbClass $db)\n  {\n    $this->db = $db;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 37,
                 "endLine": 40,
                 "isDeprecated": false,
@@ -105,26 +97,62 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "__construct",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "db",
                         "position": 0,
                         "type": "bbn\\Db",
+                        "type_arr": [
+                            "bbn\\Db"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": "",
                         "description": "A database connection"
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "Constructor.\n",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "dbClass",
+                            "name": "$db",
+                            "description": "A database connection"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Constructor.\n   *\n   * @param dbClass $db A database connection\n   *\/"
             },
+            "trait": false,
+            "startLine": 120,
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
+            "returns": [],
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -135,6 +163,11 @@
                     "name": "code",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -145,24 +178,89 @@
                     "name": "cfg",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": "",
                     "description": "The configuration"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\Db",
+                        "name": "$db",
+                        "description": "The database connection"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code",
+                        "description": "The code of the option"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The configuration"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   *\n   * @param bbn\\Db $db   The database connection\n   * @param string $code The code of the option\n   * @param array  $cfg  The configuration\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks if the constructor is gone through.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return (bool)$this->ocfg;\n  }",
+            "code": "  public function check(): bool\n  {\n    return (bool)$this->ocfg;\n  }",
+            "parent": {
+                "name": "check",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "check",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
             "startLine": 206,
             "endLine": 209,
             "isDeprecated": false,
@@ -173,45 +271,31 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [
                 "bool"
             ],
-            "parent": {
-                "name": "check",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the constructor is gone through.\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks if the constructor is gone through.\n   *\n   * @return bool\n   *\/"
         },
         "getCode": {
             "name": "getCode",
             "summary": "Code getter.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->check()) {\n      return $this->code;\n    }\n\n    return null;\n  }",
+            "code": "  public function getCode(): ?string\n  {\n    if ($this->check()) {\n      return $this->code;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 217,
             "endLine": 224,
             "isDeprecated": false,
@@ -222,23 +306,32 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCode",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Code getter.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Code getter.\n   *\n   * @return string|null\n   *\/"
         },
         "run": {
             "name": "run",
-            "summary": "",
+            "summary": "Run the stat",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($start, $end = NULL)\n  {\n    if ($this->db_cfg && !empty($this->db_cfg['values'])) {\n      if (is_string($start)) {\n        $start = strtotime($start . (strlen($start) === 10 ? ' 00:00:00' : ''));\n      }\n\n      if (!$start || !is_int($start)) {\n        throw new Exception(X::_('Impossible to read the given start date'));\n      }\n\n      if (!$this->is_total) {\n        if (!$end || ($end <= $start)) {\n          $end = mktime(23, 59, 59, Date('n', $start), Date('j', $start), Date('Y', $start));\n        }\n\n        if (!$end || !is_int($end)) {\n          throw new Exception(X::_('Impossible to read the given end date'));\n        }\n      }\n\n      $vals = [];\n      foreach ($this->db_cfg['values'] as $v) {\n        if (!$this->is_total && ($v === self::$_placeholder . '2')) {\n          $vals[] = $end;\n        } else {\n          $vals[] = $v === self::$_placeholder ? $start : $v;\n        }\n      }\n\n      $cfg           = $this->db_cfg;\n      $cfg['values'] = $vals;\n      try {\n        $res = $this->db->selectOne($cfg);\n      }\n      catch (\\Exception $e) {\n        X::log([$e->getMessage(), $this->ocfg, $cfg['sql'], $cfg['values']], 'stat');\n        throw new Exception($e);\n      }\n\n      return $res;\n    }\n  }",
+            "code": "  public function run($start, $end = null)\n  {\n    if ($this->db_cfg && !empty($this->db_cfg['values'])) {\n      if (is_string($start)) {\n        $start = strtotime($start . (strlen($start) === 10 ? ' 00:00:00' : ''));\n      }\n\n      if (!$start || !is_int($start)) {\n        throw new Exception(X::_('Impossible to read the given start date'));\n      }\n\n      if (!$this->is_total) {\n        if (!$end || ($end <= $start)) {\n          $end = mktime(23, 59, 59, Date('n', $start), Date('j', $start), Date('Y', $start));\n        }\n\n        if (!$end || !is_int($end)) {\n          throw new Exception(X::_('Impossible to read the given end date'));\n        }\n      }\n\n      $vals = [];\n      foreach ($this->db_cfg['values'] as $v) {\n        if (!$this->is_total && ($v === self::$_placeholder . '2')) {\n          $vals[] = $end;\n        } else {\n          $vals[] = $v === self::$_placeholder ? $start : $v;\n        }\n      }\n\n      $cfg           = $this->db_cfg;\n      $cfg['values'] = $vals;\n      try {\n        $res = $this->db->selectOne($cfg);\n      }\n      catch (\\Exception $e) {\n        X::log([$e->getMessage(), $this->ocfg, $cfg['sql'], $cfg['values']], 'stat');\n        throw new Exception($e);\n      }\n\n      return $res;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 234,
             "endLine": 276,
             "isDeprecated": false,
@@ -249,13 +342,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "run",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "start",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -265,25 +361,48 @@
                     "name": "end",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Run the stat\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$start"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$end"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Run the stat\n   *\n   * @param [type] $start\n   * @param [type] $end\n   * @return void\n   *\/"
         },
         "update": {
             "name": "update",
             "summary": "Update a statistic in the table bbn_statistics from the start of time",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $variant = NULL, string $start = NULL)\n  {\n    if ($this->check()) {\n      if (!$variant) {\n        $variant = 'default';\n      }\n\n      if (!($real_start = $this->db->selectOne('bbn_statistics', 'MAX(day)', ['id_option' => $this->id_option, 'code' => $variant]))) {\n        if ($start) {\n          $real_start = $start;\n        } elseif (!empty($this->ocfg['start'])) {\n          $real_start = $this->ocfg['start'];\n        } else {\n          $real_start = self::ODATE;\n        }\n      }\n\n      if (Str::isDateSql($real_start)) {\n        $num_days  = 0;\n        $num       = $this->db->count(\n          'bbn_statistics',\n          [\n            'id_option' => $this->id_option,\n            'code' => $variant\n          ]\n        );\n        $today     = date('Ymd');\n        $last_res  = null;\n        $last_date = $real_start;\n        $time      = mktime(\n          12,\n          0,\n          0,\n          (int)substr($real_start, 5, 2),\n          (int)substr($real_start, 8, 2),\n          (int)substr($real_start, 0, 4)\n        );\n        $test      = date('Ymd', $time);\n        while ($test <= $today) {\n          $res = $this->run($real_start);\n          \/*\n          if ($num_days) {\n            X::hdump($res, $this->db->getLastValues());\n          }\n          else {\n            X::hdump($res, $this->db->last(), $this->db->getLastValues());\n          }\n          *\/\n\n          $num_days++;\n          if (!$res) {\n            $res = 0;\n          }\n\n          if (($res !== $last_res) || !$num) {\n            if ($this->db->count(\n              'bbn_statistics',\n              [\n                'id_option' => $this->ocfg['id'],\n                'code' => $variant,\n                'day' => $real_start\n              ]\n            )) {\n              $this->db->update(\n                'bbn_statistics',\n                [\n                  'res' => $res\n                ],\n                [\n                  'id_option' => $this->ocfg['id'],\n                  'code' => $variant,\n                  'day' => $real_start\n                ]\n              );\n            } else {\n              $this->db->insert(\n                'bbn_statistics',\n                [\n                  'id_option' => $this->ocfg['id'],\n                  'code' => $variant,\n                  'day' => $real_start,\n                  'res' => $res\n                ]\n              );\n            }\n\n            $last_res = $res;\n            $num++;\n          } else {\n            $this->db->update(\n              'bbn_statistics',\n              [\n                'day' => $real_start\n              ],\n              [\n                'id_option' => $this->ocfg['id'],\n                'code' => $variant,\n                'day' => $last_date\n              ]\n            );\n          }\n\n          $last_date  = $real_start;\n          $time      += 24 * 3600;\n          $real_start = date('Y-m-d', $time);\n          $test       = date('Ymd', $time);\n        }\n\n        return $num_days;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function update(string $variant = null, string $start = null): ?int\n  {\n    if ($this->check()) {\n      if (!$variant) {\n        $variant = 'default';\n      }\n\n      if (!($real_start = $this->db->selectOne('bbn_statistics', 'MAX(day)', ['id_option' => $this->id_option, 'code' => $variant]))) {\n        if ($start) {\n          $real_start = $start;\n        } elseif (!empty($this->ocfg['start'])) {\n          $real_start = $this->ocfg['start'];\n        } else {\n          $real_start = self::ODATE;\n        }\n      }\n\n      if (Str::isDateSql($real_start)) {\n        $num_days  = 0;\n        $num       = $this->db->count(\n          'bbn_statistics',\n          [\n            'id_option' => $this->id_option,\n            'code' => $variant\n          ]\n        );\n        $today     = date('Ymd');\n        $last_res  = null;\n        $last_date = $real_start;\n        $time      = mktime(\n          12,\n          0,\n          0,\n          (int)substr($real_start, 5, 2),\n          (int)substr($real_start, 8, 2),\n          (int)substr($real_start, 0, 4)\n        );\n        $test      = date('Ymd', $time);\n        while ($test <= $today) {\n          $res = $this->run($real_start);\n          \/\/X::adump($res, $this->db->last(), $this->db->getLastValues());\n          \/*\n          if ($num_days) {\n            X::hdump($res, $this->db->getLastValues());\n          }\n          else {\n            X::hdump($res, $this->db->last(), $this->db->getLastValues());\n          }\n          *\/\n\n          $num_days++;\n          if (!$res) {\n            $res = 0;\n          }\n\n          if (($res !== $last_res) || !$num) {\n            if ($this->db->count(\n              'bbn_statistics',\n              [\n                'id_option' => $this->ocfg['id'],\n                'code' => $variant,\n                'day' => $real_start\n              ]\n            )) {\n              $this->db->update(\n                'bbn_statistics',\n                [\n                  'res' => $res\n                ],\n                [\n                  'id_option' => $this->ocfg['id'],\n                  'code' => $variant,\n                  'day' => $real_start\n                ]\n              );\n            } else {\n              $this->db->insert(\n                'bbn_statistics',\n                [\n                  'id_option' => $this->ocfg['id'],\n                  'code' => $variant,\n                  'day' => $real_start,\n                  'res' => $res\n                ]\n              );\n            }\n\n            $last_res = $res;\n            $num++;\n          } else {\n            $this->db->update(\n              'bbn_statistics',\n              [\n                'day' => $real_start\n              ],\n              [\n                'id_option' => $this->ocfg['id'],\n                'code' => $variant,\n                'day' => $last_date\n              ]\n            );\n          }\n\n          $last_date  = $real_start;\n          $time      += 24 * 3600;\n          $real_start = date('Y-m-d', $time);\n          $test       = date('Ymd', $time);\n        }\n\n        return $num_days;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 286,
-            "endLine": 399,
+            "endLine": 400,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -292,16 +411,22 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "update",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "variant",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -310,27 +435,54 @@
                 {
                     "name": "start",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "Start of time"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Update a statistic in the table bbn_statistics from the start of time\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$variant"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$start",
+                        "description": "Start of time"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Update a statistic in the table bbn_statistics from the start of time\n   *\n   * @param string      $variant\n   * @param string|null $start   Start of time\n   * @return int\n   *\/"
         },
         "serieByDate": {
             "name": "serieByDate",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($unit, string $end, string $start)\n  {\n    if (Str::isDateSql($start, $end)) {\n      $tsStart = mktime(12, 0, 0, substr($start, 5, 2), substr($start, 8, 2), substr($start, 0, 4));\n      $res = [];\n      $labels = [];\n      switch ($unit) {\n        case 'd':\n          $label = \"%s\";\n          $format = \"d\/m\";\n          break;\n        case 'w':\n          $label = \"week %s\";\n          $format = \"W\";\n          break;\n        case 'm':\n          $label = \"%s\";\n          $format = \"m\/Y\";\n          break;\n        case 'y':\n          $label = \"%s\";\n          $format = \"Y\";\n          break;\n      }\n      $idx = null;\n\n      $total = 0;\n      while ($start <= $end) {\n        $new_idx = date($format, $tsStart);\n        if ($new_idx !== $idx) {\n          if (!is_null($idx)) {\n            $res[] = $total;\n          }\n\n          $labels[] = $start;\n          \/\/$labels[] = sprintf($label, $new_idx);\n          $total = 0;\n          $idx = $new_idx;\n        }\n\n        if ($tmp = $this->db->rselect(\n          'bbn_statistics',\n          ['day', 'res'],\n          [\n            'id_option' => $this->id_option,\n            'day' => $start\n          ]\n        )) {\n          if (empty($this->ocfg['total'])) {\n            $total += (int)$tmp['res'];\n          } else {\n            $total = (int)$tmp['res'];\n          }\n        }\n\n        $tsStart = strtotime(\"+ 1 day\", $tsStart);\n        $start = date('Y-m-d', $tsStart);\n        if ($start > $end) {\n          $res[] = $total;\n        }\n      }\n\n      return [\n        'labels' => $labels,\n        'series' => $res\n      ];\n    }\n\n    return null;\n  }",
-            "startLine": 402,
-            "endLine": 471,
+            "code": "  public function serieByDate($unit, string $end, string $start): ?array\n  {\n    if (empty($unit)) {\n      $unit = $d;\n    }\n\n    if (Str::isDateSql($start, $end)) {\n      $tsStart = mktime(12, 0, 0, substr($start, 5, 2), substr($start, 8, 2), substr($start, 0, 4));\n      $res = [];\n      $labels = [];\n      switch ($unit) {\n        case 'd':\n          $label = \"%s\";\n          $format = \"d\/m\";\n          break;\n        case 'w':\n          $label = \"week %s\";\n          $format = \"W\";\n          break;\n        case 'm':\n          $label = \"%s\";\n          $format = \"m\/Y\";\n          break;\n        case 'y':\n          $label = \"%s\";\n          $format = \"Y\";\n          break;\n      }\n      $idx = null;\n\n      $total = 0;\n      while ($start <= $end) {\n        $new_idx = date($format, $tsStart);\n        if ($new_idx !== $idx) {\n          if (!is_null($idx)) {\n            $res[] = $total;\n          }\n\n          $labels[] = $start;\n          \/\/$labels[] = sprintf($label, $new_idx);\n          $total = 0;\n          $idx = $new_idx;\n        }\n\n        if ($tmp = $this->db->rselect(\n          'bbn_statistics',\n          ['day', 'res'],\n          [\n            'id_option' => $this->id_option,\n            'day' => $start\n          ]\n        )) {\n          if (empty($this->ocfg['total'])) {\n            $total += (int)$tmp['res'];\n          } else {\n            $total = (int)$tmp['res'];\n          }\n        }\n\n        $tsStart = strtotime(\"+ 1 day\", $tsStart);\n        $start = date('Y-m-d', $tsStart);\n        if ($start > $end) {\n          $res[] = $total;\n        }\n      }\n\n      return [\n        'labels' => $labels,\n        'series' => $res\n      ];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 403,
+            "endLine": 476,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -339,16 +491,19 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "serieByDate",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "unit",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -358,6 +513,11 @@
                     "name": "end",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -367,6 +527,11 @@
                     "name": "start",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -379,13 +544,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $values = 30, string $unit = 'd', string $end = NULL)\n  {\n    if ($this->check()) {\n      if (!Str::isDateSql($end)) {\n        $end = date('Y-m-d');\n      }\n      $tst = mktime(12, 0, 0, substr($end, 5, 2), substr($end, 8, 2), substr($end, 0, 4));\n      switch ($unit) {\n        case 'd':\n          $exp = 'days';\n          break;\n        case 'w':\n          $exp = 'weeks';\n          break;\n        case 'm':\n          $exp = 'month';\n          break;\n        case 'y':\n          $exp = 'years';\n          break;\n      }\n\n      $start = date('Y-m-d', strtotime(\"$values $exp ago\", $tst));\n      return $this->serieByDate($unit, $end, $start);\n    }\n\n    return null;\n  }",
-            "startLine": 473,
-            "endLine": 500,
+            "code": "  public function serie(int $values = 30, string $unit = 'd', string $end = null): ?array\n  {\n    if ($this->check()) {\n      if (!Str::isDateSql($end)) {\n        $end = date('Y-m-d');\n      }\n      $tst = mktime(12, 0, 0, substr($end, 5, 2), substr($end, 8, 2), substr($end, 0, 4));\n      switch ($unit) {\n        case 'd':\n          $exp = 'days';\n          break;\n        case 'w':\n          $exp = 'weeks';\n          break;\n        case 'm':\n          $exp = 'month';\n          break;\n        case 'y':\n          $exp = 'years';\n          break;\n      }\n\n      $start = date('Y-m-d', strtotime(\"$values $exp ago\", $tst));\n      return $this->serieByDate($unit, $end, $start);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 478,
+            "endLine": 505,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -394,16 +562,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
+            "shortName": "serie",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "values",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 30,
@@ -413,6 +586,11 @@
                     "name": "unit",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "d",
@@ -421,7 +599,13 @@
                 {
                     "name": "end",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -434,13 +618,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $values = 30, string $unit = 'd', string $end = NULL)\n  {\n    if ($res = $this->serie($values, $unit, $end)) {\n      return $res['series'];\n    }\n\n    return null;\n  }",
-            "startLine": 503,
-            "endLine": 510,
+            "code": "  public function serieValues(int $values = 30, string $unit = 'd', string $end = null): ?array\n  {\n    if ($res = $this->serie($values, $unit, $end)) {\n      return $res['series'];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 508,
+            "endLine": 515,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -449,16 +636,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 0,
+            "shortName": "serieValues",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "values",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 30,
@@ -468,6 +660,11 @@
                     "name": "unit",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "d",
@@ -476,7 +673,13 @@
                 {
                     "name": "end",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -489,13 +692,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $values = 30, string $unit = 'm', string $end = NULL, string $pstart = NULL)\n  {\n    if ($this->ocfg && $values) {\n      if (!$end) {\n        $end = date('Y-m-d');\n      }\n\n      if (bbn\\Str::isDateSql($end)) {\n        switch (strtolower($unit)) {\n          case 'y':\n            $funit = 'years';\n            $tmp   = date('Y-m-d', mktime(23, 59, 59, 12, 31, substr($end, 0, 4)));\n            if ($end !== $tmp) {\n              $end = date('Y-m-d', mktime(23, 59, 59, 12, 31, (int)substr($end, 0, 4) - 1));\n            }\n            break;\n          case 't':\n            $funit   = 'months';\n            $values *= 3;\n          case 'm':\n            $funit  = 'months';\n            $month  = (int)substr($end, 5, 2);\n            $remain = $month % 3;\n            if ($remain) {\n              $remain = 3 - $remain;\n            }\n\n            $tmp = date('Y-m-d', mktime(23, 59, 59, $month + 1, 0, substr($end, 0, 4)));\n            if (($end !== $tmp) || $remain) {\n              $end = date('Y-m-d', mktime(23, 59, 59, $month - $remain + 1, 0, (int)substr($end, 0, 4)));\n            }\n            break;\n          case 'w':\n            $funit = 'weeks';\n\n            break;\n          case 'd':\n            $funit = 'days';\n            break;\n        }\n\n        if (isset($funit)) {\n          $dend   = new \\DateTime($end);\n          $dstart = $dend->sub(date_interval_create_from_date_string(\"$values $funit\"));\n          $start  = $dstart->format('Y-m-d');\n          $res    = [\n            'labels' => [],\n            'series' => []\n          ];\n          if ($all = $this->db->rselectAll(\n            'bbn_statistics',\n            ['day', 'res'],\n            [\n              [\n                'field' => 'id_option',\n                'value' => $this->id_option\n              ], [\n                'field' => 'day',\n                'operator' => '<=',\n                'value' => $end\n              ], [\n                'field' => 'day',\n                'operator' => '>=',\n                'value' => $start\n              ]\n            ],\n            [\n              'day' => 'ASC'\n            ]\n          )) {\n            $last = count($all) - 1;\n            if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect(\n                'bbn_statistics',\n                ['day', 'res'],\n                [\n                  [\n                    'field' => 'id_option',\n                    'value' => $this->id_option\n                  ], [\n                    'field' => 'day',\n                    'operator' => '>',\n                    'value' => $end\n                  ]\n                ],\n                [\n                  'day' => 'ASC'\n                ]\n              ))\n            ) {\n              $all[] = $tmp;\n              $last++;\n            }\n\n            $dcurrent = new \\DateTime($start);\n            $num_days = (int)$dend->diff($dcurrent)->format('%a');\n            $diff     = $num_days;\n            $interval = (int)floor($num_days \/ $values);\n            $num      = 0;\n            $idx      = 0;\n            $didx     = 0;\n            while ($diff >= 0) {\n              $current = $dcurrent->format('Y-m-d');\n              if ($num === $interval) {\n                $num = 0;\n              }\n\n              if (!$num) {\n                $res['labels'][$didx] = $current;\n                $res['series'][$didx] = $all[$idx]['res'];\n                $didx++;\n              } elseif (empty($this->ocfg['total'])) {\n                $res['labels'][$didx]  = $current;\n                $res['series'][$didx] += (int)$all[$idx]['res'];\n              }\n\n              if (!$diff) {\n                break;\n              }\n\n              if ($current === $all[$idx]['day']) {\n                $idx++;\n              }\n\n              $dcurrent = $dcurrent->add(date_interval_create_from_date_string('1 days'));\n              $diff     = (int)$dend->diff($dcurrent)->format('%a');\n              $num++;\n            }\n          }\n\n          return $res;\n        }\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 513,
-            "endLine": 648,
+            "code": "  public function serieByPeriod(int $values = 30, string $unit = 'm', string $end = null, string $pstart = null): ?array\n  {\n    if ($this->ocfg && $values) {\n      if (!$end) {\n        $end = date('Y-m-d');\n      }\n\n      if (bbn\\Str::isDateSql($end)) {\n        switch (strtolower($unit)) {\n          case 'y':\n            $funit = 'years';\n            $tmp   = date('Y-m-d', mktime(23, 59, 59, 12, 31, substr($end, 0, 4)));\n            if ($end !== $tmp) {\n              $end = date('Y-m-d', mktime(23, 59, 59, 12, 31, (int)substr($end, 0, 4) - 1));\n            }\n            break;\n          case 't':\n            $funit   = 'months';\n            $values *= 3;\n          case 'm':\n            $funit  = 'months';\n            $month  = (int)substr($end, 5, 2);\n            $remain = $month % 3;\n            if ($remain) {\n              $remain = 3 - $remain;\n            }\n\n            $tmp = date('Y-m-d', mktime(23, 59, 59, $month + 1, 0, substr($end, 0, 4)));\n            if (($end !== $tmp) || $remain) {\n              $end = date('Y-m-d', mktime(23, 59, 59, $month - $remain + 1, 0, (int)substr($end, 0, 4)));\n            }\n            break;\n          case 'w':\n            $funit = 'weeks';\n\n            break;\n          case 'd':\n            $funit = 'days';\n            break;\n        }\n\n        if (isset($funit)) {\n          $dend   = new \\DateTime($end);\n          $dstart = $dend->sub(date_interval_create_from_date_string(\"$values $funit\"));\n          $start  = $dstart->format('Y-m-d');\n          $res    = [\n            'labels' => [],\n            'series' => []\n          ];\n          if ($all = $this->db->rselectAll(\n            'bbn_statistics',\n            ['day', 'res'],\n            [\n              [\n                'field' => 'id_option',\n                'value' => $this->id_option\n              ], [\n                'field' => 'day',\n                'operator' => '<=',\n                'value' => $end\n              ], [\n                'field' => 'day',\n                'operator' => '>=',\n                'value' => $start\n              ]\n            ],\n            [\n              'day' => 'ASC'\n            ]\n          )) {\n            $last = count($all) - 1;\n            if (($all[$last]['day'] !== $end) && ($tmp = $this->db->rselect(\n                'bbn_statistics',\n                ['day', 'res'],\n                [\n                  [\n                    'field' => 'id_option',\n                    'value' => $this->id_option\n                  ], [\n                    'field' => 'day',\n                    'operator' => '>',\n                    'value' => $end\n                  ]\n                ],\n                [\n                  'day' => 'ASC'\n                ]\n              ))\n            ) {\n              $all[] = $tmp;\n              $last++;\n            }\n\n            $dcurrent = new \\DateTime($start);\n            $num_days = (int)$dend->diff($dcurrent)->format('%a');\n            $diff     = $num_days;\n            $interval = (int)floor($num_days \/ $values);\n            $num      = 0;\n            $idx      = 0;\n            $didx     = 0;\n            while ($diff >= 0) {\n              $current = $dcurrent->format('Y-m-d');\n              if ($num === $interval) {\n                $num = 0;\n              }\n\n              if (!$num) {\n                $res['labels'][$didx] = $current;\n                $res['series'][$didx] = $all[$idx]['res'];\n                $didx++;\n              } elseif (empty($this->ocfg['total'])) {\n                $res['labels'][$didx]  = $current;\n                $res['series'][$didx] += (int)$all[$idx]['res'];\n              }\n\n              if (!$diff) {\n                break;\n              }\n\n              if ($current === $all[$idx]['day']) {\n                $idx++;\n              }\n\n              $dcurrent = $dcurrent->add(date_interval_create_from_date_string('1 days'));\n              $diff     = (int)$dend->diff($dcurrent)->format('%a');\n              $num++;\n            }\n          }\n\n          return $res;\n        }\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 518,
+            "endLine": 653,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -504,16 +710,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 0,
+            "shortName": "serieByPeriod",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "values",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 30,
@@ -523,6 +734,11 @@
                     "name": "unit",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "m",
@@ -531,7 +747,13 @@
                 {
                     "name": "end",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -540,7 +762,13 @@
                 {
                     "name": "pstart",
                     "position": 3,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -548,18 +776,21 @@
                 }
             ]
         },
-        "test": {
-            "name": "test",
-            "summary": "Checks whether the error property has been set (so an error happened).",
+        "_set_request_cfg": {
+            "name": "_set_request_cfg",
+            "summary": "Creates the proper request parameters from the current configuration",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
+            "code": "  private function _set_request_cfg(): ?array\n  {\n    if ($this->type) {\n      $cfg = [\n        'tables' => ['bbn_history'],\n        'join' => [\n          [\n            'table' => $this->cfg['table'],\n            'on' => [\n              [\n                'field' => $this->cfg['table'] . '.' . $this->hcfg['primary'],\n                'exp' => 'bbn_history.uid'\n              ]\n            ]\n          ]\n        ],\n        'where' => [\n          'logic' => 'AND',\n          'conditions' => [[\n            'field' => 'bbn_history.tst',\n            'operator' => '<=',\n            'value' => self::$_placeholder . ($this->is_total ? '' : '2')\n          ]]\n        ]\n      ];\n      if ($this->inserter) {\n        if ($this->type === 'insert') {\n          $cfg['where']['conditions'][] = [\n            'field' => 'bbn_history.usr',\n            'value' => $this->inserter\n          ];\n        } else {\n          $alias                        = Str::genpwd(12);\n          $cfg['join'][]                = [\n            'table' => 'bbn_history',\n            'alias' => $alias,\n            'on' => [\n              [\n                'field' => 'bbn_history.uid',\n                'exp' => $alias . '.uid'\n              ], [\n                'field' => 'bbn_history.tst',\n                'operator' => '>',\n                'exp' => $alias . '.tst'\n              ], [\n                'field' => $alias . '.opr',\n                'value' => 'INSERT'\n              ]\n            ]\n          ];\n          $cfg['where']['conditions'][] = [\n            'field' => $alias . '.usr',\n            'value' => $this->inserter\n          ];\n        }\n      }\n\n      switch ($this->type) {\n        case 'insert':\n          $this->_set_insert_cfg($cfg);\n          break;\n        case 'update':\n          $this->_set_update_cfg($cfg);\n          break;\n        case 'delete':\n          $this->_set_delete_cfg($cfg);\n          break;\n        case 'restore':\n          $this->_set_restore_cfg($cfg);\n          break;\n        case 'count':\n          $this->_set_count_cfg($cfg);\n          break;\n        case 'sum':\n        case 'avg':\n          $this->_set_fn_cfg($this->type, $cfg);\n          break;\n      }\n\n      if (\n        X::hasProp($this->cfg, 'filter', true)\n        && ($conditions = $this->db->treatConditions($this->cfg['filter']))\n        && !empty($conditions['where']['conditions'])\n        && ($tmp2 = $this->_set_filter($conditions['where']))\n      ) {\n        foreach ($tmp2['join'] as $j) {\n          $cfg['join'][] = $j;\n        }\n\n        if (!empty($tmp2['filter'])) {\n          $cfg['where']['conditions'][] = $tmp2['filter'];\n        }\n      }\n\n      $this->request = $cfg;\n      return $cfg;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 661,
+            "endLine": 760,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -568,186 +799,78 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "test",
-                "summary": "Checks whether the error property has been set (so an error happened).",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "shortName": "_set_request_cfg",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Creates the proper request parameters from the current configuration\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Creates the proper request parameters from the current configuration\n   *\n   * @return array|null\n   *\/"
         },
-        "getError": {
-            "name": "getError",
+        "_set_count_cfg": {
+            "name": "_set_count_cfg",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "code": "  private function _set_count_cfg(array &$cfg): array\n  {\n    $alias         = Str::genpwd(12);\n    $cfg['fields'] = ['COUNT(DISTINCT bbn_history.uid)'];\n    $cfg['join'][] = [\n      'table' => 'bbn_history',\n      'alias' => $alias,\n      'type' => 'left',\n      'on' => [\n        \/\/ Same UID\n        [\n          'field' => $alias . '.uid',\n          'operator' => '=',\n          'exp' => 'bbn_history.uid'\n        ],\n        \/\/ Delete action\n        [\n          'field' => $alias . '.opr',\n          'operator' => 'LIKE',\n          'value' => 'DELETE'\n        ],\n        \/\/ Performed after the INSERT\n        [\n          'field' => $alias . '.tst',\n          'operator' => '>',\n          'exp' => 'bbn_history.tst'\n        ],\n        \/\/ Performed before the end of the period\n        [\n          'field' => $alias . '.tst',\n          'operator' => '<=',\n          'value' => self::$_placeholder . ($this->is_total ? '' : '2')\n        ]\n      ]\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.opr',\n      'operator' => 'LIKE',\n      'value' => 'INSERT'\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => $alias . '.uid',\n      'operator' => 'isnull'\n    ];\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 763,
+            "endLine": 808,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_count_cfg",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         },
-        "getErrors": {
-            "name": "getErrors",
+        "_set_fn_cfg": {
+            "name": "_set_fn_cfg",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "getErrors",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
+            "code": "  private function _set_fn_cfg($fn, array &$cfg): array\n  {\n    $alias         = Str::genpwd(12);\n    $alias1        = bbn\\Str::genpwd(12);\n    $alias2        = bbn\\Str::genpwd(12);\n    $field         = $this->db->cfn($this->cfg['field'], $this->cfg['table'], true);\n    $fn            = strtoupper($fn);\n    $cfg['fields'] = [\"$fn(IFNULL($alias1.val, $field))\"];\n    $cfg['join'][] = [\n      'table' => 'bbn_history',\n      'alias' => $alias,\n      'type' => 'left',\n      'on' => [\n        \/\/ Same UID\n        [\n          'field' => $alias . '.uid',\n          'operator' => '=',\n          'exp' => 'bbn_history.uid'\n        ],\n        \/\/ Delete action\n        [\n          'field' => $alias . '.opr',\n          'operator' => 'LIKE',\n          'value' => 'DELETE'\n        ],\n        \/\/ Performed after the INSERT\n        [\n          'field' => $alias . '.tst',\n          'operator' => '>',\n          'exp' => 'bbn_history.tst'\n        ],\n        \/\/ Performed before the end of the period\n        [\n          'field' => $alias . '.tst',\n          'operator' => '<=',\n          'value' => self::$_placeholder . ($this->is_total ? '' : '2')\n        ]\n      ]\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.opr',\n      'operator' => 'LIKE',\n      'value' => 'INSERT'\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => $alias . '.uid',\n      'operator' => 'isnull'\n    ];\n    $join1                        = [\n      'table' => 'bbn_history',\n      'alias' => $alias1,\n      'type' => 'LEFT',\n      'on' => [\n        [\n          'field' => $alias1 . '.uid',\n          'operator' => '=',\n          'exp' => $this->cfg['table'] . '.' . $this->hcfg['primary']\n        ], [\n          'field' => $alias1 . '.opr',\n          'operator' => 'LIKE',\n          'value' => 'UPDATE'\n        ], [\n          'field' => $alias1 . '.col',\n          'operator' => '=',\n          'value' => $this->_id_field\n        ], [\n          'field' => $alias1 . '.tst',\n          'operator' => '>',\n          'value' => self::$_placeholder . '2'\n        ]\n      ]\n    ];\n    $join2                        = [\n      'table' => 'bbn_history',\n      'alias' => $alias2,\n      'type' => 'LEFT',\n      'on' => [\n        [\n          'field' => $alias2 . '.uid',\n          'operator' => '=',\n          'exp' => $this->cfg['table'] . '.' . $this->hcfg['primary']\n        ], [\n          'field' => $alias2 . '.col',\n          'operator' => '=',\n          'exp' => $alias1 . '.col'\n        ], [\n          'field' => $alias2 . '.opr',\n          'operator' => 'LIKE',\n          'exp' => $alias1 . '.opr'\n        ], [\n          'field' => $alias2 . '.tst',\n          'operator' => '<',\n          'exp' => $alias1 . '.tst'\n        ]\n      ]\n    ];\n    $cfg['join'][]                = $join1;\n    $cfg['join'][]                = $join2;\n    $cfg['where']['conditions'][] = [\n      'field' => $alias2 . '.uid',\n      'operator' => 'isnull'\n    ];\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 811,
+            "endLine": 914,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -756,64 +879,32 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
-                "returns": [],
-                "parent": false,
-                "arguments": [
-                    {
-                        "name": "name",
-                        "position": 0,
-                        "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    },
-                    {
-                        "name": "arguments",
-                        "position": 1,
-                        "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
-                        "default_name": ""
-                    }
-                ]
-            },
+            "shortName": "_set_fn_cfg",
+            "returns": [
+                "array"
+            ],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "fn",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "cfg",
                     "position": 1,
-                    "type": "",
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -821,18 +912,307 @@
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "_set_insert_cfg": {
+            "name": "_set_insert_cfg",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_insert_cfg(array &$cfg): array\n  {\n    $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.opr',\n      'operator' => 'LIKE',\n      'value' => 'INSERT'\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.tst',\n      'operator' => '>=',\n      'value' => self::$_placeholder\n    ];\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 917,
+            "endLine": 931,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_insert_cfg",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_set_update_cfg": {
+            "name": "_set_update_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_update_cfg(array &$cfg)\n  {\n    if (empty($this->cfg['field'])) {\n      throw new Exception(X::_(\"The parameters field and value must be given for update statistics\"));\n    }\n\n    if (!$this->_id_field) {\n      throw new Exception(X::_(\"The parameters field must be a valid column from the given table\"));\n    }\n\n    $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.col',\n      'value' => $this->_id_field\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.opr',\n      'value' => 'UPDATE'\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.tst',\n      'operator' => '>=',\n      'value' => self::$_placeholder\n    ];\n    if (array_key_exists('value', $this->cfg)) {\n      $alias1                       = bbn\\Str::genpwd(12);\n      $alias2                       = bbn\\Str::genpwd(12);\n      $join1                        = [\n        'table' => 'bbn_history',\n        'alias' => $alias1,\n        'type' => 'LEFT',\n        'on' => [\n          [\n            'field' => $alias1 . '.uid',\n            'exp' => $this->cfg['table'] . '.' . $this->hcfg['primary']\n          ], [\n            'field' => $alias1 . '.opr',\n            'exp' => 'bbn_history.opr'\n          ], [\n            'field' => $alias1 . '.col',\n            'exp' => 'bbn_history.col'\n          ], [\n            'field' => $alias1 . '.tst',\n            'operator' => '>',\n            'exp' => 'bbn_history.tst'\n          ]\n        ]\n      ];\n      $join2                        = [\n        'table' => 'bbn_history',\n        'alias' => $alias2,\n        'type' => 'LEFT',\n        'on' => [\n          [\n            'field' => $alias2 . '.uid',\n            'exp' => $this->cfg['table'] . '.' . $this->hcfg['primary']\n          ], [\n            'field' => $alias2 . '.col',\n            'exp' => $alias1 . '.col'\n          ], [\n            'field' => $alias2 . '.opr',\n            'exp' => $alias1 . '.opr'\n          ], [\n            'field' => $alias2 . '.tst',\n            'operator' => '<',\n            'exp' => $alias1 . '.tst'\n          ]\n        ]\n      ];\n      $cd                           = [\n        'logic' => 'OR',\n        'conditions' => [\n          [\n            'logic' => 'AND',\n            'conditions' => [\n              is_null($this->cfg['value']) ? \n              [\n                'field' => $this->db->cfn($this->cfg['field'], $this->cfg['table']),\n                'operator' => 'isnull'\n              ] : [\n                'field' => $this->db->cfn($this->cfg['field'], $this->cfg['table']),\n                'operator' => $this->cfg['operator'] ?? '=',\n                'value' => $this->cfg['value']\n              ], [\n                'field' => $alias1 . '.uid',\n                'operator' => 'isnull'\n              ]\n            ]\n          ], is_null($this->cfg['value']) ? [\n            'field' => 'IFNULL(' . $alias1 . '.ref, ' . $alias1 . '.val)',\n            'operator' => 'isnull'\n          ] : [\n            'field' => 'IFNULL(' . $alias1 . '.ref, ' . $alias1 . '.val)',\n            'operator' => $this->cfg['operator'] ?? '=',\n            'value' => $this->cfg['value']\n          ]\n        ]\n      ];\n      $cfg['join'][]                = $join1;\n      $cfg['join'][]                = $join2;\n      $cfg['where']['conditions'][] = [\n        'logic' => 'AND',\n        'conditions' => [\n          $cd,\n          [\n            'field' => $alias2 . '.uid',\n            'operator' => 'isnull'\n          ]\n        ]\n      ];\n    }\n\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 934,
+            "endLine": 1047,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_update_cfg",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_set_delete_cfg": {
+            "name": "_set_delete_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_delete_cfg(array &$cfg)\n  {\n    $cfg['fields']                = ['COUNT(DISTINCT bbn_history.uid)'];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.opr',\n      'value' => 'DELETE'\n    ];\n    $cfg['where']['conditions'][] = [\n      'field' => 'bbn_history.tst',\n      'operator' => '>=',\n      'value' => self::$_placeholder\n    ];\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1050,
+            "endLine": 1063,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_delete_cfg",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_set_restore_cfg": {
+            "name": "_set_restore_cfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_restore_cfg(array &$cfg)\n  {\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1066,
+            "endLine": 1068,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_restore_cfg",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": true,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_set_filter": {
+            "name": "_set_filter",
+            "summary": "Combines the history filters with config filters recursively.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Statistic.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_filter(array $conditions, int $tst = 0): ?array\n  {\n    if (!empty($conditions['conditions'])) {\n      $flt  = [\n        'logic' => $conditions['logic'],\n        'conditions' => []\n      ];\n      $join = [];\n      foreach ($conditions['conditions'] as $c) {\n        if (!empty($c['conditions'])) {\n          if ($tmp = $this->_set_filter($c)) {\n            if (!empty($tmp['join'])) {\n              foreach ($tmp['join'] as $j) {\n                $join[] = $j;\n              }\n            }\n\n            if (X::hasDeepProp($tmp, ['filter', 'conditions'], true)) {\n              $flt['conditions'][] = $tmp['filter'];\n            }\n          }\n        }\n        \/\/ Adding for each filter 2 alternative conditions:\n        \/\/ - The value matches and has not been changed since then\n        \/\/ - The value used to match but has been changed\n        elseif ($id_col = $this->dbo->columnId($c['field'], $this->cfg['table'])) {\n          $alias1 = bbn\\Str::genpwd(12);\n          $alias2 = bbn\\Str::genpwd(12);\n          $join1  = [\n            'table' => 'bbn_history',\n            'alias' => $alias1,\n            'type' => 'LEFT',\n            'on' => [\n              [\n                'field' => $alias1 . '.uid',\n                'operator' => '=',\n                'exp' => $this->cfg['table'] . '.' . $this->hcfg['primary']\n              ], [\n                'field' => $alias1 . '.opr',\n                'operator' => 'LIKE',\n                'value' => 'UPDATE'\n              ], [\n                'field' => $alias1 . '.col',\n                'operator' => '=',\n                'value' => $id_col\n              ], [\n                'field' => $alias1 . '.tst',\n                'operator' => '>',\n                'value' => self::$_placeholder\n              ]\n            ]\n          ];\n          $join2  = [\n            'table' => 'bbn_history',\n            'alias' => $alias2,\n            'type' => 'LEFT',\n            'on' => [\n              [\n                'field' => $alias2 . '.uid',\n                'operator' => '=',\n                'exp' => $this->cfg['table'] . '.' . $this->hcfg['primary']\n              ], [\n                'field' => $alias2 . '.col',\n                'operator' => '=',\n                'exp' => $alias1 . '.col'\n              ], [\n                'field' => $alias2 . '.opr',\n                'operator' => 'LIKE',\n                'exp' => $alias1 . '.opr'\n              ], [\n                'field' => $alias2 . '.tst',\n                'operator' => '<',\n                'exp' => $alias1 . '.tst'\n              ]\n            ]\n          ];\n          $cd     = [\n            'logic' => 'OR',\n            'conditions' => [\n              [\n                'logic' => 'AND',\n                'conditions' => [\n                  [\n                    'field' => $this->db->cfn($c['field'], $this->cfg['table']),\n                    'operator' => $c['operator']\n                  ], [\n                    'field' => $alias1 . '.uid',\n                    'operator' => 'isnull'\n                  ]\n                ]\n              ], [\n                'field' => 'IFNULL(' . $alias1 . '.ref, ' . $alias1 . '.val)',\n                'operator' => $c['operator']\n              ]\n            ]\n          ];\n          if (!empty($c['exp'])) {\n            $cd['conditions'][0]['conditions'][0]['exp'] = $c['exp'];\n            $cd['conditions'][1]['exp']                  = $c['exp'];\n          } elseif (X::hasProp($c, 'value')) {\n            $cd['conditions'][0]['conditions'][0]['value'] = $c['value'];\n            $cd['conditions'][1]['value']                  = $c['value'];\n          }\n\n          $join[]              = $join1;\n          $join[]              = $join2;\n          $tmp                 = [\n            'logic' => 'AND',\n            'conditions' => [\n              $cd,\n              [\n                'field' => $alias2 . '.uid',\n                'operator' => 'isnull'\n              ]\n            ]\n          ];\n          $flt['conditions'][] = $tmp;\n        }\n      }\n\n      return ['join' => $join, 'filter' => $flt];\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1080,
+            "endLine": 1204,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_set_filter",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "conditions",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "A conditions array in a conditions prop."
+                },
+                {
+                    "name": "tst",
+                    "position": 1,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "A Timestamp."
+                }
+            ],
+            "doc": {
+                "description": "Combines the history filters with config filters recursively.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$conditions",
+                        "description": "A conditions array in a conditions prop."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$tst",
+                        "description": "A Timestamp."
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Useless second argument, what for?"
+                }
+            },
+            "comments": "  \/**\n   * Combines the history filters with config filters recursively.\n   *\n   * @todo  Useless second argument, what for?\n   *\n   * @param array $conditions A conditions array in a conditions prop.\n   * @param int   $tst        A Timestamp.\n   * @return array|null\n   *\/"
+        },
+        "test": {
+            "name": "test",
+            "summary": "Checks whether the error property has been set (so an error happened).",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+            "parent": {
+                "name": "test",
+                "summary": "Checks whether the error property has been set (so an error happened).",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "test",
+                "returns": [],
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+            },
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -841,17 +1221,359 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "test",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
+        },
+        "setError": {
+            "name": "setError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
+            "parent": {
+                "name": "setError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "protected",
+                "final": false,
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
+                "returns": [],
+                "arguments": [
+                    {
+                        "name": "err",
+                        "position": 0,
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
+                        "required": true,
+                        "has_default": false,
+                        "default": "",
+                        "default_name": ""
+                    },
+                    {
+                        "name": "code",
+                        "position": 1,
+                        "type": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
+                        "default_name": ""
+                    }
+                ]
+            },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "err",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "code",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
+        },
+        "getError": {
+            "name": "getError",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getError",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -862,43 +1584,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -909,44 +1649,272 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
+        },
+        "optionalInit": {
+            "name": "optionalInit",
+            "summary": "Returns the option's root ID for the current class based on {@link $option_root_code}",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function optionalInit(array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      $opt = Option::getInstance();\n      if (!$opt) {\n        throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n      }\n\n      $justDefined = false;\n      if (!\\defined(\"BBN_APPUI\")) {\n        $justDefined = true;\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = strtolower(end($tmp));\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n      if (!self::$option_root_id) {\n        if (!$cls) {\n          throw new Exception(\"Impossible to find the option \".json_encode($path).\" !!! for \".__CLASS__);\n        }\n        throw new Exception(\"Impossible to find the option $cls for \".__CLASS__);\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 41,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionalInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the option's root ID for the current class based on {@link $option_root_code}\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the option's root ID for the current class based on {@link $option_root_code}\n   *\n   * @return false|int\n   *\/"
+        },
+        "initOptionalGlobal": {
+            "name": "initOptionalGlobal",
+            "summary": "Sets only once all the constants used by the class.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function initOptionalGlobal(Option $opt, array $path = null)\n  {\n    if (!self::$optional_is_init) {\n      if (!\\defined(\"BBN_APPUI\")) {\n        \\define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));\n      }\n\n      if (!$path) {\n        if (!BBN_APPUI) {\n          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');\n          return;\n        }\n\n        $tmp                   = explode('\\\\', __CLASS__);\n        $cls                   = end($tmp);\n        $path                  = [$cls, 'appui'];\n      }\n\n      self::$option_root_id = $opt->fromCode(...$path);\n            if (!self::$option_root_id) {\n        X::log(\"Impossible to find the option $cls for \".__CLASS__, 'errors');\n        return;\n      }\n\n      self::$optional_is_init = true;\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 85,
+            "endLine": 111,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "initOptionalGlobal",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "opt",
+                    "position": 0,
+                    "type": "bbn\\Appui\\Option",
+                    "type_arr": [
+                        "bbn\\Appui\\Option"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "path",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets only once all the constants used by the class.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "Option",
+                        "name": "$opt"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets only once all the constants used by the class.\n   *\n   * @param Option $opt\n   * @param array             $path\n   * @return void\n   *\/"
+        },
+        "initOptional": {
+            "name": "initOptional",
+            "summary": "Defines the options prop and launches the static init method.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initOptional(array $path = null)\n  {\n    $this->options = Option::getInstance();\n    if (!$this->options) {\n      throw new Exception(X::_(\"There is no options object as needed by\").' '.__CLASS__);\n    }\n\n    self::initOptionalGlobal($this->options, $path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 120,
+            "endLine": 128,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initOptional",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "path",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Defines the options prop and launches the static init method.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Defines the options prop and launches the static init method.\n   *\n   * @param array $path\n   * @return void\n   *\/"
         },
         "getOptionRoot": {
             "name": "getOptionRoot",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
-            "startLine": 150,
-            "endLine": 154,
+            "code": "  public static function getOptionRoot()\n  {\n    self::optionalInit();\n    return self::$option_root_id;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 131,
+            "endLine": 135,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -955,32 +1923,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionRoot",
             "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "getAppuiRoot": {
-            "name": "getAppuiRoot",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    self::optionalInit();\n    return self::$option_appui_id;\n  }",
-            "startLine": 157,
-            "endLine": 161,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsObject": {
@@ -988,13 +1932,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
-            "startLine": 164,
-            "endLine": 172,
+            "code": "  public static function getOptionsObject(): Option\n  {\n    $o = Option::getInstance();\n    if (!$o) {\n      throw new Exception(X::_(\"Impossible to get the options object from class\").' '.__CLASS__);\n    }\n\n    return $o;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 138,
+            "endLine": 146,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1003,10 +1950,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsObject",
             "returns": [
                 "bbn\\Appui\\Option"
             ],
-            "parent": false,
             "arguments": []
         },
         "getOptionId": {
@@ -1014,13 +1961,16 @@
             "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 181,
-            "endLine": 184,
+            "code": "  public static function getOptionId()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 155,
+            "endLine": 158,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1029,22 +1979,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionId",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns The option's ID of a category, i.e. direct children of option's root\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$code"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns The option's ID of a category, i.e. direct children of option's root\n   *\n   * @param string $code\n   * @return int|false\n   *\/"
         },
         "getOptionsIds": {
             "name": "getOptionsIds",
             "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 193,
-            "endLine": 203,
+            "code": "  public static function getOptionsIds(): array\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 167,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1053,24 +2018,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsIds",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Check it, it doesn't seem ok"
+                }
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @todo Check it, it doesn't seem ok\n   * @return array\n   *\/"
         },
         "getOptionsTree": {
             "name": "getOptionsTree",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 206,
-            "endLine": 209,
+            "code": "  public static function getOptionsTree()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1079,8 +2057,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTree",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTreeRef": {
@@ -1088,13 +2066,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
-            "startLine": 212,
-            "endLine": 215,
+            "code": "  public static function getOptionsTreeRef()\n  {\n    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 186,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1103,8 +2084,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTreeRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptions": {
@@ -1112,13 +2093,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 218,
-            "endLine": 221,
+            "code": "  public static function getOptions()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1127,8 +2111,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptions",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsRef": {
@@ -1136,13 +2120,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 224,
-            "endLine": 227,
+            "code": "  public static function getOptionsRef()\n  {\n    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 198,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1151,8 +2138,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOption": {
@@ -1160,13 +2147,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
-            "startLine": 230,
-            "endLine": 233,
+            "code": "  public static function getOption()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1175,8 +2165,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOption",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValue": {
@@ -1184,13 +2174,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 236,
-            "endLine": 239,
+            "code": "  public static function getOptionsTextValue()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1199,8 +2192,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValue",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getOptionsTextValueRef": {
@@ -1208,13 +2201,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
-            "startLine": 242,
-            "endLine": 245,
+            "code": "  public static function getOptionsTextValueRef()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1223,169 +2219,839 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getOptionsTextValueRef",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
-        "getOptionId": {
-            "name": "getOptionId",
-            "summary": "Returns The option's ID of a category, i.e. direct children of option's root",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 254,
-            "endLine": 257,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsIds": {
-            "name": "getOptionsIds",
+        "_treat_args": {
+            "name": "_treat_args",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
+            "class": "bbn\\Appui\\Statistic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Optional.php",
             "static": true,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n    return array_flip(\n      array_filter(\n        self::getOptionsObject()->getCodes(\n          ...self::_treat_args(func_get_args(), true)\n        ),\n        function ($a) {\n          return $a !== null;\n        }\n      )\n    );\n  }",
-            "startLine": 260,
-            "endLine": 272,
+            "code": "  protected static function _treat_args(array $args, $appui = false): array\n  {\n    $hasUid = Str::isUid(end($args));\n    if (count($args) && !$hasUid) {\n      self::optionalInit();\n      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {\n        $args[] = 'options';\n      }\n    }\n\n    if (!$hasUid) {\n      $args[] = self::$option_root_id;\n    }\n\n    return $args;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\Optional",
+            "startLine": 223,
+            "endLine": 238,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_treat_args",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTree": {
-            "name": "getOptionsTree",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args(), true)) ) ? $tree['items'] : [];\n  }",
-            "startLine": 275,
-            "endLine": 278,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptions": {
-            "name": "getOptions",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 281,
-            "endLine": 284,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOption": {
-            "name": "getOption",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return self::getOptionsObject()->option(...self::_treat_args(func_get_args(), true));\n  }",
-            "startLine": 287,
-            "endLine": 290,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "array"
-            ],
-            "parent": false,
-            "arguments": []
-        },
-        "getOptionsTextValue": {
-            "name": "getOptionsTextValue",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Appui\\Statistic",
-            "static": true,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];\n  }",
-            "startLine": 293,
-            "endLine": 296,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [
+                {
+                    "name": "args",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "appui",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "types": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "List of accepteed values for the opr option config"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                "insert",
+                "update",
+                "delete",
+                "restore",
+                "count",
+                "sum",
+                "avg"
+            ]
+        },
+        "type": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "name": "$oprs"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "id_option": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The UID of the statistic's option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "dbo": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bbn\\Appui\\Database",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Appui\\Database",
+                        "description": "The DB object used to retrieve columns IDs"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "request": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$db"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "is_total": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "bool",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "If true the statistic will show the aggregated total for each day"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The configuration array as used in constructor"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "db_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "?array",
+                        "description": "The database configuration array ending the construction"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "hcfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "ocfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The configuration from the statistic's option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "code": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The configuration's code from the statistic's option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "inserter": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "When stat by user the UID of the user inserting."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "updater": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "When stat by user the UID of the user updating."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "deleter": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "When stat by user the UID of the user deleting."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_id_field": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The UID."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_placeholder": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Appui\\Statistic",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The expression that will be used as placeholder for the timestamps"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "___BBN_TST___"
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Db"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Db",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "dbClass"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "db",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Db"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Db",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "dbClass"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": null
+            },
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "optional_is_init": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "Set as true from the moment a first instance has been initiated and has defined the constants."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "option_root_id": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The ID of the root option"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "options": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Statistic"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Optional",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Option",
+                        "description": "The Option object"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": {
         "types": [
             "insert",
@@ -1398,10 +3064,39 @@
         ],
         "_placeholder": "___BBN_TST___",
         "optional_is_init": false,
-        "option_root_id": null,
-        "option_appui_id": null
+        "option_root_id": null
     },
-    "constants": [],
+    "constants": {
+        "ODATE": {
+            "name": "ODATE",
+            "value": "2014-01-01",
+            "class": "bbn\\Appui\\Statistic",
+            "parent": false,
+            "private": false,
+            "protected": true,
+            "public": false,
+            "final": false,
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "description": "The default start date of the statistic"
+                    }
+                ]
+            }
+        }
+    },
+    "uses": {
+        "bbn": "bbn",
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n * This class creates daily statistics in the database, and extracts series for displaying graphs.\n * The list of statistic is based on the options in appui > statistics > active; \n * The statistic system uses the history system to determine and store values of the past.\n * For counting the number of elements in a table on a given day the class will check:\n *  - that the latest creation event (INSERT\/RESTORE) happened before the given day\n *  - while there has not been posterior deletion (DELETE) before the given day\n * If there are filters with value, for each of them the class will also check:\n *  - if the column had not been changed to that value after the given day\n *  - if the column with a different value had that value before the given day\n * Therefore a lot of JOINs are added to each request and the filling of the table can take a long time\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

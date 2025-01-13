@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\Url",
     "namespace": true,
+    "realName": "Url",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/Url.php",
     "startLine": 10,
     "endLine": 358,
-    "numMethods": 13,
-    "numProperties": 0,
+    "numMethods": 15,
+    "numProperties": 6,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -43,11 +44,14 @@
             "summary": "Returns the URL corresponding to the given item's ID",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item, bool $followRedirect = true)\n  {\n    $this->checkUrlCfg();\n    if ($id_url = $this->db->selectOne($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ])) {\n      return $this->url->getUrl($id_url, $followRedirect);\n    }\n\n    return null;\n  }",
+            "code": "  public function getUrl(string $id_item, bool $followRedirect = true): ?string\n  {\n    $this->checkUrlCfg();\n    if ($id_url = $this->db->selectOne($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ])) {\n      return $this->url->getUrl($id_url, $followRedirect);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 63,
             "endLine": 73,
             "isDeprecated": false,
@@ -58,16 +62,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUrl",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -78,24 +87,51 @@
                     "name": "followRedirect",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
                     "default_name": "",
                     "description": "edirect"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the URL corresponding to the given item's ID\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$follow",
+                        "description": "edirect"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the URL corresponding to the given item's ID\n   *\n   * @param string $id_item\n   * @param boolean $followRedirect\n   * @return string|null\n   *\/"
         },
         "getUrls": {
             "name": "getUrls",
             "summary": "Returns the URL corresponding to the given item's ID",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item, bool $followRedirect = true)\n  {\n    $this->checkUrlCfg();\n    $res = [];\n    if ($id_urls = $this->db->getColumnValues($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ])) {\n      foreach ($id_urls as $id_url) {\n        $res[] = $this->url->getUrl($id_url, $followRedirect);\n      }\n    }\n\n    return $res;\n  }",
+            "code": "  public function getUrls(string $id_item, bool $followRedirect = true): array\n  {\n    $this->checkUrlCfg();\n    $res = [];\n    if ($id_urls = $this->db->getColumnValues($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ])) {\n      foreach ($id_urls as $id_url) {\n        $res[] = $this->url->getUrl($id_url, $followRedirect);\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 83,
             "endLine": 96,
             "isDeprecated": false,
@@ -106,15 +142,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUrls",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -125,24 +166,51 @@
                     "name": "followRedirect",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
                     "default_name": "",
                     "description": "edirect"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the URL corresponding to the given item's ID\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$follow",
+                        "description": "edirect"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the URL corresponding to the given item's ID\n   *\n   * @param string $id_item\n   * @param boolean $followRedirect\n   * @return string|null\n   *\/"
         },
         "urlExists": {
             "name": "urlExists",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url)\n  {\n    return (bool)$this->getUrlId($url);\n  }",
+            "code": "  public function urlExists(string $url): bool\n  {\n    return (bool)$this->getUrlId($url);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 103,
             "endLine": 106,
             "isDeprecated": false,
@@ -153,32 +221,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "urlExists",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $url\n   * @return bool\n   *\/"
         },
         "urlToId": {
             "name": "urlToId",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url)\n  {\n    $this->checkUrlCfg();\n    if ($id_url = $this->getUrlId($url)) {\n      return $this->db->selectOne($this->urlTable, $this->class_cfg['urlItemField'], [\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return null;\n  }",
+            "code": "  public function urlToId(string $url): ?string\n  {\n    $this->checkUrlCfg();\n    if ($id_url = $this->getUrlId($url)) {\n      return $this->db->selectOne($this->urlTable, $this->class_cfg['urlItemField'], [\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 113,
             "endLine": 123,
             "isDeprecated": false,
@@ -189,33 +277,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "urlToId",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $url\n   * @return string|null\n   *\/"
         },
         "idToUrl": {
             "name": "idToUrl",
             "summary": "Returns the ID of the URL for the given item",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item)\n  {\n    $this->checkUrlCfg();\n    return $this->db->selectOne($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ]);\n  }",
+            "code": "  public function idToUrl(string $id_item): ?string\n  {\n    $this->checkUrlCfg();\n    return $this->db->selectOne($this->urlTable, $this->urlFields['id_url'], [\n      $this->class_cfg['urlItemField'] => $id_item\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 132,
             "endLine": 138,
             "isDeprecated": false,
@@ -226,34 +334,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "idToUrl",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "item"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the ID of the URL for the given item\n\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the ID of the URL for the given item\n   * \n   * @param string $id_item\n   * @return string|null\n   *\/"
         },
         "getUrlId": {
             "name": "getUrlId",
             "summary": "Returns a URL's id based on its URL",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url)\n  {\n    $this->checkUrlCfg();\n    return $this->url->retrieveUrl($url);\n  }",
+            "code": "  public function getUrlId(string $url): ?string\n  {\n    $this->checkUrlCfg();\n    return $this->url->retrieveUrl($url);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 147,
             "endLine": 151,
             "isDeprecated": false,
@@ -264,33 +393,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUrlId",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns a URL's id based on its URL\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns a URL's id based on its URL\n   *\n   * @param string $url\n   * @return string|null\n   *\/"
         },
         "getFullUrl": {
             "name": "getFullUrl",
             "summary": "Returns the whole content of the URL row based on its ID",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_url)\n  {\n    $this->checkUrlCfg();\n    return $this->url->select($id_url);\n  }",
+            "code": "  public function getFullUrl(string $id_url): ?stdClass\n  {\n    $this->checkUrlCfg();\n    return $this->url->select($id_url);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 160,
             "endLine": 164,
             "isDeprecated": false,
@@ -301,34 +450,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getFullUrl",
             "returns": [
                 null,
                 "stdClass"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "url"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the whole content of the URL row based on its ID\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "url"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the whole content of the URL row based on its ID\n   *\n   * @param string $id_url\n   * @return stdClass|null\n   *\/"
         },
         "setUrl": {
             "name": "setUrl",
             "summary": "Adds or replace a URL for a given item's ID",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item, string $url, string $type = NULL)\n  {\n    $this->checkUrlCfg();\n    if (!($url = $this->sanitizeUrl($url))) {\n      throw new Exception(X::_(\"The URL can't be empty\"));\n    }\n\n    if (!($id_url = $this->url->retrieveUrl($url))\n        && (!$id_url = $this->url->add($url, $type ?: $this->urlType))\n    ) {\n      throw new Exception(X::_(\"Impossible to add the URL %s\", $url));\n    }\n\n    if ($checkItem = $this->urlToId($id_url)) {\n      if ($checkItem !== $id_item) {\n        throw new Exception(X::_(\"The URL is already in use by another item\"));\n      }\n    }\n    elseif (!$this->db->insert($this->urlTable, [\n      $this->class_cfg['urlItemField'] => $id_item,\n      $this->urlFields['id_url'] => $id_url\n    ])) {\n      return null;\n    }\n\n    return $id_url ?: null;\n  }",
+            "code": "  public function setUrl(string $id_item, string $url, string $type = null): ?string\n  {\n    $this->checkUrlCfg();\n    if (!($url = $this->sanitizeUrl($url))) {\n      throw new Exception(X::_(\"The URL can't be empty\"));\n    }\n\n    if (!($id_url = $this->url->retrieveUrl($url))\n        && (!$id_url = $this->url->add($url, $type ?: $this->urlType))\n    ) {\n      throw new Exception(X::_(\"Impossible to add the URL %s\", $url));\n    }\n\n    if ($checkItem = $this->urlToId($id_url)) {\n      if ($checkItem !== $id_item) {\n        throw new Exception(X::_(\"The URL is already in use by another item\"));\n      }\n    }\n    elseif (!$this->db->insert($this->urlTable, [\n      $this->class_cfg['urlItemField'] => $id_item,\n      $this->urlFields['id_url'] => $id_url\n    ])) {\n      return null;\n    }\n\n    return $id_url ?: null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 175,
             "endLine": 201,
             "isDeprecated": false,
@@ -339,16 +509,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "setUrl",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -359,6 +534,11 @@
                     "name": "url",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -367,24 +547,56 @@
                 {
                     "name": "type",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Adds or replace a URL for a given item's ID\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Adds or replace a URL for a given item's ID\n   *\n   * @param string $id_item\n   * @param string $url\n   * @param string $type\n   * @return null|string\n   *\/"
         },
         "addUrl": {
             "name": "addUrl",
             "summary": "Creates a new URL for a given item's ID",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item, string $url, string $prefix = '', string $type = NULL)\n  {\n    $this->checkUrlCfg();\n    if (!$type && !$this->urlType) {\n      throw new Exception(X::_(\"You have no type set and no default type for the class %s\"), __CLASS__);\n    }\n\n    if ($id_url = $this->url->add($url, $type ?: $this->urlType, $prefix)) {\n      $this->db->delete($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item\n      ]);\n      return (bool)$this->db->insert($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item,\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return $id_url ?: null;\n  }",
+            "code": "  public function addUrl(string $id_item, string $url, string $prefix = '', string $type = null): ?string\n  {\n    $this->checkUrlCfg();\n    if (!$type && !$this->urlType) {\n      throw new Exception(X::_(\"You have no type set and no default type for the class %s\"), __CLASS__);\n    }\n\n    if ($id_url = $this->url->add($url, $type ?: $this->urlType, $prefix)) {\n      $this->db->delete($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item\n      ]);\n      return (bool)$this->db->insert($this->urlTable, [\n        $this->class_cfg['urlItemField'] => $id_item,\n        $this->urlFields['id_url'] => $id_url\n      ]);\n    }\n\n    return $id_url ?: null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 213,
             "endLine": 231,
             "isDeprecated": false,
@@ -395,16 +607,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "addUrl",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -415,6 +632,11 @@
                     "name": "url",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -424,6 +646,11 @@
                     "name": "prefix",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -432,24 +659,61 @@
                 {
                     "name": "type",
                     "position": 3,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Creates a new URL for a given item's ID\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$prefix"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a new URL for a given item's ID\n   *\n   * @param string $id_item\n   * @param string $url\n   * @param string $prefix\n   * @param string $type\n   * @return null|string\n   *\/"
         },
         "redirectUrl": {
             "name": "redirectUrl",
             "summary": "Returns true if the item is linked to an url.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item, string $url_source, string $url_destination)\n  {\n    $this->checkUrlCfg();\n    if ($id_source = $this->getUrlId($url_source)) {\n      $url = $this->getFullUrl($id_source);\n      if ($url && ($id_destination = $this->setUrl($id_item, $url_destination, $url->type))) {\n        $cfg = $this->url->getClassCfg();\n        return (bool)$this->db->update(\n          $cfg['table'],\n          [$cfg['arch']['url']['redirect'] => $id_destination],\n          [$cfg['arch']['url']['id'] => $id_source]\n        );\n      }\n    }\n\n    return false;\n  }",
+            "code": "  public function redirectUrl(string $id_item, string $url_source, string $url_destination): bool\n  {\n    $this->checkUrlCfg();\n    if ($id_source = $this->getUrlId($url_source)) {\n      $url = $this->getFullUrl($id_source);\n      if ($url && ($id_destination = $this->setUrl($id_item, $url_destination, $url->type))) {\n        $cfg = $this->url->getClassCfg();\n        return (bool)$this->db->update(\n          $cfg['table'],\n          [$cfg['arch']['url']['redirect'] => $id_destination],\n          [$cfg['arch']['url']['id'] => $id_source]\n        );\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 242,
             "endLine": 258,
             "isDeprecated": false,
@@ -460,15 +724,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "redirectUrl",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -479,6 +748,11 @@
                     "name": "url_source",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -489,23 +763,50 @@
                     "name": "url_destination",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns true if the item is linked to an url.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "source"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "destination"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the item is linked to an url.\n   *\n   * @param string $id_source\n   * @param string $id_destination\n   * @return bool\n   *\n   *\/"
         },
         "hasUrl": {
             "name": "hasUrl",
             "summary": "Returns true if the item is linked to an url.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item)\n  {\n    $this->checkUrlCfg();\n    return (bool)$this->db->count(\n      $this->urlTable,\n      [$this->class_cfg['urlItemField'] => $id_item]\n    );\n  }",
+            "code": "  public function hasUrl(string $id_item): bool\n  {\n    $this->checkUrlCfg();\n    return (bool)$this->db->count(\n      $this->urlTable,\n      [$this->class_cfg['urlItemField'] => $id_item]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 268,
             "endLine": 275,
             "isDeprecated": false,
@@ -516,33 +817,54 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "hasUrl",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "item"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns true if the item is linked to an url.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns true if the item is linked to an url.\n   *\n   * @param string $id_item\n   * @return bool\n   *\n   *\/"
         },
         "deleteUrl": {
             "name": "deleteUrl",
             "summary": "Deletes url for the given note.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_item)\n  {\n    $this->checkUrlCfg();\n    $id_url = $this->db->selectOne(\n      $this->urlTable,\n      $this->urlFields['id_url'],\n      [$this->class_cfg['urlItemField'] => $id_item]\n    );\n\n    if ($id_url) {\n      $this->db->delete(\n        $this->urlTable,\n        [$this->class_cfg['urlItemField'] => $id_item]\n      );\n      return (bool)$this->url->delete($id_url);\n    }\n\n    throw new Exception(X::_(\"Impossible to retrieve the URL for item %s\", $id_item));\n  }",
+            "code": "  public function deleteUrl(string $id_item)\n  {\n    $this->checkUrlCfg();\n    $id_url = $this->db->selectOne(\n      $this->urlTable,\n      $this->urlFields['id_url'],\n      [$this->class_cfg['urlItemField'] => $id_item]\n    );\n\n    if ($id_url) {\n      $this->db->delete(\n        $this->urlTable,\n        [$this->class_cfg['urlItemField'] => $id_item]\n      );\n      return (bool)$this->url->delete($id_url);\n    }\n\n    throw new Exception(X::_(\"Impossible to retrieve the URL for item %s\", $id_item));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 284,
             "endLine": 302,
             "isDeprecated": false,
@@ -553,31 +875,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "deleteUrl",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_item",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "item"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Deletes url for the given note.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "item"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes url for the given note.\n   *\n   * @param string $id_item\n   * @return int|null\n   *\/"
         },
         "sanitizeUrl": {
             "name": "sanitizeUrl",
             "summary": "Trims the slashes and removes double slashes if any.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Url",
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $url)\n  {\n    $this->checkUrlCfg();\n    return $this->url->sanitize($url);\n  }",
+            "code": "  public function sanitizeUrl(string $url): string\n  {\n    $this->checkUrlCfg();\n    return $this->url->sanitize($url);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 311,
             "endLine": 315,
             "isDeprecated": false,
@@ -588,26 +931,281 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "sanitizeUrl",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "url",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Trims the slashes and removes double slashes if any.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$url"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Trims the slashes and removes double slashes if any.\n   *\n   * @param string $url\n   * @return string\n   *\/"
+        },
+        "initUrl": {
+            "name": "initUrl",
+            "summary": "initialize the trait's props",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initUrl(): void\n  {\n    if (!$this->isInitUrl\n        && $this->db\n        && $this->class_cfg\n        && $this->class_table_index\n        && $this->class_cfg['tables'][$this->class_table_index . '_url']\n        && $this->class_cfg['urlItemField']\n        && $this->class_cfg['urlTypeValue']\n    ) {\n      $this->urlTableIdx = $this->class_table_index . '_url';\n      $this->urlTable    = $this->class_cfg['tables'][$this->urlTableIdx];\n      $this->urlFields   = $this->class_cfg['arch'][$this->urlTableIdx];\n      $this->urlType     = $this->class_cfg['urlTypeValue'];\n      if (X::hasProps($this->urlFields, ['id_url', $this->class_cfg['urlItemField']], true)) {\n        $this->url = new urlCls($this->db);\n      }\n      $this->isInitUrl = true;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 323,
+            "endLine": 342,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initUrl",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "initialize the trait's props\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * initialize the trait's props\n   *\n   * @return void\n   *\/"
+        },
+        "checkUrlCfg": {
+            "name": "checkUrlCfg",
+            "summary": "Checks if the class has been correctly initialized and throws an exception if not",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Url",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Url.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function checkUrlCfg(): void\n  {\n    $this->initUrl();\n    if (!$this->url) {\n      throw new Exception(X::_(\"The class is missing configuration to make use of URL\"));\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 350,
+            "endLine": 356,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "checkUrlCfg",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Checks if the class has been correctly initialized and throws an exception if not\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks if the class has been correctly initialized and throws an exception if not\n   *\n   * @return void\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "isInitUrl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Url"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Url",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "Remains false until initUrl is executed for preventing it's executed twice\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "urlType": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Url"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Url",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "The default type for the links, must be set in the construct\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "urlTable": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Url"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Url",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "The name of the table associating the items from the current class and the URLs\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "urlTableIdx": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Url"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Url",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "The name of the index of the table in class_cfg (eg for media it's medias_url)\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "urlFields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Url"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Url",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "The array of fields\/columns for the urlTable\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "url": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Url"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Url",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "The url object\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bbn\\Appui\\Url"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "stdClass": "stdClass",
+        "bbn\\Appui\\Url": "urlCls",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n   * Remains false until initUrl is executed for preventing it's executed twice\n   *\n   * @var boolean\n   *\/",
+        "\/**\n  * The default type for the links, must be set in the construct\n   *\n   * @var string\n   *\/",
+        "\/**\n   * The name of the table associating the items from the current class and the URLs\n   *\n   * @var string\n   *\/",
+        "\/**\n   * The name of the index of the table in class_cfg (eg for media it's medias_url)\n   *\n   * @var string\n   *\/",
+        "\/**\n   * The array of fields\/columns for the urlTable\n   *\n   * @var array\n   *\/",
+        "\/**\n   * The url object\n   *\n   * @var bbn\\Appui\\Url\n   *\/",
+        "\/**\n   * Returns the URL corresponding to the given item's ID\n   *\n   * @param string $id_item\n   * @param boolean $followRedirect\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns the URL corresponding to the given item's ID\n   *\n   * @param string $id_item\n   * @param boolean $followRedirect\n   * @return string|null\n   *\/",
+        "\/**\n   * @param string $url\n   * @return bool\n   *\/",
+        "\/**\n   * @param string $url\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns the ID of the URL for the given item\n   * \n   * @param string $id_item\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns a URL's id based on its URL\n   *\n   * @param string $url\n   * @return string|null\n   *\/",
+        "\/**\n   * Returns the whole content of the URL row based on its ID\n   *\n   * @param string $id_url\n   * @return stdClass|null\n   *\/",
+        "\/**\n   * Adds or replace a URL for a given item's ID\n   *\n   * @param string $id_item\n   * @param string $url\n   * @param string $type\n   * @return null|string\n   *\/",
+        "\/**\n   * Creates a new URL for a given item's ID\n   *\n   * @param string $id_item\n   * @param string $url\n   * @param string $prefix\n   * @param string $type\n   * @return null|string\n   *\/",
+        "\/**\n   * Returns true if the item is linked to an url.\n   *\n   * @param string $id_source\n   * @param string $id_destination\n   * @return bool\n   *\n   *\/",
+        "\/**\n   * Returns true if the item is linked to an url.\n   *\n   * @param string $id_item\n   * @return bool\n   *\n   *\/",
+        "\/**\n   * Deletes url for the given note.\n   *\n   * @param string $id_item\n   * @return int|null\n   *\/",
+        "\/**\n   * Trims the slashes and removes double slashes if any.\n   *\n   * @param string $url\n   * @return string\n   *\/",
+        "\/**\n   * initialize the trait's props\n   *\n   * @return void\n   *\/",
+        "\/**\n   * Checks if the class has been correctly initialized and throws an exception if not\n   *\n   * @return void\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

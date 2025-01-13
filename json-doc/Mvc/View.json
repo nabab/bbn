@@ -5,6 +5,8 @@
     },
     "name": "bbn\\Mvc\\View",
     "namespace": true,
+    "realName": "View",
+    "realNamespace": "bbn\\Mvc",
     "traits": [
         "bbn\\Mvc\\Common"
     ],
@@ -12,15 +14,12 @@
     "fileName": "\/Mvc\/View.php",
     "startLine": 25,
     "endLine": 237,
-    "numMethods": 26,
-    "numProperties": 0,
+    "numMethods": 29,
+    "numProperties": 11,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Mvc\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -46,7 +45,6 @@
     "namespaceName": "bbn\\Mvc",
     "shortName": "View",
     "contentConstructor": {
-        "file": "bbn\\Mvc\\View",
         "returns": []
     },
     "methods": {
@@ -55,11 +53,14 @@
             "summary": "This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/View.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $info)\n  {\n    if (!empty($info['mode']) && Router::isMode($info['mode'])) {\n      $this->_path           = $info['path'];\n      $this->_ext            = $info['ext'];\n      $this->_file           = $info['file'];\n      $this->_checkers       = $info['checkers'] ?? [];\n      $this->_lang_file      = $info['i18n'] ?? null;\n      $this->_plugin         = $info['plugin'] ?? null;\n      $this->_plugin_name    = $info['plugin_name'] ?? null;\n      $this->_component      = $info['component'] ?? null;\n      $this->_component_name = $info['component_name'] ?? null;\n    }\n\n    $this->_mvc = Mvc::getInstance();\n  }",
+            "code": "  public function __construct(array $info)\n  {\n    if (!empty($info['mode']) && Router::isMode($info['mode'])) {\n      $this->_path           = $info['path'];\n      $this->_ext            = $info['ext'];\n      $this->_file           = $info['file'];\n      $this->_checkers       = $info['checkers'] ?? [];\n      $this->_lang_file      = $info['i18n'] ?? null;\n      $this->_plugin         = $info['plugin'] ?? null;\n      $this->_plugin_name    = $info['plugin_name'] ?? null;\n      $this->_component      = $info['component'] ?? null;\n      $this->_component_name = $info['component_name'] ?? null;\n    }\n\n    $this->_mvc = Mvc::getInstance();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 96,
             "endLine": 111,
             "isDeprecated": false,
@@ -70,30 +71,50 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "info",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$info"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This will call the initial build a new instance. It should be called only once from within the script. All subsequent calls to controllers should be done through $this->add($path).\n   *\n   * @param array $info\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/View.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return !empty($this->_file);\n  }",
+            "code": "  public function check()\n  {\n    return !empty($this->_file);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 117,
             "endLine": 120,
             "isDeprecated": false,
@@ -104,20 +125,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return bool\n   *\/"
         },
         "get": {
             "name": "get",
             "summary": "Processes the controller and checks whether it has been routed or not.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/View.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data = NULL)\n  {\n    if ($this->check()) {\n      if (\\is_null($this->_content) && is_file($this->_file)) {\n        $this->_content = file_get_contents($this->_file);\n      }\n\n      if (empty($this->_content)) {\n        return '';\n      }\n\n      if ($this->_checkers) {\n        $st = '';\n        foreach ($this->_checkers as $chk){\n          if (is_file($chk)) {\n            $st .= file_get_contents($chk);\n          }\n        }\n\n        $this->_content = $st.$this->_content;\n      }\n\n      switch ($this->_ext){\n        case 'js':\n          \/\/ Language variables inclusions in the javascript files\n          if (!empty($this->_lang_file) && is_file($this->_lang_file)) {\n            $tmp  = json_decode(file_get_contents($this->_lang_file), true);\n            $path = $this->_plugin && !$this->_component ? substr($this->_path, \\strlen($this->_plugin) + 1) : $this->_path;\n            \/\/die(var_dump(count($tmp), 'components\/'.$this->path.'\/'.$this->path, $tmp));\n            $idx = $this->_component ? 'components\/' : 'mvc\/';\n            \/\/die(var_dump($idx.$path, $tmp));\n            \/\/die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));\n            \/\/die(var_dump($idx.$path, $tmp));\n            if ($translations = ($tmp[$idx.$path] ?? null)) {\n              $json           = json_encode($translations);\n              $tmp            = <<<JAVASCRIPT\n((data) => {\n  if (!!bbn.env && bbn.env.isInit) {\n    bbn.fn.autoExtend(\"lng\", $json);\n  }\n  else {\n    document.addEventListener('bbninit', () => {\n      bbn.fn.autoExtend(\"lng\", $json);\n    }, {once: true});\n  }\n})();\nJAVASCRIPT;\n              $this->_content = $tmp.$this->_content;\n            }\n\n            unset($tmp, $translations, $json);\n          }\n\n          $tmp = false;\n          try {\n            if (!defined('BBN_IS_DEV') || !BBN_IS_DEV) {\n              $tmp = \\JShrink\\Minifier::minify($this->_content, ['flaggedComments' => false]);\n            }\n          }\n          catch (\\RuntimeException $e){\n            \\bbn\\X::log([$e->getMessage(), $this->_file], 'js_shrink');\n          }\n          return $tmp ?: $this->_content;\n        case 'css':\n          return $this->_content;\n        case 'less':\n          if ($this->_component_name) {\n            $this->_content = '@componentName: '.$this->_component_name.';'.PHP_EOL.$this->_content;\n          }\n\n          $less = new \\bbn\\Compilers\\Less();\n          return $less->compile($this->_content);\n        case 'scss':\n          $scss = new \\ScssPhp\\ScssPhp\\Compiler();\n          return $scss->compile($this->_content);\n        case 'html':\n          return empty($data) ? $this->_content : bbn\\Tpl::render($this->_content, $data);\n        case 'php':\n          $dir = getcwd();\n          \/** @todo explain why *\/\n          chdir(X::dirname($this->_file));\n          if ($this->_plugin &&\n              ($router = Router::getInstance()) &&\n              ($textDomain = $router->getLocaleDomain($this->_plugin_name))\n          ) {\n            $oldTextDomain = textdomain(null);\n            if ($textDomain !== $oldTextDomain) {\n              textdomain($textDomain);\n            }\n            else {\n              unset($oldTextDomain);\n            }\n          }\n\n          $r = bbn\\Mvc::includePhpView($this->_file, $this->_content, $data ?: []);\n          if (!empty($oldTextDomain)) {\n            textdomain($oldTextDomain);\n          }\n\n          chdir($dir);\n          return $r;\n      }\n    }\n\n    return false;\n  }",
+            "code": "  public function get(?array $data=null)\n  {\n    if ($this->check()) {\n      if (\\is_null($this->_content) && is_file($this->_file)) {\n        $this->_content = file_get_contents($this->_file);\n      }\n\n      if (empty($this->_content)) {\n        return '';\n      }\n\n      if ($this->_checkers) {\n        $st = '';\n        foreach ($this->_checkers as $chk){\n          if (is_file($chk)) {\n            $st .= file_get_contents($chk);\n          }\n        }\n\n        $this->_content = $st.$this->_content;\n      }\n\n      switch ($this->_ext){\n        case 'js':\n          \/\/ Language variables inclusions in the javascript files\n          if (!empty($this->_lang_file) && is_file($this->_lang_file)) {\n            $tmp  = json_decode(file_get_contents($this->_lang_file), true);\n            $path = $this->_plugin && !$this->_component ? substr($this->_path, \\strlen($this->_plugin) + 1) : $this->_path;\n            \/\/die(var_dump(count($tmp), 'components\/'.$this->path.'\/'.$this->path, $tmp));\n            $idx = $this->_component ? 'components\/' : 'mvc\/';\n            \/\/die(var_dump($idx.$path, $tmp));\n            \/\/die(var_dump($idx.$path, $this->_path, $this->_plugin, $this->_component, array_keys($tmp)));\n            \/\/die(var_dump($idx.$path, $tmp));\n            if ($translations = ($tmp[$idx.$path] ?? null)) {\n              $json           = json_encode($translations);\n              $tmp            = <<<JAVASCRIPT\n((data) => {\n  if (window.bbn && bbn.env && bbn.env.isInit) {\n    bbn.fn.autoExtend(\"lng\", $json);\n  }\n  else {\n    document.addEventListener('bbninit', () => {\n      bbn.fn.autoExtend(\"lng\", $json);\n    }, {once: true});\n  }\n})();\nJAVASCRIPT;\n              $this->_content = $tmp.$this->_content;\n            }\n\n            unset($tmp, $translations, $json);\n          }\n\n          $tmp = false;\n          try {\n            if (!defined('BBN_IS_DEV') || !BBN_IS_DEV) {\n              $tmp = \\JShrink\\Minifier::minify($this->_content, ['flaggedComments' => false]);\n            }\n          }\n          catch (\\RuntimeException $e){\n            \\bbn\\X::log([$e->getMessage(), $this->_file], 'js_shrink');\n          }\n          return $tmp ?: $this->_content;\n        case 'css':\n          return $this->_content;\n        case 'less':\n          if ($this->_component_name) {\n            $this->_content = '@componentName: '.$this->_component_name.';'.PHP_EOL.$this->_content;\n          }\n\n          $less = new \\bbn\\Compilers\\Less();\n          return $less->compile($this->_content);\n        case 'scss':\n          $scss = new \\ScssPhp\\ScssPhp\\Compiler();\n          return $scss->compile($this->_content);\n        case 'html':\n          return empty($data) ? $this->_content : bbn\\Tpl::render($this->_content, $data);\n        case 'php':\n          $dir = getcwd();\n          \/** @todo explain why *\/\n          chdir(X::dirname($this->_file));\n          if ($this->_plugin &&\n              ($router = Router::getInstance()) &&\n              ($textDomain = $router->getLocaleDomain($this->_plugin_name))\n          ) {\n            $oldTextDomain = textdomain(null);\n            if ($textDomain !== $oldTextDomain) {\n              textdomain($textDomain);\n            }\n            else {\n              unset($oldTextDomain);\n            }\n          }\n\n          $r = bbn\\Mvc::includePhpView($this->_file, $this->_content, $data ?: []);\n          if (!empty($oldTextDomain)) {\n            textdomain($oldTextDomain);\n          }\n\n          chdir($dir);\n          return $r;\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 129,
             "endLine": 234,
             "isDeprecated": false,
@@ -128,93 +158,53 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "get",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "data",
                     "position": 0,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\View",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if (Mvc::getDebug()) {\n      $ar = \\func_get_args();\n      X::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
-            "startLine": 64,
-            "endLine": 70,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
-            "arguments": []
-        },
-        "pluginDataPath": {
-            "name": "pluginDataPath",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Mvc\\View",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($plugin = NULL)\n  {\n    if (($this->_plugin || $plugin) && \\defined('BBN_DATA_PATH')) {\n      return BBN_DATA_PATH.'plugins\/'.$this->pluginName($plugin ?: $this->_plugin).'\/';\n    }\n\n    return null;\n  }",
-            "startLine": 73,
-            "endLine": 80,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 0,
-            "returns": [
-                null,
-                "string"
             ],
-            "parent": false,
-            "arguments": [
-                {
-                    "name": "plugin",
-                    "position": 0,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
-                    "default_name": ""
-                }
-            ]
+            "doc": {
+                "description": "Processes the controller and checks whether it has been routed or not.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Processes the controller and checks whether it has been routed or not.\n   *\n   * @param array|null $data\n   * @return string\n   *\/"
         },
-        "getPlugins": {
-            "name": "getPlugins",
-            "summary": "",
+        "checkPath": {
+            "name": "checkPath",
+            "summary": "This checks whether an argument used for getting controller, View or model - which are files - doesn't contain malicious content.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getPlugins();\n  }",
-            "startLine": 83,
-            "endLine": 86,
+            "code": "  private function checkPath()\n  {\n    $ar = \\func_get_args();\n    foreach ($ar as $a){\n      $b = Str::parsePath($a, true);\n      if (empty($b) && !empty($a)) {\n        $this->error(\"The path $a is not an acceptable value\");\n        return false;\n      }\n    }\n\n    return 1;\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 37,
+            "endLine": 49,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -223,22 +213,38 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "checkPath",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "This checks whether an argument used for getting controller, View or model - which are files - doesn't contain malicious content.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$p",
+                        "description": "The request path <em>(e.g books\/466565 or html\/home)<\/em>"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * This checks whether an argument used for getting controller, View or model - which are files - doesn't contain malicious content.\n   *\n   * @param string $p The request path <em>(e.g books\/466565 or html\/home)<\/em>\n   * @return bool\n   *\/"
         },
-        "hasPlugin": {
-            "name": "hasPlugin",
+        "error": {
+            "name": "error",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "private",
             "final": false,
-            "code": "function($plugin)\n  {\n    return $this->_mvc->hasPlugin($plugin);\n  }",
-            "startLine": 89,
-            "endLine": 92,
+            "code": "  private function error($msg)\n  {\n    $msg = \"Error from \".\\get_class($this).\": \".$msg;\n    $this->log($msg, 'mvc');\n    throw new \\Exception(X::_($msg));\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 56,
+            "endLine": 61,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -247,32 +253,85 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "error",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
-                    "name": "plugin",
+                    "name": "msg",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$msg"
+                    }
+                ],
+                "return": "",
+                "throws": {
+                    "tag": "throws",
+                    "type": "\\Exception"
+                }
+            },
+            "comments": "  \/**\n   * @param $msg\n   * @throws \\Exception\n   *\/"
         },
-        "isPlugin": {
-            "name": "isPlugin",
-            "summary": "",
+        "log": {
+            "name": "log",
+            "summary": "Log to a specific log with debug info",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($plugin = NULL)\n  {\n    return $this->_mvc->isPlugin($plugin ?: $this->pluginName($this->_plugin));\n  }",
-            "startLine": 95,
-            "endLine": 98,
+            "code": "  public function log()\n  {\n    if (Mvc::getDebug()) {\n      $ar = \\func_get_args();\n      X::log(\\count($ar) > 1 ? $ar : $ar[0], 'mvc');\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 67,
+            "endLine": 73,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Log to a specific log with debug info",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Log to a specific log with debug info\n   *\/"
+        },
+        "pluginDataPath": {
+            "name": "pluginDataPath",
+            "summary": "Returns the path of a plugin in the data",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginDataPath(string $plugin = null): ?string\n  {\n    if ($this->_plugin || $plugin) {\n      return $this->dataPath().'plugins\/'.$this->pluginName($plugin ?: $this->_plugin).'\/';\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 82,
+            "endLine": 89,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -281,32 +340,267 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "shortName": "pluginDataPath",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the path of a plugin in the data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the path of a plugin in the data\n   *\n   * @param string $plugin\n   * @return string|null\n   *\/"
         },
-        "pluginPath": {
-            "name": "pluginPath",
-            "summary": "",
+        "pluginTmpPath": {
+            "name": "pluginTmpPath",
+            "summary": "Returns the path of a plugin in the data",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($plugin = NULL, $raw = false)\n  {\n    return $this->_mvc->pluginPath($plugin ?: $this->pluginName($this->_plugin), $raw);\n  }",
-            "startLine": 101,
-            "endLine": 104,
+            "code": "  public function pluginTmpPath(string $plugin = null): ?string\n  {\n    if ($this->_plugin || $plugin) {\n      return $this->tmpPath().'plugins\/'.$this->pluginName($plugin ?: $this->_plugin).'\/';\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 98,
+            "endLine": 105,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "pluginTmpPath",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the path of a plugin in the data\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the path of a plugin in the data\n   *\n   * @param string $plugin\n   * @return string|null\n   *\/"
+        },
+        "getPlugins": {
+            "name": "getPlugins",
+            "summary": "Returns all the plugins available with their name, path and url",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getPlugins(): ?array\n  {\n    return $this->_mvc->getPlugins();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 112,
+            "endLine": 115,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getPlugins",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Returns all the plugins available with their name, path and url\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns all the plugins available with their name, path and url\n   * @return array|null\n   *\/"
+        },
+        "hasPlugin": {
+            "name": "hasPlugin",
+            "summary": "Checks whether a plugin is available",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function hasPlugin(string $plugin): bool\n  {\n    return $this->_mvc->hasPlugin($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 124,
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "hasPlugin",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The plugin name"
+                }
+            ],
+            "doc": {
+                "description": "Checks whether a plugin is available\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a plugin is available\n   *\n   * @param string $plugin The plugin name\n   * @return boolean\n   *\/"
+        },
+        "isPlugin": {
+            "name": "isPlugin",
+            "summary": "Checks whether a plugin exists",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isPlugin(string $plugin = null): bool\n  {\n    return $this->_mvc->isPlugin($plugin ?: $this->pluginName($this->_plugin));\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 136,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isPlugin",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "plugin",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The plugin name"
+                }
+            ],
+            "doc": {
+                "description": "Checks whether a plugin exists\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether a plugin exists\n   *\n   * @param string|null $plugin The plugin name\n   * @return boolean\n   *\/"
+        },
+        "pluginPath": {
+            "name": "pluginPath",
+            "summary": "Returns the path of a plugin from its root directory (app, lib...) based on its name",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function pluginPath(string $plugin = null, $raw = false): ?string\n  {\n    return $this->_mvc->pluginPath($plugin ?: $this->pluginName($this->_plugin), $raw);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 150,
+            "endLine": 153,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -315,41 +609,77 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "shortName": "pluginPath",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The plugin name"
                 },
                 {
                     "name": "raw",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "If true will not include `src`"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the path of a plugin from its root directory (app, lib...) based on its name\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$raw",
+                        "description": "If true will not include `src`"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the path of a plugin from its root directory (app, lib...) based on its name\n   *\n   * @param string|null $plugin The plugin name\n   * @param boolean $raw If true will not include `src`\n   * @return string|null\n   *\/"
         },
         "pluginUrl": {
             "name": "pluginUrl",
-            "summary": "",
+            "summary": "Returns the url of a plugin based on its name",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($plugin = NULL)\n  {\n    return $this->_mvc->pluginUrl($plugin ?: $this->pluginName($this->_plugin));\n  }",
-            "startLine": 107,
-            "endLine": 110,
+            "code": "  public function pluginUrl(string $plugin = null): ?string\n  {\n    return $this->_mvc->pluginUrl($plugin ?: $this->pluginName($this->_plugin));\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 162,
+            "endLine": 165,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -358,32 +688,58 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "shortName": "pluginUrl",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The plugin name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the url of a plugin based on its name\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$plugin",
+                        "description": "The plugin name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the url of a plugin based on its name\n   *\n   * @param string|null $plugin The plugin name\n   * @return string|null\n   *\/"
         },
         "pluginName": {
             "name": "pluginName",
-            "summary": "",
+            "summary": "Returns the name of a plugin based on its path",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path = NULL)\n  {\n    return $this->_mvc->pluginName($path ?: $this->_path);\n  }",
-            "startLine": 113,
-            "endLine": 116,
+            "code": "  public function pluginName($path = null): ?string\n  {\n    return $this->_mvc->pluginName($path ?: $this->_path);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 174,
+            "endLine": 177,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -392,32 +748,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "shortName": "pluginName",
+            "returns": [
+                null,
+                "string"
+            ],
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
-                    "default_name": ""
+                    "default_name": "",
+                    "description": "The plugin path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the name of a plugin based on its path\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$path",
+                        "description": "The plugin path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the name of a plugin based on its path\n   *\n   * @param string|null $path The plugin path\n   * @return string|null\n   *\/"
         },
         "getCookie": {
             "name": "getCookie",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getCookie();\n  }",
-            "startLine": 119,
-            "endLine": 122,
+            "code": "  public function getCookie()\n  {\n    return $this->_mvc->getCookie();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 180,
+            "endLine": 183,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -426,8 +805,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCookie",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getRoutes": {
@@ -435,13 +814,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getRoutes();\n  }",
-            "startLine": 125,
-            "endLine": 128,
+            "code": "  public function getRoutes(): ?array\n  {\n    return $this->_mvc->getRoutes();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 186,
+            "endLine": 189,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -450,8 +832,11 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "shortName": "getRoutes",
+            "returns": [
+                null,
+                "array"
+            ],
             "arguments": []
         },
         "getAliases": {
@@ -459,13 +844,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getRoutes('alias');\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getAliases(): ?array\n  {\n    return $this->_mvc->getRoutes('alias');\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 192,
+            "endLine": 195,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -474,8 +862,11 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": false,
+            "shortName": "getAliases",
+            "returns": [
+                null,
+                "array"
+            ],
             "arguments": []
         },
         "getRoute": {
@@ -483,28 +874,36 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($path, $mode, $root = NULL)\n  {\n    return $this->_mvc->getRoute($path, $mode, $root);\n  }",
-            "startLine": 137,
-            "endLine": 140,
+            "code": "  public function getRoute(string $path, string $mode)\n  {\n    return $this->_mvc->getRoute($path, $mode);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 198,
+            "endLine": 201,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getRoute",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -513,19 +912,15 @@
                 {
                     "name": "mode",
                     "position": 1,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
-                },
-                {
-                    "name": "root",
-                    "position": 2,
-                    "type": "",
-                    "required": false,
-                    "has_default": true,
-                    "default": null,
                     "default_name": ""
                 }
             ]
@@ -535,13 +930,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $locale)\n  {\n    return $this->_mvc->setLocale($locale);\n  }",
-            "startLine": 143,
-            "endLine": 146,
+            "code": "  public function setLocale(string $locale)\n  {\n    return $this->_mvc->setLocale($locale);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 204,
+            "endLine": 207,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -550,13 +948,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setLocale",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "locale",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -569,13 +972,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->_mvc->getLocale();\n  }",
-            "startLine": 149,
-            "endLine": 152,
+            "code": "  public function getLocale(): ?string\n  {\n    return $this->_mvc->getLocale();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 210,
+            "endLine": 213,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -584,11 +990,11 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getLocale",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": []
         },
         "appPath": {
@@ -596,13 +1002,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($raw = false)\n  {\n    return Mvc::getAppPath($raw);\n  }",
-            "startLine": 155,
-            "endLine": 158,
+            "code": "  public function appPath($raw = false): string\n  {\n    return Mvc::getAppPath($raw);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 216,
+            "endLine": 219,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -611,15 +1020,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "appPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "raw",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -632,13 +1044,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return Mvc::getLibPath();\n  }",
-            "startLine": 161,
-            "endLine": 164,
+            "code": "  public function libPath(): string\n  {\n    return Mvc::getLibPath();\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 222,
+            "endLine": 225,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -647,10 +1062,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "libPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": []
         },
         "dataPath": {
@@ -658,13 +1073,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getDataPath().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
-            "startLine": 167,
-            "endLine": 170,
+            "code": "  public function dataPath(string $plugin = null): string\n  {\n    return Mvc::getDataPath().($plugin ? 'plugins\/'.$plugin.'\/' : '');\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 228,
+            "endLine": 231,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -673,15 +1091,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "dataPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -694,13 +1118,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getTmpPath($plugin);\n  }",
-            "startLine": 173,
-            "endLine": 176,
+            "code": "  public function tmpPath(string $plugin = null): string\n  {\n    return Mvc::getTmpPath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 234,
+            "endLine": 237,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -709,15 +1136,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "tmpPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -730,13 +1163,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getLogPath($plugin);\n  }",
-            "startLine": 179,
-            "endLine": 182,
+            "code": "  public function logPath(string $plugin = null): string\n  {\n    return Mvc::getLogPath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 240,
+            "endLine": 243,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -745,15 +1181,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "logPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -766,13 +1208,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getCachePath($plugin);\n  }",
-            "startLine": 185,
-            "endLine": 188,
+            "code": "  public function cachePath(string $plugin = null): string\n  {\n    return Mvc::getCachePath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 246,
+            "endLine": 249,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -781,15 +1226,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "cachePath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -802,13 +1253,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $plugin = NULL)\n  {\n    return Mvc::getContentPath($plugin);\n  }",
-            "startLine": 191,
-            "endLine": 194,
+            "code": "  public function contentPath(string $plugin = null): string\n  {\n    return Mvc::getContentPath($plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 252,
+            "endLine": 255,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -817,15 +1271,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "contentPath",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "plugin",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -838,13 +1298,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user = NULL, string $plugin = NULL)\n  {\n    return Mvc::getUserTmpPath($id_user, $plugin);\n  }",
-            "startLine": 197,
-            "endLine": 200,
+            "code": "  public function userTmpPath(string $id_user = null, string $plugin = null):? string\n  {\n    return Mvc::getUserTmpPath($id_user, $plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 258,
+            "endLine": 261,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -853,16 +1316,22 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "userTmpPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -871,7 +1340,13 @@
                 {
                     "name": "plugin",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -884,13 +1359,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\View",
+            "class": "bbn\\Mvc\\View",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user = NULL, string $plugin = NULL)\n  {\n    return Mvc::getUserDataPath($id_user, $plugin);\n  }",
-            "startLine": 203,
-            "endLine": 206,
+            "code": "  public function userDataPath(string $id_user = null, string $plugin = null):? string\n  {\n    return Mvc::getUserDataPath($id_user, $plugin);\n  }",
+            "parent": false,
+            "trait": "bbn\\Mvc\\Common",
+            "startLine": 264,
+            "endLine": 267,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -899,16 +1377,22 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "userDataPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -917,7 +1401,13 @@
                 {
                     "name": "plugin",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -926,9 +1416,271 @@
             ]
         }
     },
-    "properties": null,
+    "properties": {
+        "_file": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The full path to the view file\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_path": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The local path for the view file\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_ext": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The file's extension\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_checkers": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "Included files (only for LESS)\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_component": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "true of the view is part of a Vue component\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_component_name": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "true of the view is part of a Vue component\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_plugin": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The URL path to the plugin.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_plugin_name": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The plugin name.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_lang_file": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "A JSON file for adding language to javascript.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_content": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\View",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The content the view file.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "null|string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "_mvc": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Mvc\\View"
+            },
+            "declaring_trait": "bbn\\Mvc\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "The MVC class from which the controller is called\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bbn\\Mvc"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X",
+        "bbn\\Mvc": "Mvc"
+    },
+    "dummyComments": [
+        "\/**\n * Copyright (C) 2014 BBN\n *\n * This program is free software: you can redistribute it and\/or modify\n * it under the terms of the GNU General Public License as published by\n * the Free Software Foundation, either version 3 of the License, or\n * (at your option) any later version.\n *\n * This program is distributed in the hope that it will be useful,\n * but WITHOUT ANY WARRANTY; without even the implied warranty of\n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n * GNU General Public License for more details.\n *\n * You should have received a copy of the GNU General Public License\n * along with this program.  If not, see <http:\/\/www.gnu.org\/licenses\/>.\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

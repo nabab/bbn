@@ -2,7 +2,7 @@
 
 namespace bbn\Models\Cls;
 
-use Db as DbCls;
+use bbn\Db as DbCls;
 use bbn\Models\Tts\DbConfig;
 
 class NoteLink extends DbCls

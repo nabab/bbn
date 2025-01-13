@@ -1,0 +1,345 @@
+{
+    "doc": {
+        "description": "This trait provides configuration-related functionality for the Options class.",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Cfg",
+    "namespace": true,
+    "realName": "Cfg",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Cfg.php",
+    "startLine": 10,
+    "endLine": 210,
+    "numMethods": 5,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Cfg",
+    "contentConstructor": null,
+    "methods": {
+        "getCfg": {
+            "name": "getCfg",
+            "summary": "Returns a formatted content of the cfg column as an array.",
+            "description": "Checks if the parent option has inheritance and sets array accordingly.\n\nThe following inheritance values are supported:\n- 'children': if the option is the direct parent\n- 'cascade': any level of parenthood",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "Checks if the parent option has inheritance and sets array accordingly.\n\nThe following inheritance values are supported:\n- 'children': if the option is the direct parent\n- 'cascade': any level of parenthood"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Cfg",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cfg.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCfg(...$codes): ?array\n  {\n    \/\/ Get the ID of the option from its code.\n    $id = $this->fromCode($codes);\n\n    \/\/ Check if the ID is valid and if the result is cached.\n    if (Str::isUid($id) && ($tmp = $this->cacheGet($id, __FUNCTION__))) {\n      return $tmp;\n    }\n\n    \/\/ Get references to class configuration and fields.\n    $c   = &$this->class_cfg;\n    $f   = &$this->fields;\n\n    \/\/ Retrieve the cfg value from the database.\n    $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);\n\n    \/\/ Decode the JSON string to an array if possible, otherwise initialize as empty array.\n    $cfg = Str::isJson($cfg) ? json_decode($cfg, true) : [];\n\n    \/\/ Check for permissions and store them in the config array.\n    $perm = $cfg['permissions'] ?? false;\n\n    \/\/ Look for parent options with inheritance.\n    $parents = array_reverse($this->parents($id));\n    $last    = count($parents) - 1;\n\n    \/\/ Iterate through the parents to find one with inheritance.\n    foreach ($parents as $i => $p) {\n      \/\/ Retrieve the config of the parent option.\n      $parent_cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $p]);\n\n      \/\/ Decode the JSON string to an array if possible, otherwise initialize as empty array.\n      $parent_cfg = Str::isJson($parent_cfg) ? json_decode($parent_cfg, true) : [];\n\n      \/\/ Check for inheritance in the parent's config or scfg.\n      if (!empty($parent_cfg['scfg']) && ($i === $last)) {\n        \/\/ Merge the current config with the parent's scfg and set inherit_from and frozen.\n        $cfg                 = array_merge((array)$cfg, $parent_cfg['scfg']);\n        $cfg['inherit_from'] = $p;\n        $cfg['frozen']       = 1;\n        break;\n      }\n\n      \/\/ Check for inheritance in the parent's config or scfg.\n      if (!empty($parent_cfg['inheritance']) || !empty($parent_cfg['scfg']['inheritance'])) {\n        \/\/ Check if the parent is a direct parent and its inheritance value is 'children' or 'cascade'.\n        if (\n          (($i === $last)\n            && (\n              (($parent_cfg['inheritance'] ?? null) === 'children')\n              || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'children'))\n            )\n          )\n          || (\n            (($parent_cfg['inheritance'] ?? null) === 'cascade')\n            || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'cascade'))\n          )\n        ) {\n          \/\/ Merge the current config with the parent's scfg or config, and set inherit_from and frozen.\n          $cfg                 = array_merge((array)$cfg, $parent_cfg['scfg'] ?? $parent_cfg);\n          $cfg['inherit_from'] = $p;\n          $cfg['frozen']       = 1;\n          break;\n        }\n        \/\/ If the current config is empty and the parent's inheritance value is 'default', use the parent's scfg or config.\n        elseif (\n          !count($cfg)\n          && ((($parent_cfg['inheritance'] ?? null) === 'default')\n            || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'default')))\n        ) {\n          $cfg                 = $parent_cfg['scfg'] ?? $parent_cfg;\n          $cfg['inherit_from'] = $p;\n        }\n      }\n    }\n\n    \/\/ Restore permissions if they were present initially.\n    if ($perm) {\n      $cfg['permissions'] = $perm;\n    }\n\n    \/\/ Set default values for mandatory fields.\n    $mandatories = ['show_code', 'show_alias', 'show_value', 'show_icon', 'sortable', 'allow_children', 'frozen'];\n    foreach ($mandatories as $m) {\n      $cfg[$m] = empty($cfg[$m]) ? 0 : 1;\n    }\n\n    \/\/ Set default values for fields that should be strings.\n    $mandatories = ['desc', 'inheritance', 'permissions', 'i18n', 'i18n_inheritance'];\n    foreach ($mandatories as $m) {\n      $cfg[$m] = empty($cfg[$m]) ? '' : $cfg[$m];\n    }\n\n    \/\/ Set default values for fields that should be null.\n    $mandatories = ['controller', 'schema', 'form', 'default_value'];\n    foreach ($mandatories as $m) {\n      $cfg[$m] = empty($cfg[$m]) ? null : $cfg[$m];\n    }\n\n    \/\/ Cache the result and return it.\n    $this->cacheSet($id, __FUNCTION__, $cfg);\n    return $cfg;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 23,
+            "endLine": 126,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getCfg",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Any option(s) accepted by fromCode()"
+                }
+            ],
+            "doc": {
+                "description": "Returns a formatted content of the cfg column as an array.\nChecks if the parent option has inheritance and sets array accordingly.\n\nThe following inheritance values are supported:\n- 'children': if the option is the direct parent\n- 'cascade': any level of parenthood\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$codes",
+                        "description": "Any option(s) accepted by fromCode()"
+                    }
+                ],
+                "return": "The formatted array or null if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns a formatted content of the cfg column as an array.\n   * Checks if the parent option has inheritance and sets array accordingly.\n   *\n   * The following inheritance values are supported:\n   * - 'children': if the option is the direct parent\n   * - 'cascade': any level of parenthood\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return array|null The formatted array or null if the option cannot be found\n   *\/"
+        },
+        "getRawCfg": {
+            "name": "getRawCfg",
+            "summary": "Returns the raw content of the cfg column for the given option.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cfg",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cfg.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getRawCfg(...$codes): ?string\n  {\n    \/\/ Get the ID of the option from its code.\n    $id = $this->fromCode($codes);\n\n    \/\/ Check if the ID is valid and retrieve the raw cfg value from the database.\n    if (Str::isUid($id)) {\n      $c = &$this->class_cfg;\n      $f = &$this->fields;\n      return $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 135,
+            "endLine": 148,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getRawCfg",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Any option(s) accepted by fromCode()"
+                }
+            ],
+            "doc": {
+                "description": "Returns the raw content of the cfg column for the given option.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$codes",
+                        "description": "Any option(s) accepted by fromCode()"
+                    }
+                ],
+                "return": "The raw cfg value or null if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns the raw content of the cfg column for the given option.\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return string|null The raw cfg value or null if the option cannot be found\n   *\/"
+        },
+        "getParentCfg": {
+            "name": "getParentCfg",
+            "summary": "Returns a formatted content of the cfg column as an array from the option's parent.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cfg",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cfg.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getParentCfg(...$codes): ?array\n  {\n    \/\/ Get the ID of the option from its code.\n    $id = $this->fromCode($codes);\n\n    \/\/ Check if the ID is valid and retrieve the parent's config.\n    if ($id && ($id_parent = $this->getIdParent($id))) {\n      return $this->getCfg($id_parent);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 157,
+            "endLine": 168,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getParentCfg",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Any option(s) accepted by fromCode()"
+                }
+            ],
+            "doc": {
+                "description": "Returns a formatted content of the cfg column as an array from the option's parent.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$codes",
+                        "description": "Any option(s) accepted by fromCode()"
+                    }
+                ],
+                "return": "The formatted config or null if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Returns a formatted content of the cfg column as an array from the option's parent.\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return array|null The formatted config or null if the option cannot be found\n   *\/"
+        },
+        "isSortable": {
+            "name": "isSortable",
+            "summary": "Tells if an option has its config set as sortable or no",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cfg",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cfg.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isSortable(...$codes): ?bool\n  {\n    \/\/ Get the ID of the option from its code.\n    $id = $this->fromCode($codes);\n\n    \/\/ Check if the ID is valid and retrieve the config to check for sortability.\n    if (Str::isUid($id)) {\n      $cfg = $this->getCfg($id);\n      return !empty($cfg['sortable']);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 177,
+            "endLine": 189,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isSortable",
+            "returns": [
+                null,
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Any option(s) accepted by fromCode()"
+                }
+            ],
+            "doc": {
+                "description": "Tells if an option has its config set as sortable or no\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$codes",
+                        "description": "Any option(s) accepted by fromCode()"
+                    }
+                ],
+                "return": "Whether the option is sortable or null if the option cannot be found"
+            },
+            "comments": "  \/**\n   * Tells if an option has its config set as sortable or no\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return bool|null Whether the option is sortable or null if the option cannot be found\n   *\/"
+        },
+        "getSchema": {
+            "name": "getSchema",
+            "summary": "Retrieves the schema of an option.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cfg",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cfg.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getSchema(string $id): ?array\n  {\n    \/\/ Retrieve the config to check for a schema.\n    if ($cfg = $this->getCfg($id)) {\n      \/\/ Check if a schema is defined and decode it from JSON.\n      if (!empty($cfg['schema']) && is_string($cfg['schema'])) {\n        return json_decode($cfg['schema'], true);\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 198,
+            "endLine": 209,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getSchema",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The ID of the option"
+                }
+            ],
+            "doc": {
+                "description": "Retrieves the schema of an option.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The ID of the option"
+                    }
+                ],
+                "return": "The schema or null if it cannot be found"
+            },
+            "comments": "  \/**\n   * Retrieves the schema of an option.\n   *\n   * @param string $id The ID of the option\n   * @return array|null The schema or null if it cannot be found\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n * This trait provides configuration-related functionality for the Options class.\n *\/",
+        "\/**\n   * Returns a formatted content of the cfg column as an array.\n   * Checks if the parent option has inheritance and sets array accordingly.\n   *\n   * The following inheritance values are supported:\n   * - 'children': if the option is the direct parent\n   * - 'cascade': any level of parenthood\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return array|null The formatted array or null if the option cannot be found\n   *\/",
+        "\/**\n   * Returns the raw content of the cfg column for the given option.\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return string|null The raw cfg value or null if the option cannot be found\n   *\/",
+        "\/**\n   * Returns a formatted content of the cfg column as an array from the option's parent.\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return array|null The formatted config or null if the option cannot be found\n   *\/",
+        "\/**\n   * Tells if an option has its config set as sortable or no\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return bool|null Whether the option is sortable or null if the option cannot be found\n   *\/",
+        "\/**\n   * Retrieves the schema of an option.\n   *\n   * @param string $id The ID of the option\n   * @return array|null The schema or null if it cannot be found\n   *\/"
+    ],
+    "summary": "This trait provides configuration-related functionality for the Options class.",
+    "description": "",
+    "description_parts": []
+}

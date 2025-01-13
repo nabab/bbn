@@ -1,0 +1,383 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Indexed",
+    "namespace": true,
+    "realName": "Indexed",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Indexed.php",
+    "startLine": 6,
+    "endLine": 204,
+    "numMethods": 6,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Indexed",
+    "contentConstructor": null,
+    "methods": {
+        "codeOptions": {
+            "name": "codeOptions",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function codeOptions(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Retrieve the list of items for the given ID.\n      $list = $this->items($id);\n      \n      \/\/ If the list is an array, process it to create the result array.\n      if (\\is_array($list)) {\n        $res = [];\n        $cfg = $this->getCfg($id) ?: [];\n        \n        \/\/ Iterate over each item in the list and add its details to the result array.\n        foreach ($list as $i){\n          $o = $this->option($i);\n          $res[$o[$this->fields['code']]] = [\n            $this->fields['id'] => $o[$this->fields['id']],\n            $this->fields['code'] => $o[$this->fields['code']],\n            $this->fields['text'] => $o[$this->fields['text']]\n          ];\n\n          \/\/ If the configuration has a schema, add its fields to the result array.\n          if ( !empty($cfg['schema']) ){\n            if ( \\is_string($cfg['schema']) ){\n              $cfg['schema'] = json_decode($cfg['schema'], true);\n            }\n  \n            foreach ( $cfg['schema'] as $s ){\n              if (!empty($s['field']) && !in_array($s['field'], [$this->fields['id'], $this->fields['code'], $this->fields['text']])) {\n                $res[$o[$this->fields['code']]][$s['field']] = $o[$s['field']] ?? null;\n              }\n            }\n          }\n\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 9,
+            "endLine": 50,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "codeOptions",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "codeIds": {
+            "name": "codeIds",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function codeIds(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Retrieve the list of items for the given ID.\n      $list = $this->items($id);\n      \n      \/\/ If the list is an array, process it to create the result array.\n      if (\\is_array($list)) {\n        $res = [];\n        \n        \/\/ Iterate over each item in the list and add its ID to the result array.\n        foreach ($list as $i){\n          $o               = $this->option($i);\n          $res[$o[$this->fields['code']]] = $o[$this->fields['id']];\n        }\n\n        return $res;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 54,
+            "endLine": 76,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "codeIds",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fullOptionsById": {
+            "name": "fullOptionsById",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullOptionsById(...$codes): ?array\n  {\n    \/\/ Initialize the result array.\n    $res = [];\n    \n    \/\/ Get the full options for the provided codes.\n    if ($opt = $this->fullOptions($codes)) {\n      $cf = $this->getFields();\n      \n      \/\/ Iterate over each option and add its details to the result array.\n      foreach ($opt as $o){\n        $res[$o[$cf['id']]] = $o;\n      }\n    }\n\n    return $opt === null ? $opt : $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 81,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullOptionsById",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "fullOptionsByCode": {
+            "name": "fullOptionsByCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function fullOptionsByCode(...$codes): ?array\n  {\n    \/\/ Initialize the result array.\n    $res = [];\n    \n    \/\/ Get the full options for the provided codes.\n    if ($opt = $this->fullOptions($codes)) {\n      $cf = $this->getFields();\n      \n      \/\/ Iterate over each option and add its details to the result array.\n      foreach ($opt as $o){\n        $res[$o[$cf['code']]] = $o;\n      }\n    }\n\n    return $opt === null ? $opt : $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 101,
+            "endLine": 117,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "fullOptionsByCode",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "optionsByCode": {
+            "name": "optionsByCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function optionsByCode(...$codes): ?array\n  {\n    \/\/ Get the ID from the provided codes.\n    if (Str::isUid($id = $this->fromCode($codes))) {\n      \/\/ Check if the result is cached.\n      if ($r = $this->getCache($id, __FUNCTION__)) {\n        return $r;\n      }\n\n      \/\/ Retrieve the native options for the given ID.\n      $opts = $this->nativeOptions($id);\n      \n      \/\/ If there are options, create the result array.\n      if ($opts) {\n        $res = [];\n        \n        \/\/ Iterate over each option and add its code and text to the result array.\n        foreach ($opts as $o) {\n          $res[$o[$this->fields['code']]] = $o[$this->fields['text']];\n        }\n        \n        \/\/ Sort the result array by value.\n        \\asort($res);\n        $opts = $res;\n      }\n\n      \/\/ Cache the result and return it.\n      $this->setCache($id, __FUNCTION__, $opts);\n      return $opts;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 121,
+            "endLine": 153,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "optionsByCode",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "codes",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "textValueOptions": {
+            "name": "textValueOptions",
+            "summary": "Returns an option's children array of id and text in a user-defined indexed array.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Indexed",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Indexed.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function textValueOptions(string $id, string $text = 'text', string $value = 'value', ...$additionalFields): ?array\n  {\n    \/\/ Initialize the result array.\n    $res = [];\n    \n    \/\/ Get the full options for the provided codes.\n    if ($opts = $this->fullOptions($id)) {\n      \/\/ Get the configuration for the given code.\n      $cfg = $this->getCfg($id) ?: [];\n      \n      \/\/ Initialize a counter.\n      $i   = 0;\n      \n      \/\/ Iterate over each option and add it to the result array.\n      foreach ($opts as $k => $o) {\n        if (!isset($is_array)) {\n          $is_array = \\is_array($o);\n        }\n        \n        $res[$i] = [\n          $text => $is_array ? $o[$this->fields['text']] : $o,\n          $value => $is_array ? $o[$this->fields['id']] : $k\n        ];\n        if (!empty($cfg['show_code'])) {\n          $res[$i][$this->fields['code']] = $o[$this->fields['code']];\n        }\n        foreach ($additionalFields as $f) {\n          if (!array_key_exists($f, $res[$i])) {\n            $res[$i][$f] = $o[$f] ?? null;\n          }\n        }\n        \n        $i++;\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 166,
+            "endLine": 203,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 1,
+            "shortName": "textValueOptions",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option's ID or its code if it is children of {@link default}"
+                },
+                {
+                    "name": "text",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "text",
+                    "default_name": "",
+                    "description": "The text field name for the text column"
+                },
+                {
+                    "name": "value",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "value",
+                    "default_name": "",
+                    "description": "The value field name for the id column"
+                },
+                {
+                    "name": "additionalFields",
+                    "position": 3,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "ields Additional fields to include in the result"
+                }
+            ],
+            "doc": {
+                "description": "Returns an option's children array of id and text in a user-defined indexed array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|string",
+                        "name": "$id",
+                        "description": "The option's ID or its code if it is children of {@link default}"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The text field name for the text column"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$value",
+                        "description": "The value field name for the id column"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$additional",
+                        "description": "ields Additional fields to include in the result"
+                    }
+                ],
+                "return": "Options' list in a text\/value indexed array or null if not found"
+            },
+            "comments": "  \/**\n   * Returns an option's children array of id and text in a user-defined indexed array.\n   *\n   * @param int|string      $id    The option's ID or its code if it is children of {@link default}\n   * @param string          $text  The text field name for the text column\n   * @param string          $value The value field name for the id column\n   * @param string          ...$additionalFields Additional fields to include in the result\n   *\n   * @return array|null Options' list in a text\/value indexed array or null if not found\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Returns an option's children array of id and text in a user-defined indexed array.\n   *\n   * @param int|string      $id    The option's ID or its code if it is children of {@link default}\n   * @param string          $text  The text field name for the text column\n   * @param string          $value The value field name for the id column\n   * @param string          ...$additionalFields Additional fields to include in the result\n   *\n   * @return array|null Options' list in a text\/value indexed array or null if not found\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

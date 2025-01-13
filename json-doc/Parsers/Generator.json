@@ -1,0 +1,411 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Parsers\\Generator",
+    "namespace": true,
+    "realName": "Generator",
+    "realNamespace": "bbn\\Parsers",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Parsers\/Generator.php",
+    "startLine": 7,
+    "endLine": 508,
+    "numMethods": 6,
+    "numProperties": 4,
+    "numConstants": 0,
+    "numStaticProperties": 1,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "nonClassesReturns": [
+            "string",
+            "int",
+            "float",
+            "array",
+            "bool",
+            "boolean",
+            "void",
+            "self",
+            "null",
+            "object",
+            "iterable",
+            "callable"
+        ],
+        "blala": 1
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Parsers",
+    "shortName": "Generator",
+    "contentConstructor": {
+        "returns": []
+    },
+    "methods": {
+        "__construct": {
+            "name": "__construct",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Generator",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Generator.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function __construct(\r\n    \/** array  *\/\r\n    private array $cfg = [],\r\n    private int $spacing = 2\r\n  ) {\r\n  \r\n  }\r",
+            "parent": false,
+            "trait": false,
+            "startLine": 26,
+            "endLine": 32,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "promoted": "private"
+                },
+                {
+                    "name": "spacing",
+                    "position": 1,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 2,
+                    "default_name": "",
+                    "promoted": "private"
+                }
+            ]
+        },
+        "formatExport": {
+            "name": "formatExport",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Generator",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Generator.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function formatExport($value): string \r\n  {\r\n    $export = var_export($value, true);\r\n    if (is_array($value)) {\r\n      $export = preg_replace(\"\/^([ ]*)(.*)\/m\", '$1$1$2', $export);\r\n      $array = preg_split(\"\/\\r\\n|\\n|\\r\/\", $export);\r\n      $array = preg_replace([\"\/\\s*array\\s\\($\/\", \"\/\\)(,)?$\/\", \"\/\\s=>\\s$\/\"], [NULL, ']$1', ' => ['], $array);\r\n      $export = str_replace('['.PHP_EOL.']','[]', join(PHP_EOL, array_filter([\"[\"] + $array)));\r\n    }\r\n    return $export;\r\n  \r\n  }\r",
+            "parent": false,
+            "trait": false,
+            "startLine": 34,
+            "endLine": 45,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "formatExport",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "value",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "generateClass": {
+            "name": "generateClass",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Generator",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Generator.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function generateClass() {\r\n    \/\/X::ddump('Tests');\r\n    $res = \"<?php\\n\\n\";\r\n    \r\n    if ( !empty($this->cfg['realNamespace'])) {\r\n      $res .= \"namespace \" . $this->cfg['realNamespace'] . \";\\n\\n\";\r\n    }\r\n    \r\n    \/*if (str_contains($this->cfg['name'], $this->cfg['namespace'])) {\r\n      $res .= \"class \" . substr($this->cfg['name'], strlen($this->cfg['namespace']) + 1);\r\n    } else {\r\n      $res .= \"class \" . $this->cfg['name'];\r\n    }*\/\r\n\r\n    if (!empty($this->cfg['uses'])) {\r\n      foreach ($this->cfg['uses'] as $fqn => $alias) {\r\n        $res .= \"use $fqn\";\r\n        if (end(X::split($fqn, \"\\\\\")) !== $alias) {\r\n          $res .= \" as $alias\";\r\n        }\r\n        $res .= \";\" . PHP_EOL;\r\n      }\r\n    }\r\n\r\n    $res .= PHP_EOL . PHP_EOL;\r\n\r\n    if (!empty($this->cfg['dummyComments'])) {\r\n      foreach ($this->cfg['dummyComments'] as $comment) {\r\n        $res .= $comment . PHP_EOL . PHP_EOL;\r\n      }\r\n    }\r\n\r\n    \/*if (!empty($this->cfg['doc']) && (!empty($this->cfg['doc']['description'])) || !empty($this->cfg['doc']['tags'])) {\r\n      $res .= PHP_EOL . \"\/**\" . PHP_EOL . \" * \";\r\n      if (!empty($this->cfg['doc']['description'])) {\r\n        $res .= str_replace(\"\\n\", \"\\n * \", $this->cfg['doc']['description']);\r\n      }\r\n      if (!empty($this->cfg['doc']['tags'])) {\r\n        foreach ($this->cfg['doc']['tags'] as $tag => $value) {\r\n          $res .= PHP_EOL . \" * @\" . $tag . \"  \" . $value; \r\n        }\r\n      }\r\n      $res .= PHP_EOL . \" *\" . PHP_EOL . \" * \/\" . PHP_EOL;\r\n    }*\/\r\n\r\n    $res .= PHP_EOL . \"class \" . $this->cfg['realName'];\r\n    \r\n    if ( !empty($this->cfg['parentClass'])) {\r\n      $res .= \" extends \" . ($this->cfg['uses'][$this->cfg['parentClass']] ?? $this->cfg['parentClass']) ;\r\n    }\r\n    if ( !empty($this->cfg['interfaceNames'])) {\r\n      $implements = array_filter($this->cfg['interfaceNames'], function($a) {\r\n        return str_contains($a, \"bbn\");\r\n     });\r\n      if (!empty($implements)) {\r\n        $res .= \" implements \" . join(\", \", array_map(function($elem) {\r\n          if ( !empty($this->cfg['realNamespace'])) {\r\n            return str_replace(($this->cfg['realNamespace'] . \"\\\\\"), \"\", $elem);\r\n          }\r\n        }, $implements));\r\n      }\r\n    }\r\n\r\n    $res .= \"\\n{\\n\";\r\n    \r\n\r\n    if ( !empty($this->cfg['traits'])) {\r\n      foreach ($this->cfg['traits'] as $trait) {\r\n        if ( !empty($this->cfg['realNamespace'])) {\r\n          $use = str_replace(($this->cfg['realNamespace'] . \"\\\\\"), \"\", ($this->cfg['uses'][$trait] ?? $trait));\r\n        }\r\n        $res .= str_repeat(' ', $this->spacing) . \"use \" . $use . \";\\n\";\r\n      }\r\n      $res .= \"\\n\";\r\n    }\r\n\r\n    if (!empty($this->cfg['constants'])) {\r\n      $res .= PHP_EOL;\r\n      foreach ($this->cfg['constants'] as $const) {\r\n        if (!$const['parent']) {\r\n          if (!empty($const['doc']) && (!empty($const['doc']['description'])) || !empty($const['doc']['tags'])) {\r\n            $res .= PHP_EOL . \"  \/**\";\r\n            if (!empty($const['doc']['description'])) {\r\n              $res .= PHP_EOL . \"   * \";\r\n              $res .= str_replace(\"\\n\", \"\\n   * \", $const['doc']['description']);\r\n            }\r\n            if (!empty($const['doc']['tags'])) {\r\n              foreach ($const['doc']['tags'] as $tag) {\r\n                $str = \"\";\r\n                if (!empty($tag['type'])) {\r\n                  $str .= $tag['type'] . \" \";\r\n                }\r\n                if (!empty($tag['description'])) {\r\n                  $str .= $tag['description'];\r\n                }\r\n                $res .= PHP_EOL . \"   * @\" . $tag['tag'] . \" \" . $str; \r\n              }\r\n            }\r\n            $res .= PHP_EOL . \"   *\/\" . PHP_EOL;\r\n          }\r\n          $line = \"  \";\r\n          if ($const['final']) {\r\n            $line .= \"final \";\r\n          }\r\n          if ($const['protected']) {\r\n            $line .= \"protected \";\r\n          }\r\n          if ($const['private']) {\r\n            $line .= \"private \";\r\n          }\r\n          if ($const['public']) {\r\n            $line .= \"public \";\r\n          }\r\n          $line .= \"const \". $const['name'];\r\n          if ($const['value']) {\r\n            $line .= \" = \" . $this->formatExport($const['value']);\r\n          }\r\n          $line .=  \";\" . PHP_EOL;\r\n          $res .= $line;\r\n        }\r\n      }\r\n      $res .= PHP_EOL;\r\n    }\r\n    \r\n    \r\n    if (!empty($this->cfg['properties'])) {\r\n      foreach ($this->cfg['properties'] as $property => $info) {\r\n        if ($info['promoted']) {\r\n          continue;\r\n        }\r\n        if ($info['parent']) {\r\n          continue;\r\n        }\r\n        if ($info['declaring_trait'] !== $this->cfg['name']) {\r\n          continue;\r\n        }\r\n        if (!empty($info['doc']) && (!empty($info['doc']['description'])) || !empty($info['doc']['tags'])) {\r\n          $res .= PHP_EOL . \"  \/**\";\r\n          if (!empty($info['doc']['description'])) {\r\n            $res .= PHP_EOL . \"   * \";\r\n            $res .= str_replace(\"\\n\", \"\\n   * \", $info['doc']['description']);\r\n          }\r\n          if (!empty($info['doc']['tags'])) {\r\n            foreach ($info['doc']['tags'] as $tag) {\r\n              $str = \"\";\r\n              if (!empty($tag['type'])) {\r\n                $str .= $tag['type'] . \" \";\r\n              }\r\n              if (!empty($tag['description'])) {\r\n                $str .= $tag['description'];\r\n              }\r\n              $res .= PHP_EOL . \"   * @\" . $tag['tag'] . \" \" . $str; \r\n            }\r\n          }\r\n          $res .= PHP_EOL . \"   *\/\" . PHP_EOL;\r\n        }\r\n        $static = ($info[\"static\"]) ? \" static\" : \"\";\r\n        $readonly = ($info[\"readonly\"]) ? \" readonly\" : \"\";\r\n        $type = ($info[\"type\"] !== null) ? (' ' . $info[\"type\"]) : \"\";\r\n        $val = is_null($info[\"value\"]) ? \"\" : \" = \" . $this->formatExport($info[\"value\"]);\r\n        $res .= str_repeat(\" \", $this->spacing) . $info[\"visibility\"] . $readonly . $static . $type .' $'. $property .  $val . \";\" . PHP_EOL;\r\n\r\n      } \r\n    }\r\n    \r\n    if ( !empty($this->cfg['methods'])) {\r\n      $res .= PHP_EOL . PHP_EOL;\r\n      foreach ($this->cfg['methods'] as $method) {\r\n        if (!empty($method['trait'])) {\r\n          continue;\r\n        }\r\n        if ($method['class'] !== $this->cfg['name']) {\r\n          continue;\r\n        }\r\n        $res .= $this->generateMethod($method) . \"\\n\\n\";\r\n      }\r\n    }\r\n    \r\n    return $res . \"}\";\r\n    \r\n  }\r",
+            "parent": false,
+            "trait": false,
+            "startLine": 47,
+            "endLine": 227,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "generateClass",
+            "returns": [],
+            "arguments": []
+        },
+        "writeDocumentation": {
+            "name": "writeDocumentation",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Generator",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Generator.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function writeDocumentation(array $cfg): string\r\n  {\r\n    $res = \"\";\r\n    $head = PHP_EOL . \"  \/**\";\r\n    $line = PHP_EOL . \"   * \";\r\n    $end = PHP_EOL . \"   *\/\" . PHP_EOL;\r\n    $params = \"\";\r\n    if (!empty($cfg['comments'])) {\r\n      $res .= $cfg['comments'] . PHP_EOL;\r\n    }\r\n    if (!empty($cfg['arguments'])) {\r\n      if (!empty($cfg['doc']['params'])) {\r\n        foreach ($cfg['arguments'] as $param) {\r\n          $str = '';\r\n          if (!empty($param['type'])) {\r\n            $str .= $param['type'] . \" \";\r\n          }\r\n          if (!empty($param['name'])) {\r\n            $str .= $param['name'] . \" \";\r\n          }\r\n          if (!empty($param['description'])) {\r\n            $str .= $param['description'];\r\n          }\r\n          $params .= PHP_EOL . \"   * @param\" . \" \" . $str;\r\n        }\r\n        if (empty($res)) {\r\n          $res .= $head . $line . $params . $end;\r\n        }\r\n        else {\r\n          $params = \"   * \" . $params;\r\n          $arrComments = X::split($res, PHP_EOL);\r\n          $replace = '';\r\n          foreach ($arrComments as $comment) {\r\n            if (str_contains($comment, '@param ')) {\r\n              $replace .= $comment . PHP_EOL;\r\n            }\r\n          }\r\n          $res = str_replace($replace, $params . PHP_EOL, $res);\r\n        }\r\n      }\r\n    }\r\n    return $res;\r\n  }\r",
+            "parent": false,
+            "trait": false,
+            "startLine": 229,
+            "endLine": 271,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "writeDocumentation",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "generateMethod": {
+            "name": "generateMethod",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Generator",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Generator.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function generateMethod(array $cfg) {\r\n    $res = \"\";\r\n    $res .= $this->writeDocumentation($cfg);\r\n    \/*$res .= str_repeat(' ', $this->spacing);\r\n  \r\n    if ( !empty($cfg['final']) ) {\r\n      $res .= \"final \";\r\n    }\r\n    \r\n    if ( !empty($cfg['visibility']) ) {\r\n      $res .= $cfg['visibility'] . ' ';\r\n    }\r\n    \r\n    if ( !empty($cfg['static']) ) {\r\n      $res .= \"static \";\r\n    }\r\n  \r\n    if (!empty($cfg['name'])) {\r\n      $res .= \"function \" . $cfg['name'] . \"(\";\r\n      $orig_res = $res;\r\n      if (!empty($cfg['arguments'])) {\r\n        foreach ($cfg['arguments'] as $arg) {\r\n          $argStr = \"\";\r\n          if (!empty($arg['promoted'])) {\r\n            $argStr .= $arg['promoted'] . \" \";\r\n          }\r\n\r\n          if (!empty($arg['type_arr'])) {\r\n            $has_null = false;\r\n            $type = \"\";\r\n            foreach ($arg['type_arr'] as $t) {\r\n              if (str_contains($t, '?')) {\r\n                $has_null = true;\r\n              }\r\n              else if ($t === 'null') {\r\n                $has_null = true;\r\n              }\r\n            }\r\n            if ($has_null && (count($arg['type_arr']) === 2) && (!$arg['has_default'] || !is_null($arg['default']))) {\r\n              $type .= \"?\";\r\n            }\r\n            else if ($has_null && (count($arg['type_arr']) > 2)) {\r\n              $type .= 'null|';\r\n            }\r\n            foreach ($arg['type_arr'] as $t) {\r\n              if ($t !== 'null') {\r\n                if (!empty($this->cfg['realNamespace'])\r\n                    && (strpos($t, ($this->cfg['realNamespace'] . '\\\\')) === 0))\r\n                {\r\n                  $t = str_replace(($this->cfg['realNamespace'] . '\\\\'), '', $t);\r\n                }\r\n                if (!in_array($t, self::$nonClassesReturns)\r\n                    && !in_array($t, $this->cfg['uses'] ?? [])\r\n                    && (strpos($t, '\\\\') !== 0)\r\n                    && !class_exists(('\\\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\\\' : '') . $t))\r\n                ) {\r\n                  $t = '\\\\' . $t;\r\n                }\r\n                $type .= $t . \"|\";\r\n              }\r\n            }\r\n            $last_pipe = strrpos($type, '|');\r\n            \r\n            $type = substr($type, 0, $last_pipe);\r\n            $argStr .= $type . \" \";\r\n          }\r\n\r\n          \r\n          if ($arg['variadic']) {\r\n            $argStr .= \"...\";\r\n          }\r\n          if ($arg['reference']) {\r\n            $argStr .= \"&\";\r\n          }\r\n          $argStr .= \"$\" . $arg['name'];\r\n        \r\n          if (!empty($arg['has_default'])) {\r\n            $argStr .= \" = \" .  $this->formatExport($arg['default']);\r\n          }\r\n        \r\n          $orig_res .= $argStr . \", \";\r\n        }\r\n        if (strlen($orig_res) >= 100) {\r\n          $res .= PHP_EOL . \"      \";\r\n          foreach ($cfg['arguments'] as $arg) {\r\n            $argStr = \"\";\r\n            if (!empty($arg['promoted'])) {\r\n              $argStr .= $arg['promoted'] . \" \";\r\n            }\r\n  \r\n            if (!empty($arg['type_arr'])) {\r\n              $has_null = false;\r\n              $type = \"\";\r\n              foreach ($arg['type_arr'] as $t) {\r\n                if (str_contains($t, '?')) {\r\n                  $has_null = true;\r\n                }\r\n                else if ($t === 'null') {\r\n                  $has_null = true;\r\n                }\r\n              }\r\n              if ($has_null && (count($arg['type_arr']) === 2) && (!$arg['has_default'] || !is_null($arg['default']))) {\r\n                $type .= \"?\";\r\n              }\r\n              else if ($has_null && (count($arg['type_arr']) > 2)) {\r\n                $type .= 'null|';\r\n              }\r\n              foreach ($arg['type_arr'] as $t) {\r\n                if ($t !== 'null') {\r\n                  if (!empty($this->cfg['realNamespace'])\r\n                      && (strpos($t, ($this->cfg['realNamespace'] . '\\\\')) === 0))\r\n                  {\r\n                    $t = str_replace(($this->cfg['realNamespace'] . '\\\\'), '', $t);\r\n                  }\r\n                  if (!in_array($t, self::$nonClassesReturns)\r\n                      && !in_array($t, $this->cfg['uses'] ?? [])\r\n                      && (strpos($t, '\\\\') !== 0)\r\n                      && !class_exists(('\\\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\\\' : '') . $t))\r\n                  ) {\r\n                    $t = '\\\\' . $t;\r\n                  }\r\n                  $type .= $t . \"|\";\r\n                }\r\n              }\r\n              $last_pipe = strrpos($type, '|');\r\n              \r\n              $type = substr($type, 0, $last_pipe);\r\n              $argStr .= $type . \" \";\r\n            }\r\n  \r\n            \r\n            if ($arg['variadic']) {\r\n              $argStr .= \"...\";\r\n            }\r\n            if ($arg['reference']) {\r\n              $argStr .= \"&\";\r\n            }\r\n            $argStr .= \"$\" . $arg['name'];\r\n          \r\n            if (!empty($arg['has_default'])) {\r\n              $argStr .= \" = \" .  $this->formatExport($arg['default']);\r\n            }\r\n          \r\n            $res .= $argStr. \",\" . PHP_EOL . \"      \";\r\n          }\r\n          $res = substr($res, 0, -8);\r\n          $res .= PHP_EOL . \"  )\";\r\n        }\r\n        else {\r\n          $res = $orig_res;\r\n          $res = substr($res, 0, -2);\r\n          $res .= \")\";\r\n        }\r\n      }\r\n      else {\r\n        $res .= \")\";\r\n      }\r\n      \r\n      \r\n      if ( !empty($cfg['returns']) ) {\r\n        $has_null = false;\r\n        \r\n        $res_returns = \": \";\r\n        \r\n        foreach ($cfg['returns'] as $ret) {\r\n          if (str_contains($ret, '?')) {\r\n            $has_null = true;\r\n          }\r\n          else if ($ret === null) {\r\n            $has_null = true;\r\n          }\r\n        }\r\n\r\n        if ($has_null) {\r\n          $res_returns .= \"?\";\r\n        }\r\n        \r\n        foreach ($cfg['returns'] as $ret) {\r\n          if ($ret !== null) {\r\n            if (!in_array($ret, self::$nonClassesReturns)\r\n                && !in_array($ret, $this->cfg['uses'] ?? [])\r\n                && (strpos($ret, '\\\\') !== 0)\r\n                && !class_exists(('\\\\' . ($this->cfg['realNamespace'] ? $this->cfg['realNamespace'] . '\\\\' : '') . $ret))\r\n            ) {\r\n              $ret = '\\\\' . $ret;\r\n            }\r\n            $res_returns .= $ret . \"|\";\r\n          }\r\n        }\r\n        $last_pipe = strrpos($res_returns, '|');\r\n        \r\n        $res .= substr($res_returns, 0, $last_pipe) . \" \";\r\n        \r\n        \r\n      }\r\n      \r\n    }\r\n    \r\n   \/\/ X::ddump($res, $cfg[]);\r\n   \r\n    if (!empty($cfg['code'])) {\r\n      \/\/ Get the position of the first opening curly brace\r\n      $pos = strpos($cfg['code'], '{');\r\n        \r\n        \/\/ Get everything from the opening curly brace to the end of the string\r\n      $newCode = substr($cfg['code'], $pos);\r\n    \r\n      \/\/ Add the code to the function definition\r\n      $res .= \"\\n\" . str_repeat(' ', $this->spacing) . $newCode;\r\n    }\r\n    *\/\r\n    if (!empty($cfg['code'])) {\r\n      $res .= $cfg['code'];\r\n    }\r\n    \r\n    return $res;\r\n    \r\n  }\r",
+            "parent": false,
+            "trait": false,
+            "startLine": 273,
+            "endLine": 490,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "generateMethod",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "generateProperty": {
+            "name": "generateProperty",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Generator",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Generator.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function generateProperty(array $cfg = [])\r\n  {\r\n    $res = str_repeat(' ', $this->spacing);\r\n    $res .= $cfg['protected'] ? 'protected ' : ($cfg['private'] ? 'private ' : 'public ');\r\n  \r\n    if (!empty($cfg['static'])) {\r\n      $res .= 'static ';\r\n    }\r\n    if (!empty($cfg['name'])) {\r\n      $res .= \"$\" . $cfg['name'] . \";\" . \"\\n\";\r\n    }\r\n    return $res;\r\n  }\r",
+            "parent": false,
+            "trait": false,
+            "startLine": 492,
+            "endLine": 504,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "generateProperty",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": {
+        "blala": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Generator"
+            },
+            "declaring_trait": "bbn\\Parsers\\Generator",
+            "promoted": false,
+            "visibility": "public",
+            "doc": "",
+            "parent": false,
+            "value": 1
+        },
+        "nonClassesReturns": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Generator"
+            },
+            "declaring_trait": "bbn\\Parsers\\Generator",
+            "promoted": false,
+            "visibility": "public",
+            "doc": "",
+            "parent": false,
+            "value": [
+                "string",
+                "int",
+                "float",
+                "array",
+                "bool",
+                "boolean",
+                "void",
+                "self",
+                "null",
+                "object",
+                "iterable",
+                "callable"
+            ]
+        },
+        "cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "array",
+            "declaring": {
+                "name": "bbn\\Parsers\\Generator"
+            },
+            "declaring_trait": "bbn\\Parsers\\Generator",
+            "promoted": true,
+            "visibility": "private",
+            "doc": {
+                "description": "array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "spacing": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "int",
+            "declaring": {
+                "name": "bbn\\Parsers\\Generator"
+            },
+            "declaring_trait": "bbn\\Parsers\\Generator",
+            "promoted": true,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
+    "staticProperties": {
+        "nonClassesReturns": [
+            "string",
+            "int",
+            "float",
+            "array",
+            "bool",
+            "boolean",
+            "void",
+            "self",
+            "null",
+            "object",
+            "iterable",
+            "callable"
+        ]
+    },
+    "constants": null,
+    "uses": {
+        "bbn\\X": "X"
+    },
+    "dummyComments": [],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

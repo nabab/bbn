@@ -1,0 +1,960 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Models\\Tts\\TmpFiles",
+    "namespace": true,
+    "realName": "TmpFiles",
+    "realNamespace": "bbn\\Models\\Tts",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Models\/Tts\/TmpFiles.php",
+    "startLine": 7,
+    "endLine": 349,
+    "numMethods": 12,
+    "numProperties": 1,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "tableLinksExtrafields": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Models\\Tts",
+    "shortName": "TmpFiles",
+    "contentConstructor": null,
+    "methods": {
+        "_getFile": {
+            "name": "_getFile",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _getFile(array $where): ?array\n  {\n    $cCfg = $this->getClassCfg();\n    $oCfg = $this->options()->getClassCfg();\n    $file = $this->db->rselect(\n      [\n      'table' => $cCfg['tables']['files'],\n      'fields' => [\n        $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']),\n        $this->db->cfn($cCfg['arch']['files']['files'], $cCfg['tables']['files']),\n        $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),\n        $this->db->cfn($cCfg['arch']['files']['labels'], $cCfg['tables']['files']),\n        $this->db->cfn($cCfg['arch']['files']['date_added'], $cCfg['tables']['files']),\n        'code' => 'CAST('.$this->db->cfn($oCfg['arch']['options']['code'], $oCfg['table']).' AS CHAR)'\n      ],\n      'join' => [[\n        'table' => $cCfg['tables']['links'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),\n            'exp' => $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files'])\n          ]]\n        ]\n      ], [\n        'table' => $this->class_table,\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($this->fields['id'], $this->class_table),\n            'exp' => $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links'])\n          ]]\n        ]\n      ], [\n        'table' => $oCfg['table'],\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($oCfg['arch']['options']['id'], $oCfg['table']),\n            'exp' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files'])\n          ]]\n        ]\n      ]],\n      'where' => [\n        'conditions' => $where\n      ]\n      ]\n    );\n    if (!empty($file['code'])) {\n      $file['code'] = (string)$file['code'];\n    }\n\n    return $file;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 17,
+            "endLine": 67,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_getFile",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "where",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array $where\n   * @return array|null\n   *\/"
+        },
+        "_getFileByType": {
+            "name": "_getFileByType",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _getFileByType($id_type, bool $files = true, array $conditions = []): ?array\n  {\n    $cCfg = $this->getClassCfg();\n    if (\\is_array($id_type)) {\n      $tmp = [\n        'logic' => 'OR',\n        'conditions' => []\n      ];\n      foreach ($id_type as $t) {\n        $tmp['conditions'][] = [\n          'field' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),\n          'value' => !Str::isUid($t) ? $this->options()->fromCode($t, 'documents') : $t\n        ];\n      }\n\n      $conditions[] = $tmp;\n    }\n    else {\n      $conditions[] = [\n        'field' => $this->db->cfn($cCfg['arch']['files']['type_doc'], $cCfg['tables']['files']),\n        'value' => !Str::isUid($id_type) ? $this->options()->fromCode($id_type, 'documents') : $id_type\n      ];\n    }\n\n    if ($files) {\n      $conditions[] = [\n        'field' => $this->db->cfn($cCfg['arch']['files']['files'], $cCfg['tables']['files']),\n        'operator' => 'isnotnull'\n      ];\n    }\n\n    return $this->_getFile($conditions);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 76,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_getFileByType",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id_type",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "type"
+                },
+                {
+                    "name": "files",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                },
+                {
+                    "name": "conditions",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|string",
+                        "name": "$id",
+                        "description": "type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$files"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$conditions"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array|string $id_type\n   * @param bool         $files\n   * @param array        $conditions\n   * @return null|array\n   *\/"
+        },
+        "insertFile": {
+            "name": "insertFile",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function insertFile(string $type, array $files = [], string $labels = ''): ?string\n  {\n    $cCfg = $this->getClassCfg();\n    return $this->db->insert(\n      $cCfg['tables']['files'], [\n        $cCfg['arch']['files']['files'] => empty($files) ? null : json_encode($files),\n        $cCfg['arch']['files']['type_doc'] => Str::isUid($type) ? $type : $this->options()->fromCode($type, 'documents'),\n        $cCfg['arch']['files']['labels'] => $labels,\n        $cCfg['arch']['files']['date_added'] => date('Y-m-d H:i:s')\n      ]\n    ) ? $this->db->lastId() : null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 116,
+            "endLine": 127,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "insertFile",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "files",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "labels",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$files"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $type\n   * @param array  $files\n   * @return null|string\n   *\/"
+        },
+        "updateFile": {
+            "name": "updateFile",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function updateFile(string $id, array $data): bool\n  {\n    $cCfg = $this->getClassCfg();\n    return Str::isUid($id) && $this->db->update($cCfg['tables']['files'], $data, [$cCfg['arch']['files']['id'] => $id]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 135,
+            "endLine": 139,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "updateFile",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id\n   * @param array  $data\n   * @return bool\n   *\/"
+        },
+        "deleteFile": {
+            "name": "deleteFile",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function deleteFile(string $id): bool\n  {\n    if (Str::isUid($id) && !$this->hasLinks($id)) {\n      $cCfg = $this->getClassCfg();\n      \/\/ Can be linked to others\n      return !!$this->db->deleteIgnore($cCfg['tables']['files'], [$cCfg['arch']['files']['id'] => $id]);\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 146,
+            "endLine": 155,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "deleteFile",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id\n   * @return bool\n   *\/"
+        },
+        "insertFileLink": {
+            "name": "insertFileLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function insertFileLink(string $id_link, string $id_file, bool $mandatory = true): ?int\n  {\n    if (Str::isUid($id_link) && Str::isUid($id_file)) {\n      $cCfg = $this->getClassCfg();\n      return $this->db->insertIgnore(\n        $cCfg['tables']['links'], [\n          $cCfg['arch']['links']['id_link'] => $id_link,\n          $cCfg['arch']['links']['id_file'] => $id_file,\n          $cCfg['arch']['links']['mandatory'] => empty($mandatory) ? 0 : 1\n        ]\n      );\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 164,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "insertFileLink",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "id_link",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "link"
+                },
+                {
+                    "name": "id_file",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "file"
+                },
+                {
+                    "name": "mandatory",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "link"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "file"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$mandatory"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id_link\n   * @param string $id_file\n   * @param bool   $mandatory\n   * @return nul|int\n   *\/"
+        },
+        "deleteFileLink": {
+            "name": "deleteFileLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function deleteFileLink(string $id_link, string $id_file): bool\n  {\n    if (Str::isUid($id_link) && Str::isUid($id_file)) {\n      $cCfg = $this->getClassCfg();\n      return !!$this->db->delete(\n        $cCfg['tables']['links'], [\n          $cCfg['arch']['links']['id_link'] => $id_link,\n          $cCfg['arch']['links']['id_file'] => $id_file\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 186,
+            "endLine": 199,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "deleteFileLink",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id_link",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "change"
+                },
+                {
+                    "name": "id_file",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "file"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "change"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "file"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id_change\n   * @param string $id_file\n   * @return bool\n   *\/"
+        },
+        "_fileExistsOrInsert": {
+            "name": "_fileExistsOrInsert",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _fileExistsOrInsert(string $id_link, string $type, bool $mandatory): ?string\n  {\n    if (Str::isUid($id_link)) {\n      if ($exists = $this->_getFileByType($type, false)) {\n        $id_file = $exists[$this->getClassCfg()['arch']['links']['id_link']];\n      }\n      else {\n        $id_file = $this->insertFile($type);\n      }\n\n      if (Str::isUid($id_file) && !$this->hasFileLink($id_link, $id_file)) {\n        $this->insertFileLink($id_link, $id_file, $mandatory);\n      }\n\n      return $id_file;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 208,
+            "endLine": 226,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 3,
+            "shortName": "_fileExistsOrInsert",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "id_link",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "link"
+                },
+                {
+                    "name": "type",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mandatory",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "link"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$mandatory"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id_link\n   * @param string $type\n   * @param bool   $mandatory\n   * @return string|null\n   *\/"
+        },
+        "getFilesLink": {
+            "name": "getFilesLink",
+            "summary": "Gets the files linked",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getFilesLink(string $id): ?array\n  {\n    if (Str::isUid($id)) {\n      $cCfg = $this->getClassCfg();\n      return $this->db->rselectAll([\n        'table' => $cCfg['tables']['links'],\n        'fields' => X::mergeArrays(\n          [\n            $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),\n            $this->db->cfn($cCfg['arch']['links']['mandatory'], $cCfg['tables']['links']),\n            'other_link' => 'IF(l.'.$cCfg['arch']['links']['id_link'].' IS NULL, false, true)'\n          ],\n          array_map(fn($f) => $this->db->cfn($f, $cCfg['tables']['links']), $this->tableLinksExtrafields)\n        ),\n        'join' => [[\n          'table' => $cCfg['tables']['files'],\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),\n              'exp' => $this->db->cfn($cCfg['arch']['files']['id'], $cCfg['tables']['files']),\n            ]]\n          ]\n        ], [\n          'table' => $cCfg['tables']['links'],\n          'type' => 'left',\n          'alias' => 'l',\n          'on' => [\n            'conditions' => [[\n              'field' => $this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links']),\n              'exp' => 'l.'.$cCfg['arch']['links']['id_file']\n            ], [\n              'field' => 'l.'.$cCfg['arch']['links']['id_link'],\n              'operator' => '!=',\n              'value' => $id\n            ]]\n          ]\n        ]],\n        'where' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($cCfg['arch']['links']['id_link'], $cCfg['tables']['links']),\n            'value' => $id\n          ]]\n        ],\n        'group_by' => [$this->db->cfn($cCfg['arch']['links']['id_file'], $cCfg['tables']['links'])]\n      ]);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 234,
+            "endLine": 282,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getFilesLink",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets the files linked\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the files linked\n   * @param string $id\n   * @return array|null\n   *\/"
+        },
+        "hasFileLink": {
+            "name": "hasFileLink",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function hasFileLink(string $id_link, string $id_file): ?bool\n  {\n    if (Str::isUid($id_link) && Str::isUid($id_file)) {\n      $cCfg = $this->getClassCfg();\n      return !!$this->db->selectOne(\n        $cCfg['tables']['links'],\n        $cCfg['arch']['links']['id_file'],\n        [\n          $cCfg['arch']['links']['id_link'] => $id_link,\n          $cCfg['arch']['links']['id_file'] => $id_file\n        ]\n      );\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 290,
+            "endLine": 303,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "hasFileLink",
+            "returns": [
+                null,
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id_link",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "link"
+                },
+                {
+                    "name": "id_file",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "file"
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "link"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "file"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $id_link\n   * @param string $id_file\n   * @return null|bool\n   *\/"
+        },
+        "hasLinks": {
+            "name": "hasLinks",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function hasLinks(string $id_file){\n    if (Str::isUid($id_file)) {\n      $cCfg = $this->getClassCfg();\n      return !!$this->db->selectAll([\n        'table' => $cCfg['tables']['links'],\n        'fields' => [],\n        'where' => [\n          'conditions' => [[\n            'field' => $cCfg['arch']['links']['id_file'],\n            'value' => $id_file\n          ]]\n        ]\n      ]);\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 305,
+            "endLine": 320,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "hasLinks",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id_file",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "deleteFileAndLink": {
+            "name": "deleteFileAndLink",
+            "summary": "Deletes the file and its link.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\TmpFiles",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/TmpFiles.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function deleteFileAndLink(string $id): bool\n  {\n    if (Str::isUid($id)) {\n      if ($links = $this->getFilesLink($id)) {\n        $cCfg = $this->getClassCfg();\n        foreach ($links as $link){\n          if (!$this->deleteFileLink($id, $link[$cCfg['arch']['links']['id_file']])) {\n            return false;\n          }\n\n          $this->deleteFile($link[$cCfg['arch']['links']['id_file']]);\n        }\n      }\n\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 328,
+            "endLine": 346,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "deleteFileAndLink",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes the file and its link.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the file and its link.\n   * @param string $id\n   * @return bool\n   *\/"
+        }
+    },
+    "properties": {
+        "tableLinksExtrafields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\TmpFiles"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\TmpFiles",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": []
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n   * @param array $where\n   * @return array|null\n   *\/",
+        "\/**\n   * @param array|string $id_type\n   * @param bool         $files\n   * @param array        $conditions\n   * @return null|array\n   *\/",
+        "\/**\n   * @param string $type\n   * @param array  $files\n   * @return null|string\n   *\/",
+        "\/**\n   * @param string $id\n   * @param array  $data\n   * @return bool\n   *\/",
+        "\/**\n   * @param string $id\n   * @return bool\n   *\/",
+        "\/**\n   * @param string $id_link\n   * @param string $id_file\n   * @param bool   $mandatory\n   * @return nul|int\n   *\/",
+        "\/**\n   * @param string $id_change\n   * @param string $id_file\n   * @return bool\n   *\/",
+        "\/**\n   * @param string $id_link\n   * @param string $type\n   * @param bool   $mandatory\n   * @return string|null\n   *\/",
+        "\/**\n   * Gets the files linked\n   * @param string $id\n   * @return array|null\n   *\/",
+        "\/**\n   * @param string $id_link\n   * @param string $id_file\n   * @return null|bool\n   *\/",
+        "\/**\n   * Deletes the file and its link.\n   * @param string $id\n   * @return bool\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

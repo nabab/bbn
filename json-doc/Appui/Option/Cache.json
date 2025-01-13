@@ -1,0 +1,547 @@
+{
+    "doc": {
+        "description": "Trait Cache provides caching functionality for options.",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Cache",
+    "namespace": true,
+    "realName": "Cache",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Cache.php",
+    "startLine": 11,
+    "endLine": 138,
+    "numMethods": 5,
+    "numProperties": 1,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "_local_cache": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Cache",
+    "contentConstructor": null,
+    "methods": {
+        "setCache": {
+            "name": "setCache",
+            "summary": "Sets the cache value for a given method and ID, with optional locale support.",
+            "description": "If no locale is provided, it will attempt to retrieve the translating locale for the given ID.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "If no locale is provided, it will attempt to retrieve the translating locale for the given ID."
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cache.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setCache(string $id, string $method, $data, ?string $locale = null): self\n  {\n    \/\/ If no locale is provided, attempt to retrieve the translating locale for the given ID.\n    if (empty($locale)) {\n      $locale = $this->getTranslatingLocale($id);\n    }\n\n    \/\/ If a locale exists, cache with locale support; otherwise, cache without locale.\n    if (!empty($locale)) {\n      return $this->cacheSetLocale($id, $locale, $method, $data);\n    } else {\n      return $this->cacheSet($id, $method, $data);\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 32,
+            "endLine": 45,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 3,
+            "shortName": "setCache",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option's ID"
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The method name to cache"
+                },
+                {
+                    "name": "data",
+                    "position": 2,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The data to cache"
+                },
+                {
+                    "name": "locale",
+                    "position": 3,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Optional locale for caching (defaults to null)"
+                }
+            ],
+            "doc": {
+                "description": "Sets the cache value for a given method and ID, with optional locale support.\n\nIf no locale is provided, it will attempt to retrieve the translating locale for the given ID.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The option's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method",
+                        "description": "The method name to cache"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$data",
+                        "description": "The data to cache"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$locale",
+                        "description": "Optional locale for caching (defaults to null)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the cache value for a given method and ID, with optional locale support.\n   *\n   * If no locale is provided, it will attempt to retrieve the translating locale for the given ID.\n   *\n   * @param string $id The option's ID\n   * @param string $method The method name to cache\n   * @param mixed $data The data to cache\n   * @param string|null $locale Optional locale for caching (defaults to null)\n   *\n   * @return self\n   *\/"
+        },
+        "getCache": {
+            "name": "getCache",
+            "summary": "Retrieves the cached value for a given method and ID, with optional locale support.",
+            "description": "If no locale is provided, it will attempt to retrieve the translating locale for the given ID.",
+            "description_parts": [
+                {
+                    "type": "text",
+                    "content": "If no locale is provided, it will attempt to retrieve the translating locale for the given ID."
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cache.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getCache(string $id, string $method, ?string $locale = null)\n  {\n    \/\/ If no locale is provided, attempt to retrieve the translating locale for the given ID.\n    if (empty($locale)) {\n      $locale = $this->getTranslatingLocale($id);\n    }\n\n    \/\/ If a locale exists, retrieve cache with locale support; otherwise, retrieve without locale.\n    if (!empty($locale)) {\n      return $this->cacheGetLocale($id, $locale, $method);\n    } else {\n      return $this->cacheGet($id, $method);\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 71,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "getCache",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The option's ID"
+                },
+                {
+                    "name": "method",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The method name to retrieve from cache"
+                },
+                {
+                    "name": "locale",
+                    "position": 2,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Optional locale for caching (defaults to null)"
+                }
+            ],
+            "doc": {
+                "description": "Retrieves the cached value for a given method and ID, with optional locale support.\n\nIf no locale is provided, it will attempt to retrieve the translating locale for the given ID.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "The option's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$method",
+                        "description": "The method name to retrieve from cache"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$locale",
+                        "description": "Optional locale for caching (defaults to null)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves the cached value for a given method and ID, with optional locale support.\n   *\n   * If no locale is provided, it will attempt to retrieve the translating locale for the given ID.\n   *\n   * @param string $id The option's ID\n   * @param string $method The method name to retrieve from cache\n   * @param string|null $locale Optional locale for caching (defaults to null)\n   *\n   * @return mixed\n   *\/"
+        },
+        "deleteCache": {
+            "name": "deleteCache",
+            "summary": "Deletes the options' cache for a given ID or globally, with optional deep deletion of children's caches.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cache.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function deleteCache(string $id = null, bool $deep = false, bool $subs = false): self\n  {\n    \/\/ Ensure the class is initialized and has a valid database connection before proceeding with cache deletion.\n    if ($this->check()) {\n      \/\/ If an ID is provided and it's a valid UID, proceed with cache deletion for that ID.\n      if (Str::isUid($id)) {\n        \/\/ Recursively delete caches of children if deep deletion is enabled or not deleting the parent's cache.\n        if (($deep || !$subs) && ($items = $this->items($id))) {\n          foreach ($items as $it) {\n            $this->deleteCache($it, $deep, true);\n          }\n        }\n\n        \/\/ Delete the alias's cache if it exists and not deleting the parent's cache.\n        if (!$subs && ($id_alias = $this->alias($id))) {\n          $this->deleteCache($id_alias, false, true);\n        }\n\n        \/\/ Delete the cache for the given ID.\n        $this->cacheDelete($id);\n\n        \/\/ If not deleting the parent's cache, also delete its cache.\n        if (!$subs) {\n          $this->cacheDelete($this->getIdParent($id));\n        }\n      } elseif (is_null($id)) {\n        \/\/ Delete all caches if no ID is provided.\n        $this->cacheDeleteAll();\n      }\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 82,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "shortName": "deleteCache",
+            "returns": [
+                "self"
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The option's ID (or null for global deletion)"
+                },
+                {
+                    "name": "deep",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If true, also deletes children's caches"
+                },
+                {
+                    "name": "subs",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "Used internally for recursive cache deletion without deleting the parent's cache"
+                }
+            ],
+            "doc": {
+                "description": "Deletes the options' cache for a given ID or globally, with optional deep deletion of children's caches.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$id",
+                        "description": "The option's ID (or null for global deletion)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep",
+                        "description": "If true, also deletes children's caches"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$subs",
+                        "description": "Used internally for recursive cache deletion without deleting the parent's cache"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes the options' cache for a given ID or globally, with optional deep deletion of children's caches.\n   *\n   * @param string|null $id The option's ID (or null for global deletion)\n   * @param boolean $deep If true, also deletes children's caches\n   * @param boolean $subs Used internally for recursive cache deletion without deleting the parent's cache\n   *\n   * @return Option\n   *\/"
+        },
+        "_set_local_cache": {
+            "name": "_set_local_cache",
+            "summary": "Sets a value in the local cache.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cache.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_local_cache(string $name, $val): void\n  {\n    $this->_local_cache[$name] = $val;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 122,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "_set_local_cache",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the cache entry"
+                },
+                {
+                    "name": "val",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The value to cache"
+                }
+            ],
+            "doc": {
+                "description": "Sets a value in the local cache.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The name of the cache entry"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$val",
+                        "description": "The value to cache"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets a value in the local cache.\n   *\n   * @param string $name The name of the cache entry\n   * @param mixed $val The value to cache\n   *\/"
+        },
+        "_get_local_cache": {
+            "name": "_get_local_cache",
+            "summary": "Retrieves a value from the local cache.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Option\\Cache",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Cache.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _get_local_cache(string $name): ?string\n  {\n    return $this->_local_cache[$name] ?? null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 134,
+            "endLine": 137,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_get_local_cache",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The name of the cache entry"
+                }
+            ],
+            "doc": {
+                "description": "Retrieves a value from the local cache.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name",
+                        "description": "The name of the cache entry"
+                    }
+                ],
+                "return": "The cached value or null if not found"
+            },
+            "comments": "  \/**\n   * Retrieves a value from the local cache.\n   *\n   * @param string $name The name of the cache entry\n   *\n   * @return string|null The cached value or null if not found\n   *\/"
+        }
+    },
+    "properties": {
+        "_local_cache": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Option\\Cache"
+            },
+            "declaring_trait": "bbn\\Appui\\Option\\Cache",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "A store for parameters sent to methods that utilize caching.\n",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str",
+        "bbn\\Appui\\Option": "Option"
+    },
+    "dummyComments": [
+        "\/**\n * Trait Cache provides caching functionality for options.\n *\/",
+        "\/**\n   * A store for parameters sent to methods that utilize caching.\n   *\n   * @var array\n   *\/",
+        "\/**\n   * Sets the cache value for a given method and ID, with optional locale support.\n   *\n   * If no locale is provided, it will attempt to retrieve the translating locale for the given ID.\n   *\n   * @param string $id The option's ID\n   * @param string $method The method name to cache\n   * @param mixed $data The data to cache\n   * @param string|null $locale Optional locale for caching (defaults to null)\n   *\n   * @return self\n   *\/",
+        "\/**\n   * Retrieves the cached value for a given method and ID, with optional locale support.\n   *\n   * If no locale is provided, it will attempt to retrieve the translating locale for the given ID.\n   *\n   * @param string $id The option's ID\n   * @param string $method The method name to retrieve from cache\n   * @param string|null $locale Optional locale for caching (defaults to null)\n   *\n   * @return mixed\n   *\/",
+        "\/**\n   * Deletes the options' cache for a given ID or globally, with optional deep deletion of children's caches.\n   *\n   * @param string|null $id The option's ID (or null for global deletion)\n   * @param boolean $deep If true, also deletes children's caches\n   * @param boolean $subs Used internally for recursive cache deletion without deleting the parent's cache\n   *\n   * @return Option\n   *\/",
+        "\/**\n   * Sets a value in the local cache.\n   *\n   * @param string $name The name of the cache entry\n   * @param mixed $val The value to cache\n   *\/",
+        "\/**\n   * Retrieves a value from the local cache.\n   *\n   * @param string $name The name of the cache entry\n   *\n   * @return string|null The cached value or null if not found\n   *\/"
+    ],
+    "summary": "Trait Cache provides caching functionality for options.",
+    "description": "",
+    "description_parts": []
+}

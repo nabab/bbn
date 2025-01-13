@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Models\\Tts\\Tagger",
     "namespace": true,
+    "realName": "Tagger",
+    "realNamespace": "bbn\\Models\\Tts",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Models\/Tts\/Tagger.php",
     "startLine": 18,
     "endLine": 201,
-    "numMethods": 5,
-    "numProperties": 0,
+    "numMethods": 7,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -41,11 +42,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Tagger",
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_element, bool $full = false, bool $force = false)\n  {\n    $this->taggerInit();\n    $res = [];\n    $ids = $this->db->getColumnValues(\n      $this->taggerTable,\n      $this->taggerCols['id_tag'],\n      [$this->taggerCols['id_element'] => $id_element]\n    );\n    foreach ($ids as $id) {\n      if ($tmp = $this->taggerObject->getById($id, $full)) {\n        $res[] = $tmp;\n      }\n      elseif (!$force) {\n        X::log([$ids, $this->db->last()]);\n        throw new Exception(X::_(\"Impossible to find the tag %s\", $id));\n      }\n    }\n   \n    return $res;\n  }",
+            "code": "  public function getTags(string $id_element, bool $full = false, bool $force = false): array\n  {\n    $this->taggerInit();\n    $res = [];\n    $ids = $this->db->getColumnValues(\n      $this->taggerTable,\n      $this->taggerCols['id_tag'],\n      [$this->taggerCols['id_element'] => $id_element]\n    );\n    foreach ($ids as $id) {\n      if ($tmp = $this->taggerObject->getById($id, $full)) {\n        $res[] = $tmp;\n      }\n      elseif (!$force) {\n        X::log([$ids, $this->db->last()]);\n        throw new Exception(X::_(\"Impossible to find the tag %s\", $id));\n      }\n    }\n   \n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 41,
             "endLine": 61,
             "isDeprecated": false,
@@ -56,15 +60,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "getTags",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_element",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -74,6 +83,11 @@
                     "name": "full",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -83,6 +97,11 @@
                     "name": "force",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -95,11 +114,14 @@
             "summary": "Undocumented function",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Tagger",
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_element, array $tags, string $lang = '')\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if (!$this->exists($id_element)) {\n      throw new Exception(X::_(\"Impossible to find the element in %s\", __CLASS__));\n    }\n\n    foreach ($this->getTags($id_element, true) as $tag) {\n      $idx = X::indexOf($tags, $tag['tag']);\n      if ($idx > -1) {\n        array_splice($tags, $idx, 1);\n      }\n      else {\n        $this->removeTag($id_element, $tag['id']);\n      }\n    }\n\n    $num = 0;\n    foreach ($tags as $tag) {\n      if ($this->addTag($id_element, $tag, $lang)) {\n        $num++;\n      }\n    }\n\n    return $num;\n  }",
+            "code": "  public function setTags(string $id_element, array $tags, string $lang = ''): int\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if (!method_exists($this, 'dbTraitExists') || !$this->dbTraitExists($id_element)) {\n      throw new Exception(X::_(\"Impossible to find the element in %s\", __CLASS__));\n    }\n\n    foreach ($this->getTags($id_element, true) as $tag) {\n      $idx = X::indexOf($tags, $tag['tag']);\n      if ($idx > -1) {\n        array_splice($tags, $idx, 1);\n      }\n      else {\n        $this->removeTag($id_element, $tag['id']);\n      }\n    }\n\n    $num = 0;\n    foreach ($tags as $tag) {\n      if ($this->addTag($id_element, $tag, $lang)) {\n        $num++;\n      }\n    }\n\n    return $num;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 71,
             "endLine": 97,
             "isDeprecated": false,
@@ -110,15 +132,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "setTags",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_element",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -129,6 +156,11 @@
                     "name": "tags",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -139,23 +171,50 @@
                     "name": "lang",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Undocumented function\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "element The ID of the element to which attach the tags"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$tags",
+                        "description": "A list of tags which will be retrieved or added"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Undocumented function\n   *\n   * @param string $id_element The ID of the element to which attach the tags\n   * @param array  $tags A list of tags which will be retrieved or added\n   * @return int \n   *\/"
         },
         "removeTag": {
             "name": "removeTag",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Tagger",
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_element, string $id_tag)\n  {\n    $this->taggerInit();\n    return $this->db->delete(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
+            "code": "  public function removeTag(string $id_element, string $id_tag): int\n  {\n    $this->taggerInit();\n    return $this->db->delete(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 100,
             "endLine": 110,
             "isDeprecated": false,
@@ -166,15 +225,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "removeTag",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_element",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -184,6 +248,11 @@
                     "name": "id_tag",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -196,11 +265,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Tagger",
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_element)\n  {\n    $this->taggerInit();\n    return $this->db->delete(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n      ]\n    );\n  }",
+            "code": "  public function removeTags(string $id_element): int\n  {\n    $this->taggerInit();\n    return $this->db->delete(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 113,
             "endLine": 122,
             "isDeprecated": false,
@@ -211,15 +283,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "removeTags",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_element",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -232,11 +309,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Tts\\Tagger",
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_element, string $tag, string $lang = '', string $description = '')\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if ($tmp = $this->taggerObject->get($tag, $lang)) {\n      $id_tag = $tmp['id'];\n    }\n    else {\n      $id_tag = $this->taggerObject->add($tag, $lang, $description);\n    }\n\n    if (!$id_tag) {\n      throw new Exception(X::_(\"Impossible to create the tag %s\", $tag));\n    }\n\n    return $this->db->insertIgnore(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
+            "code": "  public function addTag(string $id_element, string $tag, string $lang = '', string $description = ''): int\n  {\n    $this->taggerInit();\n    $lang = $this->taggerGetLang($lang);\n    if ($tmp = $this->taggerObject->get($tag, $lang)) {\n      $id_tag = $tmp['id'];\n    }\n    else {\n      $id_tag = $this->taggerObject->add($tag, $lang, $description);\n    }\n\n    if (!$id_tag) {\n      throw new Exception(X::_(\"Impossible to create the tag %s\", $tag));\n    }\n\n    return $this->db->insertIgnore(\n      $this->taggerTable,\n      [\n        $this->taggerCols['id_element'] => $id_element,\n        $this->taggerCols['id_tag'] => $id_tag\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 125,
             "endLine": 147,
             "isDeprecated": false,
@@ -247,15 +327,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "addTag",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_element",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -265,6 +350,11 @@
                     "name": "tag",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -274,6 +364,11 @@
                     "name": "lang",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -283,17 +378,233 @@
                     "name": "description",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "taggerGetLang": {
+            "name": "taggerGetLang",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function taggerGetLang(string $lang = '')\n  {\n    if ($lang) {\n      return $lang;\n    }\n\n    if (method_exists($this, 'getLang')) {\n      return $this->getLang();\n    }\n\n    if (defined('BBN_LANG')) {\n      return BBN_LANG;\n    }\n\n    return 'en';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 150,
+            "endLine": 165,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "taggerGetLang",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "lang",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "taggerInit": {
+            "name": "taggerInit",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\Tagger",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/Tagger.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function taggerInit(string $table = null, array $columns = null)\n  {\n    if (!$this->taggerIsInit) {\n      if (!$this->db) {\n        throw new Exception(X::_(\"Impossible to init the tagger if there is no Db property\"));\n      }\n\n      if (!$this->class_cfg) {\n        throw new Exception(X::_(\"Impossible to init the tagger if the class hasn't the trait Dbconfig\"));\n      }\n\n      if (empty($table) || empty($columns)) {\n        throw new Exception(X::_(\"Impossible to init the tagger without a table name and 2 columns defined\"));\n      }\n\n      if (empty($columns['id_tag'])) {\n        throw new Exception(X::_(\"Impossible to init the tagger without an id_tag column\"));\n      }\n\n      if (empty($columns['id_element'])) {\n        throw new Exception(X::_(\"Impossible to init the tagger without an id_element column\"));\n      }\n\n      $this->taggerObject = new Tag($this->db);\n      $this->taggerTable  = $table;\n      $this->taggerCols   = $columns;\n      $this->taggerIsInit = true;\n    }\n\n    return $this->taggerIsInit;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 168,
+            "endLine": 198,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "taggerInit",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                },
+                {
+                    "name": "columns",
+                    "position": 1,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "taggerIsInit": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Tagger"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Tagger",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "bool",
+                        "description": "False while initTagger has not been called."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": false
+        },
+        "taggerTable": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Tagger"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Tagger",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The name of the table where to insert tags relations."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "taggerCols": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Tagger"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Tagger",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "The names of the columns where to insert tags relations (must have a id_tag and a id_element indexes)."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        },
+        "taggerObject": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\Tagger"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\Tagger",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "Tag",
+                        "description": "The Tag object."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "Exception": "Exception",
+        "bbn\\X": "X",
+        "bbn\\Appui\\Tag": "Tag"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 16\/09\/2021\n * Time: 19:35\n *\/",
+        "\/**\n * Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.\n *\/",
+        "\/**\n   * @var bool False while initTagger has not been called.\n   *\/",
+        "\/**\n   * @var array The name of the table where to insert tags relations.\n   *\/",
+        "\/**\n   * @var array The names of the columns where to insert tags relations (must have a id_tag and a id_element indexes).\n   *\/",
+        "\/**\n   * @var Tag The Tag object.\n   *\/",
+        "\/**\n   * Undocumented function\n   *\n   * @param string $id_element The ID of the element to which attach the tags\n   * @param array  $tags A list of tags which will be retrieved or added\n   * @return int \n   *\/"
+    ],
     "summary": "Gives static props and methods to register an instance of an object and be able to retrieve the last registered one.",
     "description": "",
     "description_parts": []

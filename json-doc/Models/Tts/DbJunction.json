@@ -1,0 +1,2160 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Models\\Tts\\DbJunction",
+    "namespace": true,
+    "realName": "DbJunction",
+    "realNamespace": "bbn\\Models\\Tts",
+    "traits": [
+        "bbn\\Models\\Tts\\DbConfig",
+        "bbn\\Models\\Tts\\DbTrait"
+    ],
+    "interfaces": [],
+    "fileName": "\/Models\/Tts\/DbJunction.php",
+    "startLine": 16,
+    "endLine": 261,
+    "numMethods": 25,
+    "numProperties": 10,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": {
+        "dbTraitFilterCfg": [],
+        "rootFilterCfg": [],
+        "dbJunctionStructure": [],
+        "dbTraitRelations": [],
+        "_isInitClassCfg": false,
+        "fields": null,
+        "class_cfg": null,
+        "class_table": null,
+        "class_table_index": null,
+        "dbTraitStructure": []
+    },
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Models\\Tts",
+    "shortName": "DbJunction",
+    "contentConstructor": null,
+    "methods": {
+        "dbTraitExists": {
+            "name": "dbTraitExists",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitExists(string|array $filter): bool\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    if (!empty($filter) && $this->db->count(\n      $this->class_table,\n      $this->dbTraitGetFilterCfg($filter)\n    )) {\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 34,
+            "endLine": 49,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitExists",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param array|string $id\n   * @return bool\n   *\/"
+        },
+        "dbTraitInsert": {
+            "name": "dbTraitInsert",
+            "summary": "Inserts a new row in the table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitInsert(array $data, bool $ignore = false): ?string\n  {\n    if ($data = $this->dbTraitPrepare($data)) {\n      $ccfg = $this->getClassCfg();\n      if (!empty($ccfg['arch'][$this->class_table_index]['cfg'])) {\n        $col = $ccfg['arch'][$this->class_table_index]['cfg'];\n        if (isset($data[$col])) {\n          $data[$col] = json_encode($data[$col]);\n        }\n      }\n\n      if ($this->db->{$ignore ? 'insertIgnore' : 'insert'}($ccfg['table'], $data)) {\n        return $this->dbTraitRselect($data);\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 58,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitInsert",
+            "returns": [
+                null,
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "ignore",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Inserts a new row in the table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Inserts a new row in the table.\n   *\n   * @param array $data\n   *\n   * @return string|null\n   *\/"
+        },
+        "dbTraitDelete": {
+            "name": "dbTraitDelete",
+            "summary": "Deletes a single row from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitDelete(array $filter, bool $cascade = false): bool\n  {\n    if ($this->dbTraitExists($filter)) {\n      $cfg = $this->getClassCfg();\n      $f = $cfg['arch'][$this->class_table_index];\n\n      return (bool)$this->db->delete($cfg['table'], $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 85,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitDelete",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "cascade",
+                    "position": 1,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Deletes a single row from the table through its id.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes a single row from the table through its id.\n   *\n   * @param string $id\n   *\n   * @return bool\n   *\/"
+        },
+        "dbTraitUpdate": {
+            "name": "dbTraitUpdate",
+            "summary": "Updates a single row in the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitUpdate(string|array $filter, array $data, bool $addCfg = false): bool\n  {\n    if (!$this->dbTraitExists($filter)) {\n      throw new Exception(X::_(\"Impossible to find the given row\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    $f = $ccfg['arch'][$this->class_table_index];\n    if ($data = $this->dbTraitPrepare($data)) {\n      if (!empty($f['cfg'])) {\n        $col = $f['cfg'];\n        if (!empty($data[$col])) {\n          $jsonUpdate = 'JSON_SET(' . $this->db->csn($col, true);\n          foreach ($data[$col] as $k => $v) {\n            $jsonUpdate .= ', \"$.' . $k . '\", \"' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '\"';\n          }\n\n          $jsonUpdate .= \")\";\n          $data[$col] = [null, $jsonUpdate];\n        }\n      }\n      \n      return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 106,
+            "endLine": 132,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 2,
+            "shortName": "dbTraitUpdate",
+            "returns": [
+                "bool"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "data",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "addCfg",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Updates a single row in the table through its id.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Updates a single row in the table through its id.\n   *\n   * @param string $id\n   * @param array $data\n   *\n   * @return bool\n   *\/"
+        },
+        "dbTraitSelectOne": {
+            "name": "dbTraitSelectOne",
+            "summary": "Retrieves a row as an object from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitSelectOne(string $field, string|array $filter = [], array $order = [])\n  {\n    if ($res = $this->dbTraitSingleSelection($filter, $order, 'array', [$field])) {\n      return $res[$field] ?? null;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 143,
+            "endLine": 150,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitSelectOne",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "field",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "filter",
+                    "position": 1,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieves a row as an object from the table through its id.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves a row as an object from the table through its id.\n   *\n   * @param string|array $filter\n   * @param array $order\n   *\n   * @return mixed\n   *\/"
+        },
+        "dbTraitSelect": {
+            "name": "dbTraitSelect",
+            "summary": "Retrieves a row as an object from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitSelect(string|array $filter = [], array $order = [], array $fields = []): ?stdClass\n  {\n    return $this->dbTraitSingleSelection($filter, $order, 'object', $fields);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 161,
+            "endLine": 164,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitSelect",
+            "returns": [
+                null,
+                "stdClass"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "fields",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieves a row as an object from the table through its id.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves a row as an object from the table through its id.\n   *\n   * @param string|array $filter\n   * @param array $order\n   *\n   * @return stdClass|null\n   *\/"
+        },
+        "dbTraitRselect": {
+            "name": "dbTraitRselect",
+            "summary": "Retrieves a row as an array from the table through its id.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitRselect(string|array $filter = [], array $order = [], array $fields = []): ?array\n  {\n    return $this->dbTraitSingleSelection($filter, $order, 'array', $fields);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 175,
+            "endLine": 178,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitRselect",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "fields",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Retrieves a row as an array from the table through its id.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Retrieves a row as an array from the table through its id.\n   *\n   * @param string|array $filter\n   * @param array $order\n   *\n   * @return array|null\n   *\/"
+        },
+        "dbTraitSelectValues": {
+            "name": "dbTraitSelectValues",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitSelectValues(string $field, string|array $filter = [], array $order = [], int $limit = 0, int $start = 0): array\n  {\n    return $this->dbTraitSelection($filter, $order, $limit, $start, 'value', [$field]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 180,
+            "endLine": 183,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitSelectValues",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "field",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "filter",
+                    "position": 1,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 4,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbTraitCount": {
+            "name": "dbTraitCount",
+            "summary": "Returns the number of rows from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitCount(array $filter = []): int\n  {\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    $req = $this->dbTraitGetRequestCfg($filter, [], 1, 0, []);\n    return $this->db->count($req);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 193,
+            "endLine": 201,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitCount",
+            "returns": [
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns the number of rows from the table for the given conditions.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$filter"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the number of rows from the table for the given conditions.\n   *\n   * @param array $filter\n   *\n   * @return int\n   *\/"
+        },
+        "dbTraitSelectAll": {
+            "name": "dbTraitSelectAll",
+            "summary": "Returns an array of rows as objects from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitSelectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array\n  {\n    return $this->dbTraitSelection($filter, $order, $limit, $start, 'object', $fields);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 214,
+            "endLine": 217,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitSelectAll",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "fields",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of rows as objects from the table for the given conditions.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$limit"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$start"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array of rows as objects from the table for the given conditions.\n   *\n   * @param array $filter\n   * @param array $order\n   * @param array $limit\n   * @param array $start\n   *\n   * @return array\n   *\/"
+        },
+        "dbTraitRselectAll": {
+            "name": "dbTraitRselectAll",
+            "summary": "Returns an array of rows as arrays from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function dbTraitRselectAll(array $filter = [], array $order = [], int $limit = 0, int $start = 0, $fields = []): array\n  {\n    return $this->dbTraitSelection($filter, $order, $limit, $start, 'array', $fields);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 230,
+            "endLine": 233,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitRselectAll",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "start",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": ""
+                },
+                {
+                    "name": "fields",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of rows as arrays from the table for the given conditions.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$limit"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$start"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array of rows as arrays from the table for the given conditions.\n   *\n   * @param array $filter\n   * @param array $order\n   * @param array $limit\n   * @param array $start\n   *\n   * @return array\n   *\/"
+        },
+        "dbTraitSingleSelection": {
+            "name": "dbTraitSingleSelection",
+            "summary": "Gets a single row and returns it",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbJunction.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function dbTraitSingleSelection(\n    string|array $filter,\n    array $order,\n    string $mode = 'array',\n    array $fields = []\n  ): mixed\n  {\n    if (is_string($filter) || is_int($filter)) {\n      $filter = [$this->fields['id'] => $filter];\n    }\n\n    if ($res = $this->dbTraitSelection($filter, $order, 1, 0, $mode, $fields)) {\n      return $res[0];\n    }\n\n    return null;\n\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 243,
+            "endLine": 260,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 4,
+            "numberOfRequiredParameters": 2,
+            "shortName": "dbTraitSingleSelection",
+            "returns": [
+                null,
+                "mixed"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array|string",
+                    "type_arr": [
+                        {},
+                        {}
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "mode",
+                    "position": 2,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "array",
+                    "default_name": ""
+                },
+                {
+                    "name": "fields",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Gets a single row and returns it\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "[type]",
+                        "name": "$filter"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets a single row and returns it\n   *\n   * @param [type] $filter\n   * @param array $order\n   * @param string $mode\n   * @return mixed\n   *\/"
+        },
+        "getClassCfg": {
+            "name": "getClassCfg",
+            "summary": "Returns the class configuration.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getClassCfg()\n  {\n    return $this->class_cfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 37,
+            "endLine": 40,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getClassCfg",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the class configuration.\n\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the class configuration.\n   * \n   * @return mixed\n   *\/"
+        },
+        "getFields": {
+            "name": "getFields",
+            "summary": "Returns the fields of the main table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getFields()\n  {\n    return $this->fields;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 48,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getFields",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Returns the fields of the main table.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the fields of the main table.\n   *\n   * @return array\n   *\/"
+        },
+        "initClassCfg": {
+            "name": "initClassCfg",
+            "summary": "Sets the class configuration as defined in self::default_class_cfg",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function initClassCfg(array $cfg = null)\n  {\n$arr = [];\n    if (isset(self::$default_class_cfg)) {\n      $arr[] = self::$default_class_cfg;\n    }\n\n    if (isset(static::$default_class_cfg)) {\n      $arr[] = static::$default_class_cfg;\n    }\n    \n    if ($cfg) {\n      $arr[] = $cfg;\n    }\n\n    if (!count($arr)) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $cfg = count($arr) > 1 ? X::mergeArrays(...$arr) : $arr[0];\n\n    $table_index = array_flip($cfg['tables'])[$cfg['table']];\n    if (!$table_index || !isset($cfg['tables'], $cfg['table'], $cfg['arch'], $cfg['arch'][$table_index])) {\n      throw new Exception(X::_(\"The class %s is not configured properly to work with trait DbActions\", get_class($this)));\n    }\n\n    $this->class_table = $cfg['table'];\n    \/\/ We completely replace the table structure, no merge\n    $props = [];\n    foreach ($cfg['arch'] as $t => &$fields){\n      if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {\n        $this->class_table_index = $t;\n      }\n    foreach ($fields as $f => $it) {\n        if (is_array($it)) {\n          $props[$t][$f] = $it;\n          $fields[$f] = $it['name'] ?? $f;\n        }\n      }\n    }\n    unset($fields);\n    if (!empty($props)) {\n      $cfg['props'] = $props;\n    }\n\n\n\n    \/\/ The selection comprises the defined fields of the users table\n    \/\/ Plus a bunch of user-defined additional fields in the same table\n    $this->fields = $cfg['arch'][$this->class_table_index];\n\n    $this->class_cfg = $cfg;\n    $this->_isInitClassCfg = true;\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 59,
+            "endLine": 114,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "initClassCfg",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Sets the class configuration as defined in self::default_class_cfg\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the class configuration as defined in self::default_class_cfg\n   * @param array $cfg\n   * @return $this\n   *\/"
+        },
+        "isInitClassCfg": {
+            "name": "isInitClassCfg",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbConfig.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function isInitClassCfg(): bool\n  {\n    return $this->_isInitClassCfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbConfig",
+            "startLine": 117,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isInitClassCfg",
+            "returns": [
+                "bool"
+            ],
+            "arguments": []
+        },
+        "dbTraitPrepare": {
+            "name": "dbTraitPrepare",
+            "summary": "Prepares data before inserting or updating in the database.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitPrepare(array $data): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (!empty($ccfg['cfg'])) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $res[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        unset($data[$f['cfg']]);\n      }\n      elseif (isset($ccfg['cfg'])) {\n        $cfg = [];\n        foreach ($ccfg['cfg'] as $k => $v) {\n          if (array_key_exists($v['field'], $data)) {\n            $cfg[$v['field']] = $data[$v['field']];\n            unset($data[$v['field']]);\n          }\n        }\n        if (!empty($cfg)) {\n          $res[$f['cfg']] = $cfg;\n        }\n      }\n    }\n\n    $structure = $this->dbTraitGetStructure();\n    foreach ($data as $k => $v) {\n      if (in_array($k, $f)) {\n        \/\/ Set the value to null if it's empty and not 0 and the field allows null\n        if (empty($v)\n          && ($v !== 0)\n          && $structure['fields'][$k]['null']\n        ) {\n          $v = null;\n        }\n\n        $res[$k] = $v;\n      }\n    }\n\n    return $res;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 39,
+            "endLine": 92,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitPrepare",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "data",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The data to be prepared."
+                }
+            ],
+            "doc": {
+                "description": "Prepares data before inserting or updating in the database.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$data",
+                        "description": "The data to be prepared."
+                    }
+                ],
+                "return": "The prepared data.",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception",
+                    "description": "If the class config has not been initialized or is incorrect."
+                }
+            },
+            "comments": "  \/**\n   * Prepares data before inserting or updating in the database.\n   *\n   * @param array $data The data to be prepared.\n   *\n   * @return array The prepared data.\n   * @throws Exception If the class config has not been initialized or is incorrect.\n   *\/"
+        },
+        "dbTraitTreat": {
+            "name": "dbTraitTreat",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitTreat(array ...$rows): array\n  {\n    \/\/ Ensure that the class configuration is initialized\n    if (!$this->isInitClassCfg()) {\n      throw new Exception(X::_(\"Impossible to prepare an item if the class config has not been initialized\"));\n    }\n\n    $ccfg = $this->getClassCfg();\n    \/\/ Get the table index from the class configuration\n    $table_index = array_flip($ccfg['tables'])[$ccfg['table']];\n    if (!$table_index) {\n      throw new Exception(X::_(\"The class config is not correct as the main table doesn't have an arch\"));\n    }\n\n    $f = $ccfg['arch'][$table_index];\n    $res = [];\n    \/\/ Handle 'cfg' field if present in the table configuration\n    if (empty($f['cfg'])) {\n      return [...$rows];\n    }\n    foreach ($rows as &$data) {\n      if (array_key_exists($f['cfg'], $data)) {\n        $data[$f['cfg']] = is_string($data[$f['cfg']]) ? json_decode($data[$f['cfg']], true) : $data[$f['cfg']];\n        if (!empty($ccfg['cfg'])) {\n          foreach ($ccfg['cfg'] as $k => $v) {\n            if (isset($v['field']) \n                && array_key_exists($v['field'], $data[$f['cfg']])\n                && !array_key_exists($v['field'], $data)) {\n              $data[$v['field']] = $data[$f['cfg']][$v['field']];\n            }\n          }\n          unset($data[$f['cfg']]);\n        }\n      }\n\n      $res[] = $data;\n    }\n\n    unset($data);\n    return $res;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 94,
+            "endLine": 134,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": true,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitTreat",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "rows",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": true,
+                    "reference": false,
+                    "required": false,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "dbTraitSetFilterCfg": {
+            "name": "dbTraitSetFilterCfg",
+            "summary": "Sets the filter configuration for database queries.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitSetFilterCfg(array $cfg): void\n  {\n    $this->dbTraitFilterCfg = $cfg;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 142,
+            "endLine": 145,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitSetFilterCfg",
+            "returns": [
+                "void"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The filter configuration."
+                }
+            ],
+            "doc": {
+                "description": "Sets the filter configuration for database queries.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "The filter configuration."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the filter configuration for database queries.\n   *\n   * @param array $cfg The filter configuration.\n   *\/"
+        },
+        "dbTraitResetFilterCfg": {
+            "name": "dbTraitResetFilterCfg",
+            "summary": "Resets the filter configuration for database queries.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitResetFilterCfg(): void\n  {\n    $this->dbTraitFilterCfg = [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 150,
+            "endLine": 153,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitResetFilterCfg",
+            "returns": [
+                "void"
+            ],
+            "arguments": [],
+            "doc": {
+                "description": "Resets the filter configuration for database queries.",
+                "tags": []
+            },
+            "comments": "  \/**\n   * Resets the filter configuration for database queries.\n   *\/"
+        },
+        "dbTraitGetFilterCfg": {
+            "name": "dbTraitGetFilterCfg",
+            "summary": "Combines multiple filter configurations into a single array.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitGetFilterCfg(array $cfg): array\n  {\n    $conditions = [];\n    if (!empty($this->rootFilterCfg)) {\n      $conditions[] = $this->rootFilterCfg;\n    }\n\n    if (!empty($this->dbTraitFilterCfg)) {\n      $conditions[] = $this->dbTraitFilterCfg;\n    }\n\n    if (!empty($cfg)) {\n      $conditions[] = $cfg;\n    }\n\n    \/\/ Return empty array if no conditions exist\n    if (empty($conditions)) {\n      return [];\n    }\n\n    \/\/ Return single condition if only one exists\n    if (count($conditions) === 1) {\n      return $conditions[0];\n    }\n\n    \/\/ Combine all conditions with 'AND' logic\n    return array_map(function ($a) {\n      return [\n        'logic' => 'AND',\n        'conditions' => $a\n      ];\n    }, $conditions);\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 162,
+            "endLine": 194,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "dbTraitGetFilterCfg",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "cfg",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Additional filter configuration."
+                }
+            ],
+            "doc": {
+                "description": "Combines multiple filter configurations into a single array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "Additional filter configuration."
+                    }
+                ],
+                "return": "The combined filter configuration."
+            },
+            "comments": "  \/**\n   * Combines multiple filter configurations into a single array.\n   *\n   * @param array $cfg Additional filter configuration.\n   *\n   * @return array The combined filter configuration.\n   *\/"
+        },
+        "dbTraitGetStructure": {
+            "name": "dbTraitGetStructure",
+            "summary": "Gets the structure of the specified table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitGetStructure(string $table = null): array\n  {\n    if (!$table) {\n      $cfg = $this->getClassCfg();\n      $table = $cfg['table'];\n    }\n\n    if (!isset($this->dbTraitStructure[$table])) {\n      $this->dbTraitStructure[$table] = $this->db->modelize($table);\n    }\n\n    return $this->dbTraitStructure[$table];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 203,
+            "endLine": 215,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitGetStructure",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The table name (optional)."
+                }
+            ],
+            "doc": {
+                "description": "Gets the structure of the specified table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$table",
+                        "description": "The table name (optional)."
+                    }
+                ],
+                "return": "The structure of the table."
+            },
+            "comments": "  \/**\n   * Gets the structure of the specified table.\n   *\n   * @param string|null $table The table name (optional).\n   *\n   * @return array The structure of the table.\n   *\/"
+        },
+        "dbTraitGetTableRelations": {
+            "name": "dbTraitGetTableRelations",
+            "summary": "Retrieves the relations for a given table.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function dbTraitGetTableRelations(string $table = null): array\n  {\n    $cfg = $this->getClassCfg();\n    if (!$table) {\n      $table = $cfg['table'];\n    }\n    $idx = array_flip($cfg['tables'])[$table];\n    if ($idx && !isset($this->dbTraitRelations[$table])) {\n      $arc = &$cfg['arch'][$idx];\n      $this->dbTraitRelations[$table] = [];\n      if (!empty($arc['id'])) {\n        $refs = $this->db->findReferences($this->db->cfn($arc['id'], $table));\n        foreach ($refs as $ref) {\n          [$db, $tab, $col] = X::split($ref, '.');\n          $model = $this->db->modelize($tab);\n          $this->dbTraitRelations[$table][] = [\n            'db' => $db,\n            'table' => $tab,\n            'primary' => isset($model['keys']['PRIMARY']) && (count($model['keys']['PRIMARY']['columns']) === 1) ? $model['keys']['PRIMARY']['columns'][0] : null,\n            'col' => $col,\n            'model' => $model\n          ];\n        }\n      }\n    }\n\n    return $this->dbTraitRelations[$table];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 224,
+            "endLine": 251,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "dbTraitGetTableRelations",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "table",
+                    "position": 0,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The table name (optional)."
+                }
+            ],
+            "doc": {
+                "description": "Retrieves the relations for a given table.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|null",
+                        "name": "$table",
+                        "description": "The table name (optional)."
+                    }
+                ],
+                "return": "An array of relations."
+            },
+            "comments": "  \/**\n   * Retrieves the relations for a given table.\n   *\n   * @param string|null $table The table name (optional).\n   *\n   * @return array An array of relations.\n   *\/"
+        },
+        "dbTraitSelection": {
+            "name": "dbTraitSelection",
+            "summary": "Returns an array of rows from the table for the given conditions.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function dbTraitSelection(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    string $mode = 'array',\n    array $fields = []\n  ): array\n  {\n    $returnObject = $mode === 'object';\n    $req = $this->dbTraitGetRequestCfg($filter, $order, $limit, $start, $fields);\n    $f = $this->class_cfg['arch'][$this->class_table_index];\n    $method = $mode === 'object' ? 'selectAll' : ($mode === 'value' ? 'getColumnValues' : 'rselectAll');\n    $res = $this->db->$method($req);\n    if ($res) {\n      if (!empty($f['cfg'])) {\n        foreach ($res as &$r) {\n          if ($returnObject && !empty($r->{$f['cfg']})) {\n            $cfg = json_decode($r->{$f['cfg']});\n            $r = X::mergeObjects($cfg, $r);\n            unset($r->{$f['cfg']});\n          }\n          elseif (!$returnObject && !empty($r[$f['cfg']])) {\n            $cfg = json_decode($r[$f['cfg']], true);\n            $r = array_merge($cfg, $r);\n            unset($r[$f['cfg']]);\n          }\n        }\n\n        unset($r);\n      }\n\n      return $res;\n    }\n\n    return [];\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 265,
+            "endLine": 301,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 4,
+            "shortName": "dbTraitSelection",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Filter conditions."
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Order by conditions."
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Maximum number of rows to return."
+                },
+                {
+                    "name": "start",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Offset of the first row to return."
+                },
+                {
+                    "name": "mode",
+                    "position": 4,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "array",
+                    "default_name": "",
+                    "description": "The mode of result ('array', 'object', 'value')."
+                },
+                {
+                    "name": "fields",
+                    "position": 5,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "Fields to select."
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of rows from the table for the given conditions.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$filter",
+                        "description": "Filter conditions."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "Order by conditions."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "Maximum number of rows to return."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "Offset of the first row to return."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The mode of result ('array', 'object', 'value')."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$fields",
+                        "description": "Fields to select."
+                    }
+                ],
+                "return": "The result set."
+            },
+            "comments": "  \/**\n   * Returns an array of rows from the table for the given conditions.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param string $mode The mode of result ('array', 'object', 'value').\n   * @param array $fields Fields to select.\n   *\n   * @return array The result set.\n   *\/"
+        },
+        "dbTraitGetRequestCfg": {
+            "name": "dbTraitGetRequestCfg",
+            "summary": "Prepares the request configuration for a database query.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Tts\\DbJunction",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Tts\/DbTrait.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function dbTraitGetRequestCfg(\n    array $filter,\n    array $order,\n    int $limit,\n    int $start,\n    array $fields = []\n  ): array\n  {\n    \/\/ Ensure table index is defined\n    if (!$this->class_table_index) {\n      throw new Exception(X::_(\"The table index parameter should be defined\"));\n    }\n\n    \/\/ Validate fields\n    if (!empty($fields)) {\n      foreach (array_values($fields) as $f) {\n        if (!in_array($f, $this->class_cfg['arch'][$this->class_table_index])) {\n          throw new Exception(X::_(\"The field %s does not exist\", $f));\n        }\n      }\n\n      $properFields = $fields;\n    }\n    else {\n      $fields = $this->class_cfg['arch'][$this->class_table_index];\n    }\n\n    $ccfg = $this->getClassCfg();\n    if (isset($fields['cfg']) && !empty($ccfg['cfg'])) {\n      $cfgCol = $fields['cfg'];\n      unset($fields['cfg']);\n      if (!isset($properFields)) {\n        $properFields = array_values($fields);\n      }\n\n      foreach ($ccfg['cfg'] as $v) {\n        if ($v['field'] && !in_array($v['field'], $properFields)) {\n          $properFields[$v['field']] = \"IF(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              . \"') = 'null', NULL, JSON_UNQUOTE(JSON_EXTRACT(\"\n              . $this->db->csn($cfgCol, true) . \", '\\$.\" . $v['field']\n              .\"')))\";\n        }\n      }\n    }\n    elseif (!isset($properFields)) {\n      $properFields = array_values($fields);\n    }\n\n    \/\/ Build the request configuration\n    $req = [\n      'table' => $this->class_table,\n      'fields' => $properFields,\n      'where' => $this->dbTraitGetFilterCfg($filter),\n      'order' => $order\n    ];\n\n    if ($limit) {\n      $req['limit'] = $limit;\n      $req['start'] = $start;\n    }\n\n    return $req;\n  }",
+            "parent": false,
+            "trait": "bbn\\Models\\Tts\\DbTrait",
+            "startLine": 315,
+            "endLine": 378,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 5,
+            "numberOfRequiredParameters": 4,
+            "shortName": "dbTraitGetRequestCfg",
+            "returns": [
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "filter",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Filter conditions."
+                },
+                {
+                    "name": "order",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Order by conditions."
+                },
+                {
+                    "name": "limit",
+                    "position": 2,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Maximum number of rows to return."
+                },
+                {
+                    "name": "start",
+                    "position": 3,
+                    "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "Offset of the first row to return."
+                },
+                {
+                    "name": "fields",
+                    "position": 4,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "Fields to select."
+                }
+            ],
+            "doc": {
+                "description": "Prepares the request configuration for a database query.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$filter",
+                        "description": "Filter conditions."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "Order by conditions."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "Maximum number of rows to return."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "Offset of the first row to return."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$fields",
+                        "description": "Fields to select."
+                    }
+                ],
+                "return": "The request configuration.",
+                "throws": {
+                    "tag": "throws",
+                    "type": "Exception",
+                    "description": "If the table index is not defined or a field does not exist."
+                }
+            },
+            "comments": "  \/**\n   * Prepares the request configuration for a database query.\n   *\n   * @param array $filter Filter conditions.\n   * @param array $order Order by conditions.\n   * @param int $limit Maximum number of rows to return.\n   * @param int $start Offset of the first row to return.\n   * @param array $fields Fields to select.\n   *\n   * @return array The request configuration.\n   * @throws Exception If the table index is not defined or a field does not exist.\n   *\/"
+        }
+    },
+    "properties": {
+        "dbTraitFilterCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbJunction",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "rootFilterCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "dbJunctionStructure": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbJunction",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "dbTraitRelations": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": []
+        },
+        "_isInitClassCfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bool",
+                "tags": []
+            },
+            "parent": false,
+            "value": false
+        },
+        "fields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var array",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "class_table": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "class_table_index": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbConfig",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "@var string",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "dbTraitStructure": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Tts\\DbJunction"
+            },
+            "declaring_trait": "bbn\\Models\\Tts\\DbTrait",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "description": "Cached relations for the current table."
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        }
+    },
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "bbn\\Str": "Str",
+        "stdClass": "stdClass",
+        "Exception": "Exception",
+        "DbConfig": "DbConfig",
+        "DbTrait": "DbTrait"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 05\/11\/2016\n * Time: 02:47\n *\/",
+        "\/**\n   * @param array|string $id\n   * @return bool\n   *\/",
+        "\/**\n   * Inserts a new row in the table.\n   *\n   * @param array $data\n   *\n   * @return string|null\n   *\/",
+        "\/**\n   * Deletes a single row from the table through its id.\n   *\n   * @param string $id\n   *\n   * @return bool\n   *\/",
+        "\/**\n   * Updates a single row in the table through its id.\n   *\n   * @param string $id\n   * @param array $data\n   *\n   * @return bool\n   *\/",
+        "\/**\n   * Retrieves a row as an object from the table through its id.\n   *\n   * @param string|array $filter\n   * @param array $order\n   *\n   * @return mixed\n   *\/",
+        "\/**\n   * Retrieves a row as an object from the table through its id.\n   *\n   * @param string|array $filter\n   * @param array $order\n   *\n   * @return stdClass|null\n   *\/",
+        "\/**\n   * Retrieves a row as an array from the table through its id.\n   *\n   * @param string|array $filter\n   * @param array $order\n   *\n   * @return array|null\n   *\/",
+        "\/**\n   * Returns the number of rows from the table for the given conditions.\n   *\n   * @param array $filter\n   *\n   * @return int\n   *\/",
+        "\/**\n   * Returns an array of rows as objects from the table for the given conditions.\n   *\n   * @param array $filter\n   * @param array $order\n   * @param array $limit\n   * @param array $start\n   *\n   * @return array\n   *\/",
+        "\/**\n   * Returns an array of rows as arrays from the table for the given conditions.\n   *\n   * @param array $filter\n   * @param array $order\n   * @param array $limit\n   * @param array $start\n   *\n   * @return array\n   *\/",
+        "\/**\n   * Gets a single row and returns it\n   *\n   * @param [type] $filter\n   * @param array $order\n   * @param string $mode\n   * @return mixed\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

@@ -12,18 +12,19 @@
     },
     "name": "bbn\\User\\Manager",
     "namespace": true,
+    "realName": "Manager",
+    "realNamespace": "bbn\\User",
     "traits": [],
     "interfaces": [],
     "fileName": "\/User\/Manager.php",
     "startLine": 22,
-    "endLine": 1168,
-    "numMethods": 47,
-    "numProperties": 0,
+    "endLine": 1199,
+    "numMethods": 51,
+    "numProperties": 9,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -63,7 +64,6 @@
     "namespaceName": "bbn\\User",
     "shortName": "Manager",
     "contentConstructor": {
-        "file": "bbn\\User\\Manager",
         "returns": []
     },
     "methods": {
@@ -72,11 +72,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->list_fields;\n  }",
+            "code": "  public function getListFields()\n  {\n    return $this->list_fields;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 68,
             "endLine": 71,
             "isDeprecated": false,
@@ -87,8 +90,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getListFields",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getMailer": {
@@ -96,11 +99,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!$this->mailer) {\n      $this->mailer = $this->usrcls->getMailer();\n    }\n\n    return $this->mailer;\n  }",
+            "code": "  public function getMailer()\n  {\n    if (!$this->mailer) {\n      $this->mailer = $this->usrcls->getMailer();\n    }\n\n    return $this->mailer;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 74,
             "endLine": 81,
             "isDeprecated": false,
@@ -111,8 +117,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getMailer",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "findSessions": {
@@ -120,11 +126,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user = NULL, int $minutes = 5)\n  {\n    $cfg = [\n      'table' => $this->class_cfg['tables']['sessions'],\n      'fields' => [],\n      'where' => [\n        [\n          'field' => $this->class_cfg['arch']['sessions']['last_activity'],\n          'operator' => '<',\n          'value' => 'DATE_SUB(NOW(), INTERVAL '.$this->db->csn($this->class_cfg['sess_length'], true).' MINUTE)'\n        ]\n      ]\n    ];\n    if (!\\is_null($id_user)) {\n      $cfg['where'][] = [\n        'field' => $this->class_cfg['arch']['sessions']['id_user'],\n        'value' => $id_user\n      ];\n    }\n\n    return $this->db->rselectAll($cfg);\n  }",
+            "code": "  public function findSessions(string $id_user=null, int $minutes = 5): array\n  {\n    $cfg = [\n      'table' => $this->class_cfg['tables']['sessions'],\n      'fields' => [],\n      'where' => [\n        [\n          'field' => $this->class_cfg['arch']['sessions']['last_activity'],\n          'operator' => '<',\n          'value' => 'DATE_SUB(NOW(), INTERVAL '.$this->db->csn($this->class_cfg['sess_length'], true).' MINUTE)'\n        ]\n      ]\n    ];\n    if (!\\is_null($id_user)) {\n      $cfg['where'][] = [\n        'field' => $this->class_cfg['arch']['sessions']['id_user'],\n        'value' => $id_user\n      ];\n    }\n\n    return $this->db->rselectAll($cfg);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 84,
             "endLine": 105,
             "isDeprecated": false,
@@ -135,15 +144,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "findSessions",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -153,6 +168,11 @@
                     "name": "minutes",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 5,
@@ -165,11 +185,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, int $minutes = 5)\n  {\n    $sessions = $this->findSessions($id_user, $minutes);\n    \/\/$num = count($sessions);\n    foreach ($sessions as $s){\n      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id'] => $s['id']]);\n    }\n\n    return true;\n  }",
+            "code": "  public function destroySessions(string $id_user, int $minutes = 5): bool\n  {\n    $sessions = $this->findSessions($id_user, $minutes);\n    \/\/$num = count($sessions);\n    foreach ($sessions as $s){\n      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id'] => $s['id']]);\n    }\n\n    return true;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 108,
             "endLine": 117,
             "isDeprecated": false,
@@ -180,15 +203,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "destroySessions",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -198,6 +226,11 @@
                     "name": "minutes",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 5,
@@ -210,11 +243,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\User $obj)\n  {\n    if (\\is_object($obj) && method_exists($obj, 'getClassCfg')) {\n      $this->usrcls    = $obj;\n      $this->class_cfg = $this->usrcls->getClassCfg();\n      if (!$this->list_fields) {\n        $this->setDefaultListFields();\n      }\n\n      $this->db = $this->usrcls->getDbInstance();\n    }\n  }",
+            "code": "  public function __construct(bbn\\User $obj)\n  {\n    if (\\is_object($obj) && method_exists($obj, 'getClassCfg')) {\n      $this->usrcls    = $obj;\n      $this->class_cfg = $this->usrcls->getClassCfg();\n      if (!$this->list_fields) {\n        $this->setDefaultListFields();\n      }\n\n      $this->db = $this->usrcls->getDbInstance();\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 124,
             "endLine": 135,
             "isDeprecated": false,
@@ -225,31 +261,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "obj",
                     "position": 0,
                     "type": "bbn\\User",
+                    "type_arr": [
+                        "bbn\\User"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "A user's connection object (\\connection or subclass)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\User",
+                        "name": "$obj",
+                        "description": "A user's connection object (\\connection or subclass)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param bbn\\User $obj A user's connection object (\\connection or subclass)\n   *\n   *\/"
         },
         "getClassCfg": {
             "name": "getClassCfg",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->class_cfg;\n  }",
+            "code": "  public function getClassCfg(): array\n  {\n    return $this->class_cfg;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 138,
             "endLine": 141,
             "isDeprecated": false,
@@ -260,10 +317,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getClassCfg",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "isOnline": {
@@ -271,11 +328,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, int $delay = 180)\n  {\n    $a =& $this->class_cfg['arch'];\n    $t =& $this->class_cfg['tables'];\n    if (($max = $this->db->selectOne($t['sessions'], 'MAX('.$a['sessions']['last_activity'].')', ['id_user' => $id_user]))\n        && (strtotime($max) > (time() - $delay))\n    ) {\n      return true;\n    }\n\n    return false;\n  }",
+            "code": "  public function isOnline(string $id_user, int $delay = 180): bool\n  {\n    $a =& $this->class_cfg['arch'];\n    $t =& $this->class_cfg['tables'];\n    if (($max = $this->db->selectOne($t['sessions'], 'MAX('.$a['sessions']['last_activity'].')', ['id_user' => $id_user]))\n        && (strtotime($max) > (time() - $delay))\n    ) {\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 144,
             "endLine": 155,
             "isDeprecated": false,
@@ -286,15 +346,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "isOnline",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -304,6 +369,11 @@
                     "name": "delay",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 180,
@@ -316,11 +386,14 @@
             "summary": "Returns all the users' groups - with or without admin",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $a             =& $this->class_cfg['arch'];\n    $t             =& $this->class_cfg['tables'];\n    $id            = $this->db->cfn($a['groups']['id'], $t['groups']);\n    $users_id      = $this->db->cfn($a['users']['id'], $t['users'], 1);\n    $db            =& $this->db;\n    $fields        = \\array_map(\n      function ($g) use ($db, $t) {\n        return $db->cfn($g, $t['groups']);\n      }, \\array_values($a['groups'])\n    );\n    $fields['num'] = \"COUNT($users_id)\";\n    return $this->db->rselectAll(\n      [\n      'table' => $t['groups'],\n      'fields' => $fields,\n      'join' => [[\n        'table' => $t['users'],\n        'type' => 'left',\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($a['users']['id_group'], $t['users']),\n            'exp' => $id\n          ]]\n        ]\n      ]],\n      'group_by' => [$id]\n      ]\n    );\n  }",
+            "code": "  public function groups(): array\n  {\n    $a             =& $this->class_cfg['arch'];\n    $t             =& $this->class_cfg['tables'];\n    $id            = $this->db->cfn($a['groups']['id'], $t['groups']);\n    $users_id      = $this->db->cfn($a['users']['id'], $t['users'], 1);\n    $db            =& $this->db;\n    $fields        = \\array_map(\n      function ($g) use ($db, $t) {\n        return $db->cfn($g, $t['groups']);\n      }, \\array_values($a['groups'])\n    );\n    $fields['num'] = \"COUNT($users_id)\";\n    return $this->db->rselectAll(\n      [\n      'table' => $t['groups'],\n      'fields' => $fields,\n      'join' => [[\n        'table' => $t['users'],\n        'type' => 'left',\n        'on' => [\n          'conditions' => [[\n            'field' => $this->db->cfn($a['users']['id_group'], $t['users']),\n            'exp' => $id\n          ]]\n        ]\n      ]],\n      'group_by' => [$id]\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 163,
             "endLine": 193,
             "isDeprecated": false,
@@ -331,22 +404,37 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "groups",
             "returns": [
                 "array"
             ],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Returns all the users' groups - with or without admin\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$adm"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns all the users' groups - with or without admin\n   * @param bool $adm\n   * @return array|false\n   *\/"
         },
         "textValueGroups": {
             "name": "textValueGroups",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->db->rselectAll(\n      $this->class_cfg['tables']['groups'], [\n        'value' => $this->class_cfg['arch']['groups']['id'],\n        'text' => $this->class_cfg['arch']['groups']['group'],\n      ]\n    );\n  }",
+            "code": "  public function textValueGroups()\n  {\n    return $this->db->rselectAll(\n      $this->class_cfg['tables']['groups'], [\n        'value' => $this->class_cfg['arch']['groups']['id'],\n        'text' => $this->class_cfg['arch']['groups']['group'],\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 196,
             "endLine": 204,
             "isDeprecated": false,
@@ -357,8 +445,8 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "textValueGroups",
             "returns": [],
-            "parent": false,
             "arguments": []
         },
         "getEmail": {
@@ -366,11 +454,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    if (bbn\\Str::isUid($id)) {\n      $email = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);\n      if ($email && bbn\\Str::isEmail($email)) {\n        return $email;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function getEmail(string $id): ?string\n  {\n    if (bbn\\Str::isUid($id)) {\n      $email = $this->db->selectOne($this->class_cfg['tables']['users'], $this->class_cfg['arch']['users']['email'], [$this->class_cfg['arch']['users']['id'] => $id]);\n      if ($email && bbn\\Str::isEmail($email)) {\n        return $email;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 207,
             "endLine": 217,
             "isDeprecated": false,
@@ -381,16 +472,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getEmail",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -403,13 +499,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $group_id = NULL)\n  {\n    $db     =& $this->db;\n    $arch   =& $this->class_cfg['arch'];\n    $s      =& $arch['sessions'];\n    $tables =& $this->class_cfg['tables'];\n\n    if (!empty($arch['users']['username'])) {\n      $sort = $arch['users']['username'];\n    }\n    elseif (!empty($arch['users']['login'])) {\n      $sort = $arch['users']['login'];\n    }\n    else{\n      $sort = $arch['users']['email'];\n    }\n\n    $sql  = \"SELECT \";\n    $done = [];\n    foreach ($arch['users'] as $n => $f){\n      if (!\\in_array($f, $done)) {\n        $sql .= $db->cfn($f, $tables['users'], 1).', ';\n        array_push($done, $f);\n      }\n    }\n\n    $gr   = !empty($group_id) && \\bbn\\Str::isUid($group_id) ? \"AND \" . $db->cfn($arch['groups']['id'], $tables['groups'], 1) . \" = UNHEX('$group_id')\" : '';\n    $sql .= \"\n      MAX({$db->cfn($s['last_activity'], $tables['sessions'], 1)}) AS {$db->csn($s['last_activity'], 1)},\n      COUNT({$db->cfn($s['sess_id'], $tables['sessions'])}) AS {$db->csn($s['sess_id'], 1)}\n      FROM {$db->escape($tables['users'])}\n        JOIN {$db->tsn($tables['groups'], 1)}\n          ON {$db->cfn($arch['users']['id_group'], $tables['users'], 1)} = {$db->cfn($arch['groups']['id'], $tables['groups'], 1)}\n          $gr\n        LEFT JOIN {$db->tsn($tables['sessions'])}\n          ON {$db->cfn($s['id_user'], $tables['sessions'], 1)} = {$db->cfn($arch['users']['id'], $tables['users'], 1)}\n      WHERE {$db->cfn($arch['users']['active'], $tables['users'], 1)} = 1\n      GROUP BY {$db->cfn($arch['users']['id'], $tables['users'], 1)}\n      ORDER BY {$db->cfn($sort, $tables['users'], 1)}\";\n    return $db->getRows($sql);\n  }",
+            "code": "  public function getList(string $group_id = null): array\n  {\n    $db     =& $this->db;\n    $arch   =& $this->class_cfg['arch'];\n    $s      =& $arch['sessions'];\n    $tables =& $this->class_cfg['tables'];\n\n    if (!empty($arch['users']['username'])) {\n      $sort = $arch['users']['username'];\n    }\n    elseif (!empty($arch['users']['login'])) {\n      $sort = $arch['users']['login'];\n    }\n    else{\n      $sort = $arch['users']['email'];\n    }\n\n    $fields = array_map(function($a) use($db) {\n      return $db->cfn($a, $this->class_cfg['tables']['users']);\n    }, array_values($arch['users']));\n    $fields[$s['last_activity']] = \"MAX($s[last_activity])\";\n    $fields[$s['sess_id']] = \"COUNT($s[sess_id])\";\n    return $this->db->rselectAll([\n      'tables' => [$tables['users']],\n      'fields' => $fields,\n      'join' => [[\n        'table' => $tables['sessions'],\n        'type' => 'left',\n        'on' => [\n          'conditions' => [[\n            'field' => $db->cfn($s['id_user'], $tables['sessions']),\n            'exp' => $db->cfn($arch['users']['id'], $tables['users'])\n          ]]\n        ]\n      ], [\n        'table' => $tables['groups'],\n        'on' => [\n          'conditions' => [[\n            'field' => $db->cfn($arch['users']['id_group'], $tables['users']),\n            'exp' => $db->cfn($arch['groups']['id'], $tables['groups'])\n          ]]\n        ]\n      ]],\n      'where' => [$arch['users']['active'] => 1],\n      'group_by' => [$db->cfn($arch['users']['id'], $tables['users'])],\n      'order' => [[\n        'field' => $db->cfn($sort, $tables['users']),\n        'dir' => 'ASC'\n      ]]\n    ]);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 220,
-            "endLine": 260,
+            "endLine": 270,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -418,15 +517,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "group_id",
                     "position": 0,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -439,13 +544,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    $u = $this->class_cfg['arch']['users'];\n    if (bbn\\Str::isUid($id)) {\n      $where = [$u['id'] => $id];\n    }\n    else{\n      $where = [$u['login'] => $id];\n    }\n\n    if ($user = $this->db->rselect(\n      $this->class_cfg['tables']['users'],\n      array_values($u),\n      $where\n    )\n    ) {\n      if ($session = $this->db->rselect(\n        $this->class_cfg['tables']['sessions'],\n        array_values($this->class_cfg['arch']['sessions']),\n        [$this->class_cfg['arch']['sessions']['id_user'] => $user[$u['id']]],\n        [$this->class_cfg['arch']['sessions']['last_activity'] => 'DESC']\n      )\n      ) {\n        $session['id_session'] = $session['id'];\n      }\n      else{\n        $session               = array_fill_keys(\n          array_values($this->class_cfg['arch']['sessions']),\n          ''\n        );\n        $session['id_session'] = false;\n      }\n\n      return array_merge($session, $user);\n    }\n\n    return null;\n  }",
-            "startLine": 263,
-            "endLine": 300,
+            "code": "  public function getUser(string $id): ?array\n  {\n    $u = $this->class_cfg['arch']['users'];\n    if (bbn\\Str::isUid($id)) {\n      $where = [$u['id'] => $id];\n    }\n    else{\n      $where = [$u['login'] => $id];\n    }\n\n    if ($user = $this->db->rselect(\n      $this->class_cfg['tables']['users'],\n      $u,\n      $where\n    )\n    ) {\n      if ($session = $this->db->rselect(\n        $this->class_cfg['tables']['sessions'],\n        $this->class_cfg['arch']['sessions'],\n        [$this->class_cfg['arch']['sessions']['id_user'] => $user[$u['id']]],\n        [$this->class_cfg['arch']['sessions']['last_activity'] => 'DESC']\n      )\n      ) {\n        $session['id_session'] = $session['id'];\n      }\n      else{\n        $session               = array_fill_keys(\n          array_values($this->class_cfg['arch']['sessions']),\n          ''\n        );\n        $session['id_session'] = false;\n      }\n\n      return array_merge($session, $user);\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 273,
+            "endLine": 310,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -454,16 +562,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUser",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -476,13 +589,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if ($group = $this->db->rselect(\n      $this->class_cfg['tables']['groups'], [], [\n      $g['id'] => $id\n      ]\n    )\n    ) {\n      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];\n      return $group;\n    }\n\n    return null;\n  }",
-            "startLine": 303,
-            "endLine": 317,
+            "code": "  public function getGroup(string $id): ?array\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if ($group = $this->db->rselect(\n      $this->class_cfg['tables']['groups'], [], [\n      $g['id'] => $id\n      ]\n    )\n    ) {\n      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];\n      return $group;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 313,
+            "endLine": 327,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -491,16 +607,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getGroup",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -513,13 +634,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $code)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if ($group = $this->db->rselect(\n      $this->class_cfg['tables']['groups'], [], [\n      $g['code'] => $code\n      ]\n    )\n    ) {\n      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];\n      return $group;\n    }\n\n    return null;\n  }",
-            "startLine": 320,
-            "endLine": 334,
+            "code": "  public function getGroupByCode(string $code): ?array\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if ($group = $this->db->rselect(\n      $this->class_cfg['tables']['groups'], [], [\n      $g['code'] => $code\n      ]\n    )\n    ) {\n      $group[$g['cfg']] = $group[$g['cfg']] ? json_decode($group[$g['cfg']], 1) : [];\n      return $group;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 330,
+            "endLine": 344,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -528,16 +652,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getGroupByCode",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "code",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -550,13 +679,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($group_id = NULL)\n  {\n    return $this->db->getColArray(\n      \"\n      SELECT \".$this->class_cfg['arch']['users']['id'].\"\n      FROM \".$this->class_cfg['tables']['users'].\"\n      WHERE {$this->db->escape($this->class_cfg['tables']['users'].'.'.$this->class_cfg['arch']['users']['active'])} = 1\n      AND \".$this->class_cfg['arch']['users']['id_group'].\" \".( $group_id ? \"= \".(int)$group_id : \"!= 1\" )\n    );\n  }",
-            "startLine": 337,
-            "endLine": 346,
+            "code": "  public function getUsers($group_id = null): array\n  {\n    return $this->db->getColumnValues(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']['id'],\n      [\n        $this->class_cfg['arch']['users']['active'] => 1,\n        $this->class_cfg['arch']['users']['id_group'] => $group_id\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 347,
+            "endLine": 357,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -565,15 +697,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "group_id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -586,13 +721,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    $r = [];\n    $u = $this->class_cfg['arch']['users'];\n    foreach ($this->db->rselectAll('bbn_users') as $a){\n      $r[] = [\n        'value' => $a[$u['id']],\n        'text' => $this->getName($a, false),\n        'id_group' => $a[$u['id_group']],\n        'active' => $a[$u['active']] ? true : false\n      ];\n    }\n\n    return $r;\n  }",
-            "startLine": 349,
-            "endLine": 363,
+            "code": "  public function fullList(): array\n  {\n    $r = [];\n    $all = $this->db->rselectAll(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']\n    );\n    foreach ($all as $a){\n      $r[] = [\n        'value' => $a['id'],\n        'text' => $this->getName($a, false),\n        'id_group' => $a['id_group'],\n        'active' => $a['active'] ? true : false\n      ];\n    }\n\n    return $r;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 360,
+            "endLine": 377,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -601,10 +739,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "fullList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getUserId": {
@@ -612,13 +750,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $login)\n  {\n    return $this->db->selectOne(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']['id'],\n      [\n        $this->class_cfg['arch']['users']['login'] => $login\n      ]\n    );\n  }",
-            "startLine": 366,
-            "endLine": 375,
+            "code": "  public function getUserId(string $login): ?string\n  {\n    return $this->db->selectOne(\n      $this->class_cfg['tables']['users'],\n      $this->class_cfg['arch']['users']['id'],\n      [\n        $this->class_cfg['arch']['users']['login'] => $login\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 380,
+            "endLine": 389,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -627,16 +768,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getUserId",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "login",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -649,13 +795,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!self::$admin_group) {\n      if ($res = $this->db->selectOne(\n        $this->class_cfg['tables']['groups'],\n        $this->class_cfg['arch']['groups']['id'],\n        [\n          $this->class_cfg['arch']['groups']['code'] => 'admin'\n        ]\n      )\n      ) {\n        self::setAdminGroup($res);\n      }\n    }\n\n    return self::$admin_group;\n  }",
-            "startLine": 378,
-            "endLine": 394,
+            "code": "  public function getAdminGroup(): ?string\n  {\n    if (!self::$admin_group) {\n      if ($res = $this->db->selectOne(\n        $this->class_cfg['tables']['groups'],\n        $this->class_cfg['arch']['groups']['id'],\n        [\n          $this->class_cfg['arch']['groups']['code'] => 'admin'\n        ]\n      )\n      ) {\n        self::setAdminGroup($res);\n      }\n    }\n\n    return self::$admin_group;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 392,
+            "endLine": 408,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -664,11 +813,11 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getAdminGroup",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": []
         },
         "getDevGroup": {
@@ -676,13 +825,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (!self::$dev_group) {\n      if ($res = $this->db->selectOne(\n        $this->class_cfg['tables']['groups'],\n        $this->class_cfg['arch']['groups']['id'],\n        [\n          $this->class_cfg['arch']['groups']['code'] => 'dev'\n        ]\n      )\n      ) {\n        self::setDevGroup($res);\n      }\n    }\n\n    return self::$dev_group;\n  }",
-            "startLine": 397,
-            "endLine": 413,
+            "code": "  public function getDevGroup(): ?string\n  {\n    if (!self::$dev_group) {\n      if ($res = $this->db->selectOne(\n        $this->class_cfg['tables']['groups'],\n        $this->class_cfg['arch']['groups']['id'],\n        [\n          $this->class_cfg['arch']['groups']['code'] => 'dev'\n        ]\n      )\n      ) {\n        self::setDevGroup($res);\n      }\n    }\n\n    return self::$dev_group;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 411,
+            "endLine": 427,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -691,11 +843,11 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getDevGroup",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": []
         },
         "getName": {
@@ -703,13 +855,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($user, $full = true)\n  {\n    if (!\\is_array($user)) {\n      $user = $this->getUser($user);\n    }\n\n    if (\\is_array($user)) {\n      $idx = 'email';\n      if (!empty($this->class_cfg['arch']['users']['username'])) {\n        $idx = 'username';\n      }\n      elseif (!empty($this->class_cfg['arch']['users']['login'])) {\n        $idx = 'login';\n      }\n\n      return $user[$this->class_cfg['arch']['users'][$idx]];\n    }\n\n    return '';\n  }",
-            "startLine": 416,
-            "endLine": 435,
+            "code": "  public function getName($user, $full = true)\n  {\n    if (!\\is_array($user)) {\n      $user = $this->getUser($user);\n    }\n\n    if (\\is_array($user)) {\n      $idx = 'email';\n      if (!empty($this->class_cfg['arch']['users']['username'])) {\n        $idx = 'username';\n      }\n      elseif (!empty($this->class_cfg['arch']['users']['login'])) {\n        $idx = 'login';\n      }\n\n      return $user[$idx];\n    }\n\n    return '';\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 430,
+            "endLine": 449,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -718,13 +873,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getName",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "user",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -734,6 +892,9 @@
                     "name": "full",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
@@ -746,13 +907,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_group)\n  {\n    $g =& $this->class_cfg['arch']['groups'];\n    return $this->db->selectOne($this->class_cfg['tables']['groups'], $g['type'], [$g['id'] => $id_group]);\n  }",
-            "startLine": 438,
-            "endLine": 442,
+            "code": "  public function getGroupType(string $id_group): ?string\n  {\n    $g =& $this->class_cfg['arch']['groups'];\n    return $this->db->selectOne($this->class_cfg['tables']['groups'], $g['type'], [$g['id'] => $id_group]);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 452,
+            "endLine": 456,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -761,16 +925,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getGroupType",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_group",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -783,13 +952,16 @@
             "summary": "Creates a new user and returns its configuration (with the new ID)",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg)\n  {\n    $u                 =& $this->class_cfg['arch']['users'];\n    $fields            = array_unique(array_values($u));\n    $cfg[$u['active']] = 1;\n    $cfg[$u['cfg']]    = new stdClass();\n    foreach ($cfg as $k => $v){\n      if (!\\in_array($k, $fields)) {\n        $cfg[$u['cfg']]->$k = $v;\n        unset($cfg[$k]);\n      }\n    }\n    $cfg[$u['cfg']] = json_encode($cfg[$u['cfg']]);\n\n    if (isset($cfg['id'])) {\n      unset($cfg['id']);\n    }\n\n    if (!empty($cfg[$u['id_group']])) {\n      $group = $this->getGroupType($cfg[$u['id_group']]);\n      switch ($group) {\n        case 'real':\n          if (bbn\\Str::isEmail($cfg[$u['email']])\n              && $this->db->insert($this->class_cfg['tables']['users'], $cfg)\n          ) {\n            $cfg[$u['id']] = $this->db->lastId();\n            \/\/ Envoi d'un lien\n            if (!empty($this->class_cfg['arch']['hotlinks'])) {\n              $this->makeHotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');\n            }\n\n            return $cfg;\n          }\n          break;\n        case 'api':\n          $cfg[$u['email']] = null;\n          $cfg[$u['login']] = null;\n          if ($this->db->insert($this->class_cfg['tables']['users'], $cfg)) {\n            $cfg[$u['id']] = $this->db->lastId();\n            return $cfg;\n          }\n          break;\n      }\n    }\n\n      return null;\n  }",
-            "startLine": 451,
-            "endLine": 497,
+            "code": "  public function add(array $cfg): ?array\n  {\n    $u                 =& $this->class_cfg['arch']['users'];\n    $fields            = array_unique(array_values($u));\n    $cfg[$u['active']] = 1;\n    $cfg[$u['cfg']]    = new stdClass();\n    foreach ($cfg as $k => $v){\n      if (!\\in_array($k, $fields)) {\n        $cfg[$u['cfg']]->$k = $v;\n        unset($cfg[$k]);\n      }\n    }\n    $cfg[$u['cfg']] = json_encode($cfg[$u['cfg']]);\n\n    if (isset($cfg['id'])) {\n      unset($cfg['id']);\n    }\n\n    if (!empty($cfg[$u['id_group']])) {\n      $group = $this->getGroupType($cfg[$u['id_group']]);\n      switch ($group) {\n        case 'real':\n          if (bbn\\Str::isEmail($cfg[$u['email']])\n              && $this->db->insert($this->class_cfg['tables']['users'], $cfg)\n          ) {\n            $cfg[$u['id']] = $this->db->lastId();\n            \/\/ Envoi d'un lien\n            if (!empty($this->class_cfg['arch']['hotlinks'])) {\n              $this->makeHotlink($cfg[$this->class_cfg['arch']['users']['id']], 'creation');\n            }\n\n            return $cfg;\n          }\n          break;\n        case 'api':\n          $cfg[$u['email']] = null;\n          $cfg[$u['login']] = null;\n          if ($this->db->insert($this->class_cfg['tables']['users'], $cfg)) {\n            $cfg[$u['id']] = $this->db->lastId();\n            return $cfg;\n          }\n          break;\n      }\n    }\n\n      return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 465,
+            "endLine": 511,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -798,36 +970,57 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "add",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "A configuration array"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Creates a new user and returns its configuration (with the new ID)\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "A configuration array"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a new user and returns its configuration (with the new ID)\n   *\n   * @param array $cfg A configuration array\n     * @return array|false\n     *\/"
         },
         "edit": {
             "name": "edit",
             "summary": "Creates a new user and returns its configuration (with the new ID)",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $cfg, string $id_user = NULL)\n  {\n    $u                 =& $this->class_cfg['arch']['users'];\n    $fields            = array_unique(array_values($this->class_cfg['arch']['users']));\n    $cfg[$u['active']] = 1;\n    if (!empty($this->class_cfg['arch']['users']['cfg'])) {\n      if (empty($cfg[$this->class_cfg['arch']['users']['cfg']])) {\n        $cfg[$this->class_cfg['arch']['users']['cfg']] = [];\n      }\n      elseif (is_string($cfg[$this->class_cfg['arch']['users']['cfg']])) {\n        $cfg[$this->class_cfg['arch']['users']['cfg']] = json_decode($cfg[$this->class_cfg['arch']['users']['cfg']], true);\n      }\n\n      foreach ($cfg as $k => $v){\n        if (!\\in_array($k, $fields)) {\n          $cfg[$this->class_cfg['arch']['users']['cfg']][$k] = $v;\n          unset($cfg[$k]);\n        }\n      }\n\n      $cfg[$this->class_cfg['arch']['users']['cfg']] = json_encode($cfg[$this->class_cfg['arch']['users']['cfg']]);\n    }\n    else {\n      foreach ($cfg as $k => $v){\n        if (!\\in_array($k, $fields)) {\n          unset($cfg[$k]);\n        }\n      }\n    }\n\n\n    if (!$id_user && isset($cfg[$u['id']])) {\n      $id_user = $cfg[$u['id']];\n    }\n\n    if ($id_user && (        !isset($cfg[$this->class_cfg['arch']['users']['email']])\n        || bbn\\Str::isEmail($cfg[$this->class_cfg['arch']['users']['email']])        )\n    ) {\n      if ($this->db->update(\n        $this->class_cfg['tables']['users'], $cfg, [\n        $u['id'] => $id_user\n        ]\n      )\n      ) {\n        $cfg['id'] = $id_user;\n        return $cfg;\n      }\n    }\n\n      return null;\n  }",
-            "startLine": 506,
-            "endLine": 556,
+            "code": "  public function edit(array $cfg, string $id_user = null): ?array\n  {\n    $u                 =& $this->class_cfg['arch']['users'];\n    $fields            = array_unique(array_values($this->class_cfg['arch']['users']));\n    $cfg[$u['active']] = 1;\n    if (!empty($this->class_cfg['arch']['users']['cfg'])) {\n      if (empty($cfg[$this->class_cfg['arch']['users']['cfg']])) {\n        $cfg[$this->class_cfg['arch']['users']['cfg']] = [];\n      }\n      elseif (is_string($cfg[$this->class_cfg['arch']['users']['cfg']])) {\n        $cfg[$this->class_cfg['arch']['users']['cfg']] = json_decode($cfg[$this->class_cfg['arch']['users']['cfg']], true);\n      }\n\n      foreach ($cfg as $k => $v){\n        if (!\\in_array($k, $fields)) {\n          $cfg[$this->class_cfg['arch']['users']['cfg']][$k] = $v;\n          unset($cfg[$k]);\n        }\n      }\n\n      $cfg[$this->class_cfg['arch']['users']['cfg']] = json_encode($cfg[$this->class_cfg['arch']['users']['cfg']]);\n    }\n    else {\n      foreach ($cfg as $k => $v){\n        if (!\\in_array($k, $fields)) {\n          unset($cfg[$k]);\n        }\n      }\n    }\n\n\n    if (!$id_user && isset($cfg[$u['id']])) {\n      $id_user = $cfg[$u['id']];\n    }\n\n    if ($id_user && (        !isset($cfg[$this->class_cfg['arch']['users']['email']])\n        || bbn\\Str::isEmail($cfg[$this->class_cfg['arch']['users']['email']])        )\n    ) {\n      if ($this->db->update(\n        $this->class_cfg['tables']['users'], $cfg, [\n        $u['id'] => $id_user\n        ]\n      )\n      ) {\n        $cfg['id'] = $id_user;\n        return $cfg;\n      }\n    }\n\n      return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 520,
+            "endLine": 570,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -836,16 +1029,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "edit",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "cfg",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -855,26 +1053,48 @@
                 {
                     "name": "id_user",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Creates a new user and returns its configuration (with the new ID)\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$cfg",
+                        "description": "A configuration array"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Creates a new user and returns its configuration (with the new ID)\n   *\n   * @param array $cfg A configuration array\n     * @return array|false\n     *\/"
         },
         "copy": {
             "name": "copy",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $type, string $id, array $data)\n  {\n    $pref = Preferences::getPreferences();\n    $cfg  = $pref->getClassCfg();\n    switch ($type) {\n      case 'user':\n        if ($src = $this->getUser($id)) {\n          $data = X::mergeArrays($src, $data);\n          unset($data[$this->class_cfg['arch']['users']['id']]);\n          $col    = $cfg['arch']['user_options']['id_user'];\n          $id_new = $this->add($data);\n        }\n        break;\n      case 'group':\n        if ($src = $this->getGroup($id)) {\n          $data = X::mergeArrays($src, $data);\n          unset($data[$this->class_cfg['arch']['groups']['id']]);\n          $col    = $cfg['arch']['user_options']['id_group'];\n          $id_new = $this->groupInsert($data);\n        }\n        break;\n    }\n\n    if (!empty($id_new)) {\n      if ($options = $this->getOptions($type, $id)) {\n        $ids = [];\n        foreach ($options as $o) {\n          $old_id = $o['id'];\n          unset($o['id']);\n          $o[$col] = $id_new;\n          if ($this->db->insertIgnore($cfg['table'], $o)) {\n            $ids[$old_id] = $this->db->lastId();\n          }\n        }\n\n        $bids = [];\n        foreach ($ids as $oid => $nid) {\n          $bits = $this->db->rselectAll(\n            $cfg['tables']['user_options_bits'], [], [\n            $cfg['arch']['user_options_bits']['id_user_option'] => $oid,\n            $cfg['arch']['user_options_bits']['id_parent'] => null\n            ]\n          );\n          foreach ($bits as $bit) {\n            $old_id = $bit[$cfg['arch']['user_options_bits']['id']];\n            unset($bit[$cfg['arch']['user_options_bits']['id']]);\n            $bit[$cfg['arch']['user_options_bits']['id_user_option']] = $nid;\n            $this->db->insert($cfg['tables']['user_options_bits'], $bit);\n            $bids[$old_id] = $this->db->lastId();\n          }\n        }\n\n        $remaining = -1;\n        $before    = 0;\n        $done      = [];\n        while ($remaining && ($before !== $remaining)) {\n          if ($remaining === -1) {\n            $before = 0;\n          }\n          else {\n            $before = $remaining;\n          }\n\n          $remaining = 0;\n          foreach ($ids as $oid => $nid) {\n            if (in_array($nid, $done)) {\n              continue;\n            }\n\n            $bits = $this->db->rselectAll(\n              $cfg['tables']['user_options_bits'], [], [\n              $cfg['arch']['user_options_bits']['id_user_option'] => $oid,\n              [$cfg['arch']['user_options_bits']['id_parent'], 'isnotnull']\n              ]\n            );\n            if (!count($bits)) {\n              $done[] = $nid;\n              continue;\n            }\n\n            foreach ($bits as $bit) {\n              $old_id = $bit[$cfg['arch']['user_options_bits']['id']];\n              if (isset($bids[$old_id])) {\n                continue;\n              }\n\n              if (!isset($bids[$bit[$cfg['arch']['user_options_bits']['id_parent']]])) {\n                $remaining++;\n              }\n              else {\n                unset($bit[$cfg['arch']['user_options_bits']['id']]);\n                $bit[$cfg['arch']['user_options_bits']['id_user_option']] = $nid;\n                $bit[$cfg['arch']['user_options_bits']['id_parent']]      = $bids[$bit[$cfg['arch']['user_options_bits']['id_parent']]];\n                $this->db->insert($cfg['tables']['user_options_bits'], $bit);\n                $bids[$old_id] = $this->db->lastId();\n              }\n            }\n          }\n        }\n      }\n\n      return $id_new;\n    }\n\n    return null;\n  }",
-            "startLine": 559,
-            "endLine": 664,
+            "code": "  public function copy(string $type, string $id, array $data): ?string\n  {\n    $pref = Preferences::getPreferences();\n    $cfg  = $pref->getClassCfg();\n    switch ($type) {\n      case 'user':\n        if ($src = $this->getUser($id)) {\n          $data = X::mergeArrays($src, $data);\n          unset($data[$this->class_cfg['arch']['users']['id']]);\n          $col    = $cfg['arch']['user_options']['id_user'];\n          $id_new = $this->add($data);\n        }\n        break;\n      case 'group':\n        if ($src = $this->getGroup($id)) {\n          $data = X::mergeArrays($src, $data);\n          unset($data[$this->class_cfg['arch']['groups']['id']]);\n          $col    = $cfg['arch']['user_options']['id_group'];\n          $id_new = $this->groupInsert($data);\n        }\n        break;\n    }\n\n    if (!empty($id_new)) {\n      if ($options = $this->getOptions($type, $id)) {\n        $ids = [];\n        foreach ($options as $o) {\n          $old_id = $o['id'];\n          unset($o['id']);\n          $o[$col] = $id_new;\n          if ($this->db->insertIgnore($cfg['table'], $o)) {\n            $ids[$old_id] = $this->db->lastId();\n          }\n        }\n\n        $bids = [];\n        foreach ($ids as $oid => $nid) {\n          $bits = $this->db->rselectAll(\n            $cfg['tables']['user_options_bits'], [], [\n            $cfg['arch']['user_options_bits']['id_user_option'] => $oid,\n            $cfg['arch']['user_options_bits']['id_parent'] => null\n            ]\n          );\n          foreach ($bits as $bit) {\n            $old_id = $bit[$cfg['arch']['user_options_bits']['id']];\n            unset($bit[$cfg['arch']['user_options_bits']['id']]);\n            $bit[$cfg['arch']['user_options_bits']['id_user_option']] = $nid;\n            $this->db->insert($cfg['tables']['user_options_bits'], $bit);\n            $bids[$old_id] = $this->db->lastId();\n          }\n        }\n\n        $remaining = -1;\n        $before    = 0;\n        $done      = [];\n        while ($remaining && ($before !== $remaining)) {\n          if ($remaining === -1) {\n            $before = 0;\n          }\n          else {\n            $before = $remaining;\n          }\n\n          $remaining = 0;\n          foreach ($ids as $oid => $nid) {\n            if (in_array($nid, $done)) {\n              continue;\n            }\n\n            $bits = $this->db->rselectAll(\n              $cfg['tables']['user_options_bits'], [], [\n              $cfg['arch']['user_options_bits']['id_user_option'] => $oid,\n              [$cfg['arch']['user_options_bits']['id_parent'], 'isnotnull']\n              ]\n            );\n            if (!count($bits)) {\n              $done[] = $nid;\n              continue;\n            }\n\n            foreach ($bits as $bit) {\n              $old_id = $bit[$cfg['arch']['user_options_bits']['id']];\n              if (isset($bids[$old_id])) {\n                continue;\n              }\n\n              if (!isset($bids[$bit[$cfg['arch']['user_options_bits']['id_parent']]])) {\n                $remaining++;\n              }\n              else {\n                unset($bit[$cfg['arch']['user_options_bits']['id']]);\n                $bit[$cfg['arch']['user_options_bits']['id_user_option']] = $nid;\n                $bit[$cfg['arch']['user_options_bits']['id_parent']]      = $bids[$bit[$cfg['arch']['user_options_bits']['id_parent']]];\n                $this->db->insert($cfg['tables']['user_options_bits'], $bit);\n                $bids[$old_id] = $this->db->lastId();\n              }\n            }\n          }\n        }\n      }\n\n      return $id_new;\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 573,
+            "endLine": 678,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -883,16 +1103,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "copy",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "type",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -902,6 +1127,11 @@
                     "name": "id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -911,6 +1141,11 @@
                     "name": "data",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -923,13 +1158,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, string $subject, string $text, array $attachments = [])\n  {\n    if (($usr = $this->getUser($id_user)) && $usr['email']) {\n      if (!$this->getMailer()) {\n        \/\/return mail($usr['email'], $subject, $text);\n        throw new \\Exception(X::_(\"Impossible to make hotlinks without a proper mailer parameter\"));\n      }\n\n      return $this->mailer->send(\n        [\n        'to' => $usr['email'],\n        'subject' => $subject,\n        'text' => $text,\n        'attachments' => $attachments\n        ]\n      );\n    }\n\n    return null;\n  }",
-            "startLine": 667,
-            "endLine": 686,
+            "code": "  public function sendMail(string $id_user, string $subject, string $text, array $attachments = []): ?int\n  {\n    if (($usr = $this->getUser($id_user)) && $usr['email']) {\n      if (!$this->getMailer()) {\n        \/\/return mail($usr['email'], $subject, $text);\n        throw new \\Exception(X::_(\"Impossible to make hotlinks without a proper mailer parameter\"));\n      }\n\n      return $this->mailer->send(\n        [\n        'to' => $usr['email'],\n        'subject' => $subject,\n        'text' => $text,\n        'attachments' => $attachments\n        ]\n      );\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 681,
+            "endLine": 700,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -938,16 +1176,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 3,
+            "shortName": "sendMail",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -957,6 +1200,11 @@
                     "name": "subject",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -966,6 +1214,11 @@
                     "name": "text",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -975,6 +1228,11 @@
                     "name": "attachments",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -987,13 +1245,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($id, $pass)\n  {\n    return (bool)$this->db->insert(\n      $this->class_cfg['tables']['passwords'], [\n      $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),\n      $this->class_cfg['arch']['passwords']['id_user'] => $id,\n      $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n      ]\n    );\n  }",
-            "startLine": 688,
-            "endLine": 697,
+            "code": "  public function setPassword($id, $pass)\n  {\n    return (bool)$this->db->insert(\n      $this->class_cfg['tables']['passwords'], [\n      $this->class_cfg['arch']['passwords']['pass'] => $this->_hash($pass),\n      $this->class_cfg['arch']['passwords']['id_user'] => $id,\n      $this->class_cfg['arch']['passwords']['added'] => date('Y-m-d H:i:s')\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 702,
+            "endLine": 711,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1002,13 +1263,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "setPassword",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1018,6 +1282,9 @@
                     "name": "pass",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1030,30 +1297,38 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, string $message = 'hotlink', $exp = NULL)\n  {\n    if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {\n      switch ($message)\n      {\n        case 'hotlink':\n          if ($path = bbn\\Mvc::getPluginUrl('appui-usergroup')) {\n            $this->messages[$message]['link'] = BBN_URL.$path.'\/main\/profile';\n          }\n          break;\n        case 'creation':\n          if ($path = bbn\\Mvc::getPluginUrl('appui-core')) {\n            $this->messages[$message]['link'] = BBN_URL.$path.'\/login\/%s';\n          }\n          break;\n        case 'password':\n          if ($path = bbn\\Mvc::getPluginUrl('appui-core')) {\n            $this->messages[$message]['link'] = BBN_URL.$path.'\/login\/%s';\n          }\n          break;\n      }\n\n      if (empty($this->messages[$message]['link'])) {\n        throw new \\Exception(X::_(\"Impossible to make hotlinks without a link configured\"));\n      }\n    }\n\n    if ($usr = $this->getUser($id_user)) {\n      \/\/ Expiration date\n      if (!\\is_int($exp) || ($exp < 1)) {\n        $exp = time() + $this->hotlink_length;\n      }\n\n      $hl =& $this->class_cfg['arch']['hotlinks'];\n      \/\/ Expire existing valid hotlinks\n      $this->db->update(\n        $this->class_cfg['tables']['hotlinks'], [\n        $hl['expire'] => date('Y-m-d H:i:s')\n        ],[\n        [$hl['id_user'], '=', $id_user],\n        [$hl['expire'], '>', date('Y-m-d H:i:s')]\n        ]\n      );\n      $magic = $this->usrcls->makeMagicString();\n      \/\/ Create hotlink\n      $this->db->insert(\n        $this->class_cfg['tables']['hotlinks'], [\n        $hl['magic'] => $magic['hash'],\n        $hl['id_user'] => $id_user,\n        $hl['expire'] => date('Y-m-d H:i:s', $exp)\n        ]\n      );\n      $id_link = $this->db->lastId();\n      $link    = \"?id=$id_link&key=\".$magic['key'];\n      $this->sendMail(\n        $id_user,\n        $this->messages[$message]['subject'],\n        sprintf($this->messages[$message]['text'], sprintf($this->messages[$message]['link'], $link))\n      );\n    }\n    else{\n      X::log(\"User $id_user not found\");\n      throw new \\Exception(X::_('User not found'));\n    }\n\n    return $this;\n  }",
-            "startLine": 708,
-            "endLine": 774,
+            "code": "  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null, string $url = null): self\n  {\n    if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {\n      switch ($message)\n      {\n        case 'hotlink':\n          if ($path = bbn\\Mvc::getPluginUrl('appui-usergroup')) {\n            $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'\/main\/profile';\n          }\n          break;\n        case 'creation':\n          if ($path = bbn\\Mvc::getPluginUrl('appui-core')) {\n            $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'\/login\/%s';\n          }\n          break;\n        case 'password':\n          if ($path = bbn\\Mvc::getPluginUrl('appui-core')) {\n            $this->messages[$message]['link'] = ($url ?: BBN_URL).$path.'\/login\/%s';\n          }\n          break;\n      }\n\n      if (empty($this->messages[$message]['link'])) {\n        throw new \\Exception(X::_(\"Impossible to make hotlinks without a link configured\"));\n      }\n    }\n\n    if ($usr = $this->getUser($id_user)) {\n      \/\/ Expiration date\n      if (!\\is_int($exp) || ($exp < 1)) {\n        $exp = time() + $this->hotlink_length;\n      }\n\n      $hl =& $this->class_cfg['arch']['hotlinks'];\n      \/\/ Expire existing valid hotlinks\n      $this->db->update(\n        $this->class_cfg['tables']['hotlinks'], [\n        $hl['expire'] => date('Y-m-d H:i:s')\n        ],[\n        [$hl['id_user'], '=', $id_user],\n        [$hl['expire'], '>', date('Y-m-d H:i:s')]\n        ]\n      );\n      $magic = $this->usrcls->makeMagicString();\n      \/\/ Create hotlink\n      $this->db->insert(\n        $this->class_cfg['tables']['hotlinks'], [\n        $hl['magic'] => $magic['hash'],\n        $hl['id_user'] => $id_user,\n        $hl['expire'] => date('Y-m-d H:i:s', $exp)\n        ]\n      );\n      $id_link = $this->db->lastId();\n      $link    = \"?id=$id_link&key=\".$magic['key'];\n      $this->sendMail(\n        $id_user,\n        $this->messages[$message]['subject'],\n        sprintf($this->messages[$message]['text'], sprintf($this->messages[$message]['link'], $link))\n      );\n    }\n    else{\n      X::log(\"User $id_user not found\");\n      throw new \\Exception(X::_('User not found'));\n    }\n\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 722,
+            "endLine": 788,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 3,
+            "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "makeHotlink",
             "returns": [
                 "self"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1064,6 +1339,11 @@
                     "name": "message",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "hotlink",
@@ -1074,26 +1354,72 @@
                     "name": "exp",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": "",
                     "description": "Timestamp of the expiration date"
+                },
+                {
+                    "name": "url",
+                    "position": 3,
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$id",
+                        "description": "user User ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$message",
+                        "description": "Type of the message"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$exp",
+                        "description": "Timestamp of the expiration date"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   *\n   * @param string $id_user User ID\n   * @param string $message Type of the message\n   * @param int    $exp     Timestamp of the expiration date\n   * @return manager\n   *\/"
         },
         "setUniqueGroup": {
             "name": "setUniqueGroup",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, string $id_group)\n  {\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['users'], [\n      $this->class_cfg['arch']['users']['id_group'] => $id_group\n      ], [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n      ]\n    );\n  }",
-            "startLine": 783,
-            "endLine": 792,
+            "code": "  public function setUniqueGroup(string $id_user, string $id_group): bool\n  {\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['users'], [\n      $this->class_cfg['arch']['users']['id_group'] => $id_group\n      ], [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 797,
+            "endLine": 806,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1102,15 +1428,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "setUniqueGroup",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1121,26 +1452,53 @@
                     "name": "id_group",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "group Group ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "user  User ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "group Group ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   *\n   * @param int $id_user  User ID\n   * @param int $id_group Group ID\n   * @return manager\n   *\/"
         },
         "userHasOption": {
             "name": "userHasOption",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, string $id_option, bool $with_group = true)\n  {\n    if ($with_group && $user = $this->getUser($id_user)) {\n      $id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n      if ($this->groupHasOption($id_group, $id_option)) {\n        return true;\n      }\n    }\n\n    if ($pref = Preferences::getPreferences()) {\n      if ($cfg = $pref->getClassCfg()) {\n        return $this->db->count(\n          $cfg['table'], [\n          $cfg['arch']['user_options']['id_option'] => $id_option,\n          $cfg['arch']['user_options']['id_user'] => $id_user\n          ]\n        ) ? true : false;\n      }\n    }\n\n    return false;\n  }",
-            "startLine": 795,
-            "endLine": 816,
+            "code": "  public function userHasOption(string $id_user, string $id_option, bool $with_group = true): bool\n  {\n    if ($with_group && $user = $this->getUser($id_user)) {\n      $id_group = $user[$this->class_cfg['arch']['users']['id_group']];\n      if ($this->groupHasOption($id_group, $id_option)) {\n        return true;\n      }\n    }\n\n    if ($pref = Preferences::getPreferences()) {\n      if ($cfg = $pref->getClassCfg()) {\n        return $this->db->count(\n          $cfg['table'], [\n          $cfg['arch']['user_options']['id_option'] => $id_option,\n          $cfg['arch']['user_options']['id_user'] => $id_user\n          ]\n        ) ? true : false;\n      }\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 809,
+            "endLine": 830,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1149,15 +1507,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "userHasOption",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1167,6 +1530,11 @@
                     "name": "id_option",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1176,6 +1544,11 @@
                     "name": "with_group",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
@@ -1188,13 +1561,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_group, string $id_option)\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return $this->db->count(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_group'] => $id_group\n        ]\n      ) ? true : false;\n    }\n\n    return false;\n  }",
-            "startLine": 819,
-            "endLine": 833,
+            "code": "  public function groupHasOption(string $id_group, string $id_option): bool\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return $this->db->count(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_group'] => $id_group\n        ]\n      ) ? true : false;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 833,
+            "endLine": 847,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1203,15 +1579,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "groupHasOption",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_group",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1221,6 +1602,11 @@
                     "name": "id_option",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1233,13 +1619,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $type, string $id)\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      if (stripos($type,  'group') === 0) {\n        return $this->db->rselectAll(\n          $cfg['table'], [], [\n          $cfg['arch']['user_options']['id_group'] => $id\n          ]\n        );\n      }\n      elseif (stripos($type, 'user') === 0) {\n        return $this->db->rselectAll(\n          $cfg['table'], [], [\n          $cfg['arch']['user_options']['id_user'] => $id\n          ]\n        );\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 836,
-            "endLine": 858,
+            "code": "  public function getOptions(string $type, string $id): ?array\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      if (stripos($type,  'group') === 0) {\n        return $this->db->rselectAll(\n          $cfg['table'], [], [\n          $cfg['arch']['user_options']['id_group'] => $id\n          ]\n        );\n      }\n      elseif (stripos($type, 'user') === 0) {\n        return $this->db->rselectAll(\n          $cfg['table'], [], [\n          $cfg['arch']['user_options']['id_user'] => $id\n          ]\n        );\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 850,
+            "endLine": 872,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1248,16 +1637,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getOptions",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "type",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1267,6 +1661,11 @@
                     "name": "id",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1279,13 +1678,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, string $id_option)\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->insertIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_user'] => $id_user\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 861,
-            "endLine": 875,
+            "code": "  public function userInsertOption(string $id_user, string $id_option): bool\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->insertIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_user'] => $id_user\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 875,
+            "endLine": 889,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1294,15 +1696,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "userInsertOption",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1312,6 +1719,11 @@
                     "name": "id_option",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1324,13 +1736,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_group, string $id_option)\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->insertIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_group'] => $id_group\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 878,
-            "endLine": 892,
+            "code": "  public function groupInsertOption(string $id_group, string $id_option): bool\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->insertIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_group'] => $id_group\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 892,
+            "endLine": 906,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1339,15 +1754,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "groupInsertOption",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_group",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1357,6 +1777,11 @@
                     "name": "id_option",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1369,13 +1794,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user, string $id_option)\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->deleteIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_user'] => $id_user\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 895,
-            "endLine": 909,
+            "code": "  public function userDeleteOption(string $id_user, string $id_option): bool\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->deleteIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_user'] => $id_user\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 909,
+            "endLine": 923,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1384,15 +1812,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "userDeleteOption",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1402,6 +1835,11 @@
                     "name": "id_option",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1414,13 +1852,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_group, string $id_option)\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->deleteIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_group'] => $id_group\n        ]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 912,
-            "endLine": 926,
+            "code": "  public function groupDeleteOption(string $id_group, string $id_option): bool\n  {\n    if (($pref = Preferences::getPreferences())\n        && ($cfg = $pref->getClassCfg())\n    ) {\n      return (bool)$this->db->deleteIgnore(\n        $cfg['table'], [\n        $cfg['arch']['user_options']['id_option'] => $id_option,\n        $cfg['arch']['user_options']['id_group'] => $id_group\n        ]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 926,
+            "endLine": 940,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1429,15 +1870,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "groupDeleteOption",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_group",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1447,6 +1893,11 @@
                     "name": "id_option",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1459,13 +1910,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_group)\n  {\n    $u =& $this->class_cfg['arch']['users'];\n    return $this->db->count(\n      $this->class_cfg['tables']['users'], [\n      $u['id_group'] => $id_group\n      ]\n    );\n  }",
-            "startLine": 929,
-            "endLine": 937,
+            "code": "  public function groupNumUsers(string $id_group): int\n  {\n    $u =& $this->class_cfg['arch']['users'];\n    return $this->db->count(\n      $this->class_cfg['tables']['users'], [\n      $u['id_group'] => $id_group\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 943,
+            "endLine": 951,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1474,15 +1928,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "groupNumUsers",
             "returns": [
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_group",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1495,13 +1954,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(array $data)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if (isset($data[$g['group']])) {\n      if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {\n        $data[$g['cfg']] = json_encode($data[$g['cfg']]);\n      }\n\n      if ($this->db->insert(\n        $this->class_cfg['tables']['groups'],\n        [\n          $g['group'] => $data[$g['group']],\n          $g['code'] => $data[$g['code']] ?? null,\n          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'\n        ]\n      )\n      ) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
-            "startLine": 940,
-            "endLine": 962,
+            "code": "  public function groupInsert(array $data): ?string\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if (isset($data[$g['group']])) {\n      if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {\n        $data[$g['cfg']] = json_encode($data[$g['cfg']]);\n      }\n\n      if ($this->db->insert(\n        $this->class_cfg['tables']['groups'],\n        [\n          $g['group'] => $data[$g['group']],\n          $g['code'] => $data[$g['code']] ?? null,\n          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'\n        ]\n      )\n      ) {\n        return $this->db->lastId();\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 954,
+            "endLine": 976,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1510,16 +1972,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "groupInsert",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "data",
                     "position": 0,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1532,13 +1999,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, array $data)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if (!empty($data[$g['group']])) {\n      if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {\n        $data[$g['cfg']] = json_encode($data[$g['cfg']]);\n      }\n\n      return (bool)$this->db->update(\n        $this->class_cfg['tables']['groups'],\n        [\n          $g['group'] => $data[$g['group']],\n          $g['code'] => $data[$g['code']] ?? null,\n          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'\n        ],\n        [$g['id'] => $id]\n      );\n    }\n\n    return false;\n  }",
-            "startLine": 965,
-            "endLine": 985,
+            "code": "  public function groupEdit(string $id, array $data): bool\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if (!empty($data[$g['group']])) {\n      if (!empty($data[$g['cfg']]) && is_array($data[$g['cfg']])) {\n        $data[$g['cfg']] = json_encode($data[$g['cfg']]);\n      }\n\n      return (bool)$this->db->update(\n        $this->class_cfg['tables']['groups'],\n        [\n          $g['group'] => $data[$g['group']],\n          $g['code'] => $data[$g['code']] ?? null,\n          $g['cfg'] => !empty($g['cfg']) && !empty($data[$g['cfg']]) ? $data[$g['cfg']] : '{}'\n        ],\n        [$g['id'] => $id]\n      );\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 979,
+            "endLine": 999,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1547,15 +2017,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "groupEdit",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1565,6 +2040,11 @@
                     "name": "data",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1577,13 +2057,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, string $name)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['groups'], [\n      $g['group'] => $name\n      ], [\n      $g['id'] => $id\n      ]\n    );\n  }",
-            "startLine": 988,
-            "endLine": 998,
+            "code": "  public function groupRename(string $id, string $name): bool\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['groups'], [\n      $g['group'] => $name\n      ], [\n      $g['id'] => $id\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1002,
+            "endLine": 1012,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1592,15 +2075,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "groupRename",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1610,6 +2098,11 @@
                     "name": "name",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1622,13 +2115,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id, array $cfg)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['groups'], [\n      $g['cfg'] => $cfg ?: '{}'\n      ], [\n      $g['id'] => $id\n      ]\n    );\n  }",
-            "startLine": 1001,
-            "endLine": 1011,
+            "code": "  public function groupSetCfg(string $id, array $cfg): bool\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['groups'], [\n      $g['cfg'] => $cfg ?: '{}'\n      ], [\n      $g['id'] => $id\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1015,
+            "endLine": 1025,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1637,15 +2133,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "groupSetCfg",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1655,6 +2156,11 @@
                     "name": "cfg",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1667,13 +2173,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id)\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if ($this->groupNumUsers($id)) {\n      \/** @todo Error management *\/\n      throw new \\Exception(X::_(\"Impossible to delete this group as it has users\"));\n    }\n\n    return (bool)$this->db->delete(\n      $this->class_cfg['tables']['groups'], [\n      $g['id'] => $id\n      ]\n    );\n  }",
-            "startLine": 1014,
-            "endLine": 1027,
+            "code": "  public function groupDelete(string $id): bool\n  {\n    $g = $this->class_cfg['arch']['groups'];\n    if ($this->groupNumUsers($id)) {\n      \/** @todo Error management *\/\n      throw new \\Exception(X::_(\"Impossible to delete this group as it has users\"));\n    }\n\n    return (bool)$this->db->delete(\n      $this->class_cfg['tables']['groups'], [\n      $g['id'] => $id\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1028,
+            "endLine": 1041,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1682,15 +2191,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "groupDelete",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1703,13 +2217,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user)\n  {\n    $update = [\n    $this->class_cfg['arch']['users']['active'] => 0,\n    $this->class_cfg['arch']['users']['email'] => null,\n    ];\n    if (!empty($this->class_cfg['arch']['users']['login'])) {\n      $update[$this->class_cfg['arch']['users']['login']] = null;\n    }\n\n    if ($this->db->update(\n      $this->class_cfg['tables']['users'], $update, [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n      ]\n    )\n    ) {\n      \/\/ Deleting existing sessions\n      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id_user'] => $id_user]);\n      return true;\n    }\n\n    return false;\n  }",
-            "startLine": 1035,
-            "endLine": 1057,
+            "code": "  public function deactivate(string $id_user): bool\n  {\n    $update = [\n    $this->class_cfg['arch']['users']['active'] => 0,\n    $this->class_cfg['arch']['users']['email'] => null,\n    ];\n    if (!empty($this->class_cfg['arch']['users']['login'])) {\n      $update[$this->class_cfg['arch']['users']['login']] = null;\n    }\n\n    if ($this->db->update(\n      $this->class_cfg['tables']['users'], $update, [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n      ]\n    )\n    ) {\n      \/\/ Deleting existing sessions\n      $this->db->delete($this->class_cfg['tables']['sessions'], [$this->class_cfg['arch']['sessions']['id_user'] => $id_user]);\n      return true;\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1049,
+            "endLine": 1071,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1718,35 +2235,56 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "deactivate",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "user User ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "user User ID"
+                    }
+                ],
+                "return": "Update result"
+            },
+            "comments": "  \/**\n   * @param int $id_user User ID\n   *\n   * @return int|false Update result\n     *\/"
         },
         "reactivate": {
             "name": "reactivate",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_user)\n  {\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['users'], [\n      $this->class_cfg['arch']['users']['active'] => 1\n      ], [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n      ]\n    );\n  }",
-            "startLine": 1065,
-            "endLine": 1074,
+            "code": "  public function reactivate(string $id_user): bool\n  {\n    return (bool)$this->db->update(\n      $this->class_cfg['tables']['users'], [\n      $this->class_cfg['arch']['users']['active'] => 1\n      ], [\n      $this->class_cfg['arch']['users']['id'] => $id_user\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1079,
+            "endLine": 1088,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1755,35 +2293,56 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "reactivate",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_user",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "user User ID"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$id",
+                        "description": "user User ID"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param int $id_user User ID\n   *\n   * @return manager\n   *\/"
         },
         "addPermission": {
             "name": "addPermission",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_perm, string $id_user = NULL, string $id_group = NULL, int $public = 0)\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    return (bool)$this->db->insertIgnore(\n      'bbn_users_options',\n      [\n        'id_option' => $id_perm,\n        'id_user' => $id_user,\n        'id_group' => $id_group,\n        'public' => $public\n      ]\n    );\n  }",
-            "startLine": 1077,
-            "endLine": 1092,
+            "code": "  public function addPermission(string $id_perm, string $id_user = null, string $id_group = null, int $public = 0): bool\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    if (!($pref = \\bbn\\User\\Preferences::getInstance())) {\n      throw new \\Exception(\"No User\\Preferences instance!\");\n    }\n\n    if (!($prefCfg = $pref->getClassCfg())) {\n      throw new \\Exception(\"No User\\Preferences cfg!\");\n    }\n\n\n    return (bool)$this->db->insertIgnore(\n      $prefCfg['tables']['user_options'],\n      [\n        $prefCfg['arch']['user_options']['id_option'] => $id_perm,\n        $prefCfg['arch']['user_options']['id_user'] => $id_user,\n        $prefCfg['arch']['user_options']['id_group'] => $id_group,\n        $prefCfg['arch']['user_options']['public'] => $public\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1091,
+            "endLine": 1115,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1792,15 +2351,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "addPermission",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_perm",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1809,7 +2373,13 @@
                 {
                     "name": "id_user",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1818,7 +2388,13 @@
                 {
                     "name": "id_group",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1828,6 +2404,11 @@
                     "name": "public",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1840,13 +2421,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_perm, string $id_user = NULL, string $id_group = NULL, int $public = 0)\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    return (bool)$this->db->deleteIgnore(\n      'bbn_users_options',\n      [\n        'id_option' => $id_perm,\n        'id_user' => $id_user,\n        'id_group' => $id_group,\n        'public' => $public\n      ]\n    );\n  }",
-            "startLine": 1095,
-            "endLine": 1110,
+            "code": "  public function removePermission(string $id_perm, string $id_user = null, string $id_group = null, int $public = 0): bool\n  {\n    if (!$id_group && !$id_user && !$public) {\n      throw new \\Exception(\"No paraneters!\");\n    }\n\n    if (!($pref = \\bbn\\User\\Preferences::getInstance())) {\n      throw new \\Exception(\"No User\\Preferences instance!\");\n    }\n\n    if (!($prefCfg = $pref->getClassCfg())) {\n      throw new \\Exception(\"No User\\Preferences cfg!\");\n    }\n\n    return (bool)$this->db->deleteIgnore(\n      $prefCfg['tables']['user_options'],\n      [\n        $prefCfg['arch']['user_options']['id_option'] => $id_perm,\n        $prefCfg['arch']['user_options']['id_user'] => $id_user,\n        $prefCfg['arch']['user_options']['id_group'] => $id_group,\n        $prefCfg['arch']['user_options']['public'] => $public\n      ]\n    );\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1118,
+            "endLine": 1141,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1855,15 +2439,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "removePermission",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_perm",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1872,7 +2461,13 @@
                 {
                     "name": "id_user",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1881,7 +2476,13 @@
                 {
                     "name": "id_group",
                     "position": 2,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1891,6 +2492,11 @@
                     "name": "public",
                     "position": 3,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -1903,13 +2509,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $path)\n  {\n\n    return false;\n  }",
-            "startLine": 1113,
-            "endLine": 1117,
+            "code": "  public function createPermission(string $path)\n  {\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1144,
+            "endLine": 1148,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1918,13 +2527,18 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "createPermission",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "path",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1937,13 +2551,16 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\User\\Manager",
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id_perm)\n  {\n\n    return false;\n  }",
-            "startLine": 1120,
-            "endLine": 1124,
+            "code": "  public function deletePermission(string $id_perm): bool\n  {\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1151,
+            "endLine": 1155,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1952,29 +2569,360 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "deletePermission",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id_perm",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "setDefaultListFields": {
+            "name": "setDefaultListFields",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
+            "static": false,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected function setDefaultListFields()\n  {\n    $fields = $this->class_cfg['arch']['users'];\n    unset($fields['id'], $fields['active'], $fields['cfg']);\n    $this->list_fields = [];\n    foreach ($fields as $n => $f){\n      if (!\\in_array($f, $this->list_fields)) {\n        $this->list_fields[$n] = $f;\n      }\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1158,
+            "endLine": 1168,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "setDefaultListFields",
+            "returns": [],
+            "arguments": []
+        },
+        "setAdminGroup": {
+            "name": "setAdminGroup",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function setAdminGroup($id)\n  {\n    self::$admin_group = $id;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1171,
+            "endLine": 1174,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setAdminGroup",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "setDevGroup": {
+            "name": "setDevGroup",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
+            "static": true,
+            "visibility": "protected",
+            "final": false,
+            "code": "  protected static function setDevGroup($id)\n  {\n    self::$dev_group = $id;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1177,
+            "endLine": 1180,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDevGroup",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "_hash": {
+            "name": "_hash",
+            "summary": "Use the configured hash function to encrypt a password string.",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\User\\Manager",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/User\/Manager.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _hash(string $st): string\n  {\n    if (!function_exists($this->class_cfg['encryption'])) {\n      $this->class_cfg['encryption'] = 'sha256';\n    }\n\n    return $this->class_cfg['encryption']($st);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 1189,
+            "endLine": 1196,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "_hash",
+            "returns": [
+                "string"
+            ],
+            "arguments": [
+                {
+                    "name": "st",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The string to crypt"
+                }
+            ],
+            "doc": {
+                "description": "Use the configured hash function to encrypt a password string.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st",
+                        "description": "The string to crypt"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n  * Use the configured hash function to encrypt a password string.\n  *\n  * @param string $st The string to crypt\n  * @return string\n  *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "admin_group": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "dev_group": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "messages": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": {
+                "creation": {
+                    "subject": "Account created",
+                    "link": "",
+                    "text": "\nA new user has been created for you.<br>\nPlease click the link below in order to activate your account:<br>\n%1$s"
+                },
+                "password": {
+                    "subject": "Password change",
+                    "link": "",
+                    "text": "\nYou can click the following link to change your password:<br>\n%1$s"
+                },
+                "hotlink": {
+                    "subject": "Hotlink",
+                    "link": "",
+                    "text": "\nYou can click the following link to access directly your account:<br>\n%1$s"
+                }
+            }
+        },
+        "hotlink_length": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": 86400
+        },
+        "list_fields": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "usrcls": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "mailer": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": false
+        },
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "class_cfg": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\User\\Manager"
+            },
+            "declaring_trait": "bbn\\User\\Manager",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": false,
+            "value": false
+        }
+    },
     "staticProperties": {
         "admin_group": null,
         "dev_group": null
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X",
+        "stdClass": "stdClass"
+    },
+    "dummyComments": [
+        "\/**\n * @package user\n *\/",
+        "\/**\n * A class for managing users\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Authentication\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
     "summary": "A class for managing users",
     "description": "",
     "description_parts": []

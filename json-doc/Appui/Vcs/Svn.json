@@ -11,6 +11,8 @@
     },
     "name": "bbn\\Appui\\Vcs\\Svn",
     "namespace": true,
+    "realName": "Svn",
+    "realNamespace": "bbn\\Appui\\Vcs",
     "traits": [
         "bbn\\Appui\\Vcs\\Common"
     ],
@@ -22,17 +24,14 @@
     "fileName": "\/Appui\/Vcs\/Svn.php",
     "startLine": 18,
     "endLine": 345,
-    "numMethods": 42,
-    "numProperties": 0,
+    "numMethods": 44,
+    "numProperties": 8,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [
         "bbn\\Appui\\Vcs\\Server"
     ],
     "isInterface": false,
-    "traitNames": [
-        "bbn\\Appui\\Vcs\\Common"
-    ],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -55,7 +54,6 @@
     "namespaceName": "bbn\\Appui\\Vcs",
     "shortName": "Svn",
     "contentConstructor": {
-        "file": "bbn\\Appui\\Vcs\\Svn",
         "returns": []
     },
     "methods": {
@@ -64,11 +62,14 @@
             "summary": "Constructor.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bbn\\Db $db, string $idServer)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->idServer = $idServer;\n    $this->server = $this->getServer($this->id);\n    $this->checkServerHost($this->server->host);\n    $this->userConnection = new \\stdClass();\n    $this->adminConnection = new \\stdClass();\n  }",
+            "code": "  public function __construct(bbn\\Db $db, string $idServer)\n  {\n    $this->db = $db;\n    $this->opt = Option::getInstance();\n    $this->pwd = new Passwords($this->db);\n    $this->idServer = $idServer;\n    $this->server = $this->getServer($this->id);\n    $this->checkServerHost($this->server->host);\n    $this->userConnection = new \\stdClass();\n    $this->adminConnection = new \\stdClass();\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 45,
             "endLine": 55,
             "isDeprecated": false,
@@ -79,13 +80,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "db",
                     "position": 0,
                     "type": "bbn\\Db",
+                    "type_arr": [
+                        "bbn\\Db"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -95,23 +101,43 @@
                     "name": "idServer",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Constructor.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "bbn\\Db",
+                        "name": "$db"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Constructor.\n   * @param bbn\\Db $db\n   *\/"
         },
         "getConnection": {
             "name": "getConnection",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(bool $asAdmin = false)\n  {\n    return $asAdmin ? $this->adminConnection : $this->userConnection;\n  }",
+            "code": "  public function getConnection(bool $asAdmin = false): object\n  {\n    return $asAdmin ? $this->adminConnection : $this->userConnection;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 58,
             "endLine": 61,
             "isDeprecated": false,
@@ -122,15 +148,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getConnection",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "asAdmin",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -143,11 +174,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [];\n  }",
+            "code": "  public function getCurrentUser(): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 63,
             "endLine": 66,
             "isDeprecated": false,
@@ -158,10 +192,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getCurrentUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getProjectsList": {
@@ -169,11 +203,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(int $page = 1, int $perPage = 25)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectsList(int $page = 1, int $perPage = 25): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 69,
             "endLine": 72,
             "isDeprecated": false,
@@ -184,15 +221,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectsList",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "page",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
@@ -202,6 +244,11 @@
                     "name": "perPage",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 25,
@@ -214,11 +261,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return null;\n  }",
+            "code": "  public function getProject(string $idProject): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 75,
             "endLine": 78,
             "isDeprecated": false,
@@ -229,16 +279,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProject",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -251,11 +306,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectBranches(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 81,
             "endLine": 84,
             "isDeprecated": false,
@@ -266,15 +324,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectBranches",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -287,11 +350,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectTags(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 87,
             "endLine": 90,
             "isDeprecated": false,
@@ -302,15 +368,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectTags",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -323,11 +394,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectUsers(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 93,
             "endLine": 96,
             "isDeprecated": false,
@@ -338,15 +412,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -359,11 +438,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [];\n  }",
+            "code": "  public function getProjectUsersRoles(): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 99,
             "endLine": 102,
             "isDeprecated": false,
@@ -374,10 +456,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getProjectUsersRoles",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getProjectUsersEvents": {
@@ -385,11 +467,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectUsersEvents(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 105,
             "endLine": 108,
             "isDeprecated": false,
@@ -400,15 +485,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectUsersEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -421,11 +511,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectEvents(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 111,
             "endLine": 114,
             "isDeprecated": false,
@@ -436,15 +529,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -457,11 +555,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectCommitsEvents(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 117,
             "endLine": 120,
             "isDeprecated": false,
@@ -472,15 +573,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectCommitsEvents",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -493,11 +599,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectLabels(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 123,
             "endLine": 126,
             "isDeprecated": false,
@@ -508,15 +617,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectLabels",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -529,11 +643,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $branch)\n  {\n    return [];\n  }",
+            "code": "  public function normalizeBranch(object $branch): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 129,
             "endLine": 132,
             "isDeprecated": false,
@@ -544,15 +661,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeBranch",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "branch",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -565,11 +687,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $event)\n  {\n    return (array)$event;\n  }",
+            "code": "  public function normalizeEvent(object $event): array\n  {\n    return (array)$event;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 135,
             "endLine": 138,
             "isDeprecated": false,
@@ -580,15 +705,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeEvent",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "event",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -601,11 +731,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $user)\n  {\n    return [\n      'id' => '',\n      'name' => '',\n      'username' => '',\n      'avatar' => '',\n      'url' => ''\n    ];\n  }",
+            "code": "  public function normalizeUser(object $user): array\n  {\n    return [\n      'id' => '',\n      'name' => '',\n      'username' => '',\n      'avatar' => '',\n      'url' => ''\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 141,
             "endLine": 150,
             "isDeprecated": false,
@@ -616,15 +749,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "user",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -637,11 +775,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $member)\n  {\n    return X::mergeArrays([\n      'created' => '',\n      'author' => [],\n      'expire' => '',\n      'role' => ''\n    ], $this->normalizeUser($member));\n  }",
+            "code": "  public function normalizeMember(object $member): array\n  {\n    return X::mergeArrays([\n      'created' => '',\n      'author' => [],\n      'expire' => '',\n      'role' => ''\n    ], $this->normalizeUser($member));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 153,
             "endLine": 161,
             "isDeprecated": false,
@@ -652,15 +793,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeMember",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "member",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -673,11 +819,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $label)\n  {\n    return [\n      'id' => '',\n      'name' => '',\n      'description' => '',\n      'backgroundColor' => '',\n      'fontColor' => '',\n      'openedIssues' => '',\n      'closedIssues' => ''\n    ];\n  }",
+            "code": "  public function normalizeLabel(object $label): array\n  {\n    return [\n      'id' => '',\n      'name' => '',\n      'description' => '',\n      'backgroundColor' => '',\n      'fontColor' => '',\n      'openedIssues' => '',\n      'closedIssues' => ''\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 164,
             "endLine": 175,
             "isDeprecated": false,
@@ -688,15 +837,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeLabel",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "label",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -709,11 +863,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(object $project)\n  {\n    return [\n      'id' => '',\n      'type' => 'svn',\n      'name' => '',\n      'fullname' => '',\n      'description' => '',\n      'path' => '',\n      'fullpath' => '',\n      'url' => '',\n      'urlGit' => '',\n      'urlSsh' => '',\n      'namespace' => [\n        'id' => '',\n        'idParent' => '',\n        'name' => '',\n        'path' => '',\n        'fullpath' => '',\n        'url' => ''\n      ],\n      'created' => '',\n      'creator' => '',\n      'private' => '',\n      'visibility' => '',\n      'defaultBranch' => '',\n      'archived' => '',\n      'avatar' => '',\n      'license' => [\n        'name' => '',\n        'code' => ''\n      ],\n      'noCommits' => '',\n      'size' => '',\n      'noForks' => '',\n      'noStars' => ''\n    ];\n  }",
+            "code": "  public function normalizeProject(object $project): array\n  {\n    return [\n      'id' => '',\n      'type' => 'svn',\n      'name' => '',\n      'fullname' => '',\n      'description' => '',\n      'path' => '',\n      'fullpath' => '',\n      'url' => '',\n      'urlGit' => '',\n      'urlSsh' => '',\n      'namespace' => [\n        'id' => '',\n        'idParent' => '',\n        'name' => '',\n        'path' => '',\n        'fullpath' => '',\n        'url' => ''\n      ],\n      'created' => '',\n      'creator' => '',\n      'private' => '',\n      'visibility' => '',\n      'defaultBranch' => '',\n      'archived' => '',\n      'avatar' => '',\n      'license' => [\n        'name' => '',\n        'code' => ''\n      ],\n      'noCommits' => '',\n      'size' => '',\n      'noForks' => '',\n      'noStars' => ''\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 178,
             "endLine": 215,
             "isDeprecated": false,
@@ -724,15 +881,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "normalizeProject",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "project",
                     "position": 0,
                     "type": "object",
+                    "type_arr": [
+                        "object"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -745,11 +907,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch, string $fromBranch)\n  {\n    return [];\n  }",
+            "code": "  public function insertBranch(string $idProject, string $branch, string $fromBranch): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 218,
             "endLine": 221,
             "isDeprecated": false,
@@ -760,15 +925,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertBranch",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -778,6 +948,11 @@
                     "name": "branch",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -787,6 +962,11 @@
                     "name": "fromBranch",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -799,11 +979,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $branch)\n  {\n    return false;\n  }",
+            "code": "  public function deleteBranch(string $idProject, string $branch): bool\n  {\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 224,
             "endLine": 227,
             "isDeprecated": false,
@@ -814,15 +997,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "deleteBranch",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -832,6 +1020,11 @@
                     "name": "branch",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -844,11 +1037,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser, int $idRole)\n  {\n    return [];\n  }",
+            "code": "  public function insertProjectUser(string $idProject, int $idUser, int $idRole): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 230,
             "endLine": 233,
             "isDeprecated": false,
@@ -859,15 +1055,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectUser",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -877,6 +1078,11 @@
                     "name": "idUser",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -886,6 +1092,11 @@
                     "name": "idRole",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -898,11 +1109,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idUser)\n  {\n    return false;\n  }",
+            "code": "  public function removeProjectUser(string $idProject, int $idUser): bool\n  {\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 236,
             "endLine": 239,
             "isDeprecated": false,
@@ -913,15 +1127,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "removeProjectUser",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -931,6 +1150,11 @@
                     "name": "idUser",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -943,11 +1167,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [];\n  }",
+            "code": "  public function getUsers(): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 242,
             "endLine": 245,
             "isDeprecated": false,
@@ -958,10 +1185,10 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUsers",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": []
         },
         "getProjectIssues": {
@@ -969,11 +1196,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectIssues(string $idProject): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 248,
             "endLine": 251,
             "isDeprecated": false,
@@ -984,15 +1214,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "getProjectIssues",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1005,11 +1240,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectIssue(string $idProject, int $idIssue): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 253,
             "endLine": 256,
             "isDeprecated": false,
@@ -1020,15 +1258,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getProjectIssue",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1038,6 +1281,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1050,11 +1298,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false, string $date = '')\n  {\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    return null;\n  }",
+            "code": "  public function createProjectIssue(\n    string $idProject,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false,\n    string $date = ''\n  ): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 258,
             "endLine": 269,
             "isDeprecated": false,
@@ -1065,16 +1316,21 @@
             "returnsReference": false,
             "numberOfParameters": 7,
             "numberOfRequiredParameters": 2,
+            "shortName": "createProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1084,6 +1340,11 @@
                     "name": "title",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1093,6 +1354,11 @@
                     "name": "description",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1102,6 +1368,11 @@
                     "name": "labels",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1110,7 +1381,13 @@
                 {
                     "name": "assigned",
                     "position": 4,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1120,6 +1397,11 @@
                     "name": "private",
                     "position": 5,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1129,6 +1411,11 @@
                     "name": "date",
                     "position": 6,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1141,11 +1428,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $title, string $description = '', array $labels = [], int $assigned = NULL, bool $private = false)\n  {\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    return null;\n  }",
+            "code": "  public function editProjectIssue(\n    string $idProject,\n    int $idIssue,\n    string $title,\n    string $description = '',\n    array $labels = [],\n    int $assigned = null,\n    bool $private = false\n  ): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 272,
             "endLine": 283,
             "isDeprecated": false,
@@ -1156,16 +1446,21 @@
             "returnsReference": false,
             "numberOfParameters": 7,
             "numberOfRequiredParameters": 3,
+            "shortName": "editProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1175,6 +1470,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1184,6 +1484,11 @@
                     "name": "title",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1193,6 +1498,11 @@
                     "name": "description",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1202,6 +1512,11 @@
                     "name": "labels",
                     "position": 4,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -1210,7 +1525,13 @@
                 {
                     "name": "assigned",
                     "position": 5,
-                    "type": "int",
+                    "type": "null|int",
+                    "type_arr": [
+                        "null",
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -1220,6 +1541,11 @@
                     "name": "private",
                     "position": 6,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1232,11 +1558,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return null;\n  }",
+            "code": "  public function closeProjectIssue(string $idProject, int $idIssue): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 286,
             "endLine": 289,
             "isDeprecated": false,
@@ -1247,16 +1576,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "closeProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1266,6 +1600,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1278,11 +1617,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return null;\n  }",
+            "code": "  public function reopenProjectIssue(string $idProject, int $idIssue): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 292,
             "endLine": 295,
             "isDeprecated": false,
@@ -1293,16 +1635,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "reopenProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1312,6 +1659,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1324,11 +1676,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idUser)\n  {\n    return null;\n  }",
+            "code": "  public function assignProjectIssue(string $idProject, int $idIssue, int $idUser): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 298,
             "endLine": 301,
             "isDeprecated": false,
@@ -1339,16 +1694,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "assignProjectIssue",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1358,6 +1718,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1367,6 +1732,11 @@
                     "name": "idUser",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1379,11 +1749,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue)\n  {\n    return [];\n  }",
+            "code": "  public function getProjectIssueComments(string $idProject, int $idIssue): array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 304,
             "endLine": 307,
             "isDeprecated": false,
@@ -1394,15 +1767,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "getProjectIssueComments",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1412,6 +1790,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1424,11 +1807,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = '')\n  {\n    return [];\n  }",
+            "code": "  public function insertProjectIssueComment(string $idProject, int $idIssue, string $content, bool $pvt = false, string $date = ''): ?array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 310,
             "endLine": 313,
             "isDeprecated": false,
@@ -1439,16 +1825,21 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 3,
+            "shortName": "insertProjectIssueComment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1458,6 +1849,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1467,6 +1863,11 @@
                     "name": "content",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1476,6 +1877,11 @@
                     "name": "pvt",
                     "position": 3,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1485,6 +1891,11 @@
                     "name": "date",
                     "position": 4,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1497,11 +1908,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false)\n  {\n    return [];\n  }",
+            "code": "  public function editProjectIssueComment(string $idProject, int $idIssue, int $idComment, string $content, bool $pvt = false): ?array\n  {\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 316,
             "endLine": 319,
             "isDeprecated": false,
@@ -1512,16 +1926,21 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 4,
+            "shortName": "editProjectIssueComment",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1531,6 +1950,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1540,6 +1964,11 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1549,6 +1978,11 @@
                     "name": "content",
                     "position": 3,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1558,6 +1992,11 @@
                     "name": "pvt",
                     "position": 4,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -1570,11 +2009,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, int $idComment)\n  {\n    return false;\n  }",
+            "code": "  public function deleteProjectIssueComment(string $idProject, int $idIssue, int $idComment): bool\n  {\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 322,
             "endLine": 325,
             "isDeprecated": false,
@@ -1585,15 +2027,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "deleteProjectIssueComment",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1603,6 +2050,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1612,6 +2064,11 @@
                     "name": "idComment",
                     "position": 2,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1624,11 +2081,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, string $name, string $color)\n  {\n    return null;\n  }",
+            "code": "  public function createProjectLabel(string $idProject, string $name, string $color): ?array\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 328,
             "endLine": 331,
             "isDeprecated": false,
@@ -1639,16 +2099,21 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "createProjectLabel",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1658,6 +2123,11 @@
                     "name": "name",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1667,6 +2137,11 @@
                     "name": "color",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1679,11 +2154,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    return false;\n  }",
+            "code": "  public function addLabelToProjectIssue(string $idProject, int $idIssue, string $label): bool\n  {\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 334,
             "endLine": 337,
             "isDeprecated": false,
@@ -1694,15 +2172,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "addLabelToProjectIssue",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1712,6 +2195,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1721,6 +2209,11 @@
                     "name": "label",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1733,11 +2226,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Svn.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $idProject, int $idIssue, string $label)\n  {\n    return false;\n  }",
+            "code": "  public function removeLabelFromProjectIssue(string $idProject, int $idIssue, string $label): bool\n  {\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 340,
             "endLine": 343,
             "isDeprecated": false,
@@ -1748,15 +2244,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 3,
+            "shortName": "removeLabelFromProjectIssue",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "idProject",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1766,6 +2267,11 @@
                     "name": "idIssue",
                     "position": 1,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1775,6 +2281,11 @@
                     "name": "label",
                     "position": 2,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1787,11 +2298,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "code": "  public function hasAdminAccessToken(string $id = ''): bool\n  {\n    return !!$this->getAdminAccessToken($id ?: $this->idServer);\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 24,
             "endLine": 27,
             "isDeprecated": false,
@@ -1802,15 +2316,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "hasAdminAccessToken",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1823,11 +2342,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "code": "  public function getAdminAccessToken(string $id = ''): ?string\n  {\n    return $this->pwd->get($id ?: $this->idServer);\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 30,
             "endLine": 33,
             "isDeprecated": false,
@@ -1838,16 +2360,21 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getAdminAccessToken",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1860,11 +2387,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "code": "  public function getUserAccessToken(string $id = ''): string\n  {\n    if (!empty($this->idUser)) {\n      $user = new User($this->db, ['id' => $this->idUser]);\n      $pref = new Preferences($this->db);\n      $pref->setUser($user);\n    }\n    else {\n      if (!($user = User::getInstance())) {\n        throw new \\Exception(X::_('No User class instance found'));\n      }\n      if (X::isCli()\n        && defined('BBN_EXTERNAL_USER_ID')\n        && ($user->getId() === BBN_EXTERNAL_USER_ID)\n      ) {\n        return $this->getAdminAccessToken($id);\n      }\n      if (!($pref = Preferences::getInstance())) {\n        throw new \\Exception(X::_('No User\\Preferences class instance found'));\n      }\n    }\n    if (!($userPref = $pref->getByOption($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No user\\'s preference found for the server %s', $id ?: $this->idServer));\n    }\n    else {\n      $idPref = $userPref[$pref->getFields()['id']];\n    }\n    if (!($token = $this->pwd->userGet($idPref, $user))) {\n      throw new \\Exception(X::_('No user\\'s access token found for the server %s', $id ?: $this->idServer));\n    }\n    return $token;\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 36,
             "endLine": 67,
             "isDeprecated": false,
@@ -1875,15 +2405,20 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getUserAccessToken",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -1896,11 +2431,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Appui\\Vcs\\Svn",
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $id = '')\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "code": "  public function getServer(string $id = ''): object\n  {\n    if (!($server = $this->opt->option($id ?: $this->idServer))) {\n      throw new \\Exception(X::_('No server found with ID %s', $id ?: $this->idServer));\n    }\n    return $this->normalizeServer($server);\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
             "startLine": 70,
             "endLine": 76,
             "isDeprecated": false,
@@ -1911,26 +2449,268 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getServer",
             "returns": [
                 "object"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "id",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
             ]
+        },
+        "normalizeServer": {
+            "name": "normalizeServer",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function normalizeServer(array $server): object\n  {\n    try {\n      $ut = $this->getUserAccessToken($server['id']);\n    }\n    catch(\\Exception $e) {\n      $ut = '';\n    }\n    return (object)[\n      'id' => $server['id'],\n      'name' => $server['text'],\n      'host' => 'https:\/\/' . $server['code'],\n      'type' => $server['type'],\n      'engine' => $server['engine'],\n      'userAccessToken' => $ut,\n      'hasAdminAccessToken' => $this->hasAdminAccessToken($server['id']),\n      'hasUserAccessToken'=> !empty($ut)\n    ];\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
+            "startLine": 79,
+            "endLine": 97,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "normalizeServer",
+            "returns": [
+                "object"
+            ],
+            "arguments": [
+                {
+                    "name": "server",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        },
+        "checkServerHost": {
+            "name": "checkServerHost",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Appui\\Vcs\\Svn",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Vcs\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function checkServerHost(string $host)\n  {\n    if (!str_starts_with($host, 'http')) {\n      $host = 'https:\/\/' . $host;\n    }\n    if (!Str::isUrl($host)) {\n      throw new \\Exception(X::_('No valid host URL: %s', $host));\n    }\n  }",
+            "parent": false,
+            "trait": "bbn\\Appui\\Vcs\\Common",
+            "startLine": 100,
+            "endLine": 108,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "checkServerHost",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "host",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
         }
     },
-    "properties": null,
+    "properties": {
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Db The bbn\\Db class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "pwd": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Appui\\Passwords The bbn\\Appui\\Passwords class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "idServer": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Svn",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var string The server ID",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "server": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Svn",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var object The server info",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "userConnection": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Svn",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var object The SVN class instance for normal user",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "adminConnection": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Svn",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var object The SVN class instance for admin user",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "opt": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "@var bbn\\Appui\\Option The bbn\\Appui\\Option class instance",
+                "tags": []
+            },
+            "parent": false,
+            "value": null
+        },
+        "idUser": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Appui\\Vcs\\Svn"
+            },
+            "declaring_trait": "bbn\\Appui\\Vcs\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\Appui\\Passwords": "Passwords",
+        "bbn\\Appui\\Option": "Option",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * VCS\\Svn class\n * @category Appui\n * @package Appui\\Vcs\n * @author Mirko Argentino <mirko@bbn.solutions>\n * @license http:\/\/www.opensource.org\/licenses\/mit-license.html MIT License\n * @link https:\/\/bbn.io\/bbn-php\/doc\/class\/Appui\/Vcs\/Svn\n *\/"
+    ],
     "summary": "VCS\\Svn class",
     "description": "",
     "description_parts": []

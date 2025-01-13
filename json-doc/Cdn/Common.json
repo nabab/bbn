@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Cdn\\Common",
     "namespace": true,
+    "realName": "Common",
+    "realNamespace": "bbn\\Cdn",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Cdn\/Common.php",
     "startLine": 12,
     "endLine": 53,
-    "numMethods": 0,
-    "numProperties": 1,
+    "numMethods": 1,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": true,
     "isAbstract": false,
@@ -53,11 +54,118 @@
     "namespaceName": "bbn\\Cdn",
     "shortName": "Common",
     "contentConstructor": null,
-    "methods": null,
+    "methods": {
+        "_set_prefix": {
+            "name": "_set_prefix",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Cdn\\Common",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Cdn\/Common.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function _set_prefix(){\n    if ( defined('BBN_SHARED_PATH') && (strpos(BBN_SHARED_PATH, '\/') === 0) ){\n      $this->prefix = substr(BBN_SHARED_PATH, 1);\n      $this->furl = '\/'.$this->prefix;\n    }\n    else{\n      $this->furl = BBN_URL;\n      $parsed = parse_url(BBN_SHARED_PATH);\n      if ( $parsed['path'] && ($parsed['path'] !== '\/') ){\n        $this->prefix = substr($parsed['path'], 1);\n        $this->furl .= $this->prefix;\n      }\n    }\n    $this->fpath = BBN_PUBLIC.$this->prefix;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 37,
+            "endLine": 51,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "_set_prefix",
+            "returns": [],
+            "arguments": []
+        }
+    },
     "properties": {
+        "prefix": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Common"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "fpath": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Common"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "furl": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Common"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
         "types": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Cdn\\Common"
+            },
+            "declaring_trait": "bbn\\Cdn\\Common",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
+            "parent": false,
             "value": {
                 "js": [
                     "js",
@@ -101,6 +209,13 @@
         }
     },
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 26\/02\/2017\n * Time: 00:59\n *\/",
+        "\/**\n   * @var string\n   *\/",
+        "\/**\n   * @var string\n   *\/",
+        "\/**\n   * @var string\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

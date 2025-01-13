@@ -1,0 +1,190 @@
+{
+    "doc": {
+        "description": "",
+        "tags": []
+    },
+    "name": "bbn\\Appui\\Option\\Permission",
+    "namespace": true,
+    "realName": "Permission",
+    "realNamespace": "bbn\\Appui\\Option",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Appui\/Option\/Permission.php",
+    "startLine": 7,
+    "endLine": 77,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": true,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Appui\\Option",
+    "shortName": "Permission",
+    "contentConstructor": null,
+    "methods": {
+        "hasPermission": {
+            "name": "hasPermission",
+            "summary": "Checks whether an option has _permissions_ in its parent cfg",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->hasPermission('bbn_ide'));\n\/\/ (bool) true"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Permission",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Permission.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function hasPermission($code = null)\n  {\n    if (Str::isUid($p = $this->getIdParent(\\func_get_args()))) {\n      $cfg = $this->getCfg($p);\n      return !empty($cfg['permissions']);\n    }\n\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 20,
+            "endLine": 28,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "hasPermission",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "code",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "Any option(s) accepted by {@link fromCode()}"
+                }
+            ],
+            "doc": {
+                "description": "Checks whether an option has _permissions_ in its parent cfg\n\n```php\nX::dump($opt->hasPermission('bbn_ide'));\n\/\/ (bool) true\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "mixed",
+                        "name": "$code",
+                        "description": "Any option(s) accepted by {@link fromCode()}"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether an option has _permissions_ in its parent cfg\n   *\n   * ```php\n   * X::dump($opt->hasPermission('bbn_ide'));\n   * \/\/ (bool) true\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return bool\n   *\/"
+        },
+        "findPermissions": {
+            "name": "findPermissions",
+            "summary": "Returns an array of _permissions_ from origin $id",
+            "description": "",
+            "description_parts": [
+                {
+                    "type": "code",
+                    "content": "X::dump($opt->findPermissions());\n\/* Returns a full tree of permissions for all options\narray []"
+                }
+            ],
+            "class": "bbn\\Appui\\Option\\Permission",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Appui\/Option\/Permission.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function findPermissions($id = null, $deep = false)\n  {\n    if ($this->check()) {\n      if (\\is_null($id)) {\n        $id = $this->default;\n      }\n\n      $cfg = $this->getCfg($id);\n      if (!empty($cfg['permissions'])) {\n        $perms = [];\n        if ($opts  = $this->fullOptionsCfg($id)) {\n          foreach ($opts as $opt){\n            $o = [\n              'icon' => $opt[$this->fields['cfg']]['icon'] ?? 'nf nf-fa-cog',\n              'text' => $this->getTranslation($opt[$this->fields['id']]) ?: $opt[$this->fields['text']],\n              'id' => $opt[$this->fields['id']]\n            ];\n            if ($deep && !empty($opt[$this->fields['cfg']]['permissions'])) {\n              $o['items'] = $this->findPermissions($opt[$this->fields['id']], true);\n            }\n\n            $perms[] = $o;\n          }\n        }\n\n        return $perms;\n      }\n    }\n\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 45,
+            "endLine": 75,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 0,
+            "shortName": "findPermissions",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "id",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
+                    "default_name": "",
+                    "description": "The origin's ID"
+                },
+                {
+                    "name": "deep",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": false,
+                    "default_name": "",
+                    "description": "If set to true the children will also be searched"
+                }
+            ],
+            "doc": {
+                "description": "Returns an array of _permissions_ from origin $id\n\n```php\nX::dump($opt->findPermissions());\n\/* Returns a full tree of permissions for all options\narray []\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "int|null",
+                        "name": "$id",
+                        "description": "The origin's ID"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$deep",
+                        "description": "If set to true the children will also be searched"
+                    }
+                ],
+                "return": "An array of permissions if there are, null otherwise",
+                "todo": {
+                    "tag": "todo",
+                    "text": "Returned comments to add"
+                }
+            },
+            "comments": "  \/**\n   * Returns an array of _permissions_ from origin $id\n   *\n   * ```php\n   * X::dump($opt->findPermissions());\n   * \/* Returns a full tree of permissions for all options\n   * array []\n   * ```\n   *\n   * @todo Returned comments to add\n   * @param int|null $id   The origin's ID\n   * @param boolean  $deep If set to true the children will also be searched\n   * @return array|null An array of permissions if there are, null otherwise\n   *\/"
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": {
+        "bbn\\Str": "Str"
+    },
+    "dummyComments": [
+        "\/**\n   * Checks whether an option has _permissions_ in its parent cfg\n   *\n   * ```php\n   * X::dump($opt->hasPermission('bbn_ide'));\n   * \/\/ (bool) true\n   * ```\n   *\n   * @param mixed $code Any option(s) accepted by {@link fromCode()}\n   * @return bool\n   *\/",
+        "\/**\n   * Returns an array of _permissions_ from origin $id\n   *\n   * ```php\n   * X::dump($opt->findPermissions());\n   * \/* Returns a full tree of permissions for all options\n   * array []\n   * ```\n   *\n   * @todo Returned comments to add\n   * @param int|null $id   The origin's ID\n   * @param boolean  $deep If set to true the children will also be searched\n   * @return array|null An array of permissions if there are, null otherwise\n   *\/"
+    ],
+    "summary": "",
+    "description": "",
+    "description_parts": []
+}

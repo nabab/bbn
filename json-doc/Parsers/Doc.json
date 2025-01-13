@@ -10,18 +10,19 @@
     },
     "name": "bbn\\Parsers\\Doc",
     "namespace": true,
+    "realName": "Doc",
+    "realNamespace": "bbn\\Parsers",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Parsers\/Doc.php",
     "startLine": 17,
     "endLine": 787,
-    "numMethods": 7,
-    "numProperties": 0,
+    "numMethods": 31,
+    "numProperties": 7,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -302,20 +303,1378 @@
     "namespaceName": "bbn\\Parsers",
     "shortName": "Doc",
     "contentConstructor": {
-        "file": "bbn\\Parsers\\Doc",
         "returns": []
     },
     "methods": {
+        "setTags": {
+            "name": "setTags",
+            "summary": "Sets the tags list relative to the selected mode",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function setTags()\n  {\n    if ($this->mode) {\n      if ($this->mode === 'vue') {\n        $tags = X::mergeArrays($this->all_tags['js'], $this->all_tags['vue']);\n      } else {\n        $tags = $this->all_tags[$this->mode];\n      }\n\n      $this->tags = X::mergeArrays($this->all_tags['common'], $tags);\n      return $this->tags;\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 192,
+            "endLine": 204,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "setTags",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Sets the tags list relative to the selected mode\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the tags list relative to the selected mode\n   *\n   * @return array\n   *\/"
+        },
+        "clearText": {
+            "name": "clearText",
+            "summary": "Removes spaces and not allowed characters from the text",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function clearText(string $text)\n  {\n    \/\/return trim(str_replace('   ', ' ', str_replace('  ', ' ', preg_replace('\/\\n\\s+\\*\\s{0,1}\/', PHP_EOL, $text))));\n    $lines = X::split($text, PHP_EOL);\n    $newLines = [];\n    foreach ($lines as $line) {\n      $tmp = trim($line);\n      if (substr($tmp, 0, 1) === '*') {\n        if ($tmp === '*') {\n          $tmp = '';\n        }\n        else {\n          $tmp = substr($tmp, 2);\n          $tmp = rtrim($tmp);\n        }\n      }\n\n      if (!empty($tmp) || !empty($newLines)) {\n        $newLines[] = $tmp;\n      }\n    }\n\n    return X::join($newLines, PHP_EOL);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 213,
+            "endLine": 236,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "clearText",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The text to clear"
+                }
+            ],
+            "doc": {
+                "description": "Removes spaces and not allowed characters from the text\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The text to clear"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Removes spaces and not allowed characters from the text\n   *\n   * @param string $text The text to clear\n   * @return string\n   *\/"
+        },
+        "parseTag": {
+            "name": "parseTag",
+            "summary": "Parses a tag",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function parseTag(string $text)\n  {\n    $res = [];\n    $text = $this->clearText($text);\n    \/\/$tag_end = strpos($text, ' ');\n    preg_match('\/^\\@{1}\\w+\\s{0,1}\/', $text, $tag);\n    $tag_end = !empty($tag) && !empty($tag[0]) ? strlen($tag[0]) - 1 : false;\n    if ($tag_end !== false) {\n      \/\/ Get tag\n      $res['tag'] = substr($text, 1, $tag_end - 1);\n      if (in_array($res['tag'], array_keys($this->tags))) {\n        if (\n          $this->tagHasText($res['tag']) &&\n          ($text = substr($text, $tag_end + 1))\n        ) {\n          $res['text'] = $this->clearText($text);\n        } else {\n          \/\/ Get type\n          if (\n            $this->tagHasType($res['tag']) &&\n            ($type = $this->tagGetType($text)) &&\n            !empty($type[1])\n          ) {\n            $res['type'] = $type[1][0];\n          }\n          \/\/ Get default value\n          if (\n            $this->tagHasDefault($res['tag']) &&\n            ($def = $this->tagGetDefault($text)) &&\n            !empty($def[1])\n          ) {\n            $res['default'] = $def[1][0];\n          }\n          \/\/ Get name\n          if (isset($def[1])) {\n            $n = $def[0][1] + strlen($def[0][0]) + 1;\n          } else if (isset($type[1])) {\n            $n = $type[0][1] + strlen($type[0][0]) + 1;\n          } else {\n            $n = $tag_end + 1;\n          }\n          if (\n            $this->tagHasName($res['tag']) &&\n            ($name = $this->tagGetName(substr($text, $n)))\n          ) {\n            $res['name'] = $this->clearText($name[0][0]);\n          }\n          \/\/ Get description\n          if (isset($name[0])) {\n            $d = $n + $name[0][1] + strlen($name[0][0]) + 1;\n          } else if (isset($type[1])) {\n            $d = $type[0][1] + strlen($type[0][0]) + 1;\n          } else {\n            $d = $tag_end + 1;\n          }\n          if (\n            $this->tagHasDesc($res['tag']) &&\n            ($desc = substr($text, $d))\n          ) {\n            $res['description'] = trim($desc);\n          }\n        }\n\n        return $res;\n      }\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 244,
+            "endLine": 311,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "parseTag",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag text to parse"
+                }
+            ],
+            "doc": {
+                "description": "Parses a tag\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The tag text to parse"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Parses a tag\n   *\n   * @param string $text The tag text to parse\n   * @return array|false\n   *\/"
+        },
+        "getTags": {
+            "name": "getTags",
+            "summary": "Gets te tags list of a docblock",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getTags(string $block)\n  {\n    preg_match_all($this->pattern['tag'], $block, $tags, PREG_OFFSET_CAPTURE);\n    if (!empty($tags[0])) {\n      return $tags[0];\n    }\n    return [];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 319,
+            "endLine": 326,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "getTags",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "block",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The docblock"
+                }
+            ],
+            "doc": {
+                "description": "Gets te tags list of a docblock\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$block",
+                        "description": "The docblock"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets te tags list of a docblock\n   *\n   * @param string $block The docblock\n   * @return array\n   *\/"
+        },
+        "groupTags": {
+            "name": "groupTags",
+            "summary": "Groups tags by name",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function groupTags(array $tags)\n  {\n    $res = [];\n    if (!empty($tags)) {\n      foreach ($tags as $i => $tag) {\n        \/\/ Skip the 'memberof' tag\n        if ($tag['tag'] === 'memberof') {\n          continue;\n        }\n        $t = $tag['tag'];\n        unset($tag['tag']);\n        $res[$t][] = $tag['text'] ?? $tag;\n      }\n    }\n    return array_map(function ($r) {\n      if (is_array($r) && (count($r) === 1)) {\n        \/\/return $r[0];\n      }\n      return $r;\n    }, $res);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 334,
+            "endLine": 354,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "groupTags",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tags",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tags list"
+                }
+            ],
+            "doc": {
+                "description": "Groups tags by name\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$tags",
+                        "description": "The tags list"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Groups tags by name\n   *\n   * @param array $tags The tags list\n   * @return array\n   *\/"
+        },
+        "tagHasType": {
+            "name": "tagHasType",
+            "summary": "Cheks if a tag has 'type'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagHasType(string $tag)\n  {\n    return in_array('type', array_values(\n      \\is_array($this->tags[$tag]) ?\n        $this->tags[$tag] :\n        $this->tags[$this->tags[$tag]]\n    ));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 362,
+            "endLine": 369,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagHasType",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag name"
+                }
+            ],
+            "doc": {
+                "description": "Cheks if a tag has 'type'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tag",
+                        "description": "The tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Cheks if a tag has 'type'\n   *\n   * @param string $tag The tag name\n   * @return boolean\n   *\/"
+        },
+        "tagHasDefault": {
+            "name": "tagHasDefault",
+            "summary": "Cheks if a tag has 'default'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagHasDefault(string $tag)\n  {\n    return in_array('default', array_values(\n      \\is_array($this->tags[$tag]) ?\n        $this->tags[$tag] :\n        $this->tags[$this->tags[$tag]]\n    ));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 377,
+            "endLine": 384,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagHasDefault",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag name"
+                }
+            ],
+            "doc": {
+                "description": "Cheks if a tag has 'default'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tag",
+                        "description": "The tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Cheks if a tag has 'default'\n   *\n   * @param string $tag The tag name\n   * @return boolean\n   *\/"
+        },
+        "tagHasName": {
+            "name": "tagHasName",
+            "summary": "Cheks if a tag has 'name'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagHasName(string $tag)\n  {\n    return in_array('name', array_values(\n      \\is_array($this->tags[$tag]) ?\n        $this->tags[$tag] :\n        $this->tags[$this->tags[$tag]]\n    ));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 392,
+            "endLine": 399,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagHasName",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag name"
+                }
+            ],
+            "doc": {
+                "description": "Cheks if a tag has 'name'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tag",
+                        "description": "The tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Cheks if a tag has 'name'\n   *\n   * @param string $tag The tag name\n   * @return boolean\n   *\/"
+        },
+        "tagHasDesc": {
+            "name": "tagHasDesc",
+            "summary": "Cheks if a tag has 'description'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagHasDesc(string $tag)\n  {\n    return in_array('description', array_values(\n      \\is_array($this->tags[$tag]) ?\n        $this->tags[$tag] :\n        $this->tags[$this->tags[$tag]]\n    ));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 407,
+            "endLine": 414,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagHasDesc",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag name"
+                }
+            ],
+            "doc": {
+                "description": "Cheks if a tag has 'description'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tag",
+                        "description": "The tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Cheks if a tag has 'description'\n   *\n   * @param string $tag The tag name\n   * @return boolean\n   *\/"
+        },
+        "tagHasText": {
+            "name": "tagHasText",
+            "summary": "Cheks if a tag has 'text'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagHasText(string $tag)\n  {\n    return in_array('text', array_values(\n      \\is_array($this->tags[$tag]) ?\n        $this->tags[$tag] :\n        $this->tags[$this->tags[$tag]]\n    ));\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 422,
+            "endLine": 429,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagHasText",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag name"
+                }
+            ],
+            "doc": {
+                "description": "Cheks if a tag has 'text'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tag",
+                        "description": "The tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Cheks if a tag has 'text'\n   *\n   * @param string $tag The tag name\n   * @return boolean\n   *\/"
+        },
+        "tagGetType": {
+            "name": "tagGetType",
+            "summary": "Gets tag 'type'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagGetType(string $text)\n  {\n    if (\n      ($this->mode === 'js') ||\n      ($this->mode === 'vue')\n    ) {\n      preg_match('\/(?:\\{)(\\S+)(?:\\})\/', $text, $type, PREG_OFFSET_CAPTURE);\n    } else if ($this->mode === 'php') {\n      preg_match('\/(?:\\@[a-z]+\\s{1})(\\S+)(?:\\s{0,1})\/', $text, $type, PREG_OFFSET_CAPTURE);\n      if (!empty($type) && isset($type[1])) {\n        $type[0] = $type[1];\n      }\n    }\n    return $type;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 437,
+            "endLine": 451,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagGetType",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag text"
+                }
+            ],
+            "doc": {
+                "description": "Gets tag 'type'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The tag text"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets tag 'type'\n   *\n   * @param string $text The tag text\n   * @return array\n   *\/"
+        },
+        "tagGetDefault": {
+            "name": "tagGetDefault",
+            "summary": "Gets tag 'default'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagGetDefault(string $text)\n  {\n    if (\n      ($this->mode === 'js') ||\n      ($this->mode === 'vue')\n    ) {\n      preg_match('\/(?:\\[)(.+)(?:\\])\/', $text, $def, PREG_OFFSET_CAPTURE);\n    }\n    return $def;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 459,
+            "endLine": 468,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagGetDefault",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag text"
+                }
+            ],
+            "doc": {
+                "description": "Gets tag 'default'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The tag text"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets tag 'default'\n   *\n   * @param string $text The tag text\n   * @return array\n   *\/"
+        },
+        "tagGetName": {
+            "name": "tagGetName",
+            "summary": "Gets tag 'name'",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function tagGetName(string $text)\n  {\n    if (\n      ($this->mode === 'js') ||\n      ($this->mode === 'vue')\n    ) {\n      \/\/preg_match('\/\\w+\/', $text, $name, PREG_OFFSET_CAPTURE);\n      preg_match('\/[[:graph:]]+\/', $text, $name, PREG_OFFSET_CAPTURE);\n    } else if ($this->mode === 'php') {\n      preg_match('\/\\$[a-z]+\/', $text, $name, PREG_OFFSET_CAPTURE);\n    }\n    return $name;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 476,
+            "endLine": 488,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "tagGetName",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "text",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag text"
+                }
+            ],
+            "doc": {
+                "description": "Gets tag 'name'\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$text",
+                        "description": "The tag text"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets tag 'name'\n   *\n   * @param string $text The tag text\n   * @return array\n   *\/"
+        },
+        "get": {
+            "name": "get",
+            "summary": "Parses the parsed array to get an array of the given tag",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function get(string $tag, string $memberof = '', bool $grouped = true)\n  {\n    if (empty($this->parsed)) {\n      $this->parse();\n    }\n    if (!empty($this->parsed)) {\n      $res = [];\n      foreach ($this->parsed as $p) {\n        if (\n          !empty($p['tags']) &&\n          (($i = X::find($p['tags'], ['tag' => $tag])) !== null) &&\n          (\n            (empty($memberof) &&\n              (X::find($p['tags'], ['tag' => 'memberof']) === null)) ||\n            (!empty($memberof) &&\n              (($k = X::find($p['tags'], ['tag' => 'memberof'])) !== null) &&\n              ($p['tags'][$k]['name'] === $memberof)))\n        ) {\n          if ($grouped) {\n            $tmp = $p['tags'][$i];\n            if ($p['tags'][$i]['tag'] !== 'file') {\n              $tmp['description'] = $p['description'];\n            }\n            unset($p['tags'][$i], $tmp['tag']);\n            $res[] = array_merge($tmp, $this->groupTags($p['tags']));\n          } else {\n            $res = array_map(function ($t) {\n              unset($t['tag']);\n              return $t;\n            }, $p['tags']);\n          }\n        }\n      }\n      return $res;\n    }\n    return false;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 497,
+            "endLine": 533,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 3,
+            "numberOfRequiredParameters": 1,
+            "shortName": "get",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "tag",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The tag name"
+                },
+                {
+                    "name": "memberof",
+                    "position": 1,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                },
+                {
+                    "name": "grouped",
+                    "position": 2,
+                    "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": true,
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "Parses the parsed array to get an array of the given tag\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$tag",
+                        "description": "The tag name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Parses the parsed array to get an array of the given tag\n   *\n   * @param string $tag The tag name\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getMethods": {
+            "name": "getMethods",
+            "summary": "Gets an array of 'method' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getMethods(string $memberof = '')\n  {\n    return $this->get('method', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 541,
+            "endLine": 544,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getMethods",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'method' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'method' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getEvents": {
+            "name": "getEvents",
+            "summary": "Gets an array of 'event' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getEvents(string $memberof = '')\n  {\n    return $this->get('event', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 552,
+            "endLine": 555,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getEvents",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'event' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'event' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getMixins": {
+            "name": "getMixins",
+            "summary": "Gets an array of 'mixin' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getMixins(string $memberof = '')\n  {\n    return $this->get('mixin', $memberof, false);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 563,
+            "endLine": 566,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getMixins",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'mixin' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'mixin' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getProps": {
+            "name": "getProps",
+            "summary": "Gets an array of 'prop' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getProps(string $memberof = '')\n  {\n    return $this->get('prop', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 574,
+            "endLine": 577,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getProps",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'prop' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'prop' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getData": {
+            "name": "getData",
+            "summary": "Gets an array of 'data' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getData(string $memberof = '')\n  {\n    return $this->get('data', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 585,
+            "endLine": 588,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getData",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'data' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'data' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getComputed": {
+            "name": "getComputed",
+            "summary": "Gets an array of 'computed' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getComputed(string $memberof = '')\n  {\n    return $this->get('computed', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 596,
+            "endLine": 599,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getComputed",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'computed' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'computed' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getWatch": {
+            "name": "getWatch",
+            "summary": "Gets an array of 'watch' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getWatch(string $memberof = '')\n  {\n    return $this->get('watch', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 607,
+            "endLine": 610,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getWatch",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'watch' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'watch' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getComponents": {
+            "name": "getComponents",
+            "summary": "Gets an array of 'component' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getComponents(string $memberof = '')\n  {\n    $res = [];\n    if ($components = $this->get('component', $memberof)) {\n      foreach ($components as $comp) {\n        if (!empty($comp['name'])) {\n          $res[] = array_merge($comp, $this->getVue($comp['name']));\n        }\n      }\n    }\n    return $res;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 618,
+            "endLine": 629,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getComponents",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'component' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'component' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getTodo": {
+            "name": "getTodo",
+            "summary": "Gets an array of 'todo' tags",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getTodo(string $memberof = '')\n  {\n    return $this->get('todo', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 637,
+            "endLine": 640,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getTodo",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets an array of 'todo' tags\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets an array of 'todo' tags\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
+        "getFile": {
+            "name": "getFile",
+            "summary": "Gets the 'file' tag",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
+            "static": false,
+            "visibility": "private",
+            "final": false,
+            "code": "  private function getFile(string $memberof = '')\n  {\n    return $this->get('file', $memberof);\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 648,
+            "endLine": 651,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getFile",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "memberof",
+                    "position": 0,
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": "",
+                    "default_name": "",
+                    "description": "The parent tag name"
+                }
+            ],
+            "doc": {
+                "description": "Gets the 'file' tag\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets the 'file' tag\n   *\n   * @param string $memberof The parent tag name\n   * @return array|false\n   *\/"
+        },
         "__construct": {
             "name": "__construct",
             "summary": "__construct",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $src = '', string $mode = 'vue')\n  {\n    $this->setMode($mode);\n    $this->setTags();\n    $this->setSource($src);\n  }",
+            "code": "  public function __construct(string $src = '', string $mode = 'vue')\n  {\n    $this->setMode($mode);\n    $this->setTags();\n    $this->setSource($src);\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 659,
             "endLine": 664,
             "isDeprecated": false,
@@ -326,13 +1685,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "src",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
@@ -343,24 +1707,51 @@
                     "name": "mode",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "vue",
                     "default_name": "",
                     "description": "The mode to use"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "__construct\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$src",
+                        "description": "The source code or an absolute file path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The mode to use"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * __construct\n   *\n   * @param string $src The source code or an absolute file path\n   * @param string $mode The mode to use\n   *\/"
         },
         "setSource": {
             "name": "setSource",
             "summary": "Sets the source to parse",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $src)\n  {\n    $this->source = is_file($src) ? file_get_contents($src) : $src;\n    $this->parsed = [];\n    return $this;\n  }",
+            "code": "  public function setSource(string $src)\n  {\n    $this->source = is_file($src) ? file_get_contents($src) : $src;\n    $this->parsed = [];\n    return $this;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 672,
             "endLine": 677,
             "isDeprecated": false,
@@ -371,31 +1762,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setSource",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "src",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The source code or an absolute file path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the source to parse\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$src",
+                        "description": "The source code or an absolute file path"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the source to parse\n   *\n   * @param string $src The source code or an absolute file path\n   * @return \\bbn\\Parsers\\Doc\n   *\/"
         },
         "setMode": {
             "name": "setMode",
             "summary": "Sets the mode",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $mode)\n  {\n    if (!empty($mode) && in_array($mode, $this->modes)) {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(X::_('Error: mode not allowed.'));\n  }",
+            "code": "  public function setMode(string $mode)\n  {\n    if (!empty($mode) && in_array($mode, $this->modes)) {\n      $this->mode = $mode;\n      return $this;\n    }\n    die(X::_('Error: mode not allowed.'));\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 685,
             "endLine": 692,
             "isDeprecated": false,
@@ -406,31 +1818,52 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "setMode",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "mode",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The mode to set"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Sets the mode\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The mode to set"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Sets the mode\n   *\n   * @param string $mode The mode to set\n   * @return \\bbn\\Parsers\\Doc\n   *\/"
         },
         "parse": {
             "name": "parse",
             "summary": "Parses the current source",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    preg_match_all($this->pattern['start'], $this->source, $matches, PREG_OFFSET_CAPTURE);\n    if (isset($matches[0])) {\n      foreach ($matches[0] as $match) {\n        preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);\n        $start = $match[1];\n        $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;\n        if ($db = $this->parseDocblock(substr($this->source, $start, $length))) {\n          $this->parsed[] = $db;\n        }\n      }\n    }\n    return $this->parsed;\n  }",
+            "code": "  public function parse()\n  {\n    preg_match_all($this->pattern['start'], $this->source, $matches, PREG_OFFSET_CAPTURE);\n    if (isset($matches[0])) {\n      foreach ($matches[0] as $match) {\n        preg_match($this->pattern['end'], $this->source, $mat, PREG_OFFSET_CAPTURE, $match[1]);\n        $start = $match[1];\n        $length = isset($mat[0]) ? ($mat[0][1] - $start) + 3 : 0;\n        if ($db = $this->parseDocblock(substr($this->source, $start, $length))) {\n          $this->parsed[] = $db;\n        }\n      }\n    }\n    return $this->parsed;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 699,
             "endLine": 713,
             "isDeprecated": false,
@@ -441,20 +1874,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "parse",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Parses the current source\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Parses the current source\n   *\n   * @return array\n   *\/"
         },
         "parseDocblock": {
             "name": "parseDocblock",
             "summary": "Parses a given docblock",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $block)\n  {\n    $b = [\n      'description' => '',\n      'tags' => []\n    ];\n    \/\/ Remove start pattern\n    \/\/$block = trim(substr($block, 3));\n    \/\/ Remove end pattern\n    $block = trim(substr($block, 0, strlen($block) - 2));\n    \/\/ Tags\n    $tags = $this->getTags($block);\n    foreach ($tags as $i => $tag) {\n      if (\n        (isset($tags[$i + 1]) &&\n          ($t = $this->parseTag(substr($block, $tag[1], $tags[$i + 1][1] - $tag[1])))) ||\n        ($t = $this->parseTag(substr($block, $tag[1])))\n      ) {\n        if (!empty($t['tag']) && ($t['tag'] === 'ignore')) {\n          return null;\n        }\n        $b['tags'][] = $t;\n      }\n    }\n    \/\/ Get Description\n    $b['description'] = $this->clearText(isset($tags[0]) ? substr($block, 3, $tags[0][1] - 1) : substr($block, 3));\n    return $b;\n  }",
+            "code": "  public function parseDocblock(string $block): ?array\n  {\n    $b = [\n      'description' => '',\n      'tags' => []\n    ];\n    \/\/ Remove start pattern\n    \/\/$block = trim(substr($block, 3));\n    \/\/ Remove end pattern\n    $block = trim(substr($block, 0, strlen($block) - 2));\n    \/\/ Tags\n    $tags = $this->getTags($block);\n    foreach ($tags as $i => $tag) {\n      if (\n        (isset($tags[$i + 1]) &&\n          ($t = $this->parseTag(substr($block, $tag[1], $tags[$i + 1][1] - $tag[1])))) ||\n        ($t = $this->parseTag(substr($block, $tag[1])))\n      ) {\n        if (!empty($t['tag']) && ($t['tag'] === 'ignore')) {\n          return null;\n        }\n        $b['tags'][] = $t;\n      }\n    }\n    \/\/ Get Description\n    $b['description'] = $this->clearText(isset($tags[0]) ? substr($block, 3, $tags[0][1] - 1) : substr($block, 3));\n    return $b;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 722,
             "endLine": 749,
             "isDeprecated": false,
@@ -465,34 +1907,55 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "parseDocblock",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "block",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The docblock"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Parses a given docblock\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$block",
+                        "description": "The docblock"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Parses a given docblock\n   *\n   * @param string $block The docblock\n   * @return array|null\n   *\/"
         },
         "getJs": {
             "name": "getJs",
             "summary": "Gets JavaScript structure",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return [\n      'description' => $this->getFile(),\n      'methods' => $this->getMethods(),\n      'events' => $this->getEvents(),\n      \/\/'todo' => $this->getTodo()\n    ];\n  }",
+            "code": "  public function getJs()\n  {\n    return [\n      'description' => $this->getFile(),\n      'methods' => $this->getMethods(),\n      'events' => $this->getEvents(),\n      \/\/'todo' => $this->getTodo()\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 756,
             "endLine": 764,
             "isDeprecated": false,
@@ -503,20 +1966,29 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getJs",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Gets JavaScript structure\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets JavaScript structure\n   *\n   * @return array\n   *\/"
         },
         "getVue": {
             "name": "getVue",
             "summary": "Gets Vue.js structure",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Parsers\\Doc",
+            "class": "bbn\\Parsers\\Doc",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Parsers\/Doc.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $memberof = '')\n  {\n    return [\n      'description' => $this->getFile($memberof),\n      'methods' => $this->getMethods($memberof),\n      'events' => $this->getEvents($memberof),\n      'mixins' => $this->getMixins($memberof),\n      'props' => $this->getProps($memberof),\n      'data' => $this->getData($memberof),\n      'computed' => $this->getComputed($memberof),\n      'watch' => $this->getWatch($memberof),\n      'components' => $this->getComponents($memberof),\n      \/\/'todo' => $this->getTodo($memberof)\n    ];\n  }",
+            "code": "  public function getVue(string $memberof = '')\n  {\n    return [\n      'description' => $this->getFile($memberof),\n      'methods' => $this->getMethods($memberof),\n      'events' => $this->getEvents($memberof),\n      'mixins' => $this->getMixins($memberof),\n      'props' => $this->getProps($memberof),\n      'data' => $this->getData($memberof),\n      'computed' => $this->getComputed($memberof),\n      'watch' => $this->getWatch($memberof),\n      'components' => $this->getComponents($memberof),\n      \/\/'todo' => $this->getTodo($memberof)\n    ];\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 772,
             "endLine": 786,
             "isDeprecated": false,
@@ -527,25 +1999,483 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "getVue",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "memberof",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": "",
                     "description": "The parent tag name"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Gets Vue.js structure\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$memberof",
+                        "description": "The parent tag name"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Gets Vue.js structure\n   *\n   * @param string $memberof The parent tag name\n   * @return array\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "source": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "name": "$source",
+                        "description": "The current source"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "mode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string",
+                        "name": "$mode",
+                        "description": "The current mode"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": ""
+        },
+        "modes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$modes",
+                        "description": "The modes allowed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": [
+                "js",
+                "vue",
+                "php"
+            ]
+        },
+        "tags": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$tags"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        },
+        "all_tags": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$all",
+                        "description": "tags"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "common": {
+                    "author": [
+                        "text"
+                    ],
+                    "copyright": [
+                        "text"
+                    ],
+                    "deprecated": [
+                        "text"
+                    ],
+                    "example": [
+                        "text"
+                    ],
+                    "file": [
+                        "text"
+                    ],
+                    "ignore": [],
+                    "license": [
+                        "text"
+                    ],
+                    "link": [
+                        "text"
+                    ],
+                    "package": [
+                        "text"
+                    ],
+                    "return": [
+                        "type",
+                        "description"
+                    ],
+                    "returns": [
+                        "type",
+                        "description"
+                    ],
+                    "since": [
+                        "text"
+                    ],
+                    "throws": [
+                        "type",
+                        "description"
+                    ],
+                    "todo": [
+                        "text"
+                    ],
+                    "version": [
+                        "text"
+                    ]
+                },
+                "js": {
+                    "abstract": [],
+                    "access": [
+                        "text"
+                    ],
+                    "alias": [],
+                    "arg": "param",
+                    "argument": "param",
+                    "async": [],
+                    "augments": [],
+                    "borrows": [],
+                    "callback": [],
+                    "class": [],
+                    "classdesc": [],
+                    "const": "constant",
+                    "constant": [],
+                    "constructor": "class",
+                    "constructs": [],
+                    "default": [
+                        "text"
+                    ],
+                    "defaultValue": "default",
+                    "desc": "description",
+                    "description": [
+                        "text"
+                    ],
+                    "emits": "fires",
+                    "enum": [],
+                    "event": [
+                        "name"
+                    ],
+                    "exception": "throws",
+                    "exports": [],
+                    "extends": "augments",
+                    "external": [],
+                    "file": [
+                        "text"
+                    ],
+                    "fileoverview": "file",
+                    "fires": [
+                        "name"
+                    ],
+                    "func": "function",
+                    "function": [
+                        "name"
+                    ],
+                    "generator": [],
+                    "global": [],
+                    "hidecontructor": [],
+                    "host": "external",
+                    "implements": [],
+                    "inner": [],
+                    "instance": [],
+                    "interface": [],
+                    "kind": [],
+                    "lends": [],
+                    "linkcode": "link",
+                    "linkplain": "link",
+                    "listens": [],
+                    "member": [],
+                    "memberof": [
+                        "name"
+                    ],
+                    "method": "function",
+                    "mixes": [],
+                    "mixin": [
+                        "name"
+                    ],
+                    "module": [],
+                    "name": [
+                        "name"
+                    ],
+                    "namespace": [],
+                    "override": [],
+                    "overview": "file",
+                    "param": [
+                        "type",
+                        "default",
+                        "name",
+                        "description"
+                    ],
+                    "private": [],
+                    "prop": "property",
+                    "property": [
+                        "type",
+                        "default",
+                        "name"
+                    ],
+                    "protected": [],
+                    "public": [],
+                    "readonly": [],
+                    "requires": [],
+                    "returns": "return",
+                    "see": [
+                        "name"
+                    ],
+                    "static": [],
+                    "summary": [
+                        "text"
+                    ],
+                    "this": [],
+                    "tutorial": [],
+                    "type": [
+                        "type"
+                    ],
+                    "typedef": [],
+                    "var": "member",
+                    "variation": [],
+                    "virtual": "abstract",
+                    "yield": "yields",
+                    "yields": []
+                },
+                "vue": {
+                    "component": [
+                        "name"
+                    ],
+                    "computed": [
+                        "name"
+                    ],
+                    "data": [
+                        "type",
+                        "default",
+                        "name",
+                        "description"
+                    ],
+                    "emits": [
+                        "name"
+                    ],
+                    "method": [
+                        "name"
+                    ],
+                    "prop": [
+                        "type",
+                        "default",
+                        "name"
+                    ],
+                    "required": [
+                        "text"
+                    ],
+                    "watch": [
+                        "name",
+                        "description"
+                    ]
+                },
+                "php": {
+                    "api": [],
+                    "category": [
+                        "text"
+                    ],
+                    "filesource": [],
+                    "global": [
+                        "type",
+                        "name",
+                        "description"
+                    ],
+                    "internal": [
+                        "text"
+                    ],
+                    "method": [
+                        "text"
+                    ],
+                    "package": [
+                        "text"
+                    ],
+                    "param": [
+                        "type",
+                        "name",
+                        "description"
+                    ],
+                    "property": [
+                        "type",
+                        "name",
+                        "description"
+                    ],
+                    "property-read": [
+                        "type",
+                        "name",
+                        "description"
+                    ],
+                    "property-write": [
+                        "type",
+                        "name",
+                        "description"
+                    ],
+                    "see": [
+                        "text"
+                    ],
+                    "source": [
+                        "text"
+                    ],
+                    "subpackage": [
+                        "text"
+                    ],
+                    "uses": [
+                        "text"
+                    ],
+                    "var": [
+                        "type",
+                        "name",
+                        "description"
+                    ]
+                }
+            }
+        },
+        "pattern": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$pattern",
+                        "description": "A list of patterns"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": {
+                "start": "\/\\\/\\*\\*\/m",
+                "end": "\/\\s\\*\\\/\/m",
+                "tag": "\/(\\n\\s+\\*)*\\n\\s+\\*\\s{1}\\@\/m"
+            }
+        },
+        "parsed": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Parsers\\Doc"
+            },
+            "declaring_trait": "bbn\\Parsers\\Doc",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array",
+                        "name": "$parsed"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": []
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n * Documentation block parser\n *\n * @author Mirko Argentino <mirko@bbn.solutions>\n * @copyright BBN Solutions\n * @category Parsers\n * @version 1.0\n *\/"
+    ],
     "summary": "Documentation block parser",
     "description": "",
     "description_parts": []

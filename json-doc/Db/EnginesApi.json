@@ -5,18 +5,19 @@
     },
     "name": "bbn\\Db\\EnginesApi",
     "namespace": true,
+    "realName": "EnginesApi",
+    "realNamespace": "bbn\\Db",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Db\/EnginesApi.php",
     "startLine": 5,
-    "endLine": 164,
-    "numMethods": 14,
+    "endLine": 212,
+    "numMethods": 18,
     "numProperties": 0,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": true,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": true,
@@ -36,11 +37,14 @@
             "summary": "Returns the first row resulting from the query as an object.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $fields = [], array $where = [], array $order = [], int $start = 0)\n  {\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n\n  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return false|array\n   *\/\n  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/\n  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/\n  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
+            "code": "  public function select($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?\\stdClass;",
+            "parent": false,
+            "trait": false,
             "startLine": 17,
             "endLine": 17,
             "isDeprecated": false,
@@ -51,16 +55,19 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
+            "shortName": "select",
             "returns": [
                 null,
                 "stdClass"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -71,6 +78,9 @@
                     "name": "fields",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -81,6 +91,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -91,6 +106,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -101,24 +121,69 @@
                     "name": "start",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns the first row resulting from the query as an object.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|boolean",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns the first row resulting from the query as an object.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|\\stdClass\n   *\/"
         },
         "selectAll": {
             "name": "selectAll",
             "summary": "Fetches a given table and returns an array of a single row text-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0)\n  {\n  \/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n\n  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return false|array\n   *\/\n  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/\n  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/\n  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
+            "code": "  public function selectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 30,
             "endLine": 30,
             "isDeprecated": false,
@@ -129,16 +194,19 @@
             "returnsReference": false,
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
+            "shortName": "selectAll",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -149,6 +217,9 @@
                     "name": "fields",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -159,6 +230,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -169,6 +245,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -179,6 +260,11 @@
                     "name": "limit",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -189,24 +275,75 @@
                     "name": "start",
                     "position": 5,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Fetches a given table and returns an array of a single row text-indexed\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/"
         },
         "iselect": {
             "name": "iselect",
             "summary": "Return the first row resulting from the query as a numeric array.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $fields = [], array $where = [], array $order = [], int $start = 0)\n  {\n  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/\n  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return false|array\n   *\/\n  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/\n  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/\n  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
+            "code": "  public function iselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 43,
             "endLine": 43,
             "isDeprecated": false,
@@ -217,16 +354,19 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
+            "shortName": "iselect",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -237,6 +377,9 @@
                     "name": "fields",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -247,6 +390,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -257,6 +405,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -267,24 +420,69 @@
                     "name": "start",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return the first row resulting from the query as a numeric array.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/"
         },
         "iselectAll": {
             "name": "iselectAll",
             "summary": "Return the searched rows as an array of numeric arrays.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0)\n  {\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return false|array\n   *\/\n  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/\n  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/\n  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
+            "code": "  public function iselectAll($table, $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 56,
             "endLine": 56,
             "isDeprecated": false,
@@ -295,16 +493,19 @@
             "returnsReference": false,
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
+            "shortName": "iselectAll",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -315,6 +516,9 @@
                     "name": "fields",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -325,6 +529,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -335,6 +544,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -345,6 +559,11 @@
                     "name": "limit",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -355,24 +574,74 @@
                     "name": "start",
                     "position": 5,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return the searched rows as an array of numeric arrays.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "description": "| boolean The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/"
         },
         "rselect": {
             "name": "rselect",
             "summary": "Fetches a given table and returns an array of a single row text-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $fields = [], array $where = [], array $order = [], int $start = 0)\n  {\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/\n  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;\n\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/\n  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
+            "code": "  public function rselect($table, $fields = [], array $where = [], array $order = [], int $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 68,
             "endLine": 68,
             "isDeprecated": false,
@@ -383,16 +652,19 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
+            "shortName": "rselect",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -403,6 +675,9 @@
                     "name": "fields",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -413,6 +688,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -423,6 +703,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -433,24 +718,69 @@
                     "name": "start",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Fetches a given table and returns an array of a single row text-indexed\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|boolean",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return false|array\n   *\/"
         },
         "rselectAll": {
             "name": "rselectAll",
             "summary": "Fetches a given table and returns an array of a single row text-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0)\n  {\n  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/\n  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);\n\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
+            "code": "  public function rselectAll($table, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
             "startLine": 81,
             "endLine": 81,
             "isDeprecated": false,
@@ -461,16 +791,19 @@
             "returnsReference": false,
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
+            "shortName": "rselectAll",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -481,6 +814,9 @@
                     "name": "fields",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -491,6 +827,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -501,6 +842,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -511,6 +857,9 @@
                     "name": "limit",
                     "position": 4,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -521,26 +870,629 @@
                     "name": "start",
                     "position": 5,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Fetches a given table and returns an array of a single row text-indexed\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/"
+        },
+        "selectUnion": {
+            "name": "selectUnion",
+            "summary": "Fetches a given array of tables and returns an array of text-indexed rows as objects",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function selectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
+            "startLine": 94,
+            "endLine": 94,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "selectUnion",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' names"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Fetches a given array of tables and returns an array of text-indexed rows as objects\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' names"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as objects\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/"
+        },
+        "rselectUnion": {
+            "name": "rselectUnion",
+            "summary": "Fetches a given array of tables and returns an array of text-indexed rows as arrays",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function rselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
+            "startLine": 107,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "rselectUnion",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' names"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Fetches a given array of tables and returns an array of text-indexed rows as arrays\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' names"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/"
+        },
+        "iselectUnion": {
+            "name": "iselectUnion",
+            "summary": "Fetches a given array of tables and returns an array of text-indexed rows as arrays",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function iselectUnion(array $union, $fields = [], array $where = [], array $order = [], $limit = 0, $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
+            "startLine": 120,
+            "endLine": 120,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 6,
+            "numberOfRequiredParameters": 1,
+            "shortName": "iselectUnion",
+            "returns": [
+                null,
+                "array"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "fields",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The fields' names"
+                },
+                {
+                    "name": "where",
+                    "position": 2,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                },
+                {
+                    "name": "order",
+                    "position": 3,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "condition, default: false"
+                },
+                {
+                    "name": "limit",
+                    "position": 4,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"limit\" condition, default: 0"
+                },
+                {
+                    "name": "start",
+                    "position": 5,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": 0,
+                    "default_name": "",
+                    "description": "The \"start\" condition, default: 0"
+                }
+            ],
+            "doc": {
+                "description": "Fetches a given array of tables and returns an array of text-indexed rows as arrays\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$fields",
+                        "description": "The fields' names"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "condition, default: false"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The \"limit\" condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/"
+        },
+        "countUnion": {
+            "name": "countUnion",
+            "summary": "Count the result against a given array of tables and returns the number",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "\tpublic function countUnion(array $union, array $where = []): ?int;",
+            "parent": false,
+            "trait": false,
+            "startLine": 129,
+            "endLine": 129,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "countUnion",
+            "returns": [
+                null,
+                "int"
+            ],
+            "arguments": [
+                {
+                    "name": "union",
+                    "position": 0,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": "",
+                    "description": "An array of select configurations"
+                },
+                {
+                    "name": "where",
+                    "position": 1,
+                    "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": [],
+                    "default_name": "",
+                    "description": "The \"where\" condition"
+                }
+            ],
+            "doc": {
+                "description": "Count the result against a given array of tables and returns the number\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$union",
+                        "description": "An array of select configurations"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * Count the result against a given array of tables and returns the number\n\t *\n   * @param array $union An array of select configurations\n   * @param array $where  The \"where\" condition\n\t * @return int\n\t *\/"
         },
         "selectOne": {
             "name": "selectOne",
             "summary": "Fetches a given table and returns an array of a single row text-indexed",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, $field = NULL, array $where = [], array $order = [], int $start = 0)\n  {\n  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/\n  public function count($table, array $where = []): ?int;\n\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 93,
-            "endLine": 93,
+            "code": "  public function selectOne($table, $field = null, array $where = [], array $order = [], int $start = 0);",
+            "parent": false,
+            "trait": false,
+            "startLine": 141,
+            "endLine": 141,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -549,13 +1501,16 @@
             "returnsReference": false,
             "numberOfParameters": 5,
             "numberOfRequiredParameters": 1,
+            "shortName": "selectOne",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -566,6 +1521,9 @@
                     "name": "field",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -576,6 +1534,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -586,6 +1549,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -596,26 +1564,71 @@
                     "name": "start",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The \"start\" condition, default: 0."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Fetches a given table and returns an array of a single row text-indexed\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$table",
+                        "description": "The table name."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$field",
+                        "description": "The fields name."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$order",
+                        "description": "The \"order\" condition, default: false."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The \"start\" condition, default: 0."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/"
         },
         "count": {
             "name": "count",
             "summary": "Return the number of records in the table corresponding to the $where condition (non mandatory).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, array $where = [])\n  {\n  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/\n  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;\n\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 102,
-            "endLine": 102,
+            "code": "  public function count($table, array $where = []): ?int;",
+            "parent": false,
+            "trait": false,
+            "startLine": 150,
+            "endLine": 150,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -624,16 +1637,19 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "count",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -644,13 +1660,37 @@
                     "name": "where",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": "",
                     "description": "The \"where\" condition"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return the number of records in the table corresponding to the $where condition (non mandatory).\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/"
         },
         "selectAllByKeys": {
             "name": "selectAllByKeys",
@@ -659,16 +1699,19 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>The value will be an array if the request has more than two fields.\nReturn the same value as &quot;get_key_val&quot;.<\/p>"
+                    "content": "The value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\"."
                 }
             ],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0)\n  {\n  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/\n  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 117,
-            "endLine": 117,
+            "code": "  public function selectAllByKeys($table, array $fields = [], array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;",
+            "parent": false,
+            "trait": false,
+            "startLine": 165,
+            "endLine": 165,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -677,16 +1720,19 @@
             "returnsReference": false,
             "numberOfParameters": 6,
             "numberOfRequiredParameters": 1,
+            "shortName": "selectAllByKeys",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -697,6 +1743,11 @@
                     "name": "fields",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -707,6 +1758,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -717,6 +1773,11 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -727,6 +1788,11 @@
                     "name": "limit",
                     "position": 4,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
@@ -737,26 +1803,77 @@
                     "name": "start",
                     "position": 5,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The $limit condition, default: 0"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return an array indexed on the first field of the request.\nThe value will be an array if the request has more than two fields.\nReturn the same value as \"get_key_val\".\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$fields",
+                        "description": "The fields's name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|boolean",
+                        "name": "$order",
+                        "description": "The \"order\" condition"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$limit",
+                        "description": "The $limit condition, default: 0"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$start",
+                        "description": "The $limit condition, default: 0"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/"
         },
         "stat": {
             "name": "stat",
             "summary": "Return an array with the count of values corresponding to the where conditions.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(string $table, string $column, array $where = [], array $order = [])\n  {\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function insert($table, array $values = null, bool $ignore = false): ?int;\n\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 128,
-            "endLine": 128,
+            "code": "  public function stat(string $table, string $column, array $where = [], array $order = []): ?array;",
+            "parent": false,
+            "trait": false,
+            "startLine": 176,
+            "endLine": 176,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -765,16 +1882,21 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "stat",
             "returns": [
                 null,
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -785,6 +1907,11 @@
                     "name": "column",
                     "position": 1,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -795,6 +1922,11 @@
                     "name": "where",
                     "position": 2,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
@@ -805,26 +1937,65 @@
                     "name": "order",
                     "position": 3,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": [],
                     "default_name": "",
                     "description": "The \"order\" condition."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return an array with the count of values corresponding to the where conditions.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string|array",
+                        "name": "$table",
+                        "description": "The table's name or a configuration array."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$column",
+                        "description": "The field's name."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$where",
+                        "description": "The \"where\" condition."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$order",
+                        "description": "The \"order\" condition."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/"
         },
         "insert": {
             "name": "insert",
             "summary": "Inserts\/Updates rows in the a given table",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, array $values = NULL, bool $ignore = false)\n  {\n  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/\n  public function insertUpdate($table, array $values = null): ?int;\n\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 138,
-            "endLine": 138,
+            "code": "  public function insert($table, array $values = null, bool $ignore = false): ?int;",
+            "parent": false,
+            "trait": false,
+            "startLine": 186,
+            "endLine": 186,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -833,16 +2004,19 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "insert",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -851,7 +2025,13 @@
                 {
                     "name": "values",
                     "position": 1,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -861,25 +2041,54 @@
                     "name": "ignore",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Inserts\/Updates rows in the a given table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$ignore"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/"
         },
         "insertUpdate": {
             "name": "insertUpdate",
             "summary": "Inserts\/Updates rows in the a given table",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, array $values = NULL)\n  {\n  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/\n  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;\n\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 145,
-            "endLine": 145,
+            "code": "  public function insertUpdate($table, array $values = null): ?int;",
+            "parent": false,
+            "trait": false,
+            "startLine": 193,
+            "endLine": 193,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -888,16 +2097,19 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "insertUpdate",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -906,26 +2118,41 @@
                 {
                     "name": "values",
                     "position": 1,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Inserts\/Updates rows in the a given table\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/"
         },
         "update": {
             "name": "update",
             "summary": "Updates rows in the a given table",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, array $values = NULL, array $where = NULL, bool $ignore = false)\n  {\n  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/\n  }",
-            "startLine": 156,
-            "endLine": 156,
+            "code": "  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;",
+            "parent": false,
+            "trait": false,
+            "startLine": 204,
+            "endLine": 204,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -934,16 +2161,19 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "update",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -952,7 +2182,13 @@
                 {
                     "name": "values",
                     "position": 1,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -961,7 +2197,13 @@
                 {
                     "name": "where",
                     "position": 2,
-                    "type": "array",
+                    "type": "null|array",
+                    "type_arr": [
+                        "null",
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -971,25 +2213,60 @@
                     "name": "ignore",
                     "position": 3,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Updates rows in the a given table\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "array|string",
+                        "name": "$table"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$values"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array|null",
+                        "name": "$where"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$ignore"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/"
         },
         "delete": {
             "name": "delete",
             "summary": "Deletes rows in the a given table",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\EnginesApi",
+            "class": "bbn\\Db\\EnginesApi",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/EnginesApi.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($table, array $where, bool $ignore = false)\n  {\n  }",
-            "startLine": 163,
-            "endLine": 163,
+            "code": "  public function delete($table, array $where, bool $ignore = false): ?int;",
+            "parent": false,
+            "trait": false,
+            "startLine": 211,
+            "endLine": 211,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -998,16 +2275,19 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 2,
+            "shortName": "delete",
             "returns": [
                 null,
                 "int"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "table",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1017,6 +2297,11 @@
                     "name": "where",
                     "position": 1,
                     "type": "array",
+                    "type_arr": [
+                        "array"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -1026,17 +2311,49 @@
                     "name": "ignore",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Deletes rows in the a given table\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/"
         }
     },
     "properties": null,
     "staticProperties": [],
     "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n   * Returns the first row resulting from the query as an object.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|\\stdClass\n   *\/",
+        "\/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/",
+        "\/**\n   * Return the first row resulting from the query as a numeric array.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/",
+        "\/**\n   * Return the searched rows as an array of numeric arrays.\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields's name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean The \"order\" condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return array\n   *\/",
+        "\/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array|boolean $order The \"order\" condition, default: false\n   * @param int $start The \"start\" condition, default: 0\n   * @return false|array\n   *\/",
+        "\/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param string|array $fields The fields' name\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n   * @return null|array\n   *\/",
+        "\/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as objects\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/",
+        "\/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/",
+        "\/**\n\t * Fetches a given array of tables and returns an array of text-indexed rows as arrays\n\t *\n   * @param array $union An array of select configurations\n   * @param string|array $fields The fields' names\n   * @param array $where  The \"where\" condition\n   * @param array | boolean $order condition, default: false\n   * @param int $limit The \"limit\" condition, default: 0\n   * @param int $start The \"start\" condition, default: 0\n\t * @return null|array\n\t *\/",
+        "\/**\n\t * Count the result against a given array of tables and returns the number\n\t *\n   * @param array $union An array of select configurations\n   * @param array $where  The \"where\" condition\n\t * @return int\n\t *\/",
+        "\/**\n   * Fetches a given table and returns an array of a single row text-indexed\n   *\n   * @param string $table The table name.\n   * @param string $field The fields name.\n   * @param array $where  The \"where\" condition.\n   * @param string|array $order The \"order\" condition, default: false.\n   * @param int $start The \"start\" condition, default: 0.\n   * @return mixed\n   *\/",
+        "\/**\n   * Return the number of records in the table corresponding to the $where condition (non mandatory).\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $where The \"where\" condition\n   * @return null|int\n   *\/",
+        "\/**\n   * Return an array indexed on the first field of the request.\n   * The value will be an array if the request has more than two fields.\n   * Return the same value as \"get_key_val\".\n   *\n   * @param string|array $table The table's name or a configuration array\n   * @param array $fields The fields's name\n   * @param array $where The \"where\" condition\n   * @param array|boolean $order The \"order\" condition\n   * @param int $limit The $limit condition, default: 0\n   * @param int $start The $limit condition, default: 0\n   * @return null|array\n   *\/",
+        "\/**\n   * Return an array with the count of values corresponding to the where conditions.\n   *\n   * @param string|array $table The table's name or a configuration array.\n   * @param string $column The field's name.\n   * @param array $where The \"where\" condition.\n   * @param array $order The \"order\" condition.\n   * @return null|array\n   *\/",
+        "\/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @param $table\n   * @param array|null $values\n   * @param bool $ignore\n   * @return int\n   *\/",
+        "\/**\n   * Inserts\/Updates rows in the a given table\n   *\n   * @return int\n   *\/",
+        "\/**\n   * Updates rows in the a given table\n   *\n   * @param array|string $table\n   * @param array|null $values\n   * @param array|null $where\n   * @param bool $ignore\n   * @return int\n   *\/",
+        "\/**\n   * Deletes rows in the a given table\n   *\n   * @return int\n   *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

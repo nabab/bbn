@@ -12,18 +12,19 @@
     },
     "name": "bbn\\Str\\Hash",
     "namespace": true,
+    "realName": "Hash",
+    "realNamespace": "bbn\\Str",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Str\/Hash.php",
     "startLine": 18,
     "endLine": 151,
     "numMethods": 5,
-    "numProperties": 3,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 1,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -42,7 +43,6 @@
     "namespaceName": "bbn\\Str",
     "shortName": "Hash",
     "contentConstructor": {
-        "file": "bbn\\Str\\Hash",
         "returns": []
     },
     "methods": {
@@ -51,11 +51,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Str\\Hash",
+            "class": "bbn\\Str\\Hash",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($hash = '')\n  {\n\t\tif ( !empty($hash) )\n\t\t{\n\t\t\tif ( preg_match('#[A-z0-9_\/]+#',$hash,$m) === 1 && $m[0] === $hash )\n\t\t\t{\n\t\t\t\t$this->hash = $hash;\n\t\t\t\twhile ( strpos($this->hash,'\/\/') )\n\t\t\t\t\t$this->hash = str_replace('\/\/','\/',$this->hash);\n\t\t\t\tif ( strpos($this->hash,'\/') === 0 )\n\t\t\t\t\t$this->hash = substr($this->hash,1);\n\t\t\t\tif ( substr($this->hash,-1) === '\/' )\n\t\t\t\t\t$this->hash = substr($this->hash,0,-1);\n\t\t\t}\n\t\t}\n\t\tif ( !isset($this->hash) )\n\t\t\t$this->hash = '';\n\t\t$h = explode(self::$separator,$this->hash);\n\t\t$j = 0;\n\t\tfor ( $i = 0; $i < ( \\count($h) - 1 ); $i += 2 )\n\t\t{\n\t\t\t$this->keys[$j] = $h[$i];\n\t\t\t$this->values[$j] = $h[$i+1];\n\t\t\t$j++;\n\t\t}\n  }",
+            "code": "\tpublic function __construct($hash='')\n\t{\n\t\tif ( !empty($hash) )\n\t\t{\n\t\t\tif ( preg_match('#[A-z0-9_\/]+#',$hash,$m) === 1 && $m[0] === $hash )\n\t\t\t{\n\t\t\t\t$this->hash = $hash;\n\t\t\t\twhile ( strpos($this->hash,'\/\/') )\n\t\t\t\t\t$this->hash = str_replace('\/\/','\/',$this->hash);\n\t\t\t\tif ( strpos($this->hash,'\/') === 0 )\n\t\t\t\t\t$this->hash = substr($this->hash,1);\n\t\t\t\tif ( substr($this->hash,-1) === '\/' )\n\t\t\t\t\t$this->hash = substr($this->hash,0,-1);\n\t\t\t}\n\t\t}\n\t\tif ( !isset($this->hash) )\n\t\t\t$this->hash = '';\n\t\t$h = explode(self::$separator,$this->hash);\n\t\t$j = 0;\n\t\tfor ( $i = 0; $i < ( \\count($h) - 1 ); $i += 2 )\n\t\t{\n\t\t\t$this->keys[$j] = $h[$i];\n\t\t\t$this->values[$j] = $h[$i+1];\n\t\t\t$j++;\n\t\t}\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 44,
             "endLine": 69,
             "isDeprecated": false,
@@ -66,30 +69,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "hash",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "add": {
             "name": "add",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Str\\Hash",
+            "class": "bbn\\Str\\Hash",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($pair, $replace = 1)\n  {\n\t\tif ( \\is_array($pair) )\n\t\t{\n\t\t\tif ( isset($pair[0]) && isset($pair[1]) )\n\t\t\t{\n\t\t\t\t$k = $pair[0];\n\t\t\t\t$v = $pair[1];\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\t$k = array_keys($pair);\n\t\t\t\t$k = $k[0];\n\t\t\t\t$v = $pair[$k];\n\t\t\t}\n\t\t\t\n\t\t\tif (\n\t\t\t\tpreg_match('#[A-z0-9_]+#',$k,$m) === 1 &&\n\t\t\t\t$m[0] === $k &&\n\t\t\t\tpreg_match('#[A-z0-9_]+#',$v,$m) === 1 &&\n\t\t\t\t$m[0] === $v\n\t\t\t)\n\t\t\t{\n\t\t\t\tif ( is_numeric($v) )\n\t\t\t\t\t$v = $v + 0;\n\t\t\t\t$i = array_search($k,$this->keys);\n\t\t\t\tif ( $i === false )\n\t\t\t\t{\n\t\t\t\t\tarray_push($this->keys,$k);\n\t\t\t\t\tarray_push($this->values,$v);\n\t\t\t\t}\n\t\t\t\telse if ( $replace )\n\t\t\t\t{\n\t\t\t\t\t$this->keys[$i] = $k;\n\t\t\t\t\t$this->values[$i] = $v;\n\t\t\t\t}\n\t\t\t\treturn $this;\n\t\t\t}\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic function add($pair, $replace=1)\n\t{\n\t\tif ( \\is_array($pair) )\n\t\t{\n\t\t\tif ( isset($pair[0]) && isset($pair[1]) )\n\t\t\t{\n\t\t\t\t$k = $pair[0];\n\t\t\t\t$v = $pair[1];\n\t\t\t}\n\t\t\telse\n\t\t\t{\n\t\t\t\t$k = array_keys($pair);\n\t\t\t\t$k = $k[0];\n\t\t\t\t$v = $pair[$k];\n\t\t\t}\n\t\t\t\n\t\t\tif (\n\t\t\t\tpreg_match('#[A-z0-9_]+#',$k,$m) === 1 &&\n\t\t\t\t$m[0] === $k &&\n\t\t\t\tpreg_match('#[A-z0-9_]+#',$v,$m) === 1 &&\n\t\t\t\t$m[0] === $v\n\t\t\t)\n\t\t\t{\n\t\t\t\tif ( is_numeric($v) )\n\t\t\t\t\t$v = $v + 0;\n\t\t\t\t$i = array_search($k,$this->keys);\n\t\t\t\tif ( $i === false )\n\t\t\t\t{\n\t\t\t\t\tarray_push($this->keys,$k);\n\t\t\t\t\tarray_push($this->values,$v);\n\t\t\t\t}\n\t\t\t\telse if ( $replace )\n\t\t\t\t{\n\t\t\t\t\t$this->keys[$i] = $k;\n\t\t\t\t\t$this->values[$i] = $v;\n\t\t\t\t}\n\t\t\t\treturn $this;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 74,
             "endLine": 114,
             "isDeprecated": false,
@@ -100,13 +115,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "add",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "pair",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -116,23 +134,35 @@
                     "name": "replace",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 1,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "remove": {
             "name": "remove",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Str\\Hash",
+            "class": "bbn\\Str\\Hash",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($key)\n  {\n\t\tif ( isset($this->values[$key]) )\n\t\t\tunset($this->values[$key]);\n\t\treturn $this;\n  }",
+            "code": "\tpublic function remove($key)\n\t{\n\t\tif ( isset($this->values[$key]) )\n\t\t\tunset($this->values[$key]);\n\t\treturn $this;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 119,
             "endLine": 124,
             "isDeprecated": false,
@@ -143,30 +173,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "remove",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "get": {
             "name": "get",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Str\\Hash",
+            "class": "bbn\\Str\\Hash",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($key = '')\n  {\n\t\tif ( empty($key) )\n\t\t\treturn $this->values;\n\t\treturn isset($this->values[$key]) ? $this->values[$key] : false;\n  }",
+            "code": "\tpublic function get($key='')\n\t{\n\t\tif ( empty($key) )\n\t\t\treturn $this->values;\n\t\treturn isset($this->values[$key]) ? $this->values[$key] : false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 129,
             "endLine": 134,
             "isDeprecated": false,
@@ -177,30 +219,42 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
+            "shortName": "get",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "key",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         },
         "output": {
             "name": "output",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Str\\Hash",
+            "class": "bbn\\Str\\Hash",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Str\/Hash.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n\t\t$h = '';\n\t\tif ( \\count($this->values) > 0 )\n\t\t{\n\t\t\tforeach ( $this->values as $k => $v )\n\t\t\t\t$h.= $this->keys[$k].'\/'.$v.'\/';\n\t\t\t$h = substr($h,0,-1);\n\t\t}\n\t\treturn $h;\n  }",
+            "code": "\tpublic function output()\n\t{\n\t\t$h = '';\n\t\tif ( \\count($this->values) > 0 )\n\t\t{\n\t\t\tforeach ( $this->values as $k => $v )\n\t\t\t\t$h.= $this->keys[$k].'\/'.$v.'\/';\n\t\t\t$h = substr($h,0,-1);\n\t\t}\n\t\treturn $h;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 139,
             "endLine": 149,
             "isDeprecated": false,
@@ -211,13 +265,51 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "output",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n\t * @return void \n\t *\/"
         }
     },
     "properties": {
+        "separator": {
+            "trait": false,
+            "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Str\\Hash"
+            },
+            "declaring_trait": "bbn\\Str\\Hash",
+            "promoted": false,
+            "visibility": "private",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "string"
+                    }
+                ]
+            },
+            "parent": false,
+            "value": "\/"
+        },
         "keys": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Str\\Hash"
+            },
+            "declaring_trait": "bbn\\Str\\Hash",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "",
@@ -227,9 +319,20 @@
                         "type": "array"
                     }
                 ]
-            }
+            },
+            "parent": false,
+            "value": []
         },
         "values": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Str\\Hash"
+            },
+            "declaring_trait": "bbn\\Str\\Hash",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "",
@@ -239,9 +342,20 @@
                         "type": "array"
                     }
                 ]
-            }
+            },
+            "parent": false,
+            "value": []
         },
         "hash": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Str\\Hash"
+            },
+            "declaring_trait": "bbn\\Str\\Hash",
+            "promoted": false,
             "visibility": "public",
             "doc": {
                 "description": "",
@@ -251,13 +365,22 @@
                         "type": "mixed"
                     }
                 ]
-            }
+            },
+            "parent": false,
+            "value": null
         }
     },
     "staticProperties": {
         "separator": "\/"
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * @package str\n *\/",
+        "\/**\n * A Class for hashes\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Strings\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
     "summary": "A Class for hashes",
     "description": "",
     "description_parts": []

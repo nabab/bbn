@@ -12,18 +12,19 @@
     },
     "name": "bbn\\File\\Dir",
     "namespace": true,
+    "realName": "Dir",
+    "realNamespace": "bbn\\File",
     "traits": [],
     "interfaces": [],
     "fileName": "\/File\/Dir.php",
     "startLine": 20,
     "endLine": 614,
-    "numMethods": 20,
-    "numProperties": 0,
+    "numMethods": 21,
+    "numProperties": 6,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -34,6 +35,8 @@
     "defaultProperties": {
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": []
     },
@@ -46,18 +49,21 @@
         "clean": {
             "name": "clean",
             "summary": "Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\"\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\""
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir)\n  {\n    $new = trim(str_replace('\\\\', '\/', $dir));\n    if ( substr($new, -1) === '\/' ){\n      $new = substr($new, 0, -1);\n    }\n    return $new;\n  }",
+            "code": "  public static function clean(string $dir): string\n  {\n    $new = trim(str_replace('\\\\', '\/', $dir));\n    if ( substr($new, -1) === '\/' ){\n      $new = substr($new, 0, -1);\n    }\n    return $new;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 33,
             "endLine": 40,
             "isDeprecated": false,
@@ -68,42 +74,63 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "clean",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The directory path."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::clean(\"\\home\\data\\test\"));\n\/\/ (string) \"\/home\/data\/test\"\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory path."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Replaces backslash with slash and deletes whitespace from the beginning and the end of a directory's path.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::clean(\"\\home\\data\\test\"));\n\t\t* \/\/ (string) \"\/home\/data\/test\"\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory path.\n\t\t* @return string\n\t\t*\/"
         },
         "hasFile": {
             "name": "hasFile",
             "summary": "Checks if the given file(s) exists in the directory.",
-            "description": "Accepts unlimited arguments (files name).\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true\n```",
+            "description": "Accepts unlimited arguments (files name).",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Accepts unlimited arguments (files name).<\/p>"
+                    "content": "Accepts unlimited arguments (files name)."
                 },
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true"
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir)\n  {\n    $dir = self::clean($dir);\n    $as = \\func_get_args();\n    array_shift($as);\n    foreach ( $as as $a ){\n      if ( !file_exists($dir.'\/'.$a) ){\n        return false;\n      }\n    }\n\t\treturn true;\n  }",
+            "code": "\tpublic static function hasFile(string $dir): bool\n\t{\n    $dir = self::clean($dir);\n    $as = \\func_get_args();\n    array_shift($as);\n    foreach ( $as as $a ){\n      if ( !file_exists($dir.'\/'.$a) ){\n        return false;\n      }\n    }\n\t\treturn true;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 56,
             "endLine": 67,
             "isDeprecated": false,
@@ -114,38 +141,59 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "hasFile",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The directory's path."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Checks if the given file(s) exists in the directory.\nAccepts unlimited arguments (files name).\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\/file.txt\"));\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\/\/ (bool) true\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory's path."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Checks if the given file(s) exists in the directory.\n\t\t* Accepts unlimited arguments (files name).\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\/file.txt\"));\n\t\t* \/\/ (bool) true\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::hasFile(\"\/home\/data\/test\", \"file.txt\", \"doc.pdf\"));\n\t\t* \/\/ (bool) true\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory's path.\n\t\t* @return bool\n\t\t*\/"
         },
         "cur": {
             "name": "cur",
             "summary": "If the directory's path starts with '.\/' returns the path without '.\/' else returns the complete path.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\"\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\""
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir)\n  {\n    return strpos($dir, '.\/') === 0 ? substr($dir, 2) : $dir;\n  }",
+            "code": "  public static function cur(string $dir): string\n  {\n    return strpos($dir, '.\/') === 0 ? substr($dir, 2) : $dir;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 82,
             "endLine": 85,
             "isDeprecated": false,
@@ -156,22 +204,40 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "cur",
             "returns": [
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The directory path."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "If the directory's path starts with '.\/' returns the path without '.\/' else returns the complete path.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\".\/home\/data\/test\/\"));\n\/\/ (string) \"home\/data\/test\/\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::cur(\"\/home\/data\/test\/\"));\n\/\/ (string) \"\/home\/data\/test\/\"\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory path."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* If the directory's path starts with '.\/' returns the path without '.\/' else returns the complete path.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::cur(\".\/home\/data\/test\/\"));\n\t\t* \/\/ (string) \"home\/data\/test\/\"\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::cur(\"\/home\/data\/test\/\"));\n\t\t* \/\/ (string) \"\/home\/data\/test\/\"\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory path.\n\t\t* @return string\n\t\t*\/"
         },
         "getDirs": {
             "name": "getDirs",
@@ -180,14 +246,17 @@
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>It will return directories' full path.<\/p>"
+                    "content": "It will return directories' full path."
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $hidden = false)\n  {\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n\t\t}\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$dirs = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' && is_dir($dir.'\/'.$f) ){\n\t\t\t\t\t$dirs[] = self::cur($dir.'\/').$f;\n        }\n\t\t\t}\n      if ( !empty($dirs) ){\n        bbn\\X::sort($dirs);\n      }\n\t\t\treturn $dirs;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic static function getDirs($dir, $hidden = false){\n    $dir = self::clean($dir);\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n\t\t}\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$dirs = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' && is_dir($dir.'\/'.$f) ){\n\t\t\t\t\t$dirs[] = self::cur($dir.'\/').$f;\n        }\n\t\t\t}\n      if ( !empty($dirs) ){\n        bbn\\X::sort($dirs);\n      }\n\t\t\treturn $dirs;\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 101,
             "endLine": 121,
             "isDeprecated": false,
@@ -198,13 +267,16 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "getDirs",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -215,33 +287,62 @@
                     "name": "hidden",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If true return the hidden directories' path"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return an array of directories contained in the given directory.\nIt will return directories' full path.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory's path."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$hidden",
+                        "description": "If true return the hidden directories' path"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "vedere il parametro $hidden non mi funziona\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getDirs(\"C:\\Docs\\Test\"));\n\/\/ (array) ['C:\\DocsTest\\test1', 'C:\\DocsTest\\test2', 'C:\\DocsTest\\test3']\n```"
+                }
+            },
+            "comments": "  \/**\n\t\t* Return an array of directories contained in the given directory.\n\t\t* It will return directories' full path.\n\t\t* @todo vedere il parametro $hidden non mi funziona\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getDirs(\"C:\\Docs\\Test\"));\n\t\t* \/\/ (array) ['C:\\DocsTest\\test1', 'C:\\DocsTest\\test2', 'C:\\DocsTest\\test3']\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory's path.\n\t\t* @param bool $hidden If true return the hidden directories' path\n\t\t* @return array|false\n\t\t*\/"
         },
         "getFiles": {
             "name": "getFiles",
             "summary": "Returns an array of files contained in the given directory.",
-            "description": "Returns the full path of files.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n```",
+            "description": "Returns the full path of files.",
             "description_parts": [
                 {
                     "type": "text",
-                    "content": "<p>Returns the full path of files.<\/p>"
+                    "content": "Returns the full path of files."
                 },
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']"
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($dir, $including_dirs = false, $hidden = false, $extension = NULL)\n  {\n    $dir = self::clean($dir);\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n    }\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$files = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n      \/\/$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' ){\n          \/*\n          $enc = mb_detect_encoding($f, $encodings);\n          if ( $enc !== 'UTF-8' ){\n            $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');\n          }\n          *\/\n          if ( $hidden || (strpos(X::basename($f), '.') !== 0) ){\n            if ( $including_dirs ){\n              $files[] = self::cur($dir.'\/').$f;\n            }\n            else if ( is_file($dir.'\/'.$f) ){\n              if ( !$extension || (strtolower($extension) === strtolower(bbn\\Str::fileExt($f))) ){\n                $files[] = self::cur($dir.'\/').$f;\n              }\n            }\n          }\n\t\t\t\t}\n\t\t\t}\n      if ( \\count($files) > 0 ){\n        bbn\\X::sort($files);\n      }\n\t\t\treturn $files;\n\t\t}\n\t\treturn false;\n  }",
+            "code": "\tpublic static function getFiles($dir, $including_dirs = false, $hidden = false, $extension = null)\n\t{\n    $dir = self::clean($dir);\n    clearstatcache();\n    if ( $dir === '.\/' ){\n      $dir = '.';\n    }\n    if ( is_dir($dir) && (($dir === '.') || ((strpos(X::basename($dir), '.') !== 0) || $hidden)) ){\n\t\t\t$files = [];\n\t\t\t$fs = scandir($dir, SCANDIR_SORT_ASCENDING );\n      \/\/$encodings = ['UTF-8', 'WINDOWS-1252', 'ISO-8859-1', 'ISO-8859-15'];\n\t\t\tforeach ( $fs as $f ){\n\t\t\t\tif ( $f !== '.' && $f !== '..' ){\n          \/*\n          $enc = mb_detect_encoding($f, $encodings);\n          if ( $enc !== 'UTF-8' ){\n            $f = html_entity_decode(htmlentities($f, ENT_QUOTES, $enc), ENT_QUOTES , 'UTF-8');\n          }\n          *\/\n          if ( $hidden || (strpos(X::basename($f), '.') !== 0) ){\n            if ( $including_dirs ){\n              $files[] = self::cur($dir.'\/').$f;\n            }\n            else if ( is_file($dir.'\/'.$f) ){\n              if ( !$extension || (strtolower($extension) === strtolower(bbn\\Str::fileExt($f))) ){\n                $files[] = self::cur($dir.'\/').$f;\n              }\n            }\n          }\n\t\t\t\t}\n\t\t\t}\n      if ( \\count($files) > 0 ){\n        bbn\\X::sort($files);\n      }\n\t\t\treturn $files;\n\t\t}\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 143,
             "endLine": 180,
             "isDeprecated": false,
@@ -252,13 +353,16 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "getFiles",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -269,6 +373,9 @@
                     "name": "including_dirs",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -279,6 +386,9 @@
                     "name": "hidden",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -289,28 +399,59 @@
                     "name": "extension",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns an array of files contained in the given directory.\nReturns the full path of files.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\"));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\",0,1));\n\/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1,1));\n\/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory's path."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$including",
+                        "description": "dirs If set to true it will also returns the folders contained in the given directory."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$hidden",
+                        "description": "If set to true will also returns the hidden files contained the directory"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Returns an array of files contained in the given directory.\n\t\t* Returns the full path of files.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\"));\n\t\t* \/\/ (array) ['\/home\/Docs\/Test\/file.txt']\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\",0,1));\n\t\t* \/\/ (array) ['\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1));\n\t\t* \/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/file.txt']\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getFiles(\"\/home\/Docs\/Test\", 1,1));\n\t\t* \/\/ (array) ['\/home\/Docs\/Test\/folder', '\/home\/Docs\/Test\/.folder_test','\/home\/Docs\/Test\/file.txt', '\/home\/Docs\/Test\/.doc.pdf']\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory's path.\n\t\t* @param bool $including_dirs If set to true it will also returns the folders contained in the given directory.\n\t\t* @param bool $hidden If set to true will also returns the hidden files contained the directory\n\t\t* @return array|false\n\t\t*\/"
         },
         "delete": {
             "name": "delete",
             "summary": "Deletes the given directory and all its content.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false"
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir, bool $full = true)\n  {\n    $dir = self::clean($dir);\n\t\tif ( is_dir($dir) ){\n\t\t\t$files = self::getFiles($dir, 1, 1);\n\t\t\tforeach ( $files as $file ){\n        self::delete($file);\n\t\t\t}\n\t\t\tif ( $full ){\n\t\t\t\treturn rmdir($dir);\n      }\n\t\t\treturn true;\n\t\t}\n    if ( is_file($dir) ){\n      return unlink($dir);\n    }\n\t\treturn false;\n  }",
+            "code": "\tpublic static function delete(string $dir, bool $full = true): bool\n\t{\n    $dir = self::clean($dir);\n\t\tif ( is_dir($dir) ){\n\t\t\t$files = self::getFiles($dir, 1, 1);\n\t\t\tforeach ( $files as $file ){\n        self::delete($file);\n\t\t\t}\n\t\t\tif ( $full ){\n\t\t\t\treturn rmdir($dir);\n      }\n\t\t\treturn true;\n\t\t}\n    if ( is_file($dir) ){\n      return unlink($dir);\n    }\n\t\treturn false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 198,
             "endLine": 215,
             "isDeprecated": false,
@@ -321,15 +462,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "delete",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -340,24 +486,51 @@
                     "name": "full",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
                     "default_name": "",
                     "description": "If set to '0' will delete only the content of the directory. Default: \"1\"."
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Deletes the given directory and all its content.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/')\n\/\/ (bool) true\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test', 0);\n\/\/ (bool) false\n\\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/file.txt');\n\/\/ (bool) false\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory path's."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$full",
+                        "description": "If set to '0' will delete only the content of the directory. Default: \"1\"."
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Deletes the given directory and all its content.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/')\n\t\t* \/\/ (bool) true\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test', 0);\n\t\t* \/\/ (bool) false\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::delete('\/home\/Docs\/Test\/file.txt');\n\t\t* \/\/ (bool) false\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory path's.\n\t\t* @param bool $full If set to '0' will delete only the content of the directory. Default: \"1\".\n\t\t* @return bool\n \t*\/"
         },
         "scan": {
             "name": "scan",
             "summary": "Returns an array with all the content of the given directory.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir, string $type = NULL, bool $hidden = false)\n  {\n\t   $all = [];\n\t   $dir = self::clean($dir);\n\t   $dirs = self::getDirs($dir);\n\t   if ( \\is_array($dirs) ){\n\t     if ( $type && (strpos($type, 'file') === 0) ){\n\t       $all = self::getFiles($dir, false, $hidden);\n\t     }\n\t     else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){\n\t       $all = $dirs;\n\t     }\n\t     else if ( $type ){\n\t       $all = array_filter(self::getFiles($dir, false, $hidden), function($a)use($type){\n\t         $ext = bbn\\Str::fileExt($a);\n\t         return strtolower($ext) === strtolower($type);\n\t       });\n\t     }\n\t     else{\n\t       $files = self::getFiles($dir, false, $hidden);\n\t       if ( \\is_array($files) ){\n\t         $all = array_merge($dirs, $files);\n\t       }\n\t     }\n\t     foreach ( $dirs as $d ){\n\t       $all = array_merge(\\is_array($all) ? $all : [], self::scan($d, $type, $hidden));\n\t     }\n\t   }\n\t   return $all;\n  }",
+            "code": "\t public static function scan(string $dir, string $type = null, bool $hidden = false): array\n   {\n\t   $all = [];\n\t   $dir = self::clean($dir);\n\t   $dirs = self::getDirs($dir);\n\t   if ( \\is_array($dirs) ){\n\t     if ( $type && (strpos($type, 'file') === 0) ){\n\t       $all = self::getFiles($dir, false, $hidden);\n\t     }\n\t     else if ( $type && ((strpos($type, 'dir') === 0) || (strpos($type, 'fold') === 0)) ){\n\t       $all = $dirs;\n\t     }\n\t     else if ( $type ){\n\t       $all = array_filter(self::getFiles($dir, false, $hidden), function($a)use($type){\n\t         $ext = bbn\\Str::fileExt($a);\n\t         return strtolower($ext) === strtolower($type);\n\t       });\n\t     }\n\t     else{\n\t       $files = self::getFiles($dir, false, $hidden);\n\t       if ( \\is_array($files) ){\n\t         $all = array_merge($dirs, $files);\n\t       }\n\t     }\n\t     foreach ( $dirs as $d ){\n\t       $all = array_merge(\\is_array($all) ? $all : [], self::scan($d, $type, $hidden));\n\t     }\n\t   }\n\t   return $all;\n\t }",
+            "parent": false,
+            "trait": false,
             "startLine": 239,
             "endLine": 268,
             "isDeprecated": false,
@@ -368,15 +541,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "scan",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -386,7 +564,13 @@
                 {
                     "name": "type",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -397,29 +581,66 @@
                     "name": "hidden",
                     "position": 2,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If set to true will include the hidden files\/directories in the result"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns an array with all the content of the given directory.\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory's path."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type or the extension of item to return ('file', 'dir', 'php', default is both)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$hidden",
+                        "description": "If set to true will include the hidden files\/directories in the result"
+                    }
+                ],
+                "return": "",
+                "todo": {
+                    "tag": "todo",
+                    "text": "check the default value for $hidden\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\"));\n\/\/ (array) [\"\/home\/data\/test\/Folder\", \"\/home\/data\/test\/Folder_test\/image.png\"]\n\\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"\", true));\n\/\/ (array) [\"\/home\/data\/test\/Folder\", \"\/home\/data\/test\/Folder_test\/image.png\", \"\/home\/data\/test\/.doc.pdf\"]\n\\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"dir\"));\n\/\/ (array) [\"\/home\/data\/test\/Folder\", \"\/home\/data\/test\/Folder_test\"]\n\\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"file\"));\n\/\/ (array) [\"\/home\/data\/test\/Folder_test\/image.png\"]\n\\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"file\", true));\n\/\/ (array) [\"\/home\/data\/test\/Folder_test\/image.png\", \"\/home\/data\/test\/Folder\/.doc.pdf\"]\n```"
+                }
+            },
+            "comments": "  \/**\n\t\t* Returns an array with all the content of the given directory.\n\t\t*\n\t\t* @todo check the default value for $hidden\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\"));\n\t\t* \/\/ (array) [\"\/home\/data\/test\/Folder\", \"\/home\/data\/test\/Folder_test\/image.png\"]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"\", true));\n\t\t* \/\/ (array) [\"\/home\/data\/test\/Folder\", \"\/home\/data\/test\/Folder_test\/image.png\", \"\/home\/data\/test\/.doc.pdf\"]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"dir\"));\n\t\t* \/\/ (array) [\"\/home\/data\/test\/Folder\", \"\/home\/data\/test\/Folder_test\"]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"file\"));\n\t\t* \/\/ (array) [\"\/home\/data\/test\/Folder_test\/image.png\"]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::scan(\"\/home\/data\/test\", \"file\", true));\n\t\t* \/\/ (array) [\"\/home\/data\/test\/Folder_test\/image.png\", \"\/home\/data\/test\/Folder\/.doc.pdf\"]\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory's path.\n\t\t* @param string $type The type or the extension of item to return ('file', 'dir', 'php', default is both)\n\t\t* @param bool $hidden If set to true will include the hidden files\/directories in the result\n\t\t* @return array\n\t\t*\/"
         },
         "mscan": {
             "name": "mscan",
             "summary": "Returns an array of indexed arrays with the 'name' of the file\/folder contained in the given directory, the 'mtime', and the 'date' of creation the file\/folder.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]"
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir, string $type = NULL, $hidden = false)\n  {\n     $res = [];\n\t   if ( $all = self::scan($dir, $type, $hidden) ){\n\t     foreach ($all as $a ){\n\t       $t = filemtime($a);\n\t       $res[] = ['name' => $a, 'mtime' => $t, 'date' => date('Y-m-d H:i:s', $t)];\n\t     }\n\t   }\n     return $res;\n  }",
+            "code": "\t public static function mscan(string $dir, string $type = null, $hidden = false): array\n   {\n     $res = [];\n\t   if ( $all = self::scan($dir, $type, $hidden) ){\n\t     foreach ($all as $a ){\n\t       $t = filemtime($a);\n\t       $res[] = ['name' => $a, 'mtime' => $t, 'date' => date('Y-m-d H:i:s', $t)];\n\t     }\n\t   }\n     return $res;\n   }",
+            "parent": false,
+            "trait": false,
             "startLine": 337,
             "endLine": 347,
             "isDeprecated": false,
@@ -430,15 +651,20 @@
             "returnsReference": false,
             "numberOfParameters": 3,
             "numberOfRequiredParameters": 1,
+            "shortName": "mscan",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -448,7 +674,13 @@
                 {
                     "name": "type",
                     "position": 1,
-                    "type": "string",
+                    "type": "null|string",
+                    "type_arr": [
+                        "null",
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -459,29 +691,60 @@
                     "name": "hidden",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If set to true will also return the hidden files\/folders contained in the given directory. Default=false"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns an array of indexed arrays with the 'name' of the file\/folder contained in the given directory, the 'mtime', and the 'date' of creation the file\/folder.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\/* (array)\n[\n [\n   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ],\n[\n   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n   \"mtime\"  =>  1480422173,\n   \"date\"  =>  \"2016-11-29  13:22:53\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ],\n\t[\n  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n   \"mtime\"  =>  1480418947,\n   \"date\"  =>  \"2016-11-29  12:29:07\",\n ]\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory's path"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$type",
+                        "description": "The type or the extension of item to return ('file', 'dir', 'php', default is both)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$hidden",
+                        "description": "If set to true will also return the hidden files\/folders contained in the given directory. Default=false"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Returns an array of indexed arrays with the 'name' of the file\/folder contained in the given directory, the 'mtime', and the 'date' of creation the file\/folder.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\"));\n\t\t* \/* (array)\n\t\t* [\n\t\t*  [\n\t\t*    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n\t\t*    \"mtime\"  =>  1480422173,\n\t\t*    \"date\"  =>  \"2016-11-29  13:22:53\",\n\t\t*  ],\n\t\t*\t[\n\t\t*    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n\t\t*    \"mtime\"  =>  1480422173,\n\t\t*    \"date\"  =>  \"2016-11-29  13:22:53\",\n\t\t*  ],\n\t\t*  [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n\t\t*    \"mtime\"  =>  1480418947,\n\t\t*    \"date\"  =>  \"2016-11-29  12:29:07\",\n\t\t*  ]\n\t\t* ]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"dir\"));\n\t\t* \/* (array)\n\t\t* [\n\t\t*  [\n\t\t*    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n\t\t*    \"mtime\"  =>  1480422173,\n\t\t*    \"date\"  =>  \"2016-11-29  13:22:53\",\n\t\t*  ],\n\t\t*\t[\n\t\t*    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n\t\t*    \"mtime\"  =>  1480422173,\n\t\t*    \"date\"  =>  \"2016-11-29  13:22:53\",\n\t\t*  ]\n\t\t* ]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\"));\n\t\t* \/* (array)\n\t\t* [\n\t\t*  [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n\t\t*    \"mtime\"  =>  1480418947,\n\t\t*    \"date\"  =>  \"2016-11-29  12:29:07\",\n\t\t*  ]\n\t\t* ]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::mscan(\"\/home\/data\/test\", \"file\",1));\n\t\t* \/* (array)\n\t\t* [\n\t\t*  [\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n\t\t*    \"mtime\"  =>  1480418947,\n\t\t*    \"date\"  =>  \"2016-11-29  12:29:07\",\n\t\t*  ],\n\t\t* \t[\n\t\t*\t  \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n\t\t*    \"mtime\"  =>  1480418947,\n\t\t*    \"date\"  =>  \"2016-11-29  12:29:07\",\n\t\t*  ]\n\t\t* ]\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory's path\n\t\t* @param string $type The type or the extension of item to return ('file', 'dir', 'php', default is both)\n\t\t* @param bool $hidden If set to true will also return the hidden files\/folders contained in the given directory. Default=false\n\t\t* @return array\n\t\t*\/"
         },
         "getTree": {
             "name": "getTree",
             "summary": "Return an array with the tree of the folder's content.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]"
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir, bool $only_dir = false, callable $filter = NULL, bool $hidden = false)\n  {\n    $r = [];\n    $dir = self::clean($dir);\n    $dirs = self::getDirs($dir, $hidden);\n    if ( \\is_array($dirs) ){\n      foreach ( $dirs as $d ){\n        $x = [\n          'name' => $d,\n          'type' => 'dir',\n          'num_children' => 0,\n          'items' => self::getTree($d, $only_dir, $filter, $hidden)\n        ];\n        $x['num_children'] = \\count($x['items']);\n        if ( $filter ){\n          if ( $filter($x) ){\n            $r[] = $x;\n          }\n        }\n        else{\n          $r[] = $x;\n        }\n      }\n      if ( !$only_dir ){\n        $files = self::getFiles($dir, false, $hidden);\n        foreach ( $files as $f ){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\Str::fileExt($f)\n          ];\n          if ( $filter ){\n            if ( $filter($x) ){\n              $r[] = $x;\n            }\n          }\n          else{\n            $r[] = $x;\n          }\n        }\n      }\n    }\n    return $r;\n  }",
+            "code": "  public static function getTree(string $dir, bool $only_dir = false, callable $filter = null, bool $hidden = false): array\n  {\n    $r = [];\n    $dir = self::clean($dir);\n    $dirs = self::getDirs($dir, $hidden);\n    if ( \\is_array($dirs) ){\n      foreach ( $dirs as $d ){\n        $x = [\n          'name' => $d,\n          'type' => 'dir',\n          'num_children' => 0,\n          'items' => self::getTree($d, $only_dir, $filter, $hidden)\n        ];\n        $x['num_children'] = \\count($x['items']);\n        if ( $filter ){\n          if ( $filter($x) ){\n            $r[] = $x;\n          }\n        }\n        else{\n          $r[] = $x;\n        }\n      }\n      if ( !$only_dir ){\n        $files = self::getFiles($dir, false, $hidden);\n        foreach ( $files as $f ){\n          $x = [\n            'name' => $f,\n            'type' => 'file',\n            'ext' => bbn\\Str::fileExt($f)\n          ];\n          if ( $filter ){\n            if ( $filter($x) ){\n              $r[] = $x;\n            }\n          }\n          else{\n            $r[] = $x;\n          }\n        }\n      }\n    }\n    return $r;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 426,
             "endLine": 469,
             "isDeprecated": false,
@@ -492,15 +755,20 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 1,
+            "shortName": "getTree",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -511,6 +779,11 @@
                     "name": "only_dir",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
@@ -520,7 +793,13 @@
                 {
                     "name": "filter",
                     "position": 2,
-                    "type": "callable",
+                    "type": "null|callable",
+                    "type_arr": [
+                        "null",
+                        "callable"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": null,
@@ -531,29 +810,68 @@
                     "name": "hidden",
                     "position": 3,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If set to true will also return the hidden file(s)\/folder(s)"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Return an array with the tree of the folder's content.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\"));\n\/* (array)\n[\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  0,\n  \"items\"  =>  [],\n ],\n [\n  \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n  \"type\"  =>  \"dir\",\n  \"num_children\"  =>  1,\n  \"items\"  =>  [\n                 [\n                   \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                   \"type\"  =>  \"file\",\n                   \"ext\"  =>  \"png\",\n                 ],\n               ],\n ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  0,\n    \"items\"  =>  [],\n  ],\n]\n\\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", false, false, true) );\n\/* (array)\n[\n  [\n    \"name\"  =>  \"\/home\/data\/test\/Folder\",\n    \"type\"  =>  \"dir\",\n    \"num_children\"  =>  1,\n    \"items\"  =>  [\n                   [\n                     \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n                     \"type\"  =>  \"file\",\n                     \"ext\"  =>  \"pdf\",\n                   ],\n                 ],\n     ],\n     [\n       \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n       \"type\"  =>  \"dir\",\n       \"num_children\"  =>  1,\n       \"items\"  =>  [\n                      [\n                        \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n                        \"type\"  =>  \"file\",\n                        \"ext\"  =>  \"png\",\n                      ],\n                    ],\n   ],\n]\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The directory's path."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$only",
+                        "description": "dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "callable",
+                        "name": "$filter",
+                        "description": "Filter function"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$hidden",
+                        "description": "If set to true will also return the hidden file(s)\/folder(s)"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Return an array with the tree of the folder's content.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\"));\n\t\t* \/* (array)\n\t\t* [\n\t\t*  [\n\t\t*   \"name\"  =>  \"\/home\/data\/test\/Folder\",\n\t\t*   \"type\"  =>  \"dir\",\n\t\t*   \"num_children\"  =>  0,\n\t\t*   \"items\"  =>  [],\n\t\t*  ],\n\t\t*  [\n\t\t*   \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n\t\t*   \"type\"  =>  \"dir\",\n\t\t*   \"num_children\"  =>  1,\n\t\t*   \"items\"  =>  [\n\t\t*                  [\n\t\t*                    \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n\t\t*                    \"type\"  =>  \"file\",\n\t\t*                    \"ext\"  =>  \"png\",\n\t\t*                  ],\n\t\t*                ],\n\t\t*  ],\n\t\t* ]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", true) );\n\t\t* \/* (array)\n\t\t* [\n\t\t*   [\n\t\t*     \"name\"  =>  \"\/home\/data\/test\/Folder\",\n\t\t*     \"type\"  =>  \"dir\",\n\t\t*     \"num_children\"  =>  0,\n\t\t*     \"items\"  =>  [],\n\t\t*   ],\n\t\t*   [\n\t\t*     \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n\t\t*     \"type\"  =>  \"dir\",\n\t\t*     \"num_children\"  =>  0,\n\t\t*     \"items\"  =>  [],\n\t\t*   ],\n\t\t* ]\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::getTree(\"\/home\/data\/test\", false, false, true) );\n\t\t* \/* (array)\n\t\t* [\n\t\t*   [\n\t\t*     \"name\"  =>  \"\/home\/data\/test\/Folder\",\n\t\t*     \"type\"  =>  \"dir\",\n\t\t*     \"num_children\"  =>  1,\n\t\t*     \"items\"  =>  [\n\t\t*                    [\n\t\t*                      \"name\"  =>  \"\/home\/data\/test\/Folder\/.doc.pdf\",\n\t\t*                      \"type\"  =>  \"file\",\n\t\t*                      \"ext\"  =>  \"pdf\",\n\t\t*                    ],\n\t\t*                  ],\n\t\t*      ],\n\t\t*      [\n\t\t*        \"name\"  =>  \"\/home\/data\/test\/Folder_test\",\n\t\t*        \"type\"  =>  \"dir\",\n\t\t*        \"num_children\"  =>  1,\n\t\t*        \"items\"  =>  [\n\t\t*                       [\n\t\t*                         \"name\"  =>  \"\/home\/data\/test\/Folder_test\/image.png\",\n\t\t*                         \"type\"  =>  \"file\",\n\t\t*                         \"ext\"  =>  \"png\",\n\t\t*                       ],\n\t\t*                     ],\n\t\t*    ],\n\t\t* ]\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The directory's path.\n\t\t* @param bool $only_dir If set to true will just return the folder(s), if false will include in the resulr also the file(s). Default = false.\n\t\t* @param callable $filter Filter function\n\t\t* @param bool $hidden If set to true will also return the hidden file(s)\/folder(s)\n\t\t* @return array\n\t\t*\/"
         },
         "createPath": {
             "name": "createPath",
             "summary": "Creates a folder with the given path.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::createPath(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\"\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::createPath(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\""
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(string $dir, $chmod = false)\n  {\n    if ( !$dir || !\\is_string($dir) ){\n      return null;\n\t\t}\n\t\t$bits = [];\n\t\t\/\/clearstatcache();\n\t\t$path = self::clean($dir);\n    while ( $path && !is_dir($path) ){\n\t\t\t$bits[] = X::basename($path);\n\t\t\t$path = X::dirname($path);\n\t\t}\n\t\tif (is_dir($path)) {\n\t\t\tforeach (array_reverse($bits) as $b) {\n\t\t\t\tif (!empty($b)) {\n\t\t\t\t\t$path .= '\/'.$b;\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tmkdir($path);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\X::log($e->getMessage(), 'errors');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t}\n\t\t\t\t\tif ($chmod) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tchmod($path, $chmod);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\X::log($e->getMessage(), 'errors');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n    return $dir;\n  }",
+            "code": "\tpublic static function createPath(string $dir, $chmod=false): ?string\n\t{\n    if ( !$dir || !\\is_string($dir) ){\n      return null;\n\t\t}\n\t\t$bits = [];\n\t\t\/\/clearstatcache();\n\t\t$path = self::clean($dir);\n    while ( $path && !is_dir($path) ){\n\t\t\t$bits[] = X::basename($path);\n\t\t\t$path = X::dirname($path);\n\t\t}\n\t\tif (is_dir($path)) {\n\t\t\tforeach (array_reverse($bits) as $b) {\n\t\t\t\tif (!empty($b)) {\n\t\t\t\t\t$path .= '\/'.$b;\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tmkdir($path);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\X::log($e->getMessage(), 'errors');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (!is_dir($path)) {\n\t\t\t\t\t\treturn null;\n\t\t\t\t\t}\n\t\t\t\t\tif ($chmod) {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\tchmod($path, $chmod);\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (\\Exception $e) {\n\t\t\t\t\t\t\t\\bbn\\X::log($e->getMessage(), 'errors');\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n    return $dir;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 483,
             "endLine": 522,
             "isDeprecated": false,
@@ -564,16 +882,21 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "createPath",
             "returns": [
                 null,
                 "string"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "dir",
                     "position": 0,
                     "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -584,29 +907,54 @@
                     "name": "chmod",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": false,
                     "default_name": "",
                     "description": "If set to true the user won't have the permissions to view the content of the folder created"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Creates a folder with the given path.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::createPath(\"\/home\/data\/test\/New\"));\n\\\\ (string) \"\/home\/data\/test\/New\"\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dir",
+                        "description": "The new directory's path."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$chmod",
+                        "description": "If set to true the user won't have the permissions to view the content of the folder created"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Creates a folder with the given path.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::createPath(\"\/home\/data\/test\/New\"));\n\t\t* \\\\ (string) \"\/home\/data\/test\/New\"\n\t\t* ```\n\t\t*\n\t\t* @param string $dir The new directory's path.\n\t\t* @param bool $chmod If set to true the user won't have the permissions to view the content of the folder created\n\t\t* @return string|null\n\t\t*\/"
         },
         "move": {
             "name": "move",
             "summary": "Moves a file or directory to a new location",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\"\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\""
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($orig, $dest, $st = '_v', $length = 0)\n  {\n    if ( file_exists($orig) && self::createPath(X::dirname($dest)) ){\n      if ( file_exists($dest) ){\n        if ( $st === true ){\n          self::delete($dest);\n        }\n        else{\n          $i = 1;\n          while ( $i ){\n            $dir = X::dirname($dest).'\/';\n            $file_name = bbn\\Str::fileExt($dest, 1);\n            $file = $file_name[0].$st;\n            if ( $length > 0 ){\n              $len = \\strlen(bbn\\Str::cast($i));\n              if ( $len > $length ){\n                return false;\n              }\n              $file .= str_repeat('0', $length - $len);\n            }\n            $file .= bbn\\Str::cast($i);\n            if ( !empty($file_name[1]) ){\n              $file .= '.'.$file_name[1];\n            }\n            $i++;\n            if ( !file_exists($dir.$file) ){\n              $dest = $dir.$file;\n              $i = false;\n            }\n          }\n        }\n      }\n      if ( rename($orig, $dest) ){\n        return true;\n      }\n    }\n    return false;\n  }",
+            "code": "\tpublic static function move($orig, $dest, $st = '_v', $length = 0): bool\n\t{\n    if ( file_exists($orig) && self::createPath(X::dirname($dest)) ){\n      if ( file_exists($dest) ){\n        if ( $st === true ){\n          self::delete($dest);\n        }\n        else{\n          $i = 1;\n          while ( $i ){\n            $dir = X::dirname($dest).'\/';\n            $file_name = bbn\\Str::fileExt($dest, 1);\n            $file = $file_name[0].$st;\n            if ( $length > 0 ){\n              $len = \\strlen(bbn\\Str::cast($i));\n              if ( $len > $length ){\n                return false;\n              }\n              $file .= str_repeat('0', $length - $len);\n            }\n            $file .= bbn\\Str::cast($i);\n            if ( !empty($file_name[1]) ){\n              $file .= '.'.$file_name[1];\n            }\n            $i++;\n            if ( !file_exists($dir.$file) ){\n              $dest = $dir.$file;\n              $i = false;\n            }\n          }\n        }\n      }\n      if ( rename($orig, $dest) ){\n        return true;\n      }\n    }\n    return false;\n\t}",
+            "parent": false,
+            "trait": false,
             "startLine": 544,
             "endLine": 581,
             "isDeprecated": false,
@@ -617,15 +965,18 @@
             "returnsReference": false,
             "numberOfParameters": 4,
             "numberOfRequiredParameters": 2,
+            "shortName": "move",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "orig",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -636,6 +987,9 @@
                     "name": "dest",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -646,6 +1000,9 @@
                     "name": "st",
                     "position": 2,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": "_v",
@@ -656,29 +1013,66 @@
                     "name": "length",
                     "position": 3,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": 0,
                     "default_name": "",
                     "description": "The number of characters to use for the revision number; will be zerofilled"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Moves a file or directory to a new location\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\\\\ (string) \"image.png\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\\\\ (string) \"Folder_test\"\n\\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\\\\ (string) \"Folder_test_n001\"\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$orig",
+                        "description": "The path of the file to move"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dest",
+                        "description": "The full name of the destination (including basename)"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$st",
+                        "description": "If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file\/folder."
+                    },
+                    {
+                        "tag": "param",
+                        "type": "int",
+                        "name": "$length",
+                        "description": "The number of characters to use for the revision number; will be zerofilled"
+                    }
+                ],
+                "return": "Success"
+            },
+            "comments": "  \/**\n\t\t* Moves a file or directory to a new location\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/image.png\"));\n\t\t* \\\\ (string) \"image.png\"\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\/image.png\",\"\/home\/data\/test\/Folder_test\/Intro\/image.png\"));\n\t\t* \\\\ (string) \"image.png\"\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", true));\n\t\t* \\\\ (string) \"Folder_test\"\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::move(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\", \"_n\", 3));\n\t\t* \\\\ (string) \"Folder_test_n001\"\n\t\t* ```\n\t\t*\n\t\t* @param string $orig The path of the file to move\n\t\t* @param string $dest The full name of the destination (including basename)\n\t\t* @param string | true $st If in the destination folder alredy exists a file with the same name of the file to move it will rename the file adding '_v' (default). If 'string' will change the file name with the given string. If $st=true it will overwrite the file\/folder.\n\t\t* @param int $length The number of characters to use for the revision number; will be zerofilled\n\t\t* @return bool Success\n\t\t*\/"
         },
         "copy": {
             "name": "copy",
             "summary": "Will move the content of the given folder to a new destination. Doesn't move the hidden files.",
-            "description": "```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1\n```",
+            "description": "",
             "description_parts": [
                 {
                     "type": "code",
                     "content": "\\bbn\\X::dump(\\bbn\\File\\Dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1"
                 }
             ],
-            "file": "bbn\\File\\Dir",
+            "class": "bbn\\File\\Dir",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/File\/Dir.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function($src, $dst)\n  {\n    if ( is_file($src) ){\n      return copy($src, $dst);\n    }\n    if ( is_dir($src) && self::createPath($dst) ){\n      $files = self::getFiles($src);\n      $dirs = self::getDirs($src);\n      foreach ( $files as $f ){\n        copy($f, $dst.'\/'.X::basename($f));\n      }\n      foreach ( $dirs as $f ){\n        self::copy($f, $dst.'\/'.X::basename($f));\n      }\n      return true;\n    }\n    else{\n      return false;\n    }\n  }",
+            "code": "  public static function copy($src, $dst): bool\n  {\n    if ( is_file($src) ){\n      return copy($src, $dst);\n    }\n    if ( is_dir($src) && self::createPath($dst) ){\n      $files = self::getFiles($src);\n      $dirs = self::getDirs($src);\n      foreach ( $files as $f ){\n        copy($f, $dst.'\/'.X::basename($f));\n      }\n      foreach ( $dirs as $f ){\n        self::copy($f, $dst.'\/'.X::basename($f));\n      }\n      return true;\n    }\n    else{\n      return false;\n    }\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 594,
             "endLine": 613,
             "isDeprecated": false,
@@ -689,15 +1083,18 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "copy",
             "returns": [
                 "bool"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "src",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -708,47 +1105,62 @@
                     "name": "dst",
                     "position": 1,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": "",
                     "description": "The new destination of files"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Will move the content of the given folder to a new destination. Doesn't move the hidden files.\n\n```php\n\\bbn\\X::dump(\\bbn\\File\\Dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\\\\ (bool) 1\n```\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$src",
+                        "description": "The path of the files to move"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$dst",
+                        "description": "The new destination of files"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n\t\t* Will move the content of the given folder to a new destination. Doesn't move the hidden files.\n\t\t*\n\t\t* ```php\n\t\t* \\bbn\\X::dump(\\bbn\\File\\Dir::copy(\"\/home\/data\/test\/Folder\",\"\/home\/data\/test\/Folder_test\"));\n\t\t* \\\\ (bool) 1\n\t\t* ```\n\t\t*\n\t\t* @param string $src The path of the files to move\n\t\t* @param string $dst The new destination of files\n\t\t* @return bool\n\t\t*\/"
         },
         "test": {
             "name": "test",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -757,45 +1169,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -804,24 +1234,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -830,160 +1255,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -991,63 +1298,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -1056,17 +1421,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -1077,43 +1618,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -1124,36 +1683,352 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn": "bbn",
+        "bbn\\X": "X"
+    },
+    "dummyComments": [
+        "\/**\n\t\t* @package file\n\t\t*\/",
+        "\/**\n\t* A class for dealing with directories (folders)\n\t*\n\t*\n\t* @author Thomas Nabet <thomas.nabet@gmail.com>\n\t* @copyright BBN Solutions\n\t* @since Apr 4, 2011, 23:23:55 +0000\n\t* @category  Files ressources\n\t* @license   http:\/\/www.opensource.org\/licenses\/lgpl-license.php LGPL\n\t* @version 0.2r89\n\t*\/"
+    ],
     "summary": "A class for dealing with directories (folders)",
     "description": "",
     "description_parts": []

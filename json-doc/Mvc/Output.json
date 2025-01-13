@@ -5,28 +5,31 @@
     },
     "name": "bbn\\Mvc\\Output",
     "namespace": true,
+    "realName": "Output",
+    "realNamespace": "bbn\\Mvc",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Mvc\/Output.php",
     "startLine": 20,
-    "endLine": 276,
-    "numMethods": 11,
-    "numProperties": 0,
+    "endLine": 278,
+    "numMethods": 12,
+    "numProperties": 8,
     "numConstants": 0,
     "numStaticProperties": 0,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
-    "isFinal": false,
-    "modifiers": 0,
+    "isFinal": true,
+    "modifiers": 32,
     "parentClass": "bbn\\Models\\Cls\\Basic",
     "isSubclassOf": false,
     "defaultProperties": {
         "errors": [],
         "error": false,
+        "errorCode": false,
+        "errorCodes": [],
         "debug": false,
         "log": []
     },
@@ -35,7 +38,6 @@
     "namespaceName": "bbn\\Mvc",
     "shortName": "Output",
     "contentConstructor": {
-        "file": "bbn\\Mvc\\Output",
         "returns": []
     },
     "methods": {
@@ -44,13 +46,16 @@
             "summary": "Returns an array with the status and the code for the given code, and sends the corresponding header if not disabled",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Output",
+            "class": "bbn\\Mvc\\Output",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Output.php",
             "static": true,
             "visibility": "public",
             "final": false,
-            "code": "function(int $code, bool $send = true)\n  {\n    $http = [\n      100 => 'HTTP\/1.1 100 Continue',\n      101 => 'HTTP\/1.1 101 Switching Protocols',\n      200 => 'HTTP\/1.1 200 OK',\n      201 => 'HTTP\/1.1 201 Created',\n      202 => 'HTTP\/1.1 202 Accepted',\n      203 => 'HTTP\/1.1 203 Non-Authoritative Information',\n      204 => 'HTTP\/1.1 204 No Content',\n      205 => 'HTTP\/1.1 205 Reset Content',\n      206 => 'HTTP\/1.1 206 Partial Content',\n      300 => 'HTTP\/1.1 300 Multiple Choices',\n      301 => 'HTTP\/1.1 301 Moved Permanently',\n      302 => 'HTTP\/1.1 302 Found',\n      303 => 'HTTP\/1.1 303 See Other',\n      304 => 'HTTP\/1.1 304 Not Modified',\n      305 => 'HTTP\/1.1 305 Use Proxy',\n      307 => 'HTTP\/1.1 307 Temporary Redirect',\n      400 => 'HTTP\/1.1 400 Bad Request',\n      401 => 'HTTP\/1.1 401 Unauthorized',\n      402 => 'HTTP\/1.1 402 Payment Required',\n      403 => 'HTTP\/1.1 403 Forbidden',\n      404 => 'HTTP\/1.1 404 Not Found',\n      405 => 'HTTP\/1.1 405 Method Not Allowed',\n      406 => 'HTTP\/1.1 406 Not Acceptable',\n      407 => 'HTTP\/1.1 407 Proxy Authentication Required',\n      408 => 'HTTP\/1.1 408 Request Time-out',\n      409 => 'HTTP\/1.1 409 Conflict',\n      410 => 'HTTP\/1.1 410 Gone',\n      411 => 'HTTP\/1.1 411 Length Required',\n      412 => 'HTTP\/1.1 412 Precondition Failed',\n      413 => 'HTTP\/1.1 413 Request Entity Too Large',\n      414 => 'HTTP\/1.1 414 Request-URI Too Large',\n      415 => 'HTTP\/1.1 415 Unsupported Media Type',\n      416 => 'HTTP\/1.1 416 Requested Range Not Satisfiable',\n      417 => 'HTTP\/1.1 417 Expectation Failed',\n      500 => 'HTTP\/1.1 500 Internal Server Error',\n      501 => 'HTTP\/1.1 501 Not Implemented',\n      502 => 'HTTP\/1.1 502 Bad Gateway',\n      503 => 'HTTP\/1.1 503 Service Unavailable',\n      504 => 'HTTP\/1.1 504 Gateway Time-out',\n      505 => 'HTTP\/1.1 505 HTTP Version Not Supported',\n    ];\n\n    if (!isset($http[$code])) {\n      throw new Exception(\"The given status doesn't exist\");\n    }\n\n    if ($send) {\n      header($http[$code]);\n      if ($code !== 200) {\n        exit();\n      }\n    }\n \n    return [\n      'code' => $code,\n      'error' => $http[$code],\n    ];\n  }",
-            "startLine": 29,
-            "endLine": 89,
+            "code": "  static function statusHeader(int $code, bool $send = true): array\n  {\n    $http = [\n      100 => 'HTTP\/1.1 100 Continue',\n      101 => 'HTTP\/1.1 101 Switching Protocols',\n      200 => 'HTTP\/1.1 200 OK',\n      201 => 'HTTP\/1.1 201 Created',\n      202 => 'HTTP\/1.1 202 Accepted',\n      203 => 'HTTP\/1.1 203 Non-Authoritative Information',\n      204 => 'HTTP\/1.1 204 No Content',\n      205 => 'HTTP\/1.1 205 Reset Content',\n      206 => 'HTTP\/1.1 206 Partial Content',\n      300 => 'HTTP\/1.1 300 Multiple Choices',\n      301 => 'HTTP\/1.1 301 Moved Permanently',\n      302 => 'HTTP\/1.1 302 Found',\n      303 => 'HTTP\/1.1 303 See Other',\n      304 => 'HTTP\/1.1 304 Not Modified',\n      305 => 'HTTP\/1.1 305 Use Proxy',\n      307 => 'HTTP\/1.1 307 Temporary Redirect',\n      400 => 'HTTP\/1.1 400 Bad Request',\n      401 => 'HTTP\/1.1 401 Unauthorized',\n      402 => 'HTTP\/1.1 402 Payment Required',\n      403 => 'HTTP\/1.1 403 Forbidden',\n      404 => 'HTTP\/1.1 404 Not Found',\n      405 => 'HTTP\/1.1 405 Method Not Allowed',\n      406 => 'HTTP\/1.1 406 Not Acceptable',\n      407 => 'HTTP\/1.1 407 Proxy Authentication Required',\n      408 => 'HTTP\/1.1 408 Request Time-out',\n      409 => 'HTTP\/1.1 409 Conflict',\n      410 => 'HTTP\/1.1 410 Gone',\n      411 => 'HTTP\/1.1 411 Length Required',\n      412 => 'HTTP\/1.1 412 Precondition Failed',\n      413 => 'HTTP\/1.1 413 Request Entity Too Large',\n      414 => 'HTTP\/1.1 414 Request-URI Too Large',\n      415 => 'HTTP\/1.1 415 Unsupported Media Type',\n      416 => 'HTTP\/1.1 416 Requested Range Not Satisfiable',\n      417 => 'HTTP\/1.1 417 Expectation Failed',\n      500 => 'HTTP\/1.1 500 Internal Server Error',\n      501 => 'HTTP\/1.1 501 Not Implemented',\n      502 => 'HTTP\/1.1 502 Bad Gateway',\n      503 => 'HTTP\/1.1 503 Service Unavailable',\n      504 => 'HTTP\/1.1 504 Gateway Time-out',\n      505 => 'HTTP\/1.1 505 HTTP Version Not Supported',\n    ];\n\n    if (!isset($http[$code])) {\n      throw new Exception(\"The given status doesn't exist\");\n    }\n\n    if ($send) {\n      header($http[$code]);\n      if ($code !== 200) {\n        exit();\n      }\n    }\n \n    return [\n      'code' => $code,\n      'error' => $http[$code],\n    ];\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 28,
+            "endLine": 88,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -59,15 +64,20 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 1,
+            "shortName": "statusHeader",
             "returns": [
                 "array"
             ],
-            "parent": false,
             "arguments": [
                 {
                     "name": "code",
                     "position": 0,
                     "type": "int",
+                    "type_arr": [
+                        "int"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
@@ -78,26 +88,53 @@
                     "name": "send",
                     "position": 1,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": false,
                     "has_default": true,
                     "default": true,
                     "default_name": "",
                     "description": "If false the header won't be sent"
                 }
-            ]
+            ],
+            "doc": {
+                "description": "Returns an array with the status and the code for the given code, and sends the corresponding header if not disabled\n",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "integer",
+                        "name": "$code",
+                        "description": "The status code"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "bool",
+                        "name": "$send",
+                        "description": "If false the header won't be sent"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Returns an array with the status and the code for the given code, and sends the corresponding header if not disabled\n   *\n   * @param integer $code The status code\n   * @param bool    $send If false the header won't be sent\n   * @return array\n   *\/"
         },
         "__construct": {
             "name": "__construct",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Output",
+            "class": "bbn\\Mvc\\Output",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Output.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function(stdClass $obj, $mode)\n  {\n    $this->mode = $mode;\n  }",
-            "startLine": 92,
-            "endLine": 95,
+            "code": "  public function __construct(\n    private stdClass $obj,\n    private string $mode\n  ) {\n    $this->obj = $obj;\n    $this->mode = $mode;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 91,
+            "endLine": 97,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -106,26 +143,38 @@
             "returnsReference": false,
             "numberOfParameters": 2,
             "numberOfRequiredParameters": 2,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "obj",
                     "position": 0,
                     "type": "stdClass",
+                    "type_arr": [
+                        "stdClass"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "promoted": "private"
                 },
                 {
                     "name": "mode",
                     "position": 1,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
-                    "default_name": ""
+                    "default_name": "",
+                    "promoted": "private"
                 }
             ]
         },
@@ -134,13 +183,16 @@
             "summary": "Outputs the result.",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Mvc\\Output",
+            "class": "bbn\\Mvc\\Output",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Mvc\/Output.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if (\\count((array)$this->obj) === 0) {\n      self::statusHeader(404);\n    }\n\n    if ($this->mode === 'cli') {\n      if (!headers_sent() && !$this->obj->content) {\n        exit('No output...');\n      }\n      if ( $this->obj->content ){\n        echo $this->obj->content;\n      }\n      exit();\n    }\n\n    if ( isset($this->obj->prescript) ){\n      if ( empty($this->obj->prescript) ){\n        unset($this->obj->prescript);\n      }\n      else if ( !BBN_IS_DEV ){\n        try{\n          $tmp = Minifier::minify($this->obj->prescript, ['flaggedComments' => false]);\n        }\n        catch ( RuntimeException $e ){\n          X::log($this->obj->prescript, 'js_shrink');\n        }\n        if ( $tmp ){\n          $this->obj->prescript = $tmp;\n        }\n      }\n    }\n    if ( isset($this->obj->script) ){\n      if ( empty($this->obj->script) ){\n        unset($this->obj->script);\n      }\n      else if ( !BBN_IS_DEV ){\n        try{\n          $tmp = Minifier::minify($this->obj->script, ['flaggedComments' => false]);\n        }\n        catch ( RuntimeException $e ){\n          X::log($this->obj->script, 'js_shrink');\n        }\n        if ( $tmp ){\n          $this->obj->script = $tmp;\n        }\n      }\n    }\n    if ( isset($this->obj->postscript) ){\n      if ( empty($this->obj->postscript) ){\n        unset($this->obj->postscript);\n      }\n      else if ( !BBN_IS_DEV ){\n        try{\n          $tmp = Minifier::minify($this->obj->postscript, ['flaggedComments' => false]);\n        }\n        catch ( RuntimeException $e ){\n          X::log($this->obj->postscript, 'js_shrink');\n        }\n        if ( $tmp ){\n          $this->obj->postscript = $tmp;\n        }\n      }\n    }\n    if ((empty($this->obj->content) && (X::countProperties($this->obj) === 1)) || in_array($this->mode, ['file', 'image'])) {\n      if (!empty($this->obj->file)){\n        if (\\is_string($this->obj->file) && is_file($this->obj->file)){\n          $this->obj->file = new File($this->obj->file);\n        }\n        if (\\is_object($this->obj->file) &&\n          method_exists($this->obj->file, 'download') &&\n          method_exists($this->obj->file, 'test') &&\n          $this->obj->file->test()\n        ){\n          $this->mode = 'file';\n        }\n      }\n      else if (!empty($this->obj->img)){\n        if (\\is_string($this->obj->img) && is_file($this->obj->img)){\n          $this->obj->img = new Image($this->obj->img);\n        }\n        if (\\is_object($this->obj->img) &&\n          method_exists($this->obj->img, 'display') &&\n          method_exists($this->obj->img, 'test') &&\n          $this->obj->img->test()\n        ){\n          $this->mode = 'image';\n        }\n      }\n    }\n    switch ( $this->mode ){\n      case 'public':\n      case 'json':\n      case 'js':\n      case 'css':\n      case 'doc':\n      case 'html':\n        if ( !ob_start(\"ob_gzhandler\" ) ){\n          ob_start();\n        }\n        else{\n          header('Content-Encoding: gzip');\n        }\n        break;\n      default:\n        ob_start();\n    }\n    if ( (empty($this->obj->content) && empty($this->obj->file) && empty($this->obj->img) && ($this->mode !==\n          'public')) ||\n      (($this->mode === 'public') && empty($this->obj)) ){\n      $this->mode = '';\n    }\n    else if ( !empty($this->obj->content) && !empty($this->obj->help) ){\n      $mdParser = new Parsedown();\n      $this->obj->help = $mdParser->text($this->obj->help);\n    }\n    switch ( $this->mode ){\n\n      case 'public':\n        header('Content-type: application\/json; charset=utf-8');\n        if (BBN_IS_DEV) {\n          echo json_encode($this->obj, JSON_PRETTY_PRINT);\n        }\n        else {\n          echo json_encode($this->obj);\n        }\n        break;\n\n      case 'js':\n        header('Content-type: application\/javascript; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'css':\n        header('Content-type: text\/css; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'text':\n        header('Content-type: text\/plain; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'xml':\n        header('Content-type: text\/xml; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'image':\n        if ( isset($this->obj->img) && \\is_object($this->obj->img) ){\n          $this->obj->img->display();\n        }\n        else{\n          $this->log(\"Impossible to display the following image: \".$this->obj->img->name);\n          self::statusHeader(404);\n        }\n        break;\n\n      case 'file':\n        if ( isset($this->obj->file) && \\is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){\n          $this->obj->file->download();\n        }\n        else{\n          $this->log(\"Impossible to display the following controller\", $this);\n          self::statusHeader(404);\n        }\n        break;\n\n      default:\n        header('Content-type: text\/html; charset=utf-8');\n        echo isset($this->obj->content) ? $this->obj->content : '';\n    }\n  }",
-            "startLine": 103,
-            "endLine": 275,
+            "code": "  public function run()\n  {\n    if (\\count((array)$this->obj) === 0) {\n      self::statusHeader(404);\n    }\n\n    if ($this->mode === 'cli') {\n      if (!headers_sent() && !$this->obj->content) {\n        exit('No output...');\n      }\n      if ( $this->obj->content ){\n        echo $this->obj->content;\n      }\n      exit();\n    }\n\n    if ( isset($this->obj->prescript) ){\n      if ( empty($this->obj->prescript) ){\n        unset($this->obj->prescript);\n      }\n      else if ( !BBN_IS_DEV ){\n        try{\n          $tmp = Minifier::minify($this->obj->prescript, ['flaggedComments' => false]);\n        }\n        catch ( RuntimeException $e ){\n          X::log($this->obj->prescript, 'js_shrink');\n        }\n        if ( $tmp ){\n          $this->obj->prescript = $tmp;\n        }\n      }\n    }\n    if ( isset($this->obj->script) ){\n      if ( empty($this->obj->script) ){\n        unset($this->obj->script);\n      }\n      else if ( !BBN_IS_DEV ){\n        try{\n          $tmp = Minifier::minify($this->obj->script, ['flaggedComments' => false]);\n        }\n        catch ( RuntimeException $e ){\n          X::log($this->obj->script, 'js_shrink');\n        }\n        if ( $tmp ){\n          $this->obj->script = $tmp;\n        }\n      }\n    }\n    if ( isset($this->obj->postscript) ){\n      if ( empty($this->obj->postscript) ){\n        unset($this->obj->postscript);\n      }\n      else if ( !BBN_IS_DEV ){\n        try{\n          $tmp = Minifier::minify($this->obj->postscript, ['flaggedComments' => false]);\n        }\n        catch ( RuntimeException $e ){\n          X::log($this->obj->postscript, 'js_shrink');\n        }\n        if ( $tmp ){\n          $this->obj->postscript = $tmp;\n        }\n      }\n    }\n    if ((empty($this->obj->content) && (X::countProperties($this->obj) === 1)) || in_array($this->mode, ['file', 'image'])) {\n      if (!empty($this->obj->file)){\n        if (\\is_string($this->obj->file) && is_file($this->obj->file)){\n          $this->obj->file = new File($this->obj->file);\n        }\n        if (\\is_object($this->obj->file) &&\n          method_exists($this->obj->file, 'download') &&\n          method_exists($this->obj->file, 'test') &&\n          $this->obj->file->test()\n        ){\n          $this->mode = 'file';\n        }\n      }\n      else if (!empty($this->obj->img)){\n        if (\\is_string($this->obj->img) && is_file($this->obj->img)){\n          $this->obj->img = new Image($this->obj->img);\n        }\n        if (\\is_object($this->obj->img) &&\n          method_exists($this->obj->img, 'display') &&\n          method_exists($this->obj->img, 'test') &&\n          $this->obj->img->test()\n        ){\n          $this->mode = 'image';\n        }\n      }\n    }\n    switch ( $this->mode ){\n      case 'public':\n      case 'json':\n      case 'js':\n      case 'css':\n      case 'doc':\n      case 'html':\n        if ( !ob_start(\"ob_gzhandler\" ) ){\n          ob_start();\n        }\n        else{\n          header('Content-Encoding: gzip');\n        }\n        break;\n      default:\n        ob_start();\n    }\n    if ( (empty($this->obj->content) && empty($this->obj->file) && empty($this->obj->img) && ($this->mode !==\n          'public')) ||\n      (($this->mode === 'public') && empty($this->obj)) ){\n      $this->mode = '';\n    }\n    else if ( !empty($this->obj->content) && !empty($this->obj->help) ){\n      $mdParser = new Markdown();\n      $this->obj->help = $mdParser->compile($this->obj->help);\n    }\n    switch ( $this->mode ){\n\n      case 'public':\n        header('Content-type: application\/json; charset=utf-8');\n        if (BBN_IS_DEV) {\n          echo json_encode($this->obj, JSON_PRETTY_PRINT);\n        }\n        else {\n          echo json_encode($this->obj);\n        }\n        break;\n\n      case 'js':\n        header('Content-type: application\/javascript; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'css':\n        header('Content-type: text\/css; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'text':\n        header('Content-type: text\/plain; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'xml':\n        header('Content-type: text\/xml; charset=utf-8');\n        echo $this->obj->content;\n        break;\n\n      case 'image':\n        if ( isset($this->obj->img) && \\is_object($this->obj->img) ){\n          $this->obj->img->display();\n        }\n        else{\n          $this->log(\"Impossible to display the following image: \".$this->obj->img->name);\n          self::statusHeader(404);\n        }\n        break;\n\n      case 'file':\n        if ( isset($this->obj->file) && \\is_object($this->obj->file) && method_exists($this->obj->file, 'download') ){\n          $this->obj->file->download();\n        }\n        else{\n          $this->log(\"Impossible to display the following controller\", $this);\n          self::statusHeader(404);\n        }\n        break;\n\n      default:\n        header('Content-type: text\/html; charset=utf-8');\n        echo isset($this->obj->content) ? $this->obj->content : '';\n    }\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 105,
+            "endLine": 277,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -149,43 +201,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "run",
             "returns": [],
-            "parent": false,
-            "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Outputs the result.\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Outputs the result.\n   *\n   * @return void\n   *\/"
         },
         "test": {
             "name": "test",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 50,
-            "endLine": 57,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "test",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 50,
-                "endLine": 57,
+                "code": "  public function test()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 57,
+                "endLine": 64,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -194,45 +245,63 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "test",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
+            "trait": false,
+            "startLine": 57,
+            "endLine": 64,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "test",
+            "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
         "check": {
             "name": "check",
             "summary": "Checks whether the error property has been set (so an error happened).",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-            "startLine": 64,
-            "endLine": 71,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
             "parent": {
                 "name": "check",
                 "summary": "Checks whether the error property has been set (so an error happened).",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
-                "startLine": 64,
-                "endLine": 71,
+                "code": "  public function check()\n  {\n    if ($this->error) {\n      return false;\n    }\n\n    return true;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 71,
+                "endLine": 78,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -241,24 +310,19 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "check",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "Checks whether the error property has been set (so an error happened).\n",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
             },
-            "arguments": []
-        },
-        "getError": {
-            "name": "getError",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    return $this->error;\n  }",
-            "startLine": 85,
-            "endLine": 88,
+            "trait": false,
+            "startLine": 71,
+            "endLine": 78,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -267,160 +331,42 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "check",
             "returns": [],
-            "parent": {
-                "name": "getError",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    return $this->error;\n  }",
-                "startLine": 85,
-                "endLine": 88,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
+            "arguments": [],
+            "doc": {
+                "description": "Checks whether the error property has been set (so an error happened).\n",
+                "params": [],
+                "return": ""
             },
-            "arguments": []
+            "comments": "  \/**\n   * Checks whether the error property has been set (so an error happened).\n   * @return bool\n   *\/"
         },
-        "getErrors": {
-            "name": "getErrors",
+        "setError": {
+            "name": "setError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
-            "visibility": "public",
+            "visibility": "protected",
             "final": false,
-            "code": "function()\n  {\n\n  }",
-            "startLine": 91,
-            "endLine": 94,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
+            "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
             "parent": {
-                "name": "getErrors",
+                "name": "setError",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
-                "visibility": "public",
+                "visibility": "protected",
                 "final": false,
-                "code": "function()\n  {\n\n  }",
-                "startLine": 91,
-                "endLine": 94,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
+                "code": "  protected function setError(string $err, $code = null)\n  {\n    $this->error    = $err;\n    $this->errorCode = $code;\n    $err = [\n      'time' => time(),\n      'msg' => $err\n    ];\n    if ($code) {\n      $err['code'] = $code;\n    }\n\n    $this->errors[] = $err;\n    return $this;\n  }",
                 "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "log": {
-            "name": "log",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-            "startLine": 97,
-            "endLine": 106,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 0,
-            "numberOfRequiredParameters": 0,
-            "returns": [],
-            "parent": {
-                "name": "log",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function()\n  {\n    if ($this->isDebug()) {\n        $ar = \\func_get_args();\n        $cn = bbn\\Str::encodeFilename(str_replace('\\\\', '_', \\get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
-                "startLine": 97,
-                "endLine": 106,
-                "isDeprecated": false,
-                "isGenerator": false,
-                "isInternal": false,
-                "isUserDefined": true,
-                "isVariadic": false,
-                "returnsReference": false,
-                "numberOfParameters": 0,
-                "numberOfRequiredParameters": 0,
-                "returns": [],
-                "parent": false,
-                "arguments": []
-            },
-            "arguments": []
-        },
-        "__call": {
-            "name": "__call",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-            "startLine": 114,
-            "endLine": 125,
-            "isDeprecated": false,
-            "isGenerator": false,
-            "isInternal": false,
-            "isUserDefined": true,
-            "isVariadic": false,
-            "returnsReference": false,
-            "numberOfParameters": 2,
-            "numberOfRequiredParameters": 2,
-            "returns": [],
-            "parent": {
-                "name": "__call",
-                "summary": "",
-                "description": "",
-                "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
-                "static": false,
-                "visibility": "public",
-                "final": false,
-                "code": "function($name, $arguments)\n  {\n    $class = \\get_class($this);\n    throw new \\Exception(\n      sprintf(\n        X::_(\"Wrong method used for the class %s: %s with the following arguments:\"),\n        $class,\n        $name,\n        implode(', ', $arguments)\n      )\n    );\n  }",
-                "startLine": 114,
-                "endLine": 125,
+                "trait": false,
+                "startLine": 81,
+                "endLine": 95,
                 "isDeprecated": false,
                 "isGenerator": false,
                 "isInternal": false,
@@ -428,63 +374,121 @@
                 "isVariadic": false,
                 "returnsReference": false,
                 "numberOfParameters": 2,
-                "numberOfRequiredParameters": 2,
+                "numberOfRequiredParameters": 1,
+                "shortName": "setError",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
-                        "name": "name",
+                        "name": "err",
                         "position": 0,
-                        "type": "",
+                        "type": "string",
+                        "type_arr": [
+                            "string"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     },
                     {
-                        "name": "arguments",
+                        "name": "code",
                         "position": 1,
                         "type": "",
-                        "required": true,
-                        "has_default": false,
-                        "default": "",
+                        "type_arr": [],
+                        "variadic": false,
+                        "reference": false,
+                        "required": false,
+                        "has_default": true,
+                        "default": null,
                         "default_name": ""
                     }
                 ]
             },
+            "trait": false,
+            "startLine": 81,
+            "endLine": 95,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setError",
+            "returns": [],
             "arguments": [
                 {
-                    "name": "name",
+                    "name": "err",
                     "position": 0,
-                    "type": "",
+                    "type": "string",
+                    "type_arr": [
+                        "string"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 },
                 {
-                    "name": "arguments",
+                    "name": "code",
                     "position": 1,
                     "type": "",
-                    "required": true,
-                    "has_default": false,
-                    "default": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": false,
+                    "has_default": true,
+                    "default": null,
                     "default_name": ""
                 }
             ]
         },
-        "isDebug": {
-            "name": "isDebug",
+        "getError": {
+            "name": "getError",
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
-            "startLine": 131,
-            "endLine": 134,
+            "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+            "parent": {
+                "name": "getError",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getError()\n  {\n    return $this->error;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 98,
+                "endLine": 101,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getError",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 98,
+            "endLine": 101,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
@@ -493,17 +497,193 @@
             "returnsReference": false,
             "numberOfParameters": 0,
             "numberOfRequiredParameters": 0,
+            "shortName": "getError",
             "returns": [],
+            "arguments": []
+        },
+        "getErrorCode": {
+            "name": "getErrorCode",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+            "parent": {
+                "name": "getErrorCode",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrorCode()\n  {\n    return $this->errorCode;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 104,
+                "endLine": 107,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrorCode",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 104,
+            "endLine": 107,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrorCode",
+            "returns": [],
+            "arguments": []
+        },
+        "getErrors": {
+            "name": "getErrors",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+            "parent": {
+                "name": "getErrors",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function getErrors()\n  {\n    return $this->errors;\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 110,
+                "endLine": 113,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "getErrors",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 110,
+            "endLine": 113,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "getErrors",
+            "returns": [],
+            "arguments": []
+        },
+        "log": {
+            "name": "log",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+            "parent": {
+                "name": "log",
+                "summary": "",
+                "description": "",
+                "description_parts": [],
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+                "static": false,
+                "visibility": "public",
+                "final": false,
+                "code": "  public function log()\n  {\n    if ($this->isDebug()) {\n        $ar = func_get_args();\n        $cn = Str::encodeFilename(str_replace('\\\\', '_', get_class($this)));\n      foreach ($ar as $a){\n            X::log($a, $cn);\n      }\n    }\n  }",
+                "parent": false,
+                "trait": false,
+                "startLine": 116,
+                "endLine": 125,
+                "isDeprecated": false,
+                "isGenerator": false,
+                "isInternal": false,
+                "isUserDefined": true,
+                "isVariadic": false,
+                "returnsReference": false,
+                "numberOfParameters": 0,
+                "numberOfRequiredParameters": 0,
+                "shortName": "log",
+                "returns": [],
+                "arguments": []
+            },
+            "trait": false,
+            "startLine": 116,
+            "endLine": 125,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "log",
+            "returns": [],
+            "arguments": []
+        },
+        "isDebug": {
+            "name": "isDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
             "parent": {
                 "name": "isDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function()\n  {\n    return $this->debug || (defined(\"BBN_IS_DEV\") && BBN_IS_DEV);\n  }",
+                "code": "  public function isDebug()\n  {\n    return $this->debug || constant(\"BBN_IS_DEV\");\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 131,
                 "endLine": 134,
                 "isDeprecated": false,
@@ -514,43 +694,61 @@
                 "returnsReference": false,
                 "numberOfParameters": 0,
                 "numberOfRequiredParameters": 0,
+                "shortName": "isDebug",
                 "returns": [],
-                "parent": false,
-                "arguments": []
+                "arguments": [],
+                "doc": {
+                    "description": "",
+                    "params": [],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @return boolean\n   *\/"
             },
-            "arguments": []
-        },
-        "setDebug": {
-            "name": "setDebug",
-            "summary": "",
-            "description": "",
-            "description_parts": [],
-            "file": "bbn\\Models\\Cls\\Basic",
-            "static": false,
-            "visibility": "public",
-            "final": false,
-            "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
-            "startLine": 141,
-            "endLine": 144,
+            "trait": false,
+            "startLine": 131,
+            "endLine": 134,
             "isDeprecated": false,
             "isGenerator": false,
             "isInternal": false,
             "isUserDefined": true,
             "isVariadic": false,
             "returnsReference": false,
-            "numberOfParameters": 1,
-            "numberOfRequiredParameters": 1,
+            "numberOfParameters": 0,
+            "numberOfRequiredParameters": 0,
+            "shortName": "isDebug",
             "returns": [],
+            "arguments": [],
+            "doc": {
+                "description": "",
+                "params": [],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @return boolean\n   *\/"
+        },
+        "setDebug": {
+            "name": "setDebug",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Basic",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
             "parent": {
                 "name": "setDebug",
                 "summary": "",
                 "description": "",
                 "description_parts": [],
-                "file": "bbn\\Models\\Cls\\Basic",
+                "class": "bbn\\Models\\Cls\\Basic",
+                "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Basic.php",
                 "static": false,
                 "visibility": "public",
                 "final": false,
-                "code": "function(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "code": "  public function setDebug(bool $debug)\n  {\n    $this->debug = $debug;\n  }",
+                "parent": false,
+                "trait": false,
                 "startLine": 141,
                 "endLine": 144,
                 "isDeprecated": false,
@@ -561,36 +759,388 @@
                 "returnsReference": false,
                 "numberOfParameters": 1,
                 "numberOfRequiredParameters": 1,
+                "shortName": "setDebug",
                 "returns": [],
-                "parent": false,
                 "arguments": [
                     {
                         "name": "debug",
                         "position": 0,
                         "type": "bool",
+                        "type_arr": [
+                            "bool"
+                        ],
+                        "variadic": false,
+                        "reference": false,
                         "required": true,
                         "has_default": false,
                         "default": "",
                         "default_name": ""
                     }
-                ]
+                ],
+                "doc": {
+                    "description": "",
+                    "params": [
+                        {
+                            "tag": "param",
+                            "type": "boolean",
+                            "name": "$debug"
+                        }
+                    ],
+                    "return": ""
+                },
+                "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
             },
+            "trait": false,
+            "startLine": 141,
+            "endLine": 144,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "setDebug",
+            "returns": [],
             "arguments": [
                 {
                     "name": "debug",
                     "position": 0,
                     "type": "bool",
+                    "type_arr": [
+                        "bool"
+                    ],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "boolean",
+                        "name": "$debug"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param boolean $debug\n   * @return self\n   *\/"
         }
     },
-    "properties": null,
+    "properties": {
+        "obj": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "stdClass",
+            "declaring": {
+                "name": "bbn\\Mvc\\Output"
+            },
+            "declaring_trait": "bbn\\Mvc\\Output",
+            "promoted": true,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "mode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "string",
+            "declaring": {
+                "name": "bbn\\Mvc\\Output"
+            },
+            "declaring_trait": "bbn\\Mvc\\Output",
+            "promoted": true,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
+        "errors": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errors",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "error": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|string"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "error",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|string"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCode": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "false|int"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "errorCode",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "false|int"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "errorCodes": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": "",
+            "parent": {
+                "name": "errorCodes",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": "",
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        },
+        "debug": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "boolean"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "debug",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": false
+            },
+            "value": false
+        },
+        "log": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Models\\Cls\\Basic"
+            },
+            "declaring_trait": "bbn\\Models\\Cls\\Basic",
+            "promoted": false,
+            "visibility": "protected",
+            "doc": {
+                "description": "",
+                "tags": [
+                    {
+                        "tag": "var",
+                        "type": "array"
+                    }
+                ]
+            },
+            "parent": {
+                "name": "log",
+                "trait": false,
+                "static": false,
+                "readonly": false,
+                "type": "",
+                "declaring": {
+                    "name": "bbn\\Models\\Cls\\Basic"
+                },
+                "declaring_trait": "bbn\\Models\\Cls\\Basic",
+                "promoted": false,
+                "visibility": "protected",
+                "doc": {
+                    "description": "",
+                    "tags": [
+                        {
+                            "tag": "var",
+                            "type": "array"
+                        }
+                    ]
+                },
+                "parent": false,
+                "value": []
+            },
+            "value": []
+        }
+    },
     "staticProperties": [],
     "constants": null,
+    "uses": {
+        "bbn\\X": "X",
+        "bbn\\Models\\Cls\\Basic": "Basic",
+        "JShrink\\Minifier": "Minifier",
+        "stdClass": "stdClass",
+        "RuntimeException": "RuntimeException",
+        "Exception": "Exception",
+        "bbn\\File": "File",
+        "bbn\\File\\Image": "Image",
+        "bbn\\Compilers\\Markdown": "Markdown"
+    },
+    "dummyComments": [
+        "\/**\n * Created by PhpStorm.\n * User: BBN\n * Date: 15\/05\/2015\n * Time: 16:55\n *\/"
+    ],
     "summary": "",
     "description": "",
     "description_parts": []

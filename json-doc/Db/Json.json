@@ -12,18 +12,19 @@
     },
     "name": "bbn\\Db\\Json",
     "namespace": true,
+    "realName": "Json",
+    "realNamespace": "bbn\\Db",
     "traits": [],
     "interfaces": [],
     "fileName": "\/Db\/Json.php",
     "startLine": 19,
     "endLine": 65,
     "numMethods": 1,
-    "numProperties": 3,
+    "numProperties": 4,
     "numConstants": 0,
     "numStaticProperties": 2,
     "interfaceNames": [],
     "isInterface": false,
-    "traitNames": [],
     "traitAliases": [],
     "isTrait": false,
     "isAbstract": false,
@@ -70,7 +71,6 @@
     "namespaceName": "bbn\\Db",
     "shortName": "Json",
     "contentConstructor": {
-        "file": "bbn\\Db\\Json",
         "returns": []
     },
     "methods": {
@@ -79,11 +79,14 @@
             "summary": "",
             "description": "",
             "description_parts": [],
-            "file": "bbn\\Db\\Json",
+            "class": "bbn\\Db\\Json",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Db\/Json.php",
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "function($file)\n  {\n    $this->current = $file;\n  }",
+            "code": "  public function __construct($file)\n  {\n    $this->current = $file;\n  }",
+            "parent": false,
+            "trait": false,
             "startLine": 60,
             "endLine": 63,
             "isDeprecated": false,
@@ -94,25 +97,58 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
+            "shortName": "__construct",
             "returns": [],
-            "parent": false,
             "arguments": [
                 {
                     "name": "file",
                     "position": 0,
                     "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
                     "required": true,
                     "has_default": false,
                     "default": "",
                     "default_name": ""
                 }
-            ]
+            ],
+            "doc": {
+                "description": "",
+                "tags": []
+            },
+            "comments": "  \/**\n   * \n   *\/"
         }
     },
     "properties": {
+        "db": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Json"
+            },
+            "declaring_trait": "bbn\\Db\\Json",
+            "promoted": false,
+            "visibility": "private",
+            "doc": "",
+            "parent": false,
+            "value": null
+        },
         "operators": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Json"
+            },
+            "declaring_trait": "bbn\\Db\\Json",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
+            "parent": false,
             "value": [
                 "!=",
                 "=",
@@ -133,8 +169,18 @@
             ]
         },
         "numeric_types": {
+            "trait": false,
             "static": true,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Json"
+            },
+            "declaring_trait": "bbn\\Db\\Json",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
+            "parent": false,
             "value": [
                 "integer",
                 "int",
@@ -149,7 +195,18 @@
             ]
         },
         "qte": {
+            "trait": false,
+            "static": false,
+            "readonly": false,
+            "type": "",
+            "declaring": {
+                "name": "bbn\\Db\\Json"
+            },
+            "declaring_trait": "bbn\\Db\\Json",
+            "promoted": false,
             "visibility": "public",
+            "doc": "",
+            "parent": false,
             "value": "`"
         }
     },
@@ -186,6 +243,13 @@
         ]
     },
     "constants": null,
+    "uses": {
+        "bbn": "bbn"
+    },
+    "dummyComments": [
+        "\/**\n * @package db\n *\/",
+        "\/**\n * Database Class\n *\n *\n * @author Thomas Nabet <thomas.nabet@gmail.com>\n * @copyright BBN Solutions\n * @since Apr 4, 2011, 23:23:55 +0000\n * @category  Database\n * @license   http:\/\/www.opensource.org\/licenses\/mit-license.php MIT\n * @version 0.2r89\n *\/"
+    ],
     "summary": "Database Class",
     "description": "",
     "description_parts": []

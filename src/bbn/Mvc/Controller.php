@@ -181,7 +181,10 @@ class Controller implements Api
     // When using CLI a first parameter can be used as route,
     // a second JSON encoded can be used as $this->post
     /** @var Db db */
-    $this->db     = $this->_mvc->getDb();
+    if ($db = $this->_mvc->getDb()) {
+      $this->db = $db;
+    }
+
     $this->inc    = &$this->_mvc->inc;
     $this->post   = $this->_mvc->getPost();
     $this->get    = $this->_mvc->getGet();

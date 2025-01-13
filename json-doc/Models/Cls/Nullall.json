@@ -1,0 +1,161 @@
+{
+    "doc": {
+        "description": "Nullall object Class\n\n\nThis class returns null to all\n\nTodo: create a new delegation generic function for the double underscores functions",
+        "tags": []
+    },
+    "name": "bbn\\Models\\Cls\\Nullall",
+    "namespace": true,
+    "realName": "Nullall",
+    "realNamespace": "bbn\\Models\\Cls",
+    "traits": [],
+    "interfaces": [],
+    "fileName": "\/Models\/Cls\/Nullall.php",
+    "startLine": 16,
+    "endLine": 32,
+    "numMethods": 2,
+    "numProperties": 0,
+    "numConstants": 0,
+    "numStaticProperties": 0,
+    "interfaceNames": [],
+    "isInterface": false,
+    "traitAliases": [],
+    "isTrait": false,
+    "isAbstract": false,
+    "isFinal": false,
+    "modifiers": 0,
+    "parentClass": null,
+    "isSubclassOf": false,
+    "defaultProperties": [],
+    "isIterable": false,
+    "extensionName": false,
+    "namespaceName": "bbn\\Models\\Cls",
+    "shortName": "Nullall",
+    "contentConstructor": null,
+    "methods": {
+        "__call": {
+            "name": "__call",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Nullall",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Nullall.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function __call($name, $arguments)\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 23,
+            "endLine": 26,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 2,
+            "numberOfRequiredParameters": 2,
+            "shortName": "__call",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                },
+                {
+                    "name": "arguments",
+                    "position": 1,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ],
+            "doc": {
+                "description": "",
+                "params": [
+                    {
+                        "tag": "param",
+                        "type": "string",
+                        "name": "$name"
+                    },
+                    {
+                        "tag": "param",
+                        "type": "array",
+                        "name": "$arguments"
+                    }
+                ],
+                "return": ""
+            },
+            "comments": "  \/**\n   * @param string $name\n   * @param array  $arguments\n   * @return void\n   *\/"
+        },
+        "__get": {
+            "name": "__get",
+            "summary": "",
+            "description": "",
+            "description_parts": [],
+            "class": "bbn\\Models\\Cls\\Nullall",
+            "filename": "\/home\/nabab\/web\/_COMPOSER\/dev\/vendor\/bbn\/bbn\/src\/bbn\/Models\/Cls\/Nullall.php",
+            "static": false,
+            "visibility": "public",
+            "final": false,
+            "code": "  public function __get($name)\n  {\n    return null;\n  }",
+            "parent": false,
+            "trait": false,
+            "startLine": 28,
+            "endLine": 31,
+            "isDeprecated": false,
+            "isGenerator": false,
+            "isInternal": false,
+            "isUserDefined": true,
+            "isVariadic": false,
+            "returnsReference": false,
+            "numberOfParameters": 1,
+            "numberOfRequiredParameters": 1,
+            "shortName": "__get",
+            "returns": [],
+            "arguments": [
+                {
+                    "name": "name",
+                    "position": 0,
+                    "type": "",
+                    "type_arr": [],
+                    "variadic": false,
+                    "reference": false,
+                    "required": true,
+                    "has_default": false,
+                    "default": "",
+                    "default_name": ""
+                }
+            ]
+        }
+    },
+    "properties": null,
+    "staticProperties": [],
+    "constants": null,
+    "uses": [],
+    "dummyComments": [
+        "\/**\n * @package bbn\n *\/",
+        "\/**\n * Nullall object Class\n *\n *\n * This class returns null to all\n *\n * Todo: create a new delegation generic function for the double underscores functions\n *\/"
+    ],
+    "summary": "Nullall object Class",
+    "description": "This class returns null to all\n\nTodo: create a new delegation generic function for the double underscores functions",
+    "description_parts": [
+        {
+            "type": "text",
+            "content": "This class returns null to all\n\nTodo: create a new delegation generic function for the double underscores functions"
+        }
+    ]
+}
