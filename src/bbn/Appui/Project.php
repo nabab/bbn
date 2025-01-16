@@ -796,22 +796,22 @@ class Project extends DbCls
       if ($t['tab']) {
         switch ($t['tab']) {
           case 'php':
-            $icon = "nf nf-mdi-language_php";
+            $icon = "nf nf-md-language_php";
             break;
           case 'private':
-            $icon = "nf nf-mdi-language_php";
+            $icon = "nf nf-md-language_php";
             break;
           case 'model':
-            $icon = "nf nf-mdi-database";
+            $icon = "nf nf-md-database";
             break;
           case 'html':
-            $icon = "nf nf-mdi-language_html5";
+            $icon = "nf nf-md-language_html5";
             break;
           case 'js':
-            $icon = "nf nf-mdi-language_javascript";
+            $icon = "nf nf-md-language_javascript";
             break;
           case 'css':
-            $icon = "nf nf-mdi-language_css3";
+            $icon = "nf nf-md-language_css3";
             break;
         }
       }
@@ -827,7 +827,7 @@ class Project extends DbCls
     }
     //case component o folder who contain other component
     elseif (!empty($component) && !empty($is_vue)) {
-      $icon = "nf nf-mdi-vuejs";
+      $icon = "nf nf-md-vuejs";
     }
     //case folder
     else {

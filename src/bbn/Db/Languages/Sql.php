@@ -917,10 +917,22 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
           }
           elseif (isset($cfg['available_fields'][$field])) {
-            $table  = $cfg['tables_full'][$cfg['available_fields'][$field]] ?? false;
+            $table  = $cfg['tables_full'][$cfg['available_fields'][$cfg['fields'][$field] ?? $field]] ?? false;
+            if (!$table) {
+              X::ddump($cfg['available_fields'][$field], $field, $cfg['fields']);
+              throw new Exception(X::_("Impossible to find the table for the field %s", $field));
+            }
+
             $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
-            $model  = $this->modelize($table)['fields'];
-            $model = array_key_exists($column, $model) ? $model[$column] : null;
+            $model  = $this->modelize($table);
+            if (!$model || !array_key_exists('fields', $model)) {
+              throw new Exception(X::_("Impossible to modelize the table %s", $table));
+            }
+            else {
+              $model = $model['fields'];
+              $model = array_key_exists($column, $model) ? $model[$column] : null;
+            }
+
             if ($table && $column && $model) {
               $res  .= PHP_EOL . 
                   str_repeat(' ', $indent) . 

@@ -2317,7 +2317,7 @@ class Ide
                         'num' => 1,
                         'numChildren' => 1,
                         'items' => [],
-                        'icon' => !empty($info['component']) || ($info['type'] === 'components')  ? 'nf nf-mdi-vuejs' : 'nf nf-fa-folder'
+                        'icon' => !empty($info['component']) || ($info['type'] === 'components')  ? 'nf nf-md-vuejs' : 'nf nf-fa-folder'
                       ];
                       $result[$path.$name_path]['items'][] = $fileData;
                     }

@@ -889,7 +889,7 @@ class Preferences extends DbCls
    * //   "text" => "Plugins",
    * //   "code" => "plugins",
    * //   "num_children" => 0,
-   * //   "icon" => "nf nf-mdi-puzzle",
+   * //   "icon" => "nf nf-md-puzzle",
    * //   "alias" => [
    * //     "id" => "98a3dfca24ef11eca47652540000cfbe",
    * //     "id_parent" => "988d97ee24ef11eca47652540000cfbe",
@@ -898,7 +898,7 @@ class Preferences extends DbCls
    * //     "text" => "Plugins",
    * //     "code" => "plugins",
    * //     "num_children" => 0,
-   * //     "icon" => "nf nf-mdi-puzzle"
+   * //     "icon" => "nf nf-md-puzzle"
    * //   ],
    * //   "items" => [
    * //   ]
@@ -1076,7 +1076,7 @@ class Preferences extends DbCls
    * //       "text" => "Plugins",
    * //       "code" => "plugins",
    * //       "num_children" => 0,
-   * //       "icon" => "nf nf-mdi-puzzle",
+   * //       "icon" => "nf nf-md-puzzle",
    * //       "alias" => [
    * //         "id" => "98a3dfca24ef11eca47652540000cfbe",
    * //         "id_parent" => "988d97ee24ef11eca47652540000cfbe",
@@ -1085,7 +1085,7 @@ class Preferences extends DbCls
    * //         "text" => "Plugins",
    * //         "code" => "plugins",
    * //         "num_children" => 0,
-   * //         "icon" => "nf nf-mdi-puzzle"
+   * //         "icon" => "nf nf-md-puzzle"
    * //       ],
    * //       "items" => null
    * //     ],
