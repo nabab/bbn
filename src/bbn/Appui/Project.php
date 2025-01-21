@@ -400,10 +400,14 @@ class Project extends DbCls
     if (isset($res['db']) && !empty($res['db']['items'])) {
       $o = self::getOptionsObject();
       foreach ($res['db']['items'] as $i => $db) {
-        foreach ($db['items'] as $j => $conn) {
-          $res['db']['items'][$i]['items'][$j]['engine'] = $o->code($o->getIdParent($conn['alias']['id_parent']));
+        if (!empty($db['items'])) {
+          $res['db']['items'][$i]['engine'] = $o->code($o->getIdParent($db['alias']['id_parent']));
+          foreach ($db['items'] as $j => $conn) {
+            $res['db']['items'][$i]['items'][$j]['engine'] = $o->code($o->getIdParent($conn['alias']['id_parent']));
+          }
         }
       }
+
       return $res['db'];
     }
 

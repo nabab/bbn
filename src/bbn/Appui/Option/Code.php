@@ -124,25 +124,27 @@ trait Code
         $this->cacheSet($id_parent, $cache_name, $tmp);
       }
       // If no direct match is found, attempt to find a magic code option that bypasses the normal matching logic.
-      elseif (($tmp2 = $this->db->selectOne(
-          $c['table'],
-          $f['id'],
-          [
-            $f['id_parent'] => $id_parent,
-            $f['id_alias'] => [$this->getMagicOptionsTemplateId(), $this->getMagicSubOptionsTemplateId()]
-          ]
-        ))
-        && ($tmp = $this->db->selectOne(
-          $c['table'],
-          $f['id'],
-          [
-            [$f['id_parent'], '=', $tmp2],
-            [$f['code'], '=', $true_code]
-          ]
-        ))
-      ) {
-        // Cache the result for future queries.
-        $this->cacheSet($id_parent, $cache_name, $tmp);
+      elseif ($this->getMagicTemplateId()) {
+        if (($tmp2 = $this->db->selectOne(
+            $c['table'],
+            $f['id'],
+            [
+              $f['id_parent'] => $id_parent,
+              $f['id_alias'] => [$this->getMagicOptionsTemplateId(), $this->getMagicSubOptionsTemplateId()]
+            ]
+          ))
+          && ($tmp = $this->db->selectOne(
+            $c['table'],
+            $f['id'],
+            [
+              [$f['id_parent'], '=', $tmp2],
+              [$f['code'], '=', $true_code]
+            ]
+          ))
+        ) {
+          // Cache the result for future queries.
+          $this->cacheSet($id_parent, $cache_name, $tmp);
+        }
       }
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.

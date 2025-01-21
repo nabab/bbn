@@ -2,6 +2,7 @@
 
 namespace bbn\Appui\Option;
 
+use Exception;
 use bbn\Str;
 use bbn\Appui\I18n;
 
@@ -53,9 +54,14 @@ trait Native
           && \class_exists('\bbn\Appui\I18n')
           && !empty($opt[$this->fields['text']])
         ) {
-          $i18nCls = new I18n($this->db);
-          if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
-            $opt[$this->fields['text']] = $trans;
+          try {
+            $i18nCls = new I18n($this->db);
+            if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
+              $opt[$this->fields['text']] = $trans;
+            }
+          }
+          catch (Exception $e) {
+
           }
         }
         if (empty($locale)) {

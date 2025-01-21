@@ -233,10 +233,11 @@ trait Manip
    * @todo Usage example
    * @param array    $options   An array of option(s) as export returns it
    * @param array|string|int|null $id_parent The option target, if not specified {@link default}
+   * @param bool $no_alias If set to true, aliases values won't be set
    * @param array|null $todo
    * @return iterable|null
    */
-  public function import(array $options, $id_parent = null, array &$todo = null)
+  public function import(array $options, $id_parent = null, $no_alias = false, array &$todo = null)
   {
     if (is_array($id_parent)) {
       array_push($id_parent, $this->getRoot());
@@ -246,16 +247,16 @@ trait Manip
       $id_parent = $this->getDefault();
     }
 
+    if (empty($todo)) {
+      $this->cacheDeleteAll();
+    }
+
     if (!empty($options) && $this->check() && $this->exists($id_parent)) {
       $c       =& $this->fields;
       $is_root = false;
       if ($todo === null) {
         $is_root = true;
         $todo    = [];
-      }
-
-      if (!isset($options[0])) {
-        $options = [$options];
       }
 
       if (X::isAssoc($options)) {
@@ -269,6 +270,7 @@ trait Manip
         if (!is_array($o)) {
           continue;
         }
+
         if (isset($o[$c['id']])) {
           if ($this->exists($o[$c['id']])) {
             unset($o[$c['id']]);
@@ -303,7 +305,7 @@ trait Manip
           }
 
           if (!empty($items)) {
-            foreach ($this->import($items, $id, $todo) as $success) {
+            foreach ($this->import($items, $id, $no_alias, $todo) as $success) {
               yield $success;
             }
           }
@@ -314,10 +316,9 @@ trait Manip
         }
       }
 
-      if ($is_root && !empty($todo)) {
+      if (!$no_alias && $is_root && !empty($todo)) {
         foreach ($todo as $id => $td) {
           if (!empty($td['id_alias'])) {
-            array_push($td['id_alias'], $this->getRoot());
             if ($id_alias = $this->fromCode(...$td['id_alias'])) {
               try {
                 $this->setAlias($id, $id_alias);

@@ -112,27 +112,4 @@ trait Cache
 
     return $this;
   }
-
-  /**
-   * Sets a value in the local cache.
-   *
-   * @param string $name The name of the cache entry
-   * @param mixed $val The value to cache
-   */
-  private function _set_local_cache(string $name, $val): void
-  {
-    $this->_local_cache[$name] = $val;
-  }
-
-  /**
-   * Retrieves a value from the local cache.
-   *
-   * @param string $name The name of the cache entry
-   *
-   * @return string|null The cached value or null if not found
-   */
-  private function _get_local_cache(string $name): ?string
-  {
-    return $this->_local_cache[$name] ?? null;
-  }
 }

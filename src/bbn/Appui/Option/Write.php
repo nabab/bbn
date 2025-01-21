@@ -901,10 +901,12 @@ trait Write
         $it[$c['id_alias']] = $id_alias;
       }
       else {
+        X::log(['Impossible to find the alias', $it[$c['id_alias']]]);
         throw new Exception(X::_("Impossible to find the alias"));
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
+      X::log(['The alias does not exist', $it[$c['id_alias']]]);
       throw new Exception(X::_("Impossible to find the alias %s", $it[$c['id_alias']]));
     }
 
@@ -924,10 +926,12 @@ trait Write
             $cfg['id_root_alias'] = $id_root_alias;
           }
           else {
+            X::log(['No root alias', $cfg['id_root_alias']]);
             throw new Exception(X::_("Impossible to find the root alias"));
           }
         }
         elseif (!$this->exists($cfg['id_root_alias'])) {
+          X::log(['The root alias does not exist', $cfg['id_root_alias']]);
           throw new Exception(X::_("Impossible to find the root alias"));
         }
       }

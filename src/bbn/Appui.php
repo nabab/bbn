@@ -1441,12 +1441,12 @@ class Appui
         [
           'id_parent' => null,
           'code' => 'root',
-          'text' => 'root',
-          'cfg' => '{"permissions":1}'
+          'text' => 'root'
         ]
       )
     ) {
       $id = $db->lastId();
+      $this->getOption()->deleteCache();
     }
 
     if (!$id) {
@@ -1647,7 +1647,6 @@ class Appui
    */
   public function importOptions()
   {
-    $res = 0;
     if ($opt = $this->getOption()) {
       $root   = $this->getOptionRoot();
       if ($tmp = $this->getRoutes()) {
@@ -1655,37 +1654,115 @@ class Appui
       }
 
       $idx = X::find($routes, ['name' => 'appui-core']);
+      $step = 100;
+      $next = $step;
+      $num = 0;
+
       if ($routes[$idx]) {
-        $appui_options = [];
-        if ($idx !== 0) {
-          X::move($routes, $idx, 0);
+        $opt->deleteCache(null);
+        if (!$opt->getMagicTemplateId()) {
+          $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/src/cfg/templates.json';
+          $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
+          foreach ($opt->import($tmp, $root) as $res) {
+            $num += $res;
+          }
         }
 
+        if (!($idApp = $opt->fromCode($this->_current['app_name'], $root))) {
+          $idApp = $opt->add([
+            'id_parent' => $root,
+            'code' => $this->_current['app_name'],
+            'text' => $this->_current['site_title'],
+            'id_alias' => $opt->getMagicPluginTemplateId()
+          ], true);
+          $num += $opt->applyTemplate($idApp);
+          $opt->deleteCache(null);
+        }
+
+        $opt->setDefault($idApp);
+
+        $id_appui = $opt->fromCode('appui');
+        $appui_options = [];
+        $idPluginTpl = $opt->getMagicPluginTemplateId();
+        $todo = [];
         foreach (array_values($routes) as $i => $r) {
-          $file = $this->libPath() . $r['path'] . '/src/cfg/options.json';
-          if ($this->_currentFs->exists($file)) {
-            $tmp = $this->_currentFs->decodeContents($file, 'json', true);
+          $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
+          $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
+          $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
+          if ($this->_currentFs->exists($idFile)) {
+            $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
-              throw new Exception(X::_("Illegal JSON in %s", $file));
+              throw new Exception(X::_("Illegal JSON in %s", $idFile));
             }
 
-            if ($i === 0) {
-              /** @var array */
-              $appui_options = $tmp;
+            $tmp['id_alias'] = $idPluginTpl;
+            $tmp['id_parent'] = $id_appui;
+            if ($id_plugin = $opt->add($tmp)) {
+              $num++;
             }
-            else {
+
+            $num += $opt->applyTemplate($id_plugin);
+            if ($this->_currentFs->exists($optionsFile)) {
+              $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
+              if (!$tmp) {
+                throw new Exception(X::_("Illegal JSON in %s", $optionsFile));
+              }
+
+              $id_options = $opt->fromCode('options', $id_plugin);
+              if (!$id_options) {
+                throw new Exception(X::_("Impossible to find the options parent"));
+              }
+              $todo[] = [$tmp, $id_options];
+              foreach($opt->import($tmp, $id_options, true) as $res) {
+                $num += $res;
+                if ($num >= $next) {
+                  $next += $step;
+                  yield $num;
+                }
+              }
+            }
+
+            if ($this->_currentFs->exists($pluginsFile)) {
+              $tmp = $this->_currentFs->decodeContents($pluginsFile, 'json', true);
+              if (!$tmp) {
+                throw new Exception(X::_("Illegal JSON in %s", $pluginsFile));
+              }
               if (X::isAssoc($tmp)) {
-                $appui_options[0]['items'][] = $tmp;
+                $tmp = [$tmp];
               }
-              else {
-                array_push($appui_options[0]['items'], ...$tmp);
+
+              $id_plugins = $opt->fromCode('plugins', $id_plugin);
+              if (!$id_plugins) {
+                throw new Exception(X::_("Impossible to find the options parent"));
               }
+              $todo[] = [$tmp, $id_plugins];
+              foreach($opt->import($tmp, $id_plugins, true) as $res) {
+                $num += $res;
+                if ($num >= $next) {
+                  $next += $step;
+                  yield $num;
+                }
+              }
+            }
+          }
+
+          if ($num >= $next) {
+            $next += $step;
+            yield $num;
+          }
+        }
+
+        foreach ($todo as $td) {
+          foreach($opt->import($td[0], $td[1]) as $res) {
+            $num += $res;
+            if ($num >= $next) {
+              $next += $step;
+              yield $num;
             }
           }
         }
 
-        $step = 100;
-        $next = $step;
+        /*
         foreach ($opt->import($appui_options, $root) as $success) {
           if ($success) {
             $res += $success;
@@ -1695,6 +1772,7 @@ class Appui
             }
           }
         }
+          */
 
         if (!defined('BBN_APPUI')) {
           define('BBN_APPUI', $opt->fromCode('appui'));
