@@ -2392,7 +2392,7 @@ class Appui
         $installer->report("{$res} options imported");
       }
 
-
+      /*
       if ($res = $this->updatePlugins()) {
         $installer->report("{$res} options for plugins imported");
       }
@@ -2406,10 +2406,11 @@ class Appui
       else {
         $installer->report("No new options from templates");
       }
+      */
 
       $cache->deleteAll('');
 
-      $installer->report("{$res} Permissions creation...");
+      $installer->report("Permissions creation...");
       if ($res = $this->updatePermissions()) {
         $installer->report("{$res} Permissions created");
       }
