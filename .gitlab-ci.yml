@@ -32,7 +32,7 @@ github-sync:       # This job runs in the build stage, which runs first.
     - git remote add --mirror=fetch github git@github.com:nabab/bbn.git
     - git fetch git@git.bbn.so:library/bbn.git master
     - git fetch git@github.com:nabab/bbn.git master
-    - git push -f git@github.com:nabab/bbn.git --all
+    - git push -f git@github.com:nabab/bbn.git master
     - git push -f git@github.com:nabab/bbn.git --tags
     - cd -
     - rm -rf library
