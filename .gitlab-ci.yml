@@ -42,6 +42,19 @@ codeberg-sync:
   stage: codeberg
   script:
     - echo "Synching with Codeberg"
+    - cd ~/
+    - rm -rf library
+    - mkdir -p library/bbn
+    - git clone --bare git@git.bbn.so:library/bbn.git library/bbn
+    - cd library/bbn
+    - git remote add --mirror=fetch codeberg git@codeberg.org:bbn/bbn.git
+    - git fetch git@git.bbn.so:library/bbn.git master
+    - git fetch git@codeberg.org:bbn/bbn.git master
+    - git push -f git@codeberg.org:bbn/bbn.git --all
+    - git push -f git@codeberg.org:bbn/bbn.git --tags
+    - cd -
+    - rm -rf library
+    - echo "Synching finished !"
     
   tags:
     - github

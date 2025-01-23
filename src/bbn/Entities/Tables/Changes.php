@@ -663,6 +663,25 @@ class Changes extends EntityTable
   /**
    * @return null|array
    */
+  public function getMeeting(): ?array
+  {
+    return $this->_get(
+      [
+        'conditions' => [[
+          'field' => $this->fields['id_entity'],
+          'value' => $this->getId()
+        ], [
+          'field' => $this->fields['state'],
+          'value' => static::$states['meeting']
+        ]]
+      ]
+    );
+  }
+
+
+  /**
+   * @return null|array
+   */
   public function getUnready(): ?array
   {
     return $this->_get(
