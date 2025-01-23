@@ -18,6 +18,7 @@
 
 stages:          # List of stages for jobs, and their order of execution
   - github
+  - codeberg
 
 github-sync:       # This job runs in the build stage, which runs first.
   stage: github
@@ -36,5 +37,11 @@ github-sync:       # This job runs in the build stage, which runs first.
     - cd -
     - rm -rf library
     - echo "Synching finished !"
+
+codeberg-sync:
+  stage: codeberg
+  script:
+    - echo "Synching with Codeberg"
+    
   tags:
     - github
