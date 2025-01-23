@@ -414,6 +414,7 @@ abstract class Entities extends DbCls
     return $this->consultation;
   }  
 
+
   public function mail(): ?Option
   {
     $cls = $this->class_cfg['classes'];

@@ -58,7 +58,7 @@ trait DbConfig
    */
   protected function initClassCfg(array $cfg = null)
   {
-$arr = [];
+    $arr = [];
     if (isset(self::$default_class_cfg)) {
       $arr[] = self::$default_class_cfg;
     }
@@ -89,7 +89,8 @@ $arr = [];
       if (!$this->class_table_index && isset($cfg['tables'][$t]) && ($cfg['tables'][$t] === $cfg['table']))  {
         $this->class_table_index = $t;
       }
-    foreach ($fields as $f => $it) {
+
+      foreach ($fields as $f => $it) {
         if (is_array($it)) {
           $props[$t][$f] = $it;
           $fields[$f] = $it['name'] ?? $f;

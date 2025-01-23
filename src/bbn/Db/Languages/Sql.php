@@ -917,47 +917,54 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
             $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $field . ' ';
           }
           elseif (isset($cfg['available_fields'][$field])) {
-            $table  = $cfg['tables_full'][$cfg['available_fields'][$cfg['fields'][$field] ?? $field]] ?? false;
-            if (!$table) {
-              X::ddump($cfg['available_fields'][$field], $field, $cfg['fields']);
-              throw new Exception(X::_("Impossible to find the table for the field %s", $field));
-            }
-
-            $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
-            $model  = $this->modelize($table);
-            if (!$model || !array_key_exists('fields', $model)) {
-              throw new Exception(X::_("Impossible to modelize the table %s", $table));
+            $realField = $cfg['fields'][$field] ?? $field;
+            $isFunction = strpos($realField, '(') !== false;
+            $table  = $cfg['tables_full'][$cfg['available_fields'][$realField]] ?? false;
+            if ($isFunction) {
+              $res .= PHP_EOL . str_repeat(' ', $indent) . (empty($res) ? '' : "$logic ") . $realField . ' ';
             }
             else {
-              $model = $model['fields'];
-              $model = array_key_exists($column, $model) ? $model[$column] : null;
-            }
-
-            if ($table && $column && $model) {
-              $res  .= PHP_EOL . 
-                  str_repeat(' ', $indent) . 
-                  (empty($res) ? '' : "$logic ") .
-                  (
-                    !empty($cfg['available_fields'][$field]) ?
-                      $this->colFullName(
-                        $cfg['fields'][$field] ?? $field,
-                        $cfg['available_fields'][$field],
-                        true
-                      )
-                      : $this->colSimpleName($column, true)
-                ) . ' ';
-            }
-            else {
-              // Remove the alias from where and join but not in having except if it's a count
-              if (!$is_having && empty($table) && isset($cfg['fields'][$field])) {
-                $field = $cfg['fields'][$field];
-                // Same for exp in case it's an alias
-                if (!empty($f['exp']) && isset($cfg['fields'][$f['exp']])) {
-                  $f['exp'] = $cfg['fields'][$f['exp']];
-                }
+              if (!$table) {
+                X::ddump($cfg['tables_full'], $cfg['available_fields'][$field], $field, $cfg['fields']);
+                throw new Exception(X::_("Impossible to find the table for the field %s", $field));
               }
-
-              $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
+  
+              $column = $this->colSimpleName($cfg['fields'][$field] ?? $field);
+              $model  = $this->modelize($table);
+              if (!$model || !array_key_exists('fields', $model)) {
+                throw new Exception(X::_("Impossible to modelize the table %s", $table));
+              }
+              else {
+                $model = $model['fields'];
+                $model = array_key_exists($column, $model) ? $model[$column] : null;
+              }
+  
+              if ($table && $column && $model) {
+                $res  .= PHP_EOL . 
+                    str_repeat(' ', $indent) . 
+                    (empty($res) ? '' : "$logic ") .
+                    (
+                      !empty($cfg['available_fields'][$field]) ?
+                        $this->colFullName(
+                          $cfg['fields'][$field] ?? $field,
+                          $cfg['available_fields'][$field],
+                          true
+                        )
+                        : $this->colSimpleName($column, true)
+                  ) . ' ';
+              }
+              else {
+                // Remove the alias from where and join but not in having except if it's a count
+                if (!$is_having && empty($table) && isset($cfg['fields'][$field])) {
+                  $field = $cfg['fields'][$field];
+                  // Same for exp in case it's an alias
+                  if (!empty($f['exp']) && isset($cfg['fields'][$f['exp']])) {
+                    $f['exp'] = $cfg['fields'][$f['exp']];
+                  }
+                }
+  
+                $res .= (empty($res) ? '' : PHP_EOL . str_repeat(' ', $indent) . $logic . ' ') . $field . ' ';
+              }
             }
 
             if (!empty($model)) {
