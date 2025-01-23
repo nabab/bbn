@@ -36,7 +36,7 @@ github-sync:       # This job runs in the build stage, which runs first.
     - git push -f git@github.com:nabab/bbn.git --tags
     - cd -
     - rm -rf library
-    - echo "Synching finished !"
+    - echo "Github synching finished !"
   tags:
     - github
 
@@ -51,11 +51,11 @@ codeberg-sync:
     - cd library/bbn
     - git remote add --mirror=fetch codeberg git@codeberg.org:bbn/bbn.git
     - git fetch git@git.bbn.so:library/bbn.git master
-    - git fetch git@codeberg.org:bbn/bbn.git master
+    - git fetch git@codeberg.org:bbn/bbn.git main
     - git push -f git@codeberg.org:bbn/bbn.git --all
     - git push -f git@codeberg.org:bbn/bbn.git --tags
     - cd -
     - rm -rf library
-    - echo "Synching finished !"
+    - echo "Codeberg synching finished !"
   tags:
     - codeberg
