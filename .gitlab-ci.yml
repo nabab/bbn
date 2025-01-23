@@ -51,7 +51,7 @@ codeberg-sync:
     - cd library/bbn
     - git remote add --mirror=fetch codeberg git@codeberg.org:bbn/bbn.git
     - git fetch git@git.bbn.so:library/bbn.git master
-    - git fetch git@codeberg.org:bbn/bbn.git main
+    - git fetch git@codeberg.org:bbn/bbn.git master
     - git push -f git@codeberg.org:bbn/bbn.git master
     - git push -f git@codeberg.org:bbn/bbn.git --tags
     - cd -
