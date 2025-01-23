@@ -37,6 +37,8 @@ github-sync:       # This job runs in the build stage, which runs first.
     - cd -
     - rm -rf library
     - echo "Synching finished !"
+  tags:
+    - github
 
 codeberg-sync:
   stage: codeberg
@@ -55,7 +57,5 @@ codeberg-sync:
     - cd -
     - rm -rf library
     - echo "Synching finished !"
-    
   tags:
-    - github
     - codeberg
