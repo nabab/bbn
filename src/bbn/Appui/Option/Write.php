@@ -302,6 +302,21 @@ trait Write
         && Str::isUid($id_parent = $this->getIdParent($id))
     ) {
       $num = 0;
+      $this->db->delete(
+        $this->class_cfg['table'], [
+          $this->fields['id_alias'] => $id,
+          $this->fields['text'] => null,
+          $this->fields['code'] => null,
+        ]
+      );
+
+      $this->db->update(
+        $this->class_cfg['table'], [
+          $this->fields['id_alias'] => null
+        ], [
+          $this->fields['id_alias'] => $id
+        ]
+      );
       if ($items = $this->items($id)) {
         foreach ($items as $it){
           $num += (int)$this->remove($it);
@@ -353,10 +368,25 @@ trait Write
     ) {
       $res = 0;
       $this->deleteCache($id);
+      // All ids below including the one given
       $all = $this->treeIds($id);
-
       $has_history = History::isEnabled() && History::isLinked($this->class_cfg['table']);
-      foreach (array_reverse($all) as $a){
+      foreach (array_reverse($all) as $a) {
+        $this->db->delete(
+          $this->class_cfg['table'], [
+            $this->fields['id_alias'] => $a,
+            $this->fields['text'] => null,
+            $this->fields['code'] => null,
+          ]
+        );
+        $this->db->update(
+          $this->class_cfg['table'], [
+            $this->fields['id_alias'] => null
+          ], [
+            $this->fields['id_alias'] => $a
+          ]
+        );
+  
         if ($has_history) {
           $res += (int)$this->db->delete('bbn_history_uids', ['bbn_uid' => $a]);
         }
@@ -906,7 +936,7 @@ trait Write
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
-      X::log(['The alias does not exist', $it[$c['id_alias']]]);
+      X::log(['The alias does not exist', $it]);
       throw new Exception(X::_("Impossible to find the alias %s", $it[$c['id_alias']]));
     }
 
