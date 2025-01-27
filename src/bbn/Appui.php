@@ -2478,7 +2478,7 @@ class Appui
       if (!empty($settings['history'])) {
         $installer->report(X::_("History update starting, it might take a while..."));
         foreach ($this->updateHistory() as $res) {
-          $installer->report("{$res} options imported");
+          $installer->report("{$res} entries imported");
         }
 
         $installer->report(X::_("History update successful"));
