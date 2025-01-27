@@ -2304,11 +2304,11 @@ class Appui
   /**
    * Installs an app-ui instance after the installation of composer and directories structure.
    *
-   * @param $installer An installer object coming from the previously executed script.
+   * @param Installer $installer An installer object coming from the previously executed script.
    * @param array|null $cfg       The configuration comuing from the post.
    * @return bool
    */
-  public function install(Installer $installer, array $cfg, int $step = null): bool
+  public function install($installer, array $cfg, int $step = null): bool
   {
     if (!method_exists($installer, 'report')) {
       throw new Exception(X::_("The installer is invalid"));
