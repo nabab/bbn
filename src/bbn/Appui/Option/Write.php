@@ -932,7 +932,7 @@ trait Write
       }
       else {
         X::log(['Impossible to find the alias', $it[$c['id_alias']]]);
-        throw new Exception(X::_("Impossible to find the alias"));
+        throw new Exception(X::_("Impossible to find the alias for the path %s", json_encode($it[$c['id_alias']])));
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
