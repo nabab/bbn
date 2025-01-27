@@ -172,8 +172,8 @@ class X
     if (!defined('BBN_X_MAX_LOG_FILE')) {
       define('BBN_X_MAX_LOG_FILE', 1048576);
     }
-    if (\defined('BBN_DATA_PATH') && is_dir(BBN_DATA_PATH.'logs')) {
-      $log_file  = BBN_DATA_PATH.'logs/'.$file.'.log';
+    if (\defined('BBN_DATA_PATH') && is_dir(constant('BBN_DATA_PATH').'logs')) {
+      $log_file  = constant('BBN_DATA_PATH') . 'logs/' . $file . '.log';
       $backtrace = array_filter(
         debug_backtrace(), function ($a) {
           return $a['function'] === 'log';
@@ -217,7 +217,7 @@ class X
       $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 20);
       foreach ($backtrace as &$b) {
         if (!empty($b['file'])) {
-          $b['file'] = str_replace(BBN_APP_PATH, '', $b['file']);
+          $b['file'] = str_replace(constant('BBN_APP_PATH'), '', $b['file']);
         }
       }
 
@@ -235,7 +235,7 @@ class X
         $mvc = Mvc::getInstance();
       }
 
-      $errfile = str_replace(BBN_APP_PATH, '', $errfile);
+      $errfile = str_replace(constant('BBN_APP_PATH'), '', $errfile);
       $idx     = self::find(
         $r, [
         'type' => $errno,
@@ -2970,7 +2970,7 @@ class X
         }
 
         // Enclose fields containing $delimiter, $enclosure or whitespace
-        if ($encloseAll || preg_match("/(?:${delimiter_esc}|${enclosure_esc}|\s)/", $field)) {
+        if ($encloseAll || preg_match("/(?:$delimiter_esc|$enclosure_esc|\s)/", $field)) {
           $output[] = $enclosure.str_replace($enclosure, '\\'.$enclosure, $field) . $enclosure;
         }
         else {
@@ -3184,7 +3184,7 @@ class X
             break;
           case 'money':
             // Set code's format to currency
-            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_EUR_SIMPLE);
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_EUR);
             break;
           case 'date':
             // Set code's format to date
