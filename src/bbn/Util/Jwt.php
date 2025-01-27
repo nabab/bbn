@@ -6,6 +6,7 @@ use Exception;
 use bbn\X;
 use bbn\Models\Cls\Basic;
 use Firebase\JWT\JWT as FibebaseJWT;
+use Firebase\JWT\Key;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\ExpiredException;
@@ -65,11 +66,11 @@ class Jwt extends Basic
     }
     catch (ExpiredException $e) {
       X::hdump($e->getMessage());
-      throw new Exception($e);
+      throw $e;
     }
     catch (Exception $e) {
       X::hdump($e->getMessage());
-      throw new Exception($e);
+      throw $e;
     }
 
     return $jwt;
@@ -79,7 +80,7 @@ class Jwt extends Basic
   {
 
     try {
-      $payload = FibebaseJWT::decode($jwt, $this->key);
+      $payload = FibebaseJWT::decode($jwt, new Key($this->key, 'RS512'));
     }
     catch (InvalidArgumentException $e) {
       // provided key/key-array is empty or malformed.
