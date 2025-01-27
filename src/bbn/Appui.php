@@ -1751,7 +1751,7 @@ class Appui
               }
             }
 
-            if ($this->_currentFs->exists($templatesFile)) {
+            if (($r['name'] !== 'appui-core') && $this->_currentFs->exists($templatesFile)) {
               $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
               if (!$tmp) {
                 throw new Exception(X::_("Illegal JSON in %s", $templatesFile));
@@ -1765,7 +1765,7 @@ class Appui
                 throw new Exception(X::_("Impossible to find the options parent"));
               }
               $todo[] = [$tmp, $id_templates];
-              foreach($opt->import($tmp, $id_plugins, true) as $res) {
+              foreach($opt->import($tmp, $id_templates, true) as $res) {
                 $num += $res;
                 if ($num >= $next) {
                   $next += $step;
