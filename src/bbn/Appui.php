@@ -1762,7 +1762,7 @@ class Appui
   
               $id_templates = $opt->fromCode('templates', $id_plugin);
               if (!$id_templates) {
-                throw new Exception(X::_("Impossible to find the options parent"));
+                throw new Exception(X::_("Impossible to find the templates plugin %s options", $r['name']));
               }
               $todo[] = [$tmp, $id_templates];
               foreach($opt->import($tmp, $id_templates, true) as $res) {
