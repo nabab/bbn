@@ -2228,12 +2228,13 @@ class Appui
   /**
    * Updates the history tables and add the history constraints.
    *
-   * @return Generator
+   * @return iterable
    */
-  public function updateHistory() : Generator 
+  public function updateHistory() 
   {
     $tot_insert     = 0;
     $inserted       = 0;
+    $step           = 100;
     $db             = $this->getDb();
     $opt_class      = $this->getOption();
     $pass           = $this->getPassword();
@@ -2282,10 +2283,10 @@ class Appui
               ]
             )
         ) {
-          yield 1;
-        }
-        else {
-          yield 0;
+          $inserted++;
+          if (!($inserted % $step)) {
+            yield $inserted;
+          }
         }
       }
 
@@ -2476,16 +2477,8 @@ class Appui
       // If history is active
       if (!empty($settings['history'])) {
         $installer->report(X::_("History update starting, it might take a while..."));
-        $res     = 0;
-        $next    = $step;
-        foreach ($this->updateHistory() as $success) {
-          if ($success) {
-            $res += $success;
-            if ($res >= $next) {
-              $next += $step;
-              $installer->report(X::_("%s entries inserted", $res));
-            }
-          }
+        foreach ($this->updateHistory() as $res) {
+          $installer->report("{$res} options imported");
         }
 
         $installer->report(X::_("History update successful"));
