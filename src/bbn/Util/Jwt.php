@@ -2,10 +2,16 @@
 
 namespace bbn\Util;
 
-use bbn;
+use Exception;
 use bbn\X;
 use bbn\Models\Cls\Basic;
-
+use Firebase\JWT\JWT as FibebaseJWT;
+use Firebase\JWT\SignatureInvalidException;
+use Firebase\JWT\BeforeValidException;
+use Firebase\JWT\ExpiredException;
+use DomainException;
+use InvalidArgumentException;
+use UnexpectedValueException;
 class Jwt extends Basic
 {
 
@@ -30,7 +36,7 @@ class Jwt extends Basic
   public function reset(): self
   {
     $this->payload = [
-      "iss" => defined('BBN_SERVER_NAME') ? BBN_SERVER_NAME : gethostname(),
+      "iss" => defined('BBN_SERVER_NAME') ? constant('BBN_SERVER_NAME') : gethostname(),
       "iat" => time(),
       "exp" => time() + $this->ttl,
       "sub" => $this->sub,
@@ -51,19 +57,19 @@ class Jwt extends Basic
     $this->payload['data'] = $data;
     try {
       if ($this->key) {
-        $jwt = \Firebase\JWT\JWT::encode($this->payload, $this->key, 'RS512');
+        $jwt = FibebaseJWT::encode($this->payload, $this->key, 'RS512');
       }
       else {
-        $jwt = \Firebase\JWT\JWT::encode($this->payload, $this->payload['sub'], 'HS256');
+        $jwt = FibebaseJWT::encode($this->payload, $this->payload['sub'], 'HS256');
       }
     }
-    catch (\Firebase\JWT\ExpiredException $e) {
+    catch (ExpiredException $e) {
       X::hdump($e->getMessage());
-      throw new \Exception($e);
+      throw new Exception($e);
     }
-    catch (\Exception $e) {
+    catch (Exception $e) {
       X::hdump($e->getMessage());
-      throw new \Exception($e);
+      throw new Exception($e);
     }
 
     return $jwt;
@@ -71,12 +77,46 @@ class Jwt extends Basic
 
   public function get(string $jwt): ?array
   {
+
     try {
-      $payload = \Firebase\JWT\JWT::decode($jwt, $this->key, ['HS256', 'RS512']);
+      $payload = FibebaseJWT::decode($jwt, $this->key);
     }
-    catch (\Exception $e) {
+    catch (InvalidArgumentException $e) {
+      // provided key/key-array is empty or malformed.
       X::hdump($e->getMessage());
-      throw new \Exception($e);
+      throw $e;
+    }
+    catch (DomainException $e) {
+      // provided algorithm is unsupported OR
+      // provided key is invalid OR
+      // unknown error thrown in openSSL or libsodium OR
+      // libsodium is required but not available.
+      X::hdump($e->getMessage());
+      throw $e;
+    }
+    catch (SignatureInvalidException $e) {
+      // provided JWT signature verification failed.
+      X::hdump($e->getMessage());
+      throw $e;
+    }
+    catch (BeforeValidException $e) {
+      // provided JWT is trying to be used before "nbf" claim OR
+      // provided JWT is trying to be used before "iat" claim.
+      X::hdump($e->getMessage());
+      throw $e;
+    }
+    catch (ExpiredException $e) {
+      // provided JWT is trying to be used after "exp" claim.
+      X::hdump($e->getMessage());
+      throw $e;
+    }
+    catch (UnexpectedValueException $e) {
+      // provided JWT is malformed OR
+      // provided JWT is missing an algorithm / using an unsupported algorithm OR
+      // provided JWT algorithm does not match provided key OR
+      // provided key ID in key/key-array is empty or invalid.
+      X::hdump($e->getMessage());
+      throw $e;
     }
 
     if (!empty($payload->data)) {
