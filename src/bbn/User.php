@@ -6,6 +6,7 @@
 
 namespace bbn;
 
+use AllowDynamicProperties;
 use Exception;
 use bbn\X;
 use bbn\Str;
@@ -30,7 +31,9 @@ use bbn\Models\Tts\DbUauth;
  * @todo Groups and hotlinks features
  * @todo Implement Cache for session requests' results?
  */
-class User extends Basic implements Implementor
+
+ #[AllowDynamicProperties]
+ class User extends Basic implements Implementor
 {
   use Retriever;
   use DbActions;
