@@ -614,7 +614,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function dbFromItem(string $id_keycol): ?string
   {
-    if ($id_db = $this->dbIdFromItem($id_keycol)
+    if (($id_db = $this->dbIdFromItem($id_keycol))
         && ($r = $this->o->code($id_db))
     ) {
       return $r;
@@ -939,7 +939,7 @@ class Database extends bbn\Models\Cls\Cache
       throw new \Exception(X::_("Impossible to connect"));
     }
 
-    $table_id = null;
+    $table_id = '';
     $table    = $conn->tsn($table);
     $ftable   = $conn->tfn($db.'.'.$table);
     $keys     = function (&$a) use (&$table_id, $table, &$conn) {
@@ -1201,7 +1201,7 @@ class Database extends bbn\Models\Cls\Cache
         && ($connections = $this->o->fullOptions('connections', $id_db))
     ) {
       foreach ($connections as $c) {
-        if ($c['alias']['code'] === BBN_DB_USER.'@'.BBN_DB_HOST) {
+        if ($c['alias']['code'] === constant('BBN_DB_USER') . '@' . constant('BBN_DB_HOST')) {
           return $c['alias']['id'];
         }
       }

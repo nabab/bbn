@@ -17,6 +17,8 @@ use bbn\Appui\Passwords;
 use bbn\Appui\Api;
 use bbn\Appui\Dashboard;
 use bbn\Appui\Database;
+use bbn\Models\Itf\Installer;
+use Generator;
 
 /**
  * The class which deals with App-UI configuration.
@@ -95,6 +97,9 @@ class Appui
 
   /** @var array */
   private $_dashboardFilesContent;
+
+  /** @var array */
+  private $_structureFilesContent;
 
   /** @var array */
   private $_current = [];
@@ -299,9 +304,9 @@ class Appui
   {
     if (!$this->_currentDb) {
       if (!$this->_is_installer && X::isDefined('BBN_DB_HOST', 'BBN_DB_ENGINE', 'BBN_DB_USER')
-          && ($this->_current['db_host'] == BBN_DB_HOST)
-          && ($this->_current['db_engine'] == BBN_DB_ENGINE)
-          && ($this->_current['db_user'] == BBN_DB_USER)
+          && ($this->_current['db_host'] == constant('BBN_DB_HOST'))
+          && ($this->_current['db_engine'] == constant('BBN_DB_ENGINE'))
+          && ($this->_current['db_user'] == constant('BBN_DB_USER'))
       ) {
         $db = Db::getInstance();
       }
@@ -565,8 +570,8 @@ class Appui
           throw new Exception(X::_("No server name defined"));
         }
 
-        $hostname = BBN_HOSTNAME;
-        $servname = BBN_SERVER_NAME;
+        $hostname = constant('BBN_HOSTNAME');
+        $servname = constant('BBN_SERVER_NAME');
       }
 
       return md5($hostname.$servname);
@@ -912,7 +917,7 @@ class Appui
   /**
    * Returns the constraints on the history_uids table
    *
-   * @return void
+   * @return array
    */
   public function getHistoryConstraints(): array
   {
@@ -1495,7 +1500,7 @@ class Appui
       $id_project = $opt->add(
         [
           'id_parent' => $id_project_list,
-          'id_alias' => ['project', 'templates', 'appui-option', 'plugins', 'project', 'appui'],
+          'id_alias' => ['project', 'templates', 'project', 'appui'],
           'text' => $this->_current['app_name'],
           'code' => $this->_current['app_name'],
         ]
@@ -1526,8 +1531,8 @@ class Appui
           'bbn_projects',
           [
             'id_client' => $id_client,
-            'db' => BBN_DATABASE,
-            'name' => BBN_APP_NAME,
+            'db' => constant('BBN_DATABASE'),
+            'name' => constant('BBN_APP_NAME'),
             'lang' => 'en',
           ]
         )
@@ -1689,6 +1694,7 @@ class Appui
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
           $optionsFile = $this->libPath() . $r['path'] . '/src/cfg/options.json';
           $pluginsFile = $this->libPath() . $r['path'] . '/src/cfg/plugins.json';
+          $templatesFile = $this->libPath() . $r['path'] . '/src/cfg/templates.json';
           if ($this->_currentFs->exists($idFile)) {
             $tmp = $this->_currentFs->decodeContents($idFile, 'json', true);
             if (!$tmp) {
@@ -1736,6 +1742,29 @@ class Appui
                 throw new Exception(X::_("Impossible to find the options parent"));
               }
               $todo[] = [$tmp, $id_plugins];
+              foreach($opt->import($tmp, $id_plugins, true) as $res) {
+                $num += $res;
+                if ($num >= $next) {
+                  $next += $step;
+                  yield $num;
+                }
+              }
+            }
+
+            if ($this->_currentFs->exists($templatesFile)) {
+              $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
+              if (!$tmp) {
+                throw new Exception(X::_("Illegal JSON in %s", $templatesFile));
+              }
+              if (X::isAssoc($tmp)) {
+                $tmp = [$tmp];
+              }
+  
+              $id_templates = $opt->fromCode('templates', $id_plugin);
+              if (!$id_templates) {
+                throw new Exception(X::_("Impossible to find the options parent"));
+              }
+              $todo[] = [$tmp, $id_templates];
               foreach($opt->import($tmp, $id_plugins, true) as $res) {
                 $num += $res;
                 if ($num >= $next) {
@@ -1830,7 +1859,7 @@ class Appui
       $perm_routes = [];
       $routes      = $this->getRoutes();
       foreach ($routes['root'] as $u => $r) {
-        $r['path']       = BBN_LIB_PATH . $r['path'].'/';
+        $r['path']       = constant('BBN_LIB_PATH') . $r['path'].'/';
         $r['url']        = $u;
         $perm_routes[$u] = $r;
       }
@@ -2199,9 +2228,9 @@ class Appui
   /**
    * Updates the history tables and add the history constraints.
    *
-   * @return int
+   * @return Generator
    */
-  public function updateHistory()
+  public function updateHistory() : Generator 
   {
     $tot_insert     = 0;
     $inserted       = 0;
@@ -2275,11 +2304,11 @@ class Appui
   /**
    * Installs an app-ui instance after the installation of composer and directories structure.
    *
-   * @param stdClass $installer An installer object coming from the previously executed script.
+   * @param $installer An installer object coming from the previously executed script.
    * @param array|null $cfg       The configuration comuing from the post.
    * @return bool
    */
-  public function install(stdClass $installer, array $cfg, int $step = null): bool
+  public function install(Installer $installer, array $cfg, int $step = null): bool
   {
     if (!method_exists($installer, 'report')) {
       throw new Exception(X::_("The installer is invalid"));

@@ -755,7 +755,7 @@ class Permissions extends Basic
             $pluginName = $this->opt->code($p) . ($pluginName ? '-' : '') . $pluginName;
             $i++;
             $current = $parents[$i];
-            $isOk = $this->parent($current)['code'] === 'plugins';
+            $isOk = $this->opt->parent($current)['code'] === 'plugins';
           }
         }
         break;
@@ -862,11 +862,11 @@ class Permissions extends Basic
   /**
    * Updates all access permission for the main app.
    *
-   * @return int|null
+   * @return array|null
    */
-  public function accessUpdateApp(): ?int
+  public function accessUpdateApp(): ?array
   {
-    if ($id_page = $this->getOptionId('access')) {
+    if ($id_page = $this->opt->fromCode('access', 'permissions')) {
       return $this->accessUpdatePath(Mvc::getAppPath(), $id_page);
     }
 

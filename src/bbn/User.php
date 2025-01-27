@@ -1297,8 +1297,8 @@ use bbn\Models\Tts\DbUauth;
     $this->session = User\Session::getInstance();
     if (!$this->session) {
       $session_cls   = defined('BBN_SESSION')
-        && is_string(BBN_SESSION)
-        && class_exists(BBN_SESSION) ? BBN_SESSION : '\\bbn\\User\\Session';
+        && is_string(constant('BBN_SESSION'))
+        && class_exists(constant('BBN_SESSION')) ? constant('BBN_SESSION') : '\\bbn\\User\\Session';
       $this->session = new $session_cls($defaults);
     }
 
