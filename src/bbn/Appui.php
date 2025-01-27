@@ -2308,7 +2308,7 @@ class Appui
    * @param array|null $cfg       The configuration comuing from the post.
    * @return bool
    */
-  public function install($installer, array $cfg, int $step = null): bool
+  public function install($installer, array $cfg, int $step = 100): bool
   {
     if (!method_exists($installer, 'report')) {
       throw new Exception(X::_("The installer is invalid"));
@@ -2476,14 +2476,14 @@ class Appui
       // If history is active
       if (!empty($settings['history'])) {
         $installer->report(X::_("History update starting, it might take a while..."));
-        $step = 100;
+        $res     = 0;
         $next    = $step;
         foreach ($this->updateHistory() as $success) {
           if ($success) {
             $res += $success;
             if ($res >= $next) {
               $next += $step;
-              $installer->report(X::_("$res entries inserted..."));
+              $installer->report(X::_("%s entries inserted", $res));
             }
           }
         }
