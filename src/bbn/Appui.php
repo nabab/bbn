@@ -1864,6 +1864,7 @@ class Appui
         $perm_routes[$u] = $r;
       }
 
+      X::log($perm_routes);
       $perms = $perm->updateAll($perm_routes);
       $res   = $perms['total'] ?? 0;
       $this->getOption()->deleteCache(null);

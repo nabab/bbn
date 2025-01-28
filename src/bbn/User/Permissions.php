@@ -830,7 +830,7 @@ class Permissions extends Basic
     $fs  = new System();
     $ff  = function ($a) use ($url, $path) {
       if (empty($url)) {
-        $a['path'] = substr($a['name'], strlen(Mvc::getAppPath().'mvc/public/'));
+        $a['path'] = substr($a['name'], strlen(Mvc::getAppPath() . 'mvc/public/'));
       }
       else {
         $a['path'] = $url.substr($a['name'], strlen($path.'mvc/public/'));
@@ -1042,6 +1042,7 @@ class Permissions extends Basic
       $idPluginTemplate = $this->opt->getMagicPluginTemplateId();
       $aliases = $this->opt->getAliasFullOptions($idPluginTemplate);
       $aliasesByName = [];
+      // Each plugin, including the main app
       foreach ($aliases as $a) {
         $pluginGroup = $this->opt->closest($a['id'], $idPluginsTemplate);
         if ($pluginGroup) {
