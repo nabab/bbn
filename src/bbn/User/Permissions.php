@@ -682,20 +682,9 @@ class Permissions extends Basic
       'rootOptions' => $options,
       'code' => ''
     ]];
-    $all     = array_merge(
-      array_map(
-        function($a) {
-          $a['code'] = 'appui-'.$a['code'];
-          return $a;
-        },
-        $this->opt->fullOptions($appui)
-      ),
-      $this->opt->fullOptions($plugins)
-    );
+    $all     = $this->opt->getPlugins();
     foreach ($all as $o) {
-      if (!empty($o['plugin'])
-          && ($id_perm = $this->opt->fromCode('access', 'permissions', $o['id']))
-      ) {
+      if ($id_perm = $this->opt->fromCode('access', 'permissions', $o['id'])) {
         $id_option = $this->opt->fromCode('options', 'permissions', $o['id']);
         $tmp       = $this->opt->option($id_perm);
         if (!$only_with_children || !empty($tmp['num_children'])) {
