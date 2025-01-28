@@ -1912,7 +1912,7 @@ class Appui
 
     if (!empty($reg) && !empty($reg['id_app'])) {
       $this->setEnvironment(['id_app' => $reg['id_app']]);
-      $this->setSettings(['id_project' => $reg['id_project']]);
+      $this->setSettings(['project' => $reg['id_project']]);
       $pass->store($reg['key'], $id_app);
       return true;
     }
