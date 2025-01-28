@@ -12,7 +12,7 @@ trait Plugin
    */
   public function updatePlugins(): ?int
   {
-    if (($pluginAlias = $this->getMagicPluginTemplateId())
+    if (($pluginAlias = $this->getPluginTemplateId())
       && ($export = $this->export($pluginAlias, 'sfull'))
     ) {
       $res = 0;
@@ -78,8 +78,8 @@ trait Plugin
 
   public function getClosest($id, $type): ?array
   {
-    $subpluginAlias = $this->getMagicSubpluginTemplateId();
-    $pluginAlias = $this->getMagicPluginTemplateId();
+    $subpluginAlias = $this->getSubpluginTemplateId();
+    $pluginAlias = $this->getPluginTemplateId();
 
     if ($subpluginAlias && $pluginAlias) {
       $ids = $this->parents($id);
@@ -115,8 +115,8 @@ trait Plugin
 
   public function getPluginName($id): ?string
   {
-    $pluginAlias = $this->getMagicPluginTemplateId();
-    $pluginsAlias = $this->getMagicPluginsTemplateId();
+    $pluginAlias = $this->getPluginTemplateId();
+    $pluginsAlias = $this->getPluginsTemplateId();
     $o = $this->option($id);
     if ($pluginAlias && ($o['id_alias'] === $pluginAlias)) {
       $st = '';
@@ -133,8 +133,8 @@ trait Plugin
 
   public function getSubpluginName($id): ?string
   {
-    $subpluginAlias = $this->getMagicSubpluginTemplateId();
-    $pluginsAlias = $this->getMagicPluginsTemplateId();
+    $subpluginAlias = $this->getSubpluginTemplateId();
+    $pluginsAlias = $this->getPluginsTemplateId();
     $o = $this->option($id);
     if ($subpluginAlias && ($o['id_alias'] === $subpluginAlias)) {
       $st = '';
@@ -151,7 +151,7 @@ trait Plugin
 
   public function isPlugin($id): bool
   {
-    if ($this->alias($id) === $this->getMagicPluginTemplateId()) {
+    if ($this->alias($id) === $this->getPluginTemplateId()) {
       return true;
     }
 
@@ -161,8 +161,8 @@ trait Plugin
 
   public function getPlugins($root = null, bool $full = false, bool $withSubs = false): ?array
   {
-    $pluginAlias = $this->getMagicPluginTemplateId();
-    $pluginsAlias = $this->getMagicPluginsTemplateId();
+    $pluginAlias = $this->getPluginTemplateId();
+    $pluginsAlias = $this->getPluginsTemplateId();
     $plugins = $this->fromCode('plugins', $root ?: $this->getDefault());
     $res = [];
     if ($pluginAlias && $pluginsAlias && $plugins) {
@@ -235,9 +235,9 @@ trait Plugin
 
   public function getSubplugins(string $id_plugin): ?array
   {
-    $subpluginAlias = $this->getMagicSubpluginTemplateId();
-    $pluginAlias = $this->getMagicPluginTemplateId();
-    $pluginsAlias = $this->getMagicPluginsTemplateId();
+    $subpluginAlias = $this->getSubpluginTemplateId();
+    $pluginAlias = $this->getPluginTemplateId();
+    $pluginsAlias = $this->getPluginsTemplateId();
     $plugins = $this->fromCode('plugins', $id_plugin);
     $res = [];
     if ($pluginAlias && $pluginsAlias && $plugins) {

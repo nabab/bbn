@@ -130,7 +130,7 @@ trait Code
             $f['id'],
             [
               $f['id_parent'] => $id_parent,
-              $f['id_alias'] => [$this->getMagicOptionsTemplateId(), $this->getMagicSubOptionsTemplateId()]
+              $f['id_alias'] => [$this->getOptionsTemplateId(), $this->getSubOptionsTemplateId()]
             ]
           ))
           && ($tmp = $this->db->selectOne(

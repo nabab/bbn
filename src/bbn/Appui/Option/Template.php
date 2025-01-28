@@ -11,23 +11,23 @@ trait Template
 
   protected $magicTemplateId;
 
-  protected $magicOptionsTemplateId;
+  protected $optionsTemplateId;
 
-  protected $magicPermissionsTemplateId;
+  protected $permissionsTemplateId;
 
-  protected $magicPluginTemplateId;
+  protected $pluginTemplateId;
 
-  protected $magicSubpluginTemplateId;
+  protected $subpluginTemplateId;
 
-  protected $magicSubOptionsTemplateId;
+  protected $subOptionsTemplateId;
 
-  protected $magicSubPermissionsTemplateId;
+  protected $subPermissionsTemplateId;
 
-  protected $magicTemplateTemplateId;
+  protected $templateTemplateId;
 
-  protected $magicAppuiTemplateId;
+  protected $appuiTemplateId;
 
-  protected $magicPluginsTemplateId;
+  protected $pluginsTemplateId;
 
 
   public function getTemplateId(...$codes): ?string
@@ -39,7 +39,7 @@ trait Template
       }
 
       if (!isset($this->templateIds[$code])) {
-        foreach ($this->getAliasItems($this->getMagicTemplateTemplateId()) as $it) {
+        foreach ($this->getAliasItems($this->getTemplateTemplateId()) as $it) {
           if ($tmp = $this->fromCode($code, $it['id'])) {
             $this->templateIds[$code] = $tmp;
             break;
@@ -85,11 +85,11 @@ trait Template
    */
   public function getPermissionsTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicPermissionsTemplateId && $this->check()) {
-      $this->magicPermissionsTemplateId = $this->fromCode('permissions', $this->getMagicPluginTemplateId());
+    if ($this->getMagicTemplateId() && !$this->permissionsTemplateId && $this->check()) {
+      $this->permissionsTemplateId = $this->fromCode('permissions', $this->getPluginTemplateId());
     }
 
-    return $this->magicPermissionsTemplateId;
+    return $this->permissionsTemplateId;
   }
 
 
@@ -97,17 +97,17 @@ trait Template
    * Returns the ID of the 'plugin > options' template
    * @return string
    */
-  public function getMagicOptionsTemplateId(): ?string
+  public function getOptionsTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicOptionsTemplateId && $this->check()) {
+    if ($this->getMagicTemplateId() && !$this->optionsTemplateId && $this->check()) {
       $cfg = $this->getClassCfg();
-      $this->magicOptionsTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
-        $cfg['arch']['options']['id_parent'] => $this->getMagicPluginTemplateId(),
+      $this->optionsTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
+        $cfg['arch']['options']['id_parent'] => $this->getPluginTemplateId(),
         $cfg['arch']['options']['code'] => 'options',
       ]);
     }
 
-    return $this->magicOptionsTemplateId;
+    return $this->optionsTemplateId;
   }
 
 
@@ -115,17 +115,17 @@ trait Template
    * Returns the ID of the 'plugin' template
    * @return string
    */
-  public function getMagicPluginTemplateId(): ?string
+  public function getPluginTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicPluginTemplateId && $this->check()) {
+    if ($this->getMagicTemplateId() && !$this->pluginTemplateId && $this->check()) {
       $cfg = $this->getClassCfg();
-      $this->magicPluginTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
+      $this->pluginTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
         $cfg['arch']['options']['id_parent'] => $this->getMagicTemplateId(),
         $cfg['arch']['options']['code'] => 'plugin',
       ]);
     }
 
-    return $this->magicPluginTemplateId;
+    return $this->pluginTemplateId;
   }
 
 
@@ -133,17 +133,17 @@ trait Template
    * Returns the ID of the 'subplugin' template i.e. plugins in plugin
    * @return string
    */
-  public function getMagicSubpluginTemplateId(): ?string
+  public function getSubpluginTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicSubpluginTemplateId && $this->check()) {
+    if ($this->getMagicTemplateId() && !$this->subpluginTemplateId && $this->check()) {
       $cfg = $this->getClassCfg();
-      $this->magicSubpluginTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
+      $this->subpluginTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
         $cfg['arch']['options']['id_parent'] => $this->getMagicTemplateId(),
         $cfg['arch']['options']['code'] => 'subplugin',
       ]);
     }
 
-    return $this->magicSubpluginTemplateId;
+    return $this->subpluginTemplateId;
   }
 
 
@@ -151,17 +151,17 @@ trait Template
    * Returns the ID of the options template in the 'subplugin' template
    * @return string
    */
-  public function getMagicSubOptionsTemplateId(): ?string
+  public function getSubOptionsTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicSubpluginTemplateId && $this->check()) {
+    if ($this->getMagicTemplateId() && !$this->subpluginTemplateId && $this->check()) {
       $cfg = $this->getClassCfg();
-      $this->magicSubOptionsTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
-        $cfg['arch']['options']['id_parent'] => $this->getMagicSubpluginTemplateId(),
+      $this->subOptionsTemplateId = $this->db->selectOne($cfg['table'], $cfg['arch']['options']['id'], [
+        $cfg['arch']['options']['id_parent'] => $this->getSubpluginTemplateId(),
         $cfg['arch']['options']['code'] => 'options',
       ]);
     }
 
-    return $this->magicSubOptionsTemplateId;
+    return $this->subOptionsTemplateId;
   }
 
 
@@ -169,13 +169,13 @@ trait Template
    * Returns the ID of the options template in the 'subplugin' template
    * @return string
    */
-  public function getMagicSubPermissionsTemplateId(): ?string
+  public function getSubPermissionsTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicSubpluginTemplateId && $this->check()) {
-      $this->magicSubpluginTemplateId = $this->fromCode('permissions', $this->getMagicSubpluginTemplateId());
+    if ($this->getMagicTemplateId() && !$this->subpluginTemplateId && $this->check()) {
+      $this->subpluginTemplateId = $this->fromCode('permissions', $this->getSubpluginTemplateId());
     }
 
-    return $this->magicSubPermissionsTemplateId;
+    return $this->subPermissionsTemplateId;
   }
 
 
@@ -183,23 +183,23 @@ trait Template
    * Returns the ID of the 'plugin > template' template
    * @return string
    */
-  public function getMagicTemplateTemplateId(): ?string
+  public function getTemplateTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicTemplateTemplateId && $this->check()) {
-      $this->magicTemplateTemplateId = $this->fromCode('templates', $this->getMagicPluginTemplateId());
+    if ($this->getMagicTemplateId() && !$this->templateTemplateId && $this->check()) {
+      $this->templateTemplateId = $this->fromCode('templates', $this->getPluginTemplateId());
     }
 
-    return $this->magicTemplateTemplateId;
+    return $this->templateTemplateId;
   }
 
 
-  public function getMagicPluginsTemplateId(): ?string
+  public function getPluginsTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicPluginsTemplateId && $this->check()) {
-      $this->magicPluginsTemplateId = $this->fromCode('plugins', $this->getMagicPluginTemplateId());
+    if ($this->getMagicTemplateId() && !$this->pluginsTemplateId && $this->check()) {
+      $this->pluginsTemplateId = $this->fromCode('plugins', $this->getPluginTemplateId());
     }
 
-    return $this->magicPluginsTemplateId;
+    return $this->pluginsTemplateId;
   }
 
 
@@ -207,13 +207,13 @@ trait Template
    * Returns the ID of the 'plugin > plugins > appui' template
    * @return string
    */
-  public function getMagicAppuiTemplateId(): ?string
+  public function getAppuiTemplateId(): ?string
   {
-    if ($this->getMagicTemplateId() && !$this->magicAppuiTemplateId && $this->check()) {
-      $this->magicAppuiTemplateId = $this->fromCode('appui', $this->getMagicPluginsTemplateId());
+    if ($this->getMagicTemplateId() && !$this->appuiTemplateId && $this->check()) {
+      $this->appuiTemplateId = $this->fromCode('appui', $this->getPluginsTemplateId());
     }
 
-    return $this->magicAppuiTemplateId;
+    return $this->appuiTemplateId;
   }
 
 
@@ -227,7 +227,7 @@ trait Template
       }
     }
 
-    $tids = $this->getAliasItems($this->getMagicTemplateTemplateId());
+    $tids = $this->getAliasItems($this->getTemplateTemplateId());
     foreach ($tids as $tid) {
       foreach ($this->getAliasItems($tid) as $id) {
         $tot += $this->applyTemplate($id);
@@ -307,7 +307,7 @@ trait Template
         throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
       }
 
-      if ($templateParent['id_alias'] !== $this->getMagicTemplateTemplateId()) {
+      if ($templateParent['id_alias'] !== $this->getTemplateTemplateId()) {
         throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
       }
     }

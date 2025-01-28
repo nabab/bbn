@@ -1027,8 +1027,8 @@ class Permissions extends Basic
     if ($id_page) {
 
       /** @todo Add the possibility to do it for another project? */
-      $idPluginsTemplate = $this->opt->getMagicPluginsTemplateId();
-      $idPluginTemplate = $this->opt->getMagicPluginTemplateId();
+      $idPluginsTemplate = $this->opt->getPluginsTemplateId();
+      $idPluginTemplate = $this->opt->getPluginTemplateId();
       $aliases = $this->opt->getAliasFullOptions($idPluginTemplate);
       $aliasesByName = [];
       // Each plugin, including the main app

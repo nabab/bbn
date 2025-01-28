@@ -1678,7 +1678,7 @@ class Appui
             'id_parent' => $root,
             'code' => $this->_current['app_name'],
             'text' => $this->_current['site_title'],
-            'id_alias' => $opt->getMagicPluginTemplateId()
+            'id_alias' => $opt->getPluginTemplateId()
           ], true);
           $num += $opt->applyTemplate($idApp);
           $opt->deleteCache(null);
@@ -1688,7 +1688,7 @@ class Appui
 
         $id_appui = $opt->fromCode('appui');
         $appui_options = [];
-        $idPluginTpl = $opt->getMagicPluginTemplateId();
+        $idPluginTpl = $opt->getPluginTemplateId();
         $todo = [];
         foreach (array_values($routes) as $i => $r) {
           $idFile = $this->libPath() . $r['path'] . '/src/cfg/plugin.json';
@@ -2482,7 +2482,7 @@ class Appui
       if (!empty($settings['history'])) {
         $installer->report(X::_("History update starting, it might take a while..."));
         foreach ($this->updateHistory() as $res) {
-          $installer->report("%s entries imported", $res);
+          $installer->report(X::_("%s entries imported", $res));
         }
 
         $installer->report(X::_("History update successful"));
