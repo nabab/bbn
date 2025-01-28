@@ -1859,9 +1859,12 @@ class Appui
       $perm_routes = [];
       $routes      = $this->getRoutes();
       foreach ($routes['root'] as $u => $r) {
-        $r['path']       = constant('BBN_LIB_PATH') . $r['path'].'/';
-        $r['url']        = $u;
-        $perm_routes[$u] = $r;
+        $perm_routes[$u] = [
+          'url' => $u,
+          'path' => constant('BBN_LIB_PATH') . $r['path'].'/src/',
+          'root' => 'lib',
+          'name' => $r['name']
+        ];
       }
 
       X::log($perm_routes);
