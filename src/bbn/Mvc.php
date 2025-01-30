@@ -172,13 +172,13 @@ class Mvc implements Mvc\Api
   public static function initPath()
   {
     if (!self::$_app_name) {
-      self::$_app_name   = defined('BBN_APP_NAME') ? constant('BBN_APP_NAME') : 'app';
-      self::$_app_path   = defined('BBN_APP_PATH') ? constant('BBN_APP_PATH') : '';
+      self::$_app_name = defined('BBN_APP_NAME') ? constant('BBN_APP_NAME') : 'app';
+      self::$_app_path = defined('BBN_APP_PATH') ? constant('BBN_APP_PATH') : '';
       self::$_app_prefix = defined('BBN_APP_PREFIX') ? constant('BBN_APP_PREFIX') : '';
-      self::$_cur_path   = defined('BBN_CUR_PATH') ? constant('BBN_CUR_PATH') : '';
-      self::$_lib_path   = defined('BBN_LIB_PATH') ? constant('BBN_LIB_PATH') : '';
-      self::$_data_path  = defined('BBN_DATA_PATH') ? constant('BBN_DATA_PATH') : '';
-      self::$_tmp_path  = defined('BBN_TMP_PATH') ? constant('BBN_TMP_PATH') : '';
+      self::$_cur_path = defined('BBN_CUR_PATH') ? constant('BBN_CUR_PATH') : '';
+      self::$_lib_path = defined('BBN_LIB_PATH') ? constant('BBN_LIB_PATH') : '';
+      self::$_data_path = defined('BBN_DATA_PATH') ? constant('BBN_DATA_PATH') : '';
+      self::$_tmp_path = defined('BBN_TMP_PATH') ? constant('BBN_TMP_PATH') : '';
     }
   }
 
@@ -400,7 +400,8 @@ class Mvc implements Mvc\Api
     }
 
     if ($id_user) {
-      return self::getDataPath() . 'users/' . $id_user . '/data/' . ($plugin ? $plugin . '/' : '');;
+      return self::getDataPath() . 'users/' . $id_user . '/data/' . ($plugin ? $plugin . '/' : '');
+      ;
     }
 
     return null;
@@ -473,7 +474,8 @@ class Mvc implements Mvc\Api
 
     $auth_applicable = '';
     foreach ($this->static_routes as $ar) {
-      if ((substr($ar, -1) === '*')
+      if (
+        (substr($ar, -1) === '*')
         && (strpos($url, substr($ar, 0, -1)) === 0)
       ) {
         if (strlen($ar) > strlen($auth_applicable)) {
@@ -484,7 +486,8 @@ class Mvc implements Mvc\Api
 
     if ($auth_applicable) {
       foreach ($this->forbidden_routes as $forbidden) {
-        if ((substr($forbidden, -1) === '*')
+        if (
+          (substr($forbidden, -1) === '*')
           && (strpos($url, substr($forbidden, 0, -1)) === 0)
           // Should be as or more precise
           && (strlen($auth_applicable) < strlen($forbidden))
@@ -551,7 +554,7 @@ class Mvc implements Mvc\Api
       return true;
     }
 
-    $has_allow_all   = false;
+    $has_allow_all = false;
     $auth_applicable = '';
     foreach ($this->authorized_routes as $ar) {
       if ($ar === '*') {
@@ -559,7 +562,8 @@ class Mvc implements Mvc\Api
         continue;
       }
 
-      if ((substr($ar, -1) === '*')
+      if (
+        (substr($ar, -1) === '*')
         && (strpos($url, substr($ar, 0, -1)) === 0)
       ) {
         if (strlen($ar) > strlen($auth_applicable)) {
@@ -570,7 +574,8 @@ class Mvc implements Mvc\Api
 
     if ($auth_applicable || $has_allow_all) {
       foreach ($this->forbidden_routes as $forbidden) {
-        if ((substr($forbidden, -1) === '*')
+        if (
+          (substr($forbidden, -1) === '*')
           && (strpos($url, substr($forbidden, 0, -1)) === 0)
           // Should be as or more precise
           && (strlen($auth_applicable) < strlen($forbidden))
@@ -657,7 +662,7 @@ class Mvc implements Mvc\Api
 
       return $randoms[$i];
     };
-    $fn      = function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {
+    $fn = function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {
       if ($bbn_inc_content) {
         ob_start();
         if (\count($bbn_inc_data)) {
@@ -671,9 +676,8 @@ class Mvc implements Mvc\Api
         unset($bbn_inc_data);
 
         try {
-          eval('use bbn\X as xx; use bbn\Str as st; ?>' . $bbn_inc_content);
-        }
-        catch (\Exception $e){
+          eval ('use bbn\X as xx; use bbn\Str as st; ?>' . $bbn_inc_content);
+        } catch (\Exception $e) {
           error_log($e->getMessage());
           X::logError($e->getCode(), $e->getMessage(), $bbn_inc_file, $e->getLine());
         }
@@ -727,7 +731,7 @@ class Mvc implements Mvc\Api
 
   public static function debug($state = 1)
   {
-    self::$_is_debug = (bool)$state;
+    self::$_is_debug = (bool) $state;
   }
 
 
@@ -768,8 +772,8 @@ class Mvc implements Mvc\Api
   private static function destructSingleton()
   {
     self::$singleton_instance = null;
-    self::$singleton_exists   = false;
-    self::$_app_name          = null;
+    self::$singleton_exists = false;
+    self::$_app_name = null;
   }
 
 
@@ -784,20 +788,20 @@ class Mvc implements Mvc\Api
     if (!\defined("BBN_DEFAULT_MODE")) {
       define("BBN_DEFAULT_MODE", 'public');
     }
-    
+
     // Correspond to the path after the URL to the application's public root (set to '/' for a domain's root)
     if (!\defined("BBN_CUR_PATH")) {
       define('BBN_CUR_PATH', '/');
     }
-    
+
     if (!\defined("BBN_APP_NAME")) {
       throw new \Exception("BBN_APP_NAME must be defined");
     }
-    
+
     if (!\defined("BBN_APP_PATH")) {
       throw new \Exception("BBN_APP_PATH must be defined");
     }
-    
+
     if (!\defined("BBN_DATA_PATH")) {
       throw new \Exception("BBN_DATA_PATH must be defined");
     }
@@ -999,9 +1003,9 @@ class Mvc implements Mvc\Api
   public function reroute($path = '', $post = false, $arguments = false)
   {
     $this->env->simulate($path, $post, $arguments);
-    $this->is_routed     = false;
+    $this->is_routed = false;
     $this->is_controlled = null;
-    $this->info          = null;
+    $this->info = null;
     $this->router->reset();
     $this->route();
     if ($arguments || !isset($this->info['args'])) {
@@ -1126,7 +1130,7 @@ class Mvc implements Mvc\Api
    */
   public function controllerExists(string $path, bool $private = false): bool
   {
-    return (bool)$this->router->route($path, $private ? 'private' : 'public', true);
+    return (bool) $this->router->route($path, $private ? 'private' : 'public', true);
   }
 
 
@@ -1226,7 +1230,7 @@ class Mvc implements Mvc\Api
    */
   public function hasCustomPLuginModel(string $path, string $plugin): bool
   {
-    return (bool)$this->router->routeCustomPlugin(router::parse($path), 'model', $plugin);
+    return (bool) $this->router->routeCustomPlugin(router::parse($path), 'model', $plugin);
   }
 
 
@@ -1279,7 +1283,7 @@ class Mvc implements Mvc\Api
    */
   public function hasSubpluginModel(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool)$this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin);
   }
 
   /**
@@ -1293,7 +1297,7 @@ class Mvc implements Mvc\Api
    */
   public function hasSubpluginJs(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool)$this->router->routeSubplugin(router::parse($path), 'js', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(router::parse($path), 'js', $plugin, $subplugin);
   }
 
 
@@ -1308,7 +1312,7 @@ class Mvc implements Mvc\Api
    */
   public function hasSubpluginHtml(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool)$this->router->routeSubplugin(router::parse($path), 'html', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(router::parse($path), 'html', $plugin, $subplugin);
   }
 
 
@@ -1323,7 +1327,7 @@ class Mvc implements Mvc\Api
    */
   public function hasSubpluginCss(string $path, string $plugin, string $subplugin): bool
   {
-    return (bool)$this->router->routeSubplugin(router::parse($path), 'css', $plugin, $subplugin);
+    return (bool) $this->router->routeSubplugin(router::parse($path), 'css', $plugin, $subplugin);
   }
 
 
@@ -1347,7 +1351,7 @@ class Mvc implements Mvc\Api
       && ($route = $this->router->routeSubplugin(router::parse($path), 'model', $plugin, $subplugin))
     ) {
       $model = new Model($this->db, $route, $ctrl, $this);
-      $res   = $ttl ? $model->getFromCache($data, '', $ttl) : $model->get($data);
+      $res = $ttl ? $model->getFromCache($data, '', $ttl) : $model->get($data);
       return $res;
     }
 
@@ -1398,7 +1402,7 @@ class Mvc implements Mvc\Api
 
   public function hasPluginView(string $path, string $mode, string $plugin): bool
   {
-    return (bool)$this->router->routeCustomPlugin(Router::parse($path), $mode, $plugin);
+    return (bool) $this->router->routeCustomPlugin(Router::parse($path), $mode, $plugin);
   }
 
 
@@ -1440,7 +1444,8 @@ class Mvc implements Mvc\Api
   public function getModelGroup(string $path, array $data, Controller $ctrl)
   {
     $res = [];
-    if (($path = Router::parse($path))
+    if (
+      ($path = Router::parse($path))
       && ($items = $this->fetchDir($path, 'model'))
     ) {
       foreach ($items as $it) {
@@ -1455,7 +1460,8 @@ class Mvc implements Mvc\Api
   public function getCustomModelGroup(string $path, string $plugin, array $data, Controller $ctrl): array
   {
     $res = [];
-    if (($path = Router::parse($path))
+    if (
+      ($path = Router::parse($path))
       && ($items = $this->fetchCustomDir($path, 'model', $plugin))
     ) {
       foreach ($items as $it) {
@@ -1470,7 +1476,8 @@ class Mvc implements Mvc\Api
   public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data, Controller $ctrl): array
   {
     $res = [];
-    if (($path = Router::parse($path))
+    if (
+      ($path = Router::parse($path))
       && ($items = $this->fetchSubpluginDir($path, 'model', $plugin_from, $plugin_for))
     ) {
       foreach ($items as $it) {
@@ -1518,8 +1525,8 @@ class Mvc implements Mvc\Api
   /**
    * This will get the model as it is in cache if any and otherwise will save it in cache then return it
    *
-   * @params string path to the model
-   * @params array data to send to the model
+   * @param string path to the model
+   * @param array data to send to the model
    * @return array|null A data model
    */
   public function getCachedModel(string $path, array $data, Controller $ctrl, int $ttl = 10)
@@ -1540,8 +1547,8 @@ class Mvc implements Mvc\Api
   /**
    * This will set the model in cache
    *
-   * @params string path to the model
-   * @params array data to send to the model
+   * @param string path to the model
+   * @param array data to send to the model
    * @return void
    */
   public function setCachedModel($path, array $data, Controller $ctrl, $ttl = 10)
@@ -1560,8 +1567,8 @@ class Mvc implements Mvc\Api
   /**
    * This will unset the model in cache
    *
-   * @params string path to the model
-   * @params array data to send to the model
+   * @param string path to the model
+   * @param array data to send to the model
    * @return void
    */
   public function deleteCachedModel($path, array $data, Controller $ctrl)
@@ -1653,6 +1660,10 @@ class Mvc implements Mvc\Api
   public function output()
   {
     if ($this->check() && $this->controller) {
+      if ($this->controller->isStream()) {
+        die('{"success": true}');
+      }
+
       $obj = $this->controller->get();
       if ($this->isCli()) {
         if (isset($obj->content)) {
@@ -1711,7 +1722,6 @@ class Mvc implements Mvc\Api
       }
 
       if ($this->env->setPrepath($path) && $this->router->setPrepath($path)) {
-        $this->params = $this->getParams();
         return 1;
       }
     }

@@ -86,6 +86,8 @@ class Controller implements Api
    */
   private $_plugin_name;
 
+  private $_stream = false;
+
   /**
    * @var Db The db connection if accepted by the mvc class.
    */
@@ -153,6 +155,55 @@ class Controller implements Api
   {
     $this->_mvc = $mvc;
     $this->reset($route, $data);
+  }
+
+  public function setStream($type = ''): self
+  {
+    $content = ob_get_contents();
+    if ($this->_stream || $content) {
+      throw new Exception("Impossible to stream a controller that has already been streamed");
+    }
+
+    while (ob_get_level()) {
+      ob_end_clean();
+    }
+
+    $this->_stream = true;
+    ob_implicit_flush(1);
+    set_time_limit(0);
+    ini_set('output_buffering', 'Off');
+    ini_set('zlib.output_compression', false);
+    if (function_exists('apache_setenv')) {
+      apache_setenv('no-gzip', '1');
+      apache_setenv('dont-vary', '1');
+    }
+
+    header('X-Accel-Buffering: no');
+    header("Content-Encoding: none");
+    header("Transfer-Encoding: chunked"); // Or "Content-Length: ... " if chunking is not used
+    header('Content-Type: plain/text; charset=UTF-8');
+    //header('Content-Type: application/json; charset=UTF-8');
+
+    return $this;
+  }
+
+  public function isStream(): bool
+  {
+    return $this->_stream;
+  }
+
+
+  public function stream($data): void
+  {
+    if ($this->_stream) {
+      if (!$data) {
+        return;
+      }
+
+      echo json_encode(is_string($data) ? ['content' => $data] : (is_array($data) ? $data : ['success' => false])) . str_repeat(' ', 8192);
+      ob_end_flush();
+      flush();
+    }
   }
 
 
@@ -524,7 +575,7 @@ class Controller implements Api
       if (defined('BBN_ROOT_CHECKER')) {
         if (!defined('BBN_ROOT_CHECKER_OK')) {
           define('BBN_ROOT_CHECKER_OK', true);
-          array_unshift($this->_checkers, BBN_ROOT_CHECKER);
+          array_unshift($this->_checkers, constant('BBN_ROOT_CHECKER'));
         }
       }
 

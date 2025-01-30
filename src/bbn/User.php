@@ -33,6 +33,7 @@ use bbn\Models\Tts\DbUauth;
  */
 
  #[AllowDynamicProperties]
+ 
  class User extends Basic implements Implementor
 {
   use Retriever;

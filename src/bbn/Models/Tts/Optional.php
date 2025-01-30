@@ -59,7 +59,7 @@ trait Optional
 
         $tmp                   = explode('\\', __CLASS__);
         $cls                   = strtolower(end($tmp));
-        $path                  = [$cls, 'appui'];
+        $path                  = ['options', $cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
@@ -86,7 +86,7 @@ trait Optional
   {
     if (!self::$optional_is_init) {
       if (!\defined("BBN_APPUI")) {
-        \define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));
+        \define('BBN_APPUI', $opt->fromCode('appui'));
       }
 
       if (!$path) {
@@ -97,7 +97,7 @@ trait Optional
 
         $tmp                   = explode('\\', __CLASS__);
         $cls                   = end($tmp);
-        $path                  = [$cls, 'appui'];
+        $path                  = ['options', $cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
@@ -152,9 +152,10 @@ trait Optional
    * @param string $code
    * @return int|false
    */
-  public static function getOptionId()
+  public static function getOptionId(...$codes)
   {
-    return self::getOptionsObject()->fromCode(...self::_treat_args(func_get_args()));
+    $codes[] = self::getOptionRoot();
+    return self::getOptionsObject()->fromCode(...$codes);
   }
 
 
@@ -164,11 +165,12 @@ trait Optional
    * @todo Check it, it doesn't seem ok
    * @return array
    */
-  public static function getOptionsIds(): array
+  public static function getOptionsIds(...$codes): array
   {
+    $codes[] = self::getOptionRoot();
     return array_flip(
       array_filter(
-        self::getOptionsObject()->getCodes(...self::_treat_args(func_get_args())),
+        self::getOptionsObject()->getCodes(...$codes),
         function ($a) {
           return $a !== null;
         }
@@ -177,65 +179,52 @@ trait Optional
   }
 
 
-  public static function getOptionsTree()
+  public static function getOptionsTree(...$codes)
   {
-    return ($tree = self::getOptionsObject()->fullTree(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];
+    $codes[] = self::getOptionRoot();
+    return ($tree = self::getOptionsObject()->fullTree(...$codes)) ? $tree['items'] : [];
   }
 
 
-  public static function getOptionsTreeRef()
+  public static function getOptionsTreeRef(...$codes)
   {
-    return ($tree = self::getOptionsObject()->fullTreeRef(...self::_treat_args(func_get_args()))) ? $tree['items'] : [];
+    $codes[] = self::getOptionRoot();
+    return ($tree = self::getOptionsObject()->fullTreeRef(...$codes)) ? $tree['items'] : [];
   }
 
 
-  public static function getOptions()
+  public static function getOptions(...$codes)
   {
-    return self::getOptionsObject()->fullOptions(...self::_treat_args(func_get_args()));
+    $codes[] = self::getOptionRoot();
+    return self::getOptionsObject()->fullOptions(...$codes);
   }
 
 
-  public static function getOptionsRef()
+  public static function getOptionsRef(...$codes)
   {
-    return self::getOptionsObject()->fullOptionsRef(...self::_treat_args(func_get_args()));
+    $codes[] = self::getOptionRoot();
+    return self::getOptionsObject()->fullOptionsRef(...$codes);
   }
 
 
-  public static function getOption()
+  public static function getOption(...$codes)
   {
-    return self::getOptionsObject()->option(...self::_treat_args(func_get_args()));
+    $codes[] = self::getOptionRoot();
+    return self::getOptionsObject()->option(...$codes);
   }
 
 
-  public static function getOptionsTextValue()
+  public static function getOptionsTextValue(...$codes)
   {
-    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptions($id) : [];
+    $codes[] = self::getOptionRoot();
+    return ($id = self::getOptionId($codes)) ? self::getOptionsObject()->textValueOptions($id) : [];
   }
 
 
-  public static function getOptionsTextValueRef()
+  public static function getOptionsTextValueRef(...$codes)
   {
-    return ($id = self::getOptionId(...func_get_args())) ? self::getOptionsObject()->textValueOptionsRef($id) : [];
+    $codes[] = self::getOptionRoot();
+    return ($id = self::getOptionId(...$codes)) ? self::getOptionsObject()->textValueOptionsRef($id) : [];
   }
-
-
-
-  protected static function _treat_args(array $args, $appui = false): array
-  {
-    $hasUid = Str::isUid(end($args));
-    if (count($args) && !$hasUid) {
-      self::optionalInit();
-      if (!in_array($args[0], ['permissions', 'options', 'plugins'])) {
-        $args[] = 'options';
-      }
-    }
-
-    if (!$hasUid) {
-      $args[] = self::$option_root_id;
-    }
-
-    return $args;
-  }
-
 
 }

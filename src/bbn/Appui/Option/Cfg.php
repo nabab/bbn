@@ -97,6 +97,15 @@ trait Cfg
       }
     }
 
+    if (empty($cfg) && ($id_alias = $this->getIdAlias($id)) && $this->isInTemplate($id_alias)) {
+      $cfg['inherit_from'] = $id_alias;
+      $cfg['frozen']       = 1;
+    }
+
+    if ($cfg && !empty($cfg['inherit_from'])) {
+      $cfg['inherit_from_text'] = $this->text($cfg['inherit_from']);
+    }
+
     // Restore permissions if they were present initially.
     if ($perm) {
       $cfg['permissions'] = $perm;

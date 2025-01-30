@@ -3,6 +3,7 @@
 namespace bbn\Appui;
 
 use bbn\Models\Tts\DbActions;
+use bbn\Models\Tts\Optional;
 use bbn\Models\Cls\Db as DbCls;
 use bbn\Db;
 use Orhanerday\OpenAi\OpenAi;
@@ -19,6 +20,8 @@ class Ai extends DbCls
 {
   
   use DbActions;
+  use Optional;
+
   
   /**
    * Default Dbconfig configuration for the class
@@ -147,14 +150,19 @@ ws ::= ([ \t\n] ws)?',
    *
    * @var OpenAi $ai
    */
-  private $ai;
+  protected $ai;
   
-  /**
-   * Note instance
-   *
-   * @var Note $note
-   */
+  /** @var Note $note Note instance */
   private $note;
+
+  /** @var Passwords $pass */
+  private $pass;
+
+  protected $endpoint;
+
+  protected $baseUrl;
+
+  private $key;
   
   /**
    * Ai constructor.
@@ -168,13 +176,48 @@ ws ::= ([ \t\n] ws)?',
   {
     parent::__construct($db);
     $this->initClassCfg($cfg);
+    self::optionalInit();
     if (!defined("BBN_OPENAI_KEY")) {
       throw new Exception("The OpenAI key is not defined");
     }
-    $this->ai = new OpenAi(BBN_OPENAI_KEY);
-    $this->ai->setBaseURL('http://192.168.1.115:1234');
-    
+
     $this->note = new Note($this->db);
+    $this->pass = new Passwords($this->db);
+  }
+
+  public function setEndpoint(string $endpointCode = null) {
+    $endpoints = $this->getOptions('endpoints');
+    if ($endpointCode) {
+      $endpoint = X::getRow($endpoints, ['code' => $endpointCode]);
+    }
+    else {
+      $endpoint = $endpoints[0];
+    }
+
+    if (!$endpoint) {
+      throw new Exception("Endpoint not found");
+    }
+
+    $pass = $this->pass->get($endpoint['id']);
+    if (!$pass) {
+      throw new Exception("Password not found");
+    }
+
+    $this->ai = new OpenAi($pass);
+    $this->ai->setBaseURL($endpoint['url']);
+  }
+
+
+  public function getModels() {
+    return $this->ai->listModels();
+  }
+
+  public function getEndpoints() {
+
+  }
+
+  public function getModelsFromEndpoint () {
+
   }
   
   /**
@@ -285,7 +328,7 @@ ws ::= ([ \t\n] ws)?',
    * @param string $prompt Prompt string to send to the API
    * @return array Response array containing success flag and result or error message
    */
-  public function request(string | null $prompt , string $input): array
+  public function request(string | null $prompt , string $input, string $model = null): array
   {
     // check if prompt is not empty but can be null
     if (empty($prompt) && !is_null($prompt)) {
@@ -305,7 +348,7 @@ ws ::= ([ \t\n] ws)?',
       
       $complete = $this->ai->chat(
         [
-          "model" => "gpt-3.5-turbo",
+          "model" => $model ?: "gpt-3.5-turbo",
           "messages" => [
             [
               "role" => "user",
@@ -322,7 +365,7 @@ ws ::= ([ \t\n] ws)?',
       
       $complete = $this->ai->chat(
         [
-          "model" => "gpt-3.5-turbo",
+          "model" => $model ?: "gpt-3.5-turbo",
           "messages" => [
             [
               "role" => "system",

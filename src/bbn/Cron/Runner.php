@@ -172,6 +172,7 @@ class Runner extends bbn\Models\Cls\Basic
       else if ($is_boolean) {
         $log = $log ? 'true' : 'false';
       }
+
       $output = '  "' .
         bbn\Str::escapeDquotes($name) .
         '": ' . ($is_string ? '"' : '') .
