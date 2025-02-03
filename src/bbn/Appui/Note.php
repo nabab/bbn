@@ -160,7 +160,7 @@ class Note extends DbCls
 
   public function setExternalUser()
   {
-    $this->userId = defined('BBN_EXTERNAL_USER_ID') ? BBN_EXTERNAL_USER_ID : null;
+    $this->userId = defined('BBN_EXTERNAL_USER_ID') ? constant('BBN_EXTERNAL_USER_ID') : null;
     return $this->userId;
   }
 

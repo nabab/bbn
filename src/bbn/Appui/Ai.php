@@ -160,6 +160,8 @@ ws ::= ([ \t\n] ws)?',
 
   protected $endpoint;
 
+  protected $model;
+
   protected $baseUrl;
 
   private $key;
@@ -185,7 +187,7 @@ ws ::= ([ \t\n] ws)?',
     $this->pass = new Passwords($this->db);
   }
 
-  public function setEndpoint(string $endpointCode = null) {
+  public function setEndpoint(string $endpointCode = null, $model = null) {
     $endpoints = $this->getOptions('endpoints');
     if ($endpointCode) {
       $endpoint = X::getRow($endpoints, ['code' => $endpointCode]);
@@ -205,6 +207,23 @@ ws ::= ([ \t\n] ws)?',
 
     $this->ai = new OpenAi($pass);
     $this->ai->setBaseURL($endpoint['url']);
+    $this->setModel($model);
+  }
+
+  public function setModel(string $modelCode = null) {
+    $models = $this->getOptions('models');
+    if ($modelCode) {
+      $model = X::getRow($models, ['code' => $modelCode]);
+    }
+    else {
+      $model = $models[0];
+    }
+
+    if (!$model) {
+      throw new Exception("Model not found");
+    }
+
+    $this->model = $model['code'];
   }
 
 
@@ -213,13 +232,9 @@ ws ::= ([ \t\n] ws)?',
   }
 
   public function getEndpoints() {
-
+    return $this->getOptions('endpoints');
   }
 
-  public function getModelsFromEndpoint () {
-
-  }
-  
   /**
    * Gets the AI prompt response based on input, response type, and prompt ID
    *
@@ -237,7 +252,8 @@ ws ::= ([ \t\n] ws)?',
         'error' => 'Input and prompt ID cannot be empty',
       ];
     }
-    
+
+
     $prompt = $this->dbTraitRselect($id_prompt);
     
     if (empty($prompt)) {
@@ -297,29 +313,40 @@ ws ::= ([ \t\n] ws)?',
    * @param string $separator Separator string
    * @return string Built prompt string
    */
-  private function buildPrompt(array $prompt): string | null
+  private function buildPromptFromRow(array $prompt): string | null
   {
     $note = $this->note->get($prompt['id_note']);
-    
     if (empty($note) || empty($note['content'])) {
       return null;
     }
-    
-    $option = Option::getInstance();
-    $build_prompt = $note['content'];
-    $build_prompt .= "\n";
-    
-    $format = X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt');
+
+    return $this->buildPrompt($note['content'], $prompt['output'], $note['lang']);
+  }
+  
+  
+  /**
+   * Builds the AI prompt based on input, content, prompt, and separator
+   *
+   * @param string $prompt Prompt string
+   * @param string $responseFormat Response format
+   * @param string $separator Separator string
+   * @return string Built prompt string
+   */
+  private function buildPrompt(string $prompt, string $format = 'textarea', string $lang = null, array $cfg = null): string | null
+  {
+    $output = $prompt;
+    $output .= "\n\n";
     
     if ($format) {
-      $build_prompt .= $format . "\n";
+      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . "\n\n";
+    }
+
+    if ($lang) {
+      $option = Option::getInstance();
+      $output .= "The language of the response must be in " . $option->text($lang, 'languages', 'i18n', 'appui');
     }
     
-    if (!empty($note['lang'])) {
-      $build_prompt .= "The language of the response must be in " . $option->text($note['lang'], 'languages', 'i18n', 'appui');
-    }
-    
-    return $build_prompt;
+    return $output;
   }
   
   /**
@@ -328,7 +355,7 @@ ws ::= ([ \t\n] ws)?',
    * @param string $prompt Prompt string to send to the API
    * @return array Response array containing success flag and result or error message
    */
-  public function request(string | null $prompt , string $input, string $model = null): array
+  public function request(string | null $prompt , string $input): array
   {
     // check if prompt is not empty but can be null
     if (empty($prompt) && !is_null($prompt)) {
@@ -348,7 +375,7 @@ ws ::= ([ \t\n] ws)?',
       
       $complete = $this->ai->chat(
         [
-          "model" => $model ?: "gpt-3.5-turbo",
+          "model" => $this->model,
           "messages" => [
             [
               "role" => "user",
@@ -365,7 +392,7 @@ ws ::= ([ \t\n] ws)?',
       
       $complete = $this->ai->chat(
         [
-          "model" => $model ?: "gpt-3.5-turbo",
+          "model" => $this->model,
           "messages" => [
             [
               "role" => "system",
@@ -380,6 +407,7 @@ ws ::= ([ \t\n] ws)?',
         ]
       );
     }
+    X::log([$prompt, $input], 'ai_logs');
     
     
     $complete = json_decode($complete, true);
@@ -427,15 +455,6 @@ ws ::= ([ \t\n] ws)?',
         'field' => $this->class_cfg['arch']['ai_prompt']['creation_date'],
         'dir' => 'DESC'
       ]],
-      'join' => [[
-        'table' => 'bbn_history_uids',
-        'on' => [
-          'conditions' => [[
-            'field' => 'bbn_uid',
-            'exp' => 'id'
-          ]]
-        ]
-      ]],
     ]);
     
     foreach ($prompts as &$p) {
@@ -445,8 +464,6 @@ ws ::= ([ \t\n] ws)?',
       $p['lang'] = $note['lang'];
     }
     
-    X::log("Prompts:", 'ai_logs');
-    X::log($prompts, 'ai_logs');
     return $prompts;
   }
   
