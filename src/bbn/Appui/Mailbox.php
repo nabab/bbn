@@ -177,7 +177,7 @@ class Mailbox extends Basic
           }
           else {
             $this->port    = 993;
-            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/ssl}';
+            $this->mbParam = '{' . $this->host . ':' . $this->port . '/imap/ssl/novalidate-cert}';
           }
           break;
         case 'local':
@@ -666,11 +666,6 @@ class Mailbox extends Basic
 
   public function getEmailsList(array $folder, int $start, int $end)
   {
-    $current = $this->folders[$folder['uid']];
-    //$folder_last = $this->getMsgNo((int)$current['last_uid']);
-    $folder_num = $current['num_msg'];
-
-    $tmp = [];
     if (isset($this->folders[$folder['uid']])
       && $this->selectFolder($folder['uid'])
     ) {
@@ -698,6 +693,12 @@ class Mailbox extends Basic
 
           $structure = $this->getMsgStructure($start);
           if (!$tmp || !$structure) {
+            X::log([
+              'error' => "An error occured when trying to get the message $start",
+              'tmp' => $tmp,
+              'start' => $start,
+              'structure' => $structure,
+            ], 'poller_email_error2');
             continue;
           }
 
@@ -763,7 +764,8 @@ class Mailbox extends Basic
           $tmp['is_html'] = false;
           if (empty($structure->parts)) {
             $tmp['is_html'] = $structure->subtype === 'HTML';
-          } else {
+          }
+          else {
             foreach ($structure->parts as $part) {
 
               if ($part->ifdisposition

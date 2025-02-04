@@ -13,6 +13,7 @@ use bbn\Appui\Passwords;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
+use Generator;
 
 class Email extends Basic
 {
@@ -220,6 +221,7 @@ class Email extends Basic
           $a['stage'] = 1;
           $this->pref->set($id_account, $a);
         }
+
         $this->mboxes[$id_account]['stage'] = $a['stage'];
       }
     }
@@ -609,9 +611,12 @@ class Email extends Basic
     return $mb->getNextUid($uid);
   }
 
-  public function syncEmails(array $folder, int $limit = 0): ?int
-
+  public function syncEmails(string|array $folder, int $limit = 0): int|null|Generator
   {
+    if (Str::isUid($folder)) {
+      $folder = $this->getFolder($folder);
+    }
+
     // log pid
     $pid = getmypid();
     X::log([
@@ -620,7 +625,6 @@ class Email extends Basic
     ], 'pid');
 
     if (X::hasProps($folder, ['id', 'id_account', 'last_uid', 'uid'])) {
-      X::log($folder, 'monreuf');
       $res = 0;
       $mb = $this->getMailbox($folder['id_account']);
       $info = $mb->getInfoFolder($folder['uid']);
@@ -631,44 +635,56 @@ class Email extends Basic
         $last_uid = $mb->getLastUid();
         $start = null;
         $real_end = null;
-
-        if (isset($folder['db_uid_min']) && isset($folder['db_uid_max'])) {
-          if ($folder['db_uid_min'] == $first_uid && $folder['db_uid_max'] == $last_uid) {
+        X::log([
+          'where' => 'before',
+          'start' => $start,
+          'real_end' => $real_end,
+          'first_uid' => $first_uid,
+          'last_uid' => $last_uid
+        ], 'pid');
+        if (isset($folder['db_uid_min'])
+          && isset($folder['db_uid_max'])
+        ) {
+          if (($folder['db_uid_min'] == $first_uid)
+            && ($folder['db_uid_max'] == $last_uid)
+          ) {
             return 0;
           }
 
           if ($folder['db_uid_max'] != $last_uid) {
             $start = $last_uid;
             $real_end = $mb->getNextUid($folder['db_uid_max']);
-          } else if ($folder['db_uid_min'] != $first_uid) {
-            $test = $folder['db_uid_min'];
+          }
+          else if ($folder['db_uid_min'] != $first_uid) {
             $start = $folder['db_uid_min'];
-            $real_end = $start - $limit;
-            if ($real_end < 1) {
-              $real_end = $first_uid;
-            }
-            try {
-              if ($mb->getMsgNo($real_end) < $first_uid) {
+            if (!empty($limit)) {
+              $nstart = $mb->getMsgNo($start);
+              $nstart -= $limit;
+              if ($nstart < 1) {
                 $real_end = $first_uid;
               }
-            } catch (\Exception $e) {
+              else {
+                $real_end = $mb->getMsgUid($nstart);
+              }
+            }
+            else {
               $real_end = $first_uid;
             }
-
           }
         }
         else {
           $start = $last_uid;
-          $real_end = $start - $limit;
-
-          if ($real_end < 1) {
-            $real_end = $first_uid;
-          }
-          try {
-            if ($mb->getMsgNo($real_end) < $first_uid) {
+          if (!empty($limit)) {
+            $nstart = $mb->getMsgNo($start);
+            $nstart -= $limit;
+            if ($nstart < 1) {
               $real_end = $first_uid;
             }
-          } catch (\Exception $e) {
+            else {
+              $real_end = $mb->getMsgUid($nstart);
+            }
+          }
+          else {
             $real_end = $first_uid;
           }
         }
@@ -682,14 +698,18 @@ class Email extends Basic
 
         try {
           $start = $mb->getMsgNo($start);
-          $real_end = $mb->getMsgNo($real_end);
-        } catch (\Exception $e) {
+          $real_end = $mb->getMsgNo($real_end < 1 ? $first_uid : $real_end);
+        }
+        catch (\Exception $e) {
           $start = $mb->getMsgNo($last_uid);
           $real_end = $mb->getMsgNo($first_uid);
 
-          if ($folder['db_uid_min'] && $folder['db_uid_max'] == $last_uid) {
+          if ($folder['db_uid_min']
+            && ($folder['db_uid_max'] == $last_uid)
+          ) {
             $start = $folder['db_uid_min'];
-          } else if ($folder['db_uid_max'] != $last_uid) {
+          }
+          else if ($folder['db_uid_max'] != $last_uid) {
             $start = $last_uid;
             $real_end = $mb->getNextUid($folder['db_uid_max']);
           }
@@ -703,13 +723,11 @@ class Email extends Basic
           return 0;
         }
 
-
         $end = $start;
         $all = $mb->getEmailsList($folder, $start, $real_end);
         if ($all) {
           //var_dump($start, $end);
-          foreach ($all as $a) {
-            X::log($all);
+          foreach ($all as $i => $a) {
             if ($this->insertEmail($folder, $a)) {
               $a = $this->pref->get($folder['id_account']);
               if ($a) {
@@ -729,19 +747,26 @@ class Email extends Basic
                 ];
                 $this->pref->set($folder['id_account'], $a);
               }
+
               $res++;
-            } else {
+              yield $i + 1;
+            }
+            else {
               //throw new \Exception(X::_("Impossible to insert the email with ID").' '.$a['message_id']);
               $this->log(X::_("Impossible to insert the email with ID") . ' ' . $a['message_id']);
             }
           }
 
-          $hash = md5(json_encode(['numMsg' => $folder['num_msg'], 'lastUid' => $folder['last_uid']]));
+          $hash = md5(json_encode([
+            'numMsg' => $folder['num_msg'],
+            'lastUid' => $folder['last_uid']
+          ]));
           $this->pref->updateBit($folder['id'], [
             'last_check' => date('Y-m-d H:i:s'),
             'hash' => $hash
           ], true);
-        } else {
+        }
+        else {
           X::log(X::_("Impossible to get the emails for folder") . ' ' . $folder['uid'] . ' ' . X::_("from") . ' ' . $start . ' ' . X::_("to") . ' ' . $end . ' (' . $real_end . ')');
           throw new \Exception(
             X::_("Impossible to get the emails for folder")
@@ -751,7 +776,8 @@ class Email extends Basic
             . ' (' . $real_end . ')'
           );
         }
-      } else {
+      }
+      else {
         $a = $this->pref->get($folder['id_account']);
         if ($a) {
           if (!$a['sync']) {
@@ -779,16 +805,24 @@ class Email extends Basic
         $s2 = 0;
 
         while ($info->Nmsgs < $num) {
-          $msg = $this->db->rselect($table, [$cfg['id'], $cfg['msg_uid']], [$cfg['id_folder'] => $folder['id']], [$cfg['msg_uid'] => 'DESC'], $s2);
-          if (!$mb->getMsgNo($msg['msg_uid'])) {
-            if ($this->db->delete($table, [$cfg['id'] => $msg['id']])) {
-              $num--;
-              $s2--;
-            }
+          $msg = $this->db->rselect(
+            $table,
+            [$cfg['id'], $cfg['msg_uid']],
+            [$cfg['id_folder'] => $folder['id']],
+            [$cfg['msg_uid'] => 'DESC'],
+            $s2
+          );
+          if (!$mb->getMsgNo($msg['msg_uid'])
+            && ($this->db->delete($table, [$cfg['id'] => $msg['id']]))
+          ) {
+            $num--;
+            $s2--;
           }
+
           $s2++;
         }
       }
+
       return $res;
     }
 
@@ -1020,7 +1054,6 @@ class Email extends Basic
         }
       }
 
-
       if (!empty($id_sender)) {
         $id_parent = null;
         $id_thread = null;
@@ -1066,7 +1099,6 @@ class Email extends Basic
           }
         }
 
-
         $ar = [
           $cfg['id_user'] => $this->user->getId(),
           $cfg['id_folder'] => $folder['id'],
@@ -1096,24 +1128,27 @@ class Email extends Basic
           $id = $this->db->lastId();
           $mb = $this->getMailbox($folder['id_account']);
           $mb->selectFolder($folder['uid']);
-
           $number = $mb->getMsgNo($email['uid']);
           if ($number) {
             $msg = $mb->getMsg($number, $id, $folder['id_account']);
             if (empty($text)) {
               $text = $msg['plain'];
             }
-          } else {
+          }
+          else {
             $text = "";
           }
 
           if (is_null($text)) {
             $text = "";
           }
+
           // update excerpt column where id is same
           $this->db->update($table, [$cfg['excerpt'] => $text], [$cfg['id'] => $id]);
           foreach (Mailbox::getDestFields() as $df) {
-            if (in_array($df, ['to', 'cc', 'bcc']) && !empty($email[$df])) {
+            if (in_array($df, ['to', 'cc', 'bcc'])
+              && !empty($email[$df])
+            ) {
               foreach ($email[$df] as $dest) {
                 if (!empty($dest['id'])) {
                   $this->addLinkToMail($id, $dest['id'], $df);
@@ -1122,7 +1157,6 @@ class Email extends Basic
             }
           }
         }
-
       }
     }
 
@@ -1217,32 +1251,25 @@ class Email extends Basic
   {
     if (Str::isEmail($email)) {
       $contacts = $this->class_cfg['tables']['users_contacts'];
-      $cfg_c = $this->class_cfg['arch']['users_contacts'];
+      $contactsFields = $this->class_cfg['arch']['users_contacts'];
       $links = $this->class_cfg['tables']['users_contacts_links'];
-      $cfg_l = $this->class_cfg['arch']['users_contacts_links'];
-      return $this->db->selectOne(
-        [
-          'tables' => [$links],
-          'field' => $this->db->cfn($cfg_l['id'], $links),
-          'join' => [
-            [
-              'table' => $contacts,
-              'on' => [
-                [
-                  'field' => $cfg_l['id_contact'],
-                  'exp' => $this->db->cfn($cfg_c['id'], $contacts)
-                ]
-              ]
-
-            ]
-          ],
-          'where' => [
-            'value' => $email,
-            'id_user' => $this->user->getId(),
-            'type' => 'email'
-          ]
+      $linksFields = $this->class_cfg['arch']['users_contacts_links'];
+      return $this->db->selectOne([
+        'table' => $links,
+        'fields' => [$this->db->cfn($linksFields['id'], $links)],
+        'join' => [[
+          'table' => $contacts,
+          'on' => [[
+            'field' => $linksFields['id_contact'],
+            'exp' => $this->db->cfn($contactsFields['id'], $contacts)
+          ]]
+        ]],
+        'where' => [
+          'value' => $email,
+          'id_user' => $this->user->getId(),
+          'type' => 'email'
         ]
-      );
+      ]);
     }
 
     return null;
