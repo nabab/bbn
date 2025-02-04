@@ -209,8 +209,12 @@ trait Cfg
     // Retrieve the config to check for a schema.
     if ($cfg = $this->getCfg($id)) {
       // Check if a schema is defined and decode it from JSON.
-      if (!empty($cfg['schema']) && is_string($cfg['schema'])) {
-        return json_decode($cfg['schema'], true);
+      if (!empty($cfg['schema'])) {
+        if (is_string($cfg['schema'])) {
+          return json_decode($cfg['schema'], true);
+        }
+
+        return $cfg['schema'];
       }
     }
 
