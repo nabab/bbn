@@ -2020,7 +2020,7 @@ class Controller implements Api
   public static function includeController(string $bbn_inc_file, Controller $ctrl, $bbn_is_super = false)
   {
     if ($ctrl->isCli()) {
-        return include $bbn_inc_file;
+      return include $bbn_inc_file;
     }
 
     ob_start();
