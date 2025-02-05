@@ -1661,7 +1661,7 @@ class Mvc implements Mvc\Api
   {
     if ($this->check() && $this->controller) {
       if ($this->controller->isStream()) {
-        die('{"success": true}');
+        die('{"ended": true}');
       }
 
       $obj = $this->controller->get();
