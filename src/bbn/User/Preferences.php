@@ -1887,23 +1887,21 @@ class Preferences extends DbCls
    */
   public function getBit(string $id, bool $with_config = true): array
   {
-    if (
-        Str::isUid($id)
-        && ($bit = $this->db->rselect(
-            $this->class_cfg['tables']['user_options_bits'],
-            [],
-            [
-            $this->class_cfg['arch']['user_options_bits']['id'] => $id
-            ]
-        ))
+    if (Str::isUid($id)
+      && ($bit = $this->db->rselect(
+        $this->class_cfg['tables']['user_options_bits'],
+        [],
+        [
+          $this->class_cfg['arch']['user_options_bits']['id'] => $id
+        ]
+      ))
+      && $this->isAuthorized($bit['id_user_option'])
     ) {
-      if ($this->isAuthorized($bit['id_user_option'])) {
-        if ($with_config) {
-          return $this->explodeBitCfg($bit);
-        }
-
-        return $bit;
+      if ($with_config) {
+        return $this->explodeBitCfg($bit);
       }
+
+      return $bit;
     }
 
     return [];
@@ -2114,9 +2112,8 @@ class Preferences extends DbCls
   public function explodeBitCfg($bit): array
   {
     $c = $this->class_cfg['arch']['user_options_bits'];
-    if (
-        !empty($bit[$c['cfg']])
-        && ($cfg = json_decode($bit[$c['cfg']], true))
+    if (!empty($bit[$c['cfg']])
+      && ($cfg = json_decode($bit[$c['cfg']], true))
     ) {
       foreach ($cfg as $i => $v) {
         if (!array_key_exists($i, $bit)) {
@@ -2399,24 +2396,22 @@ class Preferences extends DbCls
   public function getIdByBit(string $id): ?string
   {
     if (Str::isUid($id) && ($p = $this->getByBit($id))) {
-      return $this->db->selectOne(
-          [
-          'table' => $this->class_cfg['table'],
-          'field' => $this->class_cfg['table'] . '.' . $this->fields['id'],
-          'join' => [[
-          'table' => $this->class_cfg['tables']['user_options_bits'],
-          'on' => [
-            'conditions' => [[
-              'field' => $this->class_cfg['arch']['user_options_bits']['id_user_option'],
-              'exp' => $this->class_cfg['table'] . '.' . $this->fields['id']
-            ]]
-          ]
-          ]],
-          'where' => [
-          $this->class_cfg['tables']['user_options_bits'] . '.' . $this->class_cfg['arch']['user_options_bits']['id'] => $id
-          ]
-          ]
-      );
+      $bitsTable = $this->class_cfg['tables']['user_options_bits'];
+      $bitsFields = $this->class_cfg['arch']['user_options_bits'];
+      return $this->db->selectOne([
+        'table' => $this->class_table,
+        'field' => $this->db->cfn($this->fields['id'], $this->class_table),
+        'join' => [[
+          'table' => $bitsTable,
+          'on' => [[
+            'field' => $this->db->cfn($bitsFields['id_user_option'], $bitsTable),
+            'exp' => $this->db->cfn($this->fields['id'], $this->class_table)
+          ]]
+        ]],
+        'where' => [
+          $this->db->cfn($bitsFields['id'], $bitsTable) => $id
+        ]
+      ]);
     }
 
     return null;

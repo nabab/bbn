@@ -664,7 +664,7 @@ class Mailbox extends Basic
     return $obj;
   }
 
-  public function getEmailsList(array $folder, int $start, int $end)
+  public function getEmailsList(array $folder, int $start, int $end, bool $generator = false)
   {
     if (isset($this->folders[$folder['uid']])
       && $this->selectFolder($folder['uid'])
@@ -693,12 +693,6 @@ class Mailbox extends Basic
 
           $structure = $this->getMsgStructure($start);
           if (!$tmp || !$structure) {
-            X::log([
-              'error' => "An error occured when trying to get the message $start",
-              'tmp' => $tmp,
-              'start' => $start,
-              'structure' => $structure,
-            ], 'poller_email_error2');
             continue;
           }
 
@@ -767,7 +761,6 @@ class Mailbox extends Basic
           }
           else {
             foreach ($structure->parts as $part) {
-
               if ($part->ifdisposition
                 && (strtolower($part->disposition) === 'attachment')
                 && $part->ifparameters
@@ -793,6 +786,9 @@ class Mailbox extends Basic
 
           $res[] = $tmp;
           $start--;
+          if ($generator) {
+            yield $tmp;
+          }
         } catch (\Exception $e) {
           X::log([
             'error' => "An error occured when trying to get the message $start " . $e->getMessage(),
