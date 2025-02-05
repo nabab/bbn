@@ -44,6 +44,9 @@ class Mysql extends Sql
    */
   protected $username;
 
+  protected static $defaultCharset = 'utf8mb4';
+  protected static $defaultCollation = 'utf8mb4_general_ci';
+
   /**
    * Constructor
    *
@@ -104,10 +107,10 @@ class Mysql extends Sql
       }
 
       $cfg = [
-        'host' => BBN_DB_HOST,
-        'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
-        'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
-        'db' => defined('BBN_DATABASE') ? BBN_DATABASE : '',
+        'host' => constant('BBN_DB_HOST'),
+        'user' => defined('BBN_DB_USER') ? constant('BBN_DB_USER') : '',
+        'pass' => defined('BBN_DB_PASS') ? constant('BBN_DB_PASS') : '',
+        'db' => defined('BBN_DATABASE') ? constant('BBN_DATABASE') : '',
       ];
     }
 
@@ -456,6 +459,9 @@ MYSQL
       $this->change($database);
     }
 
+    /**
+     * @var \bbn\Db\Query $q
+     */
     $q = $this->query('SHOW TABLE STATUS');
     $size = 0;
     while ($row = $q->getRow()) {
@@ -969,10 +975,22 @@ MYSQL
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array $model = null): string
+  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
   {
     if (!$model) {
       $model = $this->modelize($table);
+    }
+
+    if (!$charset) {
+      if (!empty($model['charset'])) {
+        $charset = $model['charset'];
+        if (!empty($model['collation'])) {
+          $collate = $model['collation'];
+        }
+      } else {
+        $charset = self::$defaultCharset;
+        $collate = self::$defaultCollation;
+      }
     }
 
     $st = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
@@ -987,8 +1005,7 @@ MYSQL
       $st .= $this->getColumnDefinitionStatement($name, $col);
     }
 
-    $st .= PHP_EOL . ') ENGINE=InnoDB DEFAULT CHARSET=utf8';
-
+    $st .= PHP_EOL . ") ENGINE=InnoDB DEFAULT CHARSET=" . Str::encodeFilename($charset) . ($collate ? " COLLATE=" . Str::encodeFilename($collate) : '') . ";";
     return $st;
   }
 
@@ -1508,6 +1525,12 @@ MYSQL
       && empty($col['signed'])
     ) {
       $st .= ' UNSIGNED';
+    }
+    elseif (!empty($col['charset'])) {
+      $st .= ' CHARACTER SET ' . Str::encodeFilename($col['charset']);
+      if (!empty($col['collation'])) {
+        $st .= ' COLLATE ' . Str::encodeFilename($col['collation']);
+      }
     }
 
     if (empty($col['null'])) {

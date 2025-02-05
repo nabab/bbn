@@ -9,6 +9,7 @@ use PDO;
 use PDOException;
 use bbn\Str;
 use bbn\X;
+use bbn\File\Dir;
 
 /**
  * Database Class
@@ -143,7 +144,7 @@ class Sqlite extends Sql
     $cfg['engine'] = 'sqlite';
 
     if (!isset($cfg['db']) && \defined('BBN_DATABASE')) {
-      $cfg['db'] = BBN_DATABASE;
+      $cfg['db'] = constant('BBN_DATABASE');
     }
 
     if (empty($cfg['db']) || !\is_string($cfg['db'])) {
@@ -325,7 +326,7 @@ class Sqlite extends Sql
     }
 
     $x  = [];
-    $fs = bbn\File\Dir::scan($this->host);
+    $fs = Dir::scan($this->host);
     foreach ($fs as $f){
       if (is_file($f)) {
         $x[] = X::pathinfo($f, PATHINFO_FILENAME);
@@ -643,7 +644,7 @@ class Sqlite extends Sql
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array $model = null): string
+  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
   {
     if (!$model) {
       $model = $this->modelize($table);
@@ -1109,7 +1110,7 @@ class Sqlite extends Sql
    */
   public function getUid(): string
   {
-    return bbn\X::makeUid();
+    return X::makeUid();
   }
 
 

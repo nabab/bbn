@@ -61,7 +61,7 @@ class Db implements Db\Actions
   public function __construct(array $cfg = [])
   {
     if (!isset($cfg['engine']) && \defined('BBN_DB_ENGINE')) {
-      $cfg['engine'] = BBN_DB_ENGINE;
+      $cfg['engine'] = constant('BBN_DB_ENGINE');
     }
 
     if (isset($cfg['engine'])) {
@@ -1046,33 +1046,6 @@ class Db implements Db\Actions
 
     return null;
   }
-
-// TODO-testing is this used?
-  public function rselectRandom($table, array $fields = [], array $where = []):? array
-  {
-    if ($this->check() && ($num = $this->count($table, $where))) {
-      $args = $this->_add_kind($this->_set_start($this->_set_limit_1(\func_get_args()), random_int(0, $num - 1)));
-      if ($r = $this->_exec(...$args)) {
-        return $r->getRow();
-      }
-    }
-
-    return null;
-  }
-
-  // TODO-testing is this used?
-  public function selectRandom($table, array $fields = [], array $where = []):? \stdClass
-  {
-    if ($this->check() && ($num = $this->count($table, $where))) {
-      $args = $this->_add_kind($this->_set_start($this->_set_limit_1(\func_get_args()), random_int(0, $num - 1)));
-      if ($r = $this->_exec(...$args)) {
-        return $r->getObj();
-      }
-    }
-
-    return null;
-  }
-
 
   /**
    * Returns a random value fitting the requested column's type
@@ -2770,11 +2743,11 @@ class Db implements Db\Actions
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array $model = null): string
+  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
-    return $this->language->getCreateTable($table, $model);
+    return $this->language->getCreateTable($table, $model, $charset, $collate);
   }
 
 

@@ -220,10 +220,10 @@ class Pgsql extends Sql
       }
 
       $cfg = [
-        'host' => BBN_DB_HOST,
-        'user' => defined('BBN_DB_USER') ? BBN_DB_USER : '',
-        'pass' => defined('BBN_DB_PASS') ? BBN_DB_PASS : '',
-        'db'   => defined('BBN_DATABASE') ? BBN_DATABASE : '',
+        'host' => constant('BBN_DB_HOST'),
+        'user' => defined('BBN_DB_USER') ? constant('BBN_DB_USER') : '',
+        'pass' => defined('BBN_DB_PASS') ? constant('BBN_DB_PASS') : '',
+        'db'   => defined('BBN_DATABASE') ? constant('BBN_DATABASE') : '',
       ];
     }
 
@@ -1127,7 +1127,7 @@ PGSQL
    * @return string
    * @throws \Exception
    */
-  public function getCreateTable(string $table, array $model = null): string
+  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
   {
     if (!$model) {
       $model = $this->modelize($table);

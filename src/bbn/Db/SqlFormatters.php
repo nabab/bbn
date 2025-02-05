@@ -115,7 +115,7 @@ interface SqlFormatters
    * @param array|null $model
    * @return string
    */
-  public function getCreateTable(string $table, array $model = null): string;
+  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string;
 
   /**
    * @param string $table
