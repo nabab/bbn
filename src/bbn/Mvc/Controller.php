@@ -169,7 +169,6 @@ class Controller implements Api
     }
 
     $this->_stream = true;
-    ob_implicit_flush(1);
     set_time_limit(0);
     ini_set('output_buffering', 'Off');
     ini_set('zlib.output_compression', false);
@@ -201,7 +200,6 @@ class Controller implements Api
       }
 
       echo json_encode(is_string($data) ? ['content' => $data] : (is_array($data) ? $data : ['success' => false])) . str_repeat(' ', 8192);
-      ob_end_flush();
       flush();
     }
   }
@@ -571,7 +569,6 @@ class Controller implements Api
         $this->registerPluginClasses($this->pluginPath());
       }
 
-      ob_start();
       if (defined('BBN_ROOT_CHECKER')) {
         if (!defined('BBN_ROOT_CHECKER_OK')) {
           define('BBN_ROOT_CHECKER_OK', true);
@@ -579,6 +576,7 @@ class Controller implements Api
         }
       }
 
+      ob_start();
       foreach ($this->_checkers as $appui_checker_file) {
         // If a checker file returns false, the controller is not processed
         // The checker file can define data and inc that can be used in the subsequent controller
@@ -2020,16 +2018,20 @@ class Controller implements Api
   public static function includeController(string $bbn_inc_file, Controller $ctrl, $bbn_is_super = false)
   {
     if ($ctrl->isCli()) {
-      return include $bbn_inc_file;
+      return (function() use ($bbn_inc_file, $ctrl, $bbn_is_super) {
+        return include $bbn_inc_file;
+      })();
     }
 
     ob_start();
-    $r      = include $bbn_inc_file;
+    $r = (function() use ($bbn_inc_file, $ctrl, $bbn_is_super) {
+      return include $bbn_inc_file;
+    })();
     $output = ob_get_contents();
     ob_end_clean();
 
     if ($bbn_is_super) {
-        return $r ? true : false;
+      return $r ? true : false;
     }
 
     return $output;

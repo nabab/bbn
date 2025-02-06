@@ -412,7 +412,9 @@ class Mvc implements Mvc\Api
   {
     if (is_file($bbn_inc_file)) {
       ob_start();
-      $d = include $bbn_inc_file;
+      $d = (function() use ($bbn_inc_file, $model, $bbn_is_super) {
+        return include $bbn_inc_file;
+      })();
       ob_end_clean();
 
       // Adding support for returning serialized objects
@@ -662,9 +664,9 @@ class Mvc implements Mvc\Api
 
       return $randoms[$i];
     };
-    $fn = function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {
+    ob_start();
+    (function () use ($bbn_inc_file, $bbn_inc_content, $bbn_inc_data, $_random) {
       if ($bbn_inc_content) {
-        ob_start();
         if (\count($bbn_inc_data)) {
           foreach ($bbn_inc_data as $bbn_inc_key => $bbn_inc_val) {
             $$bbn_inc_key = $bbn_inc_val;
@@ -681,16 +683,14 @@ class Mvc implements Mvc\Api
           error_log("Error for $bbn_inc_file: ". $e->getMessage());
           X::logError($e->getCode(), $e->getMessage(), $bbn_inc_file, $e->getLine());
         }
-
-        $c = ob_get_contents();
-        ob_end_clean();
-        return $c;
       }
 
-      return '';
-    };
+      echo '';
+    })();
 
-    return $fn();
+    $c = ob_get_contents();
+    ob_end_clean();
+    return $c;
   }
 
 

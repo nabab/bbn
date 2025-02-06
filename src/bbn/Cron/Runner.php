@@ -184,7 +184,7 @@ class Runner extends bbn\Models\Cls\Basic
     if (!empty($output)) {
       ob_start();
       echo $output;
-      ob_end_flush();
+      ob_end_clean();
     }
   }
 

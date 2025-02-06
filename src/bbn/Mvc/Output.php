@@ -218,6 +218,7 @@ final class Output extends Basic {
       $mdParser = new Markdown();
       $this->obj->help = $mdParser->compile($this->obj->help);
     }
+    
     switch ( $this->mode ){
 
       case 'public':
