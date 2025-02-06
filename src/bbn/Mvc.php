@@ -415,8 +415,10 @@ class Mvc implements Mvc\Api
       $d = (function() use ($bbn_inc_file, $model, $bbn_is_super) {
         return include $bbn_inc_file;
       })();
-      ob_end_clean();
-
+      if (ob_get_level()) {
+        ob_end_clean();
+      }
+  
       // Adding support for returning serialized objects
       if (is_string($d) && ($obj = @unserialize($d)) && is_object($obj)) {
         return $d;
@@ -689,7 +691,9 @@ class Mvc implements Mvc\Api
     })();
 
     $c = ob_get_contents();
-    ob_end_clean();
+    if (ob_get_level()) {
+      ob_end_clean();
+    }
     return $c;
   }
 

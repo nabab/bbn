@@ -655,7 +655,8 @@ SQL;
       }
       return true;
     }
-    bbn\X::dump('Canceling observer: '.date('H:i:s Y-m-d'));
+
+    //bbn\X::dump('Canceling observer: '.date('H:i:s Y-m-d'));
     return false;
   }
 }

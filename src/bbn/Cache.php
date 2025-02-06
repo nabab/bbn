@@ -175,14 +175,8 @@ class Cache implements CacheInterface
       }
     }
 
-    ob_start();
-    var_dump($ttl);
-    $ttl = ob_get_contents();
-    ob_end_clean();
     X::log($ttl);
-    throw new Exception(
-      X::_("Wrong ttl parameter")
-    );
+    throw new Exception(X::_("Wrong ttl parameter"));
   }
 
 

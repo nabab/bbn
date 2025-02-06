@@ -590,7 +590,10 @@ class Controller implements Api
         $this->obj->content = $log;
       }
 
-      ob_end_clean();
+      if (ob_get_level()) {
+        ob_end_clean();
+      }
+
       // If rerouted during the checkers
       if ($this->_is_rerouted) {
         $this->_is_rerouted = false;
@@ -2028,7 +2031,9 @@ class Controller implements Api
       return include $bbn_inc_file;
     })();
     $output = ob_get_contents();
-    ob_end_clean();
+    if (ob_get_level()) {
+      ob_end_clean();
+    }
 
     if ($bbn_is_super) {
       return $r ? true : false;

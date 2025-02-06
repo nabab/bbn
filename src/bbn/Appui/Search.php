@@ -122,7 +122,7 @@ class Search extends Basic
     self::optionalInit();
     $this->timer      = new Timer();
     if (empty($models)
-      &&($def = $this->getOption('default'))
+      && ($def = $this->getOption('default'))
       && !empty($def['id_alias'])
     ) {
       $models = \array_map(fn($m) => $m['alias'] ?? [], $this->getOptions($def['id_alias']) ?: []);
@@ -136,6 +136,7 @@ class Search extends Basic
       foreach ($model->getPlugins() as $pi) {
         try {
           $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
+
         }
         catch (Exception $e) {}
       }
@@ -612,6 +613,7 @@ class Search extends Basic
       $results['done'][] = basename($item['file'], '.php');
       $item['cfg']['limit'] = $limit - count($results['data']);
       $results['item'] = $item;
+      $results['id'] = $id_search;
 
       if (isset($config_array[$i + 1])) {
         $results['next_step'] = $i + 1;

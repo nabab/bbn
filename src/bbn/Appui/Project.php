@@ -300,7 +300,7 @@ class Project extends DbCls
         if ($force && !$type) {
           if (!empty($res['typology']['tabs'])) {
             if ($row = X::getRow($res['typology']['tabs'], ['default' => true])) {
-              $type = $row['path'];
+              $type = $row['url'];
             }
           }
         }
