@@ -2031,7 +2031,7 @@ class Controller implements Api
       return include $bbn_inc_file;
     })();
     $output = ob_get_contents();
-    if (ob_get_level()) {
+    if (ob_get_length()) {
       ob_end_clean();
     }
 

@@ -797,7 +797,7 @@ class Email extends Basic
         }
         $arr = $mb->getMsg($number, $id, $folder['id_account']);
         $arr['id_account'] = $folder['id_account'];
-        $arr['msg_unique_id'] = $em['msg_unique_id'];
+        $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
         return $arr;
       }
     }
@@ -863,29 +863,43 @@ class Email extends Basic
     $this->db->update($table, [$cfg['is_read'] => 1], [$cfg['id'] => $id]);
   }
 
-  public function syncThreads(int $limit)
+  public function syncThreads(int $limit): int
   {
-    $cfg = $this->class_cfg['arch']['users_emails'];
-    $table = $this->class_cfg['tables']['users_emails'];
-
+    $did = 0;
     // select all emails of the user where id_thread is null and external_id is not null
-    $emails = $this->db->rselectAll([
-      'table' => $table,
-      'fields' => $cfg,
-      'where' => [
-        'logic' => 'AND',
-        'conditions' => [
-          [
-            'field' => $cfg['id_user'],
-            'value' => $this->user->getId()
-          ],
-        ]
-      ],
+    if ($emails = $this->db->rselectAll([
+      'table' => $this->class_table,
+      'fields' => $this->fields,
+      'where' => [[
+        'field' => $this->fields['id_user'],
+        'value' => $this->user->getId()
+      ], [
+        'field' => $this->fields['external_uids'],
+        'operator' => 'isnotnull'
+      ], [
+        'field' => $this->fields['id_thread'],
+        'operator' => 'isnull'
+      ]],
       'order' => [
-        'field' => $cfg['date']
+        $this->fields['date'] => 'DESC'
       ]
-    ]);
+    ])) {
+      foreach ($emails as $email) {
+        $external_uids = json_decode($email[$this->fields['external_uids']], true);
+        $toUpd = [];
+        if (!empty($external_uids['in_reply_to'])
+          && ($parentId = $this->db->selectOne($this->class_table, $this->fields['id'], [$this->fields['msg_unique_id'] => $external_uids['in_reply_to']]))
+        ) {
+          $toUpd[$this->fields['id_parent']] = $parentId;
+        }
 
+        if (!empty($toUpd)) {
+          $did += $this->db->update($this->class_table, $toUpd, [$this->fields['id'] => $email['id']]);
+        }
+      }
+    }
+
+    return $did;
   }
 
 
@@ -973,7 +987,7 @@ class Email extends Basic
           $cfg['id_user'] => $this->user->getId(),
           $cfg['id_folder'] => $folder['id'],
           $cfg['msg_uid'] => $email['uid'],
-          $cfg['msg_unique_id'] => $email['message_id'],
+          $cfg['msg_unique_id'] => Str::toUtf8($email['message_id']),
           $cfg['date'] => date('Y-m-d H:i:s', strtotime($email['date'])),
           $cfg['id_sender'] => $id_sender,
           $cfg['subject'] => $email['subject'] ?: '',
@@ -995,22 +1009,30 @@ class Email extends Basic
           $mb = $this->getMailbox($folder['id_account']);
           $mb->selectFolder($folder['uid']);
           $number = $mb->getMsgNo($email['uid']);
+          $text = '';
           if ($number) {
             $msg = $mb->getMsg($number, $id, $folder['id_account']);
-            if (empty($text)) {
-              $text = $msg['plain'];
+            $text = Str::toUtf8($msg['plain'] ?: (!empty($msg['html']) ? Str::html2text($msg['html']) : ''));
+            if (strlen($text) > 65500) {
+              $text = substr($text, 0, 65500);
             }
-          }
-          else {
-            $text = "";
-          }
-
-          if (is_null($text)) {
-            $text = "";
           }
 
           // update excerpt column where id is same
-          $this->db->update($table, [$cfg['excerpt'] => $text], [$cfg['id'] => $id]);
+          try {
+            $this->db->update($table, [$cfg['excerpt'] => trim($text)], [$cfg['id'] => $id]);
+          }
+          catch (\Exception $e) {
+            X::log([
+              'id' => $id,
+              'email' => $email,
+              'cfg' => $ar,
+              'text' => trim($text),
+              'error' => $e->getMessage()
+            ], 'poller_email_error');
+            throw new \Exception($e->getMessage());
+          }
+
           foreach (Mailbox::getDestFields() as $df) {
             if (in_array($df, ['to', 'cc', 'bcc'])
               && !empty($email[$df])
@@ -1414,7 +1436,7 @@ class Email extends Basic
   ): bool
   {
     if ($account = $this->pref->get($idAccount)) {
-      if (!$account['sync']) {
+      if (!isset($account['sync'])) {
         $account['sync'] = [];
       }
 

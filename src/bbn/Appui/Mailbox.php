@@ -631,16 +631,19 @@ class Mailbox extends Basic
   private function decode_encoded_words($string) {
 
     preg_match_all("/=\?([^?]+)\?([QqBb])\?([^?]+)\?=/", $string, $matches);
-    for ($i = 0; $i < count($matches[0]); $i++) {
-      $encoding = $matches[2][$i];
-      $encoded_text = $matches[3][$i];
-      if (strtolower($encoding) == "q") {
-        $decoded_text = quoted_printable_decode(str_replace("_", " ", $encoded_text));
-      } else {
-        $decoded_text = base64_decode($encoded_text);
+    if (!empty($matches)) {
+      for ($i = 0; $i < count($matches[0]); $i++) {
+        $encoding = $matches[2][$i];
+        $encoded_text = $matches[3][$i];
+        if (strtolower($encoding) == "q") {
+          $decoded_text = quoted_printable_decode(str_replace("_", " ", $encoded_text));
+        } else {
+          $decoded_text = base64_decode($encoded_text);
+        }
+        $string = str_replace($matches[0][$i], $decoded_text, $string);
       }
-      $string = str_replace($matches[0][$i], $decoded_text, $string);
     }
+
     return $string;
   }
 
@@ -675,8 +678,11 @@ class Mailbox extends Basic
           $tmp = (array)$this->decode_encoded_words_deep($this->getMsgHeaderinfo($start));
 
           // imap decode the subject
-          if (isset($tmp['subject']) && is_string($tmp['subject'])) {
-            $tmp['subject'] = imap_mime_header_decode($tmp['subject'])[0]->text;
+          if (!empty($tmp['subject'])
+            && is_string($tmp['subject'])
+            && ($tmps = imap_mime_header_decode($tmp['subject']))
+          ) {
+            $tmp['subject'] = $tmps[0]->text;
           }
 
           // for each string in the array decode quoted printable
@@ -829,8 +835,11 @@ class Mailbox extends Basic
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
 
-    if (isset($res['subject']) && is_string($res['subject'])) {
-      $res['subject'] = imap_mime_header_decode($res['subject'])[0]->text;
+    if (isset($res['subject'])
+      && is_string($res['subject'])
+      && ($tmps = imap_mime_header_decode($res['subject']))
+    ) {
+      $res['subject'] = $tmps[0]->text;
     }
 
     foreach ($res as $key => $value) {
@@ -937,7 +946,7 @@ class Mailbox extends Basic
       }
     }
 
-    $res['plain']      = $this->_plainmsg;
+    $res['plain']      = Str::toUtf8($this->_plainmsg);
     $res['charset']    = $this->_charset;
     $res['attachment'] = $this->_attachments;
     $res['inline']     = $this->_inline_files;
@@ -1615,10 +1624,10 @@ class Mailbox extends Basic
     elseif (($structure->type === 2) && !empty($data) && strtolower($structure->subtype) === 'plain') {
       if (stripos($this->_charset, 'ISO') !== false) {
         $utfConverter     = new utf8($this->_charset);
-        $this->_plainmsg .= $utfConverter->loadCharset($this->_charset) ? $utfConverter->strToUtf8(trim($data)) . PHP_EOL : $this->_plainmsg .= trim($data) . PHP_EOL;
+        $this->_plainmsg .= $utfConverter->loadCharset($this->_charset) ? $utfConverter->strToUtf8(trim($data)) . PHP_EOL : $this->_plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
       }
       else {
-        $this->_plainmsg .= trim($data) . PHP_EOL;
+        $this->_plainmsg .= trim(Str::toUtf8($data)) . PHP_EOL;
       }
     }
 
