@@ -512,6 +512,7 @@ class Search extends Basic
       'data' => []
     ];
     $id_search = $this->getSearchId($search_value);
+    $results['id'] = $id_search;
     // If the search value has been done by the user before
     if (!$step) {
       if ($id_search) {
@@ -592,10 +593,18 @@ class Search extends Basic
             }
           }
         }
+
+        if (!empty($results['data'])) {
+          $results['next_step'] = -1;
+          return $results;
+        }
       }
     }
 
-    $results['id'] = $id_search;
+    if ($step === -1) {
+      $step = 0;
+    }
+
     //X::ddump($config_array, "DDDD", $this->getExecutedCfg($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
     if (!$start && !$step) {
@@ -622,7 +631,7 @@ class Search extends Basic
       break;
     }
 
-    //$this->cacheSet($this->user->getId(), $cache_name, $config_array);
+    $this->cacheSet($this->user->getId(), $cache_name, $config_array);
     return $results;
   }
 
