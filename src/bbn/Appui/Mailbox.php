@@ -718,7 +718,7 @@ class Mailbox extends Basic
           );
           foreach ($tmp as $k => $v) {
             if (is_string($v)) {
-              $tmp[$k] = trim($v);
+              $tmp[$k] = Str::toUtf8(trim($v));
               if (empty($v)) {
                 $tmp[$k] = false;
               } elseif (Str::isNumber($v)) {
@@ -954,7 +954,7 @@ class Mailbox extends Basic
     // set res to string and quoted printable decode
     foreach ($res as $k => $v) {
       if (is_string($v)) {
-        $res[$k] = quoted_printable_decode($v);
+        $res[$k] = Str::toUtf8(quoted_printable_decode($v));
       }
     }
 

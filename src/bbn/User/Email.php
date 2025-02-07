@@ -727,31 +727,100 @@ class Email extends Basic
    *
    * @return array|null
    */
-  public function getList(string $id_folder, array $post): ?array
+  public function getList(string|array $id_folder, array $post): ?array
   {
-    if ($ids = $this->idsFromFolder($id_folder)) {
-      $cfg = $this->class_cfg['arch']['users_emails'];
-      $table = $this->class_cfg['tables']['users_emails'];
-      $real_filter = [
-        'logic' => 'AND',
-        'conditions' => [
-          $cfg['id_folder'] => $ids
-        ]
-      ];
-      if (!empty($post['filters'])) {
-        if (!isset($post['filters']['conditions'])) {
-          $post['filters'] = ['conditions' => $post['filters']];
-        }
+    if (is_array($id_folder)) {
+      $ids = [];
+      foreach ($id_folder as $i) {
+        $ids = array_merge($ids, $this->idsFromFolder($i));
+      }
+    }
+    else {
+      $ids = $this->idsFromFolder($id_folder);
+    }
 
-        if (!empty($post['filters']['conditions'])) {
-          $real_filter['conditions'][] = $post['filters'];
+    if (!empty($ids)) {
+      $filters = [];
+      if (count($ids) > 1) {
+        $filters = [
+          'logic' => 'OR',
+          'conditions' => []
+        ];
+        foreach ($ids as $i) {
+          $filters['conditions'][] = [
+            'field' => $this->fields['id_folder'],
+            'value' => $i
+          ];
         }
       }
+      else {
+        $filters[] = [
+          'field' => $this->fields['id_folder'],
+          'value' => $ids[0]
+        ];
+      }
 
-      $post['filters'] = $real_filter;
+      $contactsTable = $this->class_cfg['tables']['users_contacts'];
+      $contactsFields = $this->class_cfg['arch']['users_contacts'];
+      $linksTable = $this->class_cfg['tables']['users_contacts_links'];
+      $linksFields = $this->class_cfg['arch']['users_contacts_links'];
+      $recTable = $this->class_cfg['tables']['users_emails_recipients'];
+      $recFields = $this->class_cfg['arch']['users_emails_recipients'];
       $grid = new \bbn\Appui\Grid($this->db, $post, [
-        'table' => $table,
-        'fields' => $cfg
+        'table' => $this->class_table,
+        'fields' => X::mergeArrays(
+          array_map(
+            fn($f) => $this->db->cfn($f, $this->class_table), $this->fields
+          ),
+          [
+            'from' => 'CONCAT('.$this->db->cfn($contactsFields['name'], 'fromname').', " <", '.$this->db->cfn($linksFields['value'], 'fromlink').', ">")',
+            'from_email' => $this->db->cfn($linksFields['value'], 'fromlink'),
+            'from_name' => $this->db->cfn($contactsFields['name'], 'fromname'),
+            'to' => 'IFNULL(CONCAT('.$this->db->cfn($contactsFields['name'], 'toname').', " <", '.$this->db->cfn($linksFields['value'], 'tolink').', ">"), '.$this->db->cfn($linksFields['value'], 'tolink').')',
+            'to_email' => $this->db->cfn($linksFields['value'], 'tolink'),
+            'to_name' => $this->db->cfn($contactsFields['name'], 'toname')
+          ]
+        ),
+        'join' => [[
+          'table' => $linksTable,
+          'alias' => 'fromlink',
+          'on' => [[
+            'field' => $this->db->cfn($linksFields['id'], 'fromlink'),
+            'exp' => $this->db->cfn($this->fields['id_sender'], $this->class_table)
+          ]]
+        ], [
+          'table' => $contactsTable,
+          'alias' => 'fromname',
+          'on' => [[
+            'field' => $this->db->cfn($contactsFields['id'], 'fromname'),
+            'exp' => $this->db->cfn($linksFields['id_contact'], 'fromlink')
+          ]]
+        ], [
+          'table' => $recTable,
+          'alias' => 'rec',
+          'on' => [[
+            'field' => $this->db->cfn($recFields['id_email'], 'rec'),
+            'exp' => $this->db->cfn($this->fields['id'], $this->class_table)
+          ], [
+            'field' => $this->db->cfn($recFields['type'], 'rec'),
+            'value' => 'to'
+          ]]
+        ], [
+          'table' => $linksTable,
+          'alias' => 'tolink',
+          'on' => [[
+            'field' => $this->db->cfn($linksFields['id'], 'tolink'),
+            'exp' => $this->db->cfn($recFields['id_contact_link'], 'rec')
+          ]]
+        ], [
+          'table' => $contactsTable,
+          'alias' => 'toname',
+          'on' => [[
+            'field' => $this->db->cfn($contactsFields['id'], 'toname'),
+            'exp' => $this->db->cfn($linksFields['id_contact'], 'tolink')
+          ]]
+        ]],
+        'filters' => $filters
       ]);
 
 
@@ -1383,8 +1452,6 @@ class Email extends Basic
 
   protected function idsFromFolder($id_folder): ?array
   {
-    $cfg = $this->class_cfg['arch']['users_emails'];
-    $table = $this->class_cfg['tables']['users_emails'];
     $types = self::getFolderTypes();
     if ($common_folder = X::getRow($types, ['id' => $id_folder])) {
       $ids = [];
@@ -1396,7 +1463,8 @@ class Email extends Basic
           }
         }
       }
-    } elseif (Str::isUid($id_folder)) {
+    }
+    elseif (Str::isUid($id_folder)) {
       $bit = $this->pref->getBit($id_folder);
       if (!$bit) {
         // It's not a folder but an account
@@ -1406,7 +1474,8 @@ class Email extends Basic
       } else {
         $ids = [$id_folder];
       }
-    } else if ($id_folder === 'conversations') {
+    }
+    else if ($id_folder === 'conversations') {
       $inbox = X::getRow($types, ['code' => 'inbox']);
       $sent = X::getRow($types, ['code' => 'sent']);
       $ids = [];
