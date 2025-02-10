@@ -1,9 +1,15 @@
 <?php
 namespace bbn\Cron;
 
-use bbn;
+use Exception;
+use bbn\Str;
 use bbn\X;
-
+use bbn\Cron;
+use bbn\User;
+use bbn\File\Dir;
+use bbn\Util\Timer;
+use bbn\Appui\Observer;
+use bbn\Models\Cls\Basic;
 /**
  * Cron runner.
  * This class runs the jobs properly. It has three modalities:
@@ -11,7 +17,7 @@ use bbn\X;
  * - `run_task_system` will run the task system, continuously
  * - `run_task` will run a given task, once
  */
-class Runner extends bbn\Models\Cls\Basic
+class Runner extends Basic
 {
 
   use Common;
@@ -21,14 +27,14 @@ class Runner extends bbn\Models\Cls\Basic
   /**
    * Timer
    *
-   * @var bbn\Util\Timer
+   * @var Timer
    */
   protected $timer;
 
   /**
    * @var bbn\Cron
    */
-  protected bbn\Cron $cron;
+  protected Cron $cron;
 
   /**
    * @var string|null
@@ -73,7 +79,7 @@ class Runner extends bbn\Models\Cls\Basic
         $this->log($message);
 
         if ($this->isTestingEnvironment()) {
-          throw new \Exception($message);
+          throw new Exception($message);
         }
 
         exit($message);
@@ -132,7 +138,7 @@ class Runner extends bbn\Models\Cls\Basic
    * @param bbn\Cron $cron
    * @param array $cfg
    */
-  public function __construct(bbn\Cron $cron, array $cfg)
+  public function __construct(Cron $cron, array $cfg)
   {
     //if ( defined('BBN_DATA_PATH') ){
     if (!empty($cfg['type']) && $cron->check()) {
@@ -145,7 +151,7 @@ class Runner extends bbn\Models\Cls\Basic
       $this->path = $this->controller->dataPath('appui-cron');
       $this->data = $cfg;
       $this->type = $cfg['type'];
-      $this->timer = new bbn\Util\Timer();
+      $this->timer = new Timer();
     }
   }
 
@@ -163,7 +169,7 @@ class Runner extends bbn\Models\Cls\Basic
       $output = '{' . PHP_EOL;
     }
     else if ($name) {
-      $is_number = bbn\Str::isNumber($log);
+      $is_number = Str::isNumber($log);
       $is_boolean = \is_bool($log);
       $is_string = \is_string($log);
       if (!$is_number && !$is_boolean && !$is_string) {
@@ -174,9 +180,9 @@ class Runner extends bbn\Models\Cls\Basic
       }
 
       $output = '  "' .
-        bbn\Str::escapeDquotes($name) .
+        Str::escapeDquotes($name) .
         '": ' . ($is_string ? '"' : '') .
-        ($is_string ? bbn\Str::escapeDquotes($log) : $log) .
+        ($is_string ? Str::escapeDquotes($log) : $log) .
         ($is_string ? '"' : '') . ',' .
         PHP_EOL;
     }
@@ -224,7 +230,7 @@ class Runner extends bbn\Models\Cls\Basic
         $this->cron->launchPoll();
       }
       else if ($data['type'] === 'cron') {
-        if (array_key_exists('id', $data) && bbn\Str::isUid($data['id'])) {
+        if (array_key_exists('id', $data) && Str::isUid($data['id'])) {
           $this->cron->getManager()->finish($data['id']);
         }
         else {
@@ -263,16 +269,16 @@ class Runner extends bbn\Models\Cls\Basic
   /**
    * Returns the $data property.
    *
-   * @param bbn\Appui\Observer|null $observer
+   * @param Observer|null $observer
    * @return void
    */
-  public function poll(?bbn\Appui\Observer $observer = null)
+  public function poll(?Observer $observer = null)
   {
     if ($this->check()) {
       $this->timer->start('timeout');
       $this->timer->start('users');
       $this->timer->start('cron_check');
-      $obs = $observer ?? new bbn\Appui\Observer($this->db);
+      $obs = $observer ?? new Observer($this->db);
       //$this->output(X::_('Starting poll'), Date('Y-m-d H:i:s'));
       /*
       foreach ( $admin->get_old_tokens() as $t ){
@@ -289,7 +295,7 @@ class Runner extends bbn\Models\Cls\Basic
         if (\is_array($res)) {
           $time = time();
           foreach ($res as $id_user => $o) {
-            $user = bbn\User::getInstance();
+            $user = User::getInstance();
             $ucfg = $user->getClassCfg();
             $sessions = $this->db->selectAll($ucfg['tables']['sessions'], [
               $ucfg['arch']['sessions']['id'],
@@ -300,7 +306,7 @@ class Runner extends bbn\Models\Cls\Basic
             ]);
             foreach ($sessions as $sess) {
               $file = $this->controller->userDataPath($id_user, 'appui-core')."poller/queue/{$sess->id}/observer-$time.json";
-              if (bbn\File\Dir::createPath(X::dirname($file))) {
+              if (Dir::createPath(X::dirname($file))) {
                 file_put_contents($file, Json_encode(['observers' => $o]));
               }
             }
@@ -377,7 +383,7 @@ class Runner extends bbn\Models\Cls\Basic
   {
     if (X::hasProps($cfg, ['id', 'file', 'log_file'], true) && $this->check()) {
       if (!defined('BBN_EXTERNAL_USER_ID') && defined('BBN_EXTERNAL_USER_EMAIL')) {
-        define('BBN_EXTERNAL_USER_ID', $this->db->selectOne('bbn_users', 'id', ['email' => BBN_EXTERNAL_USER_EMAIL]));
+        define('BBN_EXTERNAL_USER_ID', $this->db->selectOne('bbn_users', 'id', ['email' => constant('BBN_EXTERNAL_USER_EMAIL')]));
       }
       if ($this->cron->getManager()->start($cfg['id'])) {
         $log = [
@@ -404,7 +410,7 @@ class Runner extends bbn\Models\Cls\Basic
           try {
             $logs = json_decode($logs, true, 512, JSON_THROW_ON_ERROR);
           }
-          catch (\Exception $e) {
+          catch (Exception $e) {
             $logs = [];
           }
         }
@@ -502,11 +508,13 @@ class Runner extends bbn\Models\Cls\Basic
       ($cron = $this->cron->getManager()->getNext()) &&
       !\in_array($cron['id'], $done)
     ) {
-      if ($ctx = $this->run($cron['id'])) {
-        $time += $ctx;
-      }
+      $this->timer->start('timeout');
+      $this->data = $cron;
+      $this->run();
+      $time += $this->timer->stop('timeout');
       array_push($done, $cron['id']);
     }
+
     return $time;
   }
 

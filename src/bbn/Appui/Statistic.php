@@ -17,12 +17,17 @@ namespace bbn\Appui;
 
 use bbn;
 use Exception;
+use DateTime;
 use bbn\X;
 use bbn\Str;
+use bbn\Db;
+use bbn\Appui\Database;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\Optional;
 
-class Statistic extends bbn\Models\Cls\Db
+class Statistic extends DbCls
 {
-  use bbn\Models\Tts\Optional;
+  use Optional;
 
   /**
    * @var string The default start date of the statistic
@@ -45,9 +50,9 @@ class Statistic extends bbn\Models\Cls\Db
   protected ?string $id_option;
 
   /**
-   * @var Appui\Database The DB object used to retrieve columns IDs
+   * @var Database The DB object used to retrieve columns IDs
    */
-  protected bbn\Appui\Database $dbo;
+  protected Database $dbo;
 
   /**
    * @var array The whole request config for $db
@@ -117,7 +122,7 @@ class Statistic extends bbn\Models\Cls\Db
    * @param string $code The code of the option
    * @param array  $cfg  The configuration
    */
-  public function __construct(bbn\Db $db, string $code, array $cfg = [])
+  public function __construct(Db $db, string $code, array $cfg = [])
   {
     // Parent constructors
     parent::__construct($db);
@@ -138,7 +143,7 @@ class Statistic extends bbn\Models\Cls\Db
     }
 
     // Cfg retrieved
-    if (!($this->ocfg = self::getOption($this->id_option))) {
+    if (!($this->ocfg = self::getOptionsObject()->option($this->id_option))) {
       throw new Exception(X::_("No cfg option corresponding to id in active statistics"));
     }
 
@@ -164,7 +169,7 @@ class Statistic extends bbn\Models\Cls\Db
       }
 
       $this->code = $code;
-      $this->dbo  = new \bbn\Appui\Database($this->db);
+      $this->dbo  = new Database($this->db);
       if (isset($cfg['field'])) {
         if (!($this->_id_field = $this->dbo->columnId($cfg['field'], $cfg['table']))) {
           throw new Exception(X::_("The field parameter must be a known field of the table (asked %s in %s)", $cfg['field'], $cfg['table']));
@@ -177,15 +182,15 @@ class Statistic extends bbn\Models\Cls\Db
 
       $this->type = $cfg['type'];
       $this->cfg  = $cfg;
-      if (!empty($cfg['inserter']) && bbn\Str::isUid($cfg['inserter'])) {
+      if (!empty($cfg['inserter']) && Str::isUid($cfg['inserter'])) {
         $this->inserter = $cfg['inserter'];
       }
 
-      if (!empty($cfg['updater']) && bbn\Str::isUid($cfg['updater'])) {
+      if (!empty($cfg['updater']) && Str::isUid($cfg['updater'])) {
         $this->updater = $cfg['updater'];
       }
 
-      if (!empty($cfg['deleter']) && bbn\Str::isUid($cfg['deleter'])) {
+      if (!empty($cfg['deleter']) && Str::isUid($cfg['deleter'])) {
         $this->deleter = $cfg['deleter'];
       }
 
@@ -229,9 +234,9 @@ class Statistic extends bbn\Models\Cls\Db
    *
    * @param [type] $start
    * @param [type] $end
-   * @return void
+   * @return mixed
    */
-  public function run($start, $end = null)
+  public function run($start, $end = null): mixed
   {
     if ($this->db_cfg && !empty($this->db_cfg['values'])) {
       if (is_string($start)) {
@@ -266,7 +271,7 @@ class Statistic extends bbn\Models\Cls\Db
       try {
         $res = $this->db->selectOne($cfg);
       }
-      catch (\Exception $e) {
+      catch (Exception $e) {
         X::log([$e->getMessage(), $this->ocfg, $cfg['sql'], $cfg['values']], 'stat');
         throw new Exception($e);
       }
@@ -403,7 +408,7 @@ class Statistic extends bbn\Models\Cls\Db
   public function serieByDate($unit, string $end, string $start): ?array
   {
     if (empty($unit)) {
-      $unit = $d;
+      $unit = 'd';
     }
 
     if (Str::isDateSql($start, $end)) {
@@ -522,7 +527,7 @@ class Statistic extends bbn\Models\Cls\Db
         $end = date('Y-m-d');
       }
 
-      if (bbn\Str::isDateSql($end)) {
+      if (Str::isDateSql($end)) {
         switch (strtolower($unit)) {
           case 'y':
             $funit = 'years';
@@ -557,7 +562,7 @@ class Statistic extends bbn\Models\Cls\Db
         }
 
         if (isset($funit)) {
-          $dend   = new \DateTime($end);
+          $dend   = new DateTime($end);
           $dstart = $dend->sub(date_interval_create_from_date_string("$values $funit"));
           $start  = $dstart->format('Y-m-d');
           $res    = [
@@ -608,7 +613,7 @@ class Statistic extends bbn\Models\Cls\Db
               $last++;
             }
 
-            $dcurrent = new \DateTime($start);
+            $dcurrent = new DateTime($start);
             $num_days = (int)$dend->diff($dcurrent)->format('%a');
             $diff     = $num_days;
             $interval = (int)floor($num_days / $values);
@@ -811,8 +816,8 @@ class Statistic extends bbn\Models\Cls\Db
   private function _set_fn_cfg($fn, array &$cfg): array
   {
     $alias         = Str::genpwd(12);
-    $alias1        = bbn\Str::genpwd(12);
-    $alias2        = bbn\Str::genpwd(12);
+    $alias1        = Str::genpwd(12);
+    $alias2        = Str::genpwd(12);
     $field         = $this->db->cfn($this->cfg['field'], $this->cfg['table'], true);
     $fn            = strtoupper($fn);
     $cfg['fields'] = ["$fn(IFNULL($alias1.val, $field))"];
@@ -956,8 +961,8 @@ class Statistic extends bbn\Models\Cls\Db
       'value' => self::$_placeholder
     ];
     if (array_key_exists('value', $this->cfg)) {
-      $alias1                       = bbn\Str::genpwd(12);
-      $alias2                       = bbn\Str::genpwd(12);
+      $alias1                       = Str::genpwd(12);
+      $alias2                       = Str::genpwd(12);
       $join1                        = [
         'table' => 'bbn_history',
         'alias' => $alias1,
@@ -1103,8 +1108,8 @@ class Statistic extends bbn\Models\Cls\Db
         // - The value matches and has not been changed since then
         // - The value used to match but has been changed
         elseif ($id_col = $this->dbo->columnId($c['field'], $this->cfg['table'])) {
-          $alias1 = bbn\Str::genpwd(12);
-          $alias2 = bbn\Str::genpwd(12);
+          $alias1 = Str::genpwd(12);
+          $alias2 = Str::genpwd(12);
           $join1  = [
             'table' => 'bbn_history',
             'alias' => $alias1,

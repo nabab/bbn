@@ -2,18 +2,18 @@
 
 namespace bbn\Appui;
 
+use Exception;
+use bbn\Db;
+use bbn\X;
+use bbn\User;
+use bbn\User\Preferences;
+use bbn\File\System;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Cls\Db as DbCls;
-use bbn\Db;
 use Orhanerday\OpenAi\OpenAi;
-use Exception;
-use bbn\X;
-use bbn\User;
 use Gioni06\Gpt3Tokenizer\Gpt3TokenizerConfig;
 use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
-use bbn\File\System;
-use DOMDocument;
 
 
 class Ai extends DbCls
@@ -21,7 +21,6 @@ class Ai extends DbCls
   
   use DbActions;
   use Optional;
-
   
   /**
    * Default Dbconfig configuration for the class
@@ -88,44 +87,39 @@ class Ai extends DbCls
    *
    * @var array $responseFormats
    */
-  private static $responseFormats = [
+  private static $responseFormats = 
+  [
     [
       'value' => 'rte',
       'text' => 'Rich Text Editor',
       'prompt' => 'Your response needs to be in rich text format',
-      'component' => 'bbn-rte',
-    ],
-    [
+      'component' => 'bbn-rte'
+    ], [
       'value' => 'markdown',
       'text' => 'Markdown',
       'prompt' => 'Your response needs to be in Markdown format',
       'component' => 'bbn-markdown',
-    ],
-    [
+    ], [
       'value' => 'textarea',
       'text' => 'Text Multiline',
       'prompt' => 'Your response needs to be returned as multiple lines of text',
       'component' => 'bbn-textarea',
-    ],
-    [
+    ], [
       'value' => 'code-php',
       'text' => 'Code PHP',
       'prompt' => 'Your response should be pure PHP code with documentation comments if relevant, and avoid completly markdown format',
       'component' => 'bbn-code',
-    ],
-    [
+    ], [
       'value' => 'code-js',
       'text' => 'Code JS',
       'prompt' => 'Your response needs to be pure code in Javascript',
       'component' => 'bbn-code',
-    ],
-    [
+    ], [
       'value' => 'single-line',
       'text' => 'Single Line',
       'prompt' => 'Your response needs to be entered as a single line of text',
       'component' => 'bbn-input',
-    ],
-    [
+    ], [
       'value' => 'json-editor',
       'text' => 'JSON',
       'prompt' => 'Your response needs to use this grammar : root   ::= object
@@ -151,12 +145,15 @@ ws ::= ([ \t\n] ws)?',
    * @var OpenAi $ai
    */
   protected $ai;
+
+  protected $prefs;
   
   /** @var Note $note Note instance */
   private $note;
 
   /** @var Passwords $pass */
   private $pass;
+  private $user;
 
   protected $endpoint;
 
@@ -183,56 +180,133 @@ ws ::= ([ \t\n] ws)?',
       throw new Exception("The OpenAI key is not defined");
     }
 
+    $this->user = User::getInstance();
+    $this->prefs = Preferences::getInstance();
     $this->note = new Note($this->db);
     $this->pass = new Passwords($this->db);
   }
 
-  public function setEndpoint(string $endpointCode = null, $model = null) {
-    $endpoints = $this->getOptions('endpoints');
-    if ($endpointCode) {
-      $endpoint = X::getRow($endpoints, ['code' => $endpointCode]);
-    }
-    else {
-      $endpoint = $endpoints[0];
+  public function setEndpoint(string $id = null, $model = null) {
+    if ($endpoint = $this->getEndpoint($id)) {
+      $pass = $this->pass->userGet($endpoint['data']['id'], $this->user);
+      if (!$pass) {
+        throw new Exception("Password not found");
+      }
     }
 
     if (!$endpoint) {
       throw new Exception("Endpoint not found");
     }
 
-    $pass = $this->pass->get($endpoint['id']);
-    if (!$pass) {
-      throw new Exception("Password not found");
+    $this->ai = new OpenAi($pass);
+    $this->ai->setBaseURL($endpoint['data']['url']);
+    if (!$model) {
+      $model = $endpoint['models'][0]['text'];
     }
 
-    $this->ai = new OpenAi($pass);
-    $this->ai->setBaseURL($endpoint['url']);
     $this->setModel($model);
   }
 
-  public function setModel(string $modelCode = null) {
-    $models = $this->getOptions('models');
-    if ($modelCode) {
-      $model = X::getRow($models, ['code' => $modelCode]);
-    }
-    else {
-      $model = $models[0];
-    }
-
-    if (!$model) {
-      throw new Exception("Model not found");
-    }
-
-    $this->model = $model['code'];
+  public function setModel(string $modelName = null) {
+    $this->model = $modelName;
   }
 
 
   public function getModels() {
-    return $this->ai->listModels();
+    $res = $this->ai->listModels();
+    if ($res && is_string($res)) {
+      $res = json_decode($res, true);
+    }
+
+    return $res;
   }
 
-  public function getEndpoints() {
-    return $this->getOptions('endpoints');
+  public function syncModels(): bool
+  {
+    $models = $this->getModels();
+    if (!empty($models) && isset($models['data'])) {
+      $id_parent = self::getOptionId('models');
+      foreach ($models['data'] as $model) {
+        self::getOptionsObject()->add([
+          'text' => $model['id'],
+          'code' => $model['id'],
+          'id_parent' => $id_parent
+        ]);
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  public function getEndpoints()
+  {
+    if ($idEndpoint = self::getOptionId('endpoints')) {
+      return $this->prefs->getAll($idEndpoint);
+    }
+
+    throw new Exception(X::_("Endpoints not found"));
+  }
+
+  public function getEndpoint(string $id): ?array
+  {
+    if ($endpoint = $this->prefs->get($id)) {
+      $models = $this->prefs->getBits($id);
+      X::sortBy($models, [
+        [
+          'field' => 'last_used',
+          'dir' => 'DESC'
+        ], [
+          'field' => 'text',
+          'dir' => 'ASC'
+        ]
+      ]);
+      return [
+        'data' => $endpoint,
+        'models' => $models
+      ];
+    }
+
+    return null;
+  }
+
+  public function addEndpoint(string $name, string $url, string $pass, bool $public = false): ?array
+  {
+    if ($idEndpoint = self::getOptionId('endpoints')) {
+      $this->ai = new OpenAi($pass);
+      $this->ai->setBaseURL($url);
+      if ($models = $this->getModels()) {
+        if (
+          ($idPref = $this->prefs->addToGroup($idEndpoint, [
+            'text' => $name,
+            'url' => $url,
+            'public' => $public ? 1 : 0
+          ]))
+          && ($this->pass->userStore($pass, $idPref, $this->user))
+        ) {
+          $idModels = self::getOptionId('models');
+          foreach ($models['data'] as $model) {
+            $idModel = self::getOptionsObject()->add([
+              'text' => $model['id'],
+              'code' => $model['id'],
+              'id_parent' => $idModels
+            ]);
+            $this->prefs->addBit($idPref, [
+              'text' => $model['id'],
+              'id_option' => $idModel
+            ]);
+          }
+
+          return $this->getEndpoint($idPref);
+        }
+      }
+      else {
+        throw new Exception("Models not found");
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -280,73 +354,6 @@ ws ::= ([ \t\n] ws)?',
       'result' => $response['result'] ?? $response['error'],
     ];
     
-  }
-  
-  /**
-   * Inserts an AI prompt item into the database
-   *
-   * @param string $id_prompt ID of the AI prompt to insert the item into
-   * @param string $text Text of the AI prompt item
-   * @param string $ai AI response of the prompt item
-   *
-   * @return void
-   */
-  private function insertItem(string $id_prompt, string $text, string $ai)
-  {
-    $tf = $this->class_cfg['arch']['ai_prompt_items'];
-    $user = User::getInstance();
-    $this->db->insert($this->class_cfg['tables']['ai_prompt_items'], [
-      $tf['id_prompt'] => $id_prompt,
-      $tf['text'] => $text,
-      $tf['author'] => $user->getId(),
-      $tf['ai'] => $ai ? 1 : 0,
-    ]);
-  }
-  
-  
-  /**
-   * Builds the AI prompt based on input, content, prompt, and separator
-   *
-   * @param string $input Input string
-   * @param string $prompt Prompt string
-   * @param string $responseFormat Response format
-   * @param string $separator Separator string
-   * @return string Built prompt string
-   */
-  private function buildPromptFromRow(array $prompt): string | null
-  {
-    $note = $this->note->get($prompt['id_note']);
-    if (empty($note) || empty($note['content'])) {
-      return null;
-    }
-
-    return $this->buildPrompt($note['content'], $prompt['output'], $note['lang']);
-  }
-  
-  
-  /**
-   * Builds the AI prompt based on input, content, prompt, and separator
-   *
-   * @param string $prompt Prompt string
-   * @param string $responseFormat Response format
-   * @param string $separator Separator string
-   * @return string Built prompt string
-   */
-  private function buildPrompt(string $prompt, string $format = 'textarea', string $lang = null, array $cfg = null): string | null
-  {
-    $output = $prompt;
-    $output .= "\n\n";
-    
-    if ($format) {
-      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . "\n\n";
-    }
-
-    if ($lang) {
-      $option = Option::getInstance();
-      $output .= "The language of the response must be in " . $option->text($lang, 'languages', 'i18n', 'appui');
-    }
-    
-    return $output;
   }
   
   /**
@@ -655,5 +662,72 @@ ws ::= ([ \t\n] ws)?',
     ]);
     
     return true;
+  }
+  
+  /**
+   * Inserts an AI prompt item into the database
+   *
+   * @param string $id_prompt ID of the AI prompt to insert the item into
+   * @param string $text Text of the AI prompt item
+   * @param string $ai AI response of the prompt item
+   *
+   * @return void
+   */
+  private function insertItem(string $id_prompt, string $text, string $ai)
+  {
+    $tf = $this->class_cfg['arch']['ai_prompt_items'];
+    $user = User::getInstance();
+    $this->db->insert($this->class_cfg['tables']['ai_prompt_items'], [
+      $tf['id_prompt'] => $id_prompt,
+      $tf['text'] => $text,
+      $tf['author'] => $user->getId(),
+      $tf['ai'] => $ai ? 1 : 0,
+    ]);
+  }
+  
+  
+  /**
+   * Builds the AI prompt based on input, content, prompt, and separator
+   *
+   * @param string $input Input string
+   * @param string $prompt Prompt string
+   * @param string $responseFormat Response format
+   * @param string $separator Separator string
+   * @return string Built prompt string
+   */
+  private function buildPromptFromRow(array $prompt): string | null
+  {
+    $note = $this->note->get($prompt['id_note']);
+    if (empty($note) || empty($note['content'])) {
+      return null;
+    }
+
+    return $this->buildPrompt($note['content'], $prompt['output'], $note['lang']);
+  }
+  
+  
+  /**
+   * Builds the AI prompt based on input, content, prompt, and separator
+   *
+   * @param string $prompt Prompt string
+   * @param string $responseFormat Response format
+   * @param string $separator Separator string
+   * @return string Built prompt string
+   */
+  private function buildPrompt(string $prompt, string $format = 'textarea', string $lang = null, array $cfg = null): string | null
+  {
+    $output = $prompt;
+    $output .= "\n\n";
+    
+    if ($format) {
+      $output .= X::getField(self::$responseFormats, ['value' => $prompt['output']], 'prompt') . "\n\n";
+    }
+
+    if ($lang) {
+      $option = Option::getInstance();
+      $output .= "The language of the response must be in " . $option->text($lang, 'languages', 'i18n', 'appui');
+    }
+    
+    return $output;
   }
 }

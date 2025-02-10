@@ -3225,8 +3225,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     if (X::isAssoc($cfg)) {
       if (isset($cfg['table']) && !isset($cfg['tables'])) {
-        $cfg['tables'] = $cfg['table'];
+        $cfg['tables'] = [$cfg['table']];
         unset($cfg['table']);
+      }
+      if (isset($cfg['field']) && !isset($cfg['fields'])) {
+        $cfg['fields'] = [$cfg['field']];
+        unset($cfg['field']);
       }
 
       $res = array_merge($res, $cfg);
@@ -3437,7 +3441,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
         $res['kind'],
         $res['ignore'],
         $res['count'],
-        $res['tables'],
+        $res['tables'] ?? [],
         $res['fields'],
         $res['hashed_join'],
         $res['hashed_where'],

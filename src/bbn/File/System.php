@@ -18,15 +18,18 @@
 namespace bbn\File;
 
 use stdClass;
-use bbn;
+use Throwable;
 use bbn\X;
 use bbn\Str;
+use bbn\File;
+use bbn\Models\Cls\Basic;
+use bbn\Util\Enc;
 
 /**
  * Class system
  * @package bbn\File
  */
-class System extends bbn\Models\Cls\Basic
+class System extends Basic
 {
 
   /**
@@ -123,7 +126,8 @@ class System extends bbn\Models\Cls\Basic
 
   public function sanitize(string $filename)
   {
-    $st = end(explode('/', $filename));
+    $bits = explode('/', $filename);
+    $st = end($bits);
     return Str::encodeFilename($st);
   }
 
@@ -560,7 +564,7 @@ class System extends bbn\Models\Cls\Basic
       } else {
         $encoding = false;
         if (!$decoder) {
-          $encoding = bbn\Str::fileExt($file);
+          $encoding = Str::fileExt($file);
         } elseif (is_string($decoder)) {
           $encoding = $decoder;
         }
@@ -700,7 +704,7 @@ class System extends bbn\Models\Cls\Basic
    * @param string $file
    * @return bbn\File|null
    */
-  public function getFile(string $file): ?bbn\File
+  public function getFile(string $file): ?File
   {
     if ($this->check()) {
       if ($this->mode === 'nextcloud') {
@@ -708,7 +712,7 @@ class System extends bbn\Models\Cls\Basic
       }
 
       if ($this->isFile($file)) {
-        return new bbn\File($this->getRealPath($file));
+        return new File($this->getRealPath($file));
       }
     }
 
@@ -970,7 +974,7 @@ class System extends bbn\Models\Cls\Basic
           $x = [
             'name' => $f,
             'type' => 'file',
-            'ext' => bbn\Str::fileExt($f)
+            'ext' => Str::fileExt($f)
           ];
           if ($this->_check_filter($x, $filter)) {
             $r[] = $x;
@@ -988,7 +992,7 @@ class System extends bbn\Models\Cls\Basic
     if (isset($cfg['pass'])) {
       if (!empty($cfg['encrypted'])) {
         if ($tmp = base64_decode($cfg['pass'])) {
-          return \bbn\Util\Enc::decrypt($tmp, $cfg['encryption_key'] ?? '');
+          return Enc::decrypt($tmp, $cfg['encryption_key'] ?? '');
         }
       }
 
@@ -1435,7 +1439,11 @@ class System extends bbn\Models\Cls\Basic
   private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
   {
     if (!$this->_is_dir($dir)) {
-      return mkdir($dir, $chmod, $recursive);
+      try {
+        call_user_func('mkdir', $dir, $chmod, $recursive);
+      }
+      catch (Throwable $e) {
+      }
     }
 
     return true;
