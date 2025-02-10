@@ -2890,86 +2890,88 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       );
       $models      = [];
 
-      foreach ($args['tables'] as $key => $tab) {
-        if (empty($tab)) {
-          $this->log(\debug_backtrace());
-          throw new Exception("$key is not defined");
-        }
+      if (!empty($args['tables'])) {
+        foreach ($args['tables'] as $key => $tab) {
+          if (empty($tab)) {
+            $this->log(\debug_backtrace());
+            throw new Exception("$key is not defined");
+          }
 
-        $tfn = $this->tableFullName($tab);
+          $tfn = $this->tableFullName($tab);
 
-        // 2 tables in the same statement can't have the same idx
-        $idx = is_string($key) ? $key : $tfn;
-        // Error if they do
-        if (isset($tables_full[$idx])) {
-          $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']), false);
-          return null;
-        }
+          // 2 tables in the same statement can't have the same idx
+          $idx = is_string($key) ? $key : $tfn;
+          // Error if they do
+          if (isset($tables_full[$idx])) {
+            $this->error('You cannot use twice the same table with the same alias'.PHP_EOL.X::getDump($args['tables']), false);
+            return null;
+          }
 
-        $tables_full[$idx]   = $tfn;
-        $res['tables'][$idx] = $tfn;
-        if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
-          $models[$tfn] = $model;
-        }
-      }
-
-      if ((\count($res['tables']) === 1)
-        && ($tfn = array_values($res['tables'])[0])
-        && isset($models[$tfn]['keys']['PRIMARY'])
-        && (\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
-        && ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
-      ) {
-        $p                     = $models[$tfn]['fields'][$res['primary']];
-        $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');
-        $res['primary_length'] = $p['maxlength'] ?? null;
-        $res['primary_type']   = $p['type'];
-        if (($res['kind'] === 'INSERT')
-          && !$res['auto_increment']
-          && !\in_array($this->colSimpleName($res['primary']), $res['fields'], true)
-        ) {
-          $res['generate_id'] = true;
-          $res['fields'][]    = $res['primary'];
-        }
-      }
-
-      foreach ($args['join'] as $key => $join){
-        if (!empty($join['table'])) {
-          $tfn = $this->tableFullName($join['table']);
+          $tables_full[$idx]   = $tfn;
+          $res['tables'][$idx] = $tfn;
           if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
             $models[$tfn] = $model;
           }
+        }
 
-          $idx               = $join['alias'] ?? $tfn;
-          $tables_full[$idx] = $tfn;
-          if (isset($join['join'])) {
-            foreach ($join['join'] as $j){
-              if (!empty($j['table'])) {
-                $tfn = $this->tableFullName($j['table']);
-                if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
-                  $models[$tfn] = $model;
+        if ((\count($res['tables']) === 1)
+          && ($tfn = array_values($res['tables'])[0])
+          && isset($models[$tfn]['keys']['PRIMARY'])
+          && (\count($models[$tfn]['keys']['PRIMARY']['columns']) === 1)
+          && ($res['primary'] = $models[$tfn]['keys']['PRIMARY']['columns'][0])
+        ) {
+          $p                     = $models[$tfn]['fields'][$res['primary']];
+          $res['auto_increment'] = isset($p['extra']) && ($p['extra'] === 'auto_increment');
+          $res['primary_length'] = $p['maxlength'] ?? null;
+          $res['primary_type']   = $p['type'];
+          if (($res['kind'] === 'INSERT')
+            && !$res['auto_increment']
+            && !\in_array($this->colSimpleName($res['primary']), $res['fields'], true)
+          ) {
+            $res['generate_id'] = true;
+            $res['fields'][]    = $res['primary'];
+          }
+        }
+
+        foreach ($args['join'] as $key => $join){
+          if (!empty($join['table'])) {
+            $tfn = $this->tableFullName($join['table']);
+            if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
+              $models[$tfn] = $model;
+            }
+
+            $idx               = $join['alias'] ?? $tfn;
+            $tables_full[$idx] = $tfn;
+            if (isset($join['join'])) {
+              foreach ($join['join'] as $j){
+                if (!empty($j['table'])) {
+                  $tfn = $this->tableFullName($j['table']);
+                  if (!isset($models[$tfn]) && ($model = $this->modelize($tfn))) {
+                    $models[$tfn] = $model;
+                  }
+                  $idx               = $j['alias'] ?? $tfn;
+                  $tables_full[$idx] = $tfn;
                 }
-                $idx               = $j['alias'] ?? $tfn;
-                $tables_full[$idx] = $tfn;
               }
             }
           }
+          else{
+            $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join), false);
+          }
         }
-        else{
-          $this->error('Error! The join array must have on and table defined'.PHP_EOL.X::getDump($join), false);
-        }
-      }
 
-      foreach ($tables_full as $idx => $tfn){
-        foreach ($models[$tfn]['fields'] as $col => $cfg){
-          $res['available_fields'][$this->colFullName($col, $idx)] = $idx;
-          $csn                                             = $this->colSimpleName($col);
-          if (!isset($res['available_fields'][$csn])) {
-            /*
-            $res['available_fields'][$csn] = false;
+        foreach ($tables_full as $idx => $tfn){
+          foreach ($models[$tfn]['fields'] as $col => $cfg){
+            $res['available_fields'][$this->colFullName($col, $idx)] = $idx;
+            $csn                                             = $this->colSimpleName($col);
+            if (!isset($res['available_fields'][$csn])) {
+              /*
+              $res['available_fields'][$csn] = false;
+              }
+              else{
+              */
+              $res['available_fields'][$csn] = $idx;
             }
-            else{
-            */
-            $res['available_fields'][$csn] = $idx;
           }
         }
       }
