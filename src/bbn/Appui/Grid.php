@@ -105,7 +105,7 @@ class Grid extends bbn\Models\Cls\Cache
     if (\is_array($cfg) && $this->db->check()) {
       // Preparing a classic config array for DB
       $db_cfg = [
-        'tables' => $cfg['tables'] ?? ($cfg['table'] ? (\is_string($cfg['table']) ? [$cfg['table']] : $cfg['table']) : null),
+        'tables' => $cfg['tables'] ?? (isset($cfg['table']) ? (\is_string($cfg['table']) ? [$cfg['table']] : $cfg['table']) : null),
         'fields' => !empty($cfg['fields']) ? (array)$cfg['fields'] : [],
         'ofields' => !empty($cfg['ofields']) ? (array)$cfg['ofields'] : [],
         'order' => $post['order'] ?? ($cfg['order'] ?? []),
