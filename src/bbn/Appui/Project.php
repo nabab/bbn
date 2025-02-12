@@ -797,7 +797,7 @@ class Project extends DbCls
     if (!empty($t['file']) && empty($component)) {
       //x::ddump($t, $cfg, $tab);
       //if (isset($cfg['alias']['types']) && ($row = X::getRow($cfg['alias']['types'], ))
-      if ($t['tab']) {
+      if (!empty($t['tab'])) {
         switch ($t['tab']) {
           case 'php':
             $icon = "nf nf-md-language_php";

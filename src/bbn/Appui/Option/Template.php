@@ -61,6 +61,24 @@ trait Template
   }
 
 
+  public function templateList() {
+    return [
+      ...$this->fullOptionsRef($this->getMagicTemplateId()),
+      ...$this->fullOptionsRef($this->getTemplateTemplateId())
+    ];
+  }
+
+  public function textValueTemplates(): array
+  {
+    return array_map(function($a) {
+      return [
+        'text' => $a['text'],
+        'value' => $a['id']
+      ];
+    }, $this->templateList());
+  }
+
+
   /**
    * Returns the ID of the root templates
    * @return string
