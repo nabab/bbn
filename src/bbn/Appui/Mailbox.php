@@ -859,16 +859,22 @@ class Mailbox extends Basic
         // check if the part have fdisposition and if disposition its inline
         if (!empty($p->parts)) {
           foreach ($p->parts as $p2) {
-            if (isset($p2->ifdisposition) && isset($p2->disposition) && (strtolower($p2->disposition) === 'inline')) {
-              if (isset($p2->dparameters) && is_array($p2->dparameters)) {
-                // search in dparameters when attribute is filename
-                foreach ($p2->dparameters as $dparam) {
-                  if (!empty($p2->id) && isset($dparam->attribute) && strtolower($dparam->attribute) === 'filename') {
-                    $this->_inline_files[] = [
-                      'name' => $dparam->value,
-                      'id' => substr($p2->id, 1, -1)
-                    ];
-                  }
+            if (isset($p2->ifdisposition)
+              && isset($p2->disposition)
+              && (strtolower($p2->disposition) === 'inline')
+              && isset($p2->dparameters)
+              && is_array($p2->dparameters)
+            ) {
+              // search in dparameters when attribute is filename
+              foreach ($p2->dparameters as $dparam) {
+                if (!empty($p2->id)
+                  && isset($dparam->attribute)
+                  && (strtolower($dparam->attribute) === 'filename')
+                ) {
+                  $this->_inline_files[] = [
+                    'name' => $dparam->value,
+                    'id' => substr($p2->id, 1, -1)
+                  ];
                 }
               }
             }
@@ -877,7 +883,6 @@ class Mailbox extends Basic
       }
     }
     if ($res['html'] = $this->_htmlmsg) {
-
       // replace cid links by name
       $attachments_path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       $res['html'] = preg_replace_callback(
@@ -915,27 +920,23 @@ class Mailbox extends Basic
         $res['html']
       );
 
-
-      $config = HTMLPurifier_HTML5Config::createDefault();
-
-      $config->set('URI.AllowedSchemes', [
-        'http' => true,
-        'https' => true,
-        'mailto' => true,
-        'ftp' => true,
-        'nntp' => true,
-        'news' => true,
-        'tel' => true,
-      ]);
-
-      //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
-      $purifier    = new HTMLPurifier($config);
-//        X::ddump($config, $this->_htmlmsg);
-
       if ($res['html']) {
         $save = $res['html'];
         try {
-          $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));
+          /*$config = HTMLPurifier_HTML5Config::createDefault();
+          $config->set('URI.AllowedSchemes', [
+            'http' => true,
+            'https' => true,
+            'mailto' => true,
+            'ftp' => true,
+            'nntp' => true,
+            'news' => true,
+            'tel' => true,
+          ]);
+          //\HTMLPurifier_URISchemeRegistry::instance()->register("data", new HTMLPurifier_URIScheme_data());
+          $purifier    = new HTMLPurifier($config);
+          $res['html'] = $purifier->purify(quoted_printable_decode($res['html']));*/
+          $res['html'] = Str::toUtf8($res['html']);
         } catch (\Exception $e) {
           X::log([
             'error' => $e->getMessage(),
@@ -953,7 +954,7 @@ class Mailbox extends Basic
 
     // set res to string and quoted printable decode
     foreach ($res as $k => $v) {
-      if (is_string($v)) {
+      if (is_string($v) && ($k !== 'html')) {
         $res[$k] = Str::toUtf8(quoted_printable_decode($v));
       }
     }

@@ -820,7 +820,8 @@ class Email extends Basic
             'exp' => $this->db->cfn($linksFields['id_contact'], 'tolink')
           ]]
         ]],
-        'filters' => $filters
+        'filters' => $filters,
+        'group_by' => [$this->db->cfn($this->fields['id'], $this->class_table)],
       ]);
 
 
@@ -1308,7 +1309,7 @@ class Email extends Basic
       // get the option 'folders'
       $types = self::getFolderTypes();
 
-      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed) {
+      $put_in_res = function (array $a, &$res, $prefix = '') use (&$put_in_res, $subscribed, $mb) {
         // set the first value of $a in $ele and remove it in the array
         $ele = array_shift($a);
         // search if res contain an array with 'text' => $ele and return the index or null instead
@@ -1317,14 +1318,19 @@ class Email extends Basic
         if (null === $idx) {
           // count number of element in array (useless ?)
           $idx = count($res);
+          $info = $mb->getInfoFolder($prefix . $ele);
+          $mb->selectFolder($prefix . $ele);
           // add $ele in the res array
           $res[] = [
             'text' => $ele,
             'uid' => $prefix . $ele,
             'items' => [],
-            'subscribed' => in_array($prefix . $ele, $subscribed)
+            'subscribed' => in_array($prefix . $ele, $subscribed),
+            'num_msg' => $info->Nmsgs,
+            'last_uid' => !empty($info->Nmsgs) ? $mb->getMsgUid($info->Nmsgs) : null,
           ];
         }
+
         if (count($a)) {
           $put_in_res($a, $res[$idx]['items'], $prefix . $ele . '.');
         }
@@ -1337,7 +1343,11 @@ class Email extends Basic
               $id_parent = null
       ) use (&$compare): array {
         if (!$res) {
-          $res = ['add' => [], 'delete' => []];
+          $res = [
+            'add' => [],
+            'update' => [],
+            'delete' => []
+          ];
         }
 
         foreach ($real as $r) {
@@ -1348,8 +1358,23 @@ class Email extends Basic
             }
 
             $res['add'][] = $r;
-          } elseif ($r['items'] && $db[$idx]['items']) {
-            $compare($r['items'], $db[$idx]['items'], $res, $db[$idx]['id']);
+          }
+          else {
+            if (!array_key_exists('num_msg', $db[$idx])
+              || !array_key_exists('last_uid', $db[$idx])
+              || ($r['num_msg'] !== $db[$idx]['num_msg'])
+              || ($r['last_uid'] !== $db[$idx]['last_uid'])
+            ) {
+              $res['update'][] = [
+                'id' => $db[$idx]['id'],
+                'num_msg' => $r['num_msg'],
+                'last_uid' => $r['last_uid']
+              ];
+            }
+
+            if ($r['items'] && $db[$idx]['items']) {
+              $compare($r['items'], $db[$idx]['items'], $res, $db[$idx]['id']);
+            }
           }
         }
 
@@ -1370,7 +1395,8 @@ class Email extends Basic
           if ($id_parent) {
             $a['id_parent'] = $id_parent;
             $a['id_option'] = X::getField($types, ['code' => 'folders'], 'id');
-          } else {
+          }
+          else {
             foreach ($types as $type) {
               if (!empty($type['names'])) {
                 if (in_array($a['text'], $type['names'], true)) {
@@ -1393,6 +1419,18 @@ class Email extends Basic
         }
       };
 
+      $update = function(array $toUpdate) use ($pref) {
+        foreach ($toUpdate as $u) {
+          $pref->updateBit($u['id'], $u);
+        }
+      };
+
+      $remove = function(array $toRemove) use ($pref) {
+        foreach ($toRemove as $r) {
+          $pref->deleteBit($r['id']);
+        }
+      };
+
       $res = [];
       $all = $mb->listAllFolders();
       foreach ($all as $dir) {
@@ -1401,13 +1439,16 @@ class Email extends Basic
         $put_in_res($bits, $res);
       }
 
-      // We have a tree
       $db_tree = $this->pref->getFullBits($id_account);
-
       $result = $compare($res, $db_tree);
-
       $import($result['add']);
-      return ['real' => $res, 'db' => $db_tree, 'compare' => $result];
+      $update($result['update']);
+      $remove($result['delete']);
+      return [
+        'real' => $res,
+        'db' => $this->pref->getFullBits($id_account),
+        'compare' => $result
+      ];
     }
 
     return null;
