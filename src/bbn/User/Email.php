@@ -1082,7 +1082,7 @@ class Email extends Basic
           $text = '';
           if ($number) {
             $msg = $mb->getMsg($number, $id, $folder['id_account']);
-            $text = Str::toUtf8($msg['plain'] ?: (!empty($msg['html']) ? Str::html2text($msg['html']) : ''));
+            $text = Str::toUtf8($msg['plain'] ?: (!empty($msg['html']) ? Str::html2text(quoted_printable_decode($msg['html'])) : ''));
             if (strlen($text) > 65500) {
               $text = substr($text, 0, 65500);
             }
@@ -1090,7 +1090,7 @@ class Email extends Basic
 
           // update excerpt column where id is same
           try {
-            $this->db->update($table, [$cfg['excerpt'] => trim($text)], [$cfg['id'] => $id]);
+            $this->db->update($table, [$cfg['excerpt'] => trim(normalizer_normalize($text))], [$cfg['id'] => $id]);
           }
           catch (\Exception $e) {
             X::log([
