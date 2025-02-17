@@ -14,6 +14,7 @@ use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Optional;
 use Generator;
+use stdClass;
 
 class Email extends Basic
 {
@@ -766,6 +767,11 @@ class Email extends Basic
       $linksFields = $this->class_cfg['arch']['users_contacts_links'];
       $recTable = $this->class_cfg['tables']['users_emails_recipients'];
       $recFields = $this->class_cfg['arch']['users_emails_recipients'];
+      $prefCgf = $this->pref->getClassCfg();
+      $prefOptTable = $prefCgf['tables']['user_options'];
+      $prefOptFields = $prefCgf['arch']['user_options'];
+      $prefOptBitsTable = $prefCgf['tables']['user_options_bits'];
+      $prefOptBitsFields = $prefCgf['arch']['user_options_bits'];
       $grid = new \bbn\Appui\Grid($this->db, $post, [
         'table' => $this->class_table,
         'fields' => X::mergeArrays(
@@ -778,7 +784,8 @@ class Email extends Basic
             'from_name' => $this->db->cfn($contactsFields['name'], 'fromname'),
             'to' => 'IFNULL(CONCAT('.$this->db->cfn($contactsFields['name'], 'toname').', " <", '.$this->db->cfn($linksFields['value'], 'tolink').', ">"), '.$this->db->cfn($linksFields['value'], 'tolink').')',
             'to_email' => $this->db->cfn($linksFields['value'], 'tolink'),
-            'to_name' => $this->db->cfn($contactsFields['name'], 'toname')
+            'to_name' => $this->db->cfn($contactsFields['name'], 'toname'),
+            'id_account' => $this->db->cfn($prefOptFields['id'], $prefOptTable),
           ]
         ),
         'join' => [[
@@ -819,6 +826,18 @@ class Email extends Basic
             'field' => $this->db->cfn($contactsFields['id'], 'toname'),
             'exp' => $this->db->cfn($linksFields['id_contact'], 'tolink')
           ]]
+        ], [
+          'table' => $prefOptBitsTable,
+          'on' => [[
+            'field' => $this->db->cfn($prefOptBitsFields['id'], $prefOptBitsTable),
+            'exp' => $this->db->cfn($this->fields['id_folder'], $this->class_table)
+          ]]
+        ], [
+          'table' => $prefOptTable,
+          'on' => [[
+            'field' => $this->db->cfn($prefOptBitsFields['id_user_option'], $prefOptBitsTable),
+            'exp' => $this->db->cfn($prefOptFields['id'], $prefOptTable)
+          ]]
         ]],
         'filters' => $filters,
         'group_by' => [$this->db->cfn($this->fields['id'], $this->class_table)],
@@ -826,7 +845,14 @@ class Email extends Basic
 
 
       if ($grid->check()) {
-        return $grid->getDatatable();
+        $dataTable = $grid->getDatatable();
+        if (!empty($dataTable['data'])) {
+          foreach ($dataTable['data'] as $i => $d) {
+            $dataTable['data'][$i]['attachments'] = !empty($d['attachments']) ? json_decode($d['attachments'], true) : [];
+            $dataTable['data'][$i]['external_uids'] = !empty($d['external_uids']) ? json_decode($d['external_uids'], true) : new stdClass();
+          }
+        }
+        return $dataTable;
       }
     }
 

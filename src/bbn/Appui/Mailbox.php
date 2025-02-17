@@ -824,6 +824,7 @@ class Mailbox extends Basic
     $this->_plainmsg    = '';
     $this->_charset     = '';
     $this->_attachments = [];
+    $this->_inline_files = [];
 
 
 
@@ -854,62 +855,27 @@ class Mailbox extends Basic
       $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
     }
     else {  // multipart: cycle through each part
+     // X::ddump($structure);
       foreach ($structure->parts as $partno0 => $p){
         $this->_get_msg_part($msgno, $p, $partno0 + 1, $id, $id_account);
-        // check if the part have fdisposition and if disposition its inline
-        if (!empty($p->parts)) {
-          foreach ($p->parts as $p2) {
-            if (isset($p2->ifdisposition)
-              && isset($p2->disposition)
-              && (strtolower($p2->disposition) === 'inline')
-              && isset($p2->dparameters)
-              && is_array($p2->dparameters)
-            ) {
-              // search in dparameters when attribute is filename
-              foreach ($p2->dparameters as $dparam) {
-                if (!empty($p2->id)
-                  && isset($dparam->attribute)
-                  && (strtolower($dparam->attribute) === 'filename')
-                ) {
-                  $this->_inline_files[] = [
-                    'name' => $dparam->value,
-                    'id' => substr($p2->id, 1, -1)
-                  ];
-                }
-              }
-            }
-          }
-        }
       }
     }
     if ($res['html'] = $this->_htmlmsg) {
       // replace cid links by name
-      $attachments_path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       $res['html'] = preg_replace_callback(
         '/src="cid:(.*?)"/',
-        function ($m) use ($attachments_path) {
+        function ($m) {
           $res = $m[0];
           $cid = $m[1];
           // get the name of the file with the cid in inline array
-          $att = null;
-          foreach ($this->_inline_files as $a) {
-            if ($a['id'] === $cid) {
-              $att = $a['name'];
-              break;
-            }
-          }
-          // encode this file BBN_USER_PATH . 'tmp_mail/' . $att in base64
-
-          $file = $attachments_path. $att;
-
-          // check if the file in an image and get the extension
-          $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-          if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
-            $type = 'image/' . $ext;
-            if (file_exists($file)) {
-              $base64 = 'src="data:' . $type . ';base64,' . base64_encode(file_get_contents($file)) . '"';
+          if ($att = X::getRow($this->_inline_files, ['id' => $cid])) {
+            $ext = Str::fileExt($att['name']);
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])
+              || in_array($att['type'], ['jpeg', 'png', 'gif'])
+            ) {
+              $type = 'image/'.($ext ?: $att['type']);
+              $base64 = 'src="data:'.$type.';base64,'.base64_encode($att['data']).'"';
               if ($att) {
-                // set src to base64 decode for html
                 $res = $base64;
               }
             }
@@ -1566,32 +1532,25 @@ class Mailbox extends Basic
     // Any part with a filename is an attachment,
     // so an attached text file (type 0) is not mistaken as the message.
     if (!empty($params['filename']) || !empty($params['name'])) {
-
-      if (!is_dir(BBN_USER_PATH . 'tmp_mail')) {
-        mkdir(BBN_USER_PATH . 'tmp_mail');
-      }
-
-      if (!is_dir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account)) {
-        mkdir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account);
-      }
-
-      if (!is_dir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id)) {
-        mkdir(BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id);
-      }
-
-
-
-      $path = BBN_USER_PATH . 'tmp_mail' . DIRECTORY_SEPARATOR . $id_account . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR;
       // filename may be given as 'Filename' or 'Name' or both
-      $filename = empty($params['name']) ? $params['filename'] : $params['name'];
-
-      // check if the file already exist
-      $this->_attachments[] = $filename;
-      if (!file_exists($path . $filename)) {
-        file_put_contents($path . $filename, $data);
+      if ($filename = empty($params['filename']) ? $params['name'] : $params['filename']) {
+        if (isset($structure->ifdisposition)
+          && isset($structure->disposition)
+          && (strtolower($structure->disposition) === 'inline')
+        ) {
+          //X::ddump($structure);
+          $this->_inline_files[] = [
+            'id' => substr($structure->id, 1, -1),
+            'type' => strtolower($structure->subtype),
+            'name' => $filename,
+            'size' => $params['size'] ?? 0,
+            'data' => $data
+          ];
+        }
+        else {
+          $this->_attachments[] = $filename;
+        }
       }
-      // filename may be encoded, so see imap_mime_header_decode()
-      // this is a problem if two files have same name
     }
 
     // TEXT
