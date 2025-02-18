@@ -753,6 +753,7 @@ class Mailbox extends Basic
               $tmp[$df] = $ads;
             }
           }
+
           $tmp['references'] = empty($tmp['references']) ? [] : X::split(substr($tmp['references'], 1, -1), '> <');
           if (!isset($tmp['subject'])) {
             $tmp['subject'] = '';
@@ -775,7 +776,7 @@ class Mailbox extends Basic
                 $tmp['attachments'][] = [
                   'name' => $name_row->value,
                   'size' => $part->bytes,
-                  'type' => Str::fileExt($name_row->value)
+                  'type' => Str::fileExt($name_row->value) || strtolower($part->subtype)
                 ];
               } elseif (!empty($part->parts)) {
                 foreach ($part->parts as $p) {
@@ -816,7 +817,7 @@ class Mailbox extends Basic
    *
    * @param int $msgno
    */
-  public function getMsg($msgno, $id, $id_account)
+  public function getMsg($msgno)
   {
     // input $mbox = IMAP stream, $msgno = message id
     // output all the following:
@@ -836,13 +837,15 @@ class Mailbox extends Basic
     // add code here to get date, from, to, cc, subject...
     // BODY STRUCTURE
 
-    if (isset($res['subject'])
+    // decode the subject
+    if (!empty($res['subject'])
       && is_string($res['subject'])
       && ($tmps = imap_mime_header_decode($res['subject']))
     ) {
       $res['subject'] = $tmps[0]->text;
     }
 
+    // decode quoted printable
     foreach ($res as $key => $value) {
       if (is_string($value)) {
         $res[$key] = quoted_printable_decode($value);
@@ -852,12 +855,12 @@ class Mailbox extends Basic
 
     $structure = $this->decode_encoded_words_deep($this->getMsgStructure($msgno));
     if (empty($structure->parts)) {  // simple
-      $this->_get_msg_part($msgno, $structure, 0, $id, $id_account);  // pass 0 as part-number
+      $this->_get_msg_part($msgno, $structure, 0);  // pass 0 as part-number
     }
     else {  // multipart: cycle through each part
      // X::ddump($structure);
       foreach ($structure->parts as $partno0 => $p){
-        $this->_get_msg_part($msgno, $p, $partno0 + 1, $id, $id_account);
+        $this->_get_msg_part($msgno, $p, $partno0 + 1);
       }
     }
     if ($res['html'] = $this->_htmlmsg) {
@@ -1366,6 +1369,44 @@ class Mailbox extends Basic
   }
 
 
+  public function getAttachments(int $msgNum, ?string $filename = null): ?array
+  {
+    if ($structure = $this->getMsgStructure($msgNum)) {
+      $attachments = [];
+      if (!empty($structure->parts)) {
+        foreach ($structure->parts as $np => $part) {
+          if ($part->ifdisposition
+            && (strtolower($part->disposition) === 'attachment')
+            && $part->ifparameters
+            && ($nameParam = X::getRow($part->parameters, ['attribute' => 'name']))
+            && (!$filename || ($filename === $nameParam->value))
+          ) {
+            if ($data = $this->getMsgBody($msgNum, $np + 1)) {
+              $data = $this->_get_decode_value($data, $structure->encoding);
+            }
+
+            $a = [
+              'name' => $nameParam->value,
+              'size' => $part->bytes,
+              'type' => Str::fileExt($nameParam->value) || strtolower($part->subtype),
+              'data' => $data
+            ];
+            if ($filename) {
+              return $a;
+            }
+
+            $attachments[] = $a;
+          }
+        }
+      }
+
+      return $attachments;
+    }
+
+    return null;
+  }
+
+
   /**
    * Checks if we are connected  (Test: ok)
    *
@@ -1507,7 +1548,7 @@ class Mailbox extends Basic
    * @param $structure
    * @param string|false $partno '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
    */
-  private function _get_msg_part($msgno, $structure, $partno, $id, $id_account)
+  private function _get_msg_part($msgno, $structure, $partno)
   {
     // DECODE DATA
     $data = $this->getMsgBody($msgno, $partno);
@@ -1594,7 +1635,7 @@ class Mailbox extends Basic
     // SUBPART RECURSION
     if (!empty($structure->parts)) {
       foreach ($structure->parts as $partno0 => $p2){
-        $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1), $id, $id_account);  // 1.2, 1.2.1, etc.
+        $this->_get_msg_part($msgno, $p2, $partno . '.' . ($partno0 + 1));  // 1.2, 1.2.1, etc.
       }
     }
   }

@@ -877,25 +877,21 @@ class Email extends Basic
 
   public function getEmail($id): ?array
   {
-    $cfg = $this->class_cfg['arch']['users_emails'];
-    $table = $this->class_cfg['tables']['users_emails'];
-    $em = $this->db->rselect($table, $cfg, [$cfg['id'] => $id]);
-    if ($em) {
-      $folder = $this->getFolder($em['id_folder']);
-      if ($folder
-        && ($mb = $this->getMailbox($folder['id_account']))
-        && $mb->selectFolder($folder['uid'])
-        && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
-      ) {
-        if ($number === 0) {
-          $this->db->delete($table, [$cfg['id'] => $id]);
-          return null;
-        }
-        $arr = $mb->getMsg($number, $id, $folder['id_account']);
-        $arr['id_account'] = $folder['id_account'];
-        $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
-        return $arr;
+    if (($em = $this->db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
+      && ($folder = $this->getFolder($em['id_folder']))
+      && ($mb = $this->getMailbox($folder['id_account']))
+      && $mb->selectFolder($folder['uid'])
+      && Str::isInteger($number = $mb->getMsgNo($em['msg_uid']))
+    ) {
+      if ($number === 0) {
+        $this->db->delete($this->class_table, [$this->fields['id'] => $id]);
+        return null;
       }
+
+      $arr = $mb->getMsg($number);
+      $arr['id_account'] = $folder['id_account'];
+      $arr['msg_unique_id'] = Str::toUtf8($em['msg_unique_id']);
+      return $arr;
     }
 
     return null;
@@ -1107,7 +1103,7 @@ class Email extends Basic
           $number = $mb->getMsgNo($email['uid']);
           $text = '';
           if ($number) {
-            $msg = $mb->getMsg($number, $id, $folder['id_account']);
+            $msg = $mb->getMsg($number);
             $text = Str::toUtf8($msg['plain'] ?: (!empty($msg['html']) ? Str::html2text(quoted_printable_decode($msg['html'])) : ''));
             if (strlen($text) > 65500) {
               $text = substr($text, 0, 65500);
@@ -1514,6 +1510,21 @@ class Email extends Basic
   public function getStructure($id_account, $force)
   {
 
+  }
+
+
+  public function getAttachments(string $id, ?string $filename = null): ?array
+  {
+    if (($em = $this->db->rselect($this->class_table, $this->fields, [$this->fields['id'] => $id]))
+      && ($folder = $this->getFolder($em['id_folder']))
+      && ($mb = $this->getMailbox($folder['id_account']))
+      && $mb->selectFolder($folder['uid'])
+      && ($msgNum = $mb->getMsgNo($em['msg_uid']))
+    ) {
+      return $mb->getAttachments($msgNum, $filename);
+    }
+
+    return null;
   }
 
 
