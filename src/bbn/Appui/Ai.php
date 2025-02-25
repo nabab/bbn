@@ -32,8 +32,6 @@ class Ai extends DbCls
     'tables' => [
       'ai_prompt' => 'bbn_ai_prompt',
       'ai_prompt_items' => 'bbn_ai_prompt_items',
-      'notes_versions' => 'bbn_notes_versions',
-      'notes' => 'bbn_notes'
     ],
     'arch' => [
       'ai_prompt' => [
@@ -54,31 +52,6 @@ class Ai extends DbCls
         'mime' => 'mime',
         'ai' => 'ai',
       ],
-      'notes_versions' => [
-        'id_note' => 'id_note',
-        'version' => 'version',
-        'latest' => 'latest',
-        'title' => 'title',
-        'content' => 'content',
-        'excerpt' => 'excerpt',
-        'id_user' => 'id_user',
-        'creation' => 'creation',
-      ],
-      'notes' => [
-        'id' => 'id',
-        'id_parent' => 'id_parent',
-        'id_alias' => 'id_alias',
-        'id_type' => 'id_type',
-        'id_option' => 'id_option',
-        'mime' => 'mime',
-        'lang' => 'lang',
-        'private' => 'private',
-        'locked' => 'locked',
-        'pinned' => 'pinned',
-        'important' => 'important',
-        'creator' => 'creator',
-        'active' => 'active',
-      ]
     ]
   ];
   
@@ -414,10 +387,9 @@ ws ::= ([ \t\n] ws)?',
         ]
       );
     }
-    X::log([$prompt, $input], 'ai_logs');
-    
-    
+
     $complete = json_decode($complete, true);
+    X::log([$prompt, $input, $complete], 'ai_logs');
     
     if (!$complete || !empty($complete['error'])) {
       return [
@@ -531,22 +503,20 @@ ws ::= ([ \t\n] ws)?',
    * @param string|null $shortcode The shortcode of the prompt (optional).
    * @return mixed The ID of the inserted prompt if successful, otherwise null.
    */
-  public function insertPrompt(string $title, string $content, string $lang, string $input, string $output, string $shortcode = null)
+  public function insertPrompt(array $data)
   {
     $option = Option::getInstance();
-    
-    // Get the option ID for 'prompt' type from the 'types' table in the 'note' application UI
+    if (!X::hasProps($data, ['title', 'content', 'lang', 'input', 'output'])) {
+      throw new Exception("Missing required data");
+    }
+
     $id_option = $option->fromCode('prompt', 'types', 'note', 'appui');
-    
-    // Insert a new note with the provided title, content, option ID, plain text format, and language
-    $id_note = $this->note->insert($title, $content, $id_option, true, false, NULL, NULL, 'text/plain', $lang);
-    
-    // Insert the prompt into the database with the note ID, input, output, and shortcode
+    $id_note = $this->note->insert($data['title'], $data['content'], $id_option, true, false, NULL, NULL, 'text/plain', $data['lang']);
     return $this->dbTraitInsert([
       $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,
-      $this->class_cfg['arch']['ai_prompt']['input'] => $input,
-      $this->class_cfg['arch']['ai_prompt']['output'] => $output,
-      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
+      $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],
+      $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],
+      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'] ?: null,
     ]);
   }
   
@@ -554,39 +524,52 @@ ws ::= ([ \t\n] ws)?',
    * Updates an existing prompt in the database.
    *
    * @param string $id The ID of the prompt to update.
-   * @param string $title The updated title of the prompt.
-   * @param string $content The updated content of the prompt.
-   * @param string $input The updated input of the prompt.
-   * @param string $output The updated output of the prompt.
+   * @param array $data The updated data of the prompt.
    * @return bool True if the update was successful, false otherwise.
    */
-  public function updatePrompt(string $id, string $title, string $content, string $input, string $output, string $shortcode = null): bool
+  public function updatePrompt(string $id, array $data): bool
   {
+    if (!X::hasProps($data, ['title', 'content', 'lang', 'input', 'output'])) {
+      throw new Exception("Missing required data");
+    }
+
     $prompt = $this->getPromptById($id);
-    
     if (empty($prompt)) {
-      // If the prompt does not exist, return false to indicate the failure
-      return false;
+      throw new Exception("Unrecognized prompt ID");
     }
     
     $note = $this->note->get($prompt['id_note']);
-    
     if (empty($note)) {
-      // If the associated note does not exist, return false to indicate the failure
-      return false;
+      throw new Exception("The corresponding notedoes not exist");
     }
     
     // Update the title and content of the associated note
-    $this->note->update($note['id'], $title, $content);
-    
+    X::ddump("UUU", $data, $note);
+    $noteUpdate = [];
+    if (isset($data['lang']) && ($data['lang'] !== $note['lang'])) {
+      $noteUpdate['lang'] = $data['lang'];
+      X::ddump("TTTT");
+    }
+    if ($data['title'] !== $note['title']) {
+      $noteUpdate['title'] = $data['title'];
+    }
+    if ($data['content'] !== $note['content']) {
+      $noteUpdate['content'] = $data['content'];
+    }
+
+    $res1 = false;
+    if (!empty($noteUpdate)) {
+      $res1 = $this->note->update($note['id'], $noteUpdate);
+    }
+
     // Update the prompt with the provided ID, input, and output values
-    $this->dbTraitUpdate($id, [
-      $this->class_cfg['arch']['ai_prompt']['input'] => $input,
-      $this->class_cfg['arch']['ai_prompt']['output'] => $output,
-      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $shortcode,
+    $res2 = $this->dbTraitUpdate($id, [
+      $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],
+      $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],
+      $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'],
     ]);
     
-    return true;
+    return (bool)($res1 || $res2);
   }
   
   public function deletePrompt(string $id) {

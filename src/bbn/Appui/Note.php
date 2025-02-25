@@ -436,19 +436,21 @@ class Note extends DbCls
       'content',
       'private',
       'locked',
+      'lang',
       'excerpt',
       'pinned',
       'important'
     ];
     if (is_array($title)) {
       $cfg = $title;
+      $title = $cfg['title'] ?? '';
     }
     else {
       $cfg = [];
     }
 
     foreach ($props as $prop) {
-      if (!array_key_exists($prop, $cfg)) {
+      if (!array_key_exists($prop, $cfg) && isset($$prop)) {
         $cfg[$prop] = $$prop;
       }
     }
