@@ -181,111 +181,115 @@ class Meeting extends DbCls
         $serverWhere['field'] = $this->prefFields['id_option'];
         $serverWhere['value'] = $servers[0];
       }
-    }
-    $where = [
-      'conditions' => [[
-        'field' => $this->prefFields['id_alias'],
-        'operator' => 'isnull'
-      ], $serverWhere, [
-        'logic' => 'OR',
+
+      $where = [
         'conditions' => [[
-          'field' => $this->prefFields['public'],
-          'value' => 1
-        ]]
-      ]]
-    ];
-    if (!empty($idUser)) {
-      $where['conditions'][2]['conditions'][] = [
-        'field' => $this->prefFields['id_user'],
-        'value' => $idUser
-      ];
-    }
-    if (!empty($idGroup)) {
-      $where['conditions'][2]['conditions'][] = [
-        'field' => $this->prefFields['id_group'],
-        'value' => $idGroup
-      ];
-    }
-    $rooms = $this->db->rselectAll([
-      'table' => $this->prefTable,
-      'fields' => [],
-      'where' => $where,
-      'order' => [[
-        'field' => $this->prefFields['text'],
-        'dir' => 'ASC'
-      ]]
-    ]);
-    if (!empty($idUser)) {
-      $meetingsTable = $this->class_cfg['tables']['meetings'];
-      $meetingsFields = $this->class_cfg['arch']['meetings'];
-      $partsTable = $this->class_cfg['tables']['participants'];
-      $partsFields = $this->class_cfg['arch']['participants'];
-      $t = $this;
-      if ($roomsInvited = $this->db->rselectAll([
-        'table' => $this->prefTable,
-        'fields' => \array_map(function($f) use ($t){
-          return $t->db->colFullName($f, $t->prefTable);
-        }, $this->prefFields),
-        'join' => [[
-          'table' => $meetingsTable,
-          'on' => [
-            'conditions' => [[
-              'field' => $this->db->colFullName($meetingsFields['id_room'], $meetingsTable),
-              'exp' => $this->db->colFullName($this->prefFields['id'], $this->prefTable)
-            ]]
-          ]
-        ], [
-          'table' => $partsTable,
-          'on' => [
-            'conditions' => [[
-              'field' => $this->db->colFullName($meetingsFields['id'], $meetingsTable),
-              'exp' => $this->db->colFullName($partsFields['id_meeting'], $partsTable)
-            ]]
-          ]
-        ]],
-        'where' => [
+          'field' => $this->prefFields['id_alias'],
+          'operator' => 'isnull'
+        ], $serverWhere, [
+          'logic' => 'OR',
           'conditions' => [[
-            'field' => $this->db->colFullName($partsFields['id_user'], $partsTable),
-            'value' => $idUser
-          ], [
-            'field' => $this->db->colFullName($partsFields['invited'], $partsTable),
+            'field' => $this->prefFields['public'],
             'value' => 1
           ]]
-        ],
-        'group_by' => [$this->db->colFullName($meetingsFields['id_room'], $meetingsTable)]
-      ])) {
-        foreach ($roomsInvited as $r) {
-          if (X::find($rooms, [$this->prefFields['id'] => $r[$this->prefFields['id']]]) === null) {
-            $rooms[] = $r;
+        ]]
+      ];
+      if (!empty($idUser)) {
+        $where['conditions'][2]['conditions'][] = [
+          'field' => $this->prefFields['id_user'],
+          'value' => $idUser
+        ];
+      }
+      if (!empty($idGroup)) {
+        $where['conditions'][2]['conditions'][] = [
+          'field' => $this->prefFields['id_group'],
+          'value' => $idGroup
+        ];
+      }
+      $rooms = $this->db->rselectAll([
+        'table' => $this->prefTable,
+        'fields' => [],
+        'where' => $where,
+        'order' => [[
+          'field' => $this->prefFields['text'],
+          'dir' => 'ASC'
+        ]]
+      ]);
+      if (!empty($idUser)) {
+        $meetingsTable = $this->class_cfg['tables']['meetings'];
+        $meetingsFields = $this->class_cfg['arch']['meetings'];
+        $partsTable = $this->class_cfg['tables']['participants'];
+        $partsFields = $this->class_cfg['arch']['participants'];
+        $t = $this;
+        if ($roomsInvited = $this->db->rselectAll([
+          'table' => $this->prefTable,
+          'fields' => \array_map(function($f) use ($t){
+            return $t->db->colFullName($f, $t->prefTable);
+          }, $this->prefFields),
+          'join' => [[
+            'table' => $meetingsTable,
+            'on' => [
+              'conditions' => [[
+                'field' => $this->db->colFullName($meetingsFields['id_room'], $meetingsTable),
+                'exp' => $this->db->colFullName($this->prefFields['id'], $this->prefTable)
+              ]]
+            ]
+          ], [
+            'table' => $partsTable,
+            'on' => [
+              'conditions' => [[
+                'field' => $this->db->colFullName($meetingsFields['id'], $meetingsTable),
+                'exp' => $this->db->colFullName($partsFields['id_meeting'], $partsTable)
+              ]]
+            ]
+          ]],
+          'where' => [
+            'conditions' => [[
+              'field' => $this->db->colFullName($partsFields['id_user'], $partsTable),
+              'value' => $idUser
+            ], [
+              'field' => $this->db->colFullName($partsFields['invited'], $partsTable),
+              'value' => 1
+            ]]
+          ],
+          'group_by' => [$this->db->colFullName($meetingsFields['id_room'], $meetingsTable)]
+        ])) {
+          foreach ($roomsInvited as $r) {
+            if (X::find($rooms, [$this->prefFields['id'] => $r[$this->prefFields['id']]]) === null) {
+              $rooms[] = $r;
+            }
           }
         }
       }
-    }
-    X::sortBy($rooms, $this->prefFields['text'], 'asc');
-    if (!empty($rooms)) {
-      foreach ($rooms as $i => $r) {
-        $r['moderators'] = $this->getModerators($r[$this->prefFields['id']]);
-        if (Str::isJson($r[$this->prefFields['cfg']])) {
-          $r = \array_merge($r, \json_decode($r[$this->prefFields['cfg']], true));
-          unset($r[$this->prefFields['cfg']]);
+      X::sortBy($rooms, $this->prefFields['text'], 'asc');
+      if (!empty($rooms)) {
+        foreach ($rooms as $i => $r) {
+          $r['moderators'] = $this->getModerators($r[$this->prefFields['id']]);
+          if (Str::isJson($r[$this->prefFields['cfg']])) {
+            $r = \array_merge($r, \json_decode($r[$this->prefFields['cfg']], true));
+            unset($r[$this->prefFields['cfg']]);
+          }
+          if ($idMeeting = $this->getStartedMeeting($r[$this->prefFields['id']])) {
+            $r['participants'] = $this->getParticipants($idMeeting);
+            $r['invited'] = $this->getInvited($idMeeting);
+            $r['liveMeeting'] = $idMeeting;
+          }
+          else {
+            $r['participants'] = [];
+            $r['invited'] = [];
+            $r['liveMeeting'] = null;
+          }
+          $r['live'] = !empty($idMeeting);
+          $last = $this->getLastMeeting($r[$this->prefFields['id']]);
+          $r['last'] = !empty($last) ? $last[$this->class_cfg['arch']['meetings']['started']] : '';
+          $rooms[$i] = $r;
         }
-        if ($idMeeting = $this->getStartedMeeting($r[$this->prefFields['id']])) {
-          $r['participants'] = $this->getParticipants($idMeeting);
-          $r['invited'] = $this->getInvited($idMeeting);
-          $r['liveMeeting'] = $idMeeting;
-        }
-        else {
-          $r['participants'] = [];
-          $r['invited'] = [];
-          $r['liveMeeting'] = null;
-        }
-        $r['live'] = !empty($idMeeting);
-        $last = $this->getLastMeeting($r[$this->prefFields['id']]);
-        $r['last'] = !empty($last) ? $last[$this->class_cfg['arch']['meetings']['started']] : '';
-        $rooms[$i] = $r;
       }
+
+      return $rooms;
     }
-    return $rooms;
+
+    return null;
   }
 
 

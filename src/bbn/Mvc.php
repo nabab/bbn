@@ -85,6 +85,9 @@ class Mvc implements Mvc\Api
   protected static $db_in_controller = false;
 
   private $is_routed = false;
+
+  private $default;
+
   private $is_controlled = false;
   /**
    * The current controller
@@ -844,6 +847,8 @@ class Mvc implements Mvc\Api
       if (isset($routes['forbidden'])) {
         $this->forbidden_routes = $routes['forbidden'];
       }
+
+      $this->default = $routes['default'] ?? 'home';
     }
 
     $this->initLocaleDomain();
@@ -855,6 +860,11 @@ class Mvc implements Mvc\Api
   public function __destruct()
   {
     self::destructSingleton();
+  }
+
+  public function getDefault() :string
+  {
+    return $this->default;
   }
 
 

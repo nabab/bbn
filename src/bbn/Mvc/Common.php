@@ -183,6 +183,11 @@ trait Common
   }
 
 
+  public function getDefault()
+  {
+    return $this->_mvc->getDefault();
+  }
+
   public function getRoutes(): ?array
   {
     return $this->_mvc->getRoutes();
