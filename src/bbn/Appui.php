@@ -1506,7 +1506,9 @@ class Appui
         ]
       );
       $opt->applyTemplate($id_project);
+      $opt->deleteCache();
       $idPath = $opt->fromCode('app', 'path', $id_project);
+      X::log($idPath, 'idPath');
       $idAliasPath = $opt->fromCode("bbn-project", "types", "ide", "appui");
       $opt->add([
         'id_parent' => $idPath,
