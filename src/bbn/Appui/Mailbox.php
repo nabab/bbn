@@ -1141,7 +1141,7 @@ class Mailbox extends Basic
    * @param int $msguid UID of the message
    * @return bool|int
    */
-  public function getMsgNo($msguid)
+  public function getMsgNo(int $msguid)
   {
     if ($this->_is_connected()) {
       return imap_msgno($this->stream, $msguid);

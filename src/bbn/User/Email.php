@@ -565,6 +565,14 @@ class Email extends Basic
           $folder['uid'],
           $info->Nmsgs
         );
+        if ($info->Nmsgs === 0) {
+          if ($generator) {
+            yield 0;
+          }
+
+          return 0;
+        }
+
         $first_uid = $mb->getFirstUid();
         $last_uid = $mb->getLastUid();
         $start = null;
