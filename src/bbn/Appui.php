@@ -1675,6 +1675,23 @@ class Appui
             'id_alias' => $opt->getPluginTemplateId()
           ], true);
           $num += $opt->applyTemplate($idApp);
+          $idPath = $opt->fromCode('app', 'path', $idApp);
+          $num += $opt->import(json_decode('{
+              "id_alias": [
+                  "bbn-project",
+                  "types",
+                  "options",
+                  "ide",
+                  "appui"
+              ],
+              "text": "main",
+              "code": "main",
+              "path": "\/",
+              "bcolor": "#0c1b71",
+              "fcolor": "#fdfdfd",
+              "default": true,
+              "language": "en"
+          }'), $idPath);
           $opt->deleteCache(null);
         }
 
