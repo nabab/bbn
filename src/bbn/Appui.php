@@ -1676,7 +1676,7 @@ class Appui
           ], true);
           $num += $opt->applyTemplate($idApp);
           $idPath = $opt->fromCode('app', 'path', $idApp);
-          $num += $opt->import(json_decode('{
+          $num += $opt->import([json_decode('{
               "id_alias": [
                   "bbn-project",
                   "types",
@@ -1691,7 +1691,7 @@ class Appui
               "fcolor": "#fdfdfd",
               "default": true,
               "language": "en"
-          }', true), $idPath);
+          }', true)], $idPath);
           $opt->deleteCache(null);
         }
 
