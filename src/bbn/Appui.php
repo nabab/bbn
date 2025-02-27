@@ -1691,7 +1691,7 @@ class Appui
               "fcolor": "#fdfdfd",
               "default": true,
               "language": "en"
-          }'), $idPath);
+          }', true), $idPath);
           $opt->deleteCache(null);
         }
 
