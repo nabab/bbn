@@ -1505,13 +1505,7 @@ class Appui
           'code' => $this->_current['app_name'],
         ]
       );
-      $opt->add(
-        [
-          'id_parent' => $id_project,
-          'text' => X::_("Environment"),
-          'code' => 'env'
-        ]
-      );
+      $opt->applyTemplate($id_project);
     }
 
     $id_client = $this->getClient($this->_current['client_name']);
