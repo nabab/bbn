@@ -1506,6 +1506,19 @@ class Appui
         ]
       );
       $opt->applyTemplate($id_project);
+      $idPath = $opt->fromCode('app', 'path', $id_project);
+      $idAliasPath = $opt->fromCode("bbn-project", "types", "ide", "appui");
+      $opt->add([
+        'id_parent' => $idPath,
+        'id_alias' => $idAliasPath,
+        'text' =>  "main",
+        'code' =>  "main",
+        'path' =>  "/",
+        'bcolor' =>  "#0c1b71",
+        'fcolor' =>  "#fdfdfd",
+        'default' =>  true,
+        'language' =>  "en"
+      ], false, true);
     }
 
     $id_client = $this->getClient($this->_current['client_name']);
@@ -1675,19 +1688,6 @@ class Appui
             'id_alias' => $opt->getPluginTemplateId()
           ], true);
           $num += $opt->applyTemplate($idApp);
-          $idPath = $opt->fromCode('app', 'path', $idApp);
-          $idAliasPath = $opt->fromCode("bbn-project", "types", "options", "ide", "appui");
-          $num += $opt->add([
-            'id_parent' => $idPath,
-            'id_alias' => $idAliasPath,
-            'text' =>  "main",
-            'code' =>  "main",
-            'path' =>  "/",
-            'bcolor' =>  "#0c1b71",
-            'fcolor' =>  "#fdfdfd",
-            'default' =>  true,
-            'language' =>  "en"
-          ], false, true);
           $opt->deleteCache(null);
         }
 
