@@ -1442,14 +1442,15 @@ class Ide
                 'value' => $pref['id']
               ]]
             ],
-            'limit' => 10,
+            'limit' => $limit*3,
             'order' => ['date' => "DESC"]
           ]
         );
+
         //configure path for link  for each recent file
-        foreach ($recents as $id => $bit) {
+        foreach ($recents as $bit) {
           //path for link
-          $arr  = explode("/", $bit['text']);
+          $arr  = explode("/", Str::parsePath($bit['text']));
           $type = '';
           $root = $arr[0] . '/' . $arr[1];
           if (!empty($arr[2])) {
@@ -1459,25 +1460,34 @@ class Ide
 
           unset($arr[0]);
           unset($arr[1]);
+          $arr  = implode('/', $arr);
+          $bits = X::split($arr, '/_end_/');
+          $file = $bits[0];
           if (($type !== 'mvc') && ($type !== 'components')) {
             $tab = 'code';
           } else {
-            $tab = array_shift($arr);
-            $tab = $tab === 'public' ? 'php' : $tab;
+            $tab = $bits[1];
           }
 
-          $arr  = implode('/', $arr);
-          $file = explode('.', $arr)[0];
-          $path = Str::parsePath('file/' . $root . '/' . $type . '/' . $file . '/_end_/' . $tab);
+          $group = $root . '/' . $type . '/' . $file;
+          if (X::getRow($all, ['group' => $group])) {
+            continue;
+          }
 
+          $path = Str::parsePath('file/' . $group . '/_end_/' . $tab);
           $value = json_decode($bit['cfg'], true);
           $all[] = [
             'cfg' => !empty($value['file_json']) ? json_decode($this->fs->getContents(self::$backup_path . $value['file_json']), true) : [],
-            'file' => Str::parsePath($bit['text']),
+            'file' => $file,
             'repository' => $root,
+            'group' => $group,
             'path' => $path,
             'type' => $type === '' ? false : $type
           ];
+
+          if (count($all) === $limit) {
+            break;
+          }
         }
       }
     }

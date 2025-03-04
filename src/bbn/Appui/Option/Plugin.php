@@ -167,12 +167,12 @@ trait Plugin
     $res = [];
     if ($pluginAlias && $pluginsAlias && $plugins) {
       foreach ($this->fullOptions($plugins) as $p) {
-        if (empty($p['code'])) {
-          throw new Exception(X::_("The plugin option must have a code"));
-        }
-
         $code = $p['code'];
         if ($p['id_alias'] === $pluginAlias) {
+          if (empty($code)) {
+            throw new Exception(X::_("The plugin option must have a code"));
+          }
+
           $item = [
             'id' => $p['id'],
             'code' => $code,
@@ -195,6 +195,13 @@ trait Plugin
           $res[] = $item;
         }
         else {
+          if (empty($code) && !empty($p['alias']['code'])) {
+            $code = $p['alias']['code'];
+          }
+          if (empty($code)) {
+            throw new Exception(X::_("The plugin option must have a code"));
+          }
+          
           foreach ($this->fullOptions($p['id']) as $p2) {
             if (empty($p2['code'])) {
               throw new Exception(X::_("The plugin option must have a code"));
