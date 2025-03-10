@@ -407,9 +407,10 @@ class Identity extends DbCls
    * Merges the history of multiple person records.
    *
    * @param mixed $ids IDs of the person records to merge.
+   * @param string|null $main The ID of the main person record.
    * @return int Result of the merge operation.
    */
-  public function fusion($ids, $main = null)
+  public function fusion($ids, ?string $main = null)
   {
     return History::fusion($ids, $this->class_cfg['table'], $this->db, $main);
   }
