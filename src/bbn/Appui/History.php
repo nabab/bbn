@@ -963,7 +963,7 @@ MYSQL;
     array_unshift($ids, $main);
 
     $tables = $db->rselectAll(
-      [self::$table_uids],
+      self::$table_uids,
       'bbn_table',
       ['bbn_uid' => $ids]
     );
@@ -987,7 +987,7 @@ MYSQL;
       self::$table_uids,
       'bbn_active',
       [
-        'uid' => $source
+        'bbn_uid' => $source
       ]
     );
 
