@@ -1022,6 +1022,10 @@ MYSQL;
       self::disable();
     }
 
+    if ($isTriggerEnabled = $db->isTriggerEnabled()) {
+      $db->disableTrigger();
+    }
+
     $num = 0;
     foreach ($ids as $id) {
       foreach ($relations as $ref) {
@@ -1044,6 +1048,10 @@ MYSQL;
         self::$table_uids,
         ['bbn_uid' => $id]
       );
+    }
+
+    if ($isTriggerEnabled) {
+      $db->enableTrigger();
     }
 
     if (!$isDisabled) {
