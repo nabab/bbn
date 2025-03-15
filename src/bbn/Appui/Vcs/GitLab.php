@@ -370,6 +370,10 @@ class GitLab implements Server
    */
   public function normalizeProject(object $project): array
   {
+    if (is_array($project->namespace)) {
+      $project->namespace = (object)$project->namespace;
+    }
+
     return [
       'id' => $project->id,
       'type' => 'git',
@@ -396,12 +400,12 @@ class GitLab implements Server
       'defaultBranch' => $project->default_branch,
       'archived' => $project->archived,
       'avatar' => $project->avatar_url,
-      'license' => (object)[
+      'license' => empty($project->license) ? null : (object)[
         'name' => $project->license->name,
         'code' => $project->license->nickname
       ],
-      'noCommits' => $project->statistics['commit_count'],
-      'size' => $project->statistics['repository_size'],
+      'noCommits' => isset($project->statistics) ? $project->statistics['commit_count'] : null,
+      'size' => isset($project->statistics) ? $project->statistics['repository_size'] : null,
       'noForks' => $project->forks_count,
       'noStars' => $project->star_count
     ];

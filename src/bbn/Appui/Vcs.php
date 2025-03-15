@@ -105,7 +105,6 @@ class Vcs
 
   public function setUserAccessToken(string $id, string $token): bool
   {
-    $this->changeServer($id);
     if (!($user = User::getInstance())) {
       throw new \Exception(X::_('No User class instance found'));
     }
@@ -122,6 +121,8 @@ class Vcs
     if (!$this->pwd->userStore($token, $idPref, $user)) {
       throw new \Exception(X::_('Error while storing the user access token: ID: %s , Token: %s', $id, $token));
     }
+
+    $this->changeServer($id);
     if (empty($this->server)) {
       throw new \Exception(X::_('Unable to connect with the following access token: ID: %s , Token: %s', $id, $token));
     }

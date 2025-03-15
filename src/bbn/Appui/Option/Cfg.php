@@ -34,8 +34,14 @@ trait Cfg
     $c   = &$this->class_cfg;
     $f   = &$this->fields;
 
-    // Retrieve the cfg value from the database.
-    $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
+    $id_alias = $this->db->selectOne($c['table'], $f['id_alias'], [$f['id'] => $id]);
+    if ($id_alias && $this->isInTemplate($id_alias)) {
+      $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id_alias]);
+    }
+    else {
+      // Retrieve the cfg value from the database.
+      $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id]);
+    }
 
     // Decode the JSON string to an array if possible, otherwise initialize as empty array.
     $cfg = Str::isJson($cfg) ? json_decode($cfg, true) : [];
