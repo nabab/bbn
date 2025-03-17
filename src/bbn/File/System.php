@@ -1484,16 +1484,16 @@ $obj =& $this;
             E_WARNING
           );
           if ($this->mode === 'ssh') {
-                          $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-                        }
+            $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          }
           elseif ($this->mode === 'ftp') {
-                          $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-                        }
+            $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          }
           else {
-                          $res = rmdir($path);
-                        }
+            $res = rmdir($path);
+          }
 
-          restore_error_handler();          
+          restore_error_handler();
           }
         else {
           $res = true;
@@ -1512,7 +1512,7 @@ $obj =& $this;
           } catch (\Exception $e) {
             $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
           }
-        } else {
+        } else if (is_file($path)) {
           $res = @unlink($path);
           if (!$res) {
             $this->log(X::_('Error in _delete') . ': ' . $path);
