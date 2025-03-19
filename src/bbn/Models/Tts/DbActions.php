@@ -126,7 +126,7 @@ trait DbActions
             $data[$col] = json_decode($data[$col], true);
           }
 
-          $jsonUpdate = 'JSON_SET(' . $this->db->csn($col, true);
+          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,"{}")';
           foreach ($data[$col] as $k => $v) {
             $jsonUpdate .= ', "$.' . $k . '", "' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '"';
           }
@@ -135,7 +135,7 @@ trait DbActions
           $data[$col] = [null, $jsonUpdate];
         }
       }
-      
+
       return $this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
     }
 

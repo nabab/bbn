@@ -115,7 +115,7 @@ trait DbJunction
       if (!empty($f['cfg'])) {
         $col = $f['cfg'];
         if (!empty($data[$col])) {
-          $jsonUpdate = 'JSON_SET(' . $this->db->csn($col, true);
+          $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,"{}")';
           foreach ($data[$col] as $k => $v) {
             $jsonUpdate .= ', "$.' . $k . '", "' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '"';
           }
@@ -124,7 +124,7 @@ trait DbJunction
           $data[$col] = [null, $jsonUpdate];
         }
       }
-      
+
       return (bool)$this->db->update($ccfg['table'], $data, $this->dbTraitGetFilterCfg($filter));
     }
 
