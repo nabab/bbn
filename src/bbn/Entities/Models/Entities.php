@@ -107,7 +107,7 @@ abstract class Entities extends DbCls
    *
    * @var array
    */
-  private static $links = [];
+  private static $linksCache = [];
 
   /**
    * Class cache.
@@ -123,6 +123,7 @@ abstract class Entities extends DbCls
    */
   private $linkCls;
 
+  private $links;
   /**
    * Entities constructor.
    *
@@ -141,7 +142,7 @@ abstract class Entities extends DbCls
    */
   public function __construct(
     Db $db,
-    array $cfg = null,
+    array|null $cfg = null,
     protected Option|null $options = null,
     protected Mail|null $mail = null,
     private Identity|null $identity = null,
@@ -319,8 +320,8 @@ abstract class Entities extends DbCls
    *
    * @param array $filter
    * @param array $order
-   * @param array $limit
-   * @param array $start
+   * @param int $limit
+   * @param int $start
    *
    * @return array
    */
@@ -329,7 +330,7 @@ abstract class Entities extends DbCls
     return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
   }
 
-  public function getRelations(string $id, string $table = null): ?array
+  public function getRelations(string $id, string|null $table = null): ?array
   {
     return $this->dbTraitGetRelations($id, $table);
   }
@@ -487,12 +488,12 @@ abstract class Entities extends DbCls
   {
     $id = $this->options()->fromCode($linkCls::$codes);
     if (!$entity) {
-      if (!isset(self::$links[$id])) {
+      if (!isset(self::$linksCache[$id])) {
         $link = new $linkCls($this->db, $this);
         self::setLink($id, $link);
       }
 
-      return self::$links[$id];
+      return self::$linksCache[$id];
     }
 
     return new $linkCls($this->db, $this, $entity);
@@ -541,7 +542,7 @@ abstract class Entities extends DbCls
 
   private static function setLink(string $id, Link $link): void
   {
-    self::$links[$id] = $link;
+    self::$linksCache[$id] = $link;
   }
 
 
