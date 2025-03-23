@@ -13,7 +13,8 @@ use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\DbActions;
 use bbn\Mvc\Model;
 use bbn\Util\Timer;
-use Opis\Closure\SerializableClosure;
+use function Opis\Closure\serialize as serializeFn;
+use function Opis\Closure\unserialize as unserializeFn;
 
 class Search extends Basic
 {
@@ -240,7 +241,7 @@ class Search extends Basic
 
       foreach ($items as $item) {
         if (!empty($item['fn'])
-            && ($wrapper = unserialize($item['fn']))
+            && ($wrapper = unserializeFn($item['fn']))
             && ($wrapper instanceof SerializableClosure)
         ) {
           // Extract the closure object

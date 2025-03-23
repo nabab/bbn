@@ -4,7 +4,8 @@ namespace bbn;
 use Closure;
 use Exception;
 use Traversable;
-use Opis\Closure\SerializableClosure;
+use function Opis\Closure\serialize as serializeFn;
+use function Opis\Closure\unserialize as unserializeFn;
 use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 
@@ -719,9 +720,7 @@ class Cache implements CacheInterface
    */
   public function serializeFunction(Closure $function): string
   {
-    return serialize(
-      new SerializableClosure($function)
-    );
+    return serializeFn($function);
   }
 
 

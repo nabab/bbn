@@ -115,7 +115,7 @@ class Database extends bbn\Models\Cls\Cache
                   throw new \Exception(X::_("No password for %s", $cfg['code']));
                 }
                 $db_cfg = [
-                  'engine' => 'mysql',
+                  'engines' => 'mysql',
                   'user' => $bits[0],
                   'host' => $bits[1],
                   'db' => $db,
@@ -124,7 +124,7 @@ class Database extends bbn\Models\Cls\Cache
               }
               else {
                 $db_cfg = [
-                  'engine' => 'mysql',
+                  'engines' => 'mysql',
                   'host' => $cfg['code'],
                   'db' => $db
                 ];
@@ -151,7 +151,7 @@ class Database extends bbn\Models\Cls\Cache
             }
             
             $db_cfg = [
-              'engine' => 'sqlite',
+              'engines' => 'sqlite',
               'db' => $cfg['path'].'/'.$db
             ];
             try {
@@ -163,7 +163,7 @@ class Database extends bbn\Models\Cls\Cache
             break;
 
           default:
-            throw new \Exception(X::_('Impossible to find the engine').' '.$cfg['engine']);
+            throw new \Exception(X::_('Impossible to find the engine').' '.$cfg['engines']);
         }
       }
 
@@ -183,13 +183,13 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection code (user@host or host)
    * @return null|string
    */
-  public function hostId(string $host = null, string $engine = 'mysql'): ?string
+  public function hostId(string|null $host, string $engine = 'mysql'): ?string
   {
     if (empty($host)) {
       $host = $this->db->getConnectionCode();
     }
 
-    $r = self::getOptionId($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine);
+    $r = self::getOptionId($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines');
     return $r ?: null;
   }
 
@@ -201,7 +201,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function countHosts(string $engine = 'mysql'): ?int
   {
-    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine))
+    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines'))
         && ($num = $this->o->count($id_parent))
     ) {
       return $num;
@@ -218,7 +218,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function hosts(string $engine = 'mysql'): array
   {
-    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine))
+    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines'))
         && ($co = array_values($this->o->codeOptions($id_parent)))
     ) {
       return $co;
@@ -235,7 +235,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function fullHosts(string $engine = 'mysql'): ?array
   {
-    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine))
+    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines'))
         && ($opt = $this->o->fullOptions($id_parent))
     ) {
       return $opt;
@@ -256,7 +256,8 @@ class Database extends bbn\Models\Cls\Cache
     if (!\bbn\Str::isUid($host)) {
       $host = $this->hostId($host, $engine);
     }
-    if (($id_parent = self::getOptionId('dbs', $engine))
+
+    if (($id_parent = self::getOptionId('dbs', $engine, 'engines'))
         && ($res = $this->o->fromCode($db ?: $this->db->getCurrent(), $id_parent))
     ) {
       return $res;
@@ -275,7 +276,7 @@ class Database extends bbn\Models\Cls\Cache
   public function countDbs(string $host = '', string $engine = 'mysql'): int
   {
     if (!$host) {
-      $num = $this->o->count(self::getOptionId('dbs', $engine));
+      $num = $this->o->count(self::getOptionId('dbs', $engine, 'engines'));
       return $num;
     }
     elseif (!bbn\Str::isUid($host)) {
@@ -297,7 +298,7 @@ class Database extends bbn\Models\Cls\Cache
   public function dbs(string $host = '', string $engine = 'mysql'): array
   {
     if (!$host) {
-      $arr = $this->o->fullOptions(self::getOptionId('dbs', $engine));
+      $arr = $this->o->fullOptions(self::getOptionId('dbs', $engine, 'engines'));
     }
     elseif (!bbn\Str::isUid($host)) {
       $host = $this->hostId($host, $engine);
@@ -1012,7 +1013,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function importHost(string $host, string $engine, array $cfg, bool $full = false): ?string
   {
-    if (($id_parent = self::getOptionId('connections', $engine))
+    if (($id_parent = self::getOptionId('connections', $engine, 'engines'))
         && !($id_host = $this->o->fromCode($host, $id_parent))
     ) {
       $id_host = $this->o->add(
@@ -1104,7 +1105,7 @@ class Database extends bbn\Models\Cls\Cache
             [
               'show_alias' => 1,
               'notext' => 1,
-              'id_root_alias' => self::getOptionId('connections'),
+              'id_root_alias' => self::getOptionId('connections', $id_db),
               'root_alias' => 'Connections'
             ]
           );

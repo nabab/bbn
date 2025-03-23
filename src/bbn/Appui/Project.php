@@ -399,15 +399,32 @@ class Project extends DbCls
     $res = $this->getFullTree();
     if (isset($res['db']) && !empty($res['db']['items'])) {
       $o = self::getOptionsObject();
-      foreach ($res['db']['items'] as $i => $db) {
+      foreach ($res['db']['items'] as &$db) {
+        if (empty($db['text']) && !empty($db['alias'])) {
+          $db['text'] = $db['alias']['text'];
+        }
+        if (empty($db['code']) && !empty($db['alias'])) {
+          $db['code'] = $db['alias']['code'];
+        }
+
+        $db['items'] = $o->fullOptions('connections', $db['id_alias']);
         if (!empty($db['items'])) {
-          $res['db']['items'][$i]['engine'] = $o->code($o->getIdParent($db['alias']['id_parent']));
+          $db['engine'] = $o->code($o->getIdParent($db['alias']['id_parent']));
           foreach ($db['items'] as $j => $conn) {
-            $res['db']['items'][$i]['items'][$j]['engine'] = $o->code($o->getIdParent($conn['alias']['id_parent']));
+            if (empty($conn['text']) && !empty($conn['alias'])) {
+              $db['items'][$j]['text'] = $conn['alias']['text'];
+            }
+
+            if (empty($conn['code']) && !empty($conn['alias'])) {
+              $db['items'][$j]['code'] = $conn['alias']['code'];
+            }
+
+            $db['items'][$j]['engine'] = $db['engine'];//$o->code($o->getIdParent($conn['alias']['id_parent']));
           }
         }
       }
 
+      unset($db);
       return $res['db'];
     }
 
@@ -538,7 +555,7 @@ class Project extends DbCls
    */
   private function _checkGit($ele): bool
   {
-    $difference_git = $this->getDifferenceGit();
+    $difference_git = $this->_getDifferenceGit();
     $info_git = false;
     if (!empty($difference_git['ide'])) {
       foreach($difference_git['ide'] as $commit){
@@ -926,7 +943,7 @@ class Project extends DbCls
     if (!$this->fs->isDir($path)) {
       throw new Exception(X::_('Invalid Path %s', $path));
     }
-    return !empty($onlydirs) ? $this->getDirs($path, false, 'tmce') : $this->fs->getFiles($path, true, false, false, 'tmce');
+    return !empty($onlydirs) ? $this->fs->getDirs($path, false, 'tmce') : $this->fs->getFiles($path, true, false, false, 'tmce');
   }
 
   /**
@@ -1030,8 +1047,8 @@ class Project extends DbCls
               'id' => $option['id'],
               'id_alias' => $option['id_alias'],
               'parent_code' => $root['code'],
-              'text' => $option['text'],
-              'code' => $option['code'],
+              'text' => $option['text'] ?: $option['alias']['text'],
+              'code' => $option['code'] ?: $option['alias']['code'],
               'bcolor' => $option['bcolor'] ?? null,
               'fcolor' => $option['fcolor'] ?? null,
               'language' => $option['language'] ?? BBN_LANG,
@@ -1539,7 +1556,7 @@ class Project extends DbCls
    * @param string $lang
    * @return void
    */
-  private function setProjectInfo(string $id = null)
+  private function setProjectInfo(string|null $id)
   {
     if ($o = $this->options->option($id ?: $this->id)) {
       $cfg                = $this->options->getCfg($id ?: $this->id);

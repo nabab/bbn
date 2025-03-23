@@ -85,7 +85,7 @@ class Ai extends DbCls
     ], [
       'value' => 'code-js',
       'text' => 'Code JS',
-      'prompt' => 'Your response needs to be pure code in Javascript',
+      'prompt' => "Your response needs to be pure Javascript code, it shouldn't have anything else than code, and it shouldn't be surouneded by markdown quotes.",
       'component' => 'bbn-code',
     ], [
       'value' => 'single-line',
@@ -544,15 +544,15 @@ ws ::= ([ \t\n] ws)?',
     }
     
     // Update the title and content of the associated note
-    X::ddump("UUU", $data, $note);
     $noteUpdate = [];
     if (isset($data['lang']) && ($data['lang'] !== $note['lang'])) {
       $noteUpdate['lang'] = $data['lang'];
-      X::ddump("TTTT");
     }
+
     if ($data['title'] !== $note['title']) {
       $noteUpdate['title'] = $data['title'];
     }
+
     if ($data['content'] !== $note['content']) {
       $noteUpdate['content'] = $data['content'];
     }

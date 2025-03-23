@@ -37,10 +37,6 @@ class Db implements Db\Actions
    */
   protected $engine;
 
-
-
-
-
   /** @var array The database engines allowed */
   protected static $engines = [
     'mysql' => 'nf nf-dev-mysql',
@@ -3446,6 +3442,11 @@ class Db implements Db\Actions
     }
 
     return $structure;
+  }
+
+  public function parseQuery(string $query): ?array
+  {
+    return $this->language->parseQuery($query);
   }
 
 
