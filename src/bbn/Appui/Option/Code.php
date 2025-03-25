@@ -88,6 +88,7 @@ trait Code
       // Perform a database query to find an option matching the provided code and parent ID.
       $c = &$this->class_cfg;
       $f = &$this->fields;
+      $rightValue = null;
 
       /** @var int|false $tmp */
       if ($tmp = $this->db->selectOne(
@@ -98,8 +99,7 @@ trait Code
           [$f['code'], '=', $true_code]
         ]
       )) {
-        // Cache the result for future queries.
-        $this->cacheSet($id_parent, $cache_name, $tmp);
+        $rightValue = $tmp;
       }
       // If still no match is found, attempt to follow an alias with a matching code.
       elseif ($tmp = $this->db->selectOne([
@@ -120,8 +120,7 @@ trait Code
           ['o1.' . $f['code'], 'LIKE', $true_code]
         ]
       ])) {
-        // Cache the result for future queries.
-        $this->cacheSet($id_parent, $cache_name, $tmp);
+        $rightValue = $tmp;
       }
       // If no direct match is found, attempt to find a magic code option that bypasses the normal matching logic.
       elseif ($this->getMagicTemplateId()) {
@@ -142,13 +141,19 @@ trait Code
             ]
           ))
         ) {
-          // Cache the result for future queries.
-          $this->cacheSet($id_parent, $cache_name, $tmp);
+          $rightValue = $tmp;
         }
       }
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
-      if ($tmp) {
+      if ($rightValue) {
+        if (!\count($codes)) {
+          $id_alias = $this->db->selectOne($c['table'], $f['id_alias'], [$f['id'] => $rightValue]);
+          if (in_array($id_alias, [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
+            $codes[] = 'options';
+          }
+        }
+
         if (\count($codes)) {
           $codes[] = $tmp;
           return $this->_fromCode($codes, $depth + 1);

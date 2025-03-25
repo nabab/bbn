@@ -24,7 +24,7 @@ trait Indexed
           $res[$o[$this->fields['code']]] = [
             $this->fields['id'] => $o[$this->fields['id']],
             $this->fields['code'] => $o[$this->fields['code']],
-            $this->fields['text'] => $o[$this->fields['text']]
+            $this->fields['text'] => $o[$this->fields['text']] ?: $o['alias'][$this->fields['text']]
           ];
 
           // If the configuration has a schema, add its fields to the result array.
@@ -128,7 +128,7 @@ trait Indexed
       }
 
       // Retrieve the native options for the given ID.
-      $opts = $this->nativeOptions($id);
+      $opts = $this->fullOptions($id);
       
       // If there are options, create the result array.
       if ($opts) {
@@ -136,7 +136,7 @@ trait Indexed
         
         // Iterate over each option and add its code and text to the result array.
         foreach ($opts as $o) {
-          $res[$o[$this->fields['code']]] = $o[$this->fields['text']];
+          $res[$o[$this->fields['code']]] = $o[$this->fields['text']] ?: $o['alias'][$this->fields['text']];
         }
         
         // Sort the result array by value.
@@ -183,7 +183,7 @@ trait Indexed
         }
         
         $res[$i] = [
-          $text => $is_array ? $o[$this->fields['text']] : $o,
+          $text => $is_array ? ($o[$this->fields['text']] ?: $o['alias'][$this->fields['text']]) : $o,
           $value => $is_array ? $o[$this->fields['id']] : $k
         ];
         if (!empty($cfg['show_code'])) {

@@ -513,7 +513,7 @@ class Cache implements CacheInterface
           if ($this->fs->isFile($tmp_file)) {
             $num = 0;
             while (!$this->fs->isFile($file) && ($num < self::$max_wait)) {
-              X::log([$key, $file, $tmp_file, date('Y-m-d H:i:s')], "$num wait_for_cache");
+              X::log([$key, $file, $tmp_file, date('Y-m-d H:i:s')], "$num-wait_for_cache");
               sleep(1);
               $num++;
             }

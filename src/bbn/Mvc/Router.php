@@ -841,9 +841,6 @@ class Router
     // Removing trailing slashes
     $path = self::parse($path);
     // If the result is already known we just return it
-    if ($path !== 'core/poller') {
-      X::log([$path, $mode, $this->_is_known($path, $mode)], 'known');
-    }
     if ($this->_is_known($path, $mode)) {
       return $this->_get_known($path, $mode);
     }
@@ -985,6 +982,7 @@ class Router
                 */
 
     if ($file) {
+      /*
       if ($path !== 'core/poller') {
         X::log([$path, $mode, $this->_is_known($path, $mode), [
           'file' => $file,
@@ -997,6 +995,7 @@ class Router
           'args' => $args,
           ]], 'known');
       }
+      */
 
       return $this->_set_known(
         [
