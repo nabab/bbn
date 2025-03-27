@@ -1363,7 +1363,7 @@ class Controller implements Api
   public function combo(
       string|null $title = null,
       $data = null,
-      int $ttl = null,
+      ?int $ttl = null,
       string $path = ''
   ): self
   {

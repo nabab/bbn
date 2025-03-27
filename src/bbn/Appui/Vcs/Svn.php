@@ -260,7 +260,7 @@ class Svn implements Server
     string $title,
     string $description = '',
     array $labels = [],
-    int $assigned = null,
+    ?int $assigned = null,
     bool $private = false,
     string $date = ''
   ): ?array
@@ -275,7 +275,7 @@ class Svn implements Server
     string $title,
     string $description = '',
     array $labels = [],
-    int $assigned = null,
+    ?int $assigned = null,
     bool $private = false
   ): ?array
   {

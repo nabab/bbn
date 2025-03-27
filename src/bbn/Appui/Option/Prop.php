@@ -97,7 +97,7 @@ trait Prop
    * @param int|null $pos The new position
    * @return int|null The new or existing order of the option or null if not found or not sortable
    */
-  public function order($id, int $pos = null)
+  public function order($id, ?int $pos = null)
   {
     if ($this->check()
         && ($parent = $this->getIdParent($id))

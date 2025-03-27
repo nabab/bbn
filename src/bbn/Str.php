@@ -546,7 +546,7 @@ class Str
    * @param int $int_min Minimum password characters, default: "6".
    * @return string
    */
-  public static function genpwd(int $int_max = null, int $int_min = null): string
+  public static function genpwd(?int $int_max = null, ?int $int_min = null): string
   {
     if (is_null($int_max) && is_null($int_min)) {
       $int_max = 12;

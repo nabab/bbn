@@ -862,7 +862,7 @@ class Medias extends DbCls
    * @param int|null $width
    * @return array|false|string
    */
-  public function getMedia(string $id, bool $details = false, int $width = null, int $height = null, bool $crop = false, bool $force = false)
+  public function getMedia(string $id, bool $details = false, ?int $width = null, ?int $height = null, bool $crop = false, bool $force = false)
   {
     $cf =& $this->class_cfg;
     if (Str::isUid($id)
@@ -1270,7 +1270,7 @@ class Medias extends DbCls
   }
 
 
-  protected function transformMedia(array &$data, int $width = null, int $height = null, bool $crop = false, bool $force = false): void
+  protected function transformMedia(array &$data, ?int $width = null, ?int $height = null, bool $crop = false, bool $force = false): void
   {
     if (!empty($data['content'])) {
       $data['content'] = json_decode($data['content'], true);

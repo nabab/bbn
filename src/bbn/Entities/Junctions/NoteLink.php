@@ -74,7 +74,7 @@ class NoteLink extends EntityJunction
 
 
 
-  public function notes(int $start = null, int $limit = null){
+  public function notes(?int $start = null, ?int $limit = null){
     $r = [];
     if ( $this->check() ){
       //$args = func_get_args();

@@ -1472,7 +1472,7 @@ class System extends Basic
         if ($full) {
 $obj =& $this;
           set_error_handler(
-            function (int $errno, string $errstr, string|null $errfile = null, int $errline = null)
+            function (int $errno, string $errstr, string|null $errfile = null, ?int $errline = null)
             use ($attempts, $path, &$obj) {
               if ($attempts >= 3) {
                 X::logError($errno, $errstr, $errfile, $errline);

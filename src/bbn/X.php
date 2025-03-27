@@ -3765,7 +3765,7 @@ class X
    * @param int|null $start
    * @return int
    */
-  public static function lastIndexOf($subject, $search, int $start = null): int
+  public static function lastIndexOf($subject, $search, ?int $start = null): int
   {
     $res = false;
     if (is_array($subject)) {

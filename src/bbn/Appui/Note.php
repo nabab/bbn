@@ -560,7 +560,7 @@ class Note extends DbCls
    * @param bool $simple
    * @return array|null
    */
-  public function get(string $id, int $version = null, bool $simple = false): ?array
+  public function get(string $id, ?int $version = null, bool $simple = false): ?array
   {
     $cf = &$this->class_cfg;
     if (!\is_int($version)) {
@@ -616,7 +616,7 @@ class Note extends DbCls
    * @param int|null $version
    * @return array|null
    */
-  public function getFull(string $id, int $version = null): ?array
+  public function getFull(string $id, ?int $version = null): ?array
   {
     $cf = &$this->class_cfg;
     if (!\is_int($version)) {
@@ -1363,7 +1363,7 @@ class Note extends DbCls
    * @param bool|null $private
    * @return string|null
    */
-  public function copy(string $id, int $version = null, bool $private = null): ?string
+  public function copy(string $id, ?int $version = null, bool $private = null): ?string
   {
     if ($note = $this->getFull($id, $version)) {
       if ($private === null) {
@@ -1626,7 +1626,7 @@ class Note extends DbCls
    * @param array|null $cfg
    * @return string|null
    */
-  public function addFeature(string $id_option, string $id_note, string|null $id_media = null, int $num = null, array|null $cfg = null): ?array
+  public function addFeature(string $id_option, string $id_note, string|null $id_media = null, ?int $num = null, array|null $cfg = null): ?array
   {
     $id_option = $this->getFeatureOption($id_option);
     $dbCfg     = $this->getClassCfg();

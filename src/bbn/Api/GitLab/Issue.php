@@ -132,7 +132,7 @@ trait Issue
     string $title,
     string $description = '',
     array $labels = [],
-    int $assigned = null,
+    ?int $assigned = null,
     bool $private = false,
     string $date = ''
   ): ?array

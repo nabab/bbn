@@ -22,7 +22,7 @@ trait User
    * @param int $id The user id
    * @return array
    */
-  public function getUser(int $id = null): array
+  public function getUser(?int $id = null): array
   {
     return $this->request(!empty($id) ? $this->userURL . $id : 'user');
   }

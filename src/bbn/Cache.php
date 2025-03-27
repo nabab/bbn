@@ -404,7 +404,7 @@ class Cache implements CacheInterface
    * @param null|int $time The timestamp to which the item's timestamp will be compared
    * @return bool
    */
-  public function isNew(string $key, int $time = null): bool
+  public function isNew(string $key, ?int $time = null): bool
   {
     if (!$time) {
       return false;
@@ -492,7 +492,7 @@ class Cache implements CacheInterface
    * @param int    $ttl  The cache length
    * @return null|array
    */
-  private function getRaw(string $key, int $ttl = null, bool $force = false): ?array
+  private function getRaw(string $key, ?int $ttl = null, bool $force = false): ?array
   {
     switch (self::$type) {
       case 'apc':
@@ -568,7 +568,7 @@ class Cache implements CacheInterface
      * @return mixed
      * @throws Exception
      */
-  public function getSet(callable $fn, string $key, int $ttl = null)
+  public function getSet(callable $fn, string $key, ?int $ttl = null)
   {
     switch (self::$type) {
       case 'apc':

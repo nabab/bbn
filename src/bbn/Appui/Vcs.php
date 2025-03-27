@@ -307,7 +307,7 @@ class Vcs
     string $title,
     string $description = '',
     array $labels = [],
-    int $assigned = null,
+    ?int $assigned = null,
     bool $private = false,
     string $date = ''
   ): ?array
@@ -322,7 +322,7 @@ class Vcs
     string $title,
     string $description = '',
     array $labels = [],
-    int $assigned = null,
+    ?int $assigned = null,
     bool $private = false
   ): ?array
   {
