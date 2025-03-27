@@ -280,7 +280,7 @@ class Session
 
   protected function open()
   {
-    if (!$this->was_opened && !$this->isOpened() && !headers_sent()) {
+    if (!$this->was_opened && !$this->isOpened()) {
       if (headers_sent($filename, $line)) {
         throw new Exception(X::_("Headers already sent in %s on line %s", $filename, $line));
       }
