@@ -23,11 +23,12 @@ use bbn\X;
 use bbn\Str;
 use bbn\File;
 use bbn\Models\Cls\Basic;
+use bbn\Api\Nextcloud;
+use Sabre\DAV\Client as SabreClient;
 use bbn\Util\Enc;
 
 /**
  * Class system
- * @package bbn\File
  */
 class System extends Basic
 {
@@ -90,14 +91,14 @@ class System extends Basic
       case 'nextcloud':
         if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
           $this->mode = 'nextcloud';
-          $this->obj  = new \bbn\Api\Nextcloud($cfg);
+          $this->obj  = new Nextcloud($cfg);
         }
         break;
       case 'webdav':
         if (isset($cfg['host'], $cfg['user'], $cfg['pass'])) {
           $this->mode   = 'webdav';
           $this->prefix = 'https://' . $cfg['host'] . $cfg['prefix'];
-          $this->obj    = new \Sabre\DAV\Client([
+          $this->obj    = new SabreClient([
             'baseUri' => $this->prefix,
             'userName' => $cfg['user'],
             'password' => $cfg['pass']
@@ -678,21 +679,22 @@ class System extends Basic
   {
     if ($this->check() && $this->exists($source)) {
       $name = X::basename($source);
+      $target = "$dest/$name";
       if ($fs) {
         if (
           $fs->check()
           && $fs->isDir($dest)
-          && $this->copy($source, $dest . '/' . $name, $overwrite, $fs)
+          && $this->copy($source, $target, $overwrite, $fs)
           && $this->delete($source)
         ) {
           return true;
         }
       } elseif ($this->isDir($dest)) {
-        if ($this->exists($dest . '/' . $name) && (!$overwrite || !$this->delete($dest . '/' . $name))) {
+        if ($this->exists($target) && (!$overwrite || !$this->delete($target))) {
           return false;
         }
 
-        return $this->_rename($this->getRealPath($source), $this->getRealPath($dest . '/' . $name));
+        return $this->_rename($this->getRealPath($source), $this->getRealPath($target));
       }
     }
 
@@ -702,7 +704,7 @@ class System extends Basic
 
   /**
    * @param string $file
-   * @return bbn\File|null
+   * @return File|null
    */
   public function getFile(string $file): ?File
   {
@@ -765,9 +767,9 @@ class System extends Basic
       } else {
         return $this->obj->getSize($rpath);
       }
-
-      return null;
     }
+
+    return null;
   }
 
 
@@ -1460,7 +1462,8 @@ class System extends Basic
     $res = false;
     if ($this->mode === 'nextcloud') {
       $res = $this->obj->delete($path);
-    } else {
+    }
+    else {
       if ($this->_is_dir($path)) {
         $files = $this->_get_items($path, 'both', true);
         if (!empty($files)) {
@@ -1470,7 +1473,7 @@ class System extends Basic
         }
 
         if ($full) {
-$obj =& $this;
+          $obj =& $this;
           set_error_handler(
             function (int $errno, string $errstr, string|null $errfile = null, ?int $errline = null)
             use ($attempts, $path, &$obj) {
@@ -1494,7 +1497,7 @@ $obj =& $this;
           }
 
           restore_error_handler();
-          }
+        }
         else {
           $res = true;
         }
@@ -1543,9 +1546,9 @@ $obj =& $this;
 
         return true;
       }
-
-      return false;
     }
+
+    return false;
   }
 
 
@@ -1560,7 +1563,7 @@ $obj =& $this;
       $file1 = substr($source, strlen($this->prefix));
       $file2 = substr($dest, strlen($this->prefix));
       if ($this->mode === 'ssh') {
-        return ssh2_sftp_rename($this->obj, $file1, $file2);
+        return @ssh2_sftp_rename($this->obj, $file1, $file2);
       }
 
       if ($this->mode === 'ftp') {
@@ -1678,7 +1681,7 @@ $obj =& $this;
       if ($this->mode === 'nextcloud') {
         $this->obj->download($file);
       } elseif ($this->isFile($file)) {
-        $f = new bbn\File($file);
+        $f = new File($file);
         $f->download();
       }
     }
