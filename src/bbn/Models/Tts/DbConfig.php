@@ -56,7 +56,7 @@ trait DbConfig
    * @param array $cfg
    * @return $this
    */
-  protected function initClassCfg(array $cfg = null)
+  protected function initClassCfg(array|null $cfg = null)
   {
     $arr = [];
     if (isset(self::$default_class_cfg)) {

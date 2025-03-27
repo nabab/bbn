@@ -901,7 +901,7 @@ class Ide
    * @param string $file The file's path
    * @return array|false
    */
-  public function getFilePermissions(string $file = null)
+  public function getFilePermissions(string|null $file = null)
   {
 
     if (empty($file)) {
@@ -2664,7 +2664,7 @@ class Ide
    * @param string $id_user if set user id will return the result for that user otherwise the current one will return
    * @return array|null
    */
-  private function _get_bit_by_file(string $file, string $id_user = null): ?array
+  private function _get_bit_by_file(string $file, string|null $id_user = null): ?array
   {
     if (
       !empty($file)
@@ -2703,7 +2703,7 @@ class Ide
    * @param string $file
    * @return string|false
    */
-  private function _set_current_file(string $file = null)
+  private function _set_current_file(string|null $file = null)
   {
     if (empty($file)) {
       self::$current_file = false;
@@ -2723,7 +2723,7 @@ class Ide
    * @param string $file
    * @return string
    */
-  private function _set_current_id(string $file = null)
+  private function _set_current_id(string|null $file = null)
   {
     self::$current_id = false;
     if (empty($file)) {

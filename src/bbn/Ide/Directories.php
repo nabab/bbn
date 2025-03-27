@@ -204,7 +204,7 @@ class Directories {
    *
    * @param bbn\Appui\Option $options
    */
-  public function __construct(bbn\Appui\Option $options = null, array $routes = null) {
+  public function __construct(bbn\Appui\Option $options = null, array|null $routes = null) {
     if ($options === null) {
       $options = bbn\Appui\Option::getInstance();
     }
@@ -887,7 +887,7 @@ class Directories {
    * @param bbn\User\Preferences|null $pref
    * @return array|void
    */
-  public function save($file, $code, array $cfg = null, bbn\User\Preferences $pref = null){
+  public function save($file, $code, array|null $cfg = null, bbn\User\Preferences $pref = null){
     die(var_dump($file, $code, $cfg ));
     if ( ($file = bbn\Str::parsePath($file)) &&
       ($real = $this->urlToReal($file)) &&
@@ -955,7 +955,7 @@ class Directories {
    * @param bbn\User\Preferences|null $pref
    * @return bool
    */
-  public function setPreferences($id_user, $id_file, $md5, array $cfg = null, bbn\User\Preferences $pref = null){
+  public function setPreferences($id_user, $id_file, $md5, array|null $cfg = null, bbn\User\Preferences $pref = null){
     if ( !empty($id_user) && !empty($id_file) && !empty($pref) ){
       $change['md5'] = $md5;
       if ( !empty($cfg['selections']) ){

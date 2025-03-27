@@ -162,7 +162,7 @@ class Ftp extends bbn\Models\Cls\Basic
    * 
 	 * @return array
 	 */
-	public function scan(string $dir, string $type = null, &$res = [], int $timeout = 0): array
+	public function scan(string $dir, string|null $type = null, &$res = [], int $timeout = 0): array
   {
     $res = [];
     if ( $dirs = $this->listFiles($dir) ){

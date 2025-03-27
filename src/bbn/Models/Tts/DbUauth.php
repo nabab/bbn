@@ -120,7 +120,7 @@ trait DbUauth
     return false;
   }
 
-  protected function dbUauthSet(string $id, string $value, string $type, array $cfg = null): bool
+  protected function dbUauthSet(string $id, string $value, string $type, array|null $cfg = null): bool
   {
     $this->dbUauthInitCheck();
     $arch = $this->class_cfg['arch']['uauth'];
@@ -208,7 +208,7 @@ trait DbUauth
    * @throws \Exception
    * @return mixed
    */
-  public function dbUauthAdd(string $id, string $value, string $type, array $cfg = null): ?string
+  public function dbUauthAdd(string $id, string $value, string $type, array|null $cfg = null): ?string
   {
     $this->dbUauthInitCheck();
     $arch = $this->class_cfg['arch']['uauth'];
@@ -437,7 +437,7 @@ trait DbUauth
   }
 
 
-  protected function dbUauthFind(string $value, string $type = null): ?array
+  protected function dbUauthFind(string $value, string|null $type = null): ?array
   {
     $this->dbUauthInitCheck();
     return self::$dbUauth->find($value, $type);

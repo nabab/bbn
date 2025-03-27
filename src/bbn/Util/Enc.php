@@ -78,8 +78,8 @@ class Enc
    * @return null|string
    */
   public static function encryptOpenssl(string $s,
-      string $key = null,
-      string $method = null,
+      string|null $key = null,
+      string|null $method = null,
       string $password = ''
   ): ?string {
     if (!$key) {
@@ -111,8 +111,8 @@ class Enc
    * @return null|string
    */
   public static function decryptOpenssl(string $s,
-      string $key = null,
-      string $method = null,
+      string|null $key = null,
+      string|null $method = null,
       string $password = ''
   ): ?string {
     if (!$key) {

@@ -165,7 +165,7 @@ trait Tagger
   }
 
 
-  protected function taggerInit(string $table = null, array $columns = null)
+  protected function taggerInit(string|null $table = null, array|null $columns = null)
   {
     if (!$this->taggerIsInit) {
       if (!$this->db) {

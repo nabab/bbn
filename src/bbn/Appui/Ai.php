@@ -159,7 +159,7 @@ ws ::= ([ \t\n] ws)?',
     $this->pass = new Passwords($this->db);
   }
 
-  public function setEndpoint(string $id = null, $model = null) {
+  public function setEndpoint(string|null $id = null, $model = null) {
     if ($endpoint = $this->getEndpoint($id)) {
       $pass = $this->pass->userGet($endpoint['data']['id'], $this->user);
       if (!$pass) {
@@ -180,7 +180,7 @@ ws ::= ([ \t\n] ws)?',
     $this->setModel($model);
   }
 
-  public function setModel(string $modelName = null) {
+  public function setModel(string|null $modelName = null) {
     $this->model = $modelName;
   }
 
@@ -697,7 +697,7 @@ ws ::= ([ \t\n] ws)?',
    * @param string $separator Separator string
    * @return string Built prompt string
    */
-  private function buildPrompt(string $prompt, string $format = 'textarea', string $lang = null, array $cfg = null): string | null
+  private function buildPrompt(string $prompt, string $format = 'textarea', string|null $lang = null, array|null $cfg = null): string | null
   {
     $output = $prompt;
     $output .= "\n\n";

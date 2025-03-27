@@ -42,7 +42,7 @@ class Cache implements CacheInterface
    * @param null $engine
    * @return int
    */
-  private static function _init(string $engine = null): int
+  private static function _init(string|null $engine = null): int
   {
     if (!self::$is_init) {
       self::$engine  = new Cache($engine);
@@ -187,7 +187,7 @@ class Cache implements CacheInterface
    * @param string $engine
    * @return self
    */
-  public static function getCache(string $engine = null): self
+  public static function getCache(string|null $engine = null): self
   {
     self::_init($engine);
     return self::$engine;
@@ -197,10 +197,10 @@ class Cache implements CacheInterface
   /**
    * Alias of get_cache.
    *
-   * @param string $engine
+   * @param null|string $engine
    * @return self
    */
-  public static function getEngine(string $engine = null): self
+  public static function getEngine(?string $engine = null): self
   {
     return self::getCache($engine);
   }
@@ -209,11 +209,11 @@ class Cache implements CacheInterface
     /**
      * Constructor - this is a singleton: it can't be called more then once.
      *
-     * @param string $engine The type of engine to use
+     * @param null|string $engine The type of engine to use
      *
      * @throws Exception
      */
-  public function __construct(string $engine = null)
+  public function __construct(?string $engine = null)
   {
     /** @todo APC doesn't work */
     $engine = 'files';
@@ -243,15 +243,15 @@ class Cache implements CacheInterface
    * Checks whether a valid cache exists for the given item.
    *
    * @param string     $key The name of the item
-   * @param string|int $ttl  The time-to-live value
+   * @param null|int|string $ttl  The time-to-live value
    * @return bool
    */
-  public function has($key, $ttl = null): bool
+  public function has($key, null|int|string $ttl = null): bool
   {
     if (self::$type) {
       switch (self::$type){
         case 'apc':
-          return apc_exists($key);
+          return (bool)apc_exists($key);
         case 'memcache':
           return $this->obj->get($key) !== $key;
         case 'files':
@@ -270,6 +270,8 @@ class Cache implements CacheInterface
           return false;
       }
     }
+
+    return false;
   }
 
 
@@ -295,6 +297,8 @@ class Cache implements CacheInterface
           return false;
       }
     }
+
+    return false;
   }
 
 
@@ -305,7 +309,7 @@ class Cache implements CacheInterface
      *
      * @return bool|int
      */
-  public function deleteAll(string $st = null): bool
+  public function deleteAll(string|null $st = null): bool
   {
     if (self::$type === 'files') {
       if ($st === null) {
@@ -727,7 +731,7 @@ class Cache implements CacheInterface
   public function getMultiple($keys, $default = null): Traversable|array
   {
     if (!is_iterable($keys)) {
-      throw new InvalidArgumentException("Keys must be iterable");
+      throw new Exception("Keys must be iterable");
     }
 
     $res = [];
@@ -754,7 +758,7 @@ class Cache implements CacheInterface
   public function deleteMultiple($keys): bool
   {
     if (!is_iterable($keys)) {
-      throw new InvalidArgumentException("Keys must be iterable");
+      throw new Exception("Keys must be iterable");
     }
 
     foreach ($keys as $k) {

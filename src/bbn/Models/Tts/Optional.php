@@ -38,7 +38,7 @@ trait Optional
    *
    * @return false|int
    */
-  protected static function optionalInit(array $path = null)
+  protected static function optionalInit(array|null $path = null)
   {
     if (!self::$optional_is_init) {
       $opt = Option::getInstance();
@@ -82,7 +82,7 @@ trait Optional
    * @param array             $path
    * @return void
    */
-  protected static function initOptionalGlobal(Option $opt, array $path = null)
+  protected static function initOptionalGlobal(Option $opt, array|null $path = null)
   {
     if (!self::$optional_is_init) {
       if (!\defined("BBN_APPUI")) {
@@ -117,7 +117,7 @@ trait Optional
    * @param array $path
    * @return void
    */
-  protected function initOptional(array $path = null)
+  protected function initOptional(array|null $path = null)
   {
     $this->options = Option::getInstance();
     if (!$this->options) {

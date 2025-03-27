@@ -437,7 +437,7 @@ class Grid extends bbn\Models\Cls\Cache
    * @param array $data
    * @return array
    */
-  public function toExcel(array $data = null, array $options = null): array
+  public function toExcel(array|null $data = null, array|null $options = null): array
   {
     $path = X::makeStoragePath(\bbn\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
     $cfg = $this->getExcel();

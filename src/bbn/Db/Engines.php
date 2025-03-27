@@ -409,7 +409,7 @@ interface Engines
    * @param string|null $db
    * @return array
    */
-  public function getForeignKeys(string $col, string $table, string $db = null): array;
+  public function getForeignKeys(string $col, string $table, string|null $db = null): array;
 
   /**
    * find_relations
@@ -479,7 +479,7 @@ interface Engines
    * @param array $order
    * @return array|null
    */
-  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array;
+  public function countFieldValues($table, string|null $field = null,  array $where = [], array $order = []): ?array;
 
   /**
    * Return a numeric indexed array with the values of the unique column ($field) from the selected $table
@@ -503,7 +503,7 @@ interface Engines
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
+  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array;
 
   /**
    * Return an indexed array with the first result of the query or false if there are no results.

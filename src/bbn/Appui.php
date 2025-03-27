@@ -143,7 +143,7 @@ class Appui
    * @param null|array       $cfg An initial configuration
    * @param null|System $fs  A File System connection for the given config.
    */
-  public function __construct(array $cfg = null, System $fs = null)
+  public function __construct(array|null $cfg = null, System $fs = null)
   {
     $this->setConfig($cfg, $fs);
   }
@@ -218,7 +218,7 @@ class Appui
    * @param System|null $fs  A filesystem object accessing the config path
    * @return void
    */
-  public function setConfig(array $cfg = null, System $fs = null)
+  public function setConfig(array|null $cfg = null, System $fs = null)
   {
     $this->unsetConfig();
     $this->_currentFs = $fs ?? new System();
@@ -558,7 +558,7 @@ class Appui
    *
    * @return string|null
    */
-  public function getEnvironmentIndex(string $hostname = null, string $servname = null): ?string
+  public function getEnvironmentIndex(string|null $hostname = null, string|null $servname = null): ?string
   {
     if ($this->check()) {
       if (empty($hostname) && empty($servname)) {
@@ -590,7 +590,7 @@ class Appui
    *
    * @return array
    */
-  public function getEnvironment($hostname = null, string $servname = null): ?array
+  public function getEnvironment($hostname = null, string|null $servname = null): ?array
   {
     if ($this->check()) {
       if ($hostname !== true) {
@@ -727,8 +727,8 @@ class Appui
    */
   public function setEnvironment(
       array $update,
-      string $hostname = null,
-      string $servname = null,
+      string|null $hostname = null,
+      string|null $servname = null,
       bool $replace = false
   ): bool
   {
@@ -809,8 +809,8 @@ class Appui
    */
   public function replaceEnvironment(
       array $update,
-      string $hostname = null,
-      string $servname = null
+      string|null $hostname = null,
+      string|null $servname = null
   ): bool
   {
     return $this->setEnvironment($update, $hostname, $servname, true);
@@ -836,7 +836,7 @@ class Appui
    * @param string|null $title The title of the plugin
    * @return null|string
    */
-  public function addPlugin(string $name, string $title = null): ?string
+  public function addPlugin(string $name, string|null $title = null): ?string
   {
     $id_plugin = null;
     if (!$title) {

@@ -172,7 +172,7 @@ trait Url
    * @param string $type
    * @return null|string
    */
-  public function setUrl(string $id_item, string $url, string $type = null): ?string
+  public function setUrl(string $id_item, string $url, string|null $type = null): ?string
   {
     $this->checkUrlCfg();
     if (!($url = $this->sanitizeUrl($url))) {
@@ -210,7 +210,7 @@ trait Url
    * @param string $type
    * @return null|string
    */
-  public function addUrl(string $id_item, string $url, string $prefix = '', string $type = null): ?string
+  public function addUrl(string $id_item, string $url, string $prefix = '', string|null $type = null): ?string
   {
     $this->checkUrlCfg();
     if (!$type && !$this->urlType) {

@@ -338,7 +338,7 @@ class Identity extends DbCls
     return $ok;
   }
 
-  public function getTableRelations(string $table = null): array
+  public function getTableRelations(string|null $table = null): array
   {
     return $this->dbTraitGetTableRelations($table);
 

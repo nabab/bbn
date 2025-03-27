@@ -280,7 +280,7 @@ SQL;
   }
 
 
-  public function setTitle(string $id_chat, string $title = null)
+  public function setTitle(string $id_chat, string|null $title = null)
   {
     if (\bbn\Str::isUid($id_chat)
         && $this->isAdmin($id_chat)
@@ -512,7 +512,7 @@ SQL;
    * @param string $id_user
    * @return bool|null
    */
-  public function isParticipant(string $id_chat, string $id_user = null): ?bool
+  public function isParticipant(string $id_chat, string|null $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -537,7 +537,7 @@ SQL;
    * @param string $id_user
    * @return bool|null
    */
-  public function isAdmin(string $id_chat, string $id_user = null): ?bool
+  public function isAdmin(string $id_chat, string|null $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -565,7 +565,7 @@ SQL;
    * @param string $id_user
    * @return bool|null
    */
-  public function isCreator(string $id_chat, string $id_user = null): ?bool
+  public function isCreator(string $id_chat, string|null $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -698,13 +698,13 @@ SQL;
   }
 
 
-  public function getPrevMessages(string $id_chat, float $moment = null, int $num = 50, string $id_user = null): ?array
+  public function getPrevMessages(string $id_chat, float $moment = null, int $num = 50, string|null $id_user = null): ?array
   {
     return $this->_get_messages($id_chat, $moment ?: X::microtime(), '<', $num, $id_user);
   }
 
 
-  public function getNextMessages(string $id_chat, float $moment = null, int $num = 0, string $id_user = null)
+  public function getNextMessages(string $id_chat, float $moment = null, int $num = 0, string|null $id_user = null)
   {
     return $this->_get_messages($id_chat, $moment ?: X::microtime(), '>', $num, $id_user);
   }
@@ -732,7 +732,7 @@ SQL;
   }
 
 
-  public function leave(string $id_chat, string $id_user = null): ?bool
+  public function leave(string $id_chat, string|null $id_user = null): ?bool
   {
     if ($this->check()
         && bbn\Str::isUid($id_chat)
@@ -797,7 +797,7 @@ SQL;
   }
 
 
-  public function getMaxLastActivity(string $id_user = null)
+  public function getMaxLastActivity(string|null $id_user = null)
   {
     if ($this->check()
         && (bbn\Str::isUid($id_user)
@@ -880,7 +880,7 @@ SQL;
    * @param string $id
    * @return bool
    */
-  public function getUserStatus(string $id = null): bool
+  public function getUserStatus(string|null $id = null): bool
   {
     if (!$this->user) {
       return false;
@@ -984,7 +984,7 @@ SQL;
   }
 
 
-  private function _get_path(string $id_chat, string $id_user = null): ?string
+  private function _get_path(string $id_chat, string|null $id_user = null): ?string
   {
     if (bbn\Str::isUid($id_chat)
         && (bbn\Str::isUid($id_user) || \is_null($id_user))
@@ -1015,7 +1015,7 @@ SQL;
   }
 
 
-  private function _get_messages(string $id_chat, float $moment, string $comparator, int $num = 0, string $id_user = null)
+  private function _get_messages(string $id_chat, float $moment, string $comparator, int $num = 0, string|null $id_user = null)
   {
     if ($this->check() && bbn\Str::isUid($id_chat)) {
       $res    = [];

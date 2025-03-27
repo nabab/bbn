@@ -149,7 +149,7 @@ class Notification extends DbCls
   }
 
 
-  public function insert(string $title, string $content, string $id_option = null, array $users = [], bool $user_excluded = false): bool
+  public function insert(string $title, string $content, string|null $id_option = null, array $users = [], bool $user_excluded = false): bool
   {
     if (\is_string($id_option) && !Str::isUid($id_option)) {
       $id_option = \array_reverse(\explode('/', $id_option));
@@ -262,7 +262,7 @@ class Notification extends DbCls
   }
 
 
-  public function read($id, string $id_user = null, $moment = null): bool
+  public function read($id, string|null $id_user = null, $moment = null): bool
   {
     if (!$id_user) {
       $id_user = $this->user->getId();
@@ -297,7 +297,7 @@ class Notification extends DbCls
   }
 
 
-  public function readAll(string $id_user = null, $moment = null): bool
+  public function readAll(string|null $id_user = null, $moment = null): bool
   {
     if (!$id_user) {
       $id_user = $this->user->getId();
@@ -391,7 +391,7 @@ class Notification extends DbCls
   }
 
 
-  public function getUnread(string $id_user = null, array $additional_where = []): array
+  public function getUnread(string|null $id_user = null, array $additional_where = []): array
   {
     $ucfg  = $this->user->getClassCfg();
     $where = [
@@ -452,7 +452,7 @@ class Notification extends DbCls
   }
 
 
-  public function getUnreadIds(string $id_user = null, array $filters = []): array
+  public function getUnreadIds(string|null $id_user = null, array $filters = []): array
   {
     $ucfg  = $this->user->getClassCfg();
     $where = [
@@ -565,7 +565,7 @@ class Notification extends DbCls
     return $this->lastId;
   }
 
-  public function contUnread(string $id_user = null): int
+  public function contUnread(string|null $id_user = null): int
   {
     return \count($this->getUnreadIds($id_user));
   }
@@ -660,7 +660,7 @@ class Notification extends DbCls
   }
 
 
-  public function getCfg(string $id_user, string $id_option = null): ?array
+  public function getCfg(string $id_user, string|null $id_option = null): ?array
   {
     if (Str::isUid($id_user)
         && ($cfg_opt_id = self::getOptionId('cfg'))
@@ -841,7 +841,7 @@ class Notification extends DbCls
   }
 
 
-  public function _user_has_permission($notification, string $id_user = null): bool
+  public function _user_has_permission($notification, string|null $id_user = null): bool
   {
     if (!\is_array($notification)
         && \is_string($notification)

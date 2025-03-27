@@ -190,14 +190,14 @@ interface Api
 	 * @param bool $ignore
 	 * @return int
 	 */
-	public function insert($table, array $values = null, bool $ignore = false): ?int;
+	public function insert($table, array|null $values = null, bool $ignore = false): ?int;
 
 	/**
 	 * Inserts/Updates rows in the a given table
 	 *
 	 * @return int
 	 */
-	public function insertUpdate($table, array $values = null): ?int;
+	public function insertUpdate($table, array|null $values = null): ?int;
 
 	/**
 	 * Updates rows in the a given table
@@ -208,7 +208,7 @@ interface Api
 	 * @param bool $ignore
 	 * @return int
 	 */
-  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;
+  public function update($table, array|null $values = null, array|null $where = null, bool $ignore = false): ?int;
 
 	/**
 	 * Updates rows in the a given table
@@ -218,7 +218,7 @@ interface Api
 	 * @param array|null $where
 	 * @return int
 	 */
-  public function updateIgnore($table, array $values = null, array $where = null): ?int;
+  public function updateIgnore($table, array|null $values = null, array|null $where = null): ?int;
 
   /**
    * Deletes rows in the a given table

@@ -47,7 +47,7 @@ class Tag extends DbCls
 
   protected $lang;
 
-  public function __construct(Db $db, string $lang = null)
+  public function __construct(Db $db, string|null $lang = null)
   {
     $this->lang = $lang ?: 'en';
     parent::__construct($db);
@@ -73,7 +73,7 @@ class Tag extends DbCls
   }
 
 
-  public function get(string $tag, string $lang = null): ?array
+  public function get(string $tag, string|null $lang = null): ?array
   {
     $table = $this->class_cfg['table'];
     $cf = $this->class_cfg['arch']['tags'];
@@ -100,7 +100,7 @@ class Tag extends DbCls
    * @param string|null $id_parent
    * @return string
    */
-  public function add(string $tag, string $lang = null, string $description = ''): ?string
+  public function add(string $tag, string|null $lang = null, string $description = ''): ?string
   {
     $table = $this->class_cfg['table'];
     $cf = $this->class_cfg['arch']['tags'];

@@ -264,7 +264,7 @@ class Mysql extends Sql
    * @return bool
    * @throws Exception
    */
-  public function createUser(string $user, string $pass, string $db = null): bool
+  public function createUser(string $user, string $pass, string|null $db = null): bool
   {
     if (null === $db) {
       $db = $this->getCurrent();
@@ -559,7 +559,7 @@ MYSQL
    * @param string $engine
    * @return string
    */
-  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
+  public function createTable($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
   {
     $lines = [];
     $sql = '';
@@ -975,7 +975,7 @@ MYSQL
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
+  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
   {
     if (!$model) {
       $model = $this->modelize($table);
@@ -1015,7 +1015,7 @@ MYSQL
    * @return string
    * @throws Exception
    */
-  public function getCreateKeys(string $table, array $model = null): string
+  public function getCreateKeys(string $table, array|null $model = null): string
   {
     $st = '';
     if (!$model) {
@@ -1061,7 +1061,7 @@ MYSQL
    * @return string
    * @throws Exception
    */
-  public function getCreate(string $table, array $model = null): string
+  public function getCreate(string $table, array|null $model = null): string
   {
     $st = '';
     if (!$model) {
@@ -1367,7 +1367,7 @@ MYSQL
   }
 
 
-  public function getMoveColumn(string $table, string $column, string $after = null, array $cfg = null): ?string
+  public function getMoveColumn(string $table, string $column, string|null $after = null, array|null $cfg = null): ?string
   {
     if (!$cfg) {
       $cfg = $this->modelize($table, true);
@@ -1562,7 +1562,7 @@ MYSQL
     return $st;
   }
 
-  public function getColMaxLength(string $column, string $table = null): ?int
+  public function getColMaxLength(string $column, string|null $table = null): ?int
   {
     [$tab, $col] = X::split($this->colFullName($column, $table), '.');
     if (!$tab) {

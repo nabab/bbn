@@ -242,7 +242,7 @@ class Router
    * @param string|null $plugin
    * @return string|null
    */
-  public function getLocaleDomain(string $plugin = null): ?string
+  public function getLocaleDomain(string|null $plugin = null): ?string
   {
     return $this->_textdomains[$plugin ?: 'main'] ?? null;
   }
@@ -651,7 +651,7 @@ class Router
    * @param string|null $path The path of the plugin
    * @return string|null
    */
-  private function _get_alt_root(string $mode, string $path = null): ?string
+  private function _get_alt_root(string $mode, string|null $path = null): ?string
   {
     if (($path || $this->alt_root)
         && self::isMode($mode)
@@ -1001,7 +1001,7 @@ class Router
         [
         'file' => $file,
         'path' => $real_path,
-        'root' => X::dirname($root, 2) . '/',
+        'root' => X::dirname($root) . '/',
         'request' => $path,
         'mode' => $mode,
         'plugin' => $plugin ? $plugin['url'] : false,
@@ -1041,7 +1041,7 @@ class Router
    * @param string|null $plugin
    * @return string|null
    */
-  private function _find_translation(string $plugin = null): ?string
+  private function _find_translation(string|null $plugin = null): ?string
   {
     if ($locale = $this->getLocale()) {
       $locale = strtolower(substr($locale, 0, 2));
@@ -1178,7 +1178,7 @@ class Router
    *
    * @return string|null
    */
-  private function _registerLocaleDomain(string $plugin = null): ?string
+  private function _registerLocaleDomain(string|null $plugin = null): ?string
   {
     if (empty($plugin)) {
       if (is_dir($this->appPath().'locale')) {

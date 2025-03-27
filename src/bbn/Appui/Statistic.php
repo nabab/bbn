@@ -288,7 +288,7 @@ class Statistic extends DbCls
    * @param string|null $start   Start of time
    * @return int
    */
-  public function update(string $variant = null, string $start = null): ?int
+  public function update(string|null $variant = null, string|null $start = null): ?int
   {
     if ($this->check()) {
       if (!$variant) {
@@ -480,7 +480,7 @@ class Statistic extends DbCls
     return null;
   }
 
-  public function serie(int $values = 30, string $unit = 'd', string $end = null): ?array
+  public function serie(int $values = 30, string $unit = 'd', string|null $end = null): ?array
   {
     if ($this->check()) {
       if (!Str::isDateSql($end)) {
@@ -510,7 +510,7 @@ class Statistic extends DbCls
   }
 
 
-  public function serieValues(int $values = 30, string $unit = 'd', string $end = null): ?array
+  public function serieValues(int $values = 30, string $unit = 'd', string|null $end = null): ?array
   {
     if ($res = $this->serie($values, $unit, $end)) {
       return $res['series'];
@@ -520,7 +520,7 @@ class Statistic extends DbCls
   }
 
 
-  public function serieByPeriod(int $values = 30, string $unit = 'm', string $end = null, string $pstart = null): ?array
+  public function serieByPeriod(int $values = 30, string $unit = 'm', string|null $end = null, string|null $pstart = null): ?array
   {
     if ($this->ocfg && $values) {
       if (!$end) {

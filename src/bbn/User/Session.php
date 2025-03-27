@@ -43,7 +43,7 @@ class Session
   protected $id;
 
 
-  public function __construct(array $defaults = null)
+  public function __construct(array|null $defaults = null)
   {
     if (self::singletonExists()) {
       throw new Exception("Impossible to create a new session, one already exists");

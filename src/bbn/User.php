@@ -1218,7 +1218,7 @@ use bbn\Models\Tts\DbUauth;
    * @param null|string $fp
    * @return null|string
    */
-  protected function getPrint(string $fp = null): ?string
+  protected function getPrint(string|null $fp = null): ?string
   {
     if (!$fp) {
       $fp = $this->_get_session('fingerprint');
@@ -1377,7 +1377,7 @@ use bbn\Models\Tts\DbUauth;
    * @param string|null $attr Name of the attribute to get.
    * @return mixed
    */
-  protected function _get_session(string $attr = null)
+  protected function _get_session(string|null $attr = null)
   {
     if ($this->session->has($this->sessIndex)) {
       return $attr ? $this->session->get($this->sessIndex, $attr) : $this->session->get($this->sessIndex);
@@ -1558,7 +1558,7 @@ use bbn\Models\Tts\DbUauth;
    * @param string $id_session The session's table data or its ID
    * @return self
    */
-  private function _sess_info(string $id_session = null): self
+  private function _sess_info(string|null $id_session = null): self
   {
     if (!Str::isUid($id_session)) {
       $id_session = $this->getIdSession();

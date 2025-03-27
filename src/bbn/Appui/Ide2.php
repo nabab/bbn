@@ -388,7 +388,7 @@ class Ide2 extends modelDb {
    * @param string $type  type given in order to fill the tree
    * @return array
    */
-  public function openTree(string $path, string $id_path, string $type = null): array
+  public function openTree(string $path, string $id_path, string|null $type = null): array
   {
     return $this->_getTree($path, $id_path, $type);
   }
@@ -491,7 +491,7 @@ class Ide2 extends modelDb {
    * @param array $types  types given in order to fill tree array
    * @return array
    */
-  private function _getTree(string $path, string $id_path, string $type = null, bool $onlydirs = false): array
+  private function _getTree(string $path, string $id_path, string|null $type = null, bool $onlydirs = false): array
   {
     // get info of the current path selected in first dropdown
     $currentPathArray = $this->getPath($id_path);

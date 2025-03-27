@@ -320,7 +320,7 @@ trait Common
    * @param bool   $move
    * @return string|null
    */
-  public function addToTmp(string $file, string $name = null, $move = true):? string
+  public function addToTmp(string $file, string|null $name = null, $move = true):? string
   {
     if ($this->auth) {
       $fs   = new System();

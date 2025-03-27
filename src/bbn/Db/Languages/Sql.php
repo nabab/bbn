@@ -1487,7 +1487,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return string
    * @throws Exception
    */
-  public function getJoin(array $cfg, array $joins = null): string
+  public function getJoin(array $cfg, array|null $joins = null): string
   {
     $res = '';
     if (!$joins) {
@@ -1659,7 +1659,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return string
    * @throws Exception
    */
-  public function getCreateConstraints(string $table, array $model = null): string
+  public function getCreateConstraints(string $table, array|null $model = null): string
   {
     $st = '';
     if (!$model) {
@@ -4491,7 +4491,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array        $order The "order" condition
    * @return array|null
    */
-  public function countFieldValues($table, string $field = null, array $where = [], array $order = []): ?array
+  public function countFieldValues($table, string|null $field = null, array $where = [], array $order = []): ?array
   {
     if (is_array($table) && is_array($table['fields']) && count($table['fields'])) {
       $args  = $table;
@@ -4540,7 +4540,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     $res = null;
     if ($this->check()) {
@@ -4602,7 +4602,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return int|null Number affected rows.
    * @throws Exception
    */
-  public function insert($table, array $values = null, bool $ignore = false): ?int
+  public function insert($table, array|null $values = null, bool $ignore = false): ?int
   {
     if (empty($table)) {
       throw new Exception(X::_('Table name is not specified'));
@@ -4664,7 +4664,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return int|null The number of rows inserted or updated.
    * @throws Exception
    */
-  public function insertUpdate($table, array $values = null): ?int
+  public function insertUpdate($table, array|null $values = null): ?int
   {
     if (empty($table)) {
       throw new Exception(X::_('Table name is not specified'));
@@ -4742,7 +4742,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return int|null The number of rows updated.
    * @throws Exception
    */
-  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
+  public function update($table, array|null $values = null, array|null $where = null, bool $ignore = false): ?int
   {
     $cfg         = is_array($table) ? $table : [
       'tables' => [$table],
@@ -4768,7 +4768,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @return int|null The number of rows deleted.
    * @throws Exception
    */
-  public function delete($table, array $where = null, bool $ignore = false): ?int
+  public function delete($table, array|null $where = null, bool $ignore = false): ?int
   {
     $cfg         = is_array($table) ? $table : [
       'tables' => [$table],
@@ -5132,7 +5132,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param string|null $db The database name if different from the current one
    * @return array with tables and fields related to the searched foreign key
    */
-  public function getForeignKeys(string $col, string $table, string $db = null): array
+  public function getForeignKeys(string $col, string $table, string|null $db = null): array
   {
     if (!$db) {
       $db = $this->getCurrent();

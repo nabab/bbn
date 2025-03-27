@@ -243,7 +243,7 @@ trait DbActions
     return $this->dbTraitSelection($filter, $order, $limit, $start, 'array', $fields);
   }
 
-  protected function dbTraitGetRelations(string $id, string $table = null): ?array
+  protected function dbTraitGetRelations(string $id, string|null $table = null): ?array
   {
     if ($this->dbTraitExists($id)) {
       $db =& $this->db;

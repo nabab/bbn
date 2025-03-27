@@ -323,7 +323,7 @@ class Event extends modelDb
   }
 
 
-  private function getIds(string $mode = 'next', array $filter = [], string $from = null, int $num = 1): array
+  private function getIds(string $mode = 'next', array $filter = [], string|null $from = null, int $num = 1): array
   {
     $timeFilter = [
       'logic' => 'AND',
@@ -361,7 +361,7 @@ class Event extends modelDb
   }
 
 
-  private function getOnes(string $mode = 'next', array $filter = [], string $from = null, int $num = 1): ?array
+  private function getOnes(string $mode = 'next', array $filter = [], string|null $from = null, int $num = 1): ?array
   {
     $ids = $this->getIds($mode, $filter, $from, $num);
     if ($num === 1) {
@@ -380,25 +380,25 @@ class Event extends modelDb
     return $res;
   }
   
-  public function getLastIds(array $filter = [], string $from = null, int $num = 1): array
+  public function getLastIds(array $filter = [], string|null $from = null, int $num = 1): array
   {
     return $this->getIds('last', $filter, $from, $num);
   }
 
 
-  public function getNextIds(array $filter = [], string $from = null, int $num = 1): array
+  public function getNextIds(array $filter = [], string|null $from = null, int $num = 1): array
   {
     return $this->getIds('next', $filter, $from, $num);
   }
 
 
-  public function getLast(array $filter = [], string $from = null, int $num = 1): ?array
+  public function getLast(array $filter = [], string|null $from = null, int $num = 1): ?array
   {
     return $this->getOnes('last', $filter, $from, $num);
   }
   
 
-  public function getNext(array $filter = [], string $from = null, int $num = 1): ?array
+  public function getNext(array $filter = [], string|null $from = null, int $num = 1): ?array
   {
     return $this->getOnes('next', $filter, $from, $num);
   }
@@ -677,7 +677,7 @@ class Event extends modelDb
    * @param string $until
    * @return bool
    */
-  public function setUntil(string $id, string $until = null): bool
+  public function setUntil(string $id, string|null $until = null): bool
   {
     if ( 
       Str::isUid($id) &&

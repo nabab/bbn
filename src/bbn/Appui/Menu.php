@@ -317,7 +317,7 @@ class Menu extends bbn\Models\Cls\Basic
    * @return null|string
    * @internal param $id
    */
-  public function add($id_menu, array $cfg = null): ?string
+  public function add($id_menu, array|null $cfg = null): ?string
   {
     $id_opt = $this->fromPath('menus');
     if (\is_array($id_menu)) {
@@ -639,7 +639,7 @@ class Menu extends bbn\Models\Cls\Basic
    * @param string|null $id_parent The parent's ID.
    * @return bool
    */
-  public function move(string $id, string $id_parent = null): bool
+  public function move(string $id, string|null $id_parent = null): bool
   {
     if ($this->pref->moveBit($id, $id_parent)) {
       $this->deleteCache($this->getIdMenu($id));
@@ -825,7 +825,7 @@ class Menu extends bbn\Models\Cls\Basic
   /**
    *
    */
-  private function _clone(string $id_menu, array $bits, string $id_parent = null)
+  private function _clone(string $id_menu, array $bits, string|null $id_parent = null)
   {
     $c = $this->pref->getClassCfg();
     if (Str::isUid($id_menu)) {

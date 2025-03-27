@@ -93,7 +93,7 @@ class Sync2 extends bbn\Models\Cls\Db
    */
   private $max_retry = 5;
 
-  public function __construct(Db $db, array $tables, array $sync_cfg = null, array $arch = [])
+  public function __construct(Db $db, array $tables, array|null $sync_cfg = null, array $arch = [])
   {
     parent::__construct($db);
     Singleton::init($this);

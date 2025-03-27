@@ -299,7 +299,7 @@ trait I18n
   }
 
 
-  private function findI18nChildren(array $opt, array &$res, bool $cascade = false, string $locale = null){
+  private function findI18nChildren(array $opt, array &$res, bool $cascade = false, string|null $locale = null){
     $fid = $this->fields['id'];
     if ($children = $this->fullOptions($opt[$fid])) {
       foreach ($children as $child) {

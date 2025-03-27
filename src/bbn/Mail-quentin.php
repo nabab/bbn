@@ -294,7 +294,7 @@ TEMPLATE;
    * @param string $name
    * @return self
    */
-  public function setFrom(string $email, string $name = null): self
+  public function setFrom(string $email, string|null $name = null): self
   {
     if (!PHPMailer::validateAddress($email)) {
       die("The From eMail address is not valid");

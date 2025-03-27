@@ -87,7 +87,7 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $db   The database name
    * @return Db|null
    */
-  public function connection(string $host = null, string $engine = 'mysql', string $db = ''): Db
+  public function connection(string|null $host = null, string $engine = 'mysql', string $db = ''): Db
   {
     if (bbn\Str::isUid($host)) {
       $id_host = $host;

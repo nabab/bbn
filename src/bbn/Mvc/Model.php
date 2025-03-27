@@ -131,7 +131,7 @@ class Model extends DbClass
    * @param bool $check_empty
    * @return bool
    */
-  public function checkAction(array $vars = null, bool $check_empty = false): bool
+  public function checkAction(array|null $vars = null, bool $check_empty = false): bool
   {
     if (isset($this->data['res'], $this->data['res'])) {
       if (is_array($vars)) {
@@ -218,7 +218,7 @@ class Model extends DbClass
    * @param array|null $data
    * @return array|null
    */
-  public function get(array $data = null): ?array
+  public function get(array|null $data = null): ?array
   {
     if (\is_null($data)) {
       $data = [];
@@ -275,13 +275,13 @@ class Model extends DbClass
   }
 
 
-  public function getCustomModelGroup(string $path, string $plugin, array $data = null)
+  public function getCustomModelGroup(string $path, string $plugin, array|null $data = null)
   {
     return $this->_ctrl->getCustomModelGroup(...\func_get_args());
   }
 
 
-  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data = null)
+  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array|null $data = null)
   {
     return $this->_ctrl->getSubpluginModelGroup(...\func_get_args());
   }
@@ -328,7 +328,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getPluginModel($path, array $data = [], string $plugin = null, int $ttl = 0): ?array
+  public function getPluginModel($path, array $data = [], string|null $plugin = null, int $ttl = 0): ?array
   {
     return $this->_ctrl->getPluginModel(...\func_get_args());
   }
@@ -344,7 +344,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getSubpluginModel($path, array $data = [], string $plugin = null, string $subplugin, int $ttl = 0): ?array
+  public function getSubpluginModel($path, array $data = [], string|null $plugin = null, string $subplugin, int $ttl = 0): ?array
   {
     return $this->_ctrl->getSubpluginModel(...\func_get_args());
   }
@@ -515,7 +515,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return void
    */
-  public function setCache(array $data = null, string $spec = '', $ttl = 10)
+  public function setCache(array|null $data = null, string $spec = '', $ttl = 10)
   {
     if ($this->_path) {
       $d = $this->get($data);
@@ -530,7 +530,7 @@ class Model extends DbClass
    * @param array|null $data
    * @param string $spec
    */
-  public function deleteCache(array $data = null, $spec = '', string $path = '')
+  public function deleteCache(array|null $data = null, $spec = '', string $path = '')
   {
     if ($cn = $this->_cache_name($data, $spec)) {
       if ($path) {
@@ -550,7 +550,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getFromCache(array $data = null, string $spec = '', int $ttl = 10)
+  public function getFromCache(array|null $data = null, string $spec = '', int $ttl = 10)
   {
     $model =& $this;
     return $this->getSetFromCache(
@@ -570,7 +570,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getSetFromCache(\Closure $fn, array $data = null, string $spec = '', int $ttl = 10): ?array
+  public function getSetFromCache(\Closure $fn, array|null $data = null, string $spec = '', int $ttl = 10): ?array
   {
     if ($cn = $this->_cache_name($data, $spec)) {
       return $this->cacheGetSet($fn, $cn, '', $ttl) ?: null;

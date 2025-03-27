@@ -54,7 +54,7 @@ class Url extends DbCls
   }
 
 
-  public function set(string $url, string $type_url, string $id_url = null): bool
+  public function set(string $url, string $type_url, string|null $id_url = null): bool
   {
     if ($id_url && ($url = $this->sanitize($url))) {
       return (bool)$this->dbTraitUpdate($id_url, ['url' => $url]);

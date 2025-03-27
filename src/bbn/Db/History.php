@@ -421,7 +421,7 @@ class History
    * @param string|null $dir
    * @return array
    */
-  public function getAllHistory(string $table, int $start = 0, int $limit = 20, string $dir = null): array
+  public function getAllHistory(string $table, int $start = 0, int $limit = 20, string|null $dir = null): array
   {
     if ($id_table = $this->database_obj->tableId($table, $this->db->getCurrent())) {
       $tab      = $this->db->escape($this->getHistoryTableName());
@@ -1031,7 +1031,7 @@ MYSQL;
    * @param bool        $force
    * @return array
    */
-  public function getDbCfg(string $db = null, bool $force = false): array
+  public function getDbCfg(string|null $db = null, bool $force = false): array
   {
     $res    = [];
     $tables = $this->db->getTables($db);

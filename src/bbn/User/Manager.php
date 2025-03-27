@@ -217,7 +217,7 @@ You can click the following link to access directly your account:<br>
   }
 
 
-  public function getList(string $group_id = null): array
+  public function getList(string|null $group_id = null): array
   {
     $db     =& $this->db;
     $arch   =& $this->class_cfg['arch'];
@@ -517,7 +517,7 @@ You can click the following link to access directly your account:<br>
    * @param array $cfg A configuration array
      * @return array|false
      */
-  public function edit(array $cfg, string $id_user = null): ?array
+  public function edit(array $cfg, string|null $id_user = null): ?array
   {
     $u                 =& $this->class_cfg['arch']['users'];
     $fields            = array_unique(array_values($this->class_cfg['arch']['users']));
@@ -719,7 +719,7 @@ You can click the following link to access directly your account:<br>
    * @param int    $exp     Timestamp of the expiration date
    * @return manager
    */
-  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null, string $url = null): self
+  public function makeHotlink(string $id_user, string $message = 'hotlink', $exp = null, string|null $url = null): self
   {
     if (!isset($this->messages[$message]) || empty($this->messages[$message]['link'])) {
       switch ($message)
@@ -1088,7 +1088,7 @@ You can click the following link to access directly your account:<br>
   }
 
 
-  public function addPermission(string $id_perm, string $id_user = null, string $id_group = null, int $public = 0): bool
+  public function addPermission(string $id_perm, string|null $id_user = null, string|null $id_group = null, int $public = 0): bool
   {
     if (!$id_group && !$id_user && !$public) {
       throw new \Exception("No paraneters!");
@@ -1115,7 +1115,7 @@ You can click the following link to access directly your account:<br>
   }
 
 
-  public function removePermission(string $id_perm, string $id_user = null, string $id_group = null, int $public = 0): bool
+  public function removePermission(string $id_perm, string|null $id_user = null, string|null $id_group = null, int $public = 0): bool
   {
     if (!$id_group && !$id_user && !$public) {
       throw new \Exception("No paraneters!");

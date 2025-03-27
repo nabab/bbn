@@ -53,7 +53,7 @@ interface SqlFormatters
    * @param array $cfg
    * @return string
    */
-  public function getJoin(array $cfg, array $join = null): string;
+  public function getJoin(array $cfg, array|null $join = null): string;
 
 
   /**
@@ -108,28 +108,28 @@ interface SqlFormatters
    * @param array|null $model
    * @return string
    */
-  public function getCreate(string $table, array $model = null): string;
+  public function getCreate(string $table, array|null $model = null): string;
 
   /**
    * @param string $table
    * @param array|null $model
    * @return string
    */
-  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string;
+  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string;
 
   /**
    * @param string $table
    * @param array|null $model
    * @return string
    */
-  public function getCreateKeys(string $table, array $model = null): string;
+  public function getCreateKeys(string $table, array|null $model = null): string;
 
   /**
    * @param string $table
    * @param array|null $model
    * @return string
    */
-  public function getCreateConstraints(string $table, array $model = null): string;
+  public function getCreateConstraints(string $table, array|null $model = null): string;
 
 
   /**

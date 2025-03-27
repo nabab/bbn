@@ -93,7 +93,7 @@ trait Path
    * @param string|null $parent The start/origin of the path
    * @return string|null The path concatenated with the separator or null if no path
    */
-  public function toPath(string $id, string $sep = '|', string $parent = null): ?string
+  public function toPath(string $id, string $sep = '|', string|null $parent = null): ?string
   {
     if ($this->check() && ($parts = $this->getPathArray($id, $parent))) {
       return implode($sep, $parts);

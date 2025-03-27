@@ -79,7 +79,7 @@ trait Common
    * @param string $plugin
    * @return string|null
    */
-  public function pluginDataPath(string $plugin = null): ?string
+  public function pluginDataPath(string|null $plugin = null): ?string
   {
     if ($this->_plugin || $plugin) {
       return $this->dataPath().'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
@@ -95,7 +95,7 @@ trait Common
    * @param string $plugin
    * @return string|null
    */
-  public function pluginTmpPath(string $plugin = null): ?string
+  public function pluginTmpPath(string|null $plugin = null): ?string
   {
     if ($this->_plugin || $plugin) {
       return $this->tmpPath().'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
@@ -133,7 +133,7 @@ trait Common
    * @param string|null $plugin The plugin name
    * @return boolean
    */
-  public function isPlugin(string $plugin = null): bool
+  public function isPlugin(string|null $plugin = null): bool
   {
     return $this->_mvc->isPlugin($plugin ?: $this->pluginName($this->_plugin));
   }
@@ -147,7 +147,7 @@ trait Common
    * @param boolean $raw If true will not include `src`
    * @return string|null
    */
-  public function pluginPath(string $plugin = null, $raw = false): ?string
+  public function pluginPath(string|null $plugin = null, $raw = false): ?string
   {
     return $this->_mvc->pluginPath($plugin ?: $this->pluginName($this->_plugin), $raw);
   }
@@ -159,7 +159,7 @@ trait Common
    * @param string|null $plugin The plugin name
    * @return string|null
    */
-  public function pluginUrl(string $plugin = null): ?string
+  public function pluginUrl(string|null $plugin = null): ?string
   {
     return $this->_mvc->pluginUrl($plugin ?: $this->pluginName($this->_plugin));
   }
@@ -230,43 +230,43 @@ trait Common
   }
 
 
-  public function dataPath(string $plugin = null): string
+  public function dataPath(string|null $plugin = null): string
   {
     return Mvc::getDataPath().($plugin ? 'plugins/'.$plugin.'/' : '');
   }
 
 
-  public function tmpPath(string $plugin = null): string
+  public function tmpPath(string|null $plugin = null): string
   {
     return Mvc::getTmpPath($plugin);
   }
 
 
-  public function logPath(string $plugin = null): string
+  public function logPath(string|null $plugin = null): string
   {
     return Mvc::getLogPath($plugin);
   }
 
 
-  public function cachePath(string $plugin = null): string
+  public function cachePath(string|null $plugin = null): string
   {
     return Mvc::getCachePath($plugin);
   }
 
 
-  public function contentPath(string $plugin = null): string
+  public function contentPath(string|null $plugin = null): string
   {
     return Mvc::getContentPath($plugin);
   }
 
 
-  public function userTmpPath(string $id_user = null, string $plugin = null):? string
+  public function userTmpPath(string|null $id_user = null, string|null $plugin = null):? string
   {
     return Mvc::getUserTmpPath($id_user, $plugin);
   }
 
 
-  public function userDataPath(string $id_user = null, string $plugin = null):? string
+  public function userDataPath(string|null $id_user = null, string|null $plugin = null):? string
   {
     return Mvc::getUserDataPath($id_user, $plugin);
   }

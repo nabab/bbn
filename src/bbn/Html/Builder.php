@@ -118,7 +118,7 @@ class Builder
   /**
 	 * @param array $cfg The default config for the elements
 	 */
-	public function __construct( array $cfg = null )
+	public function __construct( array|null $cfg = null )
 	{
 		if ( \is_array($cfg) ){
       $this->parameters = $cfg;

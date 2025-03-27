@@ -49,7 +49,7 @@ class Config extends bbn\Models\Cls\Basic
    * @param string      $request A request string
    * @param bbn\Db|null $db      A DB connection to the libraries' tables (if needed)
    */
-  public function __construct(string $request = null, bbn\Db $db = null)
+  public function __construct(string|null $request = null, bbn\Db $db = null)
   {
     // Need to be in a bbn environment, this is the absolute path of the server's root directory
     if (!defined('BBN_PUBLIC')) {

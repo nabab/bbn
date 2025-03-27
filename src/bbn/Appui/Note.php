@@ -139,7 +139,7 @@ class Note extends DbCls
    * @param Db $db
    * @throws Exception
    */
-  public function __construct(Db $db, string $lang = null)
+  public function __construct(Db $db, string|null $lang = null)
   {
     parent::__construct($db);
     $this->initClassCfg(self::$default_class_cfg);
@@ -267,14 +267,14 @@ class Note extends DbCls
   public function insert(
     $title,
     string $content = '',
-    string $id_type = null,
+    string|null $id_type = null,
     bool   $private = false,
     bool   $locked = false,
-    string $id_parent = null,
-    string $id_alias = null,
+    string|null $id_parent = null,
+    string|null $id_alias = null,
     string $mime = '',
     string $lang = '',
-    string $id_option = null,
+    string|null $id_option = null,
     string $excerpt = '',
     bool   $pinned = false,
     bool   $important = false
@@ -873,7 +873,7 @@ class Note extends DbCls
    * @return string|null
    * @throws Exception
    */
-  public function addMedia($id_note, string $name, array $content = null, string $title = '', string $type = 'file', bool $private = false): ?string
+  public function addMedia($id_note, string $name, array|null $content = null, string $title = '', string $type = 'file', bool $private = false): ?string
   {
     $media = $this->getMediaInstance();
 
@@ -1185,7 +1185,7 @@ class Note extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function browse(array $cfg, bool $with_content = false, bool $private = false, string $id_type = null, bool $pinned = null): ?array
+  public function browse(array $cfg, bool $with_content = false, bool $private = false, string|null $id_type = null, bool $pinned = null): ?array
   {
     if (isset($cfg['limit']) && $this->userId) {
       /** @var Db $db */
@@ -1626,7 +1626,7 @@ class Note extends DbCls
    * @param array|null $cfg
    * @return string|null
    */
-  public function addFeature(string $id_option, string $id_note, string $id_media = null, int $num = null, array $cfg = null): ?array
+  public function addFeature(string $id_option, string $id_note, string|null $id_media = null, int $num = null, array|null $cfg = null): ?array
   {
     $id_option = $this->getFeatureOption($id_option);
     $dbCfg     = $this->getClassCfg();
@@ -1743,7 +1743,7 @@ class Note extends DbCls
    * @param string|null $id_media
    * @return integer
    */
-  public function setFeatureMedia(string $id, string $id_media = null): int
+  public function setFeatureMedia(string $id, string|null $id_media = null): int
   {
     $dbCfg = $this->getClassCfg();
     $table = $dbCfg['tables']['features'];
@@ -1899,7 +1899,7 @@ class Note extends DbCls
    * @param array|null $cfg
    * @return integer
    */
-  public function setFeatureCfg(string $id, array $cfg = null): int
+  public function setFeatureCfg(string $id, array|null $cfg = null): int
   {
     $dbCfg = $this->getClassCfg();
     $table = $dbCfg['tables']['features'];

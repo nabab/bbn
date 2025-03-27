@@ -659,7 +659,7 @@ class Db implements Db\Actions
    * @param string|null $db The database name if different from the current one
    * @return array with tables and fields related to the searched foreign key
    */
-  public function getForeignKeys(string $col, string $table, string $db = null): array
+  public function getForeignKeys(string $col, string $table, string|null $db = null): array
   {
     return $this->language->getForeignKeys($col, $table, $db);
   }
@@ -717,7 +717,7 @@ class Db implements Db\Actions
   /**
    * 
    */
-  public function getColMaxLength(string $column, string $table = null): ?int
+  public function getColMaxLength(string $column, string|null $table = null): ?int
   {
     return $this->language->getColMaxLength($column, $table);
   } 
@@ -1596,7 +1596,7 @@ class Db implements Db\Actions
    * @param array        $order The "order" condition
    * @return array | false
    */
-  public function getFieldValues($table, string $field = null, array $where = [], array $order = []): ?array
+  public function getFieldValues($table, string|null $field = null, array $where = [], array $order = []): ?array
   {
     return $this->getColumnValues($table, $field, $where, $order);
   }
@@ -1616,7 +1616,7 @@ class Db implements Db\Actions
    * @param array        $order The "order" condition
    * @return array|null
    */
-  public function countFieldValues($table, string $field = null,  array $where = [], array $order = []): ?array
+  public function countFieldValues($table, string|null $field = null,  array $where = [], array $order = []): ?array
   {
     return $this->language->countFieldValues($table, $field, $where, $order);
   }
@@ -1644,7 +1644,7 @@ class Db implements Db\Actions
    * @param int $start
    * @return array
    */
-  public function getColumnValues($table, string $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
+  public function getColumnValues($table, string|null $field = null,  array $where = [], array $order = [], int $limit = 0, int $start = 0): ?array
   {
     return $this->language->getColumnValues($table, $field, $where, $order, $limit, $start);
   }
@@ -1669,7 +1669,7 @@ class Db implements Db\Actions
    * @return array
    * // TODO-testing: this method stated that it will return string but actually it returns an array!
    */
-  public function getValuesCount($table, string $field = null, array $where = [], array $order = []): array
+  public function getValuesCount($table, string|null $field = null, array $where = [], array $order = []): array
   {
     return $this->countFieldValues($table, $field, $where, $order);
   }
@@ -1713,7 +1713,7 @@ class Db implements Db\Actions
    *
    * @return int Number affected rows.
    */
-  public function insert($table, array $values = null, bool $ignore = false): ?int
+  public function insert($table, array|null $values = null, bool $ignore = false): ?int
   {
     return $this->language->insert($table, $values, $ignore);
   }
@@ -1737,7 +1737,7 @@ class Db implements Db\Actions
    *
    * @return int The number of rows inserted or updated.
    */
-  public function insertUpdate($table, array $values = null): ?int
+  public function insertUpdate($table, array|null $values = null): ?int
   {
     return $this->language->insertUpdate($table, $values);
   }
@@ -1764,7 +1764,7 @@ class Db implements Db\Actions
    *
    * @return int The number of rows updated.
    */
-  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int
+  public function update($table, array|null $values = null, array|null $where = null, bool $ignore = false): ?int
   {
     return $this->language->update($table, $values, $where, $ignore);
   }
@@ -1790,7 +1790,7 @@ class Db implements Db\Actions
    *
    * @return int The number of rows deleted.
    */
-  public function updateIgnore($table, array $values = null, array $where = null): ?int
+  public function updateIgnore($table, array|null $values = null, array|null $where = null): ?int
   {
     return $this->update($table, $values, $where, true);
   }
@@ -1809,7 +1809,7 @@ class Db implements Db\Actions
    *
    * @return int The number of rows deleted.
    */
-  public function delete($table, array $where = null, bool $ignore = false): ?int
+  public function delete($table, array|null $where = null, bool $ignore = false): ?int
   {
     return $this->language->delete($table, $where, $ignore);
   }
@@ -1830,7 +1830,7 @@ class Db implements Db\Actions
    *
    * @return int The number of rows deleted.
    */
-  public function deleteIgnore($table, array $where = null): ?int
+  public function deleteIgnore($table, array|null $where = null): ?int
   {
     return $this->delete(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $where, true);
   }
@@ -1854,7 +1854,7 @@ class Db implements Db\Actions
    *
    * @return int The number of rows inserted.
    */
-  public function insertIgnore($table, array $values = null): ?int
+  public function insertIgnore($table, array|null $values = null): ?int
   {
     return $this->insert(\is_array($table) ? array_merge($table, ['ignore' => true]) : $table, $values, true);
   }
@@ -2606,7 +2606,7 @@ class Db implements Db\Actions
    * @return string
    * @throws Exception
    */
-  public function getJoin(array $cfg, array $join = null): string
+  public function getJoin(array $cfg, array|null $join = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
@@ -2725,7 +2725,7 @@ class Db implements Db\Actions
    * @return string | false
    * @throws Exception
    */
-  public function getCreate(string $table, array $model = null): string
+  public function getCreate(string $table, array|null $model = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
@@ -2739,7 +2739,7 @@ class Db implements Db\Actions
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
+  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
@@ -2753,7 +2753,7 @@ class Db implements Db\Actions
    * @return string
    * @throws Exception
    */
-  public function getCreateKeys(string $table, array $model = null): string
+  public function getCreateKeys(string $table, array|null $model = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
@@ -2767,7 +2767,7 @@ class Db implements Db\Actions
    * @return string
    * @throws Exception
    */
-  public function getCreateConstraints(string $table, array $model = null): string
+  public function getCreateConstraints(string $table, array|null $model = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 
@@ -2900,7 +2900,7 @@ class Db implements Db\Actions
    * @param string|null $after
    * @return integer
    */
-  public function moveColumn(string $table, string $column, array $cfg, string $after = null): int
+  public function moveColumn(string $table, string $column, array $cfg, string|null $after = null): int
   {
     $this->ensureLanguageMethodExists('getMoveColumn');
 
@@ -2927,7 +2927,7 @@ class Db implements Db\Actions
    * @return bool
    * @throws Exception
    */
-  public function createUser(string $user = null, string $pass = null, string $db = null): bool
+  public function createUser(string|null $user = null, string|null $pass = null, string|null $db = null): bool
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
 

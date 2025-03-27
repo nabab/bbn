@@ -71,7 +71,7 @@ class Project extends DbCls
    * @param Db $db
    * @param string $id
    */
-  public function __construct(Db $db, string $id = null)
+  public function __construct(Db $db, string|null $id = null)
   {
     parent::__construct($db);
     self::optionalInit();
@@ -576,7 +576,7 @@ class Project extends DbCls
    * @param string $type  type given in order to fill the tree
    * @return array
    */
-  public function openTree(string $path, string $id_path, string $type = null): array
+  public function openTree(string $path, string $id_path, string|null $type = null): array
   {
     return $this->_getTree($path, $id_path, $type);
   }
@@ -593,7 +593,7 @@ class Project extends DbCls
    * @param array $types  types given in order to fill tree array
    * @return array
    */
-  private function _getTree(string $path, string $id_path, string $type = null, bool $onlydirs = false): array
+  private function _getTree(string $path, string $id_path, string|null $type = null, bool $onlydirs = false): array
   {
     // get info of the current path selected in first dropdown
     $currentPathArray = $this->getPath($id_path, true);
@@ -1312,7 +1312,7 @@ class Project extends DbCls
    *
    * @return string
    */
-  public function getDataPath(string $plugin = null): string
+  public function getDataPath(string|null $plugin = null): string
   {
     if ($this->name === BBN_APP_NAME) {
       return Mvc::getDataPath($plugin);
@@ -1333,7 +1333,7 @@ class Project extends DbCls
    *
    * @return string
    */
-  public function getUserDataPath(string $plugin = null): string
+  public function getUserDataPath(string|null $plugin = null): string
   {
     if ($this->name === BBN_APP_NAME) {
       return Mvc::getUserDataPath($plugin);

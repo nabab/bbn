@@ -183,14 +183,14 @@ interface EnginesApi
    * @param bool $ignore
    * @return int
    */
-  public function insert($table, array $values = null, bool $ignore = false): ?int;
+  public function insert($table, array|null $values = null, bool $ignore = false): ?int;
 
   /**
    * Inserts/Updates rows in the a given table
    *
    * @return int
    */
-  public function insertUpdate($table, array $values = null): ?int;
+  public function insertUpdate($table, array|null $values = null): ?int;
 
   /**
    * Updates rows in the a given table
@@ -201,7 +201,7 @@ interface EnginesApi
    * @param bool $ignore
    * @return int
    */
-  public function update($table, array $values = null, array $where = null, bool $ignore = false): ?int;
+  public function update($table, array|null $values = null, array|null $where = null, bool $ignore = false): ?int;
 
   /**
    * Deletes rows in the a given table

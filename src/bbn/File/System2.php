@@ -762,7 +762,7 @@ class System2 extends bbn\Models\Cls\Basic
    * @param string $detailed
    * @return array|null
    */
-  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
+  public function getFiles(string|null $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ( $this->check() && $this->isDir($path) ){
       //die(var_dump($path));

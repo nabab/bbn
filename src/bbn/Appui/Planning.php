@@ -206,7 +206,7 @@ class Planning {
    * @param string $end
    * @return array
    */
-  public function getAll(string $start, string $end, string $id_staff = null): array
+  public function getAll(string $start, string $end, string|null $id_staff = null): array
   {
     $et = $this->ecfg['table'];
     $ef = $this->ecfg['arch']['events'];

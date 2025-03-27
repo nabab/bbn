@@ -133,7 +133,7 @@ class Provider extends DbCls
     }
   }
 
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(Db $db, array|null $cfg = null)
   {
     // The database connection
     $this->db = $db;
@@ -147,7 +147,7 @@ class Provider extends DbCls
   }
 
 
-  public function add($name, array $cfg = null): ?string
+  public function add($name, array|null $cfg = null): ?string
   {
     $dbcfg = $this->getClassCfg();
     if ($this->dbTraitInsert([

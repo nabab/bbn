@@ -521,7 +521,7 @@ class MollieManager
    * @return array
    * @throws \Mollie\Api\Exceptions\ApiException
    */
-  public function listPayments(array $params = [], string $from = null, int $limit = 250): array
+  public function listPayments(array $params = [], string|null $from = null, int $limit = 250): array
   {
     $payments = $this->mollie->payments->page($from, $limit, $params);
 
@@ -573,7 +573,7 @@ class MollieManager
   public function listMainAccountPayments(
     string $api_key,
     array $params = [],
-    string $from = null,
+    string|null $from = null,
     int $limit = 250
   ): array
   {

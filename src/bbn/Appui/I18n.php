@@ -42,7 +42,7 @@ class I18n extends cacheCls
    *
    * @param db
    */
-  public function __construct(Db $db, string $code = null)
+  public function __construct(Db $db, string|null $code = null)
   {
     parent::__construct($db);
     $this->user    = User::getInstance();

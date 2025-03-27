@@ -67,7 +67,7 @@ class Mailing extends ClassDb
     ]
   ];
 
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(Db $db, array|null $cfg = null)
   {
     if ($db->check()) {
       self::optionalInit();
@@ -110,7 +110,7 @@ class Mailing extends ClassDb
    * @param string $id
    * @return boolean
    */
-  public function isSending(string $id = null): bool
+  public function isSending(string|null $id = null): bool
   {
     $cfg = $this->class_cfg['arch']['emailings'];
     $table = $this->class_cfg['tables']['emailings'];
@@ -127,7 +127,7 @@ class Mailing extends ClassDb
    * @param string $id
    * @return boolean
    */
-  public function isSuspended(string $id = null): bool
+  public function isSuspended(string|null $id = null): bool
   {
     $cfg = $this->class_cfg['arch']['emailings'];
     $table = $this->class_cfg['tables']['emailings'];
@@ -407,7 +407,7 @@ class Mailing extends ClassDb
     return null;
   }
 
-  public function send(array $cfg, string $sender = null): bool
+  public function send(array $cfg, string|null $sender = null): bool
   {
     if (!empty($cfg['to']) && ($mailer = $this->_get_mailer($sender))) {
       return $mailer->send($cfg);
@@ -1038,7 +1038,7 @@ class Mailing extends ClassDb
     return null;
   }
 
-  private static function _get_mailer(string $id = null): ?Mail
+  private static function _get_mailer(string|null $id = null): ?Mail
   {
     if (!$id) {
       if ($cfgs = self::_get_cfgs()) {

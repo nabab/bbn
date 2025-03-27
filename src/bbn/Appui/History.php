@@ -285,7 +285,7 @@ class History
    * @param string|null $dir
    * @return array
    */
-  public static function getAllHistory(string $table, int $start = 0, int $limit = 20, string $dir = null): array
+  public static function getAllHistory(string $table, int $start = 0, int $limit = 20, string|null $dir = null): array
   {
     if (
       ($db = self::_get_db()) &&
@@ -362,7 +362,7 @@ MYSQL;
    * @param string|null $column
    * @return null|array
    */
-  public static function getNextUpdate(string $table, string $id, string|int $from_when, string $column = null)
+  public static function getNextUpdate(string $table, string $id, string|int $from_when, string|null $column = null)
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
@@ -458,7 +458,7 @@ MYSQL;
    * @param string|null $column
    * @return null|array
    */
-  public static function getPrevUpdate(string $table, string $id, string|int $from_when, string $column = null): ?array
+  public static function getPrevUpdate(string $table, string $id, string|int $from_when, string|null $column = null): ?array
   {
     if (
       Str::checkName($table) &&
@@ -784,7 +784,7 @@ MYSQL;
    * @param string $id
    * @return array
    */
-  public static function getFullHistory(string $table, string $id, string $column = null): array
+  public static function getFullHistory(string $table, string $id, string|null $column = null): array
   {
     $res = [];
     if ($db = self::_get_db()) {
@@ -897,7 +897,7 @@ MYSQL;
     return null;
   }
 
-  public static function getDbCfg(string $db = null, bool $force = false): ?array
+  public static function getDbCfg(string|null $db = null, bool $force = false): ?array
   {
     if ($db = self::_get_db()) {
       $res = [];

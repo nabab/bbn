@@ -79,7 +79,7 @@ trait Parents
    * @param string|null $id_root
    * @return array|null The array of parents' ids, an empty array if no parent (root case), and null if it can't find the option
    */
-  public function sequence(string $id_option, string $id_root = null): ?array
+  public function sequence(string $id_option, string|null $id_root = null): ?array
   {
     if ($this->check()) {
       if (null === $id_root) {

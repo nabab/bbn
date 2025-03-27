@@ -40,7 +40,7 @@ class Bill extends DbCls
     ],
   ];
 
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(Db $db, array|null $cfg = null)
   {
     // The database connection
     $this->db = $db;

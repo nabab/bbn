@@ -236,7 +236,7 @@ class Php extends bbn\Models\Cls\Basic
    * @param string $path
    * @return array|null
    */
-  public function analyzeClass(string $cls, string $path = '', string $level = null): ?array
+  public function analyzeClass(string $cls, string $path = '', string|null $level = null): ?array
   {
     $rc = new ReflectionClass($cls);
     if (!empty($cls) && is_object($rc)) {

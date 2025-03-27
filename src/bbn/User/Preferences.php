@@ -196,7 +196,7 @@ class Preferences extends DbCls
    * @return null|array
    * @throws Exception
    */
-  public function retrieveIds(string $id_option = null): ?array
+  public function retrieveIds(string|null $id_option = null): ?array
   {
     return $this->_retrieveIds($id_option, $this->id_user, $this->id_group);
   }
@@ -230,7 +230,7 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function retrieveUserIds(string $id_option = null, string $id_user = null): ?array
+  public function retrieveUserIds(string|null $id_option = null, string|null $id_user = null): ?array
   {
     if (!$id_user) {
       $id_user = $this->id_user;
@@ -252,7 +252,7 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function retrieveGroupIds(string $id_option = null, string $id_group = null): ?array
+  public function retrieveGroupIds(string|null $id_option = null, string|null $id_group = null): ?array
   {
     if (!$id_group) {
       $id_group = $this->id_group;
@@ -299,7 +299,7 @@ class Preferences extends DbCls
    * @return bool
    * @throws Exception
    */
-  public function has(string $id_option = null, bool $force = false): bool
+  public function has(string|null $id_option = null, bool $force = false): bool
   {
     if (!$force && $this->user->isDev()) {
       return true;
@@ -323,7 +323,7 @@ class Preferences extends DbCls
    * @return bool
    * @throws Exception
    */
-  public function userHas(string $id_option, string $id_user = null): bool
+  public function userHas(string $id_option, string|null $id_user = null): bool
   {
     return (bool)$this->_retrieveIds($id_option, $id_user);
   }
@@ -431,7 +431,7 @@ class Preferences extends DbCls
    * @param null|array $cfg
    * @return null|array
    */
-  public function getCfg(string $id = null, array $cfg = null): ?array
+  public function getCfg(string|null $id = null, array|null $cfg = null): ?array
   {
     if (
         (null !== $cfg)
@@ -474,7 +474,7 @@ class Preferences extends DbCls
    * @param string|null $id_user
    * @return null|array
    */
-  public function getCfgByOption(string $id_option, string $id_user = null): ?array
+  public function getCfgByOption(string $id_option, string|null $id_user = null): ?array
   {
     if (
         ($cfg = $this->db->selectOne(
@@ -601,7 +601,7 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function getAll(string $id_option = null, bool $with_config = true): ?array
+  public function getAll(string|null $id_option = null, bool $with_config = true): ?array
   {
     if ($id_option = $this->_getIdOption($id_option)) {
       $farch  = $this->fields;
@@ -696,7 +696,7 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function getAllNotMine(string $id_option = null, bool $with_config = true): ?array
+  public function getAllNotMine(string|null $id_option = null, bool $with_config = true): ?array
   {
     if ($id_option = $this->_getIdOption($id_option)) {
       $fields = $this->fields;
@@ -1225,7 +1225,7 @@ class Preferences extends DbCls
    * @param array|null $cfg
    * @return int
    */
-  public function set(string $id, array $cfg = null): int
+  public function set(string $id, array|null $cfg = null): int
   {
     return $this->db->update(
         $this->class_cfg['table'],
@@ -1314,7 +1314,7 @@ class Preferences extends DbCls
    * @return null|string
    * @throws Exception
    */
-  public function add(string $id_option = null, array $cfg): ?string
+  public function add(string|null $id_option = null, array $cfg): ?string
   {
     if (
         ($id_option = $this->_getIdOption($id_option))
@@ -1335,7 +1335,7 @@ class Preferences extends DbCls
    * @return null|string
    * @throws Exception
    */
-  public function addToGroup(string $id_option = null, array $cfg): ?string
+  public function addToGroup(string|null $id_option = null, array $cfg): ?string
   {
     if (
         ($id_option = $this->_getIdOption($id_option))
@@ -1402,7 +1402,7 @@ class Preferences extends DbCls
    * @return null|int
    * @throws Exception
    */
-  public function deleteUserOption(string $id_option, string $id_user = null): ?int
+  public function deleteUserOption(string $id_option, string|null $id_user = null): ?int
   {
     if ($id_option = $this->_getIdOption($id_option)) {
       return $this->db->delete(
@@ -1449,7 +1449,7 @@ class Preferences extends DbCls
    * @param null|array $cfg
    * @return int
    */
-  public function setCfg(string $id = null, array $cfg = null): int
+  public function setCfg(string|null $id = null, array|null $cfg = null): int
   {
     if (null !== $cfg) {
       $cfg    = $this->getCfg(null, $cfg);
@@ -1478,7 +1478,7 @@ class Preferences extends DbCls
    * @param null|string $text
    * @return null|int
    */
-  public function setText(string $id, string $text = null): ?int
+  public function setText(string $id, string|null $text = null): ?int
   {
     return $this->db->update(
         $this->class_cfg['table'],
@@ -1499,7 +1499,7 @@ class Preferences extends DbCls
    * @param string|null $id_link
    * @return null|int
    */
-  public function setLink(string $id, string $id_link = null): ?int
+  public function setLink(string $id, string|null $id_link = null): ?int
   {
     return $this->db->update(
         $this->class_cfg['table'],
@@ -2026,7 +2026,7 @@ class Preferences extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getFullBits(string $id_user_option, string $id_parent = null, bool $with_config = true): array
+  public function getFullBits(string $id_user_option, string|null $id_parent = null, bool $with_config = true): array
   {
     if ($this->isAuthorized($id_user_option)) {
       $c = $this->class_cfg['arch']['user_options_bits'];
@@ -2155,7 +2155,7 @@ class Preferences extends DbCls
    * @param null|array $cfg
    * @return null|array
    */
-  public function getBitCfg(string $id = null, array $cfg = null): ?array
+  public function getBitCfg(string|null $id = null, array|null $cfg = null): ?array
   {
     if (
         (null !== $cfg)
@@ -2253,7 +2253,7 @@ class Preferences extends DbCls
    * @return int|null
    * @throws Exception
    */
-  public function fixBitsOrder(string $id_user_option, string $id_parent = null, $deep = false): ?int
+  public function fixBitsOrder(string $id_user_option, string|null $id_parent = null, $deep = false): ?int
   {
     if (
         Str::isUid($id_user_option)
@@ -2286,7 +2286,7 @@ class Preferences extends DbCls
    * @return bool|null
    * @throws Exception
    */
-  public function moveBit(string $id, string $id_parent = null): ?bool
+  public function moveBit(string $id, string|null $id_parent = null): ?bool
   {
     if (
         Str::isUid($id)
@@ -2315,7 +2315,7 @@ class Preferences extends DbCls
    * @param bool        $incr           Set it to true if you want the result increased by 1
    * @return int
    */
-  public function getMaxBitNum(string $id_user_option, string $id_parent = null, bool $incr = false): int
+  public function getMaxBitNum(string $id_user_option, string|null $id_parent = null, bool $incr = false): int
   {
     if (
         Str::isUid($id_user_option)
@@ -2481,7 +2481,7 @@ class Preferences extends DbCls
    * @return null|string
    * @throws Exception
    */
-  private function _getIdOption(string $id_option = null): ?string
+  private function _getIdOption(string|null $id_option = null): ?string
   {
     if (!$id_option && !($id_option = $this->getCurrent())) {
       return null;
@@ -2533,7 +2533,7 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  private function _retrieveIds(string $id_option, string $id_user = null, string $id_group = null): ?array
+  private function _retrieveIds(string $id_option, string|null $id_user = null, string|null $id_group = null): ?array
   {
     if (!$id_user && !$id_group && isset($this->id_user, $this->id_group)) {
       $id_user  = $this->id_user;
@@ -2604,7 +2604,7 @@ class Preferences extends DbCls
    * @return array|null
    * @throws Exception
    */
-  private function _getLinks(string $id_link, string $id_user = null, string $id_group = null): ?array
+  private function _getLinks(string $id_link, string|null $id_user = null, string|null $id_group = null): ?array
   {
     if ($id_link = $this->_getIdOption($id_link)) {
       $where = [

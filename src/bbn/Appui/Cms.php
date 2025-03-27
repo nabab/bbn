@@ -508,7 +508,7 @@ class Cms extends DbCls
    * @return array
    * @throws Exception
    */
-  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string $type = null, bool $published = false): array
+  public function getAll(bool $with_content = false, array $filter = [], array $order = [], int $limit = 50, int $start = 0, string|null $type = null, bool $published = false): array
   {
     $cfg       = $this->getLastVersionCfg($with_content, $published, $filter);
     $type_cond = [];
@@ -956,12 +956,12 @@ class Cms extends DbCls
     string $title = '',
     string $content = '',
     string $excerpt = '',
-    string $start = null,
-    string $end = null,
-    array $tags = null,
-    string $id_type = null,
-    string $id_media = null,
-    string $id_option = null
+    string|null $start = null,
+    string|null $end = null,
+    array|null $tags = null,
+    string|null $id_type = null,
+    string|null $id_media = null,
+    string|null $id_option = null
   ): bool
   {
     if (is_array($url)) {

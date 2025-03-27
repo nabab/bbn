@@ -63,7 +63,7 @@ class Mailbox2
 
 
 
-  public function __construct(string $user, string $pass, string $type, string $host = null)
+  public function __construct(string $user, string $pass, string $type, string|null $host = null)
   {
     $this->host  = $host;
     $this->type  = $type;

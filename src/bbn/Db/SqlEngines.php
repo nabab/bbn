@@ -32,7 +32,7 @@ interface SqlEngines
    * @param string|null $db
    * @return bool
    */
-  public function createUser(string $user, string $pass, string $db = null): bool;
+  public function createUser(string $user, string $pass, string|null $db = null): bool;
 
   /**
    * Deletes a database user

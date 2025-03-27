@@ -243,7 +243,7 @@ trait Write
    * @return int|null
    * @throws Exception
    */
-  public function merge(string $id, array $data, array $cfg = null)
+  public function merge(string $id, array $data, array|null $cfg = null)
   {
     if ($this->check()
         && ($o = $this->option($id))
@@ -478,7 +478,7 @@ trait Write
    * @param string|null $code The new code
    * @return int|null The number of affected rows
    */
-  public function setCode($id, string $code = null)
+  public function setCode($id, string|null $code = null)
   {
     if ($this->check()) {
       return $this->db->updateIgnore(

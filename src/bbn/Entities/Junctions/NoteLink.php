@@ -188,7 +188,7 @@ class NoteLink extends EntityJunction
     return false;
   }
 
-  protected function NoteLinkGetRequestCfg(string $id_parent = null, string $id_alias = null): array
+  protected function NoteLinkGetRequestCfg(string|null $id_parent = null, string|null $id_alias = null): array
   {
     $dbCfg = $this->note->getLastVersionCfg(false);
     $linkCfg = $this->getClassCfg();

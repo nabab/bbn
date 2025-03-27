@@ -200,7 +200,7 @@ trait DbTrait
    *
    * @return array The structure of the table.
    */
-  protected function dbTraitGetStructure(string $table = null): array
+  protected function dbTraitGetStructure(string|null $table = null): array
   {
     if (!$table) {
       $cfg = $this->getClassCfg();
@@ -221,7 +221,7 @@ trait DbTrait
    *
    * @return array An array of relations.
    */
-  protected function dbTraitGetTableRelations(string $table = null): array
+  protected function dbTraitGetTableRelations(string|null $table = null): array
   {
     $cfg = $this->getClassCfg();
     if (!$table) {

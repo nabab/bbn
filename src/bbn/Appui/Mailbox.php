@@ -371,7 +371,7 @@ class Mailbox extends Basic
    *
    * @return object|bool
    */
-  public function update(string $dir = null)
+  public function update(string|null $dir = null)
   {
     if (($dir = $this->selectFolder($dir))
       && ($imap = imap_check($this->stream))
@@ -553,7 +553,7 @@ class Mailbox extends Basic
    * @param null|string $folder Simple/full mailbox name
    * @return null|string
    */
-  public function selectFolder(string $folder = null): ?string
+  public function selectFolder(string|null $folder = null): ?string
   {
     if ($this->_is_connected()) {
       if (!$folder || ($this->folder === $folder)) {
@@ -590,7 +590,7 @@ class Mailbox extends Basic
    *
    * @return bool|object
    */
-  public function getInfoFolder(string $dir = null)
+  public function getInfoFolder(string|null $dir = null)
   {
     if ($this->_is_connected()) {
       if (!$dir || $this->selectFolder($dir)) {

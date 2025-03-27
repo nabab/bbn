@@ -67,7 +67,7 @@ class Permissions extends Basic
    *
    * @param array $routes An array of routes to the plugins
    */
-  public function __construct(array $routes = null)
+  public function __construct(array|null $routes = null)
   {
     if (!($this->opt = Option::getInstance())) {
       throw new Exception(X::_('Impossible to construct permissions: you need to instantiate options before'));
@@ -300,7 +300,7 @@ class Permissions extends Basic
    * @param string      $type      The type: access or option
    * @return array|null
    */
-  public function options(string $id_option = null, string $type = 'access'): ?array
+  public function options(string|null $id_option = null, string $type = 'access'): ?array
   {
     if (($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->options($id_option))
@@ -326,7 +326,7 @@ class Permissions extends Basic
    * @param string      $type      The type: access or option
    * @return array|null
    */
-  public function fullOptions(string $id_option = null, string $type = 'access'): ?array
+  public function fullOptions(string|null $id_option = null, string $type = 'access'): ?array
   {
     if (($id_option = $this->_get_id_option($id_option, $type))
         && ($os = $this->opt->fullOptions($id_option))
@@ -355,7 +355,7 @@ class Permissions extends Basic
    * @param string      $type      The type: access or option
    * @return null|array
    */
-  public function getAll(string $id_option = null, string $type = 'access'): ?array
+  public function getAll(string|null $id_option = null, string $type = 'access'): ?array
   {
     if ($id_option = $this->_get_id_option($id_option, $type)) {
       return $this->pref->options($id_option ?: $this->getCurrent());
@@ -390,7 +390,7 @@ class Permissions extends Basic
    * @param bool        $force     Force permission check
    * @return array|bool
    */
-  public function get(string $id_option = null, string $type = 'access', bool $force = false): ?array
+  public function get(string|null $id_option = null, string $type = 'access', bool $force = false): ?array
   {
     /*
     if ( $all = $this->getAll($id_option, $type) ){
@@ -421,7 +421,7 @@ class Permissions extends Basic
    * @param bool        $force     Force permission check
    * @return bool
    */
-  public function has(string $id_option = null, string $type = 'access', bool $force = false): bool
+  public function has(string|null $id_option = null, string $type = 'access', bool $force = false): bool
   {
     if (!$force && $this->user && $this->user->isDev()) {
       return true;
@@ -448,7 +448,7 @@ class Permissions extends Basic
    * @param bool        $force     Force permission check
    * @return bool
    */
-  public function hasDeep(string $id_option = null, string $type = 'access', bool $force = false): bool
+  public function hasDeep(string|null $id_option = null, string $type = 'access', bool $force = false): bool
   {
     if (!$force && $this->user && $this->user->isDev()) {
       return true;
@@ -635,7 +635,7 @@ class Permissions extends Basic
    * @param string|null $id_option
    * @return bool|null
    */
-  public function readOption(string $id_option = null, bool $force = false): ?bool
+  public function readOption(string|null $id_option = null, bool $force = false): ?bool
   {
     if ($this->user->isAdmin()) {
       return true;
@@ -1416,7 +1416,7 @@ class Permissions extends Basic
    * @param string      $type
    * @return null|string
    */
-  private function _get_id_option(string $id_option = null, $type = 'access'): ?string
+  private function _get_id_option(string|null $id_option = null, $type = 'access'): ?string
   {
     if ($id_option && !Str::isUid($id_option)) {
       $id_option = $this->fromPath($id_option, $type);

@@ -115,7 +115,7 @@ EOF
     return $this->pdf;
   }
   
-  public function getConfig(array $cfg = null){
+  public function getConfig(array|null $cfg = null){
     if ( \is_array($cfg) ){
       return X::mergeArrays($this->cfg, $this->fixCfg($cfg));
     }

@@ -228,7 +228,7 @@ class System extends Basic
    * @param string               $detailed
    * @return array|null
    */
-  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
+  public function getFiles(string|null $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     if ($this->check()) {
       if ($this->mode === 'nextcloud') {
@@ -1472,7 +1472,7 @@ class System extends Basic
         if ($full) {
 $obj =& $this;
           set_error_handler(
-            function (int $errno, string $errstr, string $errfile = null, int $errline = null)
+            function (int $errno, string $errstr, string|null $errfile = null, int $errline = null)
             use ($attempts, $path, &$obj) {
               if ($attempts >= 3) {
                 X::logError($errno, $errstr, $errfile, $errline);

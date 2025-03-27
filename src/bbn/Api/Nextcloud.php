@@ -66,7 +66,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
     return $success;
   }
   
-  protected function getProps($path, array $props = null, int $depth = 0): ?array
+  protected function getProps($path, array|null $props = null, int $depth = 0): ?array
   {
     try {
       $res = $this->obj->propFind(self::fixURL($path), $props ?: [
@@ -423,7 +423,7 @@ class Nextcloud extends bbn\Models\Cls\Basic{
    * @param string $detailed
    * @return array|null
    */
-  public function getFiles(string $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
+  public function getFiles(string|null $path = null, $including_dirs = false, $hidden = false, $filter = null, string $detailed = ''): ?array
   {
     //exists and is_dir is checked $path in the function get_items
     $is_absolute = strpos($path, '/') === 0;

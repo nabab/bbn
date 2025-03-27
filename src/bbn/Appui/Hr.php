@@ -54,7 +54,7 @@ class Hr extends DbCls
    * @param \bbn\Db $db
    * @param array $cfg
    */
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(Db $db, array|null $cfg = null)
   {
     parent::__construct($db);
     $this->initClassCfg($cfg);

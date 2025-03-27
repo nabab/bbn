@@ -317,7 +317,7 @@ class Email extends Basic
   }
 
 
-  public function createFolder(string $id_account, string $name, string $id_parent = null): bool
+  public function createFolder(string $id_account, string $name, string|null $id_parent = null): bool
   {
     $mb = $this->getMailbox($id_account);
     $uid_parent = "";
@@ -335,7 +335,7 @@ class Email extends Basic
   }
 
 
-  public function createFolderDb(string $id_account, string $name, string $id_parent = null): bool
+  public function createFolderDb(string $id_account, string $name, string|null $id_parent = null): bool
   {
     $types = self::getFolderTypes();
 
@@ -356,7 +356,7 @@ class Email extends Basic
   }
 
 
-  public function renameFolder(string $id, string $name, string $id_account, string $id_parent = null): bool
+  public function renameFolder(string $id, string $name, string $id_account, string|null $id_parent = null): bool
   {
     $mb = $this->getMailbox($id_account);
     $uid_parent = "";
@@ -373,7 +373,7 @@ class Email extends Basic
   }
 
 
-  public function renameFolderDb(string $id, string $name, string $id_account, string $id_parent = null): bool
+  public function renameFolderDb(string $id, string $name, string $id_account, string|null $id_parent = null): bool
   {
     $a = [
       'text' => $name,
@@ -1208,7 +1208,7 @@ class Email extends Basic
   }
 
 
-  public function addSentToLink(string $id_link, string $date = null): bool
+  public function addSentToLink(string $id_link, string|null $date = null): bool
   {
     if ($link = $this->getLink($id_link)) {
       $cfg = $this->class_cfg['arch']['users_contacts_links'];

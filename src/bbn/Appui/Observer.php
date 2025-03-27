@@ -109,7 +109,7 @@ class Observer extends bbn\Models\Cls\Db
     return null;
   }
 
-  private static function sanitizeParams(array $params = null)
+  private static function sanitizeParams(array|null $params = null)
   {
     return $params ? json_encode(array_map('base64_encode', $params)) : '';
   }
@@ -144,7 +144,7 @@ class Observer extends bbn\Models\Cls\Db
    * @param string $params
    * @return null|string
    */
-  private function _get_id_from_user(string $request, string $params = null): ?string
+  private function _get_id_from_user(string $request, string|null $params = null): ?string
   {
     $r = null;
     if ($this->id_user && $this->check()) {
@@ -217,7 +217,7 @@ class Observer extends bbn\Models\Cls\Db
    * @param array|null $params
    * @return string
    */
-  private function _get_id_string(string $request, string $params = null): string
+  private function _get_id_string(string $request, string|null $params = null): string
   {
     return md5($request.($params ?: ''));
   }
@@ -446,7 +446,7 @@ class Observer extends bbn\Models\Cls\Db
    * @param string|null $id_user
    * @return array
    */
-  public function getList(string $id_user = null): array
+  public function getList(string|null $id_user = null): array
   {
     $field = $id_user ? 'o.id_user' : 'public';
     $now = date('Y-m-d H:i:s');

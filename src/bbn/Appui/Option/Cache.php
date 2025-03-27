@@ -79,7 +79,7 @@ trait Cache
    *
    * @return Option
    */
-  public function deleteCache(string $id = null, bool $deep = false, bool $subs = false): self
+  public function deleteCache(string|null $id = null, bool $deep = false, bool $subs = false): self
   {
     // Ensure the class is initialized and has a valid database connection before proceeding with cache deletion.
     if ($this->check()) {

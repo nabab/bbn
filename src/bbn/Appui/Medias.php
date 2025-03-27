@@ -104,7 +104,7 @@ class Medias extends DbCls
   protected $fileRoot;
 
 
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(Db $db, array|null $cfg = null)
   {
     parent::__construct($db);
     $this->initClassCfg($cfg);
@@ -167,7 +167,7 @@ class Medias extends DbCls
   }
 
 
-  public function getImageUrl(string $id = null): string
+  public function getImageUrl(string|null $id = null): string
   {
     if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
@@ -183,7 +183,7 @@ class Medias extends DbCls
   }
 
 
-  public function getFileUrl(string $id = null): string
+  public function getFileUrl(string|null $id = null): string
   {
     if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
@@ -507,11 +507,11 @@ class Medias extends DbCls
    */
   public function insert(
       string $file,
-      array $content = null,
+      array|null $content = null,
       string $title = '',
       string $type = 'file',
       bool $private = false,
-      string $description = null
+      string|null $description = null
   ): ?string
   {
     $cf =& $this->class_cfg;
@@ -1170,7 +1170,7 @@ class Medias extends DbCls
    * @param string|null $name
    * @return string|null
    */
-  public function getMediaPath($media, string $name = null)
+  public function getMediaPath($media, string|null $name = null)
   {
     if (is_string($media)) {
       $media = $this->getMedia($media);

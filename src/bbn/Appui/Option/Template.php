@@ -260,7 +260,7 @@ trait Template
    * @param string|null $id
    * @return int|null
    */
-  public function updateTemplate(string $id = null): ?int
+  public function updateTemplate(string|null $id = null): ?int
   {
     if ($this->getMagicTemplateId() && $this->exists($id)) {
       $res = 0;

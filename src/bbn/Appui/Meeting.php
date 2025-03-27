@@ -104,7 +104,7 @@ class Meeting extends DbCls
   }
 
 
-  public function getRooms(string $server, string $idUser = null, string $idGroup = null)
+  public function getRooms(string $server, string|null $idUser = null, string|null $idGroup = null)
   {
     if (!Str::isUid($server)) {
       $server = $this->getOptionId($server);
@@ -161,7 +161,7 @@ class Meeting extends DbCls
   }
 
 
-  public function getAllRooms(string $idUser = null, string $idGroup = null): ?array
+  public function getAllRooms(string|null $idUser = null, string|null $idGroup = null): ?array
   {
     $servers = $this->getOptionsIds('list');
     if (!empty($servers)) {
@@ -547,7 +547,7 @@ class Meeting extends DbCls
   }
 
 
-  public function setJoined(string $idRoom, string $idTmp, string $idUser = null): ?string
+  public function setJoined(string $idRoom, string $idTmp, string|null $idUser = null): ?string
   {
     $idMeeting = $this->getStartedMeeting($idRoom);
     if (empty($idMeeting)
@@ -603,7 +603,7 @@ class Meeting extends DbCls
   }
 
 
-  public function setLeaved(string $idMeeting, string $idTmp, string $idUser = null, bool $close = true): bool
+  public function setLeaved(string $idMeeting, string $idTmp, string|null $idUser = null, bool $close = true): bool
   {
     $fields = $this->class_cfg['arch']['participants'];
     $where = [

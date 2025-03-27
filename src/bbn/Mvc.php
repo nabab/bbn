@@ -255,7 +255,7 @@ class Mvc implements Mvc\Api
    *
    * @return string
    */
-  public static function getDataPath(string $plugin = null): string
+  public static function getDataPath(string|null $plugin = null): string
   {
     self::initPath();
     return self::$_data_path . ($plugin ? 'plugins/' . $plugin . '/' : '');
@@ -269,7 +269,7 @@ class Mvc implements Mvc\Api
    *
    * @return string
    */
-  public static function getTmpPath(string $plugin = null): string
+  public static function getTmpPath(string|null $plugin = null): string
   {
     self::initPath();
     return self::$_tmp_path . ($plugin ? 'plugins/' . $plugin . '/' : '');
@@ -285,7 +285,7 @@ class Mvc implements Mvc\Api
    *
    * @return string
    */
-  public static function getLogPath(string $plugin = null): string
+  public static function getLogPath(string|null $plugin = null): string
   {
     self::initPath();
     return self::$_app_name ? self::getDataPath() . 'logs/' . ($plugin ? $plugin . '/' : '') : '';
@@ -301,7 +301,7 @@ class Mvc implements Mvc\Api
    *
    * @return string
    */
-  public static function getCachePath(string $plugin = null): string
+  public static function getCachePath(string|null $plugin = null): string
   {
     self::initPath();
     return self::getTmpPath() . 'cache/' . ($plugin ? $plugin . '/' : '');
@@ -315,7 +315,7 @@ class Mvc implements Mvc\Api
    *
    * @return string
    */
-  public static function getContentPath(string $plugin = null): string
+  public static function getContentPath(string|null $plugin = null): string
   {
     self::initPath();
     return self::$_app_name ? self::getDataPath() . ($plugin ? 'plugins/' . $plugin . '/' : 'content/') : '';
@@ -364,7 +364,7 @@ class Mvc implements Mvc\Api
    *
    * @return string|null
    */
-  public static function getUserTmpPath(string $id_user = null, string $plugin = null): ?string
+  public static function getUserTmpPath(string|null $id_user = null, string|null $plugin = null): ?string
   {
 
     if (!$id_user) {
@@ -389,7 +389,7 @@ class Mvc implements Mvc\Api
    * @param string|null $plugin
    * @return string|null
    */
-  public static function getUserDataPath(string $id_user = null, string $plugin = null): ?string
+  public static function getUserDataPath(string|null $id_user = null, string|null $plugin = null): ?string
   {
     if (!self::$_app_name) {
       return null;
@@ -764,7 +764,7 @@ class Mvc implements Mvc\Api
   }
 
 
-  private function initLocaleDomain(string $pluginName = null)
+  private function initLocaleDomain(string|null $pluginName = null)
   {
     if (
       $this->router

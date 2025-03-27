@@ -644,7 +644,7 @@ class Sqlite extends Sql
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array $model = null, $charset = null, $collate = null): string
+  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
   {
     if (!$model) {
       $model = $this->modelize($table);
@@ -727,7 +727,7 @@ class Sqlite extends Sql
    * @param null|string $table The table for which to create the statement
    * @return string
    */
-  public function getCreate(string $table, array $model = null): string
+  public function getCreate(string $table, array|null $model = null): string
   {
     $st = '';
     if (!$model) {
@@ -1010,7 +1010,7 @@ class Sqlite extends Sql
    * @param string|null $db
    * @return bool
    */
-  public function createUser(string $user = null, string $pass = null, string $db = null): bool
+  public function createUser(string|null $user = null, string|null $pass = null, string|null $db = null): bool
   {
     return true;
   }
@@ -1022,7 +1022,7 @@ class Sqlite extends Sql
    * @param string|null $user
    * @return bool
    */
-  public function deleteUser(string $user = null): bool
+  public function deleteUser(string|null $user = null): bool
   {
     return true;
   }
@@ -1122,7 +1122,7 @@ class Sqlite extends Sql
    * @param string $charset
    * @return string
    */
-  public function createTable($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
+  public function createTable($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
   {
     $lines = [];
     $sql   = '';
@@ -1170,7 +1170,7 @@ class Sqlite extends Sql
   }
 
 
-  public function createTableSqlite($table_name, array $columns, array $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
+  public function createTableSqlite($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
   {
     $str = $this->createTable($table_name, $columns, $keys, $with_constraints, $charset);
     if ($str !== '') {
@@ -1189,7 +1189,7 @@ class Sqlite extends Sql
    * TODO-testing: ALTER TABLE ADD CONSTRAINT is not supported:
    * https://www.sqlite.org/omitted.html
    */
-  public function getCreateConstraints(string $table, array $model = null): string
+  public function getCreateConstraints(string $table, array|null $model = null): string
   {
     $st = '';
     if (!empty($model)) {
@@ -1230,7 +1230,7 @@ class Sqlite extends Sql
    * @return bool
    * @throws Exception
    */
-  public function createConstraintsSqlite(string $table, array $model = null): bool
+  public function createConstraintsSqlite(string $table, array|null $model = null): bool
   {
     $str = $this->getCreateConstraints($table,  $model);
     if ($str !== '') {

@@ -61,7 +61,7 @@ class Sales extends DbCls
     ],
   ];
 
-  public function __construct(Db $db, array $cfg = null)
+  public function __construct(Db $db, array|null $cfg = null)
   {
     // The database connection
     $this->db = $db;
@@ -108,7 +108,7 @@ class Sales extends DbCls
     return $this->changeStatus($idTransaction, 'failed', $errorMessage, $errorCode);
   }
 
-  public function getByProduct(string $id_product, string $period = null, string $value = null): ?array
+  public function getByProduct(string $id_product, string|null $period = null, string|null $value = null): ?array
   {
     $cfg = $this->getClassCfg();
     $cartCfg = $this->cart->getClassCfg();

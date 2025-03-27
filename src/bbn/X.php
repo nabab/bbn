@@ -1723,7 +1723,7 @@ class X
    * @param string|null $items If null the function will be applied just to the item of the parent array
    * @return array
    */
-  public static function map(callable $fn, array $ar, string $items = null): array
+  public static function map(callable $fn, array $ar, string|null $items = null): array
   {
     $res = [];
     foreach ($ar as $key => $a) {
@@ -1819,7 +1819,7 @@ class X
    * @param string|null $items If null the function will be applied just to the item of the parent array
    * @return array
    */
-  public static function rmap(callable $fn, array $ar, string $items = null): array
+  public static function rmap(callable $fn, array $ar, string|null $items = null): array
   {
     $res = [];
     foreach ($ar as $key => $a) {
@@ -2271,7 +2271,7 @@ class X
    * @param array|callable $where
    * @return array
    */
-  public static function getRows(array $ar, $where = null, array $order = null, int $limit = 0, int $start = 0): array
+  public static function getRows(array $ar, $where = null, array|null $order = null, int $limit = 0, int $start = 0): array
   {
     $res = $ar;
     if ($where) {

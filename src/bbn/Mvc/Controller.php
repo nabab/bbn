@@ -447,7 +447,7 @@ class Controller implements Api
    * @param array|null $model The data model to fill the view with
    * @return string
    */
-  public function render(string $view, array $model = null): string
+  public function render(string $view, array|null $model = null): string
   {
     if (empty($model) && !empty($this->data)) {
       $model = $this->data;
@@ -672,7 +672,7 @@ class Controller implements Api
    * @param string $path
    * @return string|false
    */
-  public function getJs($path = '', array $data = null, $encapsulated = true)
+  public function getJs($path = '', array|null $data = null, $encapsulated = true)
   {
     $params = func_get_args();
     // The model can be set as first argument if the path is default
@@ -709,7 +709,7 @@ class Controller implements Api
    * @param boolean      $encapsulated
    * @return string|false
    */
-  public function getJsGroup($files = '', array $data = null, $encapsulated = true)
+  public function getJsGroup($files = '', array|null $data = null, $encapsulated = true)
   {
     if ($js = $this->getViewGroup($files, $data, 'js')) {
       return '<script>' .
@@ -733,7 +733,7 @@ class Controller implements Api
    * @param string       $mode
    * @return string|false
    */
-  public function getViewGroup($files = '', array $data = null, $mode = 'html')
+  public function getViewGroup($files = '', array|null $data = null, $mode = 'html')
   {
     if (!\is_array($files)) {
       if (!($tmp = $this->_mvc->fetchDir($files, $mode))) {
@@ -945,7 +945,7 @@ class Controller implements Api
    * @param string|null $txt
    * @return $this
    */
-  public function setColor(string $bg = null, string $txt = null)
+  public function setColor(string|null $bg = null, string|null $txt = null)
   {
     if ($bg) {
       $this->obj->bcolor = $bg;
@@ -1156,7 +1156,7 @@ class Controller implements Api
    *
    * @return string|null
    */
-  public function customPluginView(string $path, string $mode = 'html', array $data = [], string $plugin = null): ?string
+  public function customPluginView(string $path, string $mode = 'html', array $data = [], string|null $plugin = null): ?string
   {
     if (!$plugin) {
       $plugin = $this->getPlugin();
@@ -1179,7 +1179,7 @@ class Controller implements Api
    *
    * @return string|null
    */
-  public function customPluginModel(string $path, array $data = [], string $plugin = null): ?string
+  public function customPluginModel(string $path, array $data = [], string|null $plugin = null): ?string
   {
     if (!$plugin) {
       $plugin = $this->getPlugin();
@@ -1217,7 +1217,7 @@ class Controller implements Api
    *
    * @return array
    */
-  public function getPluginViews(string $path, array $data = [], array $data2 = null)
+  public function getPluginViews(string $path, array $data = [], array|null $data2 = null)
   {
     return [
       'html' => $this->_mvc->getPluginView($path, 'html', $data, $this->getPlugin()),
@@ -1237,7 +1237,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getPluginModel(string $path, array $data = [], string $plugin = null, int $ttl = 0)
+  public function getPluginModel(string $path, array $data = [], string|null $plugin = null, int $ttl = 0)
   {
     return $this->_mvc->getPluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $ttl);
   }
@@ -1254,7 +1254,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getSubpluginModel(string $path, array $data = [], string $plugin = null, string $subplugin, int $ttl = 0)
+  public function getSubpluginModel(string $path, array $data = [], string|null $plugin = null, string $subplugin, int $ttl = 0)
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }
@@ -1361,7 +1361,7 @@ class Controller implements Api
    * @return self
    */
   public function combo(
-      string $title = null,
+      string|null $title = null,
       $data = null,
       int $ttl = null,
       string $path = ''
@@ -1537,7 +1537,7 @@ class Controller implements Api
   }
 
 
-  public function getModelGroup(string $path, array $data = null)
+  public function getModelGroup(string $path, array|null $data = null)
   {
     if (strpos($path, './') === 0) {
       $path = $this->getCurrentDir() . substr($path, 1);
@@ -1553,7 +1553,7 @@ class Controller implements Api
     }
   }
 
-  public function getCustomModelGroup(string $path, string $plugin, array $data = null): array
+  public function getCustomModelGroup(string $path, string $plugin, array|null $data = null): array
   {
     if (strpos($path, './') === 0) {
       $path = $this->getCurrentDir() . substr($path, 1);
@@ -1572,7 +1572,7 @@ class Controller implements Api
   }
 
   
-  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array $data = null): array
+  public function getSubpluginModelGroup(string $path, string $plugin_from, string $plugin_for, array|null $data = null): array
   {
     if (!isset($data)) {
       $data = $this->data;
