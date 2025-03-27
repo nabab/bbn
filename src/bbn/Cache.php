@@ -426,7 +426,7 @@ class Cache implements CacheInterface
    * @param int    $ttl  The length in seconds during which the value will be considered as valid
    * @return bool Returns true in case of success false otherwise
    */
-  public function set($key, $val, $ttl = null, float $exec = null): bool
+  public function set($key, $val, $ttl = null, ?float $exec = null): bool
   {
     if (self::$type) {
       $ttl  = self::ttl($ttl);

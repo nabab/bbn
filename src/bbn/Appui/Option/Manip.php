@@ -237,7 +237,7 @@ trait Manip
    * @param array|null $todo
    * @return iterable|null
    */
-  public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, array &$todo = null)
+  public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, ?array &$todo = null)
   {
     if (is_array($id_parent)) {
       array_push($id_parent, $this->getRoot());

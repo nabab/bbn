@@ -607,7 +607,7 @@ class System extends Basic
    * @param system|null $fs
    * @return bool
    */
-  public function copy(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
+  public function copy(string $source, string $dest, bool $overwrite = false, ?System $fs = null): bool
   {
     if ($this->check()) {
       if ($this->mode !== 'nextcloud') {
@@ -674,7 +674,7 @@ class System extends Basic
    * @param system|null $fs
    * @return bool
    */
-  public function move(string $source, string $dest, bool $overwrite = false, System $fs = null): bool
+  public function move(string $source, string $dest, bool $overwrite = false, ?System $fs = null): bool
   {
     if ($this->check() && $this->exists($source)) {
       $name = X::basename($source);

@@ -478,7 +478,7 @@ class X
       string $path,
       $format = 'Y/m/d',
       $max = 100,
-      File\System $fs = null
+      ?System $fs = null
   ): ?string
   {
     if (empty($format)) {
