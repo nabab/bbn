@@ -1300,9 +1300,9 @@ class Appui
       if ($this->_currentFs->isFile($path.'_rsa.pub')) {
         return $path.'_rsa.pub';
       }
-
-      return null;
     }
+
+    return null;
   }
 
 
