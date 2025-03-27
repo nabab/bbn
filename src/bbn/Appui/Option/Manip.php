@@ -267,7 +267,7 @@ trait Manip
         $tmp   = [];
         $items = [];
         /** @todo Temp solution */
-        if (!is_array($o)) {
+        if (empty($o) || !is_array($o)) {
           continue;
         }
 
