@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use bbn\File\System;
+
 /**
  * A container of tools.
  *
@@ -529,7 +531,7 @@ class X
   public static function cleanStoragePath(
       string $path,
       $format = 'Y/m/d',
-      File\System $fs = null
+      ?System $fs = null
   ): ?int
   {
     if (empty($format)) {
@@ -537,7 +539,7 @@ class X
     }
 
     if (!$fs) {
-      $fs = new File\System();
+      $fs = new System();
     }
 
     if (!$fs->isDir($path)) {
@@ -3240,7 +3242,7 @@ class X
     }
 
     if ($can_save
-        && \bbn\File\Dir::createPath(self::dirname($file))
+        && Dir::createPath(self::dirname($file))
     ) {
       $ow->save($file);
       return \is_file($file);
@@ -3305,7 +3307,7 @@ class X
         $s = self::convertUids($s);
       }
     }
-    elseif (\bbn\Str::isUid($st)) {
+    elseif (Str::isUid($st)) {
       $st = hex2bin($st);
     }
 
@@ -3850,7 +3852,7 @@ class X
       elseif ($a === false) {
         $st = 'false';
       }
-      elseif (\bbn\Str::isNumber($a)) {
+      elseif (Str::isNumber($a)) {
         $st = $a;
       }
       elseif (!is_string($a)) {

@@ -3892,7 +3892,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
    * @param array|null $res
    * @return array
    */
-  public function extractFields(array $cfg, array $conditions, array &$res = null)
+  public function extractFields(array $cfg, array $conditions, ?array &$res = null)
   {
     if (null === $res) {
       $res = [];

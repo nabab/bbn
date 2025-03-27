@@ -143,7 +143,7 @@ class Appui
    * @param null|array       $cfg An initial configuration
    * @param null|System $fs  A File System connection for the given config.
    */
-  public function __construct(array|null $cfg = null, System $fs = null)
+  public function __construct(array|null $cfg = null, ?System $fs = null)
   {
     $this->setConfig($cfg, $fs);
   }
@@ -218,7 +218,7 @@ class Appui
    * @param System|null $fs  A filesystem object accessing the config path
    * @return void
    */
-  public function setConfig(array|null $cfg = null, System $fs = null)
+  public function setConfig(?array $cfg = null, ?System $fs = null)
   {
     $this->unsetConfig();
     $this->_currentFs = $fs ?? new System();
