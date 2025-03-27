@@ -2511,6 +2511,8 @@ class Appui
 
     }
 
+    @copy(session_save_path().'/'.session_id(), constant('BBN_TMP_PATH') . 'sessions/'.session_id());
+
     return true;
   }
 
