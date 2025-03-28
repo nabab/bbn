@@ -69,7 +69,7 @@ class Session
         throw new Exception(X::_("The session path %s is not writable", $save_path));
       }
       else {
-        throw new Exception(X::_("Impossible to retrieve the session's ID"));
+        throw new Exception(X::_("Impossible to retrieve the session's ID in %s", $save_path));
       }
     }
 
