@@ -334,7 +334,7 @@ class Dir extends bbn\Models\Cls\Basic
 		* @param bool $hidden If set to true will also return the hidden files/folders contained in the given directory. Default=false
 		* @return array
 		*/
-	 public static function mscan(string $dir, string|null $type = null, $hidden = false): array
+	 public static function mscan(string $dir, ?string $type = null, $hidden = false): array
    {
      $res = [];
 	   if ( $all = self::scan($dir, $type, $hidden) ){
@@ -423,7 +423,7 @@ class Dir extends bbn\Models\Cls\Basic
 		* @param bool $hidden If set to true will also return the hidden file(s)/folder(s)
 		* @return array
 		*/
-  public static function getTree(string $dir, bool $only_dir = false, callable $filter = null, bool $hidden = false): array
+  public static function getTree(string $dir, bool $only_dir = false, ?callable $filter = null, bool $hidden = false): array
   {
     $r = [];
     $dir = self::clean($dir);

@@ -1309,12 +1309,12 @@ class Preferences extends DbCls
    * // (String) = "3ad7768e30c311eca47652540000cfbe";
    *
    * ```
-   * @param null|string $id_option
+   * @param string $id_option
    * @param array $cfg
    * @return null|string
    * @throws Exception
    */
-  public function add(string|null $id_option = null, array $cfg): ?string
+  public function add(string $id_option, array $cfg): ?string
   {
     if (
         ($id_option = $this->_getIdOption($id_option))
@@ -1330,12 +1330,12 @@ class Preferences extends DbCls
   /**
    * Adds a new preference for the given option for the current user.
    *
-   * @param null|string $id_option
+   * @param string $id_option
    * @param array $cfg
    * @return null|string
    * @throws Exception
    */
-  public function addToGroup(string|null $id_option = null, array $cfg): ?string
+  public function addToGroup(string $id_option, array $cfg): ?string
   {
     if (
         ($id_option = $this->_getIdOption($id_option))
