@@ -172,7 +172,7 @@ class Changes extends EntityTable
       $filesFields = $cCfg['arch']['files'];
       foreach ($filesLinked as $fl) {
         $f = $this->_getFile([
-          $this->db->cfn($filesFields['id'], $cCfg['tables']['files']) => $fl[$filesFields['id_file']]
+          $this->db->cfn($filesFields['id'], $cCfg['tables']['files']) => $fl[$filesFields['id']]
         ]);
         if (!empty($f)
           && ((string)$f['code'] === $code)
