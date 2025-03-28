@@ -420,7 +420,7 @@ trait Common
    */
   protected function setError(string $err, $code = null): self
   {
-    $this->log([$err, $this->class_cfg['errors'][$err] ?? null]);
+    $this->log([$err, $this->class_cfg['errors'][$err] ?? null], 'userError');
     if (!$this->error) {
       $this->error = $err;
     }
