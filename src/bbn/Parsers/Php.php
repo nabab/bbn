@@ -14,7 +14,11 @@ use phpDocumentor\Reflection\DocBlockFactory;
 
 class Php extends bbn\Models\Cls\Basic
 {
-  
+
+  protected $docParser;
+
+  /** @var phpDocumentor\Reflexion\DocBlock */
+  protected $parser;
   
   /**
    * Construct function
@@ -331,6 +335,8 @@ class Php extends bbn\Models\Cls\Basic
       
       return $res;
     }
+
+    return null;
   }
   
   

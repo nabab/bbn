@@ -1060,9 +1060,7 @@ class Server
       }
     }
 
-    $getDomains = function ($d) use ($domains) {
-      return $domains[$d] ?? [];
-    };
+    $getDomains = fn($d) => $domains[$d] ?? [];
     $this->cacheList('subdomains', $getDomains, $domain);
   }
 
@@ -1075,9 +1073,7 @@ class Server
   private function cacheListAdmins(string $domain = '')
   {
     $vm        = $this->virtualmin;
-    $getAdmins = function ($d) use ($vm) {
-      return $vm->list_admins(['domain' => $d]) ?: [];
-    };
+    $getAdmins = fn ($d) => $vm->list_admins(['domain' => $d]) ?: [];
     $this->cacheList('admins', $getAdmins, $domain);
   }
 

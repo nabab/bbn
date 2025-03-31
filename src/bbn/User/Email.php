@@ -1369,7 +1369,7 @@ class Email extends Basic
       $compare = function (
         array $real,
         array $db,
-        array &$res = null,
+        array|null &$res = null,
               $id_parent = null
       ) use (&$compare): array {
         if (!$res) {

@@ -718,15 +718,6 @@ class Cache implements CacheInterface
     }
   }
 
-  /**
-   * @param callable $function
-   * @return string
-   */
-  public function serializeFunction(Closure $function): string
-  {
-    return serializeFn($function);
-  }
-
 
   public function getMultiple($keys, $default = null): Traversable|array
   {

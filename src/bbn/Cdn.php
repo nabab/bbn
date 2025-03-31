@@ -453,9 +453,7 @@ class Cdn extends Models\Cls\Basic
     return <<<JS
 (function(window){
   if (window.bbnAddGlobalScript === undefined ){
-    window.bbnAddGlobalScript = function(fn){
-      return fn();
-    }
+    window.bbnAddGlobalScript = fn => fn();
     window.bbnLoadedFiles = [];
     window.bbnMinified = $test;
     window.bbnLoadFile = (file) => {

@@ -199,7 +199,14 @@ class Controller implements Api
         return;
       }
 
-      echo json_encode(is_string($data) ? ['content' => $data] : (is_array($data) ? $data : ['success' => false])) . str_repeat(' ', 8192);
+      while (ob_get_level()) {
+        ob_flush();
+      }
+      echo json_encode(
+        is_string($data) ? 
+          ['content' => $data]
+          : (is_array($data) ? $data : ['success' => false])
+      ) . '<!---------------B-B-N--------------->';//str_repeat(' ', 8192);
       flush();
     }
   }
@@ -1363,7 +1370,7 @@ class Controller implements Api
   public function combo(
       string|null $title = null,
       $data = null,
-      ?int $ttl = null,
+      int $ttl = null,
       string $path = ''
   ): self
   {

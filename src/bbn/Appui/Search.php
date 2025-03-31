@@ -11,6 +11,7 @@ use bbn\Tpl;
 use bbn\Models\Cls\Basic;
 use bbn\Models\Tts\Cache;
 use bbn\Models\Tts\DbActions;
+use bbn\Mvc\Controller;
 use bbn\Mvc\Model;
 use bbn\Util\Timer;
 use function Opis\Closure\serialize as serializeFn;
@@ -39,7 +40,7 @@ class Search extends Basic
   /**
    * @var Model
    */
-  protected Model $model;
+  protected Controller|Model $ctrl;
 
   /**
    * @var string
@@ -50,6 +51,8 @@ class Search extends Basic
    * @var string
    */
   protected string $search_cache_name = 'search_%s';
+
+  protected int $defaultTimeout = 10;
 
   /**
    * @var array
@@ -102,9 +105,9 @@ class Search extends Basic
   protected static array $functions = [];
 
 
-  public function __construct(Model $model, array $models = [], array $cfg = [])
+  public function __construct(Controller|Model $ctrl, array $models = [], array $cfg = [])
   {
-    //$this->ctrl   = $ctrl;
+    $this->ctrl   = $ctrl;
     // $ctrl->getCustomModelGroup('', 'appui-search'), $ctrl->data['value'], $search->get($ctrl->data['value'])
     $this->db     = Db::getInstance();
     $this->user   = User::getInstance();
@@ -130,13 +133,13 @@ class Search extends Basic
     }
     else if (empty($models)) {
       try {
-        $model->getCustomModelGroup('', 'appui-search');
+        $ctrl->getCustomModelGroup('', 'appui-search');
       }
       catch (Exception $e) {}
 
-      foreach ($model->getPlugins() as $pi) {
+      foreach ($ctrl->getPlugins() as $pi) {
         try {
-          $model->getSubpluginModelGroup('', $pi['name'], 'appui-search');
+          $ctrl->getSubpluginModelGroup('', $pi['name'], 'appui-search');
 
         }
         catch (Exception $e) {}
@@ -163,13 +166,13 @@ class Search extends Basic
         ) {
           if (empty($m['plugin'])) {
             try {
-              $model->getPluginModel($m['filename'], [], $model->pluginUrl('appui-search'));
+              $ctrl->getPluginModel($m['filename'], [], $ctrl->pluginUrl('appui-search'));
             }
             catch (Exception $e) {}
           }
           else {
             try {
-              $model->getSubpluginModel($m['filename'], [], $m['plugin'], 'appui-search');
+              $ctrl->getSubpluginModel($m['filename'], [], $m['plugin'], 'appui-search');
             }
             catch (Exception $e) {}
           }
@@ -203,16 +206,12 @@ class Search extends Basic
         }
 
         foreach ($items as $item) {
-          if (!empty($item['fn']) && is_callable($item['fn'])) {
+          if (!empty($item['fn'])) {
             if (!isset($result[$plugin])) {
               $result[$plugin] = [];
             }
 
-            $result[$plugin][] = array_merge(
-              $item, [
-                'fn' => $this->serializeFunction($item['fn'])
-              ]
-            );
+            $result[$plugin][] = $item;
           }
         }
       }
@@ -220,7 +219,7 @@ class Search extends Basic
       $this->cacheSet($this->cfg_cache_name, __FUNCTION__.'_'.\md5(\json_encode(self::$functions)), $result);
     }
 
-    return $result ?? [];
+    return $result;
   }
 
   /**
@@ -234,16 +233,15 @@ class Search extends Basic
     $result = [];
     $i      = 0;
 
-    foreach ($this->getRawCfg() as $items) {
+    $raw = $this->getRawCfg();
+    X::log($raw, 'searchCfg');
+    foreach ($raw as $plugin => $items) {
       if (!is_array($items)) {
         continue;
       }
 
       foreach ($items as $item) {
-        if (!empty($item['fn'])
-            && ($wrapper = unserializeFn($item['fn']))
-            && ($wrapper instanceof SerializableClosure)
-        ) {
+        if (!empty($item['fn']) && ($wrapper = unserializeFn($item['fn']))) {
           // Extract the closure object
           //$closure = $wrapper->getClosure();
 
@@ -266,14 +264,35 @@ class Search extends Basic
                 if (isset($alt['replace'])) {
                   unset($alt['replace']);
                 }
-                if (!empty($alt['score'])) {
-                  $tmp['score'] = $alt['score'];
-                }
+
                 if (isset($alt['score'])) {
+                  $tmp['score'] = $alt['score'];
                   unset($alt['score']);
                 }
+                else {
+                  $tmp['score'] = $content['score'];
+                }
+
+                if (isset($alt['name'])) {
+                  $tmp['name'] = $alt['name'];
+                  unset($alt['name']);
+                }
+                else {
+                  $tmp['name'] = $content['name'] ?? $item['signature'];
+                }
+
+
+                if (isset($alt['timeout'])) {
+                  $tmp['timeout'] = $alt['timeout'];
+                  unset($alt['timeout']);
+                }
+                else {
+                  $tmp['timeout'] = $this->defaultTimeout;
+                }
+
                 $tmp['cfg'] = !empty($rep) ? \array_merge($tmp['cfg'], $alt) : X::mergeArrays($tmp['cfg'], $alt);
                 $result[] = X::mergeArrays($tmp, [
+                  'plugin' => $plugin,
                   'file' => $item['file'] ?? null,
                   'alternative' => $i + 1,
                   'signature' => ($item['signature'] ?? '') . '-' . ($i + 1)
@@ -282,7 +301,10 @@ class Search extends Basic
             }
 
             $result[] = X::mergeArrays($content, [
+              'plugin' => $plugin,
               'file' => $item['file'] ?? null,
+              'timeout' => $content['timeout'] ?? $this->defaultTimeout,
+              'name' => $content['name'] ?? null,
               'signature' => $item['signature'] ?? null
             ]);
 
@@ -290,6 +312,11 @@ class Search extends Basic
           }
         }
       }
+    }
+
+
+    if (count($result) > 50) {
+      X::log([self::$functions, $raw], 'searchBigConfig');
     }
 
     X::sortBy($result, [[
@@ -300,9 +327,9 @@ class Search extends Basic
       'dir' => 'asc'
     ]]);
 
-    return array_map(function ($item, $key) {
-      return array_merge($item, ['num' => $key]);
-    }, $result, array_keys($result));
+    return array_map(fn($item, $key) => 
+      array_merge($item, ['num' => $key]), $result, array_keys($result)
+    );
   }
 
   /**
@@ -313,7 +340,7 @@ class Search extends Basic
    * @return array
    * @throws Exception
    */
-  public function get(string $search_value, int $step = 0, $start = 0, $limit = 100): array
+  public function get(string $search_value, int $step = 0, $start = 0, $limit = 1000): array
   {
     $cache_name = sprintf($this->search_cache_name, $search_value);
 
@@ -494,7 +521,7 @@ class Search extends Basic
    * @return array
    * @throws Exception
    */
-  public function stream(string $search_value, int $step = 0, $start = 0, $limit = 100): array
+  public function stream(string $search_value, int $step = 0, $start = 0, $limit = 1000): array
   {
     $cache_name = sprintf($this->search_cache_name, $search_value);
 
@@ -623,6 +650,7 @@ class Search extends Basic
       $results['done'][] = basename($item['file'], '.php');
       $item['cfg']['limit'] = $limit - count($results['data']);
       $results['item'] = $item;
+      $results['timeout'] = $item['timeout'] ?? $this->defaultTimeout;
       $results['id'] = $id_search;
 
       if (isset($config_array[$i + 1])) {
@@ -632,7 +660,6 @@ class Search extends Basic
       break;
     }
 
-    $this->cacheSet($this->user->getId(), $cache_name, $config_array);
     return $results;
   }
 
@@ -647,15 +674,16 @@ class Search extends Basic
   {
     if ($search_results = $db->rselectAll($item['cfg'])) {
       array_walk($search_results, function (&$a) use ($item) {
-        if (!empty($item['component'])) {
-          $a['component'] = $item['component'];
-        }
-        $b = $a;
+        $b = array_slice($a, 0);
         unset($b['match']);
         ksort($b);
         $a['hash']      = md5(json_encode($b));
         $a['score']     = $item['score'];
         $a['signature'] = $item['signature'];
+
+        if (!empty($item['component'])) {
+          $a['component'] = $item['component'];
+        }
 
         if (!empty($item['options'])) {
           $a['options'] = $item['options'];
@@ -668,7 +696,6 @@ class Search extends Basic
         if (!empty($item['action'])) {
           $a['action'] = $item['action'];
         }
-
       });
     }
 
@@ -865,12 +892,15 @@ class Search extends Basic
     }
 
     $res =  [
-      'fn' => $function,
+      'fn' => serializeFn($function),
       'signature' => \bbn\Cache::makeHash($function(...$args)),
       'file' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0]['file']
     ];
     // Invoke the closure with the parameters set to empty string and return the results
-    self::$functions[$plugin_name][] = $res;
+    if (!X::getRow(self::$functions[$plugin_name], $res)) {
+      self::$functions[$plugin_name][] = $res;
+    }
+
     return $res;
   }
 

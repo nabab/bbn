@@ -295,12 +295,8 @@ class Compiler extends Basic
       }
       let script = document.createElement("script");
       script.type = "text/javascript";
-      script.onload = function(){
-        bbn_resolve2()
-      };
-      script.onerror = function(){
-        bbn_reject2();
-      };
+      script.onload = () => bbn_resolve2();
+      script.onerror = () => bbn_reject2();
       script.src = "$url".replace("%s", rFiles.join(","));
       document.getElementsByTagName("body")[0].appendChild(script);
     })
@@ -427,12 +423,8 @@ JAVASCRIPT;
     let css = document.createElement("link");
     css.rel = "stylesheet";
     css.href = url.replace('~~~BBN~~~', dir + '?grouped=1&f=' + rFiles.join(",") + '&');
-    css.onload = function(){
-      bbn_resolve2();
-    };
-    css.onerror = function(){
-      bbn_reject2();
-    };
+    css.onload = () => bbn_resolve2();
+    css.onerror = () => bbn_reject2();
     document.getElementsByTagName("head")[0].appendChild(css);
   })
 })
@@ -504,12 +496,8 @@ JAVASCRIPT;
       let css = document.createElement("link");
       css.rel = "stylesheet";
       css.href = url.replace('~~~BBN~~~', dir + '?f=' + rFiles.join(",") + '&');
-      css.onload = function(){
-        bbn_resolve2();
-      };
-      css.onerror = function(){
-        bbn_reject2();
-      };
+      css.onload = () => bbn_resolve2();
+      css.onerror = () => bbn_reject2();
       document.getElementsByTagName("head")[0].appendChild(css);
     })
   })

@@ -2169,14 +2169,7 @@ class Ide
       $base          = $info['repository']['name'];
       $base_rep      = $this->getRootPath($base);
       //function that defines whether the search is sensitive or non-sensitive
-      $typeSearch = function ($element, $code, $type) {
-        if ($type === "sensitive") {
-          return strpos($element, $code);
-        } else {
-          return stripos($element, $code);
-        }
-      };
-
+      $typeSearch = fn($element, $code, $type) => call_user_func($type === "sensitive" ? "strpos" : "stripos", $element, $code);
       if (!empty($info['isProject'])) {
         $part = $info['type'];
       } else {

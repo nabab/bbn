@@ -82,7 +82,7 @@ trait Common
   public function pluginDataPath(string|null $plugin = null): ?string
   {
     if ($this->_plugin || $plugin) {
-      return $this->dataPath().'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
+      return $this->dataPath() . 'plugins/' . ($plugin ?: $this->pluginName($this->_plugin)) . '/';
     }
 
     return null;

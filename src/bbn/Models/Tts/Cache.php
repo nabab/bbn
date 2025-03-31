@@ -229,18 +229,4 @@ trait Cache
     $this->cacheCheck();
     return $this->cacheGetLocale($uid, $locale, $method) ? true : false;
   }
-
-
-
-  /**
-   * Transforms a function in a cacheable string
-   *
-   * @param callable $function
-   * @return void
-   */
-  protected function serializeFunction(callable $function)
-  {
-    $this->cacheCheck();
-    return $this->cache_engine->serializeFunction($function);
-  }
 }

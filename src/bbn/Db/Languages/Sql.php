@@ -1944,9 +1944,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     $refs   = [];
     $schema = $this->modelize();
-    $test   = function ($key) use ($bits) {
-      return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-    };
+    $test   = fn($key) => ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
     foreach ($schema as $table => $cfg){
       foreach ($cfg['keys'] as $k){
         if ($test($k)) {
@@ -1990,9 +1988,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     $table = $bits[1];
     if ($schema = $this->modelize()) {
       $refs = [];
-      $test = function ($key) use ($bits) {
-        return ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
-      };
+      $test = fn($key) => ($key['ref_db'] === $bits[0]) && ($key['ref_table'] === $bits[1]) && ($key['ref_column'] === $bits[2]);
       foreach ($schema as $tf => $cfg) {
         $t = $this->tableSimpleName($tf);
         if ($t !== $table) {

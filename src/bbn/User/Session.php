@@ -50,7 +50,6 @@ class Session
     }
     self::singletonInit($this);
 
-    X::log([session_id() ?: "no session id", session_save_path()], 'session');
     if ($id = session_id()) {
       $this->was_opened = true;
       $this->once_opened = true;
