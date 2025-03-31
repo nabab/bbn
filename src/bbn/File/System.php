@@ -18,6 +18,7 @@
 namespace bbn\File;
 
 use stdClass;
+use Exception;
 use Throwable;
 use bbn\X;
 use bbn\Str;
@@ -879,7 +880,7 @@ class System extends Basic
   {
     if (\is_array($replace)) {
       if (!\is_array($search) || (count($replace) !== count($search))) {
-        throw new \Exception(X::_("If replace is an array, search must be an array of equal length"));
+        throw new Exception(X::_("If replace is an array, search must be an array of equal length"));
       }
 
       $replace_array = true;
@@ -1045,7 +1046,7 @@ class System extends Basic
       $args = [$cfg['host'], $cfg['port'] ?? 21, $cfg['timeout'] ?? $this->timeout];
       try {
         $this->obj = ftp_ssl_connect(...$args);
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         $this->error  = X::_('Impossible to connect to the FTP host through SSL');
         $this->error .= PHP_EOL . $e->getMessage();
       }
@@ -1053,7 +1054,7 @@ class System extends Basic
       if (!$this->obj) {
         try {
           $this->obj = ftp_connect(...$args);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           $this->error  = X::_('Impossible to connect to the FTP host');
           $this->error .= PHP_EOL . $e->getMessage();
         }
@@ -1124,7 +1125,7 @@ class System extends Basic
         } else {
           try {
             $this->obj = ssh2_sftp($this->cn);
-          } catch (\Exception $e) {
+          } catch (Exception $e) {
             $this->error = X::_("Could not connect through SFTP.");
           }
 
@@ -1136,13 +1137,13 @@ class System extends Basic
       } elseif (X::hasProps($cfg, ['user', 'pass'], true)) {
         try {
           ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
           $this->error = X::_("Could not authenticate with username and password.");
         }
         if (!$this->error) {
           try {
             $this->obj = @ssh2_sftp($this->cn);
-          } catch (\Exception $e) {
+          } catch (Exception $e) {
             $this->error = X::_("Could not initialize SFTP subsystem.");
           }
 
@@ -1172,7 +1173,7 @@ class System extends Basic
       $name = \is_array($item) ? ($item['name'] ?? null) : $item;
 
       if (empty($name)) {
-        throw new \Exception(X::_("There is no item to chek the filter against"));
+        throw new Exception(X::_("There is no item to chek the filter against"));
       }
 
       if (is_string($filter)) {
@@ -1475,25 +1476,28 @@ class System extends Basic
         if ($full) {
           $obj =& $this;
           set_error_handler(
-            function (int $errno, string $errstr, string|null $errfile = null, ?int $errline = null)
-            use ($attempts, $path, &$obj) {
-              if ($attempts >= 3) {
-                X::logError($errno, $errstr, $errfile, $errline);
-              }
-              else {
-                $obj->_delete($path, true, ++$attempts);
-              }
-            },
+            fn(
+              int $errno,
+              string $errstr,
+              string|null $errfile = null,
+              ?int $errline = null
+            ) => $attempts >= 3 ? 
+              X::logError($errno, $errstr, $errfile, $errline)
+              : $obj->_delete($path, true, ++$attempts),
             E_WARNING
           );
-          if ($this->mode === 'ssh') {
-            $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+          try {
+            if ($this->mode === 'ssh') {
+              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+            }
+            elseif ($this->mode === 'ftp') {
+              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
+            }
+            else {
+              $res = rmdir($path);
+            }
           }
-          elseif ($this->mode === 'ftp') {
-            $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-          }
-          else {
-            $res = rmdir($path);
+          catch (Exception $e) {
           }
 
           restore_error_handler();
@@ -1506,18 +1510,19 @@ class System extends Basic
         if ($this->mode === 'ssh') {
           try {
             $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
-          } catch (\Exception $e) {
+          } catch (Exception $e) {
             $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
           }
         } elseif ($this->mode === 'ftp') {
           try {
             $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
-          } catch (\Exception $e) {
+          } catch (Exception $e) {
             $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
           }
         } else if (is_file($path)) {
-          $res = @unlink($path);
-          if (!$res) {
+          try {
+            $res = @unlink($path);
+          } catch (Exception $e) {
             $this->log(X::_('Error in _delete') . ': ' . $path);
           }
         }

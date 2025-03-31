@@ -30,6 +30,8 @@ class Manager
   /** @var string Base path for log files */
   protected $logFileBase;
 
+  protected Search $search;
+
   /** @var array Results array to eventually return/stream */
   protected $result = [
     'success' => false,
@@ -63,6 +65,7 @@ class Manager
     $this->logFileBase = $this->ctrl->pluginDataPath('appui-search') . "config/{$this->uid}";
     $this->filePath   = "{$this->logFileBase}.json";
     // Write the first condition into the JSON file
+    $this->search = new Search($this->ctrl, []);
     $this->setCondition($this->conditions[0]);
   }
 
@@ -96,24 +99,25 @@ class Manager
         // When value changes, reset some things
         if ($currentValue !== $condition['value']) {
           $currentValue = $condition['value'];
-          X::log([__FILE__, __LINE__], 'searchWorkerStop');
           $this->removeWorker();
           $totalResults = 0;
           $step = 0;
+          $prev = $this->search->retrievePreviousResults($condition['value']);
+          if (!empty($prev['data'])) {
+            yield $prev;
+          }
         }
 
         // If we haven't reached our global max
         if ($totalResults < $this->maxResults) {
           // Launch new workers while conditions allow
           while (!is_null($step) && (count($this->workers) < $this->maxWorkers)) {
-            $search = new Search($this->ctrl, []);
-            if ($result = $search->stream($condition['value'], $step)) {
+            if ($result = $this->search->stream($condition['value'], $step)) {
               $this->addWorker($result, $step);
               $timer->start("step-$step");
-              X::log('xx ' . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
+              //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
               // If the condition file is removed externally, stop everything
               if (!file_exists($this->filePath)) {
-                X::log([__FILE__, __LINE__], 'searchWorkerStop');
                 $this->removeWorker();
                 break;
               }
@@ -136,23 +140,22 @@ class Manager
             if ($this->isOk($condition)) {
               $worker = $this->workers[$j];
               $status = proc_get_status($worker['proc']);
-              //X::log($worker['step'] . ' ' . microtime(true) . ' ' . $status['running'], 'searchTimings');
+              //X::log("[STEP $worker[step]] " . microtime(true) . ' ' . $status['running'], 'searchTimings');
 
               // If the process has finished
               if (!$status['running']) {
+                //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
                 // Read data from stdout
                 $jsonOutput = stream_get_contents($worker['pipes'][1]);
 
-                if ($jsonOutput && Str::isJson($jsonOutput)) {
-                  X::log($worker['step'] . ' ' . microtime(true) . ' JSON OK', 'searchTimings');
-                  $ret = json_decode($jsonOutput, true);
+                if ($jsonOutput) {
+                  //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
+                  $ret  = json_decode($jsonOutput, true);
 
                   // If results are found, stream them
-                  if (!empty($ret['data']['results'])) {
-                    X::log($worker['step'] . ' ' . microtime(true) . ' RESULTS OK', 'searchTimings');
-                    $newCount = count($ret['data']['results']);
-                    $totalResults += $newCount;
-
+                  if (!empty($ret['num'])) {
+                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
+                    $data = json_decode(file_get_contents($worker['data']), true);
                     // If we exceed the max, trim them
                     /*
                     if ($totalResults > $this->maxResults) {
@@ -160,20 +163,23 @@ class Manager
                       array_splice($ret['data']['results'], $newCount - $excess);
                     }*/
 
+
                     // Stream partial results
                     yield [
-                      'data' => $ret['data']['results'],
-                      'step' => $ret['step'],
+                      'data' => $data['results'],
+                      'step' => $worker['step'],
                       'item' => $ret['item'],
                       'id'   => $worker['id']
                     ];
+
                   }
                   else {
-                    X::log($worker['step'] . ' ' . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');
+                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');
                   }
                 }
                 else {
-                  X::log([$status, $jsonOutput], 'searchError');
+                  X::log($jsonOutput, 'searchError');
+                  X::log($status, 'searchError');
                 }
 
                 // Check worker-specific log file for errors
@@ -185,21 +191,20 @@ class Manager
                   }
                 }
 
-                // If max reached, kill all workers
-                if ($totalResults > $this->maxResults) {
-                  $this->removeWorker();
-                  break;
-                }
-                else {
-                  // Remove this single worker from the array
-                  $j--;
-                  // Clean up the process and its log
-                  $this->removeWorker($worker['uid']);
-                }
-              }
-              else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {
-                X::log($worker['step'] . ' ' . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');
+                // Remove this single worker from the array
+                $j--;
+                // Clean up the process and its log
                 $this->removeWorker($worker['uid']);
+              }
+              /*
+              else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {
+                X::log("[STEP $worker[step]] " . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');
+                $this->removeWorker($worker['uid']);
+              }*/
+              // If max reached, kill all workers
+              if ($totalResults > $this->maxResults) {
+                $this->removeWorker();
+                break;
               }
             }
             else {
@@ -219,6 +224,9 @@ class Manager
           $step = null;
         }
       }
+      else {
+        $this->removeWorker();
+      }
 
       if (!count($this->workers) && is_null($step)) {
         break;
@@ -234,7 +242,6 @@ class Manager
     }
 
     // End of main loop; clean up any remaining workers
-    X::log([__FILE__, __LINE__, count($this->workers)], 'searchWorkerStop');
     $this->removeWorker();
 
     // Delete the condition file if it still exists
@@ -314,7 +321,7 @@ class Manager
       $idx = X::find($this->workers, ['uid' => $uid]);
       if (isset($this->workers[$idx])) {
         $w = array_splice($this->workers, $idx, 1)[0];
-        X::log($w['step'] . ' ' . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'], 'searchTimings');
+        //X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'], 'searchTimings');
         $status = proc_get_status($w['proc']);
         if ($status['running']) {
           proc_terminate($w['proc']);
@@ -322,6 +329,9 @@ class Manager
         proc_close($w['proc']);
         if (file_exists($w['log'])) {
           unlink($w['log']);
+        }
+        if (file_exists($w['data'])) {
+          unlink($w['data']);
         }
       }
     }
@@ -344,18 +354,20 @@ class Manager
 
     // Build final command by substituting the URL and encoded arguments
     $url = $this->ctrl->pluginUrl('appui-search') . '/results';
+    $dataFile = $this->logFileBase . '-' . $workerUid . '.json';
     $cmd = sprintf(
       $this->commandTpl,
       $url,
       Str::escapeDquotes(json_encode([
         'item' => $result['item'] ?? null,
-        'step' => $step
+        'step' => $step,
+        'file' => $dataFile
       ]))
     );
 
     // Create and clear the log file
     $logFile = $this->logFileBase . '-' . $workerUid . '.log';
-    X::log($step . ' ' . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
+    //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
     file_put_contents($logFile, '');
 
     // Attach the log file as stderr
@@ -381,11 +393,12 @@ class Manager
     $this->workers[] = [
       'proc'    => $proc,
       'id'      => $result['id'],
-      'timeout' => $result['timeout'],
+      'timeout' => $result['timeout'] ?? 10,
       'cmd'     => $cmd,
       'uid'     => $workerUid,
       'pipes'   => $pipes,
       'log'     => $logFile,
+      'data'    => $dataFile,
       'step'    => $step
     ];
   }

@@ -52,7 +52,9 @@ class Search extends Basic
    */
   protected string $search_cache_name = 'search_%s';
 
-  protected int $defaultTimeout = 10;
+  protected int $defaultTimeout = 100;
+
+  private array $executedConfigs = [];
 
   /**
    * @var array
@@ -77,7 +79,8 @@ class Search extends Basic
         'num' => 'num',
         'last' => 'last',
         'signature' => 'signature',
-        'result' => 'result'
+        'result' => 'result',
+        'data_hash' => 'data_hash'
       ]
     ]
   ];
@@ -230,11 +233,15 @@ class Search extends Basic
    */
   public function getExecutedCfg(string $search_value): array
   {
+    if (isset($this->executedConfigs[$search_value])) {
+      return $this->executedConfigs[$search_value];
+    }
+
     $result = [];
     $i      = 0;
 
     $raw = $this->getRawCfg();
-    X::log($raw, 'searchCfg');
+    //X::log($raw, 'searchCfg');
     foreach ($raw as $plugin => $items) {
       if (!is_array($items)) {
         continue;
@@ -315,10 +322,6 @@ class Search extends Basic
     }
 
 
-    if (count($result) > 50) {
-      X::log([self::$functions, $raw], 'searchBigConfig');
-    }
-
     X::sortBy($result, [[
       'key' => 'score',
       'dir' => 'desc'
@@ -327,9 +330,11 @@ class Search extends Basic
       'dir' => 'asc'
     ]]);
 
-    return array_map(fn($item, $key) => 
-      array_merge($item, ['num' => $key]), $result, array_keys($result)
+    $this->executedConfigs[$search_value] = array_map(fn($item, $key) => 
+      array_merge($item, ['step' => $key]), $result, array_keys($result)
     );
+
+    return $this->executedConfigs[$search_value];
   }
 
   /**
@@ -340,7 +345,7 @@ class Search extends Basic
    * @return array
    * @throws Exception
    */
-  public function get(string $search_value, int $step = 0, $start = 0, $limit = 1000): array
+  public function get(string $search_value, int $step = 0, $start = 0, $limit = 250): array
   {
     $cache_name = sprintf($this->search_cache_name, $search_value);
 
@@ -512,6 +517,101 @@ class Search extends Basic
     return $results;
   }
 
+  public function retrievePreviousResults($search_value) {
+    $results = [
+      'done' => [],
+      'data' => []
+    ];
+    $config_array = $this->getExecutedCfg($search_value);
+    $id_search = $this->getSearchId($search_value);
+    $results['id'] = $id_search;
+    if ($id_search) {
+      $this->updateSearch($search_value);
+    }
+    else {
+      $id_search = $this->saveSearch($search_value);
+    }
+
+    if ($previous_search_results = $this->getPreviousSearchResults($id_search)) {
+      foreach ($previous_search_results as $r) {
+        $item = X::getRow($config_array, ['signature' => $r['signature']]);
+        if (!$item) {
+          /** @todo isn't there something to delete here ? */
+          continue;
+        }
+
+        $processed_cfg = $this->db->processCfg($item['cfg']);
+        // Get the results saved in the json field `result`
+        $ok = true;
+        foreach ($processed_cfg['fields'] as $alias => $field) {
+          if (!array_key_exists(is_int($alias) ? $this->db->csn($field) : $alias, $r['result'])) {
+            $ok = false;
+            break;
+          }
+        }
+
+        if ($ok && ($previous_result = $r['result'])) {
+          $cp = $previous_result['component'];
+          $hash = $previous_result['hash'];
+          $score = $previous_result['score'];
+          $signature = $previous_result['signature'];
+          $match = $previous_result['match'];
+          $timeout = $this->defaultTimeout;
+          $search = $previous_result['search'];
+          $url = $previous_result['url'];
+          unset(
+            $previous_result['component'],
+            $previous_result['hash'],
+            $previous_result['score'],
+            $previous_result['signature'],
+            $previous_result['match'],
+            $previous_result['search'],
+            $previous_result['url']
+          );
+          $cfg          = $item['cfg'];
+          $cfg['start'] = 0;
+          $cfg['where'] = [
+            'logic' => 'AND',
+            'conditions' => [
+              $processed_cfg['filters'],
+              [
+                'conditions' => array_map(
+                  function ($value, $key) use ($processed_cfg) {
+                    $f = [
+                      'field' => $processed_cfg['fields'][$key] ?? $key,
+                      'operator' => is_null($value) ? 'isnull' : (is_string($value) ? 'LIKE' : '=')
+                    ];
+
+                    if (!is_null($value)) {
+                      $f['value'] = $value;
+                    }
+
+                    return $f;
+                  },
+                  array_values($previous_result),
+                  array_keys($previous_result)
+                )
+              ]
+            ]
+          ];
+
+          if ($add_to_top = $this->db->rselect($cfg)) {
+            $add_to_top['component'] = $cp;
+            $add_to_top['hash'] = $hash;
+            $add_to_top['score'] = $score + ($r['num'] ?: 1) * 50;
+            $add_to_top['signature'] = $signature;
+            $add_to_top['match'] = $match;
+            $add_to_top['url'] = $url;
+            $add_to_top['timeout'] = $timeout;
+            $add_to_top['search'] = $search;
+            $results['data'][] = $add_to_top;
+          }
+        }
+      }
+    }
+
+    return $results;
+  }
 
   /**
    * Launch the search and return the results.
@@ -523,115 +623,13 @@ class Search extends Basic
    */
   public function stream(string $search_value, int $step = 0, $start = 0, $limit = 1000): array
   {
-    $cache_name = sprintf($this->search_cache_name, $search_value);
-
-    // Check if same search is saved for the user
-    if (!($config_array = $this->cacheGet($this->user->getId(), $cache_name))) {
-
-      // Execute all functions with the given search string
-      $config_array = $this->getExecutedCfg($search_value);
-
-      // Save it in cache
-      $this->cacheSet($this->user->getId(), $cache_name, $config_array);
-    }
-
+    $config_array = $this->getExecutedCfg($search_value);
     $results = [
       'done' => [],
       'data' => []
     ];
     $id_search = $this->getSearchId($search_value);
     $results['id'] = $id_search;
-    // If the search value has been done by the user before
-    if (!$step) {
-      if ($id_search) {
-        $this->updateSearch($search_value);
-      }
-      else {
-        $id_search = $this->saveSearch($search_value);
-      }
-
-      if ($previous_search_results = $this->getPreviousSearchResults($id_search)) {
-        foreach ($previous_search_results as $r) {
-          $item = X::getRow($config_array, ['signature' => $r['signature']]);
-          if (!$item) {
-            /** @todo isn't there something to delete here ? */
-            continue;
-          }
-
-          $processed_cfg = $this->db->processCfg($item['cfg']);
-          // Get the results saved in the json field `result`
-          $ok = true;
-          foreach ($processed_cfg['fields'] as $alias => $field) {
-            if (!array_key_exists(is_int($alias) ? $this->db->csn($field) : $alias, $r['result'])) {
-              $ok = false;
-              break;
-            }
-          }
-
-          if ($ok && ($previous_result = $r['result'])) {
-            $cp = $previous_result['component'];
-            $hash = $previous_result['hash'];
-            $score = $previous_result['score'];
-            $signature = $previous_result['signature'];
-            $match = $previous_result['match'];
-            $url = $previous_result['url'];
-            unset(
-              $previous_result['component'],
-              $previous_result['hash'],
-              $previous_result['score'],
-              $previous_result['signature'],
-              $previous_result['match'],
-              $previous_result['url']
-            );
-            $cfg          = $item['cfg'];
-            $cfg['start'] = 0;
-            $cfg['where'] = [
-              'logic' => 'AND',
-              'conditions' => [
-                $processed_cfg['filters'],
-                [
-                  'conditions' => array_map(
-                    function ($value, $key) use ($processed_cfg) {
-                      $f = [
-                        'field' => $processed_cfg['fields'][$key] ?? $key,
-                        'operator' => is_null($value) ? 'isnull' : (is_string($value) ? 'LIKE' : '=')
-                      ];
-
-                      if (!is_null($value)) {
-                        $f['value'] = $value;
-                      }
-
-                      return $f;
-                    },
-                    array_values($previous_result),
-                    array_keys($previous_result)
-                  )
-                ]
-              ]
-            ];
-
-            if ($add_to_top = $this->db->rselect($cfg)) {
-              $add_to_top['component'] = $cp;
-              $add_to_top['hash'] = $hash;
-              $add_to_top['score'] = $score + ($r['num'] ?: 1) * 50;
-              $add_to_top['signature'] = $signature;
-              $add_to_top['match'] = $match;
-              $add_to_top['url'] = $url;
-              $results['data'][] = $add_to_top;
-            }
-          }
-        }
-
-        if (!empty($results['data'])) {
-          $results['next_step'] = -1;
-          return $results;
-        }
-      }
-    }
-
-    if ($step === -1) {
-      $step = 0;
-    }
 
     //X::ddump($config_array, "DDDD", $this->getExecutedCfg($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
@@ -679,6 +677,7 @@ class Search extends Basic
         ksort($b);
         $a['hash']      = md5(json_encode($b));
         $a['score']     = $item['score'];
+        $a['search']    = $item['name'];
         $a['signature'] = $item['signature'];
 
         if (!empty($item['component'])) {
@@ -784,7 +783,8 @@ class Search extends Basic
       $f =& $this->class_cfg['arch']['search_results'];
       $result = $this->db->rselect($this->class_cfg['tables']['search_results'], [$f['id'], $f['num']], [
         $f['id_search'] => $id,
-        $f['signature'] => $data['signature']
+        $f['signature'] => $data['signature'],
+        $f['data_hash'] => $data['hash'],
       ]);
       if ($result) {
         return $this->db->update($this->class_cfg['tables']['search_results'], [
@@ -799,7 +799,8 @@ class Search extends Basic
           $f['id_search'] => $id,
           $f['num'] => 1,
           $f['signature'] => $data['signature'],
-          $f['result'] => serialize($data)
+          $f['result'] => serialize($data),
+          $f['data_hash'] => $data['hash']
         ]);
       }
     }

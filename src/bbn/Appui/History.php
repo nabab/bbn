@@ -1467,6 +1467,10 @@ MYSQL;
               foreach ($s['unique'] as $un) {
                 $old = self::$db->selectOne($table, $un, [$s['primary'] => $primary_where]);
                 self::$db->update($table, [$un => null], [$s['primary'] => $primary_where]);
+                if (!isset($s['fields'][$un])) {
+                  X::log([$un, $s], '_toDoHistoryStructureError');
+                  continue;
+                }
                 $cfg['history'][] = [
                   'operation' => 'UPDATE',
                   'column' => $s['fields'][$un]['id_option'],
