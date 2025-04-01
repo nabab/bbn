@@ -38,9 +38,9 @@ trait Cache
 
     // If a locale exists, cache with locale support; otherwise, cache without locale.
     if (!empty($locale)) {
-      return $this->cacheSetLocale($id, $locale, $method, $data);
+      return $this->cacheSetLocale($id . ($this->default ?: ''), $locale, $method, $data);
     } else {
-      return $this->cacheSet($id, $method, $data);
+      return $this->cacheSet($id . ($this->default ?: ''), $method, $data);
     }
   }
 
@@ -59,14 +59,14 @@ trait Cache
   {
     // If no locale is provided, attempt to retrieve the translating locale for the given ID.
     if (empty($locale)) {
-      $locale = $this->getTranslatingLocale($id);
+      $locale = $this->getTranslatingLocale($id . ($this->default ?: ''));
     }
 
     // If a locale exists, retrieve cache with locale support; otherwise, retrieve without locale.
     if (!empty($locale)) {
-      return $this->cacheGetLocale($id, $locale, $method);
+      return $this->cacheGetLocale($id . ($this->default ?: ''), $locale, $method);
     } else {
-      return $this->cacheGet($id, $method);
+      return $this->cacheGet($id . ($this->default ?: ''), $method);
     }
   }
 
@@ -86,9 +86,14 @@ trait Cache
       // If an ID is provided and it's a valid UID, proceed with cache deletion for that ID.
       if (Str::isUid($id)) {
         // Recursively delete caches of children if deep deletion is enabled or not deleting the parent's cache.
-        if (($deep || !$subs) && ($items = $this->items($id))) {
+        if (($deep || $subs) && ($items = $this->items($id))) {
           foreach ($items as $it) {
             $this->deleteCache($it, $deep, true);
+          }
+        }
+        if ($deep) {
+          foreach ($this->getAliases($id) as $it) {
+            $this->deleteCache($it, false, true);
           }
         }
 
@@ -98,7 +103,7 @@ trait Cache
         }
 
         // Delete the cache for the given ID.
-        $this->cacheDelete($id);
+        $this->cacheDelete($id . ($this->default ?: ''));
 
         // If not deleting the parent's cache, also delete its cache.
         if (!$subs) {

@@ -147,18 +147,16 @@ trait Code
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {
-        if (!\count($codes)) {
-          if ($opt = $this->nativeOption($rightValue)) {
-            if (!empty($opt['id_alias'])) {
-              if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
-                $codes[] = 'options';
-              }
-              elseif (empty($opt['text'])) {
-                $alias = $this->nativeOption($opt['id_alias']);
-                if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
-                  $codes[] = 'options';
-                }
-              }
+        if (($opt = $this->nativeOption($rightValue)) && !empty($opt['id_alias'])) {
+          if (!\count($codes)) {
+            if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
+              $codes[] = 'options';
+            }
+          }
+          elseif (empty($opt['text'])) {
+            $alias = $this->nativeOption($opt['id_alias']);
+            if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
+              $tmp = $alias['id_alias'];
             }
           }
         }
