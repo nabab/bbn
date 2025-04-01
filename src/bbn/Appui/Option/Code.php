@@ -157,7 +157,6 @@ trait Code
             $alias = $this->nativeOption($opt['id_alias']);
             if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
               $tmp = $alias['id_alias'];
-              $codes[] = 'options';
             }
           }
         }
