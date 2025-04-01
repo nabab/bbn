@@ -148,9 +148,18 @@ trait Code
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {
         if (!\count($codes)) {
-          $id_alias = $this->db->selectOne($c['table'], $f['id_alias'], [$f['id'] => $rightValue]);
-          if (in_array($id_alias, [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
-            $codes[] = 'options';
+          if ($opt = $this->nativeOption($rightValue)) {
+            if (!empty($opt['id_alias'])) {
+              if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
+                $codes[] = 'options';
+              }
+              elseif (empty($opt['text'])) {
+                $alias = $this->nativeOption($opt['id_alias']);
+                if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
+                  $codes[] = 'options';
+                }
+              }
+            }
           }
         }
 
