@@ -95,9 +95,18 @@ class Identity extends DbCls
   public function getRelatedEntities(string $id): array
   {
     $lnk = new Link($this->db, $this->entities);
-    return array_unique(array_map(function ($a) {
-      return $a['id_entity'];
-    }, $lnk->getFullList(['id_identity' => $id])));
+    $lnkCfg = $lnk->getClassCfg();
+    return array_values(
+      array_filter(
+        array_unique(
+          array_map(
+            fn($a) => $a[$lnkCfg['arch']['links']['id_entity']],
+            $lnk->getFullList([$lnkCfg['arch']['links']['id_identity'] => $id])
+          )
+        ),
+        fn($a) => $this->entities->exists($a)
+      )
+    );
   }
 
 
