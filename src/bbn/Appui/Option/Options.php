@@ -189,6 +189,7 @@ trait Options
           $this->fields['id_parent'] => $id,
           ], $order
         );
+        /*
         if (!empty($res)) {
           $opt = $this->option($id);
           if (!$opt['text'] && $opt['id_alias']) {
@@ -200,6 +201,7 @@ trait Options
             );
           }
         }
+        */
         $this->cacheSet($id, __FUNCTION__, $res);
         return $res;
       }
