@@ -20,6 +20,7 @@ trait Manip
   public function export(string $id, string $mode = 'single'): ?array
   {
     $this->isExporting = true;
+    $this->deleteCache();
     $default = $this->getDefault();
     $this->setDefault($this->root);
     $o = null;
@@ -143,6 +144,7 @@ trait Manip
     
     $this->setDefault($default);
     $this->isExporting = false;
+    $this->deleteCache();
     return $o;
   }
 
