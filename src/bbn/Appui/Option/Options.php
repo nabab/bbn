@@ -166,7 +166,7 @@ trait Options
   public function items($code = null): ?array
   {
     if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      if (($res = $this->cacheGet($id, __FUNCTION__)) !== false) {
+      if (($res = $this->getCache($id, __FUNCTION__)) !== false) {
         return $res;
       }
 
@@ -201,7 +201,7 @@ trait Options
           }
         }
 
-        $this->cacheSet($id, __FUNCTION__, $res);
+        $this->setCache($id, __FUNCTION__, $res);
         return $res;
       }
     }

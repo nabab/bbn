@@ -38,7 +38,7 @@ trait Native
         return $opt;
       } else if (
         empty($locale)
-        && ($opt = $this->cacheGet($id, __FUNCTION__))
+        && ($opt = $this->getCache($id, __FUNCTION__))
       ) {
         return $opt;
       }
@@ -65,7 +65,7 @@ trait Native
           }
         }
         if (empty($locale)) {
-          $this->cacheSet($id, __FUNCTION__, $opt);
+          $this->setCache($id, __FUNCTION__, $opt);
         } else {
           $this->cacheSetLocale($id, $locale, __FUNCTION__, $opt);
         }

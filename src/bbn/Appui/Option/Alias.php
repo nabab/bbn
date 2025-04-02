@@ -118,7 +118,7 @@ trait Alias
     // Get the ID from the provided codes.
     if (Str::isUid($id = $this->fromCode($codes))) {
       // Check if the result is cached.
-      if ($res = $this->cacheGet($id, __FUNCTION__)) {
+      if ($res = $this->getCache($id, __FUNCTION__)) {
         return $res;
       }
 
@@ -134,7 +134,7 @@ trait Alias
       );
 
       // Cache the result and return it.
-      $this->cacheSet($id, __FUNCTION__, $res);
+      $this->setCache($id, __FUNCTION__, $res);
       return $res;
     }
 
@@ -187,7 +187,7 @@ trait Alias
     // Get the ID from the provided codes.
     if (Str::isUid($id = $this->fromCode($codes))) {
       // Check if the result is cached.
-      if ($r = $this->cacheGet($id, __FUNCTION__)) {
+      if ($r = $this->getCache($id, __FUNCTION__)) {
         return $r;
       }
 
@@ -202,7 +202,7 @@ trait Alias
       }
 
       // Cache the result and return it.
-      $this->cacheSet($id, __FUNCTION__, $res);
+      $this->setCache($id, __FUNCTION__, $res);
       return $res;
     }
 

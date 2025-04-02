@@ -26,7 +26,7 @@ trait Cfg
     $id = $this->fromCode($codes);
 
     // Check if the ID is valid and if the result is cached.
-    if (Str::isUid($id) && ($tmp = $this->cacheGet($id, __FUNCTION__))) {
+    if (Str::isUid($id) && ($tmp = $this->getCache($id, __FUNCTION__))) {
       return $tmp;
     }
 
@@ -136,7 +136,7 @@ trait Cfg
     }
 
     // Cache the result and return it.
-    $this->cacheSet($id, __FUNCTION__, $cfg);
+    $this->setCache($id, __FUNCTION__, $cfg);
     return $cfg;
   }
 

@@ -237,7 +237,7 @@ trait I18n
   public function findI18nById(string $id): ?string
   {
     if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      if ($c = $this->cacheGet($id, __FUNCTION__)) {
+      if ($c = $this->getCache($id, __FUNCTION__)) {
         return $c['i18n'];
       }
 
@@ -273,7 +273,7 @@ trait I18n
         }
       }
 
-      $this->cacheSet($id, __FUNCTION__, ['i18n' => $i18n]);
+      $this->setCache($id, __FUNCTION__, ['i18n' => $i18n]);
       return $i18n;
     }
 

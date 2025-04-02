@@ -33,7 +33,7 @@ trait Cache
   {
     // If no locale is provided, attempt to retrieve the translating locale for the given ID.
     if (empty($locale)) {
-      $locale = $this->getTranslatingLocale($id);
+      //$locale = $this->getTranslatingLocale($id);
     }
 
     // If a locale exists, cache with locale support; otherwise, cache without locale.
@@ -59,7 +59,7 @@ trait Cache
   {
     // If no locale is provided, attempt to retrieve the translating locale for the given ID.
     if (empty($locale)) {
-      $locale = $this->getTranslatingLocale($id . ($this->default ?: ''));
+     // $locale = $this->getTranslatingLocale($id);
     }
 
     // If a locale exists, retrieve cache with locale support; otherwise, retrieve without locale.

@@ -115,7 +115,7 @@ trait Parents
   public function getIdParent($code = null): ?string
   {
     if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      if ($opt = $this->cacheGet($id, 'nativeOption')) {
+      if ($opt = $this->getCache($id, 'nativeOption')) {
         return $opt[$this->fields['id_parent']];
       }
       else {

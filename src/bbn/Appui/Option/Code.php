@@ -74,7 +74,7 @@ trait Code
       $cache_name = $this->getDefault() . '-get_code_' . $enc_code;
 
       // Check if a cached result is available for the given parent ID and cache name.
-      if (($tmp = $this->cacheGet($id_parent, $cache_name))) {
+      if (($tmp = $this->getCache($id_parent, $cache_name))) {
         // If no more arguments are provided, return the cached result directly.
         if (!count($codes)) {
           return $tmp;
