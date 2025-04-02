@@ -42,6 +42,7 @@ trait Optional
   {
     if (!self::$optional_is_init) {
       $opt = Option::getInstance();
+      $cls = false;
       if (!$opt) {
         throw new Exception(X::_("There is no options object as needed by").' '.__CLASS__);
       }
@@ -57,16 +58,17 @@ trait Optional
           throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));
         }
 
-        $tmp                   = explode('\\', __CLASS__);
-        $cls                   = strtolower(end($tmp));
-        $path                  = ['options', $cls, 'appui'];
+        $tmp = explode('\\', __CLASS__);
+        $cls = strtolower(end($tmp));
+        $path = ['options', $cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
       if (!self::$option_root_id) {
-        if (!$cls) {
+        if (empty($cls)) {
           throw new Exception("Impossible to find the option ".json_encode($path)." !!! for ".__CLASS__);
         }
+
         throw new Exception("Impossible to find the option $cls for ".__CLASS__);
       }
 
