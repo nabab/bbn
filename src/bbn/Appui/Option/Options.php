@@ -189,6 +189,17 @@ trait Options
           $this->fields['id_parent'] => $id,
           ], $order
         );
+        if (!empty($res)) {
+          $opt = $this->option($id);
+          if (!$opt['text'] && $opt['id_alias']) {
+            $res   = $this->db->getColumnValues(
+              $this->class_cfg['table'],
+              $this->fields['id'], [
+              $this->fields['id_parent'] => $opt['id_alias'],
+              ], $order
+            );
+          }
+        }
         $this->cacheSet($id, __FUNCTION__, $res);
         return $res;
       }
