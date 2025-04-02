@@ -71,7 +71,7 @@ trait Code
       $enc_code  = $true_code ? base64_encode($true_code) : 'null';
 
       // Define the cache name based on the encoded code.
-      $cache_name = $this->getDefault() . '-get_code_' . $enc_code;
+      $cache_name = 'get_code_' . $enc_code;
 
       // Check if a cached result is available for the given parent ID and cache name.
       if (($tmp = $this->getCache($id_parent, $cache_name))) {

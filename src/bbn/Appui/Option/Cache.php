@@ -38,9 +38,9 @@ trait Cache
 
     // If a locale exists, cache with locale support; otherwise, cache without locale.
     if (!empty($locale)) {
-      return $this->cacheSetLocale($id . ($this->default ?: ''), $locale, $method, $data);
+      return $this->cacheSetLocale($id, $locale, $method, $data);
     } else {
-      return $this->cacheSet($id . ($this->default ?: ''), $method, $data);
+      return $this->cacheSet($id, $method, $data);
     }
   }
 
@@ -64,9 +64,9 @@ trait Cache
 
     // If a locale exists, retrieve cache with locale support; otherwise, retrieve without locale.
     if (!empty($locale)) {
-      return $this->cacheGetLocale($id . ($this->default ?: ''), $locale, $method);
+      return $this->cacheGetLocale($id, $locale, $method);
     } else {
-      return $this->cacheGet($id . ($this->default ?: ''), $method);
+      return $this->cacheGet($id, $method);
     }
   }
 
