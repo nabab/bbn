@@ -90,18 +90,34 @@ trait Cat
     if ($cats = $this->fullOptions($id ?: false)) {
       foreach ($cats as $cat) {
         // If a 'tekname' exists, retrieve additional information and create text/value entries.
-        if (!empty($cat['tekname'])) {
+        if (!empty($cat['tekname'])
+          || (empty($cat[$this->fields['text']]) && !empty($cat['alias']['tekname']))
+        ) {
           $additional = [];
           // Retrieve the schema for the current category's ID.
-          if ($schema = $this->getSchema($cat[$this->fields['id']])) {
+          if (($schema = $this->getSchema($cat[$this->fields['id']]))
+            || (empty($cat[$this->fields['text']])
+              && !empty($cat[$this->fields['id_alias']])
+              && ($schema = $this->getSchema($cat[$this->fields['id_alias']])))
+          ) {
             // Add fields from the schema to the list of additional information.
             array_push($additional, ...array_map(function ($a) {
               return $a['field'];
             }, $schema));
           }
+
           // Create text/value entries for the current category and its options.
-          $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']], 'text', 'value', ...$additional);
-          $res['categories'][$cat[$this->fields['id']]] = $cat['tekname'];
+          if (empty($cat[$this->fields['text']])
+            && !empty($cat[$this->fields['id_alias']])
+            && !empty($cat['alias']['tekname'])
+          ) {
+            $res[$cat['alias']['tekname']] = $this->textValueOptions($cat[$this->fields['id_alias']], 'text', 'value', ...$additional);
+            $res['categories'][$cat[$this->fields['id']]] = $cat['alias']['tekname'];
+          }
+          else {
+            $res[$cat['tekname']] = $this->textValueOptions($cat[$this->fields['id']], 'text', 'value', ...$additional);
+            $res['categories'][$cat[$this->fields['id']]] = $cat['tekname'];
+          }
         }
       }
     }
