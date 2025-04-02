@@ -86,14 +86,9 @@ trait Cache
       // If an ID is provided and it's a valid UID, proceed with cache deletion for that ID.
       if (Str::isUid($id)) {
         // Recursively delete caches of children if deep deletion is enabled or not deleting the parent's cache.
-        if (($deep || $subs) && ($items = $this->items($id))) {
+        if (($deep || !$subs) && ($items = $this->items($id))) {
           foreach ($items as $it) {
             $this->deleteCache($it, $deep, true);
-          }
-        }
-        if ($deep) {
-          foreach ($this->getAliases($id) as $it) {
-            $this->deleteCache($it, false, true);
           }
         }
 

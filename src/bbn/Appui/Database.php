@@ -943,18 +943,31 @@ class Database extends bbn\Models\Cls\Cache
     $table_id = '';
     $table    = $conn->tsn($table);
     $ftable   = $conn->tfn($db.'.'.$table);
-    $keys     = fn(&$a) => \is_array($a['keys']) ?
+    $keys     = function (&$a) use (&$table_id, $table, &$conn) {
+      if (\is_array($a['keys'])) {
         array_walk(
           $a['keys'],
-          fn (&$w, $k) => $w['id_option'] = $this->keyId($k, $table_id)
-        ) : null;
-    $fields   = fn(&$a) => \is_array($a['fields']) ?
+          function (&$w, $k) use ($table_id, $table) {
+            $w['id_option'] = $this->keyId($k, $table_id);
+          }
+        );
+      }
+    };
+    $fields   = function (&$a) use (&$table_id, $table, &$conn) {
+      if (\is_array($a['fields'])) {
         array_walk(
           $a['fields'],
-          fn(&$w, $k) => (
-            ($w['id_option'] = $this->columnId($k, $table_id))
-            && ($w['option'] = $w['id_option'] ? $this->o->option($w['id_option']) : []))
-        ) : null;
+          function (&$w, $k) use ($table_id, $table) {
+            if (!$table_id) {
+              throw new \Exception(X::_("Table undefined")." $table");
+            }
+
+            $w['id_option'] = $this->columnId($k, $table_id);
+            $w['option']    = $w['id_option'] ? $this->o->option($w['id_option']) : [];
+          }
+        );
+      }
+    };
 
     if ($model = $conn->modelize($ftable)) {
       if ($table

@@ -1575,8 +1575,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
   public function getHaving(array $cfg): string
   {
     $res = '';
-    if (!empty($cfg['group_by'])
-      && !empty($cfg['having'])
+    if (!empty($cfg['having'])
       && ($cond = $this->getConditions($cfg['having'], $cfg, true, 2))
     ) {
       if (!empty($cfg['count'])) {

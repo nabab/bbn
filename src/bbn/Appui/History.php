@@ -846,6 +846,8 @@ MYSQL;
     ) {
       if ($force || !isset(self::$structures[$table])) {
         if ($model = $dbc->modelize($table)) {
+          $dbName = X::split($table, '.')[0];
+          $tableName = X::split($table, '.')[1];
           self::$structures[$table] = [
             'history' => false,
             'primary' => false,
@@ -870,6 +872,13 @@ MYSQL;
             self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
             self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
             self::$structures[$table]['id'] = $dbc->tableId($db->tsn($table), $db->getCurrent());
+            $refs = $db->findReferences($tableName . '.' . $primary);
+            self::$structures[$table]['refs'] = array_map(fn($a) => ['table' => X::split($a, '.')[1], 'col' => X::split($a, '.')[2]], $refs);
+            foreach (self::$structures[$table]['refs'] as &$r) {
+              $refCfg = self::getTableCfg($r['table']);
+              $r['nullable'] = $refCfg['fields'][$r['col']]['null'] ?? false;
+            }
+      
             foreach ($model['keys'] as $key) {
               if (!empty($key['unique'])) {
                 foreach ($key['columns'] as $col) {
@@ -1458,7 +1467,8 @@ MYSQL;
               foreach ($ids as $id) {
                 $cfg['value'] += self::$db->delete($table, [$s['primary'] => $id]);
               }
-            } else {
+            }
+            else {
               $isDisabled = !self::$enabled;
               if (!$isDisabled) {
                 self::disable();
@@ -1478,6 +1488,17 @@ MYSQL;
                   'old' => $old
                 ];
               }
+
+              self::enable();
+              foreach ($s['refs'] as $ref) {
+                if ($ref['nullable']) {
+                  self::$db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);
+                }
+                else {
+                  self::$db->delete($ref['table'], [$ref['col'] => $primary_where]);
+                }
+              }
+              self::disable();
 
               $cfg['value'] = self::$db->update(self::$table_uids, [
                 'bbn_active' => 0

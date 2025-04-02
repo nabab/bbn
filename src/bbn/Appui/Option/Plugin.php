@@ -199,11 +199,12 @@ trait Plugin
             $code = $p['alias']['code'];
           }
           if (empty($code)) {
-            throw new Exception(X::_("The plugin option must have a code"));
+            throw new Exception(X::_("The plugin alias option must have a code"));
           }
           
           foreach ($this->fullOptions($p['id']) as $p2) {
             if (empty($p2['code'])) {
+              X::log([$p, $p2], 'optionsError');
               throw new Exception(X::_("The plugin option must have a code"));
             }
 

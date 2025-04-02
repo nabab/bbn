@@ -15,6 +15,7 @@
 
 namespace bbn\Mvc;
 
+use Exception;
 use bbn;
 use bbn\X;
 
@@ -438,7 +439,7 @@ class Router
   {
     // Only for views and models
     if (!self::isMode($mode) && !\in_array($mode, self::$_controllers)) {
-      throw new \Exception(X::_("The mode %s is invalid", $mode));
+      throw new Exception(X::_("The mode %s is invalid", $mode));
     }
 
     // If there is a prepath defined we prepend it to the path
@@ -471,14 +472,14 @@ class Router
     }
 
     if (!$dir) {
-      throw new \Exception(X::_("Impossible to find the directory for %s", $path));
+      throw new Exception(X::_("Impossible to find the directory for %s", $path));
     }
 
     $res   = [];
     $files = bbn\File\Dir::getFiles($dir);
     $prepath = $path && ($path !== '.') ? $path.'/' : '';
     if (!is_array($files)) {
-      throw new \Exception(X::_("Impossible to find the directory for %s", $dir));
+      throw new Exception(X::_("Impossible to find the directory for %s", $dir));
     }
 
     foreach ($files as $f) {
@@ -500,7 +501,7 @@ class Router
   {
     // Only for views and models
     if (!self::isMode($mode) && !\in_array($mode, self::$_controllers)) {
-      throw new \Exception(X::_("The mode %s is invalid", $mode));
+      throw new Exception(X::_("The mode %s is invalid", $mode));
     }
 
     // If there is a prepath defined we prepend it to the path
@@ -521,7 +522,7 @@ class Router
     }
 
     if (!$dir) {
-      throw new \Exception(X::_("Impossible to find the directory for %s", $path));
+      throw new Exception(X::_("Impossible to find the directory for %s", $path));
     }
 
 
@@ -529,7 +530,7 @@ class Router
     $files   = bbn\File\Dir::getFiles($dir);
     $prepath = $path && ($path !== '.') ? $path.'/' : '';
     if (!is_array($files)) {
-      throw new \Exception(X::_("The directory %s doesn't exist", $dir));
+      throw new Exception(X::_("The directory %s doesn't exist", $dir));
     }
 
     foreach ($files as $f) {
@@ -551,7 +552,7 @@ class Router
   {
     // Only for views and models
     if (!self::isMode($mode) && !\in_array($mode, self::$_controllers)) {
-      throw new \Exception(X::_("The mode %s is invalid", $mode));
+      throw new Exception(X::_("The mode %s is invalid", $mode));
     }
 
     // If there is a prepath defined we prepend it to the path
@@ -573,14 +574,14 @@ class Router
 
     if (!$dir) {
       return [];
-      //throw new \Exception(X::_("Impossible to find the directory for %s", $path));
+      //throw new Exception(X::_("Impossible to find the directory for %s", $path));
     }
 
     $res     = [];
     $files   = bbn\File\Dir::getFiles($dir);
     $prepath = $path && ($path !== '.') ? $path.'/' : '';
     if (!is_array($files)) {
-      throw new \Exception(X::_("The directory %s doesn't exist", $dir));
+      throw new Exception(X::_("The directory %s doesn't exist", $dir));
     }
 
     foreach ($files as $f) {
@@ -640,7 +641,7 @@ class Router
       return 'mvc/'.$mode.'/';
     }
 
-    throw new \Exception(X::_("The mode $mode doesn't exist in router!"));
+    throw new Exception(X::_("The mode $mode doesn't exist in router!"));
   }
 
 
