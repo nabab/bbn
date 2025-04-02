@@ -71,7 +71,7 @@ trait Code
       $enc_code  = $true_code ? base64_encode($true_code) : 'null';
 
       // Define the cache name based on the encoded code.
-      $cache_name = 'get_code_' . $enc_code;
+      $cache_name = $this->getDefault() . '-get_code_' . $enc_code;
 
       // Check if a cached result is available for the given parent ID and cache name.
       if (($tmp = $this->cacheGet($id_parent, $cache_name))) {
@@ -124,24 +124,45 @@ trait Code
       }
       // If no direct match is found, attempt to find a magic code option that bypasses the normal matching logic.
       elseif ($this->getMagicTemplateId()) {
-        if (($tmp2 = $this->db->selectOne(
+        if ($tmp2 = $this->db->selectOne(
             $c['table'],
             $f['id'],
             [
               $f['id_parent'] => $id_parent,
               $f['id_alias'] => [$this->getOptionsTemplateId(), $this->getSubOptionsTemplateId()]
             ]
-          ))
-          && ($tmp = $this->db->selectOne(
+          )
+        ) {
+          if  ($tmp = $this->db->selectOne(
             $c['table'],
             $f['id'],
             [
               [$f['id_parent'], '=', $tmp2],
               [$f['code'], '=', $true_code]
             ]
-          ))
-        ) {
-          $rightValue = $tmp;
+          )) {
+            $rightValue = $tmp;
+          }
+          elseif ($tmp = $this->db->selectOne([
+            'table' => $c['table'],
+            'fields' => [$c['table'] . '.' . $f['id_alias']],
+            'join' => [[
+              'table' => $c['table'],
+              'alias' => 'o1',
+              'on' => [
+                [
+                  'field' => 'o1.' . $f['id'],
+                  'exp' => $c['table'] . '.' . $f['id_alias']
+                ]
+              ]
+            ]],
+            'where' => [
+              $c['table'] . '.' . $f['id_parent'] => $tmp2,
+              'o1.' . $f['code'] => $true_code
+            ]
+          ])) {
+            $rightValue = $tmp;
+          }
         }
       }
 
