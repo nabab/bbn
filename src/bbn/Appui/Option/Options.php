@@ -189,8 +189,7 @@ trait Options
           $this->fields['id_parent'] => $id,
           ], $order
         );
-        /*
-        if (!empty($res)) {
+        if (!$this->isExporting && empty($res)) {
           $opt = $this->option($id);
           if (!$opt['text'] && $opt['id_alias']) {
             $res   = $this->db->getColumnValues(
@@ -201,7 +200,7 @@ trait Options
             );
           }
         }
-        */
+
         $this->cacheSet($id, __FUNCTION__, $res);
         return $res;
       }

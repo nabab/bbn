@@ -149,7 +149,7 @@ trait Code
       if ($rightValue) {
         if (($opt = $this->nativeOption($rightValue)) && !empty($opt['id_alias'])) {
           if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
-            if (!\count($codes) || !in_array($codes[0], ['options', 'plugins', 'permissions', 'templates'])) {
+            if (!\count($codes) || !in_array(end($codes), ['options', 'plugins', 'permissions', 'templates'])) {
               $codes[] = 'options';
             }
           }
@@ -157,7 +157,7 @@ trait Code
             $alias = $this->nativeOption($opt['id_alias']);
             if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
               $rightValue = $opt['id_alias'];
-              if (!\count($codes) || !in_array($codes[0], ['options', 'plugins', 'permissions', 'templates'])) {
+              if (!\count($codes) || !in_array(end($codes), ['options', 'plugins', 'permissions', 'templates'])) {
                 $codes[] = 'options';
               }
             }

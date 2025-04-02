@@ -9,6 +9,8 @@ use bbn\Str;
 trait Manip
 {
 
+  private $isExporting = false;
+
   /**
    * @param string $id
    * @param string $mode
@@ -17,6 +19,7 @@ trait Manip
    */
   public function export(string $id, string $mode = 'single'): ?array
   {
+    $this->isExporting = true;
     $default = $this->getDefault();
     $this->setDefault($this->root);
     $o = null;
@@ -139,6 +142,7 @@ trait Manip
     }
     
     $this->setDefault($default);
+    $this->isExporting = false;
     return $o;
   }
 
