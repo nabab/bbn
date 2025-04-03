@@ -670,22 +670,14 @@ class Permissions extends Basic
    */
   public function getSources($only_with_children = true): array
   {
-    $appui   = $this->opt->fromCode('appui');
     $root    = $this->opt->fromCode('permissions');
     $access  = $this->opt->fromCode('access', $root);
     $options = $this->opt->fromCode('options', $root);
-    $plugins = $this->opt->fromCode('plugins');
-    //X::ddump($root, $appui, $access, $options, $plugins);
-    $sources = [[
-      'text' => _("Main application"),
-      'rootAccess' => $access,
-      'rootOptions' => $options,
-      'code' => ''
-    ]];
-    $all     = $this->opt->getPlugins();
+    $sources = [];
+    $all     = $this->opt->getPlugins(null, true);
     foreach ($all as $o) {
-      if ($id_perm = $this->opt->fromCode('access', 'permissions', $o['id'])) {
-        $id_option = $this->opt->fromCode('options', 'permissions', $o['id']);
+      if ($id_perm = $this->opt->fromCode('access', $o['rootPermissions'])) {
+        $id_option = $this->opt->fromCode('options', $o['rootPermissions']);
         $tmp       = $this->opt->option($id_perm);
         if (!$only_with_children || !empty($tmp['num_children'])) {
           $sources[] = [
@@ -697,6 +689,14 @@ class Permissions extends Basic
         }
       }
     }
+
+    X::sortBy($sources, 'text');
+    array_unshift($sources, [
+      'text' => _("Main application"),
+      'rootAccess' => $access,
+      'rootOptions' => $options,
+      'code' => ''
+    ]);
 
     return $sources;
   }
