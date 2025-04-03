@@ -22,12 +22,21 @@ trait Path
       $root = $this->getDefault();
     }
 
+    $done = [];
     if ($code = $this->code($id)) {
       $parts = [];
       while ($id && ($id !== $root)){
         array_unshift($parts, $code);
-        if (!($id = $this->getIdParent($id))) {
+        if (!($tmp = $this->getIdParent($id))) {
           return null;
+        }
+
+        if (in_array($tmp, $done, true)) {
+          break;
+        }
+        else{
+          $id = $tmp;
+          $done[] = $id;
         }
 
         $code = $this->code($id);
@@ -117,11 +126,19 @@ trait Path
           break;
         }
 
+        if ($o[$this->fields['id_parent']] === $id) {
+          break;
+        }
+
         $id = $o[$this->fields['id_parent']];
       }
       elseif ($o[$this->fields['id_alias']] && ($code = $this->code($o[$this->fields['id_alias']]))) {
         $res[] = $code;
         if ($o[$this->fields['id_parent']] === ($fromRoot ? $this->root : $this->default)) {
+          break;
+        }
+
+        if ($o[$this->fields['id_parent']] === $id) {
           break;
         }
 

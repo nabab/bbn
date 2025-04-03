@@ -473,20 +473,28 @@ class Menu extends bbn\Models\Cls\Basic
   {
     $res = $this->pref->getBits($id_menu, $submenu);
     if (\is_array($res) && !empty($res)) {
+      $idPermTplId = $this->options->getPermissionsTemplateId();
+      $idAccessTplId = $this->options->fromCode('access', $idPermTplId);
+      $root = $this->options->getRoot();
       foreach ($res as $k => &$d) {
         $d['numChildren'] = count($this->pref->getBits($id_menu, $d['id']));
         $path = $tmp = [];
         if (!is_null($d['id_option'])) {
           $id_option = $d['id_option'];
-          while ($id_option) {
+          while ($id_option && ($id_option !== $root)) {
             array_unshift($tmp, $id_option);
-            $o = $this->options->parent($id_option);
-            if ($o['code'] === 'access') {
-              $path = $tmp;
-              break;
+            if ($o = $this->options->parent($id_option)) {
+              if ($o['id_alias'] === $idAccessTplId) {
+                $path = $tmp;
+                break;
+              }
+              else {
+                $id_option = $o['id'];
+              }
             }
             else {
-              $id_option = $o['id'];
+              X::log("Impossible to find the option $id_option", 'menuErrors');
+              break;
             }
           }
         }

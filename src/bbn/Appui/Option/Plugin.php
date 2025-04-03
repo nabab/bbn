@@ -122,7 +122,7 @@ trait Plugin
       $st = '';
       while ($o && ($o['id_alias'] !== $pluginsAlias)) {
         $st = $o['code'] . ($st ? '-' . $st : '');
-        $o = $this->option($o['id_parent']);
+        $o = $o['id_parent'] !== $o['id'] ? $this->option($o['id_parent']) : null;
       }
 
       return $st;
@@ -140,7 +140,7 @@ trait Plugin
       $st = '';
       while ($o && ($o['id_alias'] !== $pluginsAlias)) {
         $st = $o['code'] . ($st ? '-' . $st : '');
-        $o = $this->option($o['id_parent']);
+        $o = $o['id_parent'] !== $o['id'] ? $this->option($o['id_parent']) : null;
       }
 
       return $st;

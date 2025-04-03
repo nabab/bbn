@@ -117,7 +117,8 @@ trait Root
       $this->root = $this->cacheGetSet(
         function () use (&$t) {
           return $t->db->selectOne($t->class_cfg['table'], $t->fields['id'], [
-            $t->fields['id_parent'] => null, $t->fields['code'] => 'root']);
+            ['field' => $t->fields['id_parent'], 'exp'  => $t->fields['id']], ['field' => $t->fields['code'], 'value' => 'root']
+          ]);
         },
         'root',
         'root',

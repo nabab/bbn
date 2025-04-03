@@ -396,7 +396,9 @@ trait Template
         } else if ($this->getIdAlias($idParent) === $idTemplate) {
           return $id;
         }
-        $idParent = $this->getIdParent($idParent);
+
+        $tmp = $this->getIdParent($idParent);
+        $idParent = $tmp !== $idParent ? $tmp : null;
       }
     }
 
@@ -413,9 +415,14 @@ trait Template
   {
     $templateId = $this->getMagicTemplateId();
     while ($idParent = $this->getIdParent($id)) {
+      if ($idParent === $id) {
+        return false;
+      }
+
       if ($idParent === $templateId) {
         return true;
       }
+
       if ($this->getIdAlias($idParent) === $templateId) {
         return true;
       }
