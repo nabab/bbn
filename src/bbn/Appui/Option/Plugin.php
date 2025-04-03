@@ -167,29 +167,43 @@ trait Plugin
     $res = [];
     if ($pluginAlias && $pluginsAlias && $plugins) {
       foreach ($this->fullOptions($plugins) as $p) {
+        $originalId = $p['id'];
         $code = $p['code'];
+        $pluginId = null;
         if ($p['id_alias'] === $pluginAlias) {
+          $pluginId = $p['id'];
+          $pluginText = $p['text'];
+          $pluginIcon = $p['icon'] ?? '';
+        }
+        elseif (!$p['text'] && !empty($p['alias']) && ($p['alias']['id_alias'] === $pluginAlias)) {
+          $pluginId = $p['id_alias'];
+          $pluginText = $p['alias']['text'];
+          $pluginIcon = $p['alias']['icon'];
+          $code = $p['alias']['code'] ?? '';
+        }
+
+        if ($pluginId) {
           if (empty($code)) {
             throw new Exception(X::_("The plugin option must have a code"));
           }
 
           $item = [
-            'id' => $p['id'],
+            'id' => $originalId,
             'code' => $code,
-            'text' => $p['text'],
-            'icon' => $p['icon'] ?? '',
+            'text' => $pluginText,
+            'icon' => $pluginIcon,
           ];
           if ($full) {
             $item = array_merge($item, [
-              'rootPlugins' => $this->fromCode('plugins', $p['id']),
-              'rootOptions' => $this->fromCode('options', $p['id']),
-              'rootTemplates' => $this->fromCode('templates', $p['id']),
-              'rootPermissions' => $this->fromCode('permissions', $p['id'])
+              'rootPlugins' => $this->fromCode('plugins', $pluginId),
+              'rootOptions' => $this->fromCode('options', $pluginId),
+              'rootTemplates' => $this->fromCode('templates', $pluginId),
+              'rootPermissions' => $this->fromCode('permissions', $pluginId)
             ]);
           }
 
           if ($withSubs) {
-            $item['subplugins'] = $this->getSubplugins($p['id']);
+            $item['subplugins'] = $this->getSubplugins($pluginId);
           }
 
           $res[] = $item;
@@ -202,32 +216,45 @@ trait Plugin
             throw new Exception(X::_("The plugin alias option must have a code"));
           }
           
-          foreach ($this->fullOptions($p['id']) as $p2) {
-            if (empty($p2['code'])) {
-              X::log([$p, $p2], 'optionsError');
-              throw new Exception(X::_("The plugin option must have a code"));
+          foreach ($this->fullOptions($p['id']) as $p) {
+            $code2 = $p['code'];
+            $pluginId = null;
+            if ($p['id_alias'] === $pluginAlias) {
+              $pluginId = $p['id'];
+              $pluginText = $p['text'];
+              $pluginIcon = $p['icon'] ?? '';
             }
-
-            if ($p2['id_alias'] === $pluginAlias) {
+            elseif (!$p['text'] && !empty($p['alias']) && ($p['alias']['id_alias'] === $pluginAlias)) {
+              $pluginId = $p['id_alias'];
+              $pluginText = $p['alias']['text'];
+              $pluginIcon = $p['alias']['icon'];
+              $code2 = $p['alias']['code'] ?? '';
+            }
+    
+            if ($pluginId) {
+              if (empty($code2)) {
+                throw new Exception(X::_("The plugin option must have a code"));
+              }
+    
               $item = [
-                'id' => $p2['id'],
-                'code' => $code . '-' . $p2['code'],
-                'text' => $p2['text'],
-                'icon' => $p2['icon'] ?? '',
+                'id' => $originalId,
+                'code' => $code . '-' . $code2,
+                'text' => $pluginText,
+                'icon' => $pluginIcon,
               ];
               if ($full) {
                 $item = array_merge($item, [
-                  'rootPlugins' => $this->fromCode('plugins', $p2['id']),
-                  'rootOptions' => $this->fromCode('options', $p2['id']),
-                  'rootTemplates' => $this->fromCode('templates', $p2['id']),
-                  'rootPermissions' => $this->fromCode('permissions', $p2['id'])
+                  'rootPlugins' => $this->fromCode('plugins', $pluginId),
+                  'rootOptions' => $this->fromCode('options', $pluginId),
+                  'rootTemplates' => $this->fromCode('templates', $pluginId),
+                  'rootPermissions' => $this->fromCode('permissions', $pluginId)
                 ]);
               }
-
+    
               if ($withSubs) {
-                $item['subplugins'] = $this->getSubplugins($p2['id']);
+                $item['subplugins'] = $this->getSubplugins($pluginId);
               }
-
+    
               $res[] = $item;
             }
           }
