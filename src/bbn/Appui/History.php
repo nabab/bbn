@@ -7,6 +7,7 @@ use bbn\X;
 use bbn\Appui\Database;
 use bbn\Str;
 use bbn\Db;
+use bbn\Cache;
 use bbn\Models\Tts\Report;
 
 class History
@@ -46,6 +47,9 @@ class History
   public static $column = 'bbn_active';
   /** @var boolean */
   public static $is_used = false;
+
+  private static $cache;
+  private static $cache_prefix;
 
   /**
    * Returns the column's corresponding option's ID
@@ -94,8 +98,31 @@ class History
       self::$table_uids = self::$admin_db . '.' . self::$prefix . 'history_uids';
       self::$ok = true;
       self::$is_used = true;
+      self::$cache = Cache::getEngine();
+      self::$cache_prefix = Str::encodeFilename(str_replace('\\', '/', self::class), true).'/';
       self::$links = self::$db->getForeignKeys('bbn_uid', self::$prefix . 'history_uids', self::$admin_db);
       self::$db->setTrigger('\\bbn\\Appui\\History::trigger');
+    }
+  }
+
+  public static function setCache($id, $data): void
+  {
+    if (self::$cache) {
+      self::$cache->set(self::$cache_prefix . $id, $data, 3600);
+    }
+  }
+
+  public static function getCache($id)
+  {
+    if (self::$cache) {
+      return self::$cache->get(self::$cache_prefix . $id, 3600);
+    }
+  }
+
+  public static function deleteCache($id)
+  {
+    if (self::$cache) {
+      return self::$cache->get(self::$cache_prefix . $id, 3600);
     }
   }
 
@@ -845,9 +872,13 @@ MYSQL;
       ($table = $db->tfn($table))
     ) {
       if ($force || !isset(self::$structures[$table])) {
+        if (!$force && ($data = self::getCache($table))) {
+          self::$structures[$table] = $data;
+          return self::$structures[$table];
+        }
+
         if ($model = $dbc->modelize($table)) {
-          $dbName = X::split($table, '.')[0];
-          $tableName = X::split($table, '.')[1];
+          [$dbName, $tableName] = X::split($table, '.');
           self::$structures[$table] = [
             'history' => false,
             'primary' => false,
@@ -896,6 +927,8 @@ MYSQL;
               return isset($a['id_option']);
             });
           }
+
+          self::setCache($table, self::$structures[$table]);
         }
       }
       // The table exists and has history
