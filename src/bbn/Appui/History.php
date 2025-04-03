@@ -874,7 +874,11 @@ MYSQL;
       if ($force || !isset(self::$structures[$table])) {
         if (!$force && ($data = self::getCache($table))) {
           self::$structures[$table] = $data;
-          return self::$structures[$table];
+          if (!empty(self::$structures[$table]['history'])) {
+            return self::$structures[$table];
+          }
+
+          return null;
         }
 
         if ($model = $dbc->modelize($table)) {
