@@ -217,6 +217,32 @@ abstract class Entities extends DbCls
   }
 
   /**
+   * Updates records based on the given condition and data.
+   *
+   * @param string|array $where Condition for update.
+   * @param array $data Data to update.
+   * 
+   * @return bool
+   */
+  public function getNewEasyId(): ?int
+  {
+    $arc = $this->class_cfg['arch']['entities'];
+    if (isset($arc['easy_id'])) {
+      $num = random_int(1, 10^($arc['easy_id']['max_length'] ?? 5)-1);
+      $max = 100;
+      $i = 0;
+      while (!$this->dbTraitSelectOne($arc['easy_id']['name'], [$arc['easy_id']['name'] => $num]) && ($i < $max)) {
+        $num = random_int(1, 10^($arc['easy_id']['max_length'] ?? 5)-1);
+        $i++;
+      }
+
+      return $num;
+    }
+
+    return null;
+  }
+
+  /**
    * Checks if a record exists based on the given condition.
    *
    * @param string|array $where Condition for existence check.
