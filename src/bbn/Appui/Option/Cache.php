@@ -98,7 +98,7 @@ trait Cache
         }
 
         // Delete the cache for the given ID.
-        $this->cacheDelete($id . ($this->default ?: ''));
+        $this->cacheDelete($id);
 
         // If not deleting the parent's cache, also delete its cache.
         if (!$subs) {
