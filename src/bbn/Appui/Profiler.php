@@ -142,10 +142,16 @@ class Profiler extends DbCls
         $res         = $row;
         $res['data'] = [];
         foreach ($content as $fn => $data) {
-          [
-            $data['parent'],
-            $data['child']
-          ]               = X::split($fn, '==>');
+          if (str_contains($fn, '==>')) {
+            [
+              $data['parent'],
+              $data['child']
+            ] = X::split($fn, '==>');
+          }
+          else {
+            $data['parent'] = $fn;
+            $data['child']  = '';
+          }
           $data['mem_na'] = $data['mem.na'] ?? '';
           $data['mem_nf'] = $data['mem.nf'] ?? '';
           $data['mem_aa'] = $data['mem.aa'] ?? '';
