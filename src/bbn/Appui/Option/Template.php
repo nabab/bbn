@@ -354,7 +354,6 @@ trait Template
     $opt = $this->option($idSubtemplate);
     $foptions = $this->fullOptions($target);
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
-      
       if ($o = X::getRow($foptions, ['code' => $opt['code']])) {
         if ($this->setAlias($o['id'], $idSubtemplate)) {
           $tot++;
@@ -408,6 +407,31 @@ trait Template
   public function hasTemplate(string $id): bool
   {
     return (bool)$this->parentTemplate($id);
+  }
+
+
+  public function isPartOfTemplates($id): bool
+  {
+    $templateId = $this->getMagicTemplateId();
+    $i = 0;
+    while ($idParent = $this->getIdParent($id)) {
+      if ($idParent === $id) {
+        return false;
+      }
+
+      if ($idParent === $templateId) {
+        if (!$i) {
+          return false;
+        }
+
+        return true;
+      }
+
+      $id = $idParent;
+      $i++;
+    }
+
+    return false;
   }
 
 

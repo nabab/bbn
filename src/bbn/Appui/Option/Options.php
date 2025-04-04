@@ -191,7 +191,7 @@ trait Options
         );
         if (!$this->isExporting && empty($res)) {
           $opt = $this->option($id);
-          if (!$opt['text'] && $opt['id_alias']) {
+          if (!$opt['text'] && $opt['id_alias'] && !$this->isPartOfTemplates($opt['id_alias'])) {
             $res   = $this->db->getColumnValues(
               $this->class_cfg['table'],
               $this->fields['id'], [
