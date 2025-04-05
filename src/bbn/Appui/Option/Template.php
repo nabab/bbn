@@ -427,6 +427,14 @@ trait Template
         return true;
       }
 
+      if ($this->getIdAlias($idParent) === $templateId) {
+        if (!$i) {
+          return false;
+        }
+
+        return true;
+      }
+
       $id = $idParent;
       $i++;
     }
