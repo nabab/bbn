@@ -187,6 +187,7 @@ trait Options
           $this->class_cfg['table'],
           $this->fields['id'], [
           $this->fields['id_parent'] => $id,
+          [$this->fields['id'], '!=', $id],
           ], $order
         );
         if (!$this->isExporting && empty($res)) {

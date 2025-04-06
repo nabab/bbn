@@ -1442,15 +1442,38 @@ class System extends Basic
   private function _mkdir(string $dir, int $chmod = 0755, $recursive = false): bool
   {
     if (!$this->_is_dir($dir)) {
-      try {
-        call_user_func('mkdir', $dir, $chmod, $recursive);
-      }
-      catch (Throwable $e) {
-      }
+      $this->preventError(fn() => call_user_func('mkdir', $dir, $chmod, $recursive));
+
+      return $this->_is_dir($dir);
     }
 
     return true;
   }
+
+  private function preventError(callable $fn) {
+    $res = null;
+    set_error_handler(
+      function(
+        int $errno,
+        string $errstr,
+        string|null $errfile = null,
+        ?int $errline = null
+      ) {
+      },
+      E_WARNING
+    );
+    try {
+      $res = $fn();
+    }
+    catch (Exception $e) {
+      X::logError($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+    }
+
+    restore_error_handler();
+
+    return $res;
+  }
+
 
 
   /**
@@ -1474,33 +1497,15 @@ class System extends Basic
         }
 
         if ($full) {
-          $obj =& $this;
-          set_error_handler(
-            fn(
-              int $errno,
-              string $errstr,
-              string|null $errfile = null,
-              ?int $errline = null
-            ) => $attempts >= 3 ? 
-              X::logError($errno, $errstr, $errfile, $errline)
-              : $obj->_delete($path, true, ++$attempts),
-            E_WARNING
-          );
-          try {
-            if ($this->mode === 'ssh') {
-              $res = @ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-            }
-            elseif ($this->mode === 'ftp') {
-              $res = @ftp_rmdir($this->obj, substr($path, strlen($this->prefix)));
-            }
-            else {
-              $res = rmdir($path);
-            }
+          if ($this->mode === 'ssh') {
+            return $this->preventError(fn() => ssh2_sftp_rmdir($this->obj, substr($path, strlen($this->prefix))));
           }
-          catch (Exception $e) {
+          elseif ($this->mode === 'ftp') {
+            return $this->preventError(fn() => ftp_rmdir($this->obj, substr($path, strlen($this->prefix))));
           }
-
-          restore_error_handler();
+          else {
+            return $this->preventError(fn() => rmdir($path));
+          }
         }
         else {
           $res = true;
@@ -1508,23 +1513,13 @@ class System extends Basic
       }
       elseif ($this->_is_file($path)) {
         if ($this->mode === 'ssh') {
-          try {
-            $res = ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix)));
-          } catch (Exception $e) {
-            $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
-          }
-        } elseif ($this->mode === 'ftp') {
-          try {
-            $res = ftp_delete($this->obj, substr($path, strlen($this->prefix)));
-          } catch (Exception $e) {
-            $this->log(X::_('Error in _delete') . ': ' . $e->getMessage() . ' (' . $e->getLine() . ')');
-          }
-        } else if (is_file($path)) {
-          try {
-            $res = @unlink($path);
-          } catch (Exception $e) {
-            $this->log(X::_('Error in _delete') . ': ' . $path);
-          }
+          return $this->preventError(fn() => ssh2_sftp_unlink($this->obj, substr($path, strlen($this->prefix))));
+        }
+        elseif ($this->mode === 'ftp') {
+          return $this->preventError(fn() => ftp_delete($this->obj, substr($path, strlen($this->prefix))));
+        }
+        else if (is_file($path)) {
+          return $this->preventError(fn() => unlink($path));
         }
       }
     }
@@ -1543,8 +1538,16 @@ class System extends Basic
   {
     if ($this->mode !== 'nextcloud') {
       if ($this->_is_file($source)) {
-        return copy($source, $dest);
-      } elseif ($this->_is_dir($source) && $this->_mkdir($dest)) {
+        if ($this->mode === 'ssh') {
+          return $this->preventError(fn() => ssh2_sftp_copy($this->obj, substr($source, strlen($this->prefix)), substr($dest, strlen($this->prefix))));
+        }
+        elseif ($this->mode === 'ftp') {
+          return $this->preventError(fn() => ftp_copy($this->obj, substr($source, strlen($this->prefix)), substr($dest, strlen($this->prefix))));
+        }
+
+        return $this->preventError(fn() => copy($source, $dest));
+      }
+      elseif ($this->_is_dir($source) && $this->_mkdir($dest)) {
         foreach ($this->_get_items($source, 'both', true) as $it) {
           $this->_copy($it, $dest . '/' . X::basename($it));
         }
@@ -1568,16 +1571,17 @@ class System extends Basic
       $file1 = substr($source, strlen($this->prefix));
       $file2 = substr($dest, strlen($this->prefix));
       if ($this->mode === 'ssh') {
-        return @ssh2_sftp_rename($this->obj, $file1, $file2);
+        return $this->preventError(fn() => ssh2_sftp_rename($this->obj, $file1, $file2));
       }
 
       if ($this->mode === 'ftp') {
-        return ftp_rename($this->obj, $file1, $file2);
+        return $this->preventError(fn() => ftp_rename($this->obj, $file1, $file2));
       }
 
-      return rename($file1, $file2);
-    } else {
-      return $this->obj->rename($source, $dest);
+      return $this->preventError(fn() => rename($file1, $file2));
+    }
+    else {
+      return $this->preventError(fn() => $this->obj->rename($source, $dest));
     }
   }
 

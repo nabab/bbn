@@ -216,19 +216,19 @@ trait Plugin
             throw new Exception(X::_("The plugin alias option must have a code"));
           }
           
-          foreach ($this->fullOptions($p['id']) as $p) {
-            $code2 = $p['code'];
+          foreach ($this->fullOptions($p['id']) as $p2) {
+            $code2 = $p2['code'];
             $pluginId = null;
-            if ($p['id_alias'] === $pluginAlias) {
-              $pluginId = $p['id'];
-              $pluginText = $p['text'];
-              $pluginIcon = $p['icon'] ?? '';
+            if ($p2['id_alias'] === $pluginAlias) {
+              $pluginId = $p2['id'];
+              $pluginText = $p2['text'];
+              $pluginIcon = $p2['icon'] ?? '';
             }
-            elseif (!$p['text'] && !empty($p['alias']) && ($p['alias']['id_alias'] === $pluginAlias)) {
-              $pluginId = $p['id_alias'];
-              $pluginText = $p['alias']['text'];
-              $pluginIcon = $p['alias']['icon'];
-              $code2 = $p['alias']['code'] ?? '';
+            elseif (!$p2['text'] && !empty($p2['alias']) && ($p2['alias']['id_alias'] === $pluginAlias)) {
+              $pluginId = $p2['id_alias'];
+              $pluginText = $p2['alias']['text'];
+              $pluginIcon = $p2['alias']['icon'];
+              $code2 = $p2['alias']['code'] ?? '';
             }
     
             if ($pluginId) {
@@ -237,7 +237,7 @@ trait Plugin
               }
     
               $item = [
-                'id' => $originalId,
+                'id' => $p2['id'],
                 'code' => $code . '-' . $code2,
                 'text' => $pluginText,
                 'icon' => $pluginIcon,
