@@ -528,6 +528,26 @@ class Project extends DbCls
         'db' => $this->getDbs(),
       ];
 
+      if (!empty($info['db']['items'])) {
+        $conn = '';
+        if (defined('BBN_DB_USER') && !empty(constant('BBN_DB_USER'))) {
+          $conn .= constant('BBN_DB_USER') . '@';
+        }
+        $conn .= constant('BBN_DB_HOST');
+
+        foreach ($info['db']['items'] as &$item) {
+          if (($item['engine'] === constant('BBN_DB_ENGINE')) && !empty($item['items'])) {
+            foreach ($item['items'] as &$it) {
+              if ($it['code'] === $conn) {
+                $it['default'] = true;
+              }
+            }
+            unset($it);
+          }
+        }
+        unset($item);
+      }
+
       $this->cacheSet($this->id, 'project_info', $info, 3600);
       $this->projectInfo = $info;
       return $info;
