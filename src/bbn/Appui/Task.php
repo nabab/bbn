@@ -1,4 +1,6 @@
 <?php
+namespace bbn\Appui;
+
 /**
  * Created by PhpStorm.
  * User: BBN
@@ -6,16 +8,27 @@
  * Time: 05:45
  */
 
-namespace bbn\Appui;
-use bbn;
+use bbn\Mvc;
+use bbn\Db;
 use bbn\X;
 use bbn\Str;
+use bbn\Date;
+use bbn\User;
+use bbn\User\Manager;
+use bbn\User\Permissions;
+use bbn\Appui\Option;
+use bbn\Appui\Note;
+use bbn\Appui\Notification;
+use bbn\Models\Cls\Db as DbCls;
+use bbn\Models\Tts\References;
+use bbn\Models\Tts\Optional;
 
-class Task extends bbn\Models\Cls\Db
+
+class Task extends DbCls
 {
 
-  use bbn\Models\Tts\References,
-      bbn\Models\Tts\Optional;
+  use References;
+  use Optional;
 
   private
     $columns,
@@ -48,32 +61,33 @@ class Task extends bbn\Models\Cls\Db
   }
 
   private static function options(){
-    return \bbn\Appui\Option::getInstance();
+    return Option::getInstance();
   }
 
-  public function __construct(bbn\Db $db){
+  public function __construct(Db $db){
     parent::__construct($db);
     self::optionalInit();
-    if ( $user = bbn\User::getInstance() ){
+    if ( $user = User::getInstance() ){
       $this->user = $user->getName();
       $this->id_user = $user->getId();
       $this->is_dev = $user->isDev();
-      $this->mgr = new bbn\User\Manager($user);
+      $this->mgr = new Manager($user);
       $this->_get_references();
       //die(var_dump(BBN_APP_PATH, $this->references));
-      if ( is_dir(\bbn\Mvc::getAppPath()) && is_file(\bbn\Mvc::getAppPath().'plugins/appui-task/reference.php') ){
-        $f = include(\bbn\Mvc::getAppPath().'plugins/appui-task/reference.php');
-        if ( is_callable($f) ){
+      $mvc = Mvc::getInstance();
+      if (is_dir(Mvc::getAppPath()) && is_file(Mvc::getAppPath().'plugins/appui-task/reference.php') ){
+        $f = include(Mvc::getAppPath().'plugins/appui-task/reference.php');
+        if (is_callable($f)) {
           $this->template = $f;
         }
       }
     }
     $this->columns = array_keys($this->db->getColumns('bbn_tasks'));
-    $this->noteCls = new \bbn\Appui\Note($this->db);
+    $this->noteCls = new Note($this->db);
   }
 
   public static function catCorrespondances(){
-    if ( $opt = bbn\Appui\Option::getInstance() ){
+    if ( $opt = Option::getInstance() ){
       $cats = self::getOptionsTree('cats');
       $res = [];
       $opt->map(function ($a) use (&$res){
@@ -233,8 +247,8 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function translateLog(array $log){
-    $opt = bbn\Appui\Option::getInstance();
-    $user = bbn\User::getInstance();
+    $opt = Option::getInstance();
+    $user = User::getInstance();
     if ( $opt && $user && isset($log['action'], $log['id_user']) ){
       $type = explode('_', $opt->code($log['action']));
       $action = $user->getName($this->mgr->getUser($log['id_user'])).' '.$opt->text($log['action']);
@@ -245,7 +259,7 @@ class Task extends bbn\Models\Cls\Db
         switch ( $type[0] ){
           case 'deadline':
             foreach ( $log['value'] as $v ){
-              array_push($values, bbn\Date::format($v, 's'));
+              array_push($values, Date::format($v, 's'));
             }
             break;
           case 'title':
@@ -255,7 +269,7 @@ class Task extends bbn\Models\Cls\Db
             $values = $log['value'];
             break;
           case 'comment':
-            array_push($values, bbn\Str::cut($this->db->getOne("
+            array_push($values, Str::cut($this->db->getOne("
             SELECT content
             FROM bbn_notes_versions
             WHERE id_note = ?
@@ -264,7 +278,7 @@ class Task extends bbn\Models\Cls\Db
               $log['value'][0]), 80));
             break;
           case 'role':
-            if ( ($user = bbn\User::getInstance()) && isset($log['value'][0], $log['value'][1]) ){
+            if ( ($user = User::getInstance()) && isset($log['value'][0], $log['value'][1]) ){
               $values[0] = $user->getName($this->mgr->getUser($log['value'][0]));
               $values[1] = $opt->text($log['value'][1]);
             }
@@ -381,7 +395,7 @@ class Task extends bbn\Models\Cls\Db
     if (!empty($this->getPrice($id))) {
       $lastChangePrice = $this->getPriceLog($id) ?: null;
       if (!empty($lastChangePrice)
-        && \bbn\Str::isJson($lastChangePrice['value'])
+        && Str::isJson($lastChangePrice['value'])
       ) {
         $lastChangePrice['value'] = \json_decode($lastChangePrice['value'], true);
         if (\is_array($lastChangePrice['value'])) {
@@ -390,7 +404,7 @@ class Task extends bbn\Models\Cls\Db
       }
       $approved = $this->getApprovedLog($id) ?: null;
       if (!empty($approved)
-        && \bbn\Str::isJson($approved['value'])
+        && Str::isJson($approved['value'])
       ) {
         $approved['value'] = \json_decode($approved['value'], true);
         if (\is_array($approved['value'])) {
@@ -434,8 +448,8 @@ class Task extends bbn\Models\Cls\Db
       'priority' => 'priority'
     ];
     if ( !isset($orders_ok[$order]) ||
-      !bbn\Str::isInteger($limit, $start) ||
-      (!\is_null($parent) && !bbn\Str::isInteger($parent))
+      !Str::isInteger($limit, $start) ||
+      (!\is_null($parent) && !Str::isInteger($parent))
     ){
       return false;
     }
@@ -488,7 +502,7 @@ class Task extends bbn\Models\Cls\Db
     GROUP BY bbn_tasks_roles.id_task
     LIMIT $start, $limit";
 
-    $opt = bbn\Appui\Option::getInstance();
+    $opt = Option::getInstance();
     $res = $this->db->getRows($sql, hex2bin($id_user));
     foreach ( $res as $i => $r ){
       $res[$i]['hasChildren'] = $r['num_children'] ? true : false;
@@ -516,7 +530,7 @@ class Task extends bbn\Models\Cls\Db
       'state' => 'state',
       'priority' => 'priority'
     ];
-    if ( !isset($orders_ok[$order]) || !bbn\Str::isInteger($limit, $start) ){
+    if ( !isset($orders_ok[$order]) || !Str::isInteger($limit, $start) ){
       return false;
     }
     $dir = strtolower($dir) === 'asc' ? 'ASC' : 'DESC';
@@ -554,7 +568,7 @@ class Task extends bbn\Models\Cls\Db
     GROUP BY bbn_tasks.id
     LIMIT $start, $limit";
 
-    $opt = bbn\Appui\Option::getInstance();
+    $opt = Option::getInstance();
     $res = $this->db->getRows($sql, "%$search%");
     /*
     foreach ( $res as $i => $r ){
@@ -581,7 +595,7 @@ class Task extends bbn\Models\Cls\Db
     foreach ( $all as $a ){
       array_push($res, [
         'id' => $a['id'],
-        'text' => $a['title'].' ('.bbn\Date::format($a['first']).'-'.bbn\Date::format($a['last']).')',
+        'text' => $a['title'].' ('.Date::format($a['first']).'-'.Date::format($a['last']).')',
         'is_parent' => $a['num_children'] ? true : false
       ]);
     }
@@ -927,7 +941,7 @@ class Task extends bbn\Models\Cls\Db
         if ( strpos($w[1], 'IS ') === 0 ){
           $query .= " AND ".$fields['dates'][$w[0]]." $w[1] ";
         }
-        else if ( bbn\Date::validateSQL($w[2]) ){
+        else if ( Date::validateSQL($w[2]) ){
           if ( $w[0] !== 'deadline' ){
             $having .= " AND DATE(".$fields['dates'][$w[0]].") $w[1] ? ";
             array_push($args2, $w[2]);
@@ -972,7 +986,7 @@ class Task extends bbn\Models\Cls\Db
         JOIN bbn_tasks_roles AS user_role
           ON user_role.id_task = bbn_tasks.id";
           }
-          else if ( ($w[0] === 'my_group') && ($usr = bbn\User::getInstance()) ){
+          else if ( ($w[0] === 'my_group') && ($usr = User::getInstance()) ){
             $usr_table = $usr->getTables()['users'];
             $usr_fields = $usr->getFields('users');
             $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
@@ -1051,8 +1065,8 @@ class Task extends bbn\Models\Cls\Db
     }
 
     $data = $this->db->getRows($sql, $args);
-    /** @var bbn\User $user */
-    $user = bbn\User::getInstance();
+    /** @var User $user */
+    $user = User::getInstance();
     foreach ( $data as $i => $d ){
       if ( $this->template ){
         if ( $d['reference'] ){
@@ -1119,7 +1133,7 @@ class Task extends bbn\Models\Cls\Db
         if ( strpos($w[1], 'IS ') === 0 ){
           $query .= " AND ".$fields['dates'][$w[0]]." $w[1] ";
         }
-        else if ( bbn\Date::validateSQL($w[2]) ){
+        else if ( Date::validateSQL($w[2]) ){
           if ( $w[0] !== 'deadline' ){
             $having .= " AND DATE(".$fields['dates'][$w[0]].") $w[1] ? ";
             array_push($args2, $w[2]);
@@ -1164,7 +1178,7 @@ class Task extends bbn\Models\Cls\Db
         JOIN bbn_tasks_roles AS user_role
           ON user_role.id_task = bbn_tasks.id";
           }
-          else if ( ($w[0] === 'my_group') && ($usr = bbn\User::getInstance()) ){
+          else if ( ($w[0] === 'my_group') && ($usr = User::getInstance()) ){
             $usr_table = $usr->getTables()['users'];
             $usr_fields = $usr->getFields('users');
             $query .= " AND `".$usr_table."`.`".$usr_fields['id_group']."` = ? ";
@@ -1219,8 +1233,8 @@ class Task extends bbn\Models\Cls\Db
     }
 
     $data = $this->db->getRows($sql, $args);
-    /** @var bbn\User $user */
-    $user = bbn\User::getInstance();
+    /** @var User $user */
+    $user = User::getInstance();
     foreach ( $data as $i => $d ){
       if ( $this->template ){
         if ( $d['reference'] ){
@@ -1285,8 +1299,8 @@ class Task extends bbn\Models\Cls\Db
   public function infoRoles($id){
     $r = [];
     if ($roles = self::getOptions('roles')) {
-      $userCfg = bbn\User::getInstance()->getClassCfg();
-      $optCfg = bbn\Appui\Option::getInstance()->getClassCfg();
+      $userCfg = User::getInstance()->getClassCfg();
+      $optCfg = Option::getInstance()->getClassCfg();
       $all = $this->db->rselectAll([
         'table' => 'bbn_tasks_roles',
         'fields' => [],
@@ -1325,7 +1339,7 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function hasRole($id_task, $id_user){
-    if ( $opt = bbn\Appui\Option::getInstance() ){
+    if ( $opt = Option::getInstance() ){
       $r = $this->db->selectOne('bbn_tasks_roles', 'role', ['id_task' => $id_task, 'id_user' => $id_user]);
       if ( $r ){
         return $opt->code($r);
@@ -1336,7 +1350,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getComments($id_task){
     if ( $this->exists($id_task) ){
-      $note = new \bbn\Appui\Note($this->db);
+      $note = new Note($this->db);
       $ids = $this->getCommentsIds($id_task);
       $r = [];
       foreach ( $ids as $id_note ){
@@ -1349,7 +1363,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function getComment($id_task, $id_note){
     if ( $this->exists($id_task) ){
-      $note = new \bbn\Appui\Note($this->db);
+      $note = new Note($this->db);
       return $note->get($id_note);
     }
     return false;
@@ -1378,11 +1392,11 @@ class Task extends bbn\Models\Cls\Db
 
   public function comment($id_task, array $cfg){
     if ( $this->exists($id_task) && !empty($cfg) ){
-      $note = new \bbn\Appui\Note($this->db);
+      $note = new Note($this->db);
       $r = $note->insert(
         (empty($cfg['title']) ? '' : $cfg['title']),
         (empty($cfg['text']) ? '' : $cfg['text']),
-        \bbn\Appui\Note::getOptionId('tasks', 'types')
+        Note::getOptionId('tasks', 'types')
       );
       if ( $r ){
         $this->db->insert('bbn_tasks_notes', [
@@ -1394,7 +1408,7 @@ class Task extends bbn\Models\Cls\Db
           $extension = '';
           $length = 0;
           foreach ( $cfg['files'] as $f ){
-            $ext = \bbn\Str::fileExt($f, true);
+            $ext = Str::fileExt($f, true);
             if (
               (\strlen($ext[0]) < $length) ||
               ($ext[1] !== $extension) ||
@@ -1410,7 +1424,7 @@ class Task extends bbn\Models\Cls\Db
         }
         if ( !empty($cfg['links']) ){
           foreach ( $cfg['links'] as $f ){
-            $ext = \bbn\Str::fileExt($f['image'], true);
+            $ext = Str::fileExt($f['image'], true);
             if ( !preg_match('/_h[\d]+/i', substr($ext[0], 0)) ){
               $note->addMedia(
                 $r,
@@ -1434,7 +1448,7 @@ class Task extends bbn\Models\Cls\Db
       $data = [
         'id_task' => $id_task,
         'id_user' => $this->id_user,
-        'action' => \bbn\Str::isUid($action) ? $action : $this->idAction($action),
+        'action' => Str::isUid($action) ? $action : $this->idAction($action),
         'value' => empty($value) ? '' : json_encode($value),
         'chrono' => empty($this->date) ? microtime(true) : number_format((float)strtotime($this->date), 4, '.', '')
       ];
@@ -1451,7 +1465,7 @@ class Task extends bbn\Models\Cls\Db
         return $a !== $data['id_user'];
       }));
       if (!empty($users)) {
-        $notif = new bbn\Appui\Notification($this->db);
+        $notif = new Notification($this->db);
         return $notif->insert($title, $text, null, $users, true);
       }
     }
@@ -1470,13 +1484,13 @@ class Task extends bbn\Models\Cls\Db
 
   public function addRole($id_task, $role, $id_user = null){
     if ( $this->exists($id_task) ){
-      if ( !bbn\Str::isUid($role) ){
+      if ( !Str::isUid($role) ){
         /*if ( substr($role, -1) !== 's' ){
           $role .= 's';
         }*/
         $role = $this->idRole($role);
       }
-      if ( bbn\Str::isUid($role) && ($id_user || $this->id_user) ){
+      if ( Str::isUid($role) && ($id_user || $this->id_user) ){
         if ( $this->db->insert('bbn_tasks_roles', [
           'id_task' => $id_task,
           'id_user' => $id_user ?: $this->id_user,
@@ -1518,21 +1532,21 @@ class Task extends bbn\Models\Cls\Db
   }
 
   public function setUser(string $id_user){
-    if ( \bbn\Str::isUid($id_user) ){
+    if ( Str::isUid($id_user) ){
       $this->id_user = $id_user;
     }
     return $this; 
   }
 
   public function unsetUser(){
-    if ( $user = bbn\User::getInstance() ){
+    if ( $user = User::getInstance() ){
       $this->id_user = $user->getId();
     }
     return $this;
   }
 
   public function insert(array $cfg, bool $addRole = true){
-    if (($opt = bbn\Appui\Option::getInstance())
+    if (($opt = Option::getInstance())
       && ($idType = $opt->fromCode('tasks', 'types', 'note', 'appui'))
       && isset($cfg['title'], $cfg['type'])
       && ($idNote = $this->noteCls->insert($cfg['title'], $cfg['content'] ?? '', $idType))
@@ -1770,7 +1784,7 @@ class Task extends bbn\Models\Cls\Db
 
   public function approve(string $id, bool $approveChildren = true, bool $approveParent = true){
     if ($this->exists($id)
-      && ($perm = \bbn\User\Permissions::getInstance())
+      && ($perm = Permissions::getInstance())
       && ($currentState = $this->getState($id))
       && ($unapproved = $this->idState('unapproved'))
       && ($currentState === $unapproved)
