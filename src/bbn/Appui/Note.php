@@ -465,11 +465,11 @@ class Note extends DbCls
       $new_note = [];
       $new_version = [];
       foreach ($props as $p) {
-        if ($cfg[$p] != $old[$p]) {
+        if (isset($cfg[$p]) && ($cfg[$p] != ($old[$p] ?? ''))) {
           if (in_array($p, ['content', 'title', 'excerpt'])) {
             $new_version[$p] = $cfg[$p];
           }
-          else {
+          elseif (isset($cfg[$p])) {
             $new_note[$p] = $cfg[$p];
           }
         }
