@@ -7,6 +7,7 @@ use bbn\X;
 use bbn\Str;
 use bbn\User;
 use bbn\Mvc;
+use bbn\Tpl;
 use bbn\File\Dir;
 use bbn\User\Preferences;
 use bbn\User\Permissions;
