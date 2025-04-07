@@ -53,7 +53,12 @@ class Entity
     if ($this->fields['easy_id']) {
       if (Str::isInteger($id)) {
         $this->easyId = $id;
-        $this->id = $this->entities->selectOne($this->fields['id'], [$this->fields['easy_id'] => $id]);
+        if ($uid = $this->entities->selectOne($this->fields['id'], [$this->fields['easy_id'] => $id])) {
+          $this->id = $uid;
+        }
+        else {
+          throw new Exception(X::_("The entity %s does not exist", $id));
+        }
       }
       elseif ($this->entities->exists($id)) {
         $this->easyId = $this->entities->selectOne($this->fields['easy_id'], [$this->fields['id'] => $id]);
