@@ -2,6 +2,7 @@
 namespace bbn;
 
 use bbn\File\System;
+use bbn\File\Dir;
 
 /**
  * A container of tools.
