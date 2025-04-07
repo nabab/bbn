@@ -50,7 +50,7 @@ trait Optional
       $justDefined = false;
       if (!\defined("BBN_APPUI")) {
         $justDefined = true;
-        \define('BBN_APPUI', $opt->fromCode('appui', 'plugins'));
+        \define('BBN_APPUI', $opt->fromCode('appui'));
       }
 
       if (!$path) {
