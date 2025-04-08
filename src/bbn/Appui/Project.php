@@ -548,7 +548,7 @@ class Project extends DbCls
         unset($item);
       }
 
-      $this->cacheSet($this->id, 'project_info', $info, 3600);
+      $this->cacheSet($this->id, 'project_info', $info, 3600*24);
       $this->projectInfo = $info;
       return $info;
     }

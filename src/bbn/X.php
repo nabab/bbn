@@ -276,6 +276,22 @@ class X
     }
   }
 
+  public static function logException(Exception $exception): void
+  {
+    if ($exception->getFile() === __FILE__) {
+      return;
+    }
+
+    self::logError(
+      $exception->getCode(),
+      $exception->getMessage(),
+      $exception->getFile(),
+      $exception->getLine()
+    );
+
+    throw $exception;
+  }
+
 
   /**
    * Check if an array or an object has the given property
