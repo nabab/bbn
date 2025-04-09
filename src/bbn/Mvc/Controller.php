@@ -1261,7 +1261,7 @@ class Controller implements Api
    *
    * @return array|null
    */
-  public function getSubpluginModel(string $path, array $data = [], string|null $plugin = null, string $subplugin, int $ttl = 0)
+  public function getSubpluginModel(string $path, array $data, string|null $plugin, string $subplugin, int $ttl = 0): ?array
   {
     return $this->_mvc->getSubpluginModel($path, $data, $this, $plugin ?: $this->getPlugin(), $subplugin, $ttl);
   }
@@ -1276,7 +1276,7 @@ class Controller implements Api
    *
    * @return bool
    */
-  public function hasSubpluginModel(string $path, string $plugin, string $subplugin)
+  public function hasSubpluginModel(string $path, string $plugin, string $subplugin): bool
   {
     return $this->_mvc->hasSubpluginModel(...\func_get_args());
   }
@@ -1370,7 +1370,7 @@ class Controller implements Api
   public function combo(
       string|null $title = null,
       $data = null,
-      int $ttl = null,
+      int|null $ttl = null,
       string $path = ''
   ): self
   {
@@ -1403,7 +1403,7 @@ class Controller implements Api
       $model = $this->data;
     }
 
-    $this->obj->css = $this->getLess($path, false);
+    $this->obj->css = $this->getLess($path);
     if ($new_title = $this->retrieveVar($title)) {
       $this->setTitle($new_title);
     }

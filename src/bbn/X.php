@@ -1,6 +1,8 @@
 <?php
 namespace bbn;
 
+use Exception;
+use Throwable;
 use bbn\File\System;
 use bbn\File\Dir;
 
@@ -16,8 +18,6 @@ use bbn\File\Dir;
  * @todo Stop to rely only on sqlite and offer file-based or any db-based solution.
  * @todo Look into the check function and divide it
  */
-
-use Exception;
 
 
 class X
@@ -276,20 +276,20 @@ class X
     }
   }
 
-  public static function logException(Exception $exception): void
+  public static function logException(Throwable $err): void
   {
-    if ($exception->getFile() === __FILE__) {
+    if ($err->getFile() === __FILE__) {
       return;
     }
 
     self::logError(
-      $exception->getCode(),
-      $exception->getMessage(),
-      $exception->getFile(),
-      $exception->getLine()
+      $err->getCode(),
+      $err->getMessage(),
+      $err->getFile(),
+      $err->getLine()
     );
 
-    throw $exception;
+    throw $err;
   }
 
 

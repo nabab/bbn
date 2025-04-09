@@ -121,7 +121,8 @@ trait Plugin
     if ($pluginAlias && ($o['id_alias'] === $pluginAlias)) {
       $st = '';
       while ($o && ($o['id_alias'] !== $pluginsAlias)) {
-        $st = $o['code'] . ($st ? '-' . $st : '');
+        $code = $o['code'] ?: $o['alias']['code'];
+        $st = $code . ($st ? '-' . $st : '');
         $o = $o['id_parent'] !== $o['id'] ? $this->option($o['id_parent']) : null;
       }
 
@@ -136,10 +137,11 @@ trait Plugin
     $subpluginAlias = $this->getSubpluginTemplateId();
     $pluginsAlias = $this->getPluginsTemplateId();
     $o = $this->option($id);
+    $code = $o['code'] ?: $o['alias']['code'];
     if ($subpluginAlias && ($o['id_alias'] === $subpluginAlias)) {
       $st = '';
       while ($o && ($o['id_alias'] !== $pluginsAlias)) {
-        $st = $o['code'] . ($st ? '-' . $st : '');
+        $st = $code . ($st ? '-' . $st : '');
         $o = $o['id_parent'] !== $o['id'] ? $this->option($o['id_parent']) : null;
       }
 

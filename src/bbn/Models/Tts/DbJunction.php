@@ -18,8 +18,6 @@ trait DbJunction
   use DbConfig;
   use DbTrait;
 
-  protected $dbTraitFilterCfg = [];
-
   protected $rootFilterCfg = [];
 
   private $dbJunctionStructure = [];

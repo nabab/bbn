@@ -18,6 +18,8 @@ trait DbTrait
    */
   protected $rootFilterCfg = [];
 
+  protected $dbTraitFilterCfg = [];
+
   /**
    * @var array Cached relations for the current table.
    */

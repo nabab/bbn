@@ -40,7 +40,7 @@ trait Template
 
       if (!isset($this->templateIds[$code])) {
         foreach ($this->getAliasItems($this->getTemplateTemplateId()) as $it) {
-          if ($tmp = $this->fromCode($code, $it['id'])) {
+          if ($tmp = $this->fromCode($code, $it)) {
             $this->templateIds[$code] = $tmp;
             break;
           }
@@ -341,6 +341,8 @@ trait Template
     }
     */
 
+    $this->unsetCfg($id);
+
     foreach ($this->items($idAlias) as $tid) {
       $tot += $this->applyChildTemplate($tid, $id);
     }
@@ -353,6 +355,7 @@ trait Template
     $tot = 0;
     $opt = $this->option($idSubtemplate);
     $foptions = $this->fullOptions($target);
+    $update = true;
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
       if ($o = X::getRow($foptions, ['code' => $opt['code']])) {
         if ($this->setAlias($o['id'], $idSubtemplate)) {
@@ -363,16 +366,35 @@ trait Template
         'id_parent' => $target,
         'id_alias' => $idSubtemplate
       ])) {
-        $o = $this->option($id);
+        $o = $this->nativeOption($id);
         $tot++;
+        $update = false;
       }
       else {
         throw new Exception(X::_("Impossible to add the option"));
       }
     }
+    if ($update && !empty($o)) {
+      $upd = [];
+      $f =& $this->class_cfg['arch']['options'];
+      if (!empty($o[$f['code']])) {
+        $upd[$f['code']] = null;
+      }
+      if (!empty($o[$f['text']])) {
+        $upd[$f['text']] = null;
+      }
+      if (!empty($o[$f['value']])) {
+        $upd[$f['value']] = null;
+      }
+      if (!empty($o[$f['cfg']])) {
+        $upd[$f['cfg']] = null;
+      }
 
-    if (!isset($o['code']) && !empty($opt['code'])) {
-      $this->setCode($o['id'], $opt['code']);
+      if (!empty($upd)) {
+        if ($this->db->update($this->class_cfg['table'], $upd, [$f['id'] => $o['id']])) {
+          $tot++;
+        }
+      }
     }
 
     foreach ($this->items($idSubtemplate) as $tid) {
@@ -480,4 +502,5 @@ trait Template
   {
     return $this->isPlugin($id) && ($this->getIdParent($id) === $this->root);
   }
+
 }

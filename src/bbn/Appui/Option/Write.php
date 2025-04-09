@@ -566,7 +566,7 @@ trait Write
         X::log([$o, $prop], "set_prop");
         $change = false;
         foreach ($prop as $k => $v){
-          if (!isset($o[$k]) || ($o[$k] !== $v)) {
+          if (!array_key_exists($k, $o) || ($o[$k] !== $v)) {
             $change = true;
             $o[$k]  = $v;
           }

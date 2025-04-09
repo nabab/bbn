@@ -1024,6 +1024,7 @@ class Dashboard extends Basic
             if ($id_plugin = $this->opt->getParentPlugin($o[$this->archOpt['id']])) {
               $plugin = $this->opt->option($id_plugin);
               $plugin_name = $this->opt->getPluginName($plugin['id']);
+              //X::ddump($plugin_name, $this->opt->getParentPlugin($o[$this->archOpt['id']]));
               if (($plugin_name !== constant('BBN_APP_NAME')) && !$mvc->hasPlugin($plugin_name)) {
                 continue;
               }

@@ -281,22 +281,22 @@ trait Code
    * @param string $id The options' ID
    * @return string|null The code value, null is none, false if option not found
    */
-  public function code(string $id): ?string
+  public function code(string $id, $followAlias = true): ?string
   {
     // Check if a valid ID is provided and the instance is properly initialized.
     if ($this->check() && Str::isUid($id)) {
+      $o = $this->nativeOption($id);
+      if (!$o['code'] && $followAlias && $o['id_alias']) {
+        $o = $this->nativeOption($o['id_alias']);
+      }
       // Retrieve the code for the given ID from the database.
-      $code = $this->db->selectOne(
-        $this->class_cfg['table'],
-        $this->fields['code'],
-        [
-          $this->fields['id'] => $id
-        ]
-      );
+      $code = $o['code'] ?? null;
+
       // If the retrieved code is an integer, cast it to an integer for consistency.
       if (!empty($code) && Str::isInteger($code)) {
         $code = (int)$code;
       }
+
       return $code;
     }
 

@@ -4813,7 +4813,7 @@ class OptionTest extends TestCase
       )
       ->andReturn(json_encode([
         'sortable' => true,
-        'show_alias' => true,
+        'relations' => 'alias',
         'show_icon' => true,
         'desc' => 'some description',
         'default_value' => 'some value'
@@ -4839,7 +4839,7 @@ class OptionTest extends TestCase
 
     $expected = [
       'sortable' => 1,
-      'show_alias' => 1,
+      'relations' => 'alias',
       'show_icon' => 1,
       'desc' => 'some description',
       'default_value' => 'some value',
@@ -4930,7 +4930,7 @@ class OptionTest extends TestCase
       'inherit_from' => $this->item3,
       'frozen' => 1,
       'show_code' => 0,
-      'show_alias' => 0,
+      'relations' => '',
       'show_value' => 0,
       'desc' => '',
       'inheritance' => '',
@@ -5015,7 +5015,7 @@ class OptionTest extends TestCase
       'inherit_from' => $this->item2,
       'frozen' => 1,
       'show_code' => 0,
-      'show_alias' => 0,
+      'relations' => '',
       'show_value' => 0,
       'show_icon' => 0,
       'allow_children' => 0,
@@ -5105,7 +5105,7 @@ class OptionTest extends TestCase
       'inherit_from' => $this->item2,
       'frozen' => 1,
       'show_code' => 0,
-      'show_alias' => 0,
+      'relations' => '',
       'show_value' => 0,
       'show_icon' => 0,
       'allow_children' => 0,
@@ -5183,7 +5183,7 @@ class OptionTest extends TestCase
 
     $expected = [
       'show_code' => 0,
-      'show_alias' => 0,
+      'relations' => '',
       'show_value' => 0,
       'show_icon' => 0,
       'sortable' => 0,
@@ -5268,7 +5268,7 @@ class OptionTest extends TestCase
       'inheritance' => 'default',
       'inherit_from' => $this->item3,
       'show_code' => 0,
-      'show_alias' => 0,
+      'relations' => '',
       'show_value' => 0,
       'show_icon' => 0,
       'sortable' => 0,
@@ -5314,7 +5314,7 @@ class OptionTest extends TestCase
       )
       ->andReturn($expected = [
         'show_code' => 0,
-        'show_alias' => 0,
+        'relations' => '',
         'show_value' => 0,
         'show_icon' => 0,
         'sortable' => 0,

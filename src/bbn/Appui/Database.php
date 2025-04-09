@@ -1103,7 +1103,7 @@ class Database extends bbn\Models\Cls\Cache
           $this->o->setCfg(
             $id_connections,
             [
-              'show_alias' => 1,
+              'relations' => 'alias',
               'notext' => 1,
               'id_root_alias' => self::getOptionId('connections', $id_db),
               'root_alias' => 'Connections'
@@ -1272,7 +1272,7 @@ class Database extends bbn\Models\Cls\Cache
             [
               'show_code' => 1,
               'show_value' => 1,
-              'show_alias' => 1,
+              'relations' => 'alias',
               'allow_children' => 1
             ]
           );
@@ -1363,7 +1363,7 @@ class Database extends bbn\Models\Cls\Cache
             $this->o->setCfg(
               $id, [
               'show_code' => 1,
-              'show_alias' => 1
+              'relations' => 'alias'
               ]
             );
             $num_keys++;

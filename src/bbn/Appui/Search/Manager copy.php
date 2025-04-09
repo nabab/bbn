@@ -21,8 +21,11 @@ class Manager
   /** @var string Unique identifier from POST */
   protected $uid;
 
-  /** @var array Array of search conditions from POST */
-  protected $conditions;
+  /** @var string The filter string */
+  protected $value;
+
+  /** @var string The time the request was sent */
+  protected $time;
 
   /** @var string Full path to the JSON conditions file */
   protected $filePath;
@@ -57,15 +60,17 @@ class Manager
    * @param string     $uid        Unique ID (usually from POST)
    * @param array      $conditions Array of conditions (usually from POST)
    */
-  public function __construct(Controller $ctrl, string $uid, array $conditions)
+  public function __construct(Controller $ctrl, string $uid, string $value, float $time = 0)
   {
     $this->ctrl       = $ctrl;
-    $this->conditions = $conditions;
+    $this->uid        = $uid;
+    $this->value      = $value;
     $this->logFileBase = $this->ctrl->pluginDataPath('appui-search') . "config/{$this->uid}";
     $this->filePath   = "{$this->logFileBase}.json";
     // Write the first condition into the JSON file
     $this->search = new Search($this->ctrl, []);
-    $this->setCondition($this->conditions[0]);
+    $this->time = $time;
+    $this->setValue();
   }
 
   /**
@@ -74,7 +79,7 @@ class Manager
   public function run()
   {
     // We need at least one condition to proceed
-    if (empty($this->conditions)) {
+    if (empty($this->value)) {
       return null;
     }
 
@@ -90,151 +95,131 @@ class Manager
     $timer = new Timer();
 
     // Read the (latest) condition
-    $condition = $this->readCondition();
-
+    $this->readValue();
     // Main loop: runs while the condition file still exists and matches our search value
-    while ($this->isOk($condition)) {
-      if (!empty($condition['value'])) {
-        // When value changes, reset some things
-        if ($currentValue !== $condition['value']) {
-          $currentValue = $condition['value'];
-          $this->removeWorker();
-          $totalResults = 0;
-          $step = 0;
-          $prev = $this->search->retrievePreviousResults($condition['value']);
-          if (!empty($prev['data'])) {
-            $prev['is_previous'] = true;
-            $prev['value'] = $condition['value'];
-            yield $prev;
-          }
+    while ($this->isOk()) {
+      // When value changes, reset some things
+      if ($currentValue !== $this->value) {
+        $currentValue = $this->value;
+        $this->removeWorker();
+        $totalResults = 0;
+        $step = 0;
+        $prev = $this->search->retrievePreviousResults($this->value);
+        if (!empty($prev['data'])) {
+          yield $prev;
         }
+      }
 
-        // If we haven't reached our global max
-        if ($totalResults < $this->maxResults) {
-          // Launch new workers while conditions allow
-          while (!is_null($step) && (count($this->workers) < $this->maxWorkers)) {
-            if (!$this->isOk($condition)) {
+      // If we haven't reached our global max
+      if ($totalResults < $this->maxResults) {
+        // Launch new workers while conditions allow
+        while (!is_null($step) && (count($this->workers) < $this->maxWorkers)) {
+          if ($result = $this->search->stream($this->value, $step)) {
+            $this->addWorker($result, $step);
+            $timer->start("step-$step");
+            //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
+            // If the condition file is removed externally, stop everything
+            if (!file_exists($this->filePath)) {
+              $this->removeWorker();
               break;
             }
-            if ($result = $this->search->stream($condition['value'], $step)) {
-              if (!$this->isOk($condition)) {
-                break;
-              }
-
-              $this->addWorker($result, $step);
-              $timer->start("step-$step");
-              //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
-              // If the condition file is removed externally, stop everything
-              if (!file_exists($this->filePath)) {
-                $this->removeWorker();
-                break;
-              }
-              // If there's a next step, move forward
-              elseif (!empty($result['next_step'])) {
-                $step = $result['next_step'];
-              }
-              else {
-                // No next step, end the worker-adding loop
-                $step = null;
-              }
-            }
-
-            break;
-          }
-
-          for ($j = 0; $j < count($this->workers); $j++) {
-            // Re-check the condition each time in case it changed
-            if ($this->isOk($condition)) {
-              $worker = $this->workers[$j];
-              $status = proc_get_status($worker['proc']);
-              //X::log("[STEP $worker[step]] " . microtime(true) . ' ' . $status['running'], 'searchTimings');
-
-              // If the process has finished
-              if (!$status['running']) {
-                //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
-                // Read data from stdout
-                $jsonOutput = stream_get_contents($worker['pipes'][1]);
-
-                if ($jsonOutput) {
-                  //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
-                  $ret  = json_decode($jsonOutput, true);
-
-                  // If results are found, stream them
-                  if (!empty($ret['num'])) {
-                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
-                    $data = json_decode(file_get_contents($worker['data']), true);
-                    // If we exceed the max, trim them
-                    /*
-                    if ($totalResults > $this->maxResults) {
-                      $excess = $totalResults - $this->maxResults;
-                      array_splice($ret['data']['results'], $newCount - $excess);
-                    }*/
-
-
-                    // Stream partial results
-                    yield [
-                      'value' => $condition['value'],
-                      'data' => $data['results'],
-                      'step' => $worker['step'],
-                      'item' => $ret['item'],
-                      'id'   => $worker['id']
-                    ];
-
-                  }
-                  else {
-                    //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');
-                  }
-                }
-                else {
-                  X::log($jsonOutput, 'searchError');
-                  X::log($status, 'searchError');
-                }
-
-                // Check worker-specific log file for errors
-                if (file_exists($worker['log'])) {
-                  $err = file_get_contents($worker['log']);
-                  if ($err) {
-                    $this->result['errors'][] = $err;
-                    yield ['error' => $err, 'command' => $worker['cmd']];
-                  }
-                }
-
-                // Remove this single worker from the array
-                $j--;
-                // Clean up the process and its log
-                $this->removeWorker($worker['uid']);
-              }
-              /*
-              else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {
-                X::log("[STEP $worker[step]] " . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');
-                $this->removeWorker($worker['uid']);
-              }*/
-              // If max reached, kill all workers
-              if ($totalResults > $this->maxResults) {
-                $this->removeWorker();
-                break;
-              }
+            // If there's a next step, move forward
+            elseif (!empty($result['next_step'])) {
+              $step = $result['next_step'];
             }
             else {
-              // The condition changed or file missing: re-read and stop
-              $condition = $this->readCondition();
+              // No next step, end the worker-adding loop
+              $step = null;
+            }
+          }
+
+          break;
+        }
+
+        // Check the workers and read any results
+        for ($j = 0; $j < count($this->workers); $j++) {
+          // Re-check the condition each time in case it changed
+          if ($this->isOk($this->value)) {
+            $worker = $this->workers[$j];
+            $status = proc_get_status($worker['proc']);
+            //X::log("[STEP $worker[step]] " . microtime(true) . ' ' . $status['running'], 'searchTimings');
+
+            // If the process has finished
+            if (!$status['running']) {
+              //X::log("[STEP $worker[step]] " . microtime(true) . ' NOT RUNNING', 'searchTimings');
+              // Read data from stdout
+              $jsonOutput = stream_get_contents($worker['pipes'][1]);
+
+              if ($jsonOutput) {
+                //X::log("[STEP $worker[step]] " . microtime(true) . ' JSON OK', 'searchTimings');
+                $ret  = json_decode($jsonOutput, true);
+
+                // If results are found, stream them
+                if (!empty($ret['num'])) {
+                  //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
+                  $data = json_decode(file_get_contents($worker['data']), true);
+                  // If we exceed the max, trim them
+                  /*
+                  if ($totalResults > $this->maxResults) {
+                    $excess = $totalResults - $this->maxResults;
+                    array_splice($ret['data']['results'], $newCount - $excess);
+                  }*/
+
+
+                  // Stream partial results
+                  yield [
+                    'data' => $data['results'],
+                    'step' => $worker['step'],
+                    'item' => $ret['item'],
+                    'id'   => $worker['id']
+                  ];
+
+                }
+                else {
+                  //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS NOT OK ' . json_encode($ret), 'searchTimings');
+                }
+              }
+              else {
+                X::log($jsonOutput, 'searchError');
+                X::log($status, 'searchError');
+              }
+
+              // Check worker-specific log file for errors
+              if (file_exists($worker['log'])) {
+                $err = file_get_contents($worker['log']);
+                if ($err) {
+                  $this->result['errors'][] = $err;
+                  yield ['error' => $err, 'command' => $worker['cmd']];
+                }
+              }
+
+              // Remove this single worker from the array
+              $j--;
+              // Clean up the process and its log
+              $this->removeWorker($worker['uid']);
+            }
+            /*
+            else if ($timer->measure('step-' . $worker['step']) > $worker['timeout']) {
+              X::log("[STEP $worker[step]] " . microtime(true) . ' TIMEOUT: ' . $worker['timeout'], 'searchTimings');
+              $this->removeWorker($worker['uid']);
+            }*/
+            // If max reached, kill all workers
+            if ($totalResults > $this->maxResults) {
               $this->removeWorker();
               break;
             }
           }
-
-          if (!count($this->workers) && is_null($step)) {
+          else {
+            // The condition changed or file missing: re-read and stop
+            $condition = $this->readCondition();
+            $this->removeWorker();
             break;
           }
         }
-        else {
-          $this->removeWorker();
-          $step = null;
+
+        if (!count($this->workers) && is_null($step)) {
+          break;
         }
-      }
-      else {
-        $this->removeWorker();
-        $step = null;
       }
 
       if (!count($this->workers) && is_null($step)) {
@@ -248,6 +233,12 @@ class Manager
 
       $loopCount++;
       $condition = $this->readCondition();
+    }
+
+    if (!$this->isOk()) {
+      // If the condition file changed or is missing, reload the condition and kill workers
+      $condition = $this->readCondition();
+      $this->removeWorker();
     }
 
     // End of main loop; clean up any remaining workers
@@ -266,45 +257,44 @@ class Manager
   }
 
   /**
-   * Initializes the condition file with the given data.
+   * Initializes the value file with the given data.
    *
-   * @param array $condition The condition data to store
+   * @param string $value The value of the filter string
    * @return bool
    */
-  public function setCondition(array $condition): bool
+  public function setValue(): bool
   {
-    $this->conditions = [$condition];
-    file_put_contents($this->filePath, json_encode($condition));
+    file_put_contents($this->filePath, json_encode(['time' => $this->time ?: 0, 'value' => $this->value]));
     return true;
   }
 
   /**
-   * Reads the current condition from the JSON file.
+   * Reads the current value from the JSON file.
    *
-   * @return array|null The condition data or null if file doesn't exist
+   * @return array|null The value data or null if file doesn't exist
    */
-  protected function readCondition(): ?array
+  protected function readValue(): ?array
   {
     if (!file_exists($this->filePath)) {
       return null;
     }
+
     return json_decode(file_get_contents($this->filePath), true);
   }
 
   /**
-   * Checks if the condition file still exists and matches the passed condition.
+   * Checks if the value file still exists and matches the passed value.
    *
-   * @param array|null $condition The reference condition
    * @return bool Returns false if file doesn't exist, 0 if changed, or 1 if OK
    */
-  protected function isOk(?array $condition): bool
+  protected function isOk(): bool
   {
-    if (!$condition || !file_exists($this->filePath) || connection_aborted()) {
+    if (!$this->value || !file_exists($this->filePath) || connection_aborted()) {
       return false;
     }
 
     $tmp = json_decode(file_get_contents($this->filePath), true);
-    if (!isset($tmp['value']) || $tmp['value'] !== $condition['value']) {
+    if (!isset($tmp['value']) || ($tmp['value'] !== $this->value)) {
       return false;
     }
 
