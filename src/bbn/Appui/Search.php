@@ -310,8 +310,8 @@ class Search extends Basic
             $result[] = X::mergeArrays($content, [
               'plugin' => $plugin,
               'file' => $item['file'] ?? null,
-              'timeout' => $content['timeout'] ?? $this->defaultTimeout,
               'name' => $content['name'] ?? null,
+              'timeout' => $content['timeout'] ?? $this->defaultTimeout,
               'signature' => $item['signature'] ?? null
             ]);
 
@@ -683,10 +683,13 @@ class Search extends Basic
             $previous_result['score'],
             $previous_result['signature'],
             $previous_result['match'],
+            $previous_result['timeout'],
+            $previous_result['search'],
             $previous_result['url']
           );
           $cfg          = $item['cfg'];
           $cfg['start'] = 0;
+          X::log($processed_cfg['filters'], 'searchArray');
           $cfg['where'] = [
             'logic' => 'AND',
             'conditions' => [
@@ -712,6 +715,7 @@ class Search extends Basic
             ]
           ];
 
+          X::log($cfg, 'searchArray');
           if ($add_to_top = $this->db->rselect($cfg)) {
             $add_to_top['component'] = $cp;
             $add_to_top['hash'] = $hash;
