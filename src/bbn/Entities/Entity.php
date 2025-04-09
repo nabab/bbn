@@ -98,6 +98,11 @@ class Entity
     return $this->id;
   }
 
+  public function getEasyId(): ?string
+  {
+    return $this->easyId;
+  }
+
   public function getWhere(): array
   {
     return $this->where;
