@@ -275,6 +275,7 @@ class Manager
   {
     $this->conditions = [$condition];
     file_put_contents($this->filePath, json_encode($condition));
+    clearstatcache();
     return true;
   }
 
