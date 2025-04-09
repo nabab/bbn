@@ -46,6 +46,16 @@ trait EntityTrait
   }
 
 
+  public function getEasyId(): ?int
+  {
+    if ($this->entity) {
+      return $this->entity()->getEasyId();
+    }
+
+    return null;
+  }
+
+
   public function check(): bool
   {
     if ($this->id_entity) {
