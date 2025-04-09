@@ -5,6 +5,7 @@ namespace bbn\Appui\Search;
 use bbn\X;
 use bbn\Str;
 use bbn\Appui\Search;
+use bbn\File\System;
 use bbn\Util\Timer;
 use bbn\Mvc\Controller;
 use Generator;
@@ -26,6 +27,9 @@ class Manager
 
   /** @var string Full path to the JSON conditions file */
   protected $filePath;
+
+  /** @var System File system object */
+  protected System $fs;
 
   /** @var string Base path for log files */
   protected $logFileBase;
@@ -59,10 +63,13 @@ class Manager
    */
   public function __construct(Controller $ctrl, string $uid, array $conditions)
   {
-    $this->ctrl       = $ctrl;
-    $this->conditions = $conditions;
-    $this->logFileBase = $this->ctrl->pluginDataPath('appui-search') . "config/{$this->uid}";
-    $this->filePath   = "{$this->logFileBase}.json";
+    $this->ctrl        = $ctrl;
+    $this->conditions  = $conditions;
+    $this->fs          = new System();
+    $this->uid         = $uid;
+    $this->logFileBase = $this->ctrl->pluginTmpPath('appui-search') . "config/{$this->uid}";
+    $this->filePath    = "{$this->logFileBase}.json";
+    $this->fs->createPath(dirname($this->logFileBase));
     // Write the first condition into the JSON file
     $this->search = new Search($this->ctrl, []);
     $this->setCondition($this->conditions[0]);
@@ -125,8 +132,9 @@ class Manager
               $timer->start("step-$step");
               //X::log("[STEP $step] " . microtime(true) . " ADDING SEARCH WORKER POUR $currentValue $step " . ($result['item']['name'] ?? $result['item']['file'] ?? '?'), 'searchTimings');
               // If the condition file is removed externally, stop everything
-              if (!file_exists($this->filePath)) {
+              if (!$this->fs->exists($this->filePath)) {
                 $this->removeWorker();
+                $step = null;
                 break;
               }
               // If there's a next step, move forward
@@ -162,7 +170,7 @@ class Manager
                   // If results are found, stream them
                   if (!empty($ret['num'])) {
                     //X::log("[STEP $worker[step]] " . microtime(true) . ' RESULTS OK', 'searchTimings');
-                    $data = json_decode(file_get_contents($worker['data']), true);
+                    $data = $this->fs->decodeContents($worker['data'], 'json', true);
                     // If we exceed the max, trim them
                     /*
                     if ($totalResults > $this->maxResults) {
@@ -191,12 +199,9 @@ class Manager
                 }
 
                 // Check worker-specific log file for errors
-                if (file_exists($worker['log'])) {
-                  $err = file_get_contents($worker['log']);
-                  if ($err) {
-                    $this->result['errors'][] = $err;
-                    yield ['error' => $err, 'command' => $worker['cmd']];
-                  }
+                if ($err = $this->fs->getContents($worker['log'])) {
+                  $this->result['errors'][] = $err;
+                  yield ['error' => $err, 'command' => $worker['cmd']];
                 }
 
                 // Remove this single worker from the array
@@ -254,8 +259,8 @@ class Manager
     $this->removeWorker();
 
     // Delete the condition file if it still exists
-    if (file_exists($this->filePath)) {
-      unlink($this->filePath);
+    if ($this->fs->exists($this->filePath)) {
+      $this->fs->delete($this->filePath);
     }
 
     // Record the loop iteration count or any other helpful info
@@ -274,9 +279,7 @@ class Manager
   public function setCondition(array $condition): bool
   {
     $this->conditions = [$condition];
-    file_put_contents($this->filePath, json_encode($condition));
-    clearstatcache();
-    return true;
+    return $this->fs->encodeContents($condition, $this->filePath, 'json');
   }
 
   /**
@@ -286,10 +289,8 @@ class Manager
    */
   protected function readCondition(): ?array
   {
-    if (!file_exists($this->filePath)) {
-      return null;
-    }
-    return json_decode(file_get_contents($this->filePath), true);
+    clearstatcache();
+    return $this->fs->decodeContents($this->filePath, 'json', true);
   }
 
   /**
@@ -300,12 +301,12 @@ class Manager
    */
   protected function isOk(?array $condition): bool
   {
-    if (!$condition || !file_exists($this->filePath) || connection_aborted()) {
+    $inFile = $this->readCondition();
+    if (!$condition || empty($inFile) || connection_aborted()) {
       return false;
     }
 
-    $tmp = json_decode(file_get_contents($this->filePath), true);
-    if (!isset($tmp['value']) || $tmp['value'] !== $condition['value']) {
+    if (!isset($inFile['value']) || $inFile['value'] !== $condition['value']) {
       return false;
     }
 
@@ -337,12 +338,8 @@ class Manager
           proc_terminate($w['proc']);
         }
         proc_close($w['proc']);
-        if (file_exists($w['log'])) {
-          unlink($w['log']);
-        }
-        if (file_exists($w['data'])) {
-          unlink($w['data']);
-        }
+        $this->fs->delete($w['log']);
+        $this->fs->delete($w['data']);
       }
     }
   }
@@ -378,7 +375,7 @@ class Manager
     // Create and clear the log file
     $logFile = $this->logFileBase . '-' . $workerUid . '.log';
     //X::log("[STEP $step] " . microtime(true) . ' CREATING WORKER WITH FILE ' . $logFile, 'searchTimings');
-    file_put_contents($logFile, '');
+    $this->fs->putContents($logFile, '');
 
     // Attach the log file as stderr
     $descriptors = [

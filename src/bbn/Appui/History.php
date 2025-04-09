@@ -385,11 +385,11 @@ MYSQL;
   /**
    * @param string $table
    * @param string $id
-   * @param string|int $from_when
+   * @param string|float  $from_when
    * @param string|null $column
    * @return null|array
    */
-  public static function getNextUpdate(string $table, string $id, string|int $from_when, string|null $column = null)
+  public static function getNextUpdate(string $table, string $id, string|float  $from_when, string|null $column = null)
   {
     /** @todo To be redo totally with all the fields' IDs instead of the history column */
     if (
@@ -481,11 +481,11 @@ MYSQL;
   /**
    * @param string $table
    * @param string $id
-   * @param string|int $from_when
+   * @param string|float $from_when
    * @param string|null $column
    * @return null|array
    */
-  public static function getPrevUpdate(string $table, string $id, string|int $from_when, string|null $column = null): ?array
+  public static function getPrevUpdate(string $table, string $id, string|float $from_when, string|null $column = null): ?array
   {
     if (
       Str::checkName($table) &&
@@ -531,12 +531,12 @@ MYSQL;
 
   /**
    * @param string $table
-   * @param $from_when
+   * @param string|float $from_when
    * @param string $id
    * @param $column
    * @return bool|mixed
    */
-  public static function getNextValue(string $table, string $id, $from_when, $column)
+  public static function getNextValue(string $table, string $id, string|float $from_when, $column)
   {
     if ($r = self::getNextUpdate($table, $id, $from_when, $column)) {
       return $r['ref'] ?: $r['val'];
@@ -547,11 +547,11 @@ MYSQL;
   /**
    * @param string $table
    * @param string $id
-   * @param $from_when
+   * @param string|float $from_when
    * @param $column
    * @return bool|mixed
    */
-  public static function getPrevValue(string $table, string $id, $from_when, $column)
+  public static function getPrevValue(string $table, string $id, string|float $from_when, $column)
   {
     if ($r = self::getPrevUpdate($table, $id, $from_when, $column)) {
       return $r['ref'] ?: $r['val'];
@@ -562,11 +562,11 @@ MYSQL;
   /**
    * @param string $table
    * @param string $id
-   * @param $when
+   * @param string|float $when
    * @param array $columns
    * @return array|null
    */
-  public static function getRowBack(string $table, string $id, $when, array $columns = []): ?array
+  public static function getRowBack(string $table, string $id, string|float $when, array $columns = []): ?array
   {
     if (!($when = self::validDate($when))) {
       self::_report_error("The date $when is incorrect", __CLASS__, __LINE__);
@@ -628,13 +628,13 @@ MYSQL;
   }
 
   /**
-   * @param $table
-   * @param $id
-   * @param $when
-   * @param $column
+   * @param string $table
+   * @param string $id
+   * @param string|float $when
+   * @param string $column
    * @return bool|mixed
    */
-  public static function getValBack(string $table, string $id, $when, $column)
+  public static function getValBack(string $table, string $id, string|float $when, string $column)
   {
     if ($row = self::getRowBack($table, $id, $when, [$column])) {
       return $row[$column];

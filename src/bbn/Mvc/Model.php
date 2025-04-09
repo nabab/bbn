@@ -90,13 +90,13 @@ class Model extends DbClass
    * Models are always recreated and reincluded, even if they have from the same path
    * They are all created from bbn\Mvc::get_model
    *
-   * @param null|bbn\Db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
+   * @param null|Db $db The database object in the first call and the controller path in the calls within the class (through Add)<em>(e.g books/466565 or html/home)</em>
    * @param array $info The full path to the model's file
    * @param Controller $ctrl The parent controller
    * @param Mvc $mvc The parent MVC
    * @throws \Exception
    */
-  public function __construct(Db $db = null, array $info, Controller $ctrl, Mvc $mvc)
+  public function __construct(null|Db $db, array $info, Controller $ctrl, Mvc $mvc)
   {
     if (isset($info['path']) && $this->checkPath($info['path'])) {
       if ($db) {
@@ -344,7 +344,7 @@ class Model extends DbClass
    * @param int $ttl
    * @return array|null
    */
-  public function getSubpluginModel($path, array $data = [], string|null $plugin = null, string $subplugin, int $ttl = 0): ?array
+  public function getSubpluginModel($path, array $data, string|null $plugin, string $subplugin, int $ttl = 0): ?array
   {
     return $this->_ctrl->getSubpluginModel(...\func_get_args());
   }

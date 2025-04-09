@@ -98,7 +98,7 @@ trait Common
   public function pluginTmpPath(string|null $plugin = null): ?string
   {
     if ($this->_plugin || $plugin) {
-      return $this->tmpPath().'plugins/'.$this->pluginName($plugin ?: $this->_plugin).'/';
+      return $this->tmpPath().'plugins/' . ($plugin ?: $this->pluginName($this->_plugin)) . '/';
     }
 
     return null;

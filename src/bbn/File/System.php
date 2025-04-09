@@ -574,6 +574,8 @@ class System extends Basic
         switch ($encoding) {
           case 'json':
             return json_decode($c, $as_array);
+          case 'csv':
+            return X::fromCsv($c);
           case 'yml':
           case 'yaml':
             return yaml_parse($c);
@@ -584,6 +586,45 @@ class System extends Basic
     }
 
     return null;
+  }
+
+
+  /**
+   * Returns the decoded content of the given file with a predefined or given decoding function
+   *
+   * @param mixed  $value   The value to encode
+   * @param string $file    The file to put the content in
+   * @param mixed  $decoder An encoding function or type
+   * @return bool
+   */
+  public function encodeContents(mixed $value, string $file, callable|string $encoder = 'json'): bool
+  {
+    $encoded = null;
+    if (is_callable($encoder)) {
+      $encoded = $encoder($value);
+    }
+    else {
+      switch ($encoder) {
+        case 'json':
+          $encoded = json_encode($value);
+          break;
+        case 'csv':
+          $encoded = X::ToCsv($value);
+          break;
+        case 'yml':
+        case 'yaml':
+          $encoded = yaml_emit($value);
+          break;
+        default:
+          $encoded = serialize($value);
+      }
+    }
+
+    if (is_string($encoded) && $this->isDir(X::dirname($file))) {
+      return (bool)$this->putContents($file, $encoded);
+    }
+
+    return false;
   }
 
 
