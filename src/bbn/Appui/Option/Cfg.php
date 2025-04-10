@@ -118,13 +118,13 @@ trait Cfg
     }
 
     // Set default values for mandatory fields.
-    $mandatories = ['show_code', 'relations', 'show_value', 'show_icon', 'sortable', 'allow_children', 'frozen'];
+    $mandatories = ['show_code', 'show_value', 'show_icon', 'sortable', 'allow_children', 'frozen'];
     foreach ($mandatories as $m) {
       $cfg[$m] = empty($cfg[$m]) ? 0 : 1;
     }
 
     // Set default values for fields that should be strings.
-    $mandatories = ['desc', 'inheritance', 'permissions', 'i18n', 'i18n_inheritance'];
+    $mandatories = ['desc', 'inheritance', 'relations', 'permissions', 'i18n', 'i18n_inheritance'];
     foreach ($mandatories as $m) {
       $cfg[$m] = empty($cfg[$m]) ? '' : $cfg[$m];
     }

@@ -1,0 +1,229 @@
+{
+  "packages": {
+    "bbn/appui-ai": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-api": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-billing": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-bookmark": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-cdn": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-chat": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-clipboard": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-component": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-config": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-core": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-crm": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-cron": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-dashboard": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-database": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-email": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-entity": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-event": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-explorer": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-finder": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-history": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-hr": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-i18n": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-ide": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-newide": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-mailing": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-meeting": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-menu": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-monitor": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-news": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-note": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-notification": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-option": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-project": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-search": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-server": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-social": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-spreadsheet": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-statistic": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-style": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-tag": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-task": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-usergroup": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-vcs": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/appui-write": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    },
+    "bbn/apst-espace-adherents": {
+      "dev-master": {
+        "composer": "composer.json"
+      }
+    }
+  }
+}
