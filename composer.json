@@ -54,7 +54,6 @@
     "pdepend/pdepend": "^2.16",
     "phpmd/phpmd": "^2.15",
     "friendsofphp/php-cs-fixer": "^3.73",
-    "phpunitgen/core": "^4.1",
     "mockery/mockery": "^1.6"
   },
   "autoload": {
