@@ -109,7 +109,7 @@ class Entity
   }
 
 
-  public function getField(string $field, bool $force = false): ?string
+  public function getField(string $field, bool $force = false): string|float|int|null
   {
     if ($force || !array_key_exists($field, $this->info)) {
       if (!in_array($field, $this->fields)) {

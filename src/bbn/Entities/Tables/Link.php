@@ -33,6 +33,11 @@ class Link extends EntityTable
         'id_option' => 'id_option',
         'cfg' => 'cfg',
       ],
+    ],
+    'relations' => [
+      'identity' => 'id_identity',
+      'address' => 'id_address',
+      'option' => 'id_option'
     ]
   ];
 
@@ -173,9 +178,11 @@ class Link extends EntityTable
 
   public function insert(array $data): ?string
   {
-    foreach (self::$linkCfg as $k => $v) {
-      if (!empty($v['required']) && !isset($data[$k])) {
-        throw new Exception(X::_("The field %s is required", $k));
+    $ccfg = $this->getClassCfg();
+    $rel = $ccfg['relations'];
+    foreach ($this->cfg as $k => $v) {
+      if (!empty($v['required']) && !isset($data[$this->fields[$rel[$k]]])) {
+        throw new Exception(X::_("The field %s is required", $this->fields[$rel[$k]]));
       }
     }
 
@@ -186,6 +193,24 @@ class Link extends EntityTable
 
     if (empty($data[$this->fields['id_entity']])) {
       throw new Exception(X::_("The entity is not defined"));
+    }
+
+    if ($this->cfg['single']
+      && ($ex = $this->get())
+    ) {
+      if ((!empty($this->cfg['identity']) && ($data[$this->fields[$rel['identity']]] !== $ex[$this->fields[$rel['identity']]]))
+        || (!empty($this->cfg['address']) && ($data[$this->fields[$rel['address']]] !== $ex[$this->fields[$rel['address']]]))
+        || (!empty($this->cfg['option']) && ($data[$this->fields[$rel['option']]] !== $ex[$this->fields[$rel['option']]]))
+      ) {
+        if ($this->dbTraitDelete($ex[$this->fields['id']])) {
+          return $this->dbTraitInsert($data);
+        }
+
+        return null;
+      }
+
+      return $this->dbTraitUpdate($ex[$this->fields['id']], $data) ? $ex[$this->fields['id']] : null;
+
     }
 
     return $this->dbTraitInsert($data);
