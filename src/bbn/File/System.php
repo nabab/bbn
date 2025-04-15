@@ -125,6 +125,11 @@ class System extends Basic
     }
   }
 
+  public function check(): bool
+  {
+    return (bool)$this->mode;
+  }
+
 
   public function sanitize(string $filename)
   {
@@ -1152,7 +1157,8 @@ class System extends Basic
       );
       if (!$this->cn) {
         $this->error = X::_("Could not connect through SSH.");
-      } elseif (X::hasProps($cfg, ['user', 'public', 'private'], true)) {
+      }
+      elseif (X::hasProps($cfg, ['user', 'public', 'private'], true)) {
         stream_set_blocking($this->cn, true);
         stream_set_chunk_size($this->cn, 1024 * 1024);
         /*
@@ -1175,7 +1181,8 @@ class System extends Basic
             return true;
           }
         }
-      } elseif (X::hasProps($cfg, ['user', 'pass'], true)) {
+      }
+      elseif (X::hasProps($cfg, ['user', 'pass'], true)) {
         try {
           ssh2_auth_password($this->cn, $cfg['user'], $this->_get_password($cfg));
         } catch (Exception $e) {

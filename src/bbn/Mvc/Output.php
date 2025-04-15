@@ -232,7 +232,7 @@ final class Output extends Basic {
         break;
 
       case 'js':
-        header('Content-type: application/javascript; charset=utf-8');
+        header('Content-type: text/javascript');
         echo $this->obj->content;
         break;
 

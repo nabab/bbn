@@ -202,11 +202,18 @@ class Controller implements Api
       while (ob_get_level()) {
         ob_flush();
       }
-      echo json_encode(
+      
+      $st = json_encode(
         is_string($data) ? 
           ['content' => $data]
           : (is_array($data) ? $data : ['success' => false])
-      ) . '<!---------------B-B-N--------------->';//str_repeat(' ', 8192);
+      ) . PHP_EOL;
+      $len = strlen($st);
+      if ($len < 8192) {
+        $st .= str_repeat(' ', 8192 - $len);
+      }
+
+      echo $st;
       flush();
     }
   }

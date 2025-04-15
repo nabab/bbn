@@ -1812,10 +1812,6 @@ class Appui
         }
           */
 
-        if (!defined('BBN_APPUI')) {
-          define('BBN_APPUI', $opt->fromCode('appui'));
-        }
-
         $opt->deleteCache(null);
       }
     }

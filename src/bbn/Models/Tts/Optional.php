@@ -47,17 +47,7 @@ trait Optional
         throw new Exception(X::_("There is no options object as needed by").' '.__CLASS__);
       }
 
-      $justDefined = false;
-      if (!\defined("BBN_APPUI")) {
-        $justDefined = true;
-        \define('BBN_APPUI', $opt->fromCode('appui'));
-      }
-
       if (!$path) {
-        if (!BBN_APPUI) {
-          throw new Exception('Impossible to find the option appui for ' . __CLASS__ . ($justDefined ? '' : 'not') . ' defined ' . ($opt->fromCode('appui', 'plugins') ?: '') . ($opt->fromCode('appui') ?: '') . ' ' . $opt->getRoot() . ' ' . $opt->getDefault() . X::getDump($opt->option($opt->getRoot())));
-        }
-
         $tmp = explode('\\', __CLASS__);
         $cls = strtolower(end($tmp));
         $path = ['options', $cls, 'appui'];
@@ -87,23 +77,14 @@ trait Optional
   protected static function initOptionalGlobal(Option $opt, array|null $path = null)
   {
     if (!self::$optional_is_init) {
-      if (!\defined("BBN_APPUI")) {
-        \define('BBN_APPUI', $opt->fromCode('appui'));
-      }
-
       if (!$path) {
-        if (!BBN_APPUI) {
-          X::log('Impossible to find the option appui for '.__CLASS__, 'errors');
-          return;
-        }
-
         $tmp                   = explode('\\', __CLASS__);
         $cls                   = end($tmp);
         $path                  = ['options', $cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
-            if (!self::$option_root_id) {
+      if (!self::$option_root_id) {
         X::log("Impossible to find the option $cls for ".__CLASS__, 'errors');
         return;
       }

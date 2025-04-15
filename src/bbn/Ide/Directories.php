@@ -47,7 +47,7 @@ class Directories {
   private function _ide_path(){
     if ( !self::$dev_path ){
       $this->_set_appui();
-      if ( $id = $this->options->fromCode(self::IDE_PATH, BBN_APPUI) ){
+      if ( $id = $this->options->fromCode(self::IDE_PATH, 'appui') ){
         self::setIdePath($id);
       }
     }
