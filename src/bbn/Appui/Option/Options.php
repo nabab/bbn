@@ -105,7 +105,19 @@ trait Options
         return $r;
       }
 
+
       $cf  =& $this->fields;
+      $cfg = $this->getCfg($id) ?: [];
+      $order = empty($cfg['sortable']) ? [
+          $this->fields['text'] => 'ASC',
+          $this->fields['code'] => 'ASC',
+          $this->fields['id'] => 'ASC',
+        ] : [
+          $this->fields['num'] => 'ASC',
+          $this->fields['text'] => 'ASC',
+          $this->fields['code'] => 'ASC',
+          $this->fields['id'] => 'ASC',
+        ];
       $opts = $this->db->rselectAll([
         'tables' => [$this->class_cfg['table']],
         'fields' => [
@@ -127,7 +139,7 @@ trait Options
           ]
         ],
         'where' => [$this->db->cfn($cf['id_parent'], $this->class_cfg['table']) => $id],
-        'order' => ['text' => 'ASC']
+        'order' => $order
       ]);
       $res = [];
       foreach ($opts as $o) {

@@ -73,13 +73,18 @@ trait Alias
 
       // Retrieve the class configuration and query the database to get all aliases.
       $cf = $this->getClassCfg();
-      if ($results = $this->db->rselectAll(
-        $cf['table'],
-        [],
-        [
-          $this->fields['id_alias'] => $id
-        ]
-      )) {
+      $order = empty($cf['sortable']) ? [
+        $this->fields['text'] => 'ASC',
+        $this->fields['code'] => 'ASC',
+        $this->fields['id'] => 'ASC',
+      ] : [
+        $this->fields['num'] => 'ASC',
+        $this->fields['text'] => 'ASC',
+        $this->fields['code'] => 'ASC',
+        $this->fields['id'] => 'ASC',
+      ];
+
+      if ($results = $this->db->rselectAll($cf['table'], [], [$this->fields['id_alias'] => $id], $order)) {
         // Iterate through each result and process the data.
         foreach ($results as $d) {
           // Convert code to integer if it's an integer string.

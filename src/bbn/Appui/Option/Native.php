@@ -334,6 +334,12 @@ trait Native
       }
     }
 
+    $order = [
+      $this->db->cfn($this->fields['text'], $tab) => 'ASC',
+      $this->db->cfn($this->fields['code'], $tab) => 'ASC',
+      $this->db->cfn($this->fields['id'], $tab) => 'ASC',
+    ];
+
     $cols['num_children'] = 'COUNT('.$db->escape($db->cfn($c['id'], $tab.'2', true)).')';
     $res = $this->db->rselectAll(
       [
@@ -358,9 +364,7 @@ trait Native
       ],
       'where' => $where,
       'group_by' => [$this->db->cfn($c['id'], $tab)],
-      'order' => [
-        $this->db->cfn($c['id'], $tab)
-      ],
+      'order' => $order,
       'limit' => $limit,
       'start' => $start
       ]
