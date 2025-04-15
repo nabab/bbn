@@ -142,7 +142,7 @@ class Link extends EntityTable
       return $this->dbTraitRselect([$this->fields['id'] => $id]);
     }
 
-    if ($this->cfg['single']) {
+    if (!empty($this->cfg['single'])) {
       $res = $this->dbTraitRselectAll([]);
       return $res ? $res[0] : null;
     }
@@ -195,7 +195,7 @@ class Link extends EntityTable
       throw new Exception(X::_("The entity is not defined"));
     }
 
-    if ($this->cfg['single']
+    if (!empty($this->cfg['single'])
       && ($ex = $this->get())
     ) {
       if ((!empty($this->cfg['identity']) && ($data[$this->fields[$rel['identity']]] !== $ex[$this->fields[$rel['identity']]]))
