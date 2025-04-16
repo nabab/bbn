@@ -450,33 +450,11 @@ trait Template
   public function isPartOfTemplates($id): bool
   {
     $templateId = $this->getMagicTemplateId();
-    $i = 0;
-    while ($idParent = $this->getIdParent($id)) {
-      if ($idParent === $id) {
-        return false;
-      }
-
-      if ($idParent === $templateId) {
-        if (!$i) {
-          return false;
-        }
-
-        return true;
-      }
-
-      if ($this->getIdAlias($idParent) === $templateId) {
-        if (!$i) {
-          return false;
-        }
-
-        return true;
-      }
-
-      $id = $idParent;
-      $i++;
+    if ($this->getIdAlias($id) === $templateId) {
+      return true;
     }
 
-    return false;
+    return $this->isInTemplate($id);
   }
 
 
@@ -484,6 +462,7 @@ trait Template
   {
     $templateId = $this->getMagicTemplateId();
     while ($idParent = $this->getIdParent($id)) {
+      // root
       if ($idParent === $id) {
         return false;
       }
