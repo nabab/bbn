@@ -358,6 +358,9 @@ trait Template
     $update = true;
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
       if ($o = X::getRow($foptions, ['code' => $opt['code'], 'id_alias' => null])) {
+        if ($o['id'] === $idSubtemplate) {
+          X::log([$idSubtemplate, $this->option($idSubtemplate), $foptions], 'optionsFail');
+        }
         if ($this->setAlias($o['id'], $idSubtemplate)) {
           $tot++;
         }
