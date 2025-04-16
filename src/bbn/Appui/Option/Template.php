@@ -353,11 +353,11 @@ trait Template
   public function applyChildTemplate($idSubtemplate, $target): int
   {
     $tot = 0;
-    $opt = $this->option($idSubtemplate);
-    $foptions = $this->fullOptions($target);
+    $opt = $this->nativeOption($idSubtemplate);
+    $foptions = $this->nativeOptions($target);
     $update = true;
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
-      if ($o = X::getRow($foptions, ['code' => $opt['code']])) {
+      if ($o = X::getRow($foptions, ['code' => $opt['code'], 'id_alias' => null])) {
         if ($this->setAlias($o['id'], $idSubtemplate)) {
           $tot++;
         }
