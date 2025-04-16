@@ -358,7 +358,7 @@ trait Template
     }
 
     $opt = $this->nativeOption($idSubtemplate);
-    $foptions = $this->nativeOptions($target);
+    $foptions = $this->rawOptions($target);
     $update = true;
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
       if ($o = X::getRow($foptions, ['code' => $opt['code'], 'id_alias' => null])) {

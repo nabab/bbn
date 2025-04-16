@@ -157,14 +157,7 @@ trait Native
   public function rawOptions($code = null): ?array
   {
     if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $res = [];
-      if ($its = $this->items($id)) {
-        foreach ($its as $it) {
-          $res[] = $this->db->rselect($this->class_cfg['table'], [], [$this->fields['id'] => $it]);
-        }
-      }
-
-      return $res;
+      return $this->db->rselectAll($this->class_cfg['table'], [], [$this->fields['id_parent'] => $id]);
     }
 
     return null;
