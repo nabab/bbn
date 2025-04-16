@@ -353,6 +353,10 @@ trait Template
   public function applyChildTemplate($idSubtemplate, $target): int
   {
     $tot = 0;
+    if ($idSubtemplate === $target) {
+      throw new Exception("WTF Chiara!!!");
+    }
+
     $opt = $this->nativeOption($idSubtemplate);
     $foptions = $this->nativeOptions($target);
     $update = true;
