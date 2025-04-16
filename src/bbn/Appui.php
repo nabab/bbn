@@ -1436,8 +1436,8 @@ class Appui
       'bbn_options',
       'id',
       [
-        'code' => 'root',
-        'id_parent' => null
+        ['field' => 'code', 'value' => 'root'],
+        ['field' => 'id_parent', 'exp' => 'id']
       ]
     );
 
@@ -1451,6 +1451,7 @@ class Appui
       )
     ) {
       $id = $db->lastId();
+      $db->update('bbn_options', ['id_parent' => $id], ['id' => $id]);
       $this->getOption()->deleteCache();
     }
 
