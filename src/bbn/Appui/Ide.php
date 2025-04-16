@@ -495,6 +495,7 @@ class Ide
   }
 
 
+  /** @todo Very bad!! */
   public function getDataPath(string $plugin = '')
   {
     if ($this->project !== 'apst-app') {
