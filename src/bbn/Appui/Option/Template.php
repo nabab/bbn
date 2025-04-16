@@ -363,7 +363,15 @@ trait Template
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
       if ($o = X::getRow($foptions, ['code' => $opt['code'], 'id_alias' => null])) {
         if ($o['id'] === $idSubtemplate) {
-          X::log([$idSubtemplate, $target, $this->option($target), $opt, $this->items($target), $this->db->rselectAll('bbn_options', [], ['id_parent' => $target]), $foptions], 'optionsFail');
+          X::log([
+            $idSubtemplate,
+            $target,
+            $this->option($target),
+            $opt,
+            $foptions,
+            $this->items($target),
+            $this->db->rselectAll('bbn_options', [], ['id_parent' => $target]), $foptions
+          ], 'optionsFail');
         }
         if ($this->setAlias($o['id'], $idSubtemplate)) {
           $tot++;
