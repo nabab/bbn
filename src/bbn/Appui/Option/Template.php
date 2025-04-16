@@ -449,7 +449,7 @@ trait Template
 
   public function isPartOfTemplates($id): bool
   {
-    $templateId = $this->getMagicTemplateId();
+    $templateId = $this->getTemplateTemplateId();
     if ($this->getIdAlias($id) === $templateId) {
       return true;
     }
@@ -460,7 +460,7 @@ trait Template
 
   public function isInTemplate(string $id): bool
   {
-    $templateId = $this->getMagicTemplateId();
+    $templateId = $this->getTemplateTemplateId();
     while ($idParent = $this->getIdParent($id)) {
       // root
       if ($idParent === $id) {
