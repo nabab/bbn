@@ -1518,7 +1518,10 @@ class Appui
           'text' => $this->_current['app_name'],
           'code' => $this->_current['app_name'],
         ]);
+        X::log(debug_backtrace());
+        throw $e;
       }
+
       $opt->deleteCache();
       $idPath = $opt->fromCode('app', 'path', $id_project);
       X::log($idPath, 'idPath');
