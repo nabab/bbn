@@ -1506,7 +1506,19 @@ class Appui
           'code' => $this->_current['app_name'],
         ]
       );
-      $opt->applyTemplate($id_project);
+      try {
+        $opt->applyTemplate($id_project);
+      }
+      catch (Exception $e) {
+        X::log($e->getMessage());
+        X::log([
+          'id' => $id_project,
+          'id_parent' => $id_project_list,
+          'id_alias' => ['project', 'templates', 'project', 'appui'],
+          'text' => $this->_current['app_name'],
+          'code' => $this->_current['app_name'],
+        ]);
+      }
       $opt->deleteCache();
       $idPath = $opt->fromCode('app', 'path', $id_project);
       X::log($idPath, 'idPath');
