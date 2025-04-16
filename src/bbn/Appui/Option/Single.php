@@ -94,6 +94,7 @@ trait Single
       if (Str::isUid($opt[$c['id_alias']]) && ($alias = $this->nativeOption($opt[$c['id_alias']]))) {
         $opt['alias'] = $alias;
         if ($opt[$c['id_alias']] === $id) {
+          X::log([$id, $opt, \func_get_args()], 'optionsAlias');
           throw new Exception(X::_("Impossible to have the same ID as ALIAS, check out ID").' '.$id);
         }
         else {
