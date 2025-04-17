@@ -272,10 +272,10 @@ class Note extends DbCls
     bool   $locked = false,
     string|null $id_parent = null,
     string|null $id_alias = null,
-    string $mime = '',
-    string $lang = '',
+    string|null $mime = '',
+    string|null $lang = '',
     string|null $id_option = null,
-    string $excerpt = '',
+    string|null $excerpt = '',
     bool   $pinned = false,
     bool   $important = false
   ): ?string
