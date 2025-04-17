@@ -598,7 +598,16 @@ ws ::= ([ \t\n] ws)?',
   /**
    * @throws Exception
    */
-  public function saveConversation($path, $date, $userFormat, $aiFormat, $prompt, $response) {
+  public function saveConversation(
+    string $path,
+    string $date,
+    string $userFormat,
+    string $aiFormat,
+    string $prompt,
+    string $response,
+    string $model = '',
+    null|array $cfg = null
+  ): array {
     $timestamp = time();
     $fs = new System();
     if ($fs->exists($path)) {
@@ -609,23 +618,30 @@ ws ::= ([ \t\n] ws)?',
       $jsonData = [];
   
     }
-    $jsonData[] = [
+
+    $d = [[
       "ai" => 0,
       "creation_date" => $date,
       "text" => $prompt,
       'id' => bin2hex(random_bytes(10)),
       'format' => $userFormat ?? 'textarea'
-    ];
-    $jsonData[] = [
+    ], [
       "ai" => 1,
       "creation_date" => $timestamp,
       "text" => $response,
       'id' => bin2hex(random_bytes(10)),
       'format' => $aiFormat ?? 'textarea'
-    ];
+    ]];
+    if ($model) {
+      $d[1]['model'] = $model;
+    }
+    if ($cfg) {
+      $d[1]['cfg'] = $cfg;
+    }
+    array_push($jsonData, ...$d);
     $jsonData = json_encode($jsonData);
     $fs->putContents($path, $jsonData);
-  
+    return $d;
   }
   
   
