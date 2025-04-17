@@ -415,7 +415,6 @@ ws ::= ([ \t\n] ws)?',
   public function getPrompts(bool $private = true): array
   {
     $where = [
-      'bbn_active' => 1,
     ];
     
     /*if ($private) {
