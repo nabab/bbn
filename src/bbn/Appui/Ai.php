@@ -352,43 +352,40 @@ ws ::= ([ \t\n] ws)?',
     if (!$prompt) {
       
       $max_tokens = 4000 - $tokenizer->count($input);
-      
-      $complete = $this->ai->chat(
-        [
-          "model" => $this->model,
-          "messages" => [
-            [
-              "role" => "user",
-              "content" => $input
-            ]
-          ],
-          "max_tokens" => $max_tokens,
+      $request = [
+        "model" => $this->model,
+        "messages" => [
+          [
+            "role" => "user",
+            "content" => $input
+          ]
         ],
-      );
+        "max_tokens" => $max_tokens,
+      ];
       
     } else {
       
       $max_tokens = 4000 - $tokenizer->count($input . $prompt);
-      
-      $complete = $this->ai->chat(
-        [
-          "model" => $this->model,
-          "messages" => [
-            [
-              "role" => "system",
-              "content" => $prompt
-            ],
-            [
-              "role" => "user",
-              "content" => $input
-            ]
+      $request = [
+        "model" => $this->model,
+        "messages" => [
+          [
+            "role" => "system",
+            "content" => $prompt
           ],
-          "max_tokens" => $max_tokens,
-        ]
-      );
+          [
+            "role" => "user",
+            "content" => $input
+          ]
+        ],
+        "max_tokens" => $max_tokens,
+      ];      
     }
 
-    $complete = json_decode($complete, true);
+    if ($complete = $this->ai->chat($request)) {
+      $complete = json_decode($complete, true);
+    }
+
     X::log([$prompt, $input, $complete], 'ai_logs');
     
     if (!$complete || !empty($complete['error'])) {
@@ -403,7 +400,9 @@ ws ::= ([ \t\n] ws)?',
     
     return [
       'success' => true,
-      'result' => $complete['choices'][0]['message']
+      'result' => $complete['choices'][0]['message'],
+      'response' => $complete,
+      'request' => $request
     ];
   }
   
