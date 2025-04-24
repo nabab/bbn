@@ -54,6 +54,7 @@ trait Native
           && \class_exists('\bbn\Appui\I18n')
           && !empty($opt[$this->fields['text']])
         ) {
+          /*
           try {
             $i18nCls = new I18n($this->db);
             if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
@@ -63,6 +64,7 @@ trait Native
           catch (Exception $e) {
 
           }
+          */
         }
         if (empty($locale)) {
           $this->setCache($id, __FUNCTION__, $opt);
