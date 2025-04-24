@@ -2994,7 +2994,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           if (!isset($res['available_fields'][$col])) {
             //$this->log($res);
             //$this->log(json_encode($res['available_fields'], JSON_PRETTY_PRINT));
-            X::hddump($this->tableFullName('versions'), $this->modelize('versions'), $this->getTables(), $this->getColumns('versions'));
             $this->error("Impossible to find the column $col", false);
             return null;
           }
