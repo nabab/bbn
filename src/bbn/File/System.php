@@ -1586,13 +1586,6 @@ class System extends Basic
   {
     if ($this->mode !== 'nextcloud') {
       if ($this->_is_file($source)) {
-        if ($this->mode === 'ssh') {
-          return $this->preventError(fn() => ssh2_sftp_copy($this->obj, substr($source, strlen($this->prefix)), substr($dest, strlen($this->prefix))));
-        }
-        elseif ($this->mode === 'ftp') {
-          return $this->preventError(fn() => ftp_copy($this->obj, substr($source, strlen($this->prefix)), substr($dest, strlen($this->prefix))));
-        }
-
         return $this->preventError(fn() => copy($source, $dest));
       }
       elseif ($this->_is_dir($source) && $this->_mkdir($dest)) {
