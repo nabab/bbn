@@ -8,6 +8,7 @@ use bbn\Appui\I18n as I18nCls;
 
 trait I18n
 {
+  private $i18nIsPrevented = false;
   /**
    * Returns translation of an option's text
    *
@@ -25,6 +26,12 @@ trait I18n
   public function itext($code = null): ?string
   {
     return $this->getTranslation($this->fromCode(\func_get_args()));
+  }
+
+
+  public function preventI18n(bool $prevent = true)
+  {
+    $this->i18nIsPrevented = $prevent;
   }
 
 
@@ -178,6 +185,8 @@ trait I18n
   }
 
 
+
+
   /**
    * Returns an array containing all options that have the property i18n set
    *
@@ -290,7 +299,7 @@ trait I18n
       if (empty($locale)) {
         $locale = $this->getTranslatingLocale($id);
       }
-      if (!empty($locale)) {
+      if (!empty($locale) && !$this->i18nIsPrevented) {
         $i18nCls = new I18nCls($this->db);
         return  $i18nCls->getTranslation($text, $originalLocale, $locale);
       }

@@ -69,7 +69,6 @@ trait Code
       $id_parent = array_pop($codes);
       $true_code = array_pop($codes);
       $enc_code  = $true_code ? base64_encode($true_code) : 'null';
-
       // Define the cache name based on the encoded code.
       $cache_name = 'get_code_' . $enc_code;
 

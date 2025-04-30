@@ -46,7 +46,7 @@ class I18n extends cacheCls
   {
     parent::__construct($db);
     $this->user    = User::getInstance();
-    $this->options = new Option($db);
+    $this->options = Option::getInstance();
     if (empty($code)) {
       if (\defined('BBN_APP_NAME')) {
         $code = CONSTANT('BBN_APP_NAME');
@@ -58,9 +58,11 @@ class I18n extends cacheCls
 
     $this->parser  = Translations::create($code);
 
+    $this->options->preventI18n();
     $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
+    $this->options->preventI18n(false);
     if (empty($this->id_project)) {
-      throw new Exception(X::_("Project's ID not found for code %s", $this->options->fromCode('project', 'appui')));
+      throw new Exception(X::_("Project's ID not found for code %s", $code));
     }
   }
 

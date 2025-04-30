@@ -49,12 +49,7 @@ trait Native
         $opt['code'] = (int)$opt['code'];
       }
       if ($opt) {
-        if (
-          !empty($locale)
-          && \class_exists('\bbn\Appui\I18n')
-          && !empty($opt[$this->fields['text']])
-        ) {
-          /*
+        if (!empty($locale) && !empty($opt[$this->fields['text']]) && !$this->i18nIsPrevented) {
           try {
             $i18nCls = new I18n($this->db);
             if ($trans = $i18nCls->getTranslation($opt[$this->fields['text']], $originalLocale, $locale)) {
@@ -64,11 +59,10 @@ trait Native
           catch (Exception $e) {
 
           }
-          */
         }
         if (empty($locale)) {
           $this->setCache($id, __FUNCTION__, $opt);
-        } else {
+        } else if (!$this->i18nIsPrevented) {
           $this->cacheSetLocale($id, $locale, __FUNCTION__, $opt);
         }
         return $opt;
