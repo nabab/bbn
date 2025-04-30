@@ -604,7 +604,7 @@ ws ::= ([ \t\n] ws)?',
     string $userFormat,
     string $aiFormat,
     string $prompt,
-    string $response,
+    ?string $response,
     string $model = '',
     null|array $cfg = null
   ): array {
