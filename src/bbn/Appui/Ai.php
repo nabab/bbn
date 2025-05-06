@@ -290,7 +290,7 @@ ws ::= ([ \t\n] ws)?',
    * @param string $response_type Response type
    * @return array Response array containing success flag and result or error message
    */
-  public function getPromptResponse(string $id_prompt, string $input, bool $insert = true): array
+  public function getPromptResponse(string $id_prompt, string $input, bool $insert = true, ?array $cfg = null): array
   {
     // check if input and id_prompt are not empty and not null
     if (empty($input) || empty($id_prompt)) {
@@ -311,11 +311,11 @@ ws ::= ([ \t\n] ws)?',
     }
     
     //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
-    $build_prompt = $this->buildPrompt($prompt);
+    $built_prompt = $this->buildPrompt($prompt);
     
-    X::log($build_prompt, 'ai_logs');
+    X::log($built_prompt, 'ai_logs');
     
-    $response = $this->request($build_prompt, $input);
+    $response = $this->request($built_prompt, $input, $cfg);
     if (!empty($response) && $insert) {
       $this->insertItem($id_prompt, $input, false);
       $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);
@@ -323,7 +323,7 @@ ws ::= ([ \t\n] ws)?',
     
     return [
       'success' => !isset($response['error']),
-      'input' => $build_prompt,
+      'input' => $built_prompt,
       'result' => $response['result'] ?? $response['error'],
     ];
     
@@ -335,7 +335,7 @@ ws ::= ([ \t\n] ws)?',
    * @param string $prompt Prompt string to send to the API
    * @return array Response array containing success flag and result or error message
    */
-  public function request(string | null $prompt , string $input): array
+  public function request(string | null $prompt , string $input, ?array $cfg = null): array
   {
     // check if prompt is not empty but can be null
     if (empty($prompt) && !is_null($prompt)) {
@@ -382,11 +382,26 @@ ws ::= ([ \t\n] ws)?',
       ];      
     }
 
+    if (is_array($cfg)) {
+      if (array_key_exists('temperature', $cfg)) {
+        $request['temperature'] = $cfg['temperature'];
+      }
+      if (array_key_exists('top_p', $cfg)) {
+        $request['top_p'] = $cfg['top_p'];
+      }
+      if (array_key_exists('frequency_penalty', $cfg)) {
+        $request['frequency_penalty'] = $cfg['frequency_penalty'];
+      }
+      if (array_key_exists('presence_penalty', $cfg)) {
+        $request['presence_penalty'] = $cfg['presence_penalty'];
+      }
+    }
+
     if ($complete = $this->ai->chat($request)) {
       $complete = json_decode($complete, true);
     }
 
-    X::log([$prompt, $input, $complete], 'ai_logs');
+    X::log(['request' => $request, 'prompt' => $prompt, 'input' => $input, 'complete' => $complete], 'ai_logs');
     
     if (!$complete || !empty($complete['error'])) {
       return [
