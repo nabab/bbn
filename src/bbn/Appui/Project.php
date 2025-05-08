@@ -1125,7 +1125,8 @@ class Project extends DbCls
   {
     $ids = [];
     $res = [];
-    $this->options->deleteCache($this->id, true);
+    // Why do we need to delete the cache here?
+    //$this->options->deleteCache($this->id, true);
     if ($this->check() && isset($this->id_langs)) {
       if ($ids = array_keys($this->options->options($this->id_langs))) {
         foreach ($ids as $i) {
