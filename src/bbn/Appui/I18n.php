@@ -19,6 +19,11 @@ use bbn\Appui\Project;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Cls\Cache as cacheCls;
 use Gettext\Translations;
+use Gettext\Scanner\PhpScanner;
+use Gettext\Scanner\JsScanner;
+use Gettext\Loader\PoLoader;
+use Gettext\Generator\MoGenerator;
+
 
 class I18n extends cacheCls
 {
@@ -35,6 +40,10 @@ class I18n extends cacheCls
   protected $options;
 
   protected $id_project;
+
+  protected $poLoader;
+
+  protected $moGenerator;
 
 
   /**
@@ -57,7 +66,8 @@ class I18n extends cacheCls
     }
 
     $this->parser  = Translations::create($code);
-
+    $this->poLoader = new PoLoader();
+    $this->moGenerator = new MoGenerator();
     $this->options->preventI18n();
     $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
     $this->options->preventI18n(false);
@@ -76,24 +86,24 @@ class I18n extends cacheCls
   public function analyzePhp(string $file): array
   {
     $res = [];
-    $php = file_get_contents($file);
-    if ($tmp = Translations::fromPhpCodeString(
-      $php, [
-      'functions' => [
-        '_' => 'gettext'
-      ],
-      'file' => $file
-      ]
-    )
-    ) {
-      foreach ($tmp->getIterator() as $r => $tr){
-        $res[] = $tr->getOriginal();
-      }
-
-      $this->parser->mergeWith($tmp);
+    $domain = $this->parser->getDomain();
+    $parser = Translations::create($domain);
+    $scanner = new PhpScanner($parser);
+    $scanner->setDefaultDomain($domain);
+    $scanner->setFunctions([
+      '_' => 'gettext'
+    ]);
+    $scanner->scanFile($file);
+    foreach ($parser->getIterator() as $tr){
+      $res[] = $tr->getOriginal();
     }
 
-    return array_unique($res);
+    $res = array_unique($res);
+    if (!empty($res)) {
+      $this->parser = $this->parser->mergeWith($parser);
+    }
+
+    return $res;
   }
 
 
@@ -106,75 +116,57 @@ class I18n extends cacheCls
   public function analyzeJs(string $file): array
   {
     $res = [];
-    $js  = file_get_contents($file);
-    if ($tmp = Translations::fromJsCodeString(
-      $js, [
-      'functions' => [
-        '_' => 'gettext',
-        'bbn._' => 'gettext'
-      ],
-      'file' => $file
-      ]
-    )
-    ) {
-      foreach ($tmp->getIterator() as $r => $tr){
-        $res[] = $tr->getOriginal();
-      }
-
-      $this->parser->mergeWith($tmp);
-    }
-
+    $domain = $this->parser->getDomain();
+    $parser = Translations::create($domain);
+    $scanner = new JsScanner($parser);
+    $scanner->setDefaultDomain($domain);
+    $scanner->setFunctions([
+      '_' => 'gettext',
+      'bbn._' => 'gettext'
+    ]);
+    $js = file_get_contents($file);
+    $scanner->scanFile($file);
     if (preg_match_all('/`([^`]*)`/', $js, $matches)) {
       foreach ($matches[0] as $st){
-        if ($tmp = Translations::fromVueJsString(
-          '<template>'.$st.'</template>', [
-          'functions' => [
-            '_' => 'gettext',
-            'bbn._' => 'gettext'
-          ],
-          'file' => $file
-          ]
-        )
-        ) {
-          foreach ($tmp->getIterator() as $r => $tr){
-            $res[] = $tr->getOriginal();
-          }
-
-          $this->parser->mergeWith($tmp);
-        }
+        $scanner->scanString($st, $file);
       }
     }
 
-    /*if($file === '/home/thomas/domains/apstapp2.thomas.lan/_appui/vendor/bbn/appui-task/src/components/tab/tracker/tracker.js'){
-      die(X::hdump($res, $js));
-    }*/
+    foreach ($parser->getIterator() as $tr){
+      $res[] = $tr->getOriginal();
+    }
 
-    return array_unique($res);
+    $res = array_unique($res);
+    if (!empty($res)) {
+      $this->parser = $this->parser->mergeWith($parser);
+    }
+
+    return $res;
   }
 
 
   public function analyzeJson(string $file): array
   {
     $res = [];
-    $js  = file_get_contents($file);
-    if ($tmp = Translations::fromJsCodeString(
-      $js, [
-      'functions' => [
-        '_' => 'gettext',
-        'bbn._' => 'gettext'
-      ],
-      'file' => $file
-      ]
-    )
-    ) {
-      foreach ($tmp->getIterator() as $r => $tr){
-        $res[] = $tr->getOriginal();
-      }
-
-      $this->parser->mergeWith($tmp);
+    $domain = $this->parser->getDomain();
+    $parser = Translations::create($domain);
+    $scanner = new JsScanner($parser);
+    $scanner->setDefaultDomain($domain);
+    $scanner->setFunctions([
+      '_' => 'gettext',
+      'bbn._' => 'gettext'
+    ]);
+    $scanner->scanFile($file);
+    foreach ($parser->getIterator() as $tr){
+      $res[] = $tr->getOriginal();
     }
 
-    return array_unique($res);
+    $res = array_unique($res);
+    if (!empty($res)) {
+      $this->parser = $this->parser->mergeWith($parser);
+    }
+
+    return $res;
   }
 
 
@@ -187,30 +179,32 @@ class I18n extends cacheCls
   public function analyzeHtml(string $file): array
   {
     $res = [];
-    $js  = file_get_contents($file);
-    if (Str::fileExt($file) === 'php') {
-      $re = '/\<{1}\?{1}(php){0,1}.*\?{1}\>{1}/m';
-      $js = preg_replace($re, '', $js);
-    }
-    $js = Str::removeComments($js);
-    if ($tmp = Translations::fromVueJsString(
-      '<template>'.$js.'</template>', [
-      'functions' => [
-        '_' => 'gettext',
-        'bbn._' => 'gettext'
-      ],
-      'file' => $file
-      ]
-    )
+    $js = trim(file_get_contents($file));
+    if ((Str::fileExt($file) === 'php')
+      && str_starts_with($js, '<?php')
     ) {
-      foreach ($tmp->getIterator() as $r => $tr){
-        $res[] = $tr->getOriginal();
-      }
-
-      $this->parser->mergeWith($tmp);
+      return $res;
     }
 
-    return array_unique($res);
+    $domain = $this->parser->getDomain();
+    $parser = Translations::create($domain);
+    $scanner = new PhpScanner($parser);
+    $scanner->setDefaultDomain($domain);
+    $scanner->setFunctions([
+      '_' => 'gettext',
+      'bbn._' => 'gettext'
+    ]);
+    $scanner->scanString($js, $file);
+    foreach ($parser->getIterator() as $tr){
+      $res[] = $tr->getOriginal();
+    }
+
+    $res = array_unique($res);
+    if (!empty($res)) {
+      $this->parser = $this->parser->mergeWith($parser);
+    }
+
+    return $res;
   }
 
 
@@ -288,7 +282,7 @@ class I18n extends cacheCls
 
   public function result()
   {
-    foreach ($this->parser->getIterator() as $r => $tr){
+    foreach ($this->parser->getIterator() as $tr){
       $this->translations[] = $tr->getOriginal();
     }
 
@@ -1766,8 +1760,8 @@ class I18n extends cacheCls
           \unlink($file.'mo');
         }
         if (\is_file($file.'po')
-          && ($translations = Translations::fromPoFile($file.'po'))
-          && !$translations->toMoFile($file.'mo')
+          && ($translations = $this->poLoader->loadFile($file.'po'))
+          && !$this->moGenerator->generateFile($translations, $file.'mo')
         ) {
           $success = false;
         }
