@@ -855,7 +855,7 @@ class I18n extends cacheCls
         'table' => $clsCfg['tables']['i18n_exp'],
         'on' => [
           'conditions' => [[
-            'field' => $this->db->cfn($this->fields('id'), $this->class_table),
+            'field' => $this->db->cfn($this->fields['id'], $this->class_table),
             'exp' => $this->db->cfn($clsCfg['arch']['i18n_exp']['id_exp'], $clsCfg['tables']['i18n_exp'])
           ], [
             'field' => $this->db->cfn($clsCfg['arch']['i18n_exp']['lang'], $clsCfg['tables']['i18n_exp']),
@@ -864,8 +864,8 @@ class I18n extends cacheCls
         ]
       ]],
       'where' => [
-        $this->db->cfn($this->fields('hash'), $this->class_table) => $this->hashText($idExpOrExp),
-        $this->db->cfn($this->fields('lang'), $this->class_table) => $originalLang
+        $this->db->cfn($this->fields['hash'], $this->class_table) => $this->hashText($idExpOrExp),
+        $this->db->cfn($this->fields['lang'], $this->class_table) => $originalLang
       ]
     ]);
   }
