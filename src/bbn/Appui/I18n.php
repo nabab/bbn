@@ -845,7 +845,7 @@ class I18n extends cacheCls
           $clsCfg['arch']['i18n_exp']['id_exp'] => $idExpOrExp,
           $clsCfg['arch']['i18n_exp']['lang'] => $transLang
         ]
-      ]);
+      ]) ?: null;
     }
 
     return $this->db->selectOne([
@@ -867,7 +867,7 @@ class I18n extends cacheCls
         $this->db->cfn($this->fields['hash'], $this->class_table) => $this->hashText($idExpOrExp),
         $this->db->cfn($this->fields['lang'], $this->class_table) => $originalLang
       ]
-    ]);
+    ]) ?: null;
   }
 
 
@@ -1222,7 +1222,7 @@ class I18n extends cacheCls
                   $row[$lng.'_po'] = stripslashes($t->getMsgStr());
                   $row[$lng.'_db'] = $this->getTranslation($id, null, $lng);
                   if ($row[$lng.'_po'] && !$row[$lng.'_db']) {
-                    if ((($row[$lng.'_db'] === false)
+                    if ((is_null($row[$lng.'_db'])
                         && $this->insertTranslation($id, $lng, $row[$lng.'_po']))
                       || $this->updateTranslation($id, $lng, $row[$lng.'_po'])
                     ) {
