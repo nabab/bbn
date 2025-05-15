@@ -51,7 +51,7 @@ class I18n extends cacheCls
 
   protected $moGenerator;
 
-  protected static $hashAlgo = 'sha256';
+  protected static $hashAlgo = 'sha512';
 
   /** @var array $default_class_cfg */
   protected static $default_class_cfg = [
@@ -921,8 +921,7 @@ class I18n extends cacheCls
   {
     if ($this->db->insert($this->class_table, [
       $this->fields['exp'] => $this->normlizeText($exp),
-      $this->fields['lang'] => $lang,
-      $this->fields['hash'] => $this->hashText($exp)
+      $this->fields['lang'] => $lang
     ])) {
       return $this->db->lastId();
     }
@@ -1531,7 +1530,7 @@ class I18n extends cacheCls
 
   public function hashText(string $exp): string
   {
-    return hash(static::$hashAlgo, bin2hex($this->normlizeText($exp)));
+    return hash(static::$hashAlgo, $this->normlizeText($exp));
   }
 
 
