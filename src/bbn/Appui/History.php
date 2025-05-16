@@ -821,13 +821,13 @@ MYSQL;
         $fields[$f['id_option']] = $name;
       }
 
-      $where =  [$cfg['primary'] => $id];
+      $where = ['uid' => $id];
       if ($column) {
         $where['col'] = self::$database_obj->columnId($column, $table);
       }
 
-      $origin = $db->rselect($table, [], $where);
-      $all = $db->rselectAll(self::$table, [], ['uid' => $id], ['tst' => 'ASC']);
+      $origin = $db->rselect($table, [], [$cfg['primary'] => $id]);
+      $all = $db->rselectAll(self::$table, [], $where, ['tst' => 'ASC']);
       while (count($all)) {
         $row = array_shift($all);
         $ele = [

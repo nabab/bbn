@@ -1155,51 +1155,42 @@ class I18n extends cacheCls
   {
     $ret = [];
     if (!empty($id_option)
-        && ($o = $this->options->option($id_option))
+      && ($o = $this->options->option($id_option))
     ) {
-      // @var  $path_source_lang the property language of the id_option (the path)
-      //on the option the property is language, on the project i18n
+      // @var string $path_source_lang the property language of the id_option (the path) on the option
       $path_source_lang = $this->options->getProp($id_option, 'language');
-
       //the path of the locale dirs
       $locale_dir = $this->getLocaleDirPath($id_option);
-      $languages  = array_map(
-        function ($a) {
-          return X::basename($a);
-        }, Dir::getDirs($locale_dir)
-      ) ?: [];
-
-      $i       = 0;
-      $res     = [];
+      $languages = array_map(fn($a) => X::basename($a), Dir::getDirs($locale_dir)) ?: [];
+      $res = [];
       $project = new Project($this->db, $id_project);
-
       $errors = [];
       if (!empty($languages)) {
         $po_file = [];
         $success = false;
-        foreach ($languages as $lng){
+        foreach ($languages as $lng) {
           // the path of po and mo files
-          $idx = $this->getIndexValue($id_option) ?: 1;
-          $po  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
+          $index = $this->getIndexValue($id_option) ?: 1;
+          $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$index.'.po';
           // if the file po exist takes its content
           if ($translations = $this->parsePoFile($po)) {
-            foreach ($translations as $i => $t){
-              // @var  $original the original expression
+            foreach ($translations as $t) {
               $id = null;
+              // @var string $original the original expression
               if ($original = stripslashes($t->getMsgId())) {
                 $idx = X::find($res, ['exp' => $original]);
-                if ($idx !== null) {
-                  $todo = false;
-                  $row  =& $res[$idx];
-                }
-                else{
+                if (is_null($idx)) {
                   $todo = true;
                   $row  = [];
                 }
+                else {
+                  $todo = false;
+                  $row =& $res[$idx];
+                }
 
                 // the translation of the string found in the po file
-                if (isset($row['id'])) {
-                  $id = $row['id'];
+                if (isset($row['id_exp'])) {
+                  $id = $row['id_exp'];
                 }
 
                 // @var  $id takes the id of the original expression in db
@@ -1220,35 +1211,27 @@ class I18n extends cacheCls
 
                 if ($id) {
                   $row[$lng.'_po'] = stripslashes($t->getMsgStr());
-                  $row[$lng.'_db'] = $this->getTranslation($id, null, $lng);
-                  if ($row[$lng.'_po'] && !$row[$lng.'_db']) {
-                    if ((is_null($row[$lng.'_db'])
-                        && $this->insertTranslation($id, $lng, $row[$lng.'_po']))
-                      || $this->updateTranslation($id, $lng, $row[$lng.'_po'])
-                    ) {
+                  $row[$lng.'_db'] = $this->getTranslation($id, null, $lng) ?: '';
+                  if (!empty($row[$lng.'_po']) && empty($row[$lng.'_db'])) {
+                    if ($this->insertTranslation($id, $lng, $row[$lng.'_po'])) {
                       $row[$lng.'_db'] = $row[$lng.'_po'];
                     }
-                    else{
+                    else {
                       throw new Exception(
-                        sprintf(
-                          _("Impossible to insert or update the expression \"%s\" in %s"),
-                          $row[$lng.'_po'],
-                          $lng
-                        )
-                      );
+                      sprintf(
+                        _("Impossible to insert the expression \"%s\" in %s"),
+                        $row[$lng.'_po'],
+                        $lng
+                      )
+                    );
                     }
-                  }
-
-                  if (empty($row[$lng.'_db'])) {
-                    $row[$lng.'_db'] = '';
-                    // die(var_dump($row[$lng.'_db']));
                   }
 
                   if ($todo) {
                     $row['id_exp'] = $id;
-                    $row['paths']  = [];
-                    $row['exp']    = $original;
-                    // @var (array) takes $paths of files in which the string was found from the file po
+                    $row['paths'] = [];
+                    $row['exp'] = $original;
+                    // @var array takes $paths of files in which the string was found from the file po
                     $paths = $t->getReference();
 
                     // get the url to use it for the link to ide from the table
@@ -1258,10 +1241,10 @@ class I18n extends cacheCls
 
                     // the number of times the strings is found in the files of the path
                     $row['occurrence'] = count($row['paths']);
-                    $res[]             = $row;
+                    $res[] = $row;
                   }
                 }
-                else{
+                else {
                   die("Error 2");
                 }
               }
@@ -1283,6 +1266,7 @@ class I18n extends cacheCls
         'errors' => $errors
       ];
     }
+
     $this->cacheSet($id_option, 'get_translations_table', $ret);
     return $ret;
   }
