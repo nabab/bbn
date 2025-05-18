@@ -5,6 +5,7 @@ use Exception;
 use Throwable;
 use bbn\File\System;
 use bbn\File\Dir;
+use function dgettext;
 
 /**
  * A container of tools.

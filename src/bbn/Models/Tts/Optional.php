@@ -54,6 +54,7 @@ trait Optional
       }
 
       self::$option_root_id = $opt->fromCode(...$path);
+      //X::ddump($path, self::$option_root_id);
       if (!self::$option_root_id) {
         if (empty($cls)) {
           throw new Exception("Impossible to find the option ".json_encode($path)." !!! for ".__CLASS__);
