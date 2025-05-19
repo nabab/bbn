@@ -4,8 +4,6 @@
  */
 namespace bbn\User;
 
-use bbn;
-
 /**
  * A user authentication Class
  *

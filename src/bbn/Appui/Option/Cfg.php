@@ -35,8 +35,9 @@ trait Cfg
     $f   = &$this->fields;
 
     $id_alias = $this->db->selectOne($c['table'], $f['id_alias'], [$f['id'] => $id]);
-    if ($id_alias && $this->isInTemplate($id_alias)) {
+    if ($id_alias && $this->hasTemplate($id)) {
       $cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $id_alias]);
+      $id = $id_alias;
     }
     else {
       // Retrieve the cfg value from the database.

@@ -1912,12 +1912,12 @@ class Preferences extends DbCls
    * Returns the bits list of a preference
    *
    * @param string $id_user_option
-   * @param bool $id_parent The bits'parent ID
+   * @param ?string $id_parent The bits'parent ID
    * @param bool $with_config
    * @return array
    * @throws Exception
    */
-  public function getBits(string $id_user_option, $id_parent = false, bool $with_config = true): array
+  public function getBits(string $id_user_option, ?string $id_parent = null, bool $with_config = true): array
   {
     if ($this->isAuthorized($id_user_option)) {
       $c     = $this->class_cfg['arch']['user_options_bits'];

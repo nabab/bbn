@@ -366,7 +366,7 @@ class Menu extends bbn\Models\Cls\Basic
    * Sets the menu's text and deletes its chache
    *
    * @param string $id   The menu's ID
-   * @param array  $text The new text tp set
+   * @param string  $text The new text tp set
    * @return bool
    */
   public function setText(string $id, string $text): bool
