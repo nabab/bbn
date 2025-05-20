@@ -9,18 +9,20 @@
 
 namespace bbn\Appui;
 
+use Exception;
 use bbn\Db;
 use bbn\Str;
 use bbn\X;
 use bbn\User;
 use bbn\Mvc;
-use Exception;
+use bbn\Appui\Medias;
 use bbn\Models\Tts\References;
 use bbn\Models\Tts\Optional;
 use bbn\Models\Tts\DbActions;
 use bbn\Models\Tts\Url;
 use bbn\Models\Tts\Tagger;
 use bbn\Models\Cls\Db as DbCls;
+use PhpOffice\PhpWord\Media;
 
 if (!\defined('BBN_DATA_PATH')) {
   die('The constant BBN_DATA_PATH must be defined in order to use Note');
@@ -187,7 +189,7 @@ class Note extends DbCls
   /**
    * @return Medias
    */
-  public function getMediaInstance()
+  public function getMediaInstance(): Medias
   {
     if (!$this->medias) {
       $this->medias = new Medias($this->db);
@@ -1185,7 +1187,7 @@ class Note extends DbCls
    * @return array|null
    * @throws Exception
    */
-  public function browse(array $cfg, bool $with_content = false, bool $private = false, string|null $id_type = null, bool $pinned = null): ?array
+  public function browse(array $cfg, bool $with_content = false, bool $private = false, string|null $id_type = null, ?bool $pinned = null): ?array
   {
     if (isset($cfg['limit']) && $this->userId) {
       /** @var Db $db */
@@ -1241,6 +1243,8 @@ class Note extends DbCls
 
       return $grid->getDatatable();
     }
+
+    return null;
   }
 
 
@@ -1363,7 +1367,7 @@ class Note extends DbCls
    * @param bool|null $private
    * @return string|null
    */
-  public function copy(string $id, ?int $version = null, bool $private = null): ?string
+  public function copy(string $id, ?int $version = null, ?bool $private = null): ?string
   {
     if ($note = $this->getFull($id, $version)) {
       if ($private === null) {
@@ -1413,14 +1417,16 @@ class Note extends DbCls
     if (!empty($all)) {
       $root = Mvc::getDataPath('appui-note') . 'media/';
       foreach ($all as $i => $a) {
-        if (Str::isJson($a['content']) && ($media_obj = $this->getMediaInstance())) {
+        /** @var Medias */
+        $media_obj = $this->getMediaInstance();
+        if ($media_obj && Str::isJson($a['content'])) {
           $content   = json_decode($a['content'], true);
           $path      = $root . $content['path'] . '/';
           $full_path = $path . $a['id'] . '/' . $a['name'];
           if (file_exists($full_path)) {
             $all[$i]['notes'] = $this->getMediaNotes($a['id']);
             //if the media is an image it takes the thumb 60, 60 for src
-            if ($media_obj->isImage($full_path) && ($thumb = $media_obj->getThumbs($full_path))) {
+            if ($media_obj->isImage($full_path)) {
               $all[$i]['is_image'] = true;
             }
 
@@ -1585,10 +1591,10 @@ class Note extends DbCls
   }
 
 
-  public function getPostIts(int $limit = 25, int $start = 0, $only_pinned = false): ?array
+  public function getPostIts($cfg, $only_pinned = false): ?array
   {
     $id_postIt = self::getOptionId('postit', 'types');
-    $res = $this->browse(['limit' => $limit, 'start' => $start], true, true, $id_postIt, $only_pinned ?: null);
+    $res = $this->browse($cfg, true, true, $id_postIt, $only_pinned ?: null);
     if ( $res ){
       return array_map(function($a) {
         if (Str::isJson($a['content'])) {
@@ -1660,7 +1666,8 @@ class Note extends DbCls
       }
     }
     else {
-      $media = $this->getMedia($id_media);
+      $mediaObj = $this->getMediaInstance();
+      $media = $mediaObj->getMedia($id_media);
     }
 
     if ($media && !$data[$cols['id_media']]) {

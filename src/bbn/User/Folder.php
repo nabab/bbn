@@ -18,7 +18,7 @@ class Folder
     protected Preferences $prefs
   )
   {
-    self::optionalInit(['folder', 'note', 'appui']);
+    self::optionalInit(['folders', 'note', 'appui']);
     if ($pref = $this->prefs->getByOption(self::$option_root_id, false)) {
       $this->id_pref = $pref['id'];
     }
@@ -40,7 +40,10 @@ class Folder
 
     $data = [
       'text' => $name,
-      'parent' => $parent,
+      'id_parent' => $parent,
+      'cfg' => [
+        'creation' => date('Y-m-d H:i:s'),
+      ]
     ];
 
     if ($parent) {
@@ -60,7 +63,7 @@ class Folder
       return false;
     }
 
-    $all = $this->prefs->getBits($this->id_pref, $parent);
+    $all = $this->prefs->getBits($this->id_pref, $parent, false);
     return $all ? !!X::getRow($all, ['text' => $name]) : false;
   }
 
@@ -82,4 +85,16 @@ class Folder
     throw new Exception(X::_("Impossible to move the folder"));
   }
 
+  public function list(?string $parent = null): array
+  {
+    return array_map(
+      fn ($a): array => [
+        'id' => $a['id'],
+        'text' => $a['text'],
+        'numChildren' => $a['numChildren'],
+        'creation' => $a['cfg']['creation']
+      ],
+      $this->prefs->getBits($this->id_pref, $parent, true, true)
+    );
+  }
 }

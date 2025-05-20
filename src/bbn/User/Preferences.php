@@ -1914,10 +1914,11 @@ class Preferences extends DbCls
    * @param string $id_user_option
    * @param ?string $id_parent The bits'parent ID
    * @param bool $with_config
+   * @param bool $with_num
    * @return array
    * @throws Exception
    */
-  public function getBits(string $id_user_option, ?string $id_parent = null, bool $with_config = true): array
+  public function getBits(string $id_user_option, ?string $id_parent = null, bool $with_config = true, bool $with_num = false): array
   {
     if ($this->isAuthorized($id_user_option)) {
       $c     = $this->class_cfg['arch']['user_options_bits'];
@@ -1943,12 +1944,28 @@ class Preferences extends DbCls
               'conditions' => $where
               ],
               'order' => [[
-              'field' => $c['num'],
-              'dir' => 'ASC'
+                'field' => $c['num'],
+                'dir' => 'ASC'
+              ], [
+                'field' => $c['text'],
+                'dir' => 'ASC'
               ]]
               ]
           ))
       ) {
+        if ($with_num) {
+          foreach ($bits as &$b) {
+            $b['numChildren'] = $this->db->count(
+              $this->class_cfg['tables']['user_options_bits'],
+              [
+                $c['id_user_option'] => $id_user_option,
+                $c['id_parent'] => $b['id']
+              ]
+            );
+          }
+          unset($b);
+        }
+
         if (!empty($with_config)) {
           return array_map(
               function ($b) use ($t) {

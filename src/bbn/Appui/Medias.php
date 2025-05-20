@@ -167,7 +167,7 @@ class Medias extends DbCls
   }
 
 
-  public function getImageUrl(string|null $id = null): string
+  public function getImageUrl(string|null $id = null): ?string
   {
     if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
@@ -180,10 +180,12 @@ class Medias extends DbCls
 
       return $this->imageRoot . (string)$id;
     }
+
+    return null;
   }
 
 
-  public function getFileUrl(string|null $id = null): string
+  public function getFileUrl(string|null $id = null): ?string
   {
     if ($this->dbTraitExists($id)) {
       if ($url = $this->getUrl($id)) {
@@ -196,6 +198,8 @@ class Medias extends DbCls
 
       return $this->fileRoot . (string)$id;
     }
+
+    return null;
   }
 
 
@@ -360,7 +364,7 @@ class Medias extends DbCls
   }
 
 
-  public function createGroup(string $text): string
+  public function createGroup(string $text): ?string
   {
     $cf = $this->getClassCfg();
     $t = $cf['tables']['medias_groups'];
@@ -370,6 +374,8 @@ class Medias extends DbCls
     ])) {
       return $this->db->lastId();
     }
+
+    return null;
   }
 
 
