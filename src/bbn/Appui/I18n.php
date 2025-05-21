@@ -45,7 +45,7 @@ class I18n extends cacheCls
 
   protected $options;
 
-  protected $id_project;
+  protected $idProject;
 
   protected $poLoader;
 
@@ -97,15 +97,25 @@ class I18n extends cacheCls
       }
     }
 
+    $this->idProject = $code;
+    if ($code !== 'options') {
+      if (Str::isUid($code)) {
+        $code = $this->options->code($code);
+      }
+      else {
+        $this->idProject = $this->options->fromCode($code, 'list', 'project', 'appui');
+      }
+    }
+
+    if (empty($this->idProject)) {
+      throw new Exception(X::_("Project's ID not found for code %s", $code));
+    }
+
     $this->parser  = Translations::create($code);
     $this->poLoader = new PoLoader();
     $this->moGenerator = new MoGenerator();
     $this->options->preventI18n();
-    $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
     $this->options->preventI18n(false);
-    if (empty($this->id_project)) {
-      throw new Exception(X::_("Project's ID not found for code %s", $code));
-    }
   }
 
 
@@ -1356,9 +1366,9 @@ class I18n extends cacheCls
    */
   public function getPathToExplore(string $id_option) :? String
   {
-    if ($this->id_project) {
+    if ($this->idProject) {
       /** @var Project */
-      $project = new Project($this->db, $this->id_project);
+      $project = new Project($this->db, $this->idProject);
       //the repository
       $rep = $project->repositoryById($id_option);
 
@@ -1658,7 +1668,7 @@ class I18n extends cacheCls
         }
       }
       \clearstatcache();
-      $this->getTranslationsTable($this->id_project, $idPath);
+      $this->getTranslationsTable($this->idProject, $idPath);
       $this->getTranslationsWidget($idPath);
     }
     return [
