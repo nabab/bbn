@@ -17,17 +17,25 @@ use bbn\File\Dir;
 use bbn\Appui\Option;
 use bbn\Appui\Project;
 use bbn\Models\Tts\Optional;
+use bbn\Models\Tts\DbActions;
 use bbn\Models\Cls\Cache as cacheCls;
 use Gettext\Translations;
 use Gettext\Scanner\PhpScanner;
 use Gettext\Scanner\JsScanner;
 use Gettext\Loader\PoLoader;
 use Gettext\Generator\MoGenerator;
-
+use Sepia\PoParser\Parser;
+use Sepia\PoParser\SourceHandler\FileSystem;
+use Sepia\PoParser\PoCompiler;
+use Sepia\PoParser\Catalog\Header;
+use Sepia\PoParser\Catalog\Entry;
+use bbn\Appui\I18n\Api;
 
 class I18n extends cacheCls
 {
   use Optional;
+  use DbActions;
+  use Api;
 
   protected static $extensions = ['js', 'json', 'php', 'html'];
 
@@ -39,11 +47,36 @@ class I18n extends cacheCls
 
   protected $options;
 
-  protected $id_project;
+  protected $idProject;
 
   protected $poLoader;
 
   protected $moGenerator;
+
+  protected static $hashAlgo = 'sha512';
+
+  /** @var array $default_class_cfg */
+  protected static $default_class_cfg = [
+    'table' => 'bbn_i18n',
+    'tables' => [
+      'i18n' => 'bbn_i18n',
+      'i18n_exp' => 'bbn_i18n_exp'
+    ],
+    'arch' => [
+      'i18n' => [
+        'id' => 'id',
+        'exp' => 'exp',
+        'lang' => 'lang',
+        'hash' => 'hash'
+      ],
+      'i18n_exp' => [
+        'id' => 'id',
+        'id_exp' => 'id_exp',
+        'lang' => 'lang',
+        'expression' => 'expression'
+      ]
+    ]
+  ];
 
 
   /**
@@ -51,9 +84,10 @@ class I18n extends cacheCls
    *
    * @param db
    */
-  public function __construct(Db $db, string|null $code = null)
+  public function __construct(Db $db, string|null $code = null, array $api = [])
   {
     parent::__construct($db);
+    $this->initClassCfg();
     $this->user    = User::getInstance();
     $this->options = Option::getInstance();
     if (empty($code)) {
@@ -65,14 +99,28 @@ class I18n extends cacheCls
       }
     }
 
+    $this->idProject = $code;
+    if ($code !== 'options') {
+      if (Str::isUid($code)) {
+        $code = $this->options->code($code);
+      }
+      else {
+        $this->idProject = $this->options->fromCode($code, 'list', 'project', 'appui');
+      }
+    }
+
+    if (empty($this->idProject)) {
+      throw new Exception(X::_("Project's ID not found for code %s", $code));
+    }
+
     $this->parser  = Translations::create($code);
     $this->poLoader = new PoLoader();
     $this->moGenerator = new MoGenerator();
     $this->options->preventI18n();
-    $this->id_project = Str::isUid($code) ? $code : $this->options->fromCode($code, 'list', 'project', 'appui');
     $this->options->preventI18n(false);
-    if (empty($this->id_project)) {
-      throw new Exception(X::_("Project's ID not found for code %s", $code));
+
+    if (!empty($api)) {
+      $this->initApi($api);
     }
   }
 
@@ -93,7 +141,17 @@ class I18n extends cacheCls
     $scanner->setFunctions([
       '_' => 'gettext'
     ]);
-    $scanner->scanFile($file);
+    try {
+      $scanner->scanFile($file);
+    }
+    catch (Exception $e) {
+      X::log([
+        'method' => 'analyzePhp',
+        'file' => $file,
+        'error' => $e->getMessage(),
+      ], 'i18n');
+    }
+
     foreach ($parser->getIterator() as $tr){
       $res[] = $tr->getOriginal();
     }
@@ -124,11 +182,30 @@ class I18n extends cacheCls
       '_' => 'gettext',
       'bbn._' => 'gettext'
     ]);
-    $js = file_get_contents($file);
-    $scanner->scanFile($file);
-    if (preg_match_all('/`([^`]*)`/', $js, $matches)) {
-      foreach ($matches[0] as $st){
-        $scanner->scanString($st, $file);
+    $code = file_get_contents($file);
+    try {
+      $scanner->scanFile($file);
+    }
+    catch (Exception $e) {
+      X::log([
+        'method' => 'analyzeJs',
+        'file' => $file,
+        'error' => $e->getMessage(),
+      ], 'i18n');
+    }
+
+    if (preg_match_all('/`([^`]*)`/', $code, $matches)) {
+      foreach ($matches[0] as $c){
+        try {
+          $scanner->scanString($c, $file);
+        }
+        catch (Exception $e) {
+          X::log([
+            'method' => 'analyzeJs',
+            'file' => $file,
+            'error' => $e->getMessage(),
+          ], 'i18n');
+        }
       }
     }
 
@@ -156,7 +233,17 @@ class I18n extends cacheCls
       '_' => 'gettext',
       'bbn._' => 'gettext'
     ]);
-    $scanner->scanFile($file);
+    try {
+      $scanner->scanFile($file);
+    }
+    catch (Exception $e) {
+      X::log([
+        'method' => 'analyzeJson',
+        'file' => $file,
+        'error' => $e->getMessage(),
+      ], 'i18n');
+    }
+
     foreach ($parser->getIterator() as $tr){
       $res[] = $tr->getOriginal();
     }
@@ -179,29 +266,43 @@ class I18n extends cacheCls
   public function analyzeHtml(string $file): array
   {
     $res = [];
-    $js = trim(file_get_contents($file));
-    if ((Str::fileExt($file) === 'php')
-      && str_starts_with($js, '<?php')
-    ) {
-      return $res;
-    }
+    $code = file_get_contents($file);
+    if (!empty($code)) {
+      $code = trim($code);
+      if ((Str::fileExt($file) === 'php')
+        && str_starts_with($code, '<?php')
+      ) {
+        return $res;
+      }
 
-    $domain = $this->parser->getDomain();
-    $parser = Translations::create($domain);
-    $scanner = new PhpScanner($parser);
-    $scanner->setDefaultDomain($domain);
-    $scanner->setFunctions([
-      '_' => 'gettext',
-      'bbn._' => 'gettext'
-    ]);
-    $scanner->scanString($js, $file);
-    foreach ($parser->getIterator() as $tr){
-      $res[] = $tr->getOriginal();
-    }
+      $domain = $this->parser->getDomain();
+      $parser = Translations::create($domain);
+      $scanner = new PhpScanner($parser);
+      $scanner->setDefaultDomain($domain);
+      $scanner->setFunctions([
+        '_' => 'gettext',
+        'bbn._' => 'gettext'
+      ]);
+      try {
+        //$scanner->scanString('<template>'.$code.'</template>', $file);
+        $scanner->scanString($code, $file);
+      }
+      catch (Exception $e) {
+        X::log([
+          'method' => 'analyzeHtml',
+          'file' => $file,
+          'error' => $e->getMessage(),
+        ], 'i18n');
+      }
 
-    $res = array_unique($res);
-    if (!empty($res)) {
-      $this->parser = $this->parser->mergeWith($parser);
+      foreach ($parser->getIterator() as $tr){
+        $res[] = $tr->getOriginal();
+      }
+
+      $res = array_unique($res);
+      if (!empty($res)) {
+        $this->parser = $this->parser->mergeWith($parser);
+      }
     }
 
     return $res;
@@ -338,7 +439,7 @@ class I18n extends cacheCls
    */
   public function getNumOptions()
   {
-    /** @var  $paths takes all options with i18n property setted*/
+    /** @var array $paths takes all options with i18n property setted*/
     $paths = $this->options->findI18n(null, true);
     $data = [];
     /**
@@ -358,14 +459,8 @@ class I18n extends cacheCls
           'id_parent' => $parent
         ];
         foreach ($items as $idx => $item){
-          if (($id = $this->db->selectOne('bbn_i18n', 'id', [
-              'exp' => $this->normlizeText($item['text']),
-              'lang' => $paths[$p]['language']
-            ]))
-            && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
-              'id_exp' => $id,
-              'lang' => $lang
-            ])
+          if (($id = $this->getId($item['text'], $paths[$p]['language']))
+            && $this->hasTranslation($id, $lang)
           ) {
             $count++;
           }
@@ -394,7 +489,7 @@ class I18n extends cacheCls
    */
   public function getNumOption($id)
   {
-    /** @var  $paths takes all options with i18n property setted*/
+    /** @var array $paths takes all options with i18n property setted*/
     $paths = $this->options->findI18nOption($id);
     $data  = [];
     /**
@@ -413,15 +508,9 @@ class I18n extends cacheCls
           'text' => $paths[$p]['text'],
           'id_parent' => $parent
         ];
-        foreach ($items as $idx => $item){
-          if (($id = $this->db->selectOne('bbn_i18n', 'id', [
-              'exp' => $this->normlizeText($item['text']),
-              'lang' => $paths[$p]['language']
-            ]))
-            && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
-              'id_exp' => $id,
-              'lang' => $lang
-            ])
+        foreach ($items as $item){
+          if (($id = $this->getId($item['text'], $paths[$p]['language']))
+            && $this->hasTranslation($id, $lang)
           ) {
             $count ++;
           }
@@ -450,7 +539,7 @@ class I18n extends cacheCls
    */
   public function getOptions()
   {
-    /** @var ( array) $paths get all options having i18n property setted and its items */
+    /** @var array $paths get all options having i18n property setted and its items */
     $paths = $this->options->findI18n(null, true);
     $res   = [];
     foreach ($paths as $p => $val){
@@ -464,34 +553,21 @@ class I18n extends cacheCls
       /** @todo AT THE MOMENT I'M NOT CONSIDERING LANGUAGES OF TRANSLATION */
       foreach ($paths[$p]['items'] as $i => $value){
         /* check if the opt text is in bbn_i18n and takes translations from db */
-        if ($exp = $this->db->rselect('bbn_i18n', [
-          'id',
-          'exp',
-          'lang'
-        ], [
-          'exp' => $this->normlizeText($paths[$p]['items'][$i]['text']),
-          'lang' => $paths[$p]['language']
-        ])) {
-          if ($translated = $this->db->rselectAll('bbn_i18n_exp', [
-            'id_exp',
-            'expression',
-            'lang'
-          ], [
-            'id_exp' => $exp['id']
-          ])) {
-            /** @var  $languages the array of languages found in db for the options*/
+        if ($exp = $this->get($paths[$p]['items'][$i]['text'], $paths[$p]['language'])) {
+          if ($translated = $this->getTranslations($exp['id'])) {
+            /** @var array $languages the array of languages found in db for the options*/
             $languages      = [];
             $translated_exp = '';
-            foreach ($translated as $t => $trans){
-              if (!in_array($translated[$t]['lang'], $translated)) {
-                $languages[] = $translated[$t]['lang'];
+            foreach ($translated as $trans){
+              if (!in_array($trans['lang'], $translated)) {
+                $languages[] = $trans['lang'];
               }
 
-              $translated_exp = $translated[$t]['expression'];
+              $translated_exp = $trans['expression'];
             }
 
             if (!empty($languages)) {
-              foreach($languages as $lang){
+              foreach ($languages as $lang){
                 $res[$p]['strings'][] = [
                   $lang => [
                     'id_exp' => $exp['id'],
@@ -503,25 +579,15 @@ class I18n extends cacheCls
             }
           }
         }
-        else {
-          if ($this->db->insert('bbn_i18n', [
-            'exp' => $this->normlizeText($paths[$p]['items'][$i]['text']),
-            'lang' => $paths[$p]['language']
-          ])) {
-            $id = $this->db->lastId();
-            $this->db->insertIgnore('bbn_i18n_exp', [
+        else if ($id = $this->insert($paths[$p]['items'][$i]['text'], $paths[$p]['language'])) {
+          $this->insertTranslation($id, $paths[$p]['language'], $paths[$p]['items'][$i]['text']);
+          $res[$p]['strings'][] = [
+            $paths[$p]['language'] => [
               'id_exp' => $id,
-              'expression' => $this->normlizeText($paths[$p]['items'][$i]['text']),
-              'lang' => $paths[$p]['language']
-            ]);
-            $res[$p]['strings'][] = [
-              $paths[$p]['language'] => [
-                'id_exp' => $id,
-                'exp' => $paths[$p]['items'][$i]['text'],
-                'translation_db' => $paths[$p]['items'][$i]['text']
-              ]
-            ];
-          };
+              'exp' => $paths[$p]['items'][$i]['text'],
+              'translation_db' => $paths[$p]['items'][$i]['text']
+            ]
+          ];
         }
       }
     }
@@ -544,32 +610,27 @@ class I18n extends cacheCls
   /**
    * Gets the widgets initial data
    *
-   * @param string $id_project
-   * @param string $id_option
-   * @return void
+   * @param string $idOption
+   * @return array
    */
-  public function getTranslationsWidget($id_project, $id_option)
+  public function getTranslationsWidget(string $idOption): array
   {
-    $success     = false;
-    $result      = [];
-    $locale_dirs = [];
-
-    if ($id_option
-        && ($o = $this->options->option($id_option))
-        && isset($o['language'])
+    $result = [];
+    $localeDirs = [];
+    if (($o = $this->options->option($idOption))
+      && !empty($o['language'])
     ) {
-        // @var $locale_dir the path to locale dir
-        $locale_dir = $this->getLocaleDirPath($id_option);
-
-        //the txt file in the locale folder
-        $index = $this->getIndexPath($id_option);
-
-        //the text of the option . the number written in the $index file
-        $domain = $o['text'].(is_file($index) ? file_get_contents($index) : '');
+      // @var $localeDir the path to locale dir
+      $localeDir = $this->getLocaleDirPath($idOption);
+      //the txt file in the locale folder
+      $index = $this->getIndexPath($idOption);
+      //the text of the option . the number written in the $index file
+      $domain = $o['text'].(is_file($index) ? file_get_contents($index) : '');
+      // @var array $languages dirs in locale folder
+      $languages = [];
+      if (is_dir($localeDir)) {
         // @var $dirs scans dirs existing in locale folder for this path
-      if (is_dir($locale_dir)) {
-        // @var array $languages dirs in locale folder
-        $dirs = Dir::getDirs($locale_dir) ?: [];
+        $dirs = Dir::getDirs($localeDir) ?: [];
         if (!empty($dirs)) {
           foreach ($dirs as $l){
             $languages[] = X::basename($l);
@@ -577,62 +638,51 @@ class I18n extends cacheCls
         }
       }
 
-        $new = 0;
-        $i   = 0;
-        // @var array the languages found in locale dir
       if (!empty($languages)) {
-        $result = [];
         foreach ($languages as $lng){
           // the root to file po & mo
-          $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.po';
+          $po = $localeDir.'/'.$lng.'/LC_MESSAGES/'.$domain.'.po';
           // if a file po already exists takes its content
           if (is_file($po)) {
-            $locale_dirs[] = $lng;
-            $num_translations = 0;
+            $localeDirs[] = $lng;
+            $numTranslations = 0;
             if ($translations = $this->parsePoFile($po)) {
-              foreach($translations as $tr){
+              foreach ($translations as $tr) {
                 if ($tr->getMsgStr()) {
-                  $num_translations ++;
+                  $numTranslations++;
                 }
               }
 
               $result[$lng] = [
                 'num' => count($translations),
-                'num_translations' => $num_translations,
+                'num_translations' => $numTranslations,
                 'lang' => $lng,
-                'num_translations_db' => $this->countTranslationsDb($id_option) ? $this->countTranslationsDb($id_option)[$lng] : 0
+                'num_translations_db' => $this->countTranslationsDb($idOption) ? $this->countTranslationsDb($idOption)[$lng] : 0
               ];
             }
           }
-          // if the file po for the $lng doesn't exist $result is an empty object
-          else{
-            if(!empty($this->countTranslationsDb($id_option)[$lng])) {
-              $count_translations = $this->countTranslationsDb($id_option)[$lng];
-            }
-            else{
-              $count_translations = 0;
+          else {
+            $countTranslations = 0;
+            if ($ctd = $this->countTranslationsDb($idOption)) {
+              $countTranslations = $ctd[$lng] ?? 0;
             }
 
             $result[$lng] = [
               'num' => 0,
               'num_translations' => 0,
               'lang' => $lng,
-              'num_translations_db' => $count_translations
+              'num_translations_db' => $countTranslations
             ];
           }
         }
       }
-
-      $i++;
-      $success = true;
     }
 
     $ret = [
-      'locale_dirs' => $locale_dirs,
-      'result' => $result,
-      'success' => $success,
+      'locale_dirs' => $localeDirs,
+      'result' => $result
     ];
-    $this->cacheSet($id_option, 'get_translations_widget', $ret);
+    $this->cacheSet($idOption, 'get_translations_widget', $ret);
     return $ret;
   }
 
@@ -659,14 +709,8 @@ class I18n extends cacheCls
             if (!empty($opt['translation'])) {
               $count++;
             }
-            if (($id = $this->db->selectOne('bbn_i18n', 'id', [
-                'exp' => $this->normlizeText($exp),
-                'lang' => $opt['language']
-              ]))
-              && $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
-                'id_exp' => $id,
-                'lang' => $lang
-              ])
+            if (($id = $this->getId($exp, $opt['language']))
+              && $this->hasTranslation($id, $lang)
             ) {
               $countDB++;
             }
@@ -728,29 +772,22 @@ class I18n extends cacheCls
   /**
    * Count how many of the strings contained in po files are already in database
    *
-   * @param string $id_option
-   * @return void
+   * @param string $idOption
+   * @return array
    */
-  public function countTranslationsDb($id_option)
+  public function countTranslationsDb(string $idOption): array
   {
     $count = [];
-    $po    = $this->getPoFiles($id_option);
+    $po = $this->getPoFiles($idOption);
+    $sourceLanguage = $this->getLanguage($idOption);
     if (!empty($po)) {
       foreach ($po as $lang => $file) {
-        $fromPo          = $this->parsePoFile($file);
-        $source_language = $this->getLanguage($id_option);
-
+        $fromPo = $this->parsePoFile($file);
         $count[$lang] = 0;
         foreach ($fromPo as $o) {
           if (($exp = $o->getMsgId())
-            && ($id = $this->db->selectOne('bbn_i18n', 'id', [
-              'exp' => $this->normlizeText($exp),
-              'lang' => $source_language
-            ]))
-            && $this->db->selectOne('bbn_i18n_exp', 'expression', [
-              'id_exp' => $id,
-              'lang' => $lang
-            ])
+            && ($id = $this->getIdByHash($this->hashText($exp), $sourceLanguage))
+            && $this->hasTranslation($id, $lang)
           ) {
             $count[$lang]++;
           }
@@ -762,6 +799,50 @@ class I18n extends cacheCls
   }
 
 
+  public function get(string $idOrExp, ?string $lang = null): ?array
+  {
+    if (Str::isUid($idOrExp)) {
+      return $this->db->rselect($this->class_table, [], [
+        $this->fields['id'] => $idOrExp
+      ]);
+    }
+
+    if (!empty($lang)) {
+      return $this->db->rselect($this->class_table, [], [
+        $this->fields['hash'] => $this->hashText($idOrExp),
+        $this->fields['lang'] => $lang
+      ]);
+    }
+
+    return null;
+  }
+
+
+  public function getId(string $exp, string $lang): ?string
+  {
+    return $this->getIdByHash($this->hashText($exp), $lang);
+  }
+
+
+  public function getIdByHash(string $hash, string $lang): ?string
+  {
+    return $this->db->selectOne($this->class_table, $this->fields['id'], [
+      $this->fields['hash'] => $hash,
+      $this->fields['lang'] => $lang
+    ]);
+  }
+
+
+  public function hasTranslation(string $idExp, string $lang): bool
+  {
+    $clsCfg = $this->getClassCfg();
+    return (bool)$this->db->count($clsCfg['tables']['i18n_exp'], [
+      $clsCfg['arch']['i18n_exp']['id_exp'] => $idExp,
+      $clsCfg['arch']['i18n_exp']['lang'] => $lang
+    ]);
+  }
+
+
   /**
    * Get an expression translation for the given language
    * @param string $expression The expression to be translated
@@ -769,27 +850,58 @@ class I18n extends cacheCls
    * @param string $transLang the language of the translation
    * @return string|null
    */
-  public function getTranslation(string $expression, string $originalLang, string $transLang): ?string
+  public function getTranslation(string $idExpOrExp, ?string $originalLang = null, string $transLang): ?string
   {
+    $clsCfg = $this->getClassCfg();
+    if (Str::isUid($idExpOrExp)) {
+      return $this->db->selectOne([
+        'table' => $clsCfg['tables']['i18n_exp'],
+        'fields' => [$clsCfg['arch']['i18n_exp']['expression']],
+        'where' => [
+          $clsCfg['arch']['i18n_exp']['id_exp'] => $idExpOrExp,
+          $clsCfg['arch']['i18n_exp']['lang'] => $transLang
+        ]
+      ]) ?: null;
+    }
+
     return $this->db->selectOne([
-      'table' => 'bbn_i18n',
-      'fields' => ['bbn_i18n_exp.expression'],
+      'table' => $this->class_table,
+      'fields' => [$this->db->cfn($clsCfg['arch']['i18n_exp']['expression'], $clsCfg['tables']['i18n_exp'])],
       'join' => [[
-        'table' => 'bbn_i18n_exp',
+        'table' => $clsCfg['tables']['i18n_exp'],
         'on' => [
           'conditions' => [[
-            'field' => 'bbn_i18n.id',
-            'exp' => 'bbn_i18n_exp.id_exp'
+            'field' => $this->db->cfn($this->fields['id'], $this->class_table),
+            'exp' => $this->db->cfn($clsCfg['arch']['i18n_exp']['id_exp'], $clsCfg['tables']['i18n_exp'])
           ], [
-            'field' => 'bbn_i18n_exp.lang',
+            'field' => $this->db->cfn($clsCfg['arch']['i18n_exp']['lang'], $clsCfg['tables']['i18n_exp']),
             'value' => $transLang
           ]]
         ]
       ]],
       'where' => [
-        'bbn_i18n.exp' => $this->normlizeText($expression),
-        'bbn_i18n.lang' => $originalLang
+        $this->db->cfn($this->fields['hash'], $this->class_table) => $this->hashText($idExpOrExp),
+        $this->db->cfn($this->fields['lang'], $this->class_table) => $originalLang
       ]
+    ]) ?: null;
+  }
+
+
+  public function getTranslationId(string $idExp, string $lang): ?string
+  {
+    $clsCfg = $this->getClassCfg();
+    return $this->db->selectOne($clsCfg['tables']['i18n_exp'], $clsCfg['arch']['i18n_exp']['id'], [
+      $clsCfg['arch']['i18n_exp']['id_exp'] => $idExp,
+      $clsCfg['arch']['i18n_exp']['lang'] => $lang
+    ]);
+  }
+
+
+  public function getTranslations(string $idExp): ?array
+  {
+    $clsCfg = $this->getClassCfg();
+    return $this->db->rselectAll($clsCfg['tables']['i18n_exp'], [], [
+      $clsCfg['arch']['i18n_exp']['id_exp'] => $idExp
     ]);
   }
 
@@ -797,22 +909,20 @@ class I18n extends cacheCls
   public function getNumTranslations(string $idExp, ?string $originalLocale = ''): int
   {
     if (!Str::isUid($idExp) && !empty($originalLocale)) {
-      $idExp = $this->db->selectOne('bbn_i18n', 'id', [
-        'exp' => $idExp,
-        'lang' => $originalLocale
-      ]);
+      $idExp = $this->getId($idExp, $originalLocale);
     }
 
     if (Str::isUid($idExp)) {
+      $clsCfg = $this->getClassCfg();
       return $this->db->count([
-        'table' => 'bbn_i18n_exp',
+        'table' => $clsCfg['tables']['i18n_exp'],
         'fields' => [],
         'where' => [
           'conditions' => [[
-            'field' => 'id_exp',
+            'field' => $clsCfg['arch']['i18n_exp']['id_exp'],
             'value' => $idExp
           ], [
-            'field' => 'expression',
+            'field' => $clsCfg['arch']['i18n_exp']['expression'],
             'operator' => 'isnotnull'
           ]]
         ]
@@ -820,6 +930,42 @@ class I18n extends cacheCls
     }
 
     return 0;
+  }
+
+
+  public function insert(string $exp, string $lang): ?string
+  {
+    if ($this->db->insert($this->class_table, [
+      $this->fields['exp'] => $this->normlizeText($exp),
+      $this->fields['lang'] => $lang
+    ])) {
+      return $this->db->lastId();
+    }
+
+    return null;
+  }
+
+
+  public function insertTranslation(string $idExp, string $lang, string $translation): int
+  {
+    $clsCfg = $this->getClassCfg();
+    return (int)$this->db->insertIgnore($clsCfg['tables']['i18n_exp'], [
+      $clsCfg['arch']['i18n_exp']['id_exp'] => $idExp,
+      $clsCfg['arch']['i18n_exp']['lang'] => $lang,
+      $clsCfg['arch']['i18n_exp']['expression'] => $this->normlizeText($translation)
+    ]);
+  }
+
+
+  public function updateTranslation(string $idExp, string $lang, string $translation): int
+  {
+    $clsCfg = $this->getClassCfg();
+    return (int)$this->db->update($clsCfg['tables']['i18n_exp'], [
+      $clsCfg['arch']['i18n_exp']['expression'] => $this->normlizeText($translation)
+    ], [
+      $clsCfg['arch']['i18n_exp']['id_exp'] => $idExp,
+      $clsCfg['arch']['i18n_exp']['lang'] => $lang
+    ]);
   }
 
 
@@ -893,17 +1039,9 @@ class I18n extends cacheCls
         $res[$r] = ['path' => $val];
 
         // checks if the table bbn_i18n of db already contains the string $r for this $source_lang
-        if (!($id = $this->db->selectOne('bbn_i18n', 'id', [
-          'exp' => $this->normlizeText($r),
-          'lang' => $source_language
-        ]))) {
+        if (!($id = $this->getId($r, $source_language))) {
           // if the string $r is not in 'bbn_i18n' inserts the string
-          if ($this->db->insertIgnore('bbn_i18n', [
-            'exp' => $this->normlizeText($r),
-            'lang' => $source_language,
-          ])) {
-            $id = $this->db->lastId();
-          }
+          $id = $this->insert($r, $source_language);
         }
 
         // create the property 'id_exp' for the string $r
@@ -913,20 +1051,11 @@ class I18n extends cacheCls
         $res[$r]['original_exp'] = $r;
 
         // checks in 'bbn_i18n_exp' if the string $r already exist for this $source_lang
-        if (!($id_exp = $this->db->selectOne('bbn_i18n_exp', 'id_exp', [
-          'id_exp' => $id,
-          'lang' => $source_language
-        ]))) {
+        if (!$this->hasTranslation($id, $source_language)) {
           // if the string $r is not in 'bbn_i18n_exp' inserts the string
           //  $done will be the number of strings found in the folder $to_explore that haven't been found in the table
           // 'bbn_i18n_exp' of db, so $done is the number of new strings inserted in in 'bbn_i18n_exp'
-          $done += (int)$this->db->insertIgnore(
-            'bbn_i18n_exp', [
-            'id_exp' => $id,
-            'lang' => $source_language,
-            'expression' => $this->normlizeText($r)
-            ]
-          );
+          $done += $this->insertTranslation($id, $source_language, $r);
           //creates an array of new strings found in the folder;
           $news[] = $r;
         }
@@ -934,10 +1063,7 @@ class I18n extends cacheCls
         // $languages is the array of languages existing in locale dir
         foreach ($languages as $lng){
           //  create a property indexed to the code of $lng containing the string $r from 'bbn_i18n_exp' in this $lng
-          $res[$r][$lng] = (string)$this->db->selectOne('bbn_i18n_exp', 'expression', [
-            'id_exp' => $id,
-            'lang' => $lng
-          ]);
+          $res[$r][$lng] = (string)$this->getTranslation($id, null, $lng) ?: '';
         }
       }
 
@@ -968,7 +1094,7 @@ class I18n extends cacheCls
         && ($parent = $this->options->parent($id_option))
         && defined($parent['code'])
     ) {
-      // @var  $path_source_lang the property language of the id_option (the path)
+      // @var string $path_source_lang the property language of the id_option (the path)
       $path_source_lang = $this->options->getProp($id_option, 'language');
 
       $locale_dir = $this->getLocaleDirPath($id_option);
@@ -1003,11 +1129,8 @@ class I18n extends cacheCls
               $po_file[$i][$lng]['translations_po'] = $t->getMsgStr();
 
               // @var  $id takes the id of the original expression in db
-              if ($id = $this->db->selectOne('bbn_i18n', 'id', [
-                'exp' => $this->normlizeText($original),
-                'lang' => $path_source_lang
-              ])) {
-                $po_file[$i][$lng]['translations_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
+              if ($id = $this->getId($original ,$path_source_lang)) {
+                $po_file[$i][$lng]['translations_db'] = $this->getTranslation($id, null, $lng);
 
                 // the id of the string
                 $po_file[$i][$lng]['id_exp'] = $id;
@@ -1017,7 +1140,7 @@ class I18n extends cacheCls
 
                 // get the url to use it for the link to ide from the table
                 foreach ($paths as $p){
-                  $po_file[$i][$lng]['paths'][] = $project->real_to_url_i18n($p);
+                  $po_file[$i][$lng]['paths'][] = $project->realToUrl($p);
                 }
 
                 // the number of times the strings is found in the files of the path
@@ -1048,117 +1171,83 @@ class I18n extends cacheCls
   {
     $ret = [];
     if (!empty($id_option)
-        && ($o = $this->options->option($id_option))
+      && ($o = $this->options->option($id_option))
     ) {
-      // @var  $path_source_lang the property language of the id_option (the path)
-      //on the option the property is language, on the project i18n
+      // @var string $path_source_lang the property language of the id_option (the path) on the option
       $path_source_lang = $this->options->getProp($id_option, 'language');
-
       //the path of the locale dirs
       $locale_dir = $this->getLocaleDirPath($id_option);
-      $languages  = array_map(
-        function ($a) {
-          return X::basename($a);
-        }, Dir::getDirs($locale_dir)
-      ) ?: [];
-
-      $i       = 0;
-      $res     = [];
+      $languages = array_map(fn($a) => X::basename($a), Dir::getDirs($locale_dir)) ?: [];
+      $res = [];
       $project = new Project($this->db, $id_project);
-
       $errors = [];
       if (!empty($languages)) {
         $po_file = [];
         $success = false;
-        foreach ($languages as $lng){
+        foreach ($languages as $lng) {
           // the path of po and mo files
-          $idx = $this->getIndexValue($id_option) ?: 1;
-          $po  = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$idx.'.po';
+          $index = $this->getIndexValue($id_option) ?: 1;
+          $po = $locale_dir.'/'.$lng.'/LC_MESSAGES/'.$o['text'].$index.'.po';
           // if the file po exist takes its content
           if ($translations = $this->parsePoFile($po)) {
-            foreach ($translations as $i => $t){
-              // @var  $original the original expression
+            foreach ($translations as $t) {
               $id = null;
+              // @var string $original the original expression
               if ($original = stripslashes($t->getMsgId())) {
                 $idx = X::find($res, ['exp' => $original]);
-                if ($idx !== null) {
-                  $todo = false;
-                  $row  =& $res[$idx];
-                }
-                else{
+                if (is_null($idx)) {
                   $todo = true;
                   $row  = [];
                 }
+                else {
+                  $todo = false;
+                  $row =& $res[$idx];
+                }
 
                 // the translation of the string found in the po file
-                if (isset($row['id'])) {
-                  $id = $row['id'];
+                if (isset($row['id_exp'])) {
+                  $id = $row['id_exp'];
                 }
 
                 // @var  $id takes the id of the original expression in db
                 if (!isset($id)
-                  && !($id = $this->db->selectOne('bbn_i18n', 'id', [
-                    'exp' => $this->normlizeText($original),
-                    'lang' => $path_source_lang
-                  ]))
+                  && !($id = $this->getId($original, $path_source_lang))
                 ) {
-                  if (!$this->db->insertIgnore('bbn_i18n', [
-                    'exp' => $this->normlizeText($original),
-                    'lang' => $path_source_lang
-                  ])) {
+                  $id = $this->insert($original, $path_source_lang);
+                  if (!$id) {
                     throw new Exception(
                       sprintf(
-                        _("Impossible to insert the original string %s in the original language %s"),
+                        _("Impossible to insert the original string << %s >> in the original language %s"),
                         $this->normlizeText($original),
                         $path_source_lang
                       )
                     );
                   }
-                  else {
-                    $id = $this->db->lastId();
-                  }
                 }
 
                 if ($id) {
                   $row[$lng.'_po'] = stripslashes($t->getMsgStr());
-                  $row[$lng.'_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', ['id_exp' => $id, 'lang' => $lng]);
-                  if ($row[$lng.'_po'] && !$row[$lng.'_db']) {
-                    if ((($row[$lng.'_db'] === false)
-                        && $this->db->insert('bbn_i18n_exp', [
-                          'expression' => $this->normlizeText($row[$lng.'_po']),
-                          'id_exp' => $id,
-                          'lang' => $lng
-                        ]))
-                      || $this->db->update('bbn_i18n_exp', [
-                        'expression' => $this->normlizeText($row[$lng.'_po'])
-                      ], [
-                        'id_exp' => $id,
-                        'lang' => $lng
-                      ])
-                    ) {
+                  $row[$lng.'_db'] = $this->getTranslation($id, null, $lng) ?: '';
+                  if (!empty($row[$lng.'_po']) && empty($row[$lng.'_db'])) {
+                    if ($this->insertTranslation($id, $lng, $row[$lng.'_po'])) {
                       $row[$lng.'_db'] = $row[$lng.'_po'];
                     }
-                    else{
+                    else {
                       throw new Exception(
-                        sprintf(
-                          _("Impossible to insert or update the expression \"%s\" in %s"),
-                          $row[$lng.'_po'],
-                          $lng
-                        )
-                      );
+                      sprintf(
+                        _("Impossible to insert the expression \"%s\" in %s"),
+                        $row[$lng.'_po'],
+                        $lng
+                      )
+                    );
                     }
-                  }
-
-                  if (empty($row[$lng.'_db'])) {
-                    $row[$lng.'_db'] = '';
-                    // die(var_dump($row[$lng.'_db']));
                   }
 
                   if ($todo) {
                     $row['id_exp'] = $id;
-                    $row['paths']  = [];
-                    $row['exp']    = $original;
-                    // @var (array) takes $paths of files in which the string was found from the file po
+                    $row['paths'] = [];
+                    $row['exp'] = $original;
+                    // @var array takes $paths of files in which the string was found from the file po
                     $paths = $t->getReference();
 
                     // get the url to use it for the link to ide from the table
@@ -1168,10 +1257,10 @@ class I18n extends cacheCls
 
                     // the number of times the strings is found in the files of the path
                     $row['occurrence'] = count($row['paths']);
-                    $res[]             = $row;
+                    $res[] = $row;
                   }
                 }
-                else{
+                else {
                   die("Error 2");
                 }
               }
@@ -1193,6 +1282,7 @@ class I18n extends cacheCls
         'errors' => $errors
       ];
     }
+
     $this->cacheSet($id_option, 'get_translations_table', $ret);
     return $ret;
   }
@@ -1211,44 +1301,30 @@ class I18n extends cacheCls
           foreach ($options as $exp => $opt) {
             $idx = X::find($rows, ['exp' => $exp]);
             if (\is_null($idx)) {
-              if (!($idExp = $this->db->selectOne('bbn_i18n', 'id', [
-                'exp' => $this->normlizeText($exp),
-                'lang' => $opt['language']
-              ]))) {
-                if ($this->db->insert('bbn_i18n', [
-                  'exp' => $this->normlizeText($exp),
-                  'lang' => $opt['language']
-                ])) {
-                  $idExp = $this->db->lastId();
-                }
-                else {
+              if (!($idExp = $this->getId($exp, $opt['language']))) {
+                $idExp = $this->insert($exp, $opt['language']);
+                if (empty($idExp)) {
                   $langText = X::getField($primaryLanguages, ['code' => $lang], 'text');
                   throw new Exception(X::_('Impossible to insert the original string %s in the original language %s', $this->normlizeText($exp), $langText));
                 }
               }
+
               if (!empty($idExp)) {
-                if (!$this->db->selectOne('bbn_i18n_exp', 'id', [
-                  'id_exp' => $idExp,
-                  'lang' => $opt['language']
-                ])) {
+                if (!$this->hasTranslation($idExp, $opt['language'])) {
                   $this->insertOrUpdateTranslation($idExp, $exp, $opt['language']);
                 }
+
                 if (!empty($opt['translation'])
-                  && !$this->db->selectOne('bbn_i18n_exp', 'id', [
-                    'id_exp' => $idExp,
-                    'lang' => $lang
-                  ])
+                  && !$this->hasTranslation($idExp, $lang)
                 ) {
                   $this->insertOrUpdateTranslation($idExp, $opt['translation'], $lang);
                 }
+
                 $r = [
                   'id_exp' => $idExp,
                   'exp' => $this->normlizeText($exp),
                   $opt['language'] . '_po' => $exp,
-                  $opt['language'] . '_db' => $this->db->selectOne('bbn_i18n_exp', 'expression', [
-                    'id_exp' => $idExp,
-                    'lang' => $opt['language']
-                  ]) ?: '',
+                  $opt['language'] . '_db' => $this->getTranslation($idExp, null, $opt['language']) ?: '',
                   'occurrence' => count($opt['paths']),
                   'paths' => $opt['paths']
                 ];
@@ -1260,24 +1336,15 @@ class I18n extends cacheCls
               }
             }
             else {
-              if (($idExp = $this->db->selectOne('bbn_i18n', 'id', [
-                'exp' => $this->normlizeText($exp),
-                'lang' => $opt['language']
-              ]))) {
+              if (($idExp = $this->getId($exp, $opt['language']))) {
                 if (!empty($opt['translation'])
-                  && !$this->db->selectOne('bbn_i18n_exp', 'id', [
-                    'id_exp' => $idExp,
-                    'lang' => $lang
-                  ])
+                  && !$this->hasTranslation($idExp, $lang)
                 ) {
                   $this->insertOrUpdateTranslation($idExp, $opt['translation'], $lang);
                 }
               }
               $rows[$idx][$lang . '_po'] = $opt['translation'];
-              $rows[$idx][$lang . '_db'] = $this->db->selectOne('bbn_i18n_exp', 'expression', [
-                'id_exp' => $rows[$idx]['id_exp'],
-                'lang' => $lang
-              ]) ?: '';
+              $rows[$idx][$lang . '_db'] = $this->getTranslation($rows[$idx]['id_exp'], null, $lang) ?: '';
             }
           }
         }
@@ -1305,9 +1372,9 @@ class I18n extends cacheCls
    */
   public function getPathToExplore(string $id_option) :? String
   {
-    if ($this->id_project) {
+    if ($this->idProject) {
       /** @var Project */
-      $project = new Project($this->db, $this->id_project);
+      $project = new Project($this->db, $this->idProject);
       //the repository
       $rep = $project->repositoryById($id_option);
 
@@ -1371,22 +1438,15 @@ class I18n extends cacheCls
    */
   public function insertOrUpdateTranslation(string $idExp, string $expression, string $lang): bool
   {
-    if ($id = $this->db->selectOne('bbn_i18n_exp', 'id', [
-      'id_exp' => $idExp,
-      'lang' => $lang
-    ])) {
-      if ($this->db->update('bbn_i18n_exp', ['expression' => $this->normlizeText($expression)], ['id' => $id])) {
+    if ($this->hasTranslation($idExp, $lang)) {
+      if ($this->updateTranslation($idExp, $lang, $expression)) {
         return true;
       }
     }
-    /** INSERT in DB */
-    else if ($this->db->insert('bbn_i18n_exp', [
-      'expression' => $this->normlizeText($expression),
-      'id_exp' => $idExp,
-      'lang' => $lang
-    ])) {
+    else if ($this->insertTranslation($idExp, $lang, $expression)) {
       return true;
     }
+
     return false;
   }
 
@@ -1399,9 +1459,10 @@ class I18n extends cacheCls
    */
   public function deleteTranslation(string $idExp, string $lang): bool
   {
-    return (bool)$this->db->delete('bbn_i18n_exp', [
-      'id_exp' => $idExp,
-      'lang' => $lang
+    $clsCfg = $this->getClassCfg();
+    return (bool)$this->db->delete($clsCfg['tables']['i18n_exp'], [
+      $clsCfg['arch']['i18n_exp']['id_exp'] => $idExp,
+      $clsCfg['arch']['i18n_exp']['lang'] => $lang
     ]);
   }
 
@@ -1467,6 +1528,12 @@ class I18n extends cacheCls
   }
 
 
+  public function hashText(string $exp): string
+  {
+    return hash(static::$hashAlgo, $this->normlizeText($exp));
+  }
+
+
   private function generateFilesPo(string $idPath, array $languages): array
   {
     /** @var string $domain The domain on which will be bound gettext */
@@ -1493,7 +1560,6 @@ class I18n extends cacheCls
         $dir = "$localeDir/$lang/LC_MESSAGES";
         /** creates the path of the dirs */
         Dir::createPath($dir);
-        /** @var  $po & $mo files path */
         $files = Dir::getFiles($dir);
         foreach ($files as $f) {
           $ext = Str::fileExt($f);
@@ -1506,11 +1572,11 @@ class I18n extends cacheCls
         //create the file at the given path
         \fopen($poFile, 'x');
         //instantiate the parser
-        $fileHandler  = new \Sepia\PoParser\SourceHandler\FileSystem($poFile);
-        $poParser     = new \Sepia\PoParser\Parser($fileHandler);
-        $catalog      = \Sepia\PoParser\Parser::parseFile($poFile);
-        $compiler     = new \Sepia\PoParser\PoCompiler();
-        $headersClass = new \Sepia\PoParser\Catalog\Header();
+        $fileHandler  = new FileSystem($poFile);
+        $poParser     = new Parser($fileHandler);
+        $catalog      = Parser::parseFile($poFile);
+        $compiler     = new PoCompiler();
+        $headersClass = new Header();
         if ($catalog->getHeaders()) {
           //headers for new po file
           $headers = [
@@ -1540,7 +1606,7 @@ class I18n extends cacheCls
         foreach ($data['res'] as $index => $r) {
           if (!$catalog->getEntry($r['original_exp'])) {
             //prepare the new entry for the Catalog
-            $entry = new \Sepia\PoParser\Catalog\Entry($r['original_exp'], $r[$lang]);
+            $entry = new Entry($r['original_exp'], $r[$lang]);
             // set the reference for the entry
             if (!empty($r['path'])) {
               $entry->setReference($r['path']);
@@ -1608,8 +1674,8 @@ class I18n extends cacheCls
         }
       }
       \clearstatcache();
-      $this->getTranslationsTable($this->id_project, $idPath);
-      $this->getTranslationsWidget($this->id_project, $idPath);
+      $this->getTranslationsTable($this->idProject, $idPath);
+      $this->getTranslationsWidget($idPath);
     }
     return [
       'json' => $json,
@@ -1709,30 +1775,19 @@ class I18n extends cacheCls
         ) {
           foreach ($translations as $trans) {
             if (!empty($trans['original']) && !empty($trans['language'])) {
-              if (!($idExp = $this->db->selectOne('bbn_i18n', 'id', ['exp' => $this->normlizeText($trans['original'])]))
-                && $this->db->insert('bbn_i18n', [
-                  'exp' => $this->normlizeText($trans['original']),
-                  'lang' => $trans['language']
-                ])
-              ) {
-                $idExp = $this->db->lastId();
+              if (!$idExp = $this->getId($trans['original'], $trans['language'])) {
+                $idExp = $this->insert($trans['original'], $trans['language']);
               }
+
               if (!empty($idExp)) {
-                if (!$this->db->selectOne('bbn_i18n_exp', 'id', ['id_exp' => $idExp, 'lang' => $trans['language']])) {
-                  $imported += $this->db->insert('bbn_i18n_exp', [
-                    'id_exp' => $idExp,
-                    'lang' => $trans['language'],
-                    'expression' => $trans['original']
-                  ]);
+                if (!$this->hasTranslation($idExp, $trans['language'])) {
+                  $imported += $this->insertTranslation($idExp, $trans['language'], $trans['original']);
                 }
+
                 if (!empty($trans['translation'])
-                  && !$this->db->selectOne('bbn_i18n_exp', 'id', ['id_exp' => $idExp, 'lang' => $lang])
+                  && !$this->hasTranslation($idExp, $lang)
                 ) {
-                  $imported += $this->db->insert('bbn_i18n_exp', [
-                    'id_exp' => $idExp,
-                    'lang' => $lang,
-                    'expression' => $trans['translation']
-                  ]);
+                  $imported += $this->insertTranslation($idExp, $lang, $trans['translation']);
                 }
               }
             }
@@ -1785,7 +1840,7 @@ class I18n extends cacheCls
 
   private function parsePoFile(string $file): array
   {
-    return \is_file($file) ? \Sepia\PoParser\Parser::parseFile($file)->getEntries() : [];
+    return \is_file($file) ? Parser::parseFile($file)->getEntries() : [];
   }
 
 }

@@ -764,7 +764,7 @@ class Notification extends DbCls
         && ($ucfg = $this->user->getClassCfg())
         && ($rendered = Tpl::render(
           $templ['content'], [
-          'user' => $usr[$ucfg['show']] ?? '',
+          'user' => $mgr->getName($id_user),
           'notifications' => $notifications
           ]
         ))
