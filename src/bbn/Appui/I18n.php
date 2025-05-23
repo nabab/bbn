@@ -29,11 +29,13 @@ use Sepia\PoParser\SourceHandler\FileSystem;
 use Sepia\PoParser\PoCompiler;
 use Sepia\PoParser\Catalog\Header;
 use Sepia\PoParser\Catalog\Entry;
+use bbn\Appui\I18n\Api;
 
 class I18n extends cacheCls
 {
   use Optional;
   use DbActions;
+  use Api;
 
   protected static $extensions = ['js', 'json', 'php', 'html'];
 
@@ -82,7 +84,7 @@ class I18n extends cacheCls
    *
    * @param db
    */
-  public function __construct(Db $db, string|null $code = null)
+  public function __construct(Db $db, string|null $code = null, array $api = [])
   {
     parent::__construct($db);
     $this->initClassCfg();
@@ -116,6 +118,10 @@ class I18n extends cacheCls
     $this->moGenerator = new MoGenerator();
     $this->options->preventI18n();
     $this->options->preventI18n(false);
+
+    if (!empty($api)) {
+      $this->initApi($api);
+    }
   }
 
 

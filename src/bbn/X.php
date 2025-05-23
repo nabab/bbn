@@ -2692,7 +2692,7 @@ class X
    * @param array  $options
    * @return mixed
    */
-  public static function curl(string $url, $param = null, array $options = ['post' => 1])
+  public static function curl(string $url, $param = null, array $options = ['post' => 1, 'header' => 0])
   {
     $ch               = curl_init();
     self::$_last_curl = $ch;
@@ -2760,7 +2760,6 @@ class X
     }
 
     $r = curl_exec($ch);
-    
     if (!$r) {
       self::log(["PROBLEME AVEC L'URL $url", curl_error($ch), curl_getinfo($ch)], 'curl');
     }
