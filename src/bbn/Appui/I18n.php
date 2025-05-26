@@ -1363,6 +1363,32 @@ class I18n extends cacheCls
   }
 
 
+  public function getNotTranslated(string $idOption, string $lang): ?array
+  {
+    if (($o = $this->options->option($idOption))
+      && !empty($o['language'])
+    ) {
+      $index = $this->getIndexPath($idOption);
+      $domain = $o['text'].(is_file($index) ? file_get_contents($index) : '');
+      $po = $this->getLocaleDirPath($idOption)."/$lang/LC_MESSAGES/$domain.po";
+      $res = [];
+      if (is_file($po)
+        && ($translations = $this->parsePoFile($po))
+      ) {
+        foreach ($translations as $tr) {
+          if (!$tr->getMsgStr()) {
+            $res[] = $tr->getMsgId();
+          }
+        }
+
+        return $res;
+      }
+    }
+
+    return null;
+  }
+
+
   /**
    * Returns the path to explore relative to the given id_option
    * It only works if i18n class is constructed by giving the id_project
@@ -1396,7 +1422,7 @@ class I18n extends cacheCls
   public function getLocaleDirPath(string $id_option) : String
   {
     if ($path = $this->getPathToExplore($id_option)) {
-      if (substr($path, -1) !== '/') {
+      if (!str_ends_with($path, '/')) {
         $path .= '/';
       }
     }

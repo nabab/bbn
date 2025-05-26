@@ -13,7 +13,7 @@ trait Api {
     'libretranslate' => 'LibreTranslate'
   ];
 
-  protected $apiUrl = 'httsp://localhost';
+  protected $apiUrl = 'https://localhost';
 
   protected $apiPort = '';
 

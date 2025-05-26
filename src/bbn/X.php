@@ -2693,7 +2693,7 @@ class X
    * @param array  $options
    * @return mixed
    */
-  public static function curl(string $url, $param = null, array $options = ['post' => 1, 'header' => 0])
+  public static function curl(string $url, $param = null, array $options = ['post' => 1])
   {
     $ch               = curl_init();
     self::$_last_curl = $ch;
