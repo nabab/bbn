@@ -90,7 +90,7 @@ class I18n extends cacheCls
     $this->initClassCfg();
     $this->user    = User::getInstance();
     $this->options = Option::getInstance();
-    if (empty($code)) {
+    if (empty($code) || ($code === 'options')) {
       if (\defined('BBN_APP_NAME')) {
         $code = CONSTANT('BBN_APP_NAME');
       }
@@ -1505,9 +1505,11 @@ class I18n extends cacheCls
     if (empty($languages)) {
       $languages = $currentLangs;
     }
+
     if (empty($languages)) {
       $languages = $this->getPrimariesLangs(true);
     }
+
     $fromAction = [];
     if (!empty($languages)) {
       if ($toRemove = \array_diff($currentLangs, $languages)) {
@@ -1607,7 +1609,7 @@ class I18n extends cacheCls
           //headers for new po file
           $headers = [
             "Project-Id-Version: 1",
-            "Report-Msgid-Bugs-To: info@bbn.so",
+            "Report-Msgid-Bugs-To: info@bbn.solutions",
             "last-Translator: BBN Solutions <support@bbn.solutions>",
             "Language-Team: ".strtoupper($lang).' <'.strtoupper($lang).'@li.org>',
             "MIME-Version: 1.0",
