@@ -2216,6 +2216,15 @@ class X
 
 
   /**
+   * Alias of search function.
+   */
+  public static function find(array $ar, $where, int $from = 0)
+  {
+    return self::search($ar, $where, $from);
+  }
+
+
+  /**
    * Filters the given array which satisfies the 'where' condition.
    *
    * ```php
