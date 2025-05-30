@@ -665,7 +665,7 @@ class Event extends modelDb
       ($ex = $this->getExceptions($recurrences[0][$rf['id_event']])) 
     ){
       return array_filter($recurrences, function($r) use($ex, $ef, $exf){
-        return X::find($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === null;
+        return X::search($ex, [$exf['day'] => date('Y-m-d', strtotime($r[$ef['start']]))]) === null;
       });    
     }
     return $recurrences;

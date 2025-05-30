@@ -1194,7 +1194,7 @@ class I18n extends cacheCls
               $id = null;
               // @var string $original the original expression
               if ($original = stripslashes($t->getMsgId())) {
-                $idx = X::find($res, ['exp' => $original]);
+                $idx = X::search($res, ['exp' => $original]);
                 if (is_null($idx)) {
                   $todo = true;
                   $row  = [];
@@ -1299,7 +1299,7 @@ class I18n extends cacheCls
         if (\is_file("$localeDir/$lang/options.json")) {
           $options = \json_decode(\file_get_contents("$localeDir/$lang/options.json"), true);
           foreach ($options as $exp => $opt) {
-            $idx = X::find($rows, ['exp' => $exp]);
+            $idx = X::search($rows, ['exp' => $exp]);
             if (\is_null($idx)) {
               if (!($idExp = $this->getId($exp, $opt['language']))) {
                 $idExp = $this->insert($exp, $opt['language']);

@@ -504,12 +504,12 @@ class Doc
       foreach ($this->parsed as $p) {
         if (
           !empty($p['tags']) &&
-          (($i = X::find($p['tags'], ['tag' => $tag])) !== null) &&
+          (($i = X::search($p['tags'], ['tag' => $tag])) !== null) &&
           (
             (empty($memberof) &&
-              (X::find($p['tags'], ['tag' => 'memberof']) === null)) ||
+              (X::search($p['tags'], ['tag' => 'memberof']) === null)) ||
             (!empty($memberof) &&
-              (($k = X::find($p['tags'], ['tag' => 'memberof'])) !== null) &&
+              (($k = X::search($p['tags'], ['tag' => 'memberof'])) !== null) &&
               ($p['tags'][$k]['name'] === $memberof)))
         ) {
           if ($grouped) {

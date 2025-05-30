@@ -2375,7 +2375,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $this->queries[$hash]['last'] = $now;
       $this->queries[$hash]['num']++;
       if ($this->list_queries[$last_index]['hash'] !== $hash) {
-        if (($idx = X::find($this->list_queries, ['hash' => $hash])) !== null) {
+        if (($idx = X::search($this->list_queries, ['hash' => $hash])) !== null) {
           $this->list_queries[$idx]['last'] = $now;
           X::move($this->list_queries, $idx, $last_index);
         }

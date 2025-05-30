@@ -610,7 +610,7 @@ class Ide
         }
       } elseif (
         !empty($real['tab'])
-        && (($i = X::find($real['repository']['tabs'], ['url' => $real['tab']])) !== null)
+        && (($i = X::search($real['repository']['tabs'], ['url' => $real['tab']])) !== null)
       ) {
         if (!empty($real['repository']['tabs'][$i]['extensions'][0]['default'])) {
           $f['value'] = $real['repository']['tabs'][$i]['extensions'][0]['default'];
@@ -1638,7 +1638,7 @@ class Ide
           $tab       = $ssc['tab'];
           $o['tab']  = $tab;
           $file_path = $ssc['path'] . '/';
-          $i         = X::find($rep['tabs'], ['url' => $tab]);
+          $i         = X::search($rep['tabs'], ['url' => $tab]);
           if ($i !== null) {
             if (!isset($rep['tabs'][$i])) {
               throw new \Error("No index corresponding to $i");
@@ -1847,7 +1847,7 @@ class Ide
               $dir       = date('Y/m/d', $moment);
               $time      = date('H:i:s', $moment);
 
-              if (($i = X::find($history_super['items'], ['text' => $date])) === null) {
+              if (($i = X::search($history_super['items'], ['text' => $date])) === null) {
                 array_push(
                   $history_super['items'],
                   [
@@ -1859,7 +1859,7 @@ class Ide
                 );
 
                 $i = \count($history_super['items']) - 1;
-                if (($idx = X::find($history_super['items'][$i]['items'], ['text' => $time])) === null) {
+                if (($idx = X::search($history_super['items'][$i]['items'], ['text' => $time])) === null) {
                   array_push(
                     $history_super['items'][$i]['items'],
                     [
@@ -1873,8 +1873,8 @@ class Ide
                   );
                 }
               } else {
-                $j = X::find($history_super['items'], ['text' => $date]);
-                if (($idx = X::find($history_super['items'][$j]['items'], ['text' => $time])) === null) {
+                $j = X::search($history_super['items'], ['text' => $date]);
+                if (($idx = X::search($history_super['items'][$j]['items'], ['text' => $time])) === null) {
                   array_push(
                     $history_super['items'][$j]['items'],
                     [
@@ -1913,7 +1913,7 @@ class Ide
                     $moment   = strtotime(str_replace('_', ' ', $filename));
                     $date     = date('d/m/Y', $moment);
                     $time     = date('H:i:s', $moment);
-                    if (($i = X::find($backups, ['text' => $date])) === null) {
+                    if (($i = X::search($backups, ['text' => $date])) === null) {
                       array_push(
                         $backups,
                         [
@@ -1926,7 +1926,7 @@ class Ide
                       $i = \count($backups) - 1;
                     }
 
-                    if (($idx = X::find($backups[$i]['items'], ['title' => $d])) === null) {
+                    if (($idx = X::search($backups[$i]['items'], ['title' => $d])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
@@ -1966,7 +1966,7 @@ class Ide
                   $date      = date('d/m/Y', $moment);
                   $time      = date('H:i:s', $moment);
 
-                  if (($i = X::find($backups, ['text' => $date])) === null) {
+                  if (($i = X::search($backups, ['text' => $date])) === null) {
                     array_push(
                       $backups,
                       [
@@ -1978,7 +1978,7 @@ class Ide
                     );
 
                     $i = \count($backups) - 1;
-                    if (($idx = X::find($backups[$i]['items'], ['text' => $time])) === null) {
+                    if (($idx = X::search($backups[$i]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
@@ -1990,8 +1990,8 @@ class Ide
                       );
                     }
                   } else {
-                    $j = X::find($backups, ['text' => $date]);
-                    if (($idx = X::find($backups[$j]['items'], ['text' => $time])) === null) {
+                    $j = X::search($backups, ['text' => $date]);
+                    if (($idx = X::search($backups[$j]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$j]['items'],
                         [
@@ -2051,7 +2051,7 @@ class Ide
                   $date      = date('d/m/Y', $moment);
                   $time      = date('H:i:s', $moment);
 
-                  if (($i = X::find($backups, ['text' => $date])) === null) {
+                  if (($i = X::search($backups, ['text' => $date])) === null) {
                     array_push(
                       $backups,
                       [
@@ -2063,7 +2063,7 @@ class Ide
                     );
 
                     $i = \count($backups) - 1;
-                    if (($idx = X::find($backups[$i]['items'], ['text' => $time])) === null) {
+                    if (($idx = X::search($backups[$i]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$i]['items'],
                         [
@@ -2077,8 +2077,8 @@ class Ide
                       );
                     }
                   } else {
-                    $j = X::find($backups, ['text' => $date]);
-                    if (($idx = X::find($backups[$j]['items'], ['text' => $time])) === null) {
+                    $j = X::search($backups, ['text' => $date]);
+                    if (($idx = X::search($backups[$j]['items'], ['text' => $time])) === null) {
                       array_push(
                         $backups[$j]['items'],
                         [
@@ -2787,8 +2787,8 @@ class Ide
 
       if (
         !empty($cfg['is_file'])
-        && ((!empty($cfg['ext']) && (X::find($rep['extensions'], ['ext' => $cfg['ext']]) === null))
-          || (!empty($cfg['new_ext']) && (X::find($rep['extensions'], ['ext' => $cfg['new_ext']]) === null)))
+        && ((!empty($cfg['ext']) && (X::search($rep['extensions'], ['ext' => $cfg['ext']]) === null))
+          || (!empty($cfg['new_ext']) && (X::search($rep['extensions'], ['ext' => $cfg['new_ext']]) === null)))
       ) {
         return false;
       }

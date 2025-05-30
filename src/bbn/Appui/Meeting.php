@@ -255,7 +255,7 @@ class Meeting extends DbCls
           'group_by' => [$this->db->colFullName($meetingsFields['id_room'], $meetingsTable)]
         ])) {
           foreach ($roomsInvited as $r) {
-            if (X::find($rooms, [$this->prefFields['id'] => $r[$this->prefFields['id']]]) === null) {
+            if (X::search($rooms, [$this->prefFields['id'] => $r[$this->prefFields['id']]]) === null) {
               $rooms[] = $r;
             }
           }

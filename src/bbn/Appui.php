@@ -1683,7 +1683,7 @@ class Appui
         $routes = array_values($tmp['root']);
       }
 
-      $idx = X::find($routes, ['name' => 'appui-core']);
+      $idx = X::search($routes, ['name' => 'appui-core']);
       $step = 100;
       $next = $step;
       $num = 0;
@@ -2228,7 +2228,7 @@ class Appui
           foreach ($dash['items'] as $item) {
             $dashClass->setCurrent($idDash);
             $widgetOpt = $optClass->option($item['id_option']);
-            if (\is_null(X::find($dashWidgets, [
+            if (\is_null(X::search($dashWidgets, [
               $prefCfg['arch']['user_options_bits']['id_option'] => $item['id_option']
             ]))) {
               $dashClass->addWidget($item['id_option']);

@@ -240,7 +240,7 @@ class X
       }
 
       $errfile = str_replace(constant('BBN_APP_PATH'), '', $errfile);
-      $idx     = self::search(
+      $idx     = self::find(
         $r, [
         'type' => $errno,
         'error' => $errstr,
@@ -2183,7 +2183,7 @@ class X
    * @param array|callable $where The where condition
    * @return null|int
    */
-  public static function search(array $ar, $where, int $from = 0)
+  public static function find(array $ar, $where, int $from = 0)
   {
     if (!empty($where)) {
       if (is_array($where)) {
@@ -2251,7 +2251,7 @@ class X
     $num = count($ar);
     $i   = 0;
     while ($i < $num) {
-      $idx = self::search($ar, $where, $i);
+      $idx = self::find($ar, $where, $i);
       if ($idx === null) {
         break;
       }
@@ -2391,7 +2391,7 @@ class X
    */
   public static function getRow(array $r, $where)
   {
-    if (($res = self::search($r, $where)) !== null) {
+    if (($res = self::find($r, $where)) !== null) {
       return $r[$res];
     }
 
@@ -2695,7 +2695,7 @@ class X
    * @param array  $options
    * @return mixed
    */
-  public static function curl(string $url, $param = null, array $options = ['post' => 1])
+  public static function curl(string $url, $param = null, array $options = ['post' => 1, 'header' => 0])
   {
     $ch               = curl_init();
     self::$_last_curl = $ch;

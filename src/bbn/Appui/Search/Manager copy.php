@@ -317,7 +317,7 @@ class Manager
     }
 
     foreach ($workers as $uid) {
-      $idx = X::find($this->workers, ['uid' => $uid]);
+      $idx = X::search($this->workers, ['uid' => $uid]);
       if (isset($this->workers[$idx])) {
         $w = array_splice($this->workers, $idx, 1)[0];
         //X::log("[STEP $w[step]] " . microtime(true) . ' KILLING WORKER WITH FILE ' . $w['log'], 'searchTimings');

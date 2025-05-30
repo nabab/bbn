@@ -575,7 +575,7 @@ class Mailing extends ClassDb
       foreach ($cfg['attachments'] as $f){
         // It exists already, the file is not sent
         if (is_array($f)) {
-          $idx = empty($mailing['medias']) ? false : X::find($mailing['medias'], ['name' => $f['name']]);
+          $idx = empty($mailing['medias']) ? false : X::search($mailing['medias'], ['name' => $f['name']]);
           if ($idx !== null) {
             if ($version === $mailing['version']) {
               // If file found in attachments when note is not modified, it is removed from the original array which can then be used for deleting all remaining attachments

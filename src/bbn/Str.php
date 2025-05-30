@@ -1905,7 +1905,7 @@ class Str
       $config->set('Core.Encoding', 'UTF-8');
       //$config->set('HTML', 'Doctype', 'HTML 4.01 Transitional');
       if (defined('PURIFIER_CACHE')) {
-        $config->set('Cache.SerializerPath', PURIFIER_CACHE);
+        $config->set('Cache.SerializerPath', constant('PURIFIER_CACHE'));
       }
       else {
         # Disable the cache entirely

@@ -764,7 +764,7 @@ MYSQL;
           $fields[] = $modelize['fields'][$col]['type'] === 'binary' ? 'ref' : 'val';
           $col = self::$database_obj->columnId($col, $table);
         } else {
-          $idx = X::find($modelize['fields'], ['id_option' => strtolower($col)]);
+          $idx = X::search($modelize['fields'], ['id_option' => strtolower($col)]);
           if (null === $idx) {
             throw new Exception("Impossible to find the option $col");
           }
@@ -790,7 +790,7 @@ MYSQL;
         ])) {
           if ($p === 'UPDATE') {
             foreach ($all as &$a) {
-              $colname = X::find($modelize['fields'], ['id_option' => $a['col']]);
+              $colname = X::search($modelize['fields'], ['id_option' => $a['col']]);
               $a['field'] = $colname;
               $a['new'] = self::getValBack($table, $id, $a['date'], $colname);
             }
@@ -1253,7 +1253,7 @@ MYSQL;
         $primary_where = false;
         $primary_defined = false;
         $primary_value = false;
-        $idx1 = X::find($cfg['values_desc'], ['primary' => true]);
+        $idx1 = X::search($cfg['values_desc'], ['primary' => true]);
         if ($idx1 !== null) {
           $primary_where = $cfg['values'][$idx1];
         }

@@ -78,7 +78,7 @@ trait I18n
           ) {
             $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];
           }
-          if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
+          if (\is_null(X::search($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
             $cfg = $this->getCfg($opt[$this->fields['id']]);
             if (!empty($cfg['i18n'])) {
               $res[] = $opt;
@@ -218,7 +218,7 @@ trait I18n
           ) {
             $opt[$this->fields['code']] = (int)$opt[$this->fields['code']];
           }
-          if (\is_null(X::find($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
+          if (\is_null(X::search($res, [$this->fields['id'] => $opt[$this->fields['id']]]))) {
             $cfg = $this->getCfg($opt[$this->fields['id']]);
             $res[] = $opt;
             if (!empty($cfg['i18n_inheritance'])) {
@@ -312,7 +312,7 @@ trait I18n
     $fid = $this->fields['id'];
     if ($children = $this->fullOptions($opt[$fid])) {
       foreach ($children as $child) {
-        if (\is_null(X::find($res, [$fid => $child[$fid]]))) {
+        if (\is_null(X::search($res, [$fid => $child[$fid]]))) {
           $cfg = $this->getCfg($child[$fid]);
           $child = [
             $this->fields['id'] => $child[$this->fields['id']],

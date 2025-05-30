@@ -452,12 +452,12 @@ class Changes extends EntityTable
           if (isset($cfg['subdata']['id'])) {
             $cfg['subdata']['id'] = $id_sub2;
           }
-          elseif (($idx_id = X::find($cfg['subdata']['data'], ['field' => 'id'])) !== null) {
+          elseif (($idx_id = X::search($cfg['subdata']['data'], ['field' => 'id'])) !== null) {
             $cfg['subdata']['data'][$idx_id]['value'] = $id_sub2;
           }
 
           if (isset($field_sub)
-            && (($idx_sub = X::find($cfg['data'], ['field' => $field_sub])) !== null)
+            && (($idx_sub = X::search($cfg['data'], ['field' => $field_sub])) !== null)
           ) {
             $cfg['data'][$idx_sub]['value'] = $id_sub2;
           }
@@ -479,7 +479,7 @@ class Changes extends EntityTable
               if (isset($cfg['id'])) {
                 $cfg['id'] = $id_new;
               }
-              elseif (($idx_id = X::find($cfg['data'], ['field' => 'id'])) !== null) {
+              elseif (($idx_id = X::search($cfg['data'], ['field' => 'id'])) !== null) {
                 $cfg['data'][$idx_id]['value'] = $id_new;
               }
             }
@@ -507,7 +507,7 @@ class Changes extends EntityTable
               if (isset($cfg['id'])) {
                 $cfg['id'] = $id_new;
               }
-              elseif (($idx_id = X::find($cfg['data'], ['field' => 'id'])) !== null) {
+              elseif (($idx_id = X::search($cfg['data'], ['field' => 'id'])) !== null) {
                 $cfg['data'][$idx_id]['value'] = $id_new;
               }
             }
@@ -1016,7 +1016,7 @@ class Changes extends EntityTable
         || ($old[$this->fields['state']] === static::$states['email']))
       && ($cfg = \json_decode($old[$this->fields['cfg']], true))
     ) {
-      if (($idx = X::find($cfg['data'], ['field' => $todata['field']])) !== null) {
+      if (($idx = X::search($cfg['data'], ['field' => $todata['field']])) !== null) {
         $cfg['data'][$idx] = X::mergeArrays($cfg['data'][$idx], $this->checkEmailRequired($cfg['table'], $todata));
         $cfg['subdata']    = $subdata;
         if ($this->db->update(
@@ -1171,8 +1171,8 @@ class Changes extends EntityTable
             }
 
             foreach ($code as $c){
-              if ((($idx = X::find($all, ['code' => $c])) !== null)
-                && (X::find($res, ['code' => (string)$c]) === null)
+              if ((($idx = X::search($all, ['code' => $c])) !== null)
+                && (X::search($res, ['code' => (string)$c]) === null)
               ) {
                 $res[] = [
                   'code' => (string)$c,
@@ -1200,8 +1200,8 @@ class Changes extends EntityTable
             }
           }
           else {
-            if (X::find($res, ['code' => (string)$code]) === null) {
-              if (($idx = X::find($all, ['code' => (string)$code])) !== null) {
+            if (X::search($res, ['code' => (string)$code]) === null) {
+              if (($idx = X::search($all, ['code' => (string)$code])) !== null) {
                 $res[] = [
                   'code' => (string)$code,
                   'files' => json_decode($all[$idx][$filesFields['files']]),

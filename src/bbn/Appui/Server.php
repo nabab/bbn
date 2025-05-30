@@ -326,7 +326,7 @@ class Server
       $domains = $this->getCache('domains');
       $this->makeCache('', $domain);
       if (
-          !\is_null($idx = X::find($domains, ['name' => $domain]))
+          !\is_null($idx = X::search($domains, ['name' => $domain]))
           && !empty($domains[$idx]['parent_domain'])
       ) {
         $this->makeCache('subdomains', $domains[$idx]['parent_domain']);
@@ -546,7 +546,7 @@ class Server
         ($domains = $this->getCache('domains'))
         && $this->virtualmin->delete_domain(['domain' => $domain])
     ) {
-      if (!\is_null($idx = X::find($domains, ['name' => $domain]))) {
+      if (!\is_null($idx = X::search($domains, ['name' => $domain]))) {
         if (!empty($domains[$idx]['parent_domain'])) {
           $this->makeCache('subdomains', $domains[$idx]['parent_domain']);
         }
@@ -590,7 +590,7 @@ class Server
       $this->virtualmin->setJson();
       $this->makeCache('', $newDomain);
       $domains = $this->getCache('domains');
-      if (!\is_null($idx = X::find($domains, ['name' => $domain]))) {
+      if (!\is_null($idx = X::search($domains, ['name' => $domain]))) {
         if (!empty($domains[$idx]['parent_domain'])) {
           $this->makeCache('subdomains', $domains[$idx]['parent_domain']);
         }
@@ -631,7 +631,7 @@ class Server
       $this->makeCache('', $newDomain);
       $domains = $this->getCache('domains');
       if (
-          !\is_null($idx = X::find($domains, ['name' => $domain]))
+          !\is_null($idx = X::search($domains, ['name' => $domain]))
           && !empty($domains[$idx]['parent_domain'])
       ) {
         $this->makeCache('subdomains', $domains[$idx]['parent_domain']);
@@ -809,7 +809,7 @@ class Server
           if (!empty($q['server'])) {
             $running = self::getRunningTasks();
             if (empty($running)
-              || (bbn\X::find($running, ['server' => $q['server']]) === null)
+              || (bbn\X::search($running, ['server' => $q['server']]) === null)
             ) {
               exec(sprintf('php -f %srouter.php %s "%s"',
                 $appPath,
@@ -994,7 +994,7 @@ class Server
     if (!empty($domain)) {
       $dom     = !empty($domains) ? $domains[0] : [];
       $domains = $this->getCache('domains');
-      if (!\is_null($idx = X::find($domains, ['name' => $domain]))) {
+      if (!\is_null($idx = X::search($domains, ['name' => $domain]))) {
         $domains[$idx] = $dom;
       }
       else {
@@ -1125,7 +1125,7 @@ class Server
             (empty($found) || empty($found[0]))
             || (($d['name'] !== $dom . '.')
                 && (\substr_count($d['name'], '.') > 2)
-                && (!\is_null(X::find($domains, ['name' => substr($d['name'], 0, -1)]))))
+                && (!\is_null(X::search($domains, ['name' => substr($d['name'], 0, -1)]))))
         ) {
           unset($dns[$i]);
         }

@@ -1326,28 +1326,28 @@ EXPECTED;
       ['id' => 550, 'first_name' => 'John', 'last_name' => 'Smith'],
     ];
     
-    $this->assertSame(0, X::find($arr, ['first_name' => 'John', 'last_name' => 'Doe']));
-    $this->assertSame(1, X::find($arr, ['first_name' => 'Andrew', 'last_name' => 'Williams']));
-    $this->assertSame(2, X::find($arr, ['first_name' => 'Albert', 'last_name' => 'Taylor']));
-    $this->assertSame(3, X::find($arr, ['first_name' => 'Mike', 'last_name' => 'Smith']));
-    $this->assertSame(0, X::find($arr, ['first_name' => 'John']));
-    $this->assertSame(3, X::find($arr, ['last_name' => 'Smith']));
+    $this->assertSame(0, X::search($arr, ['first_name' => 'John', 'last_name' => 'Doe']));
+    $this->assertSame(1, X::search($arr, ['first_name' => 'Andrew', 'last_name' => 'Williams']));
+    $this->assertSame(2, X::search($arr, ['first_name' => 'Albert', 'last_name' => 'Taylor']));
+    $this->assertSame(3, X::search($arr, ['first_name' => 'Mike', 'last_name' => 'Smith']));
+    $this->assertSame(0, X::search($arr, ['first_name' => 'John']));
+    $this->assertSame(3, X::search($arr, ['last_name' => 'Smith']));
 
-    $this->assertSame(3, X::find($arr, ['first_name' => 'Mike', 'last_name' => 'Smith'], 2));
-    $this->assertSame(3, X::find($arr, ['first_name' => 'Mike', 'last_name' => 'Smith'], 3));
-    $this->assertNull(X::find($arr, ['first_name' => 'Mike', 'last_name' => 'Smith'], 4));
-    $this->assertNull(X::find($arr, ['first_name' => 'Mike', 'last_name' => 'Taylor']));
-    $this->assertNull(X::find($arr, ['first_name' => 'mike']));
-    $this->assertNull(X::find($arr, []));
+    $this->assertSame(3, X::search($arr, ['first_name' => 'Mike', 'last_name' => 'Smith'], 2));
+    $this->assertSame(3, X::search($arr, ['first_name' => 'Mike', 'last_name' => 'Smith'], 3));
+    $this->assertNull(X::search($arr, ['first_name' => 'Mike', 'last_name' => 'Smith'], 4));
+    $this->assertNull(X::search($arr, ['first_name' => 'Mike', 'last_name' => 'Taylor']));
+    $this->assertNull(X::search($arr, ['first_name' => 'mike']));
+    $this->assertNull(X::search($arr, []));
 
     // Using a callback
-    $this->assertSame(2, X::find($arr, function($item) {
+    $this->assertSame(2, X::search($arr, function($item) {
         return $item['first_name'] === 'Albert' && $item['last_name'] == 'Taylor';
       })
     );
 
     $this->assertNull(
-      X::find($arr, function ($item) {
+      X::search($arr, function ($item) {
         return $item['first_name'] === 'Mike' && $item['last_name'] == 'Taylor';
       })
     );
@@ -1355,12 +1355,12 @@ EXPECTED;
     // Using the whole array
     $this->assertSame(
       0,
-      X::find($arr, ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'])
+      X::search($arr, ['id' => 1, 'first_name' => 'John', 'last_name' => 'Doe'])
     );
 
 
     $this->assertNull(
-      X::find($arr, ['id' => 11111, 'first_name' => 'John', 'last_name' => 'Doe'])
+      X::search($arr, ['id' => 11111, 'first_name' => 'John', 'last_name' => 'Doe'])
     );
   }
   

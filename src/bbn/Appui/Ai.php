@@ -5,6 +5,7 @@ namespace bbn\Appui;
 use Exception;
 use bbn\Db;
 use bbn\X;
+use bbn\Str;
 use bbn\User;
 use bbn\User\Preferences;
 use bbn\File\System;
@@ -41,7 +42,7 @@ class Ai extends DbCls
         'output' => 'output',
         'creation_date' => 'creation_date',
         'usage_count' => 'usage_count',
-        'shortcode' => 'shortcode',
+        'shortcode' => 'shortcode'
       ],
       'ai_prompt_items' => [
         'id' => 'id',
@@ -51,6 +52,14 @@ class Ai extends DbCls
         'creation_date' => 'creation_date',
         'mime' => 'mime',
         'ai' => 'ai',
+      ],
+      'ai_prompt_settings' => [
+        'id' => 'id',
+        'id_prompt' => 'id_prompt',
+        'id_model' => 'id_model',
+        'def' => 'def',
+        'last_use' => 'last_use',
+        'cfg' => 'cfg',
       ],
     ]
   ];
@@ -311,7 +320,7 @@ ws ::= ([ \t\n] ws)?',
     }
     
     //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
-    $built_prompt = $this->buildPrompt($prompt);
+    $built_prompt = $this->buildPromptFromRow($prompt);
     
     X::log($built_prompt, 'ai_logs');
     
@@ -525,11 +534,13 @@ ws ::= ([ \t\n] ws)?',
 
     $id_option = $option->fromCode('prompt', 'types', 'note', 'appui');
     $id_note = $this->note->insert($data['title'], $data['content'], $id_option, true, false, NULL, NULL, 'text/plain', $data['lang']);
+
     return $this->dbTraitInsert([
       $this->class_cfg['arch']['ai_prompt']['id_note'] => $id_note,
       $this->class_cfg['arch']['ai_prompt']['input'] => $data['input'],
       $this->class_cfg['arch']['ai_prompt']['output'] => $data['output'],
       $this->class_cfg['arch']['ai_prompt']['shortcode'] => $data['shortcode'] ?: null,
+      $this->class_cfg['arch']['ai_prompt']['cfg'] => $cfg ? json_encode($cfg) : null
     ]);
   }
   
@@ -608,6 +619,12 @@ ws ::= ([ \t\n] ws)?',
     
     return true;
   }
+
+
+  public function getChatTitle() : string
+  {
+    return Str::genpwd(10);
+  }
   
   
   /**
@@ -626,12 +643,10 @@ ws ::= ([ \t\n] ws)?',
     $timestamp = time();
     $fs = new System();
     if ($fs->exists($path)) {
-      $jsonString = $fs->getContents($path);
-      $jsonData = json_decode($jsonString, true);
+      $jsonData = $fs->decodeContents($path, 'json', true);
   
     } else {
       $jsonData = [];
-  
     }
 
     $d = [[
@@ -653,9 +668,13 @@ ws ::= ([ \t\n] ws)?',
     if ($cfg) {
       $d[1]['cfg'] = $cfg;
     }
-    array_push($jsonData, ...$d);
-    $jsonData = json_encode($jsonData);
-    $fs->putContents($path, $jsonData);
+    if (isset($jsonData['conversation'])) {
+      array_push($jsonData['conversation'], ...$d);
+    } else {
+      array_push($jsonData, ...$d);
+    }
+
+    $fs->encodeContents($jsonData, $path, 'json');
     return $d;
   }
   
@@ -674,6 +693,24 @@ ws ::= ([ \t\n] ws)?',
     ]);
     
     return true;
+  }
+
+
+  public function insertSettings(string $id_prompt, string $id_model, ?array $cfg = null): ?string
+  {
+    if (empty($id_prompt) || empty($id_model)) {
+      return false;
+    }
+    
+    if ($this->db->insert($this->class_cfg['tables']['ai_prompt_settings'], [
+      $this->class_cfg['arch']['ai_prompt_settings']['id_prompt'] => $id_prompt,
+      $this->class_cfg['arch']['ai_prompt_settings']['id_model'] => $id_model,
+      $this->class_cfg['arch']['ai_prompt_settings']['cfg'] => json_encode($cfg),
+    ])) {
+      return $this->db->lastId();
+    }
+
+    return null;
   }
   
   /**

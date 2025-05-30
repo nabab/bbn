@@ -1437,7 +1437,7 @@ class Project extends DbCls
    */
   public function repositoryById(string $id)
   {
-    $idx = X::find($this->repositories, ['id' => $id]) ?: null;
+    $idx = X::search($this->repositories, ['id' => $id]) ?: null;
     if ($idx !== null) {
       return $this->repositories[$idx];
     }

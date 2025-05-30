@@ -396,7 +396,7 @@ class Search extends Basic
 
       if ($search_results = $this->getResult($item)) {
         foreach ($search_results as $s) {
-          $row = X::find($results['data'], ['hash' => $s['hash']]);
+          $row = X::search($results['data'], ['hash' => $s['hash']]);
           if (!empty($results['data'][$row])) {
             $results['data'][$row]['score'] += $s['score'];
           }

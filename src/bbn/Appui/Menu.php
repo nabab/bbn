@@ -158,7 +158,7 @@ class Menu extends bbn\Models\Cls\Basic
           && ($arch = $c['arch']['user_options_bits'])
       ) {
         if (($bits = $this->pref->getBits($id_menu, false, false))
-            && ( X::find($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)
+            && ( X::search($bits, [$arch['id_option'] => $bit[$arch['id_option']]]) !== null)
         ) {
           return null;
         }

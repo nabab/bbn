@@ -275,7 +275,7 @@ abstract class DocumentRequest extends EntityTable
       && ($requests = $this->all())
     ) {
       foreach ($requests as $r) {
-        if (X::find($r['docs'], [$dFields['doc_type'] => $docType]) !== null) {
+        if (X::search($r['docs'], [$dFields['doc_type'] => $docType]) !== null) {
           $request = $r;
         }
       }

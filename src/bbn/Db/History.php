@@ -832,7 +832,7 @@ MYSQL;
           $col = $this->database_obj->columnId($col, $table);
         }
         else {
-          $idx = X::find($modelize['fields'], ['id_option' => strtolower($col)]);
+          $idx = X::search($modelize['fields'], ['id_option' => strtolower($col)]);
           if (null === $idx) {
             throw new \Error(X::_("Impossible to find the option $col"));
           }
@@ -913,7 +913,7 @@ MYSQL;
       && ($modelize = $this->getTableCfg($table))
     ) {
       if (Str::isUid($column)) {
-        $column = X::find($modelize['fields'], ['id_option' => strtolower($column)]);
+        $column = X::search($modelize['fields'], ['id_option' => strtolower($column)]);
       }
 
       if (null === $column || !isset($modelize['fields'][$column])) {
@@ -1236,7 +1236,7 @@ MYSQL;
         $primary_where   = false;
         $primary_defined = false;
         $primary_value   = false;
-        $idx1            = X::find($cfg['values_desc'], ['primary' => true]);
+        $idx1            = X::search($cfg['values_desc'], ['primary' => true]);
         if ($idx1 !== null) {
           $primary_where = $cfg['values'][$idx1];
         }

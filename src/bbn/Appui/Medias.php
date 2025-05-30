@@ -313,14 +313,14 @@ class Medias extends DbCls
           return $this->search($filters[0]['value'], $cfg, $limit, $start);
         }
       }
-      if (($pvtIdx = X::find($filters, ['field' => $ct['private']])) === null) {
+      if (($pvtIdx = X::search($filters, ['field' => $ct['private']])) === null) {
         $filters[] = [
           'field' => $ct['private'],
           'value' => 0
         ];
       }
       else {
-        $userIdx = X::find($filters, ['field' => $ct['id_user']]);
+        $userIdx = X::search($filters, ['field' => $ct['id_user']]);
         $id_user = $this->userId;
         if (!empty($filters[$pvtIdx]['value'])) {
           if ($userIdx === null) {

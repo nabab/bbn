@@ -49,6 +49,9 @@ class Url extends DbCls
     while (strpos($url, '//')) {
       $url = str_replace('//', '/', $url);
     }
+    if (strpos($url, '../') !== false) {
+      throw new Exception(X::_("Invalid URL: %s", $url));
+    }
 
     return normalizer_normalize($url . ($prefix ? '/' . $prefix : ''));
   }

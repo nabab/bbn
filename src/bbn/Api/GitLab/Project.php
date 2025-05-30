@@ -129,7 +129,7 @@ trait Project
   {
     $diff = $this->request($this->projectURL . $project . '/repository/commits/' . $id . '/diff');
     if (!empty($filePath)) {
-      if (!\is_null($i = \bbn\X::find($diff, function($d) use($filePath){
+      if (!\is_null($i = \bbn\X::search($diff, function($d) use($filePath){
         return ($d->old_path === $filePath) || ($d->new_path === $filePath);
       }))) {
         return \bbn\X::toArray($diff[$i]);

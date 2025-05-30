@@ -1343,7 +1343,7 @@ class Email extends Basic
         // set the first value of $a in $ele and remove it in the array
         $ele = array_shift($a);
         // search if res contain an array with 'text' => $ele and return the index or null instead
-        $idx = X::find($res, ['text' => $ele]);
+        $idx = X::search($res, ['text' => $ele]);
 
         if (null === $idx) {
           // count number of element in array (useless ?)
@@ -1381,7 +1381,7 @@ class Email extends Basic
         }
 
         foreach ($real as $r) {
-          $idx = X::find($db, ['text' => $r['text']]);
+          $idx = X::search($db, ['text' => $r['text']]);
           if (null === $idx) {
             if ($id_parent) {
               $r['id_parent'] = $id_parent;
@@ -1409,7 +1409,7 @@ class Email extends Basic
         }
 
         foreach ($db as $r) {
-          $idx = X::find($real, ['text' => $r['text']]);
+          $idx = X::search($real, ['text' => $r['text']]);
           if (null === $idx) {
             $res['delete'][] = $r;
           }

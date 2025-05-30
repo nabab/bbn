@@ -99,7 +99,7 @@ class Apache
               }
 
               $num++;
-              $idx = X::find(
+              $idx = X::search(
                 $res,
                 [
                   'error' => $parsed['error'],
@@ -130,7 +130,7 @@ class Apache
                 if (count($res) > self::$file_limit) {
                   $tmp = $res[$current_error];
                   X::sortBy($res, 'last_date', 'DESC');
-                  $current_error = X::find($res, $tmp);
+                  $current_error = X::search($res, $tmp);
                   array_pop($res);
                 }
                 self::setLastErrors($num);
