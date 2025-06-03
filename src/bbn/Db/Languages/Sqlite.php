@@ -154,7 +154,7 @@ class Sqlite extends Sql
     if (is_file($cfg['db'])) {
       $info        = X::pathinfo($cfg['db']);
       $cfg['host'] = $info['dirname'].DIRECTORY_SEPARATOR;
-      $cfg['db']   = $info['basename'];
+      $cfg['db']   = $info['filename'];
     }
     elseif (\defined('BBN_DATA_PATH')
       && is_dir(constant('BBN_DATA_PATH').'db')
@@ -675,6 +675,9 @@ class Sqlite extends Sql
       ).')';
     }
 
+    if ($c = $this->getCreateConstraints($table, $model)) {
+      $st .= PHP_EOL. $c;
+    }
     $st .= PHP_EOL . ')';
     return $st;
   }
@@ -1192,30 +1195,31 @@ class Sqlite extends Sql
   public function getCreateConstraints(string $table, array|null $model = null): string
   {
     $st = '';
-    if (!empty($model)) {
-      if ($last = count($model)) {
-        $st .= 'ALTER TABLE '.$this->escape($table).PHP_EOL;
-        $i   = 0;
+    if (!$model) {
+      $model = $this->modelize($table);
+    }
 
-        if (!is_array($model[0])) {
-          $constraints[] = $model;
-        }
-        else{
-          $constraints = $model;
-        }
-
-        foreach ($constraints as $name => $key) {
-          X::log($key, 'vito');
+    if ($model && !empty($model['keys'])) {
+      $keys = array_filter(
+        $model['keys'],
+        fn($a) => !empty($a['columns'])
+          && !empty($a['constraint'])
+          && !empty($a['ref_table'])
+          && !empty($a['ref_column'])
+      );
+      if ($last = count($keys)) {
+        $i = 0;
+        foreach ($keys as $k) {
           $i++;
-          $st .= '  ADD '.
-            'CONSTRAINT '.$this->escape($key['constraint']).
-            (!empty($key['foreign_key']) ? ' FOREIGN KEY ('.$this->escape($key['columns'][0]).') ' : '').
-            (!empty($key['unique']) ? ' UNIQUE ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
-            (!empty($key['primary_key']) ? ' PRIMARY KEY ('.$this->escape($key['ref_table'].'_'.$key['columns'][0]).') ' : '').
-            'REFERENCES '.$this->escape($key['ref_table']).'('.$this->escape($key['columns'][0]).') '.
-            ($key['delete'] ? ' ON DELETE '.$key['delete'] : '').
-            ($key['update'] ? ' ON UPDATE '.$key['update'] : '').
-            ($i === $last ? ';' : ','.PHP_EOL);
+          $cols = implode(', ', array_map(fn($col) => $this->escape($col), $k['columns']));
+          $refCols = is_array($k['ref_column']) ?
+            implode(', ', array_map(fn($col) => $this->escape($col), $k['ref_column'])) :
+            $this->escape($k['ref_column']);
+          $st .= '  CONSTRAINT ' . $this->escape($k['constraint']) . ' FOREIGN KEY (' . $cols . ') ' .
+            'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
+            (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
+            (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
+            ($i === $last ? '' : ',' . PHP_EOL);
         }
       }
     }
@@ -1308,23 +1312,13 @@ class Sqlite extends Sql
     }
 
     if (array_key_exists('default', $col)) {
-      if (!empty($col['defaultExpression'])) {
-        $st .= ' DEFAULT ';
-        if ($col['default'] === null) {
-          $st .= ' NULL';
-        }
-        else {
-          $st .= (string)$col['default'];
-        }
-      }
-      else {
-        $def = (string)$col['default'];
-        if (!empty($col['default'])) {
-          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
-        }
+      if (!is_null($col['default'])
+        && ($col['default'] !== 'NULL')
+      ) {
+        $st .= " DEFAULT " . Str::escapeQuotes(trim((string)$col['default']));
       }
     }
-    
+
     return $st;
   }
 
