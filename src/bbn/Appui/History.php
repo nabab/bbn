@@ -910,7 +910,7 @@ MYSQL;
             $refs = $db->findReferences($tableName . '.' . $primary);
             self::$structures[$table]['refs'] = array_map(fn($a) => ['table' => X::split($a, '.')[1], 'col' => X::split($a, '.')[2]], $refs);
             foreach (self::$structures[$table]['refs'] as &$r) {
-              $refCfg = self::getTableCfg($r['table']);
+              $refCfg = $db->modelize($r['table']);
               $r['nullable'] = $refCfg['fields'][$r['col']]['null'] ?? false;
             }
       
