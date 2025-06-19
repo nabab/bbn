@@ -184,6 +184,13 @@ trait Optional
   }
 
 
+  public static function getSimpleOptions(...$codes)
+  {
+    $codes[] = self::getOptionRoot();
+    return self::getOptionsObject()->options(...$codes);
+  }
+
+
   public static function getOptionsRef(...$codes)
   {
     $codes[] = self::getOptionRoot();
@@ -198,17 +205,33 @@ trait Optional
   }
 
 
-  public static function getOptionsTextValue(...$codes)
+  public static function getOptionsTextValue(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array
   {
-    $codes[] = self::getOptionRoot();
-    return ($id = self::getOptionId($codes)) ? self::getOptionsObject()->textValueOptions($id) : [];
+    if (is_string($id) && !Str::isUid($id)) {
+      $id = [$id];
+    }
+
+    if (is_array($id)) {
+      $id[] = self::getOptionRoot();
+    }
+
+    return $id ? self::getOptionsObject()->textValueOptions($id, $text, $value, ...$additionalFields) : [];
   }
 
 
-  public static function getOptionsTextValueRef(...$codes)
+  public static function getOptionsTextValueRef(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array
   {
-    $codes[] = self::getOptionRoot();
-    return ($id = self::getOptionId(...$codes)) ? self::getOptionsObject()->textValueOptionsRef($id) : [];
+    if (is_string($id) && !Str::isUid($id)) {
+      $id = [$id];
+    }
+
+    if (is_array($id)) {
+      $codes = $id;
+      $codes[] = self::getOptionRoot();
+      $id = self::getOptionId(...$codes);
+    }
+
+    return $id ? self::getOptionsObject()->textValueOptionsRef($id, $text, $value, ...$additionalFields) : [];
   }
 
 }

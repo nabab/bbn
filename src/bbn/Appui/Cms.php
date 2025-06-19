@@ -522,7 +522,7 @@ class Cms extends DbCls
     }
     if (empty($type_cond)) {
       if (!($opt = Note::getOptionsObject()->option($type))) {
-        throw new \Exception(X::_("Impossible to find a type %s", $type));
+        throw new Exception(X::_("Impossible to find a type %s", $type));
       }
 
       $type_cond[] = [

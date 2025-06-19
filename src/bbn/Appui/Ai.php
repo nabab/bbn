@@ -19,9 +19,10 @@ use Gioni06\Gpt3Tokenizer\Gpt3Tokenizer;
 
 class Ai extends DbCls
 {
-  
   use DbActions;
   use Optional;
+
+  protected const MAX_TOKENS = 4000;
   
   /**
    * Default Dbconfig configuration for the class
@@ -69,81 +70,34 @@ class Ai extends DbCls
    *
    * @var array $responseFormats
    */
-  private static $responseFormats = 
-  [
-    [
-      'value' => 'rte',
-      'text' => 'Rich Text Editor',
-      'prompt' => 'Your response needs to be in rich text format',
-      'component' => 'bbn-rte'
-    ], [
-      'value' => 'markdown',
-      'text' => 'Markdown',
-      'prompt' => 'Your response needs to be in Markdown format',
-      'component' => 'bbn-markdown',
-    ], [
-      'value' => 'textarea',
-      'text' => 'Text Multiline',
-      'prompt' => 'Your response needs to be returned as multiple lines of text',
-      'component' => 'bbn-textarea',
-    ], [
-      'value' => 'code-php',
-      'text' => 'Code PHP',
-      'prompt' => 'Your response should be pure PHP code with documentation comments if relevant, and avoid completly markdown format',
-      'component' => 'bbn-code',
-    ], [
-      'value' => 'code-js',
-      'text' => 'Code JS',
-      'prompt' => "Your response needs to be pure Javascript code, it shouldn't have anything else than code, and it shouldn't be surouneded by markdown quotes.",
-      'component' => 'bbn-code',
-    ], [
-      'value' => 'single-line',
-      'text' => 'Single Line',
-      'prompt' => 'Your response needs to be entered as a single line of text',
-      'component' => 'bbn-input',
-    ], [
-      'value' => 'json-editor',
-      'text' => 'JSON',
-      'prompt' => 'Your response needs to use this grammar : root   ::= object
-
-object ::= "{" ws ( string ":" ws value ("," ws string ":" ws value)* )? "}"
-
-value  ::= object | array | string | number | ("true" | "false" | "null") ws
-
-array  ::= "[" ws ( value ("," ws value)* )? "]" ws
-
-string ::= "\"" ( [a-zA-Z0-9] )* "\"" ws
-
-number ::= ("-"? ([0-9] | [1-9] [0-9]*)) ("." [0-9]+)? ([eE] [-+]? [0-9]+)? ws
-
-ws ::= ([ \t\n] ws)?',
-      'component' => 'bbn-json-editor',
-    ]
-  ];
+  private static array $responseFormats;
   
   /**
    * OpenAI API instance
    *
    * @var OpenAi $ai
    */
-  protected $ai;
+  protected OpenAi $ai;
 
-  protected $prefs;
+  protected Preferences $prefs;
   
   /** @var Note $note Note instance */
-  private $note;
+  private Note $note;
 
   /** @var Passwords $pass */
-  private $pass;
-  private $user;
+  private Passwords $pass;
 
-  protected $endpoint;
+  private System $fs;
+  private User $user;
 
-  protected $model;
+  protected string $endpoint;
 
-  protected $baseUrl;
+  protected ?string $model;
 
-  private $key;
+  protected string $baseUrl;
+
+  private string $key;
+  protected array $cfg;
   
   /**
    * Ai constructor.
@@ -157,7 +111,7 @@ ws ::= ([ \t\n] ws)?',
   {
     parent::__construct($db);
     $this->initClassCfg($cfg);
-    self::optionalInit();
+    self::init();
     if (!defined("BBN_OPENAI_KEY")) {
       throw new Exception("The OpenAI key is not defined");
     }
@@ -166,7 +120,16 @@ ws ::= ([ \t\n] ws)?',
     $this->prefs = Preferences::getInstance();
     $this->note = new Note($this->db);
     $this->pass = new Passwords($this->db);
+    $this->fs = new System();
   }
+
+  private static function init()
+  {
+    if (!self::$optional_is_init) {
+      self::optionalInit();
+      self::$responseFormats = self::getOptions('formats');
+    }
+  } 
 
   public function setEndpoint(string|null $id = null, $model = null) {
     if ($endpoint = $this->getEndpoint($id)) {
@@ -186,11 +149,17 @@ ws ::= ([ \t\n] ws)?',
       $model = $endpoint['models'][0]['text'];
     }
 
+    $this->endpoint = $id;
     $this->setModel($model);
   }
 
   public function setModel(string|null $modelName = null) {
     $this->model = $modelName;
+  }
+
+  public function setCfg(array $cfg): void
+  {
+
   }
 
 
@@ -203,17 +172,21 @@ ws ::= ([ \t\n] ws)?',
     return $res;
   }
 
+  
+
   public function syncModels(): bool
   {
-    $models = $this->getModels();
-    if (!empty($models) && isset($models['data'])) {
-      $id_parent = self::getOptionId('models');
+    if (isset($this->endpoint) && ($models = $this->getModels())) {
+      $endpoint = $this->getEndpoint($this->endpoint);
+      $currentModels = $endpoint['models'] ?? [];
+      $idModels = self::getOptionId('models');
       foreach ($models['data'] as $model) {
-        self::getOptionsObject()->add([
-          'text' => $model['id'],
-          'code' => $model['id'],
-          'id_parent' => $id_parent
-        ]);
+        if (!X::getRow($currentModels, ['text' => $model['id']])) {
+          $this->prefs->addBit($this->endpoint, [
+            'text' => $model['id'],
+            'id_option' => $idModels
+          ]);
+        }
       }
 
       return true;
@@ -258,30 +231,18 @@ ws ::= ([ \t\n] ws)?',
     if ($idEndpoint = self::getOptionId('endpoints')) {
       $this->ai = new OpenAi($pass);
       $this->ai->setBaseURL($url);
-      if ($models = $this->getModels()) {
-        if (
-          ($idPref = $this->prefs->addToGroup($idEndpoint, [
-            'text' => $name,
-            'url' => $url,
-            'public' => $public ? 1 : 0
-          ]))
-          && ($this->pass->userStore($pass, $idPref, $this->user))
-        ) {
-          $idModels = self::getOptionId('models');
-          foreach ($models['data'] as $model) {
-            $idModel = self::getOptionsObject()->add([
-              'text' => $model['id'],
-              'code' => $model['id'],
-              'id_parent' => $idModels
-            ]);
-            $this->prefs->addBit($idPref, [
-              'text' => $model['id'],
-              'id_option' => $idModel
-            ]);
-          }
+      if (
+        ($idPref = $this->prefs->addToGroup($idEndpoint, [
+          'text' => $name,
+          'url' => $url,
+          'public' => $public ? 1 : 0
+        ]))
+        && ($this->pass->userStore($pass, $idPref, $this->user))
+      ) {
+        $this->setEndpoint($idPref);
+        $this->syncModels();
 
-          return $this->getEndpoint($idPref);
-        }
+        return $this->getEndpoint($idPref);
       }
       else {
         throw new Exception("Models not found");
@@ -299,7 +260,7 @@ ws ::= ([ \t\n] ws)?',
    * @param string $response_type Response type
    * @return array Response array containing success flag and result or error message
    */
-  public function getPromptResponse(string $id_prompt, string $input, bool $insert = true, ?array $cfg = null): array
+  public function getPromptResponseFromId(string $id_prompt, string $input, bool $insert = true, ?array $cfg = null): array
   {
     // check if input and id_prompt are not empty and not null
     if (empty($input) || empty($id_prompt)) {
@@ -320,97 +281,109 @@ ws ::= ([ \t\n] ws)?',
     }
     
     //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
+    $response = $this->getPromptResponse($prompt, $input, $cfg);
+    if (!empty($response) && !empty($response['success']) && $insert) {
+      $this->insertItem($id_prompt, $input, false);
+      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);
+    }
+    
+    return $response;
+    
+  }
+  
+  public function getPromptResponse(array $prompt, string $input, ?array $cfg = null): array
+  {
+    // check if input and id_prompt are not empty and not null
+    if (empty($input) || empty($prompt)) {
+      return [
+        'success' => false,
+        'error' => 'Input and prompt cannot be empty',
+      ];
+    }
+    
+    //$format = self::$responseFormats[array_search($prompt['output'], array_column($this->responseFormats, 'value'))];
     $built_prompt = $this->buildPromptFromRow($prompt);
     
     X::log($built_prompt, 'ai_logs');
     
     $response = $this->request($built_prompt, $input, $cfg);
-    if (!empty($response) && $insert) {
-      $this->insertItem($id_prompt, $input, false);
-      $this->insertItem($id_prompt, $response['result']['content'] ?? $response['error']['message'], true);
-    }
-    
-    return [
+
+    $res = [
       'success' => !isset($response['error']),
       'input' => $built_prompt,
-      'result' => $response['result'] ?? $response['error'],
+      'result' => $response['result'],
     ];
-    
+
+    if (!empty($response['error'])) {
+      $res['error'] = $response['error'];
+    }
+
+    return $res;
   }
   
+  public function createMessages(string $input, string $prompt = ''): array
+  {
+    $messages = [];
+    
+    if ($prompt) {
+      $messages[] = [
+        'role' => 'system',
+        'content' => $prompt
+      ];
+    }
+    
+    $messages[] = [
+      'role' => 'user',
+      'content' => $input
+    ];
+    
+    return $messages;
+
+  }
+
+  public function createRequest(array $messages, array $cfg): array
+  {
+    $config = new Gpt3TokenizerConfig();
+    $tokenizer = new Gpt3Tokenizer($config);
+    $max_tokens = self::MAX_TOKENS;
+    foreach ($messages as $message) {
+      $max_tokens -= $tokenizer->count($message['content']);
+    }
+    $request = [
+      "model" => $this->model,
+      "messages" => $messages,
+      "max_tokens" => $max_tokens,
+    ];
+
+    if (array_key_exists('temperature', $cfg)) {
+      $request['temperature'] = $cfg['temperature'];
+    }
+    if (array_key_exists('top_p', $cfg)) {
+      $request['top_p'] = $cfg['top_p'];
+    }
+    if (array_key_exists('frequency', $cfg)) {
+      $request['frequency_penalty'] = $cfg['frequency'];
+    }
+    if (array_key_exists('presence', $cfg)) {
+      $request['presence_penalty'] = $cfg['presence'];
+    }
+
+    return $request;
+  }
+
   /**
    * Sends a request to the OpenAI API and returns the response
    *
    * @param string $prompt Prompt string to send to the API
    * @return array Response array containing success flag and result or error message
    */
-  public function request(string | null $prompt , string $input, ?array $cfg = null): array
+  public function request(array $query): array
   {
-    // check if prompt is not empty but can be null
-    if (empty($prompt) && !is_null($prompt)) {
-      return [
-        'success' => false,
-        'error' => 'Prompt cannot be empty',
-      ];
-    }
-    
-    $config = new Gpt3TokenizerConfig();
-    $tokenizer = new Gpt3Tokenizer($config);
-    
-    
-    if (!$prompt) {
-      
-      $max_tokens = 4000 - $tokenizer->count($input);
-      $request = [
-        "model" => $this->model,
-        "messages" => [
-          [
-            "role" => "user",
-            "content" => $input
-          ]
-        ],
-        "max_tokens" => $max_tokens,
-      ];
-      
-    } else {
-      
-      $max_tokens = 4000 - $tokenizer->count($input . $prompt);
-      $request = [
-        "model" => $this->model,
-        "messages" => [
-          [
-            "role" => "system",
-            "content" => $prompt
-          ],
-          [
-            "role" => "user",
-            "content" => $input
-          ]
-        ],
-        "max_tokens" => $max_tokens,
-      ];      
-    }
-
-    if (is_array($cfg)) {
-      if (array_key_exists('temperature', $cfg)) {
-        $request['temperature'] = $cfg['temperature'];
-      }
-      if (array_key_exists('top_p', $cfg)) {
-        $request['top_p'] = $cfg['top_p'];
-      }
-      if (array_key_exists('frequency_penalty', $cfg)) {
-        $request['frequency_penalty'] = $cfg['frequency_penalty'];
-      }
-      if (array_key_exists('presence_penalty', $cfg)) {
-        $request['presence_penalty'] = $cfg['presence_penalty'];
-      }
-    }
-
-    if ($complete = $this->ai->chat($request)) {
+    if ($complete = $this->ai->chat($query)) {
       $complete = json_decode($complete, true);
     }
 
-    X::log(['request' => $request, 'prompt' => $prompt, 'input' => $input, 'complete' => $complete], 'ai_logs');
+    X::log(['request' => $query, 'complete' => $complete], 'ai_logs');
     
     if (!$complete || !empty($complete['error'])) {
       return [
@@ -426,10 +399,193 @@ ws ::= ([ \t\n] ws)?',
       'success' => true,
       'result' => $complete['choices'][0]['message'],
       'response' => $complete,
-      'request' => $request
+      'request' => $query
     ];
   }
   
+  public function getChatTitle(string $text) : string
+  {
+    return Str::genpwd(10);
+  }
+
+  public function getTags(string $text): array
+  {
+    // This method should return an array of tags based on the input text
+    // For now, we will return an empty array
+    return [];
+  }
+  
+  public function chat(string $input, array $cfg, string $id = ''): array
+  {
+    $startTime = time();
+    $messages = $this->createMessages($input);
+    $query = $this->createRequest($messages, $cfg);
+    $result = $this->request($query);
+    if ($result['success']) {
+      $responseTime = time();
+      $result['text']    = $result['result']['content'];
+      $fullText = '';
+      $messages[] = [
+        'role' => 'assistant',
+        'content' => $result['text']
+      ];
+
+      foreach ($messages as $message) {
+        $fullText .= "**Message by $message[role]**" . PHP_EOL . $message['content'] . PHP_EOL . PHP_EOL . PHP_EOL;
+      }
+
+      $result['id']      = $id ?: Str::genpwd(10);
+      $result['date']    = $startTime;
+      $result['rdate']   = $responseTime;
+      $result['input']   = $input;
+      $result['request'] = $result;
+      $result['title']   = $this->getChatTitle($fullText);
+      $path           = $this->user->getDataPath('appui-ai') . 'chat';
+      $summaryFile    = 'conversations.json';
+      $this->fs->cd($path);
+      $this->fs->createPath('conversations');
+      $summary     = $this->fs->exists($summaryFile) ? $this->fs->decodeContents($summaryFile, 'json', true) : [];
+      $summaryHash = md5(serialize($summary));
+      $index       = X::search($summary, ['id' => $id]);
+      $row         = $summary[$index] ?? null;
+      if ($row) {
+        if ($index !== 0) {
+          array_splice($summary, $index, 1);
+        }
+
+        $conversation = $this->fs->decodeContents($row['file'], 'json', true);
+      }
+      else {
+        $subpath = substr(X::makeStoragePath('conversations', 'Y', 100, $this->fs), strlen($path) + 1);
+        $row = [
+          'title' => $result['title'],
+          'id'    => $result['id'],
+          'file'  => $subpath . $result['id'] . '.json'
+        ];
+
+        $conversation = [
+          'id' => $result['id'],
+          'title' => $result['title'],
+          'num' => 0,
+          'tags' => [],
+          'creation' => $startTime,
+          'last' => $responseTime,
+          'conversation' => []
+        ];
+      }
+
+      $conversation['num']++;
+      $conversation['last'] = $responseTime;
+      $lastMessage = [
+        'messages' => [
+          ...$query['messages'], 
+          [
+            'role' => 'assistant',
+            'content' => $result['text']
+          ]
+        ],
+        'title'        => $result['title'],
+        'asked'        => $startTime,
+        'responded'    => $responseTime,
+        'id' => $result['id'],
+        'tags' => $this->getTags($fullText),
+        'model' => $cfg['model'],
+        'language' => $cfg['language'],
+        'aiFormat' => $cfg['aiFormat'],
+        'cfg' => [
+          'temperature' => $cfg['temperature'] ?? 0.7,
+          'top_p' => $cfg['top_p'] ?? 0.9,
+          'presence_penalty' => $cfg['presence'] ?? 0.7,
+          'frequency_penalty' => $cfg['frequency'] ?? 0.3,
+        ]
+      ];
+
+      $conversation['conversation'][] = $lastMessage;
+      $result['conversation'] = $id ? end($conversation['conversation']) : $conversation;
+
+      $this->fs->encodeContents($conversation, $row['file'], 'json');
+
+      if ($index !== 0) {
+        array_unshift($summary, $row);
+      }
+
+      if (md5(serialize($summary)) !== $summaryHash) {
+        $this->fs->encodeContents($summary, $summaryFile, 'json');
+      }
+    }
+    elseif (empty($resutl['error'])) {
+      $result['error'] = X::_("Unknown error");
+    }
+
+
+
+    return $result;
+  }
+  
+  /**
+   * @throws Exception
+   */
+  public function saveConversation(
+    string $path,
+    string $date,
+    string $userFormat,
+    string $prompt,
+    ?string $response,
+    ?array $cfg = null
+  ): array {
+    $timestamp = time();
+    $fs = new System();
+    if ($fs->exists($path)) {
+      $jsonData = $fs->decodeContents($path, 'json', true);
+  
+    } else {
+      $jsonData = [];
+    }
+
+    $d = [[
+      "ai" => 0,
+      "creation_date" => $date,
+      "text" => $prompt,
+      'id' => bin2hex(random_bytes(10)),
+      'format' => $userFormat ?? 'textarea'
+    ], [
+      "ai" => 1,
+      "creation_date" => $timestamp,
+      "text" => $response,
+      'id' => bin2hex(random_bytes(10)),
+    ]];
+
+    if ($cfg) {
+      $d[1]['cfg'] = $cfg;
+    }
+    if (isset($jsonData['conversation'])) {
+      array_push($jsonData['conversation'], ...$d);
+    } else {
+      array_push($jsonData, ...$d);
+    }
+
+    $fs->encodeContents($jsonData, $path, 'json');
+    return $d;
+  }
+  
+  
+  public function clearConversation(string $id) : bool {
+    if (empty($id)) {
+      return false;
+    }
+    
+    if (!$this->getPromptById($id)) {
+      return false;
+    }
+    
+    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
+      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
+    ]);
+    
+    return true;
+  }
+
+
   /**
    * Retrieves prompts based on the specified conditions.
    *
@@ -616,81 +772,6 @@ ws ::= ([ \t\n] ws)?',
     ]);
   
     $this->dbTraitDelete($id);
-    
-    return true;
-  }
-
-
-  public function getChatTitle() : string
-  {
-    return Str::genpwd(10);
-  }
-  
-  
-  /**
-   * @throws Exception
-   */
-  public function saveConversation(
-    string $path,
-    string $date,
-    string $userFormat,
-    string $aiFormat,
-    string $prompt,
-    ?string $response,
-    string $model = '',
-    null|array $cfg = null
-  ): array {
-    $timestamp = time();
-    $fs = new System();
-    if ($fs->exists($path)) {
-      $jsonData = $fs->decodeContents($path, 'json', true);
-  
-    } else {
-      $jsonData = [];
-    }
-
-    $d = [[
-      "ai" => 0,
-      "creation_date" => $date,
-      "text" => $prompt,
-      'id' => bin2hex(random_bytes(10)),
-      'format' => $userFormat ?? 'textarea'
-    ], [
-      "ai" => 1,
-      "creation_date" => $timestamp,
-      "text" => $response,
-      'id' => bin2hex(random_bytes(10)),
-      'format' => $aiFormat ?? 'textarea'
-    ]];
-    if ($model) {
-      $d[1]['model'] = $model;
-    }
-    if ($cfg) {
-      $d[1]['cfg'] = $cfg;
-    }
-    if (isset($jsonData['conversation'])) {
-      array_push($jsonData['conversation'], ...$d);
-    } else {
-      array_push($jsonData, ...$d);
-    }
-
-    $fs->encodeContents($jsonData, $path, 'json');
-    return $d;
-  }
-  
-  
-  public function clearConversation(string $id) : bool {
-    if (empty($id)) {
-      return false;
-    }
-    
-    if (!$this->getPromptById($id)) {
-      return false;
-    }
-    
-    $this->db->delete($this->class_cfg['tables']['ai_prompt_items'], [
-      $this->class_cfg['arch']['ai_prompt_items']['id_prompt'] => $id
-    ]);
     
     return true;
   }

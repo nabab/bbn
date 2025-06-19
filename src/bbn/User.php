@@ -1194,6 +1194,24 @@ use bbn\Models\Tts\DbUauth;
     return self::getInstance();
   }
 
+  public function getDataPath(string|null $plugin = null): ?string
+  {
+    if ($this->check()) {
+      return Mvc::getUserDataPath($this->id, $plugin);
+    }
+
+    return null;
+  }
+
+  public function getTmpPath(string|null $plugin = null): ?string
+  {
+    if ($this->check()) {
+      return Mvc::getUserTmpPath($this->id, $plugin);
+    }
+
+    return null;
+  }
+
 
   /**
    * Completes the steps for a full authentication of the user.

@@ -39,7 +39,7 @@ trait Template
       }
 
       if (!isset($this->templateIds[$code])) {
-        foreach ($this->getAliasItems($this->getTemplateTemplateId()) as $it) {
+        foreach ($this->getAliasItems($this->getTemplatesTemplateId()) as $it) {
           if ($tmp = $this->fromCode($code, $it)) {
             $this->templateIds[$code] = $tmp;
             break;
@@ -64,7 +64,7 @@ trait Template
   public function templateList() {
     return [
       ...$this->fullOptionsRef($this->getMagicTemplateId()),
-      ...$this->fullOptionsRef($this->getTemplateTemplateId())
+      ...$this->fullOptionsRef($this->getTemplatesTemplateId())
     ];
   }
 
@@ -201,7 +201,7 @@ trait Template
    * Returns the ID of the 'plugin > template' template
    * @return string
    */
-  public function getTemplateTemplateId(): ?string
+  public function getTemplatesTemplateId(): ?string
   {
     if ($this->getMagicTemplateId() && !$this->templateTemplateId && $this->check()) {
       $this->templateTemplateId = $this->fromCode('templates', $this->getPluginTemplateId());
@@ -245,7 +245,7 @@ trait Template
       }
     }
 
-    $tids = $this->getAliasItems($this->getTemplateTemplateId());
+    $tids = $this->getAliasItems($this->getTemplatesTemplateId());
     foreach ($tids as $tid) {
       foreach ($this->getAliasItems($tid) as $id) {
         $tot += $this->applyTemplate($id);
@@ -325,7 +325,7 @@ trait Template
         throw new Exception(X::_("Impossible to apply a template, the template's parent must have an alias"));
       }
 
-      if ($templateParent['id_alias'] !== $this->getTemplateTemplateId()) {
+      if ($templateParent['id_alias'] !== $this->getTemplatesTemplateId()) {
         throw new Exception(X::_("Impossible to apply a template, the template's parent must be aliased with the templates' list"));
       }
     }
@@ -423,18 +423,20 @@ trait Template
   public function parentTemplate(string $id): ?string
   {
     if ($this->exists($id) && ($idAlias = $this->getIdAlias($id))) {
-      $idTemplate = $this->getMagicTemplateId();
-      $idParent = $idAlias;
-      while ($idParent) {
-        $id = $idParent;
-        if ($idParent === $idTemplate) {
-          return $id;
-        } else if ($this->getIdAlias($idParent) === $idTemplate) {
+      $templateId1 = $this->getMagicTemplateId();
+      $templateId2 = $this->getTemplatesTemplateId();
+      $id = $idAlias;
+      while ($idParent = $this->getIdParent($id)) {
+        // root
+        if ($idParent === $id) {
+          return null;
+        }
+
+        if (($idParent === $templateId1) || ($this->getIdAlias($idParent) === $templateId2)) {
           return $id;
         }
 
-        $tmp = $this->getIdParent($idParent);
-        $idParent = $tmp !== $idParent ? $tmp : null;
+        $id = $idParent;
       }
     }
 
@@ -449,8 +451,9 @@ trait Template
 
   public function isPartOfTemplates($id): bool
   {
-    $templateId = $this->getTemplateTemplateId();
-    if ($this->getIdAlias($id) === $templateId) {
+    $templateId1 = $this->getTemplatesTemplateId();
+    $templateId2 = $this->getMagicTemplateId();
+    if (in_array($this->getIdAlias($id), [$templateId1, $templateId2], true)) {
       return true;
     }
 
@@ -460,18 +463,15 @@ trait Template
 
   public function isInTemplate(string $id): bool
   {
-    $templateId = $this->getTemplateTemplateId();
+    $templateId1 = $this->getTemplatesTemplateId();
+    $templateId2 = $this->getMagicTemplateId();
     while ($idParent = $this->getIdParent($id)) {
       // root
       if ($idParent === $id) {
         return false;
       }
 
-      if ($idParent === $templateId) {
-        return true;
-      }
-
-      if ($this->getIdAlias($idParent) === $templateId) {
+      if (in_array($idParent, [$templateId1, $templateId2], true) || in_array($this->getIdAlias($idParent), [$templateId1, $templateId2], true)) {
         return true;
       }
 

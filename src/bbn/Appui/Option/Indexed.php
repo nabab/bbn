@@ -156,20 +156,29 @@ trait Indexed
   /**
    * Returns an option's children array of id and text in a user-defined indexed array.
    *
-   * @param int|string      $id    The option's ID or its code if it is children of {@link default}
+   * @param array|string    $id    The option's ID or an array of codes
    * @param string          $text  The text field name for the text column
    * @param string          $value The value field name for the id column
    * @param string          ...$additionalFields Additional fields to include in the result
    *
    * @return array|null Options' list in a text/value indexed array or null if not found
    */
-  public function textValueOptions(string $id, string $text = 'text', string $value = 'value', ...$additionalFields): ?array
+  public function textValueOptions(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): ?array
   {
     // Initialize the result array.
     $res = [];
     
+    if (is_string($id) && !Str::isUid($id)) {
+      $id = [$id];
+    }
+
     // Get the full options for the provided codes.
-    if ($opts = $this->fullOptions($id)) {
+    if (!is_array($id)) {
+      $id = [$id];
+    }
+
+    if ($id = $this->fromCode(...$id)) {
+      $opts = $this->fullOptions($id);
       // Get the configuration for the given code.
       $cfg = $this->getCfg($id) ?: [];
       
@@ -189,9 +198,14 @@ trait Indexed
         if (!empty($cfg['show_code'])) {
           $res[$i][$this->fields['code']] = $o[$this->fields['code']];
         }
+
+        if (!isset($o['alias'])) {
+          $o['alias'] = [];
+        }
+
         foreach ($additionalFields as $f) {
           if (!array_key_exists($f, $res[$i])) {
-            $res[$i][$f] = $o[$f] ?? null;
+            $res[$i][$f] = $o[$f] ? $o[$f] : ($o['alias'][$f] ?? null);
           }
         }
         

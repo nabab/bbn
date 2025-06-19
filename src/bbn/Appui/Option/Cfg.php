@@ -131,7 +131,7 @@ trait Cfg
     }
 
     // Set default values for fields that should be null.
-    $mandatories = ['controller', 'schema', 'form', 'default_value'];
+    $mandatories = ['controller', 'schema', 'form', 'default_value', 'id_root_alias'];
     foreach ($mandatories as $m) {
       $cfg[$m] = empty($cfg[$m]) ? null : $cfg[$m];
     }

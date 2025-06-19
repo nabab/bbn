@@ -907,11 +907,24 @@ MYSQL;
             self::$structures[$table]['primary_length'] = $model['fields'][$primary]['maxlength'];
             self::$structures[$table]['auto_increment'] = isset($model['fields'][$primary]['extra']) && ($model['fields'][$primary]['extra'] === 'auto_increment');
             self::$structures[$table]['id'] = $dbc->tableId($db->tsn($table), $db->getCurrent());
-            $refs = $db->findReferences($tableName . '.' . $primary);
-            self::$structures[$table]['refs'] = array_map(fn($a) => ['table' => X::split($a, '.')[1], 'col' => X::split($a, '.')[2]], $refs);
+            $refs = $db->findReferences("$tableName.$primary");
+            self::$structures[$table]['refs'] = array_map(fn($a) => [
+              'db' => X::split($a, '.')[0],
+              'table' => X::split($a, '.')[1],
+              'col' => X::split($a, '.')[2]
+            ], $refs);
             foreach (self::$structures[$table]['refs'] as &$r) {
               $refCfg = $db->modelize($r['table']);
               $r['nullable'] = $refCfg['fields'][$r['col']]['null'] ?? false;
+              $keys = $refCfg['cols'][$r['col']];
+              foreach ($keys as $k) {
+                if ((count($refCfg['keys'][$k]['columns']) === 1) && $refCfg['keys'][$k]['constraint']) {
+                  $r['constraint'] = $refCfg['keys'][$k]['constraint'];
+                  $r['delete'] = $refCfg['keys'][$k]['delete'] ?? null;
+                  $r['update'] = $refCfg['keys'][$k]['update'] ?? null;
+                  break;
+                }
+              }
             }
       
             foreach ($model['keys'] as $key) {
@@ -1528,11 +1541,16 @@ MYSQL;
 
               self::enable();
               foreach ($s['refs'] as $ref) {
-                if ($ref['nullable']) {
-                  self::$db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);
-                }
-                else {
-                  self::$db->delete($ref['table'], [$ref['col'] => $primary_where]);
+                if ($db->count($ref['table'], [$ref['col'] => $primary_where])) {
+                  if ($ref['delete'] === 'RESTRICT') {
+                    throw new Exception(X::_("Impossible to delete the record because it is referenced in the table %s", $ref['table']));
+                  }
+                  elseif (($ref['delete'] === 'SET NULL') && $ref['nullable']) {
+                    self::$db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);
+                  }
+                  else {
+                    self::$db->delete($ref['table'], [$ref['col'] => $primary_where]);
+                  }
                 }
               }
               self::disable();

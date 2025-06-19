@@ -134,10 +134,21 @@ trait Ref
    * @param string     $value The value field name for id column
    * @return array Options' list in a text/value indexed array
    */
-  public function textValueOptionsRef($id, string $text = 'text', string $value = 'value'): ?array
+  public function textValueOptionsRef(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): ?array
   {
     $res = [];
-    if ($opts = $this->fullOptionsRef($id)) {
+
+    if (is_string($id) && !Str::isUid($id)) {
+      $id = [$id];
+    }
+
+    // Get the full options for the provided codes.
+    if (!is_array($id)) {
+      $id = [$id];
+    }
+
+    if ($id = $this->fromCode(...$id)) {
+      $opts = $this->fullOptions($id);
       $cfg = $this->getCfg($id) ?: [];
       $i   = 0;
       foreach ($opts as $k => $o) {
