@@ -1541,15 +1541,18 @@ MYSQL;
 
               self::enable();
               foreach ($s['refs'] as $ref) {
-                if ($db->count($ref['table'], [$ref['col'] => $primary_where])) {
+                if (!empty($ref['constraint']) && $db->count($ref['table'], [$ref['col'] => $primary_where])) {
                   if ($ref['delete'] === 'RESTRICT') {
-                    throw new Exception(X::_("Impossible to delete the record because it is referenced in the table %s", $ref['table']));
+                    throw new Exception(X::_("Impossible to delete the record from %s because it is referenced in the table %s", $table, $ref['table']));
                   }
-                  elseif (($ref['delete'] === 'SET NULL') && $ref['nullable']) {
+                  elseif ($ref['delete'] === 'SET NULL') {
                     self::$db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);
                   }
-                  else {
+                  elseif ($ref['delete'] === 'CASCADE') {
                     self::$db->delete($ref['table'], [$ref['col'] => $primary_where]);
+                  }
+                  elseif ($ref['delete'] !== 'NO ACTION') {
+                    throw new Exception(X::_("Impossible to find what to do with the record referenced in the table %s", $ref['table']));
                   }
                 }
               }
