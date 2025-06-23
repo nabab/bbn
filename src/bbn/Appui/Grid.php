@@ -441,9 +441,15 @@ class Grid extends bbn\Models\Cls\Cache
   {
     $path = X::makeStoragePath(\bbn\Mvc::getUserTmpPath()) . 'export_' . date('d-m-Y_H-i-s') . '.xlsx';
     $cfg = $this->getExcel();
-    $dates = array_values(array_filter($cfg['fields'], function ($c) {
-      return empty($c['hidden']) && (($c['type'] === 'date') || ($c['type'] === 'datetime'));
-    }));
+    $dates = array_values(
+      array_filter(
+        $cfg['fields'],
+        fn($c) => empty($c['hidden'])
+          && (($c['type'] === 'date')
+            || ($c['type'] === 'datetime')
+            || ($c['type'] === 'isodate'))
+      )
+    );
     $hidden = array_map(function ($a) {
       return $a['field'];
     }, X::filter($cfg['fields'], ['hidden' => true]));
@@ -460,6 +466,7 @@ class Grid extends bbn\Models\Cls\Cache
           if (!empty($dates[$k]['format']) && !empty($r)) {
             $r = date($dates[$k]['format'], strtotime($r));
           }
+
           $r = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
         }
         if (in_array($i, $hidden)) {

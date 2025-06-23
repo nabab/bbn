@@ -3216,9 +3216,15 @@ class X
             // Set code's format to currency
             $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_CURRENCY_EUR);
             break;
+          case 'isodate':
+            // Set code's format to ISO date
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_YYYYMMDD);
+            // Set the horizontal alignment to center
+            $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            break;
           case 'date':
             // Set code's format to date
-            $format->setFormatCode('dd/mm/yyyy');
+            $format->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
             // Set the horizontal alignment to center
             $style->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             break;
