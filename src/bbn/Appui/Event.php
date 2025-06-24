@@ -680,7 +680,7 @@ class Event extends modelDb
 
   public function getList(array $filter = [], array $order = [], int $limit = 50, int $start = 0, $fields = []): array
   {
-    return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
+    return $this->dbTraitRselectAll($filter, $order, $limit, $start, $fields);
   }
 
 
