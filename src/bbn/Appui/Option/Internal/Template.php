@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui\Option;
+namespace bbn\Appui\Option\Internal;
 
 use Exception;
 use bbn\X;
@@ -420,7 +420,27 @@ trait Template
     return $tot;
   }
 
-  public function parentTemplate(string $id): ?string
+  public function getParentTemplateId(string $id): ?string
+  {
+    $templateId1 = $this->getTemplatesTemplateId();
+    $templateId2 = $this->getMagicTemplateId();
+    while ($idParent = $this->getIdParent($id)) {
+      // root
+      if ($idParent === $id) {
+        return null;
+      }
+
+      if (in_array($idParent, [$templateId1, $templateId2], true) || in_array($this->getIdAlias($idParent), [$templateId1, $templateId2], true)) {
+        return $id;
+      }
+
+      $id = $idParent;
+    }
+
+    return null;
+  }
+
+  public function usedTemplate(string $id): ?string
   {
     if ($this->exists($id) && ($idAlias = $this->getIdAlias($id))) {
       $templateId1 = $this->getMagicTemplateId();
@@ -445,7 +465,7 @@ trait Template
 
   public function hasTemplate(string $id): bool
   {
-    return (bool)$this->parentTemplate($id);
+    return (bool)$this->usedTemplate($id);
   }
 
 
@@ -458,6 +478,25 @@ trait Template
     }
 
     return $this->isInTemplate($id);
+  }
+
+
+  public function isTemplate(string $id): bool
+  {
+    $templateId1 = $this->getTemplatesTemplateId();
+    $templateId2 = $this->getMagicTemplateId();
+    if ($idParent = $this->getIdParent($id)) {
+      // root
+      if ($idParent === $id) {
+        return false;
+      }
+
+      if (in_array($idParent, [$templateId1, $templateId2], true) || in_array($this->getIdAlias($idParent), [$templateId1, $templateId2], true)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 

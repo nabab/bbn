@@ -101,57 +101,10 @@ class Event extends modelDb
   /** @var array $class_cfg */
   protected $class_cfg;
 
-  /**
-   * Filters the recurrences of an event by the month's week.
-   * @param array $recurrences
-   * @param int $monthweek
-   * @return array
-   */
-  protected function filterRecurrencesByMonthWeek(array $recurrences, int $monthweek): array
-  {
-    $t =& $this;
-    // Recurring table fields
-    $rf =& $this->class_cfg['arch']['recurring'];
-    // Events table fields
-    $ef =& $this->class_cfg['arch']['events'];
-    return array_filter($recurrences, function($o) use($ef, $rf, $t, $monthweek){
-      $tstart = strtotime(date('Y-m-d', strtotime($o[$ef['start']])));
-      // Get the last day of the month
-      $lastday = strtotime('last day of this month', $tstart);
-      // Get the first day of the month
-      $firstday = strtotime('first day of this month', $tstart);
-      // Get the week number of the recurrence
-      $week = Date::getMonthWeek(date('Y-m-d', $tstart));
-      //From the end
-      if ( $monthweek < 0 ){
-        // Get the day in the last week of the month
-        $lastwd = strtotime($t->weekdays[$o[$rf['wd']]] . ' this week', $lastday);
-        if ( $lastwd > $lastday ){
-          // If the day is outside the month to decrease the week
-          $lastwd = strtotime('-1 week', $lastwd);
-        }
-        // Get the corrected week number
-        $lwd = Date::getMonthWeek(date('Y-m-d', strtotime('-' . abs($monthweek + 1) .' week', $lastwd)));
-        return $lwd === $week;
-      }
-      // From the start
-      else {
-        // Get the day in the first week of the month
-        $firstwd = strtotime($t->weekdays[$o[$rf['wd']]] . ' this week', $firstday);
-        // If the day is outside the month to increase the week
-        if ( $firstwd < $firstday ){
-          $firstwd = strtotime('+1 week', $firstwd);
-        }
-        // Get the corrected week number
-        $fwd = Date::getMonthWeek(date('Y-m-d', strtotime('+' . ($monthweek - 1) .' week', $firstwd)));
-        return $fwd === $week;
-      }
-    });
-  }
-
   public function __construct(Db $db){
     parent::__construct($db);
     $this->initClassCfg();
+    self::optionalInit();
     $this->opt = Option::getInstance();
     $this->usr = User::getInstance();
     //$this->opt_id = $this->opt->fromCode('event', 'appui');
@@ -322,63 +275,6 @@ class Event extends modelDb
     return null;
   }
 
-
-  private function getIds(string $mode = 'next', array $filter = [], string|null $from = null, int $num = 1): array
-  {
-    $timeFilter = [
-      'logic' => 'AND',
-      'conditions' => [
-        [
-          'field' => $this->fields['start'],
-          'operator' => $mode === 'next' ? '>' : '<',
-          'value' => Str::isDateSQL($from) ?: date('Y-m-d H:i:s')
-        ]
-      ]
-    ];
-    if (!empty($filter)) {
-      $tmp = $filter;
-      if (!isset($tmp['conditions'])) {
-        $tmp = [
-          'logic' => 'AND',
-          'conditions' => $tmp
-        ];
-      }
-      $filter = $timeFilter;
-      $filter['conditions'][] = $tmp;
-    }
-    else {
-      $filter = $timeFilter;
-    }
-
-    $args = [
-      $this->class_table,
-      $this->fields['id'],
-      $filter,
-      [$this->fields['start'] => 'DESC'],
-      $num
-    ];
-    return $this->db->getColumnValues(...$args);
-  }
-
-
-  private function getOnes(string $mode = 'next', array $filter = [], string|null $from = null, int $num = 1): ?array
-  {
-    $ids = $this->getIds($mode, $filter, $from, $num);
-    if ($num === 1) {
-      if (!$ids) {
-        return null;
-      }
-
-      return $this->get($ids[0]);
-    }
-
-    $res = [];
-    foreach ($ids as $id) {
-      $res[] = $this->get($id);
-    }
-
-    return $res;
-  }
   
   public function getLastIds(array $filter = [], string|null $from = null, int $num = 1): array
   {
@@ -782,4 +678,114 @@ class Event extends modelDb
     return null;
   }
 
+  public function getList(array $filter = [], array $order = [], int $limit = 50, int $start = 0, $fields = []): array
+  {
+    return $this->dbTraitSelectAll($filter, $order, $limit, $start, $fields);
+  }
+
+
+  /**
+   * Filters the recurrences of an event by the month's week.
+   * @param array $recurrences
+   * @param int $monthweek
+   * @return array
+   */
+  protected function filterRecurrencesByMonthWeek(array $recurrences, int $monthweek): array
+  {
+    $t =& $this;
+    // Recurring table fields
+    $rf =& $this->class_cfg['arch']['recurring'];
+    // Events table fields
+    $ef =& $this->class_cfg['arch']['events'];
+    return array_filter($recurrences, function($o) use($ef, $rf, $t, $monthweek){
+      $tstart = strtotime(date('Y-m-d', strtotime($o[$ef['start']])));
+      // Get the last day of the month
+      $lastday = strtotime('last day of this month', $tstart);
+      // Get the first day of the month
+      $firstday = strtotime('first day of this month', $tstart);
+      // Get the week number of the recurrence
+      $week = Date::getMonthWeek(date('Y-m-d', $tstart));
+      //From the end
+      if ( $monthweek < 0 ){
+        // Get the day in the last week of the month
+        $lastwd = strtotime($t->weekdays[$o[$rf['wd']]] . ' this week', $lastday);
+        if ( $lastwd > $lastday ){
+          // If the day is outside the month to decrease the week
+          $lastwd = strtotime('-1 week', $lastwd);
+        }
+        // Get the corrected week number
+        $lwd = Date::getMonthWeek(date('Y-m-d', strtotime('-' . abs($monthweek + 1) .' week', $lastwd)));
+        return $lwd === $week;
+      }
+      // From the start
+      else {
+        // Get the day in the first week of the month
+        $firstwd = strtotime($t->weekdays[$o[$rf['wd']]] . ' this week', $firstday);
+        // If the day is outside the month to increase the week
+        if ( $firstwd < $firstday ){
+          $firstwd = strtotime('+1 week', $firstwd);
+        }
+        // Get the corrected week number
+        $fwd = Date::getMonthWeek(date('Y-m-d', strtotime('+' . ($monthweek - 1) .' week', $firstwd)));
+        return $fwd === $week;
+      }
+    });
+  }
+
+  private function getIds(string $mode = 'next', array $filter = [], string|null $from = null, int $num = 1): array
+  {
+    $timeFilter = [
+      'logic' => 'AND',
+      'conditions' => [
+        [
+          'field' => $this->fields['start'],
+          'operator' => $mode === 'next' ? '>' : '<',
+          'value' => Str::isDateSQL($from) ?: date('Y-m-d H:i:s')
+        ]
+      ]
+    ];
+    if (!empty($filter)) {
+      $tmp = $filter;
+      if (!isset($tmp['conditions'])) {
+        $tmp = [
+          'logic' => 'AND',
+          'conditions' => $tmp
+        ];
+      }
+      $filter = $timeFilter;
+      $filter['conditions'][] = $tmp;
+    }
+    else {
+      $filter = $timeFilter;
+    }
+
+    $args = [
+      $this->class_table,
+      $this->fields['id'],
+      $filter,
+      [$this->fields['start'] => 'DESC'],
+      $num
+    ];
+    return $this->db->getColumnValues(...$args);
+  }
+
+
+  private function getOnes(string $mode = 'next', array $filter = [], string|null $from = null, int $num = 1): ?array
+  {
+    $ids = $this->getIds($mode, $filter, $from, $num);
+    if ($num === 1) {
+      if (!$ids) {
+        return null;
+      }
+
+      return $this->get($ids[0]);
+    }
+
+    $res = [];
+    foreach ($ids as $id) {
+      $res[] = $this->get($id);
+    }
+
+    return $res;
+  }
 }

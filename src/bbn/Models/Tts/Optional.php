@@ -222,13 +222,7 @@ trait Optional
   public static function getOptionsTextValueRef(string|array $id, string $text = 'text', string $value = 'value', ...$additionalFields): array
   {
     if (is_string($id) && !Str::isUid($id)) {
-      $id = [$id];
-    }
-
-    if (is_array($id)) {
-      $codes = $id;
-      $codes[] = self::getOptionRoot();
-      $id = self::getOptionId(...$codes);
+      $id = self::getOptionId($id);
     }
 
     return $id ? self::getOptionsObject()->textValueOptionsRef($id, $text, $value, ...$additionalFields) : [];

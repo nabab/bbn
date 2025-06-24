@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui\Option;
+namespace bbn\Appui\Option\Internal;
 
 use Exception;
 use bbn\X;
@@ -295,15 +295,16 @@ trait Plugin
           ];
         } else {
           foreach ($this->fullOptions($p['id']) as $p2) {
-            if (empty($p2['code'])) {
+            $code2 = $p2['code'] ?: $p2['alias']['code'];
+            if (empty($code2)) {
               throw new Exception(X::_("The plugin option must have a code"));
             }
 
             if ($p2['id_alias'] === $subpluginAlias) {
               $res[] = [
                 'id' => $p2['id'],
-                'code' => $code . '-' . $p2['code'],
-                'text' => $p2['text'],
+                'code' => "$code-$code2",
+                'text' => $p2['text'] ?: "$code-$code2",
                 'icon' => $p2['icon'] ?? '',
                 'rootOptions' => $this->fromCode('options', $p2['id']),
                 'rootPermissions' => $this->fromCode('permissions', $p2['id'])

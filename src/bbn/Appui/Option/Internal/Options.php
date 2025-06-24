@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui\Option;
+namespace bbn\Appui\Option\Internal;
 
 use Exception;
 use bbn\X;

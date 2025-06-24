@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui\Option;
+namespace bbn\Appui\Option\Internal;
 
 /**
  * Trait Cat provides methods to manage categories of options.

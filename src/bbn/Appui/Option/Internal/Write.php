@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui\Option;
+namespace bbn\Appui\Option\Internal;
 
 use Exception;
 use bbn\X;
@@ -966,6 +966,10 @@ trait Write
         }
       }
     }
+    elseif (array_key_exists('cfg', $it)) {
+      // If cfg is not set, it MUST be null
+      $it[$c['cfg']] = null;
+    }
 
     // Text is required and parent exists
     if (!empty($it[$c['id_parent']])
@@ -985,9 +989,15 @@ trait Write
         $it[$c['text']] = null;
       }
 
+      $valueIsNull = false;
       // Unsetting computed values
       if (isset($it[$c['value']]) && Str::isJson($it[$c['value']])) {
         $this->_set_value($it);
+      }
+      elseif (array_key_exists($c['value'], $it) && empty($it[$c['value']]) && !empty($it[$c['id_alias']])) {
+        // If value is not a JSON, it must be null
+        $it[$c['value']] = null;
+        $valueIsNull = true;
       }
 
       if (array_key_exists('alias', $it)) {
@@ -1014,7 +1024,7 @@ trait Write
       if (!empty($value)) {
         $it[$c['value']] = json_encode($value);
       }
-      else {
+      elseif (!$valueIsNull) {
         if (empty($it[$c['value']])) {
           $it[$c['value']] = null;
         }

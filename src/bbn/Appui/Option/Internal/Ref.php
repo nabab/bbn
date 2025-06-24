@@ -1,6 +1,6 @@
 <?php
 
-namespace bbn\Appui\Option;
+namespace bbn\Appui\Option\Internal;
 
 use bbn\Str;
 
@@ -148,7 +148,7 @@ trait Ref
     }
 
     if ($id = $this->fromCode(...$id)) {
-      $opts = $this->fullOptions($id);
+      $opts = $this->fullOptionsRef($id);
       $cfg = $this->getCfg($id) ?: [];
       $i   = 0;
       foreach ($opts as $k => $o) {
