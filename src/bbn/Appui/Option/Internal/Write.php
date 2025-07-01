@@ -676,6 +676,10 @@ trait Write
         unset($cfg['inherited_from']);
       }
 
+      if (isset($cfg['root_alias'])) {
+        unset($cfg['root_alias']);
+      }
+
       if (isset($cfg[$this->fields['id']])) {
         unset($cfg[$this->fields['id']]);
       }

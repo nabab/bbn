@@ -29,8 +29,10 @@ trait Native
   public function nativeOption($code = null): ?array
   {
     if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
-      $originalLocale = $this->findI18nById($id);
-      $locale = $this->getTranslatingLocale($id);
+      //$originalLocale = $this->findI18nById($id);
+      //$locale = $this->getTranslatingLocale($id);
+      $originalLocale = 'en';
+      $locale = false;
       if (
         !empty($locale)
         && ($opt = $this->cacheGetLocale($id, $locale, __FUNCTION__))

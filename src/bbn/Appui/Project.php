@@ -385,7 +385,9 @@ class Project extends DbCls
 
     $res = self::getOptionsObject()->fullTree($this->id);
     foreach($res['items'] as $t) {
-      $res[$t['code']] = $t;
+      if ($code = $t['code'] ?? $t['alias']['code'] ?? null) {
+        $res[$code] = $t;
+      }
     }
 
     unset($res['items']);
@@ -618,6 +620,7 @@ class Project extends DbCls
     // get info of the current path selected in first dropdown
     $currentPathArray = $this->getPath($id_path, true);
     if (!$currentPathArray || !$currentPathArray['path'] || !$currentPathArray['id_alias']) {
+      X::ddump($currentPathArray);
       throw new Exception('Invalid Path');
     }
 
@@ -743,7 +746,7 @@ class Project extends DbCls
     }
 
     $component = false;
-    $is_vue    = false;
+    $isComponent    = false;
     $name      = $t['basename'];
     //if is type and is components
     if ($cfg['type']['type'] === 'components') {
@@ -757,7 +760,7 @@ class Project extends DbCls
             $item = explode(".", basename($f))[0];
             if ($item === basename($t['name'])) {
               $arr[]  = Str::fileExt($f);
-              $is_vue = true;
+              $isComponent = true;
             }
           }
         }
@@ -788,7 +791,7 @@ class Project extends DbCls
             if ($item === basename($t['name'])) {
               $folder    = false;
               $arr[]     = Str::fileExt($f);
-              $is_vue    = true;
+              $isComponent    = true;
               $component = true;
               if (!empty($ext) && (in_array($ext, $excludeds) === false)) {
                 $num_check++;
@@ -867,7 +870,7 @@ class Project extends DbCls
       }
     }
     //case component o folder who contain other component
-    elseif (!empty($component) && !empty($is_vue)) {
+    elseif (!empty($component) && !empty($isComponent)) {
       $icon = "nf nf-md-vuejs";
     }
     //case folder
@@ -890,8 +893,8 @@ class Project extends DbCls
       'uid' => $uid,
       'has_index' => !$t['file'] && Dir::hasFile($t['name'], 'index.php', 'index.html', 'index.htm'),
       'is_svg' => $t['file'] && ($t['ext'] === 'svg'),
-      // $is_vue not use
-      'is_vue' => $is_vue,
+      // $isComponent not use
+      'isComponent' => $isComponent,
       'icon' => $icon,
       'bcolor' => $cfg['bcolor'],
       'folder' => $t['dir'],
@@ -991,7 +994,7 @@ class Project extends DbCls
     $currentTabs = $this->getType('mvc');
     $todo = [];
     if (!$this->fs->isDir($root)) {
-      throw new Exception(X::_('Invalid Root'));
+      throw new Exception(X::_('Invalid Root %s', $root));
     }
     if (!empty($currentTabs['tabs'])) {
       foreach($currentTabs['tabs'] as $tab) {
@@ -1054,27 +1057,29 @@ class Project extends DbCls
       $roots = $tree['path']['items'] ?: [];
       $res = [];
       foreach($roots as $root) {
-        if (!empty($root['items']) && defined("BBN_".strtoupper($root['code'])."_PATH")) {
-          $path = constant("BBN_".strtoupper($root['code'])."_PATH");
+        $code = $root['code'] ?: $root['alias']['code'] ?: null;
+        if (!empty($root['items']) && defined("BBN_".strtoupper($code)."_PATH")) {
+          $path = constant("BBN_".strtoupper($code)."_PATH");
           foreach($root['items'] as $option) {
-            if (!isset($option['path'])) {
+            $spath = $option['path'] ?? $option['alias']['path'] ?? $path;
+            if (!$spath) {
               //continue;
-              X::log(["Project no path", $option]);
+              X::log(["Project no path", $code, $option]);
               throw new Exception(X::_("No path in option for project for %s", $option['code']));
             }
 
             $tmp = [
               'id' => $option['id'],
               'id_alias' => $option['id_alias'],
-              'parent_code' => $root['code'],
+              'parent_code' => $code,
               'text' => $option['text'] ?: $option['alias']['text'],
               'code' => $option['code'] ?: $option['alias']['code'],
-              'bcolor' => $option['bcolor'] ?? null,
-              'fcolor' => $option['fcolor'] ?? null,
-              'language' => $option['language'] ?? BBN_LANG,
+              'bcolor' => $option['bcolor'] ?? $option['alias']['bcolor'] ?? null,
+              'fcolor' => $option['fcolor'] ?? $option['alias']['fcolor'] ?? null,
+              'language' => $option['language'] ?? $option['alias']['language'] ?? BBN_LANG,
               'alias' => $option['alias'],
               'parent' => $path,
-              'path' => $option['path'] === '/' ? '/' : $option['path'],
+              'path' => $spath === '/' ? '/' : $spath,
               'id_option' => $option['id']
             ];
 
@@ -1271,12 +1276,12 @@ class Project extends DbCls
   {
     if (!$this->appPath) {
       // Current project
-      if ($this->name === constant('BBN_APP_NAME')) {
+      if ($this->code === constant('BBN_APP_NAME')) {
         $this->appPath = Mvc::getAppPath();
       } else {
         $envs = $this->options->fullOptions('env', $this->id);
         if (empty($envs)) {
-          throw new Exception(X::_("Impossible to find environments for option %s", $this->id));
+          throw new Exception(X::_("Impossible to find environments for option %s (constant: %s = app name: %s)", $this->id, constant('BBN_APP_NAME'), $this->code));
         }
 
         if ($env = X::getRow($envs, ['type' => constant('BBN_ENV')])) {
@@ -1396,7 +1401,7 @@ class Project extends DbCls
               continue;
             }
 
-            $name = $paths['code'] . '/' . $repository['code'];
+            $name = $paths['alias']['code'] . '/' . $repository['code'];
             if (!isset($cats[$repository['id_alias']])) {
               if (isset($repository['alias'])) {
                 unset($repository['alias']['cfg']);
@@ -1408,7 +1413,7 @@ class Project extends DbCls
             unset($repository['alias']);
             $repositories[$name]               = $repository;
             $repositories[$name]['title']      = $repository['text'];
-            $repositories[$name]['root']       = $paths['code'];
+            $repositories[$name]['root']       = $paths['alias']['code'];
             $repositories[$name]['name']       = $name;
             $repositories[$name]['alias_code'] = $cats[$repository['id_alias']]['code'];
             if (!empty($cats[$repository['id_alias']]['tabs'])) {

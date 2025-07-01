@@ -354,14 +354,14 @@ trait Template
   {
     $tot = 0;
     if ($idSubtemplate === $target) {
-      throw new Exception("WTF Chiara!!!");
+      throw new Exception("The template cannot apply to itself");
     }
 
     $opt = $this->nativeOption($idSubtemplate);
     $foptions = $this->rawOptions($target);
     $update = true;
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
-      if ($o = X::getRow($foptions, ['code' => $opt['code'], 'id_alias' => null])) {
+      if ($o = X::getRow($foptions, ['code' => $opt['code']])) {
         if ($o['id'] === $idSubtemplate) {
           X::log([
             $idSubtemplate,

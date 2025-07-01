@@ -109,11 +109,11 @@ class Option extends DbCls
    */
   public function __construct(Db $db, array $cfg = [])
   {
-    // Initialize the parent class with the database connection object
-    parent::__construct($db);
-
     // Initialize the class configuration
     $this->initClassCfg($cfg);
+
+    // Initialize the parent class with the database connection object
+    parent::__construct($db);
 
     // Initialize the retriever
     self::retrieverInit($this);

@@ -10,7 +10,7 @@ use bbn\Str;
  */
 trait Code
 {
-  private function _fromCode(array $codes, $depth = 0): ?string
+  private function _fromCode(array $codes, bool $real = false, $depth = 0): ?string
   {
     if ($this->check()) {
       // Get the number of arguments provided.
@@ -21,9 +21,8 @@ trait Code
         return null;
       }
 
-      // Check for a special case where false is accepted as id_parent for root.
-      if (($num === 1) && ($codes[0] === false)) {
-        return $this->default;
+      if ($codes[0] === false) {
+        return $this->getRoot();
       }
 
       // If the first argument is a valid UID, check if it's an existing option ID or proceed with further checks.
@@ -33,8 +32,8 @@ trait Code
         }
 
         // Perform an extra check to ensure the provided ID corresponds to its parent.
-        if ($this->getIdParent($codes[0]) === $this->_fromCode(\array_slice($codes, 1), $depth + 1)) {
-          return $codes[0];
+        if ($this->getIdParent($codes[0]) === $this->_fromCode(\array_slice($codes, 1), $real, $depth + 1)) {
+          //return $codes[0];
         }
       }
 
@@ -44,19 +43,36 @@ trait Code
       }
 
       // Handle special cases for certain codes, such as 'appui' or 'plugins'.
-      if (!$depth && (end($codes) === 'appui')) {
-        $codes[] = 'plugins';
-        $num++;
-      }
-
+      
+      $lastCode = end($codes);
       // Ensure that the last argument is a valid UID; otherwise, append the default value.
-      if (!Str::isUid(end($codes))) {
-        if (end($codes) === false) {
-          array_pop($codes);
+      if (!$depth) {
+        if ($lastCode === 'appui') {
+          $codes[] = 'plugins';
+          $lastCode = 'plugins';
+          $num++;
         }
 
-        $codes[] = $this->default;
-        $num++;
+        if (!Str::isUid($lastCode)) {
+          if ($lastCode === false) {
+            array_pop($codes);
+            $codes[] = $this->getRoot();
+          }
+          else {
+            if ($lastCode === null) {
+              array_pop($codes);
+              $num--;
+            }
+
+            if (!in_array($lastCode, ['options', 'plugins', 'permissions'])) {
+              $codes[] = 'options';
+              $num++;
+            }
+
+            $codes[] = $this->getDefault();
+            $num++;
+          }
+        }
       }
 
       //X::log($codes, 'codes');
@@ -68,10 +84,9 @@ trait Code
       // Extract the parent ID and true code from the arguments.
       $id_parent = array_pop($codes);
       $true_code = array_pop($codes);
-      $enc_code  = $true_code ? base64_encode($true_code) : 'null';
+      $enc_code  = $true_code ? base64_encode($true_code . ($real ? '1' : '2')) : 'null';
       // Define the cache name based on the encoded code.
       $cache_name = 'get_code_' . $enc_code;
-
       // Check if a cached result is available for the given parent ID and cache name.
       if (($tmp = $this->getCache($id_parent, $cache_name))) {
         // If no more arguments are provided, return the cached result directly.
@@ -81,7 +96,7 @@ trait Code
 
         // Otherwise, append the cached result to the remaining arguments and proceed recursively.
         $codes[] = $tmp;
-        return $this->_fromCode($codes, $depth + 1);
+        return $this->_fromCode($codes, $real, $depth + 1);
       }
 
       // Perform a database query to find an option matching the provided code and parent ID.
@@ -101,7 +116,7 @@ trait Code
         $rightValue = $tmp;
       }
       // If still no match is found, attempt to follow an alias with a matching code.
-      elseif ($tmp = $this->db->selectOne([
+      elseif (!$real && ($tmp = $this->db->selectOne([
         'table' => $c['table'],
         'fields' => [$c['table'] . '.' . $f['id']],
         'join' => [[
@@ -118,11 +133,11 @@ trait Code
           [$c['table'] . '.' . $f['id_parent'], '=', $id_parent],
           ['o1.' . $f['code'], 'LIKE', $true_code]
         ]
-      ])) {
+      ]))) {
         $rightValue = $tmp;
       }
       // If no direct match is found, attempt to find a magic code option that bypasses the normal matching logic.
-      elseif ($this->getMagicTemplateId()) {
+      elseif (!$real && $this->getMagicTemplateId()) {
         if ($tmp2 = $this->db->selectOne(
             $c['table'],
             $f['id'],
@@ -167,7 +182,7 @@ trait Code
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {
-        if (($opt = $this->nativeOption($rightValue)) && !empty($opt['id_alias'])) {
+        if (!$real && ($opt = $this->nativeOption($rightValue)) && !empty($opt['id_alias'])) {
           if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
             if (!\count($codes) || !in_array(end($codes), ['options', 'plugins', 'permissions', 'templates'])) {
               $codes[] = 'options';
@@ -186,7 +201,7 @@ trait Code
 
         if (\count($codes)) {
           $codes[] = $rightValue;
-          return $this->_fromCode($codes, $depth + 1);
+          return $this->_fromCode($codes, $real, $depth + 1);
         }
 
         return $rightValue;
@@ -222,22 +237,48 @@ trait Code
     return $this->_fromCode($codes);
   }
 
+  /**
+   * Retrieves an option's ID from its "codes path"
+   *
+   * This method can handle diverse combinations of elements, such as:
+   * - A code or a series of codes from the most specific to a child of the root
+   * - A code or a series of codes and an id_parent where to find the last code
+   * - A code alone having $this->default as parent
+   *
+   * @param string ...$codes The option's code(s)
+   * @return string|null The ID of the option, null if not found, or false if the row cannot be found
+   */
+  public function fromRealCode(...$codes): ?string
+  {
+    // Check if the class is initialized and the database connection is valid.
+    // If the input is an array, extract its elements as separate arguments.
+    while (isset($codes[0]) && \is_array($codes[0])) {
+      $codes = $codes[0];
+    }
+    
+    // Check if we have an option array as a parameter and return its ID directly.
+    if (isset($codes[$this->fields['id']])) {
+      return $codes[$this->fields['id']];
+    }
+
+    return $this->_fromCode($codes, true);
+  }
+
 
   /**
    * Retrieves an option's ID from its code path, starting from the root.
    *
    * @return string|null
    */
-  public function fromRootCode(): ?string
+  public function fromRootCode(...$codes): ?string
   {
     // Save the default value and set it to the root for this query.
     if ($this->check()) {
       $def = $this->default;
-      $this->setDefault($this->root);
       // Proceed with the query using the updated default value.
-      $res = $this->fromCode(...func_get_args());
-      // Restore the original default value after the query.
-      $this->setDefault($def);
+
+      $codes[] = false;
+      $res = $this->fromCode(...$codes);
       return $res;
     }
 
@@ -300,5 +341,15 @@ trait Code
     }
 
     return null;
+  }
+
+  public function toCodeArray($id): ?array
+  {
+    $path = $this->toPath($id, '/');
+    if (!$path) {
+      return null;
+    }
+
+    return array_reverse(X::split($path, '/'));
   }
 }

@@ -81,7 +81,7 @@ trait Optional
       if (!$path) {
         $tmp                   = explode('\\', __CLASS__);
         $cls                   = end($tmp);
-        $path                  = ['options', $cls, 'appui'];
+        $path                  = [$cls, 'appui'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);

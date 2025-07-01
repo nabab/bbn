@@ -441,38 +441,6 @@ class Permissions extends Basic
 
 
   /**
-   * Checks if a user and/or a group has a permission for the given option or for its childern.
-   *
-   * @param string|null $id_option The option's UID
-   * @param string      $type      The type: access or option
-   * @param bool        $force     Force permission check
-   * @return bool
-   */
-  public function hasDeep(string|null $id_option = null, string $type = 'access', bool $force = false): bool
-  {
-    if (!$force && $this->user && $this->user->isDev()) {
-      return true;
-    }
-
-    if ($this->has($id_option, $type, $force)) {
-      return true;
-    }
-
-    if (($id_option = $this->_get_id_option($id_option, $type))
-        && ($options = $this->opt->fullOptions($id_option))
-    ) {
-      foreach ($options as $option){
-        if ($this->hasDeep($option['id'], $type, $force)) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-
-  /**
    * Alias of fromPath.
    *
    * @param string|null $id_option The option's UID
@@ -645,7 +613,7 @@ class Permissions extends Basic
       return $this->pref->has($id_perm, $force) ?: $this->user->isAdmin();
     }
 
-    return true;
+    return false;
   }
 
 
@@ -657,7 +625,18 @@ class Permissions extends Basic
    */
   public function writeOption(string $id_option, bool $force = false): ?bool
   {
-    return $this->readOption($id_option, $force);
+    if ($this->user->isAdmin()) {
+      return true;
+    }
+
+    if ($id_perm = $this->optionToPermission($id_option)) {
+      $p = $this->pref->get($id_perm);
+      if (is_array($p) && isset($p['write']) && $p['write']) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 

@@ -583,7 +583,7 @@ class Ide2 extends modelDb {
    */
   private function _getNode(array $t, array $cfg): array {
     $component = false;
-    $is_vue    = false;
+    $isComponent    = false;
     $name      = $t['basename'];
     //if is type and is components
     if ($cfg['type']['type'] === 'components') {
@@ -597,7 +597,7 @@ class Ide2 extends modelDb {
             $item = explode(".", basename($f))[0];
             if ($item === basename($t)) {
               $arr[]  = \bbn\Str::fileExt($f);
-              $is_vue = true;
+              $isComponent = true;
             }
           }
         }
@@ -626,7 +626,7 @@ class Ide2 extends modelDb {
             if ($item === basename($t)) {
               $folder    = false;
               $arr[]     = \bbn\Str::fileExt($f);
-              $is_vue    = true;
+              $isComponent    = true;
               $component = true;
               if (!empty($ext) && (in_array($ext, $excludeds) === false)) {
                 $num_check++;
@@ -681,7 +681,7 @@ class Ide2 extends modelDb {
       }
     }
     //case component o folder who contain other component
-    elseif (!empty($component) && !empty($is_vue)) {
+    elseif (!empty($component) && !empty($isComponent)) {
       $icon = "nf nf-md-vuejs";
     }
     //case folder
@@ -700,8 +700,8 @@ class Ide2 extends modelDb {
       'uid' => $component === true ? $cfg['publicPath'].$name.'/'.$name : $cfg['publicPath'].$name,
       'has_index' => !$t['file'] && \bbn\File\Dir::hasFile($t['name'], 'index.php', 'index.html', 'index.htm'),
       'is_svg' => $t['file'] && ($t['ext'] === 'svg'),
-      // $is_vue not use
-      'is_vue' => $is_vue,
+      // $isComponent not use
+      'isComponent' => $isComponent,
       'icon' => $icon,
       'bcolor' => $cfg['bcolor'],
       'folder' => $t['dir'],

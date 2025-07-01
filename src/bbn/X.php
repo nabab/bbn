@@ -3154,6 +3154,16 @@ class X
       throw new Exception(X::_("You need the PhpOffice library to use this function"));
     }
 
+    if ($cfg) {
+      foreach ($data as $i => $d) {
+        $t = [];
+        foreach ($cfg['fields'] as $c) {
+          $t[$c['field']] = $d[$c['field']] ?? null;
+        }
+        $data[$i] = $t;
+      }
+    }
+
     $excel    = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     $sheet    = $excel->getActiveSheet();
     $ow       = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($excel);
@@ -3188,8 +3198,22 @@ class X
       }
     }
     else {
+      if (isset($cfg['map'], $cfg['map']['callable'])
+          && is_callable($cfg['map']['callable'])
+      ) {
+        array_walk($data, $cfg['map']['callable'], !empty($cfg['map']['params']) && is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
+      }
+
+      array_walk($data, function (&$item) use ($cfg) {
+        foreach ($cfg['fields'] as $field) {
+          if (!empty($field['hidden'])) {
+            unset($item[$field['field']]);
+          }
+        }
+      });
       $end = count($data) + ($with_titles ? 1 : 0);
-      foreach ($cfg['fields'] as $i => $field) {
+      $visible = array_values(array_filter($cfg['fields'], fn ($field) => empty($field['hidden'])));
+      foreach ($visible as $i => $field) {
         // Get cell object
         $cell = $sheet->getCell([$i + 1, $with_titles ? 2 : 1]);
         // Get colum name
@@ -3265,11 +3289,6 @@ class X
         }
       }
 
-      if (isset($cfg['map'], $cfg['map']['callable'])
-          && is_callable($cfg['map']['callable'])
-      ) {
-        array_walk($data, $cfg['map']['callable'], !empty($cfg['map']['params']) && is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
-      }
 
       $sheet->fromArray($data, null, 'A' . ($with_titles ? '2' : '1'));
       $can_save = true;

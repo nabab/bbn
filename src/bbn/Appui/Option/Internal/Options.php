@@ -175,9 +175,9 @@ trait Options
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|null array of IDs, sorted or false if option not found
    */
-  public function items($code = null): ?array
+  public function items(...$code): ?array
   {
-    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if (Str::isUid($id = $this->fromCode(...$code))) {
       if (($res = $this->getCache($id, __FUNCTION__)) !== false) {
         return $res;
       }

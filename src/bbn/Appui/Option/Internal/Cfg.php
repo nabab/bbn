@@ -3,6 +3,7 @@
 namespace bbn\Appui\Option\Internal;
 
 use bbn\Str;
+use bbn\X;
 
 /**
  * This trait provides configuration-related functionality for the Options class.
@@ -53,6 +54,11 @@ trait Cfg
     // Look for parent options with inheritance.
     $parents = array_reverse($this->parents($id));
     $last    = count($parents) - 1;
+    if (!empty($cfg['container'])) {
+      $cfg = $this->getCfg($last);
+      $this->setCache($id, __FUNCTION__, $cfg);
+      return $cfg;
+    }
 
     // Iterate through the parents to find one with inheritance.
     foreach ($parents as $i => $p) {
@@ -136,6 +142,29 @@ trait Cfg
       $cfg[$m] = empty($cfg[$m]) ? null : $cfg[$m];
     }
 
+    $cfg['root_alias'] = null;
+    if ($this->root && $this->default && !empty($cfg['id_root_alias'])) {
+      $cfg['root_alias'] = $this->option($cfg['id_root_alias']);
+      if (!empty($cfg['root_alias']['num_children'])
+          && ($items = $this->items($cfg['id_root_alias']))
+      ) {
+        $cfg['root_alias']['last_level'] = true;
+        foreach ($items as $item) {
+          if ($this->items($item)) {
+            $cfg['root_alias']['last_level'] = false;
+            break;
+          }
+        }
+
+        if ($cfg['root_alias']['last_level']
+            && ($last_level_children = $this->fullOptions($cfg['id_root_alias']))
+        ) {
+          X::sortBy($last_level_children, 'text');
+          $cfg['root_alias']['last_level_children'] = $last_level_children;
+        }
+      }
+    }
+
     // Cache the result and return it.
     $this->setCache($id, __FUNCTION__, $cfg);
     return $cfg;
@@ -163,6 +192,24 @@ trait Cfg
     return null;
   }
 
+  public function getApplicableCfg(...$codes): ?array
+  {
+    // Get the ID of the option from its code.
+    $id = $this->fromCode($codes);
+
+    // Check if the ID is valid and retrieve the config.
+    if (Str::isUid($id)) {
+      
+      $cfg = $this->getParentCfg($id);
+      if ($cfg) {
+        return array_filter($cfg, function ($key) {
+          return !in_array($key, ['inherit_from', 'frozen', 'inherit_from_text']);
+        }, ARRAY_FILTER_USE_KEY);
+      }
+    }
+
+    return null;
+  }
 
   /**
    * Returns a formatted content of the cfg column as an array from the option's parent.

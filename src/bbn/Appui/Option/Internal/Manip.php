@@ -21,8 +21,6 @@ trait Manip
   {
     $this->isExporting = true;
     $this->deleteCache();
-    $default = $this->getDefault();
-    $this->setDefault($this->root);
     $o = null;
     $modes = ['children', 'full', 'sfull', 'schildren', 'simple', 'single'];
     if (!in_array($mode, $modes)) {
@@ -69,22 +67,53 @@ trait Manip
             $cfg['schema'] = json_decode($cfg['schema'], true);
           }
 
+          if (isset($cfg['root_alias'])) {
+            unset($cfg['root_alias']);
+          }
+
           //if (isset($cfg['id'])) {
             //unset($cfg['id']);
           //}
 
-          if (isset($cfg['scfg'])
-              && !empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])
-          ) {
-            $cfg['scfg']['schema'] = json_decode($cfg['scfg']['schema'], true);
+          if (!empty($cfg['scfg'])) {
+            if (!empty($cfg['scfg']['schema']) && is_string($cfg['scfg']['schema'])) {
+              $cfg['scfg']['schema'] = json_decode($cfg['scfg']['schema'], true);
+            }
+
+            if (!empty($cfg['scfg']['id_root_alias'])) {
+              if ($codes = $opt->toCodeArray($cfg['scfg']['id_root_alias'])) {
+                $cfg['scfg']['id_root_alias'] = $codes;
+              }
+              else {
+                unset($cfg['scfg']['id_root_alias']);
+              }
+            }
+
+            if (!empty($cfg['scfg']['id_template'])) {
+              if ($codes = $opt->toCodeArray($cfg['scfg']['id_template'])) {
+                $cfg['scfg']['id_template'] = $codes;
+              }
+              else {
+                unset($cfg['scfg']['id_template']);
+              }
+            }
           }
 
           if (!empty($cfg['id_root_alias'])) {
-            if ($codes = $opt->getCodePath($cfg['id_root_alias'])) {
+            if ($codes = $opt->toCodeArray($cfg['id_root_alias'])) {
               $cfg['id_root_alias'] = $codes;
             }
             else {
               unset($cfg['id_root_alias']);
+            }
+          }
+
+          if (!empty($cfg['id_template'])) {
+            if ($codes = $opt->toCodeArray($cfg['id_template'])) {
+              $cfg['id_template'] = $codes;
+            }
+            else {
+              unset($cfg['id_template']);
             }
           }
 
@@ -115,7 +144,7 @@ trait Manip
           }
 
           if (!empty($o[$this->fields['id_alias']])
-              && ($codes = $opt->getCodePath($o[$this->fields['id_alias']]))
+              && ($codes = $opt->toCodeArray($o[$this->fields['id_alias']]))
           ) {
             $o[$this->fields['id_alias']] = $codes;
           }
@@ -142,7 +171,6 @@ trait Manip
 
     }
     
-    $this->setDefault($default);
     $this->isExporting = false;
     $this->deleteCache();
     return $o;
