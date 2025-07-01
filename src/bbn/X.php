@@ -3204,10 +3204,23 @@ class X
         array_walk($data, $cfg['map']['callable'], !empty($cfg['map']['params']) && is_array($cfg['map']['params']) ? $cfg['map']['params'] : []);
       }
 
-      array_walk($data, function (&$item) use ($cfg) {
+      $dates = array_values(
+        array_filter(
+          $cfg['fields'],
+          fn($c) => empty($c['hidden'])
+            && (($c['type'] === 'date')
+              || ($c['type'] === 'datetime')
+              || ($c['type'] === 'isodate'))
+        )
+      );
+
+      array_walk($data, function (&$item) use ($cfg, $dates) {
         foreach ($cfg['fields'] as $field) {
           if (!empty($field['hidden'])) {
             unset($item[$field['field']]);
+          }
+          else if (X::search($dates, ['field' => $field['field']]) !== null) {
+            $item[$field['field']] = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($item[$field['field']]);
           }
         }
       });

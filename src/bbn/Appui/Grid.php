@@ -450,10 +450,7 @@ class Grid extends bbn\Models\Cls\Cache
             || ($c['type'] === 'isodate'))
       )
     );
-    $hidden = array_map(function ($a) {
-      return $a['field'];
-    }, X::filter($cfg['fields'], ['hidden' => true]));
-    $data = array_map(function ($row) use ($cfg, $dates, $hidden, $options) {
+    $data = array_map(function ($row) use ($dates, $options) {
       foreach ($row as $i => &$r) {
         if ($options && isset($options[$i])) {
           $r = X::getField($options[$i], ['value' => $row[$i]], 'text');
@@ -466,8 +463,6 @@ class Grid extends bbn\Models\Cls\Cache
           if (!empty($dates[$k]['format']) && !empty($r)) {
             $r = date($dates[$k]['format'], strtotime($r));
           }
-
-          $r = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
         }
       }
 
