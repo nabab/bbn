@@ -469,17 +469,11 @@ class Grid extends bbn\Models\Cls\Cache
 
           $r = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($r);
         }
-        if (in_array($i, $hidden)) {
-          unset($row[$i]);
-        }
       }
 
       unset($r);
       return $row;
     }, $data ?: ($this->getData() ?: []));
-    $cfg['fields'] = array_values(array_filter($cfg['fields'], function ($c) {
-      return empty($c['hidden']);
-    }));
     if (X::toExcel($data, $path, true, $cfg)) {
       return ['file' => $path];
     }
