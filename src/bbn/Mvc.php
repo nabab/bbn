@@ -1236,7 +1236,7 @@ class Mvc implements Mvc\Api
    * @param string $plugin
    * @return bool
    */
-  public function hasCustomPLuginModel(string $path, string $plugin): bool
+  public function hasCustomPluginModel(string $path, string $plugin): bool
   {
     return (bool) $this->router->routeCustomPlugin(router::parse($path), 'model', $plugin);
   }

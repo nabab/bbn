@@ -274,8 +274,7 @@ trait Manip
   public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, ?array &$todo = null)
   {
     if (is_array($id_parent)) {
-      array_push($id_parent, $this->getRoot());
-      $id_parent = $this->fromCode($id_parent);
+      $id_parent = $this->fromCode(...$id_parent);
     }
     elseif (null === $id_parent) {
       $id_parent = $this->getDefault();
@@ -289,6 +288,13 @@ trait Manip
       $c       =& $this->fields;
       $is_root = false;
       if ($todo === null) {
+        $parent = $this->option($id_parent);
+        if ($parent['id_alias'] && in_array($parent['id_alias'], [$this->getSubpluginTemplateId(), $this->getPluginTemplateId()], true)) {
+          $id_parent = $this->fromCode('options', $id_parent);
+          if (!$id_parent) {
+            throw new Exception(X::_("Error while importing: there should be an 'option' option in the target plugin"));
+          }
+        }
         $is_root = true;
         $todo    = [];
       }
@@ -297,8 +303,10 @@ trait Manip
         $options = [$options];
       }
 
+      $realParent = $id_parent ?: $this->default;
+      $currentOptions = $this->fullOptions($realParent);
       foreach ($options as $o) {
-        $tmp   = [];
+        $after = [];
         $items = [];
         /** @todo Temp solution */
         if (empty($o) || !is_array($o)) {
@@ -311,7 +319,7 @@ trait Manip
           }
         }
 
-        $o[$c['id_parent']] = $id_parent ?: $this->default;
+        $o[$c['id_parent']] = $realParent;
         if (isset($o['items'])) {
           $items = $o['items'] ?: null;
           unset($o['items']);
@@ -320,7 +328,7 @@ trait Manip
 
         $hasNoText = empty($o[$c['text']]);
         if (isset($o[$c['id_alias']])) {
-          $tmp['id_alias'] = $o[$c['id_alias']];
+          $after['id_alias'] = $o[$c['id_alias']];
           if ($hasNoText) {
             $o[$c['text']] = 'waiting for alias';
           }
@@ -328,14 +336,28 @@ trait Manip
         }
 
         if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_root_alias'])) {
-          $tmp['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];
+          $after['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];
           unset($o[$c['cfg']]['id_root_alias']);
+        }
+
+        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['template'])) {
+          $after['template'] = $o[$c['cfg']]['template'];
+          unset($o[$c['cfg']]['template']);
+        }
+
+        $search = $o;
+        unset($o[$c['id']], $o[$c['id_parent']], $o[$c['cfg']], $o[$c['num']]);
+        if (isset($search[$c['id_alias']]) && is_array($search[$c['id_alias']])) {
+          $search[$c['id_alias']] = $this->fromCode(...$search[$c['id_alias']]);
+        }
+        if ($row = X::getRow($currentOptions, $search)) {
+          $o = X::mergeArrays($row, $o);
         }
 
         if ($id = $this->add($o, true)) {
           yield 1;
-          if (!empty($tmp)) {
-            $todo[$id] = $tmp;
+          if (!empty($after)) {
+            $todo[$id] = $after;
           }
 
           if (!empty($items)) {
@@ -379,6 +401,12 @@ trait Manip
               && ($id_root_alias = $this->fromCode(...$td['id_root_alias']))
           ) {
             $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
+          }
+
+          if (!empty($td['template'])
+              && ($id_template = $this->fromCode(...$td['template']))
+          ) {
+            $this->setcfg($id, ['template' => $id_template], true);
           }
         }
       }

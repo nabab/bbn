@@ -151,6 +151,10 @@ trait Write
           $this->deleteCache($id);
         }
 
+        if ($id && $values[$c['id_alias']] && $this->isTemplate($values[$c['id_alias']])) {
+          $this->applyTemplate($id);
+        }
+
         if ($items && Str::isUid($id)) {
           foreach ($items as $item){
             $item[$c['id_parent']] = $id;

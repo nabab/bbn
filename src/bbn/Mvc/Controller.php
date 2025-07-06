@@ -8,6 +8,7 @@ use bbn\Db;
 use bbn\Mvc;
 use bbn\X;
 use bbn\Tpl;
+use bbn\File\System;
 
 class Controller implements Api
 {
@@ -1005,10 +1006,21 @@ class Controller implements Api
   {
     if ($tmp = $this->routeComponent($name)) {
       if (!empty($tmp['js'])) {
+        $locale = constant('BBN_LOCALE') ?? 'en';
+        $plugin = $tmp['js']['plugin_name'] ?? null;
         $v   = new View($tmp['js']);
+        $fs = new System();
+        $path = $fs->createPath($this->dataPath($plugin));
+        $file = "$path/component-registry-$locale.json";
+        if (!$fs->exists($file)) {
+          $fs->putContents($file, '[]');
+        }
+
+        $registry = $fs->decodeContents($file, 'json', true);
         $res = [
+          'plugin' => $plugin,
           'name' => $name,
-          'script' => $v->get($data)
+          'script' => $v->get($data),
         ];
         if (!empty($tmp['css'])) {
           $v          = new View($tmp['css']);
@@ -1025,6 +1037,28 @@ class Controller implements Api
           $res['content']        = $v->get($data);
         }
 
+        $hash = md5(json_encode($res));
+        $write = false;
+        if (!isset($registry[$name])) {
+          $registry[$name] = [
+            'name' => $name,
+            'plugin' => $plugin,
+            'hash' => $hash,
+            'version' => 1
+          ];
+          $write = true;
+        }
+        elseif ($hash !== $registry[$name]['hash']) {
+          $registry[$name]['version']++;
+          $registry[$name]['hash'] = $hash;
+          $write = true;
+        }
+
+        if ($write || true) {
+          $fs->putContents($file, json_encode($registry, JSON_PRETTY_PRINT));
+        }
+
+        $res['version'] = $registry[$name]['version'];
         return $res;
       }
     }
@@ -1205,6 +1239,13 @@ class Controller implements Api
 
     return null;
   }
+
+  public function hasCustomPluginModel(string $path, string $plugin): bool
+  {
+    return $this->_mvc->hasCustomPluginModel($path, $plugin);
+  }
+
+
 
 
   /**

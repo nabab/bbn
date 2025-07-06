@@ -498,13 +498,14 @@ class Ide
   /** @todo Very bad!! */
   public function getDataPath(string $plugin = '')
   {
-    if ($this->project !== 'apst-app') {
+    /*
+    if ($this->project !== 'my-project') {
       if ((strlen($plugin) > 0)
         && empty(array_search(substr($plugin, strlen('appui-')), array_keys($this->routes)))
       ) {
         return false;
       }
-    }
+    }*/
 
     return $this->projects->getDataPath($plugin);
   }
