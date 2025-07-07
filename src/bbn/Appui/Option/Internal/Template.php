@@ -370,7 +370,7 @@ trait Template
             $opt,
             $foptions,
             $this->items($target),
-            $this->db->rselectAll('bbn_options', [], ['id_parent' => $target]), $foptions
+            $this->db->rselectAll('bbn_options', [], ['id_parent' => $target])
           ], 'optionsFail');
         }
         if ($this->setAlias($o['id'], $idSubtemplate)) {

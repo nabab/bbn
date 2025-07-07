@@ -5,6 +5,8 @@ namespace bbn;
 use Exception;
 use stdClass;
 
+use function yaml_parse;
+use function yaml_emit;
 use bbn\File\System;
 use bbn\Util\Enc;
 use bbn\Db;
@@ -1690,25 +1692,24 @@ class Appui
 
       if ($routes[$idx]) {
         $opt->deleteCache(null);
-        if (!$opt->getMagicTemplateId()) {
-          $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/src/cfg/templates.json';
-          $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
-          foreach ($opt->import($tmp, $root) as $res) {
-            $num += $res;
-          }
+        $templatesFile = $this->libPath() . $routes[$idx]['path'] . '/src/cfg/templates.json';
+        $tmp = $this->_currentFs->decodeContents($templatesFile, 'json', true);
+        foreach ($opt->import($tmp, $root) as $res) {
+          $num += $res;
         }
 
-        if (!($idApp = $opt->fromCode($this->_current['app_name'], $root))) {
+        if (!($idApp = $opt->fromRealCode($this->_current['app_name'], $root))) {
           $idApp = $opt->add([
             'id_parent' => $root,
             'code' => $this->_current['app_name'],
             'text' => $this->_current['site_title'],
             'id_alias' => $opt->getPluginTemplateId()
           ], true);
-          $num += $opt->applyTemplate($idApp);
-          $opt->deleteCache(null);
         }
 
+        $opt->deleteCache(null);
+        $num += $opt->applyTemplate($idApp);
+        $opt->deleteCache(null);
         $opt->setDefault($idApp);
 
         $id_appui = $opt->fromCode('appui');
@@ -1728,11 +1729,18 @@ class Appui
 
             $tmp['id_alias'] = $idPluginTpl;
             $tmp['id_parent'] = $id_appui;
-            if ($id_plugin = $opt->add($tmp)) {
+            if ($id_plugin = $opt->fromRealCode($tmp['code'], $id_appui)) {
+              $opt->setAlias($id_plugin, $tmp['id_alias']);
+            }
+            elseif ($id_plugin = $opt->add($tmp)) {
               $num++;
+            }
+            else {
+              throw new Exception(X::_("Impossible to add the plugin %s", $tmp['code']));
             }
 
             $num += $opt->applyTemplate($id_plugin);
+            $opt->deleteCache(null);
             if ($this->_currentFs->exists($optionsFile)) {
               $tmp = $this->_currentFs->decodeContents($optionsFile, 'json', true);
               if (!$tmp) {
@@ -1744,6 +1752,7 @@ class Appui
                 throw new Exception(X::_("Impossible to find the options parent"));
               }
               $todo[] = [$tmp, $id_options];
+              //X::dump("Importing ".X::join($opt->getCodePath($id_options), '/'));
               foreach($opt->import($tmp, $id_options, true) as $res) {
                 $num += $res;
                 if ($num >= $next) {

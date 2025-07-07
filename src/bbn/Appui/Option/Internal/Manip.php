@@ -5,6 +5,7 @@ namespace bbn\Appui\Option\Internal;
 use Exception;
 use bbn\X;
 use bbn\Str;
+use Generator;
 
 trait Manip
 {
@@ -271,7 +272,7 @@ trait Manip
    * @param array|null $todo
    * @return iterable|null
    */
-  public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, ?array &$todo = null)
+  public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, ?array &$todo = null): Generator
   {
     if (is_array($id_parent)) {
       $id_parent = $this->fromCode(...$id_parent);
@@ -302,8 +303,8 @@ trait Manip
       if (X::isAssoc($options)) {
         $options = [$options];
       }
-
       $realParent = $id_parent ?: $this->default;
+
       $currentOptions = $this->fullOptions($realParent);
       foreach ($options as $o) {
         $after = [];
@@ -346,11 +347,8 @@ trait Manip
         }
 
         $search = $o;
-        unset($o[$c['id']], $o[$c['id_parent']], $o[$c['cfg']], $o[$c['num']]);
-        if (isset($search[$c['id_alias']]) && is_array($search[$c['id_alias']])) {
-          $search[$c['id_alias']] = $this->fromCode(...$search[$c['id_alias']]);
-        }
-        if ($row = X::getRow($currentOptions, $search)) {
+        unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']]);
+        if ($row = X::getRow($currentOptions, $search['code'] ? [$c['code'] => $search['code']] : $search)) {
           $o = X::mergeArrays($row, $o);
         }
 
@@ -375,7 +373,8 @@ trait Manip
       if (!$no_alias && $is_root && !empty($todo)) {
         foreach ($todo as $id => $td) {
           if (!empty($td['id_alias'])) {
-            if ($id_alias = $this->fromCode(...$td['id_alias'])) {
+            $id_alias = is_array($td['id_alias']) ? $this->fromCode(...$td['id_alias']) : $id['id_alias'];
+            if ($id_alias) {
               try {
                 $this->setAlias($id, $id_alias);
                 if ($hasNoText) {
