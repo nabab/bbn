@@ -657,20 +657,18 @@ class Sqlite extends Sql
     }
 
     $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
-    $done = false;
+    $numFields = count($cfg['fields']);
+    $i = 0;
     foreach ($cfg['fields'] as $name => $col) {
-      if (!$done) {
-        $done = true;
-      }
-      else {
+      $i++;
+      $st .= $this->getColumnDefinitionStatement($name, $col);
+      if ($i < $numFields) {
         $st .= ',' . PHP_EOL;
       }
-
-      $st .= $this->getColumnDefinitionStatement($name, $col);
     }
 
     if (isset($cfg['keys']['PRIMARY'])) {
-      $st .= ','.PHP_EOL.'  PRIMARY KEY ('.X::join(
+      $st .= ',' . PHP_EOL . '  PRIMARY KEY (' . X::join(
         array_map(
           function ($a) {
             return $this->escape($a);
@@ -678,14 +676,14 @@ class Sqlite extends Sql
           $cfg['keys']['PRIMARY']['columns']
         ),
         ', '
-      ).')';
+      ) . ')';
     }
 
     if ($c = $this->getCreateConstraintsOnly($table, $cfg)) {
-      $st .= PHP_EOL. $c;
+      $st .= ',' . PHP_EOL . $c;
     }
 
-    $st .= PHP_EOL . '); PRAGMA encoding='.$this->qte.(empty($cfg['charset']) ? static::$defaultCharset : $cfg['charset']).$this->qte.';';
+    $st .= PHP_EOL . '); PRAGMA encoding=' . $this->qte . (empty($cfg['charset']) ? static::$defaultCharset : $cfg['charset']) . $this->qte . ';';
     return $st;
   }
 
@@ -1022,6 +1020,30 @@ class Sqlite extends Sql
 
 
   /**
+   * Returns the SQL statement to get the list of charsets.
+   *
+   * @return string
+   */
+  public function getCharsets(): string
+  {
+    return "SELECT " . $this->escape("column1") . " AS ". $this->escape("charset") . PHP_EOL .
+      "FROM (VALUES('UTF-8'), ('UTF-16'), ('UTF-16le'), ('UTF-16be'))";
+  }
+
+
+  /**
+   * Returns the SQL statement to get the list of collations.
+   *
+   * @return string
+   */
+  public function getCollations(): string
+  {
+    return "SELECT DISTINCT " . $this->escape("name"). " AS " . $this->escape("collation") . PHP_EOL .
+      "FROM " . $this->escape("pragma_collation_list") . ";";
+  }
+
+
+  /**
    * Creates a database
    *
    * @param string $database
@@ -1239,7 +1261,7 @@ class Sqlite extends Sql
             'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
             (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
             (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
-            (!isset($keys[$i + 1]) ? ';' : ',' . PHP_EOL);
+            (isset($keys[$i + 1]) ? ',' . PHP_EOL : '');
         }
       }
     }

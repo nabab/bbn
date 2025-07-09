@@ -189,7 +189,7 @@ class Database extends bbn\Models\Cls\Cache
             if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'/'.$db)) {
               throw new \Exception(X::_('db or path empty'));
             }
-            
+
             $db_cfg = [
               'engine' => 'sqlite',
               'db' => $cfg['path'].'/'.$db
@@ -277,6 +277,7 @@ class Database extends bbn\Models\Cls\Cache
 
   public function engineDataTypes(string $engineCode): array
   {
+    return bbn\Db\Languages\Sql::$types;
     if (Str::isUid($engineCode)) {
       $engineCode = $this->engineCode($engineCode);
     }
@@ -444,19 +445,17 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if ($host) {
-      $o   = &$this->o;
       $arr = array_map(
         fn($a) => $this->o->parent($a['id_parent']),
         $this->o->getAliases($host)
       );
     }
-
     if (!empty($arr)) {
       return array_map(
         fn($a) => [
-            'id' => $a['id'],
-            'text' => $a['text'],
-            'name' => $a['code']
+          'id' => $a['id'],
+          'text' => $a['text'],
+          'name' => $a['code']
         ],
         $arr
       );
@@ -541,21 +540,21 @@ class Database extends bbn\Models\Cls\Cache
       ]);
       if ($idTables = $this->o->fromCode('tables', $r['id'])) {
         $r['num_tables'] = $this->o->count($idTables);
-          }
+      }
 
       if ($idConnections = $this->o->fromCode('connections', $r['id'])) {
         $r['num_connections'] = $this->o->count($idConnections);
-          }
+      }
 
       if ($idProcedures = $this->o->fromCode('procedures', $r['id'])) {
         $r['num_procedures'] = $this->o->count($idProcedures);
-          }
+      }
 
       if ($idFunctions = $this->o->fromCode('functions', $r['id'])) {
         $r['num_functions'] = $this->o->count($idFunctions);
-          }
+      }
 
-          return $r;
+      return $r;
     }
 
     return null;
@@ -674,8 +673,8 @@ class Database extends bbn\Models\Cls\Cache
   {
     if (!bbn\Str::isUid($engine)) {
       $engineId = $this->engineId($engine);
-      }
-      else {
+    }
+    else {
       $engineId = $engine;
       $engine = $this->engineCode($engineId);
     }
@@ -746,14 +745,14 @@ class Database extends bbn\Models\Cls\Cache
       ]);
       if ($idColumns = $this->o->fromCode('columns', $r['id'])) {
         $r['num_columns'] = $this->o->count($idColumns);
-            }
+      }
 
       if ($idKeys = $this->o->fromCode('keys', $r['id'])) {
         $r['num_keys'] = $this->o->count($idKeys);
-            }
-
-            return $r;
       }
+
+      return $r;
+    }
     return null;
   }
 
@@ -1296,17 +1295,17 @@ class Database extends bbn\Models\Cls\Cache
 
     if (!($idTemplate = $this->o->getTemplateId('database'))) {
       throw new \Exception(X::_("Impossible to find the template \"%s\"", 'database'));
-      }
+    }
 
     if (Str::isUid($host)
       && ($id_dbs = $this->o->fromCode('dbs', $engineId))
     ) {
       if (!($id_db = $this->o->fromCode($db, $id_dbs))) {
         $id_db = $this->addDatabase($db, $host);
-        }
+      }
       else if (($this->o->getIdAlias($id_db) !== $idTemplate)
         && $this->o->setAlias($id_db, $idTemplate)
-        ) {
+      ) {
         $this->o->applyTemplate($id_db);
       }
 
@@ -1412,7 +1411,7 @@ class Database extends bbn\Models\Cls\Cache
 
     if (!($idTemplate = $this->o->getTemplateId('table'))) {
       throw new \Exception(X::_("Impossible to find the template \"%s\"", 'table'));
-        }
+    }
 
     if (!empty($host_id)
       && ($id_tables = $this->o->fromCode('tables', $id_db))
@@ -1433,8 +1432,8 @@ class Database extends bbn\Models\Cls\Cache
         && ($id_keys = $this->o->fromCode('keys', $id_table))
         && ($db = $this->o->code($id_db))
         && ($conn = $this->connection($host_id, $engine, $db))
-          && ($m = $conn->modelize($db.'.'.$table))
-          && !empty($m['fields'])
+        && ($m = $conn->modelize($db.'.'.$table))
+        && !empty($m['fields'])
       ) {
         $num_cols     = 0;
         $num_cols_rem = 0;

@@ -140,7 +140,7 @@ class Dir extends bbn\Models\Cls\Basic
 		* @param bool $hidden If set to true will also returns the hidden files contained the directory
 		* @return array|false
 		*/
-	public static function getFiles($dir, $including_dirs = false, $hidden = false, $extension = null)
+	public static function getFiles($dir, $including_dirs = false, $hidden = false, array|string|null $extension = null)
 	{
     $dir = self::clean($dir);
     clearstatcache();
@@ -164,7 +164,13 @@ class Dir extends bbn\Models\Cls\Basic
               $files[] = self::cur($dir.'/').$f;
             }
             else if ( is_file($dir.'/'.$f) ){
-              if ( !$extension || (strtolower($extension) === strtolower(bbn\Str::fileExt($f))) ){
+              $fileExt = strtolower(bbn\Str::fileExt($f));
+              if (!$extension
+                || ((is_string($extension)
+                    && (strtolower($extension) === $fileExt))
+                  || (is_array($extension)
+                    && in_array($fileExt, array_map('strtolower', $extension))))
+              ) {
                 $files[] = self::cur($dir.'/').$f;
               }
             }

@@ -152,6 +152,30 @@ class Mysql extends Sql
 
 
   /**
+   * Returns the SQL statement to get the list of charsets.
+   *
+   * @return string
+   */
+  public function getCharsets(): string
+  {
+    return "SELECT DISTINCT " . $this->escape("CHARACTER_SET_NAME"). " AS " . $this->escape("charset") . PHP_EOL .
+      "FROM " . $this->escape("INFORMATION_SCHEMA.character_sets") . ";";
+  }
+
+
+  /**
+   * Returns the SQL statement to get the list of collations.
+   *
+   * @return string
+   */
+  public function getCollations(): string
+  {
+    return "SELECT DISTINCT " . $this->escape("COLLATION_NAME"). " AS " . $this->escape("collation") . PHP_EOL .
+      "FROM " . $this->escape("INFORMATION_SCHEMA.collations") . ";";
+  }
+
+
+  /**
    * Returns the SQL statement to create a database.
    *
    * @param string $database
@@ -480,11 +504,12 @@ MYSQL
   public function tableExists(string $table, string $database = ''): bool
   {
     $q = "SHOW tables ";
-    if ($database) {
+    if (!empty($database)) {
       $q .= "FROM " . $this->escape($database) . " ";
     }
 
-    return (bool)$this->getRow($q . "LIKE \"$table\"");
+    $q .= "LIKE \"$table\"";
+    return (bool)$this->getRow($q);
   }
 
 

@@ -287,6 +287,32 @@ class Pgsql extends Sql
     return $this;
   }
 
+
+  /**
+   * Returns the SQL statement to get the list of charsets.
+   *
+   * @return string
+   */
+  public function getCharsets(): string
+  {
+    return "SELECT DISTINCT " . $this->escape("pg_catalog") . ".pg_encoding_to_char(" .
+      $this->escape("conforencoding") . ") AS " . $this->escape("charset") . PHP_EOL .
+      "FROM " . $this->escape("pg_catalog.pg_conversion") . ";";
+  }
+
+
+  /**
+   * Returns the SQL statement to get the list of collations.
+   *
+   * @return string
+   */
+  public function getCollations(): string
+  {
+    return "SELECT " . $this->escape("collname") . " AS " . $this->escape("collation") . PHP_EOL .
+      "FROM " . $this->escape("pg_collation") . ";";
+  }
+
+
   /**
    * Returns the SQL statement to create a database.
    *
@@ -1635,28 +1661,6 @@ PGSQL
     return $res;
   }
 
-  /**
-   * Executes the original PDO query function
-   *
-   * @return false|PDOStatement
-   */
-  public function rawQuery()
-  {
-    if ($this->_fancy) {
-      $this->stopFancyStuff();
-      $switch_to_fancy = true;
-    }
-
-    $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
-    $result = $this->pdo->query(...func_get_args());
-    $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-    if (!empty($switch_to_fancy)) {
-      $this->startFancyStuff();
-    }
-
-    return $result;
-  }
 
   /**
    * Returns a new instance of the class.

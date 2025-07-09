@@ -2735,15 +2735,26 @@ class Db implements Db\Actions
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
+  public function getCreateTable(string $table, ?array $cfg = null): string
   {
     $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->getCreateTable($table, $cfg);
+  }
 
-    return $this->language->getCreateTable($table, $model, $charset, $collate);
+
+  public function getCreateTableRaw(
+    string $table,
+    ?array $cfg = null,
+    $createKeys = true,
+    $createConstraints = true
+    ): string
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->getCreateTableRaw($table, $cfg, $createKeys, $createConstraints);
   }
 
 
@@ -3246,6 +3257,34 @@ class Db implements Db\Actions
   public function getObjects(): ?array
   {
     return $this->language->getObjects(...\func_get_args());
+  }
+
+
+  /**
+   * Returns a list of charsets available for the current language.
+   *
+   * @return array|null
+   * @throws Exception
+   */
+  public function charsets(): ?array
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
+    return $this->language->charsets();
+  }
+
+
+  /**
+   * Returns a list of collations available for the current language.
+   *
+   * @return array|null
+   * @throws Exception
+   */
+  public function collations(): ?array
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+
+    return $this->language->collations();
   }
 
 

@@ -4,10 +4,71 @@ namespace bbn\Db\Languages\Models\Sql;
 use bbn\Str;
 use bbn\X;
 use Exception;
+use PDO;
 use bbn\Db\Languages\Models\Sql\Formatters;
 
 trait Commands {
   use Formatters;
+
+
+  protected function emulatePreparesAndQuery(string $sql)
+  {
+    $att = true;
+    try {
+      $att = $this->pdo->getAttribute(PDO::ATTR_EMULATE_PREPARES);
+    }
+    catch (Exception $e) {}
+
+    if (empty($att)) {
+      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+    }
+
+    $res = (bool)$this->rawQuery($sql);
+    if (empty($att)) {
+      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    }
+
+    return $res;
+  }
+
+
+  /**
+   * Returns the list of charsets available in the database.
+   *
+   * @return array|null
+   */
+  public function charsets(): ?array
+  {
+    if (($sql = $this->getCharsets())
+      && ($list = $this->getRows($sql))
+    ) {
+      $list = array_map(fn($a) => $a['charset'], $list);
+      sort($list);
+      return $list;
+    }
+
+    return null;
+  }
+
+
+  /**
+   * Returns the list of collations available in the database.
+   *
+   * @return array|null
+   */
+  public function collations(): ?array
+  {
+    if (($sql = $this->getCollations())
+      && ($list = $this->getRows($sql))
+    ) {
+      $list = array_map(fn($a) => $a['collation'], $list);
+      sort($list);
+      return $list;
+    }
+
+    return null;
+  }
+
 
   /**
    * Creates a database
@@ -47,7 +108,7 @@ trait Commands {
 
       if ($sql = $this->getDropDatabase($database)) {
         try {
-          $this->rawQuery($sql);
+          return (bool)$this->emulatePreparesAndQuery($sql);
         }
         catch (Exception $e) {
           return false;
@@ -80,7 +141,7 @@ trait Commands {
 
       if ($sql = $this->getRenameDatabase($oldName, $newName)) {
         try {
-          $this->query($sql);
+          return (bool)$this->emulatePreparesAndQuery($sql);
         }
         catch (Exception $e) {
           return false;
@@ -110,8 +171,9 @@ trait Commands {
       if ($sql = $this->getDuplicateDatabase($source, $target)) {
         try {
           $this->disableKeys();
-          $this->query($sql);
+          $res = (bool)$this->emulatePreparesAndQuery($sql);
           $this->enableKeys();
+          return $res;
         }
         catch (Exception $e) {
           return false;
@@ -134,7 +196,7 @@ trait Commands {
     if ($this->check()
       && ($sql = $this->getAnalyzeDatabase($database))
     ) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -195,7 +257,7 @@ trait Commands {
   ): bool
   {
     if ($sql = $this->getCreateTableRaw($table, $cfg, $createKeys, $createConstraints)) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -242,7 +304,7 @@ trait Commands {
     if ($this->check()
       && ($sql = $this->getAnalyzeTable($table, $database))
     ) {
-      return (bool)$this->rawQuery($sql);
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -328,8 +390,8 @@ trait Commands {
    */
   public function createKeys(string $table, ?array $cfg = null): bool
   {
-    if ($str = $this->getCreateKeys($table,  $cfg)) {
-      return (bool)$this->rawQuery($str);
+    if ($sql = $this->getCreateKeys($table,  $cfg)) {
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
@@ -358,8 +420,8 @@ trait Commands {
    */
   public function createConstraints(string $table, ?array $cfg = null): bool
   {
-    if ($str = $this->getCreateConstraints($table,  $cfg)) {
-      return (bool)$this->rawQuery($str);
+    if ($sql = $this->getCreateConstraints($table,  $cfg)) {
+      return (bool)$this->emulatePreparesAndQuery($sql);
     }
 
     return false;
