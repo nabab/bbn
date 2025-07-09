@@ -1306,8 +1306,8 @@
             },
             "comments": "  \/**\n   * Deletes a preference for a path or an ID.\n   *\n   * @param string|null $id_option The option's UID\n   * @param string      $type      The type: access or option\n   * @return null|int\n   *\/"
         },
-        "getParentCfg": {
-            "name": "getParentCfg",
+        "getApplicableCfg": {
+            "name": "getApplicableCfg",
             "summary": "Returns the permissions inherited properties.",
             "description": "",
             "description_parts": [],
@@ -1316,7 +1316,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getParentCfg(string $id_option): ?array\n  {\n    foreach ($this->opt->parents($id_option) as $i => $p) {\n      $cfg = $this->opt->getCfg($p);\n      if (!empty($cfg['permissions'])) {\n        if ((!$i && ($cfg['permissions'] === 'children')) \n          || in_array($cfg['permissions'], ['all', 'cascade'])\n        ) {\n          return [\n            'cfg' => $cfg['permissions'],\n            'from' => $p,\n            'from_text' => $this->opt->text($p),\n            'cascade' => in_array($cfg['permissions'], ['all', 'cascade'])\n          ];\n        }\n\n        break;\n      }\n    }\n\n    return null;\n  }",
+            "code": "  public function getApplicableCfg(string $id_option): ?array\n  {\n    foreach ($this->opt->parents($id_option) as $i => $p) {\n      $cfg = $this->opt->getCfg($p);\n      if (!empty($cfg['permissions'])) {\n        if ((!$i && ($cfg['permissions'] === 'children')) \n          || in_array($cfg['permissions'], ['all', 'cascade'])\n        ) {\n          return [\n            'cfg' => $cfg['permissions'],\n            'from' => $p,\n            'from_text' => $this->opt->text($p),\n            'cascade' => in_array($cfg['permissions'], ['all', 'cascade'])\n          ];\n        }\n\n        break;\n      }\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": false,
             "startLine": 564,
@@ -1329,7 +1329,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 1,
-            "shortName": "getParentCfg",
+            "shortName": "getApplicableCfg",
             "returns": [
                 null,
                 "array"

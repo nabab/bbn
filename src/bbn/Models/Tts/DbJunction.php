@@ -115,7 +115,7 @@ trait DbJunction
         if (!empty($data[$col])) {
           $jsonUpdate = 'JSON_SET(IFNULL(' . $this->db->csn($col, true) . ' ,"{}")';
           foreach ($data[$col] as $k => $v) {
-            $jsonUpdate .= ', "$.' . $k . '", ' . (is_iterable($v) ? "JSON_EXTRACT('".Str::escapeSquotes(json_encode($v))."', '$')" : ('"'.Str::escapeDquotes($v).'"'));
+            $jsonUpdate .= ', "$.' . $k . '", "' . Str::escapeDquotes(is_iterable($v) ? json_encode($v) : $v) . '"';
           }
 
           $jsonUpdate .= ")";

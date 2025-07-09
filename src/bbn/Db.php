@@ -41,7 +41,7 @@ class Db implements Db\Actions
   protected static $engines = [
     'mysql' => 'nf nf-dev-mysql',
     'pgsql' => 'nf nf-dev-postgresql',
-    'sqlite' => 'nf nf-dev-sqllite'
+    'sqlite' => 'nf nf-dev-sqlite'
   ];
 
   /**
@@ -3262,6 +3262,70 @@ class Db implements Db\Actions
 
 
   /**
+   * Drops the given database
+   *
+   * @param string $database
+   * @return bool
+   */
+  public function dropDatabase(string $database): bool
+  {
+    return $this->language->dropDatabase($database);
+  }
+
+
+  /**
+   * Renames the given database to the new given name.
+   *
+   * @param string $oldName The current database's name
+   * @param string $newName The new name.
+   * @return bool True if it succeeded
+   */
+  public function renameDatabase(string $oldName, string $newName): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->renameDatabase($oldName, $newName);
+  }
+
+
+  /**
+   * Duplicates a database
+   *
+   * @param string $source The source database name
+   * @param string $target The target database name
+   * @return bool True if it succeeded
+   */
+  public function duplicateDatabase(string $source, string $target): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->duplicateDatabase($source, $target);
+  }
+
+
+  /**
+   * Returns the charset of the given database
+   *
+   * @param string $database
+   * @return string|null
+   */
+  public function getDatabaseCharset(string $database): ?string
+  {
+    return $this->language->getDatabaseCharset($database);
+  }
+
+
+  /**
+   * Returns the collation of the given database
+   *
+   * @param string $database
+   * @return string|null
+   */
+  public function getDatabaseCollation(string $database): ?string
+  {
+    return $this->language->getDatabaseCollation($database);
+  }
+
+
+  /**
    * Returns true if the given table exists
    *
    * @param string $table
@@ -3275,14 +3339,22 @@ class Db implements Db\Actions
 
 
   /**
-   * Drops the given database
+   * Creates a table
    *
-   * @param string $database
+   * @param string $table
+   * @param array|null $cfg
+   * @param bool $createKeys
+   * @param bool $createConstraints
    * @return bool
    */
-  public function dropDatabase(string $database): bool
+  public function createTable(
+    string $table,
+    ?array $cfg = null,
+    bool $createKeys = true,
+    bool $createConstraints = true
+  ): bool
   {
-    return $this->language->dropDatabase($database);
+    return $this->language->createTable($table, $cfg, $createKeys, $createConstraints);
   }
 
 
@@ -3295,6 +3367,30 @@ class Db implements Db\Actions
   public function dropTable(string $table, string $database = ''): bool
   {
     return $this->language->dropTable($table, $database);
+  }
+
+
+  /**
+   * Returns the charset of the given table
+   *
+   * @param string $table
+   * @return string|null
+   */
+  public function getTableCharset(string $table): ?string
+  {
+    return $this->language->getTableCharset($table);
+  }
+
+
+  /**
+   * Returns the collation of the given table
+   *
+   * @param string $table
+   * @return string|null
+   */
+  public function getTableCollation(string $table): ?string
+  {
+    return $this->language->getTableCollation($table);
   }
 
 
@@ -3447,6 +3543,33 @@ class Db implements Db\Actions
   public function parseQuery(string $query): ?array
   {
     return $this->language->parseQuery($query);
+  }
+
+  /**
+   * Analyzes the given database.
+   *
+   * @param string $database The database's name
+   * @return bool True if it succeeded
+   * @throws Exception
+   */
+  public function analyzeDatabase(string $database): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->analyzeDatabase($database);
+  }
+
+
+  /**
+   * Analyzes the given table.
+   *
+   * @param string $table The table's name
+   * @return bool True if it succeeded
+   * @throws Exception
+   */
+  public function analyzeTable(string $table): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->analyzeTable($table);
   }
 
 

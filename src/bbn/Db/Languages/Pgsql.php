@@ -23,25 +23,10 @@ use bbn\X;
 class Pgsql extends Sql
 {
 
-  /**
-   * @var array
-   */
-  protected array $cfg;
+  /** @var string The quote character */
+  public $qte = '';
 
-  /** @var string The connection code as it would be stored in option */
-  protected $connection_code;
-
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $host;
-
-  /**
-   * The username of this connection
-   * @var string $host
-   */
-  protected $username;
+  protected static $defaultCharset = 'UTF8';
 
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
@@ -146,9 +131,6 @@ class Pgsql extends Sql
     'VARIANCE',
   ];
 
-  /** @var string The quote character */
-  public $qte = '';
-  
   /**
    * Constructor
    * @param array $cfg
@@ -159,38 +141,7 @@ class Pgsql extends Sql
       throw new \Exception('The PgSql driver for PDO is not installed...');
     }
 
-    $cfg = $this->getConnection($cfg);
-
-    try {
-      $this->cacheInit();
-      $this->current  = $cfg['db'] ?? null;
-      $this->host     = $cfg['host'] ?? '127.0.0.1';
-      $this->username = $cfg['user'] ?? null;
-      $this->connection_code = $cfg['code_host'];
-
-      $this->pdo = new PDO(...$cfg['args']);
-      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-      $this->cfg = $cfg;
-      $this->setHash($cfg['args']);
-
-      if (!empty($cfg['cache_length'])) {
-        $this->cache_renewal = (int)$cfg['cache_length'];
-      }
-
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
-      unset($cfg['pass']);
-    }
-    catch (PDOException $e){
-      $err = X::_("Impossible to create the connection").
-        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
-        .X::_("with the following error").$e->getMessage();
-      throw new \Exception($err);
-    }
+    parent::__construct($cfg);
   }
 
   public function getCfg(): array
@@ -337,31 +288,17 @@ class Pgsql extends Sql
   }
 
   /**
-   * Creates a database
+   * Returns the SQL statement to create a database.
    *
    * @param string $database
-   * @param string $enc
-   * @return bool
+   * @param string|null $enc
+   * @param string|null $collation
+   * @return string
    */
-  private function createPgsqlDatabase(string $database, string $enc = 'UTF8'): bool
+  public function getCreateDatabase(string $database, ?string $enc = null, ?string $collation = null): string
   {
-    if (Str::checkName($database, $enc)) {
-      return (bool)$this->rawQuery("CREATE DATABASE $database ENCODING '$enc'");
-    }
-
-    return false;
-  }
-
-
-  /**
-   * Creates a database
-   *
-   * @param string $database
-   * @return bool
-   */
-  public function createDatabase(string $database): bool
-  {
-    return $this->createPgsqlDatabase($database);
+    $enc = $enc ?: self::$defaultCharset;
+    return "CREATE DATABASE ".$this->escape($database)." ENCODING '$enc';";
   }
 
 
@@ -376,7 +313,7 @@ class Pgsql extends Sql
   {
     if ($this->check()) {
       if (!Str::checkName($database)) {
-        throw new \Exception(X::_("Wrong database name")." $database");
+        throw new \Exception(X::_("Wrong database name '%s'", $database));
       }
 
       if ($database === $this->getCurrent()) {
@@ -384,18 +321,24 @@ class Pgsql extends Sql
       }
 
       try {
-        $active_connections = $this->rawQuery("SELECT *
-                                                FROM pg_stat_activity
-                                                WHERE datname = '$database'");
+        $active_connections = $this->rawQuery("
+          SELECT *
+          FROM pg_stat_activity
+          WHERE datname = '$database'"
+        );
 
         if ($active_connections->rowCount() > 0) {
           // Close all active connections
-          $this->rawQuery("SELECT pg_terminate_backend (pg_stat_activity.pid)
-                            FROM pg_stat_activity
-                            WHERE pg_stat_activity.datname = '$database'");
+          $this->rawQuery("
+            SELECT pg_terminate_backend (pg_stat_activity.pid)
+            FROM pg_stat_activity
+            WHERE pg_stat_activity.datname = '$database'"
+          );
         }
 
-        $this->rawQuery("DROP DATABASE IF EXISTS $database");
+        if ($sql = $this->getDropDatabase($database)) {
+          $this->rawQuery($sql);
+        }
       }
       catch (\Exception $e) {
         return false;
@@ -403,6 +346,62 @@ class Pgsql extends Sql
     }
 
     return $this->check();
+  }
+
+
+  /**
+   * Returns the SQL statement to drop a database.
+   *
+   * @param string $database
+   * @return string
+   */
+  public function getDuplicateDatabase(string $source, string $target): string
+  {
+    if (Str::checkName($source) && Str::checkName($target)) {
+      return "CREATE DATABASE ".$this->escape($target)." WITH TEMPLATE ".$this->escape($source).";";
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to get the charset of a database.
+   *
+   * @param string $database
+   * @return string
+   */
+  public function getCharsetDatabase(string $database): string
+  {
+    if (Str::checkName($database)) {
+      return <<<SQL
+        SELECT pg_encoding_to_char(encoding) AS charset
+        FROM pg_database
+        WHERE datname = '$database';
+      SQL;
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to get the collation of a database.
+   *
+   * @param string $database
+   * @return string
+   */
+  public function getCollationDatabase(string $database): string
+  {
+    if (Str::checkName($database)) {
+      return <<<SQL
+        SELECT datcollate AS collation
+        FROM pg_database
+        WHERE datname = '$database';
+      SQL;
+    }
+
+    return '';
   }
 
 
@@ -508,6 +507,39 @@ PSQL
 
     return false;
   }
+
+
+  /**
+   * Returns the SQL statement to get the charset of a table.
+   *
+   * @param string $table
+   * @return string
+   */
+  public function getCharsetTable(string $table): string
+  {
+    if (Str::checkName($table)) {
+      return $this->getCharsetDatabase($this->getCurrent());
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to get the collation of a table.
+   *
+   * @param string $table
+   * @return string
+   */
+  public function getCollationTable(string $table): string
+  {
+    if (Str::checkName($table)) {
+      return $this->getCollationDatabase($this->getCurrent());
+    }
+
+    return '';
+  }
+
 
   /**
    * Returns the comment (or an empty string if none) for a given table.
@@ -615,6 +647,24 @@ PSQL
   }
 
 
+   /**
+   * Returns true if the given table exists
+   *
+   * @param string $table
+   * @param string $database. or currently selected if none
+   * @return boolean
+   */
+  public function tableExists(string $table, string $database = 'public'): bool
+  {
+    $sql = <<<SQL
+      SELECT * FROM pg_tables
+      WHERE tablename = ?
+      AND schemaname = ?;
+    SQL;
+    return (bool)$this->getRow($sql, $table, $database ?: 'public');
+  }
+
+
   /**
    * Gets the status of a table
    *
@@ -656,62 +706,6 @@ PSQL
     return str_replace('-', '', $uid);
   }
 
-
-  /**
-   * @param $table_name
-   * @param array $columns
-   * @param array|null $keys
-   * @param bool $with_constraints
-   * @param string $charset
-   * @param string $engine
-   * @return string
-   */
-  public function createTable($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
-  {
-    $lines = [];
-    $sql   = '';
-    foreach ($columns as $n => $c) {
-      $name = $c['name'] ?? $n;
-      if (isset($c['type']) && Str::checkName($name)) {
-        $st = $this->colSimpleName($name, true) . ' ' . $c['type'];
-        if (!empty($c['maxlength'])) {
-          $st .= '(' . $c['maxlength'] . ')';
-        } elseif (!empty($c['values']) && \is_array($c['values'])) {
-          $st .= '(';
-          foreach ($c['values'] as $i => $v) {
-            if (Str::isInteger($v)) {
-              $st .= Str::escapeSquotes($v);
-            }
-            else {
-              $st .= "'" . Str::escapeSquotes($v) . "'";
-            }
-            if ($i < count($c['values']) - 1) {
-              $st .= ',';
-            }
-          }
-
-          $st .= ')';
-        }
-
-        if (empty($c['null'])) {
-          $st .= ' NOT NULL';
-        }
-
-        if (isset($c['default'])) {
-          $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . Str::escapeSquotes($c['default']) . "'");
-        }
-
-        $lines[] = $st;
-      }
-    }
-
-    if (count($lines)) {
-      $sql = 'CREATE TABLE ' . $this->tableSimpleName($table_name, true) . ' (' . PHP_EOL . implode(',' . PHP_EOL, $lines) .
-        PHP_EOL . ');';
-    }
-
-    return $sql;
-  }
 
   /****************************************************************
    *                                                              *
@@ -970,24 +964,24 @@ SELECT
     a.attname as column_name,
     ix.indisprimary as is_primary,
 	  ix.indisunique as is_unique,
-    CASE 
+    CASE
       WHEN ix.indisprimary = true THEN 'PRIMARY'
       ELSE i.relname
-    END 
+    END
         AS key_name
-from
+FROM
     pg_class t,
     pg_class i,
     pg_index ix,
     pg_attribute a
-where
+WHERE
     t.oid = ix.indrelid
     and i.oid = ix.indexrelid
     and a.attrelid = t.oid
     and a.attnum = ANY(ix.indkey)
     and t.relkind = 'r'
     and t.relname = '$table'
-order by
+ORDER BY
     t.relname,
     i.relname;
 PGSQL
@@ -1020,21 +1014,25 @@ PGSQL
 
       if ($constraints = $this->getRows(<<<PGSQL
 SELECT
-    tc.table_schema, 
-    tc.constraint_name, 
-    tc.table_name, 
-    kcu.column_name, 
+    tc.table_schema,
+    tc.constraint_name,
+    tc.table_name,
+    kcu.column_name,
     ccu.table_schema AS foreign_table_schema,
     ccu.table_name AS foreign_table_name,
-    ccu.column_name AS foreign_column_name 
-FROM 
-    information_schema.table_constraints AS tc 
+    ccu.column_name AS foreign_column_name,
+    rc.update_rule AS on_update,
+    rc.delete_rule AS on_delete
+FROM
+    information_schema.table_constraints AS tc
     JOIN information_schema.key_column_usage AS kcu
       ON tc.constraint_name = kcu.constraint_name
       AND tc.table_schema = kcu.table_schema
     JOIN information_schema.constraint_column_usage AS ccu
       ON ccu.constraint_name = tc.constraint_name
       AND ccu.table_schema = tc.table_schema
+    LEFT JOIN information_schema.referential_constraints AS rc
+      ON tc.constraint_name = rc.constraint_name
 WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_name = '$table';
 PGSQL
       )) {
@@ -1046,8 +1044,8 @@ PGSQL
               'ref_table' => $constraint['foreign_table_name'],
               'ref_column' => $constraint['foreign_column_name'],
               'constraint' => $constraint['constraint_name'],
-              'update' => null,
-              'delete' => null,
+              'update' => $constraint['on_update'] ?? null,
+              'delete' => $constraint['on_delete'] ?? null,
               'unique' => 0,
             ];
           } else {
@@ -1121,172 +1119,112 @@ PGSQL
     return '';
   }
 
+
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
-   * @throws \Exception
    */
-  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
+  public function getCreateKeys(string $table, ?array $cfg = null): string
   {
-    if (!$model) {
-      $model = $this->modelize($table);
+    $st = '';
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
     }
 
-    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
-    $done = false;
-    foreach ($model['fields'] as $name => $col) {
-      if (!$done) {
-        $done = true;
-      }
-      else {
-        $st .= ',' . PHP_EOL;
-      }
+    if ($cfg && !empty($cfg['keys'])) {
+      if ($keys = array_filter($cfg['keys'], fn($k) => !empty($k['unique']))) {
+        $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+        $last = count($keys) - 1;
+        $i = 0;
+        foreach ($keys as $name => $key) {
+          if (isset($cfg['fields'][$key['columns'][0]])
+            && ($cfg['fields'][$key['columns'][0]]['key'] === 'PRI')
+          ) {
+            $st .= '  ADD PRIMARY KEY';
+          }
+          else {
+            $st .= '  ADD CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
+          }
 
-      $st .= $this->getColumnDefinitionStatement($name, $col);
+          $st .= ' ('.implode(
+            ',',
+            array_map(
+              fn($a) => $this->escape($a),
+              $key['columns']
+            )
+          ).')';
+          $st .= $i === $last ? ';' : ',' . PHP_EOL;
+          $i++;
+        }
+
+        return trim($st, ',' . PHP_EOL);
+      }
     }
 
-    $st .= PHP_EOL . ')';
     return $st;
   }
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
-   * @throws \Exception
    */
-  public function getCreateKeys(string $table, array|null $model = null): string
+  public function getCreateConstraints(string $table, ?array $cfg = null): string
   {
     $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
     }
 
-    if ($model && !empty($model['keys'])) {
-      $st   .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
-      $last  = count($model['keys']) - 1;
-
-      $i     = 0;
-      foreach ($model['keys'] as $name => $key) {
-        if (!empty($key['unique'])
-          && isset($model['fields'][$key['columns'][0]])
-          && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
-        ) {
-          $st .= 'ADD PRIMARY KEY';
-        } elseif (!empty($key['unique'])) {
-          $st .= 'ADD CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
-        } else {
+    if ($cfg && !empty($cfg['keys'])) {
+      $keys = array_values(array_filter(
+        $cfg['keys'],
+        fn($a) => !empty($a['columns'])
+          && !empty($a['constraint'])
+          && !empty($a['ref_table'])
+          && !empty($a['ref_column'])
+      ));
+      if (!empty($keys)) {
+        $db = $this->escape($this->getCurrent());
+        $st .= 'DO'.PHP_EOL.'$constraints$'.PHP_EOL.'BEGIN'.PHP_EOL;
+        $i   = 0;
+        foreach ($keys as $k) {
           $i++;
-          continue;
+          $cols = implode(', ', array_map(fn($col) => $this->escape($col), $k['columns']));
+          $refCols = is_array($k['ref_column']) ?
+            implode(', ', array_map(fn($col) => $this->escape($col), $k['ref_column'])) :
+            $this->escape($k['ref_column']);
+
+          $st .= '  IF EXISTS (SELECT FROM information_schema.tables ' .
+            "WHERE table_catalog = '" . $db . "' AND table_name = '" . $k['ref_table'] . "')".PHP_EOL. '  THEN'.PHP_EOL.
+            '    ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+
+          $st .= '      ADD CONSTRAINT ' . $this->escape($k['constraint']) .
+            ' FOREIGN KEY (' . $cols . ') ' .
+            'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
+            (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
+            (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
+            ';'.PHP_EOL.'  END IF;'.PHP_EOL;
         }
 
-        $st .= ' (' . implode(
-            ',', array_map(
-              function ($a) {
-                return $this->escape($a);
-              }, $key['columns']
-            )
-          ) . ')';
-        $st .= $i === $last ? ';' : ',' . PHP_EOL;
-        $i++;
-      }
-    }
-
-    return trim($st, ',' . PHP_EOL);
-  }
-
-  /**
-   * Return SQL string for table creation.
-   *
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   * @throws \Exception
-   */
-  public function getCreate(string $table, array|null $model = null): string
-  {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
-    }
-
-    if ($st = $this->getCreateTable($table, $model)) {
-
-      if (empty($model['keys'])) {
-        return $st;
-      }
-
-      $lines = X::split($st, PHP_EOL);
-      $end   = array_pop($lines);
-      $st    = X::join($lines, PHP_EOL);
-
-      $indexes = [];
-
-      foreach ($model['keys'] as $name => $key) {
-        $separator = ',' . PHP_EOL . '  ';
-        if (
-          !empty($key['unique']) &&
-          (count($key['columns']) === 1) &&
-          isset($model['fields'][$key['columns'][0]]) &&
-          isset($model['fields'][$key['columns'][0]]['key']) &&
-          $model['fields'][$key['columns'][0]]['key'] === 'PRI'
-        ) {
-          $st .= $separator . 'PRIMARY KEY';
-        } elseif (!empty($key['unique'])) {
-          $st .= $separator . 'CONSTRAINT ' . $this->escape($name) . ' UNIQUE';
-        } elseif (!empty($key['ref_table']) && !empty($key['ref_column'])) {
-          continue;
-        }
-        else {
-          // Pgsql does not support creating normal indexes in the create table statement
-          // so will return it as another sql
-          $indexes[$name] = $key;
-          continue;
-        }
-
-        $st   .= ' (' . implode(
-            ',', array_map(
-              function ($a) {
-                return $this->escape($a);
-              }, $key['columns']
-            )
-          ) . ')';
-      }
-
-      // For avoiding constraint names conflicts
-      $keybase = strtolower(Str::genpwd(8, 4));
-      $i       = 1;
-      foreach ($model['keys'] as $name => $key) {
-        if (!empty($key['ref_table']) && !empty($key['ref_column'])) {
-          $st .= ',' . PHP_EOL . '  ' .
-            'CONSTRAINT ' . $this->escape($keybase.$i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
-            'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
-            (!empty($key['delete']) ? ' ON DELETE ' . $key['delete'] : '') .
-            (!empty($key['update']) ? ' ON UPDATE ' . $key['update'] : '');
-          $i++;
-        }
-      }
-
-      $st .= PHP_EOL . $end;
-
-      if (!empty($indexes)) {
-        $st .= ';' . PHP_EOL;
-        foreach ($indexes as $name => $index) {
-          $st   .= 'CREATE INDEX ' . $this->escape($name) . " ON $table";
-          $st   .= ' (' . implode(
-              ',', array_map(
-                function ($a) {
-                  return $this->escape($a);
-                }, $index['columns']
-              )
-            ) . ')';
-          $st .= ";" . PHP_EOL;
-        }
+        $st .= 'END'.PHP_EOL.'$constraints$;'.PHP_EOL;
       }
     }
 
     return $st;
+  }
+
+  /**
+   * Return a string for dropping a constraint.
+   * @param string $table
+   * @param string $constraint
+   * @return string
+   */
+  public function getDropConstraint(string $table, string $constraint): string
+  {
+    return 'ALTER TABLE ' . $this->escape($table) . PHP_EOL .
+      '  DROP CONSTRAINT ' . $this->escape($constraint) . ';' . PHP_EOL;
   }
 
 
@@ -1430,64 +1368,43 @@ PGSQL
   }
 
   /**
-   * Creates the given column for the given table.
-   *
-   * @param string $table
-   * @param string $column
-   * @param array $col
-   * @return bool
-   * @throws \Exception
-   */
-  public function createColumn(string $table, string $column, array $col): bool
-  {
-    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      $column_definition = $this->getColumnDefinitionStatement($column, $col);
-
-      return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
-    }
-
-    return false;
-  }
-
-  /**
    * Returns a statement for column definition.
    *
    * @param string $name
    * @param array $col
-   * @param bool $include_col_name
+   * @param bool $includeColumnName
    * @param bool $for_alter
    * @return string
    * @throws \Exception
    */
   public function getColumnDefinitionStatement(
     string $name,
-    array $col,
-    bool $include_col_name = true,
+    array $cfg,
+    bool $includeColumnName = true,
     bool $for_alter = false
   ): string
   {
     $st = '';
-
-    if ($include_col_name) {
+    if ($includeColumnName) {
       $st .= '  ' . $this->escape($name) . ' ';
     }
 
-    if (empty($col['type'])) {
+    if (empty($cfg['type'])) {
       throw new \Exception(X::_('Column type is not provided'));
     }
 
-    $col_type = $col['type'];
+    $col_type = $cfg['type'];
 
-    if (array_key_exists('default', $col) && strpos($col['default'], '::') !== FALSE) {
-      [$col['default']] = explode('::', $col['default']);
+    if (array_key_exists('default', $cfg) && strpos($cfg['default'], '::') !== FALSE) {
+      [$cfg['default']] = explode('::', $cfg['default']);
     }
 
     if ($col_type === 'USER-DEFINED') {
-      if (!empty($col['udt_name'])) {
-        $col['type'] = $col['udt_name'];
+      if (!empty($cfg['udt_name'])) {
+        $cfg['type'] = $cfg['udt_name'];
       }
       else {
-        $col['type'] = $name;
+        $cfg['type'] = $name;
       }
     }
 
@@ -1497,33 +1414,33 @@ PGSQL
         $col_type = self::$interoperability[$col_type];
       }
       else if ($col_type === 'USER-DEFINED') {
-        $st .= $col['type'];
+        $st .= $cfg['type'];
       }
       else {
-        throw new \Exception(X::_("Impossible to recognize the column type")." $col[type]");
+        throw new \Exception(X::_("Impossible to recognize the column type")." $cfg[type]");
       }
     }
     else {
-      $st .= $col['type'];
+      $st .= $cfg['type'];
     }
 
     if (
-      !empty($col['maxlength']) && $col_type !== 'bytea' &&
+      !empty($cfg['maxlength']) && $col_type !== 'bytea' &&
       (
         (in_array($col_type, self::$numeric_types) && in_array($col_type, self::$numeric_with_max_values))
         ||
         !in_array($col_type, self::$numeric_types)
       )
     ) {
-      $st .= '(' . $col['maxlength'];
-      if (!empty($col['decimals'])) {
-        $st .= ',' . $col['decimals'];
+      $st .= '(' . $cfg['maxlength'];
+      if (!empty($cfg['decimals'])) {
+        $st .= ',' . $cfg['decimals'];
       }
 
       $st .= ')';
     }
 
-    if (empty($col['null'])) {
+    if (empty($cfg['null'])) {
       if ($for_alter) {
         $st .= ',' . PHP_EOL;
         $st .= 'ALTER COLUMN ' . $this->escape($name);
@@ -1534,26 +1451,31 @@ PGSQL
       }
     }
 
-    if (!empty($col['virtual'])) {
-      $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
+    if (!empty($cfg['virtual'])) {
+      $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
     }
-    elseif (array_key_exists('default', $col)) {
-      if (!empty($col['defaultExpression'])) {
+    elseif (array_key_exists('default', $cfg)) {
+      if (!empty($cfg['defaultExpression'])) {
         $st .= ' DEFAULT ';
-        if ($col['default'] === null) {
-          $st .= ' NULL';
+        if (is_null($cfg['default'])
+          || (strtoupper((string)$cfg['default']) === 'NULL')
+        ) {
+          $st .= 'NULL';
         }
         else {
-          $st .= (string)$col['default'];
+          $st .= (string)$cfg['default'];
         }
       }
       else {
-        $def = (string)$col['default'];
-        if (!empty($col['default'])) {
-          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
+        if (is_null($cfg['default'])
+          || (strtoupper((string)$cfg['default']) === 'NULL')
+        ) {
+          $st .= ' DEFAULT NULL';
+        }
+        else if (isset($cfg['default'])) {
+          $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
         }
       }
-
     }
 
     return rtrim($st, ',' . PHP_EOL);
@@ -1711,6 +1633,29 @@ PGSQL
     }
 
     return $res;
+  }
+
+  /**
+   * Executes the original PDO query function
+   *
+   * @return false|PDOStatement
+   */
+  public function rawQuery()
+  {
+    if ($this->_fancy) {
+      $this->stopFancyStuff();
+      $switch_to_fancy = true;
+    }
+
+    $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
+    $result = $this->pdo->query(...func_get_args());
+    $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+    if (!empty($switch_to_fancy)) {
+      $this->startFancyStuff();
+    }
+
+    return $result;
   }
 
   /**

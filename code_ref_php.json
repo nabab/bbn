@@ -5261,7 +5261,7 @@
                 "args": []
             },
             {
-                "name": "getParentCfg",
+                "name": "getApplicableCfg",
                 "type": "fn",
                 "desc": "Returns a formatted content of the cfg column as an array from the option's parent",
                 "args": [
@@ -7581,7 +7581,7 @@
                 "args": []
             },
             {
-                "name": "getParentCfg",
+                "name": "getApplicableCfg",
                 "type": "fn",
                 "desc": "Returns the permissions inherited properties.",
                 "args": [

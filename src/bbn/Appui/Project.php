@@ -23,8 +23,8 @@ use bbn\File\System;
 use bbn\File\Dir;
 use bbn\User\Preferences;
 use bbn\Api\Git;
-
 use function yaml_parse;
+use function json_decode;
 
 class Project extends DbCls
 {
@@ -452,7 +452,7 @@ class Project extends DbCls
 
     $file_environment = $appPath . 'cfg/environment';
     if ($this->fs->isFile($file_environment . '.json')) {
-      $envs = \json_decode($this->fs->getContents($file_environment . '.json'), true);
+      $envs = json_decode($this->fs->getContents($file_environment . '.json'), true);
     }
     elseif ($this->fs->isFile($file_environment . '.yml')) {
       try {
@@ -651,6 +651,7 @@ class Project extends DbCls
       $currentType = $typePath;
       $finalPath .= '/';
     }
+
     $currentPathArray['id_path'] = $id_path;
     $currentPathArray['type'] = $currentType;
     $currentPathArray['publicPath'] = $path.'/';
@@ -730,6 +731,8 @@ class Project extends DbCls
         return $tot;
       }
     }
+
+    return [];
   }
 
   /**
@@ -1005,7 +1008,7 @@ class Project extends DbCls
             ...array_map(function($a) use ($tab) {
               $a['tab'] = $tab['url'];
               return $a;
-            }, !empty($onlydirs) ? $this->getDirs($tmp, false, 'tmce') : $this->fs->getFiles($tmp, true, false, false, 'tmce'))
+            }, !empty($onlydirs) ? $this->fs->getDirs($tmp, false, 'tmce') : $this->fs->getFiles($tmp, true, false, false, 'tmce'))
           );
         }
       }
