@@ -272,7 +272,13 @@ trait Manip
    * @param array|null $todo
    * @return iterable|null
    */
-  public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, ?array &$todo = null): Generator
+  public function import( 
+    array $options,
+    null|array|string|int $id_parent = null,
+    $no_alias = false,
+    ?array &$todo = null,
+    bool $returnId = false
+  ): ?iterable
   {
     if (is_array($id_parent)) {
       $id_parent = $this->fromCode(...$id_parent);
@@ -376,7 +382,7 @@ trait Manip
         }
 
         if ($id = $this->add($o, true)) {
-          yield 1;
+          yield $returnId ? $id : 1;
           if (!empty($after)) {
             $todo[$id] = $after;
           }
@@ -466,17 +472,21 @@ trait Manip
    * @param int|string  $target The destination option's ID
    * @param boolean     $deep   If set to true, children will also be duplicated
    * @param boolean     $force  If set to true and option exists it will be merged
+   * @param boolean     $returnId If set to true, the ID of the duplicated option will be returned
    * @return int|null The number of affected rows or null if option not found
    */
-  public function duplicate($id, $target, $deep = false, $force = false, $return_num = false)
+  public function duplicate($id, $target, $deep = false, $force = false, $returnId = false)
   {
     $res    = null;
     $target = $this->fromCode($target);
     if (Str::isUid($target)) {
       if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {
-        foreach ($this->import($opt, $target) as $num) {
-          $res += $num;
+        foreach ($this->import($opt, $target, false, null, $returnId) as $num) {
+          if (!$returnId || empty($id)) {
+            $res += $num;
+          }
         }
+
         $this->deleteCache($target);
       }
     }
