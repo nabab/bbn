@@ -277,7 +277,8 @@ class Database extends bbn\Models\Cls\Cache
 
   public function engineDataTypes(string $engineCode): array
   {
-    if (Str::isUid($engineCode)) {
+    return bbn\Db\Languages\Sql::$types;
+    /* if (Str::isUid($engineCode)) {
       $engineCode = $this->engineCode($engineCode);
     }
 
@@ -288,7 +289,7 @@ class Database extends bbn\Models\Cls\Cache
       }
     }
 
-    return [];
+    return []; */
   }
 
 
