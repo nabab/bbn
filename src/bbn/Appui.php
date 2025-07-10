@@ -1775,12 +1775,24 @@ class Appui
               if (!$id_plugins) {
                 throw new Exception(X::_("Impossible to find the options parent"));
               }
-              $todo[] = [$tmp, $id_plugins];
-              foreach($opt->import($tmp, $id_plugins, true) as $res) {
-                $num += $res;
-                if ($num >= $next) {
-                  $next += $step;
-                  yield $num;
+
+              foreach ($tmp as $toImport) {
+                $tmpElements = [];
+                if (!empty($toImport['items'])) {
+                  $tmpElements = $toImport['items'];
+                  unset($toImport['items']);
+                  foreach ($opt->import($toImport, $id_plugins, true) as $tmpId) {
+                    $num++;
+                    $opt->deleteCache();
+                    $par = $opt->fromCode('options', $tmpId);
+                    foreach ($opt->import($tmpElements, $par) as $res) {
+                      $num += $res;
+                      if ($num >= $next) {
+                        $next += $step;
+                        yield $num;
+                      }
+                    }
+                  }
                 }
               }
             }

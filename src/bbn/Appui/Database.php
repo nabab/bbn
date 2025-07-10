@@ -277,7 +277,6 @@ class Database extends bbn\Models\Cls\Cache
 
   public function engineDataTypes(string $engineCode): array
   {
-    return bbn\Db\Languages\Sql::$types;
     if (Str::isUid($engineCode)) {
       $engineCode = $this->engineCode($engineCode);
     }
@@ -313,6 +312,10 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function hostId(string|null $host, string $engine = 'mysql'): ?string
   {
+    if (bbn\Str::isUid($host)) {
+      return $host;
+    }
+
     if (empty($host)) {
       $host = $this->db->getConnectionCode();
     }
