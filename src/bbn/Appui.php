@@ -1771,7 +1771,7 @@ class Appui
                 $tmp = [$tmp];
               }
 
-              $id_plugins = $opt->fromCode('plugins', $id_plugin);
+              $id_plugins = $opt->fromCode('appui', 'plugins', $id_plugin);
               if (!$id_plugins) {
                 throw new Exception(X::_("Impossible to find the options parent"));
               }

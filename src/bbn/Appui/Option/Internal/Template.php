@@ -308,7 +308,11 @@ trait Template
     if (!$target) {
       $target = $id;
     }
+
     if (($cfg = $this->getCfg($id)) && ($id_tpl = $cfg['id_template'])) {
+      if (($id_tpl === $this->getSubpluginTemplateId()) && (count($this->parents($id)) <= 3)) {
+        $id_tpl = $this->getPluginTemplateId();
+      }
       $items = $this->nativeOptions($target);
       if (!empty($items)) {
         foreach ($items as $it) {
@@ -350,6 +354,10 @@ trait Template
 
     if (!($idAlias = $this->alias($id))) {
       throw new Exception(X::_("Impossible to apply a template, the option must be aliased"));
+    }
+
+    if (($idAlias === $this->getSubpluginTemplateId()) && (count($this->parents($id)) === 3)) {
+      $idAlias = $this->getPluginTemplateId();
     }
 
     $tot = 0;

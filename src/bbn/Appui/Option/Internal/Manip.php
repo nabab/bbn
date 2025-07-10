@@ -292,6 +292,7 @@ trait Manip
     }
 
     if (!empty($options) && $this->check() && $this->exists($id_parent)) {
+      $withParent = [];
       $c       =& $this->fields;
       $is_root = false;
       if ($todo === null) {
@@ -328,6 +329,11 @@ trait Manip
           }
         }
 
+        if (!empty($o[$c['id_parent']]) && is_array($o[$c['id_parent']])) {
+          $withParent[] = $o;
+          continue;
+        }
+
         $o[$c['id_parent']] = $realParent;
         if (isset($o['items'])) {
           $items = $o['items'] ?: null;
@@ -336,18 +342,19 @@ trait Manip
 
 
         $hasNoText = empty($o[$c['text']]);
+
         if (isset($o[$c['id_alias']])) {
           if ($tmp = $this->fromCode(...$o[$c['id_alias']])) {
             $o[$c['id_alias']] = $tmp;
           }
           else {
-            $this->deleteCache();
             $after['id_alias'] = $o[$c['id_alias']];
             // Add doesn't accept element with neither alias nor text
             if ($hasNoText) {
               $o[$c['text']] = 'waiting for alias';
+              $after[$c['text']] = null;
             }
-  
+
             unset($o[$c['id_alias']]);
           }
         }
@@ -355,17 +362,19 @@ trait Manip
         if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_root_alias'])) {
           if ($tmp = $this->fromCode(...$o[$c['cfg']]['id_root_alias'])) {
             $o[$c['cfg']]['id_root_alias'] = $tmp;
+            $o[$c['cfg']]['relations'] = 'alias';
           }
           else {
             $after['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];
             unset($o[$c['cfg']]['id_root_alias']);
           }
-          unset($o[$c['cfg']]['id_root_alias']);
         }
 
         if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_template'])) {
           if ($tmp = $this->fromCode(...$o[$c['cfg']]['id_template'])) {
             $o[$c['cfg']]['id_template'] = $tmp;
+            $o[$c['cfg']]['relations'] = 'template';
+            $after['id_template'] = $o[$c['cfg']]['id_template'];
           }
           else {
             $after['id_template'] = $o[$c['cfg']]['id_template'];
@@ -377,7 +386,11 @@ trait Manip
         unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']], $search[$c['alias']]);
         $code = $o[$c['code']] ?? (isset($o['alias']) ? $o['alias']['code'] : null);
 
-        if ($row = X::getRow($currentOptions, $code ? [$c['code'] => $code] : $search)) {
+        if ($code) {
+          $fn = fn($co) => ($co[$c['code']] === $code) || (isset($co['alias']) && ($co['alias']['code'] === $code));
+        }
+
+        if ($row = X::getRow($currentOptions, $code ? $fn : $search)) {
           $o = X::mergeArrays($row, $o);
         }
 
@@ -406,7 +419,7 @@ trait Manip
             if (Str::isUid($id_alias)) {
               try {
                 $this->setAlias($id, $id_alias);
-                if ($hasNoText) {
+                if (array_key_exists($c['text'], $td) && !$td[$c['text']]) {
                   $this->setText($id, null);
                 }
               }
@@ -441,7 +454,7 @@ trait Manip
           }
 
           if (!empty($td['id_template'])) {
-            if ($id_template = $this->fromCode(...$td['id_template'])) {
+            if ($id_template = is_array($td['id_template']) ? $this->fromCode(...$td['id_template']) : $td['id_template']) {
               $this->setCfg($id, ['id_template' => $id_template, 'allow_children' => 1, 'relations' => 'template']);
               $this->applySubTemplates($id);
             }
@@ -454,6 +467,17 @@ trait Manip
               );
             }
           }
+        }
+      }
+
+      $this->deleteCache();
+      foreach ($withParent as $o) {
+        if (!empty($o['items']) &&  ($idParent = $this->fromCode(...$o[$c['id_parent']]))) {
+          $this->import(
+            $o['items'],
+            $idParent,
+            $no_alias
+          );
         }
       }
 
