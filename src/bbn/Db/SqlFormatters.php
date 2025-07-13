@@ -108,14 +108,14 @@ interface SqlFormatters
    * @param array|null $model
    * @return string
    */
-  public function getCreate(string $table, array|null $model = null): string;
+  public function getCreateTableRaw(string $table, ?array $cfg = null, bool $createKeys = true, bool $createConstraints = true): string;
 
   /**
    * @param string $table
    * @param array|null $model
    * @return string
    */
-  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string;
+  public function getCreateTable(string $table, ?array $cfg = null): string;
 
   /**
    * @param string $table
@@ -130,6 +130,13 @@ interface SqlFormatters
    * @return string
    */
   public function getCreateConstraints(string $table, array|null $model = null): string;
+
+  /**
+   * @param string $table
+   * @param string $constraint
+   * @return string
+   */
+  public function getDropConstraint(string $table, string $constraint): string;
 
 
   /**

@@ -24,28 +24,11 @@ use bbn\X;
 class Mysql extends Sql
 {
 
-  /**
-   * @var array
-   */
-  protected array $cfg;
-
-  /** @var string The connection code as it would be stored in option */
-  protected $connection_code;
-
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $host;
-
-  /**
-   * The username of this connection
-   * @var string $host
-   */
-  protected $username;
-
   protected static $defaultCharset = 'utf8mb4';
+
   protected static $defaultCollation = 'utf8mb4_general_ci';
+
+  protected static $defaultEngine = 'InnoDB';
 
   /**
    * Constructor
@@ -59,39 +42,7 @@ class Mysql extends Sql
       throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
     }
 
-    $cfg = $this->getConnection($cfg);
-
-    try {
-      $this->cacheInit();
-      $this->current = $cfg['db'] ?? null;
-      $this->host = $cfg['host'] ?? '127.0.0.1';
-      $this->username = $cfg['user'] ?? null;
-      $this->connection_code = $cfg['code_host'];
-
-      $this->pdo = new PDO(...$cfg['args']);
-      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-      $this->cfg = $cfg;
-      $this->setHash($cfg['args']);
-
-      if (!empty($cfg['cache_length'])) {
-        $this->cache_renewal = (int)$cfg['cache_length'];
-      }
-
-      if (isset($cfg['on_error'])) {
-        $this->on_error = $cfg['on_error'];
-      }
-
-      unset($cfg['pass']);
-    }
-    catch (PDOException $e) {
-      $err = X::_("Impossible to create the connection") .
-        " $cfg[engine] ".X::_("to")." {$this->host} "
-        . X::_("with the following error") . " " . $e->getMessage();
-        X::log($cfg);
-      throw new Exception($err);
-    }
+    parent::__construct($cfg);
   }
 
   
@@ -201,57 +152,86 @@ class Mysql extends Sql
 
 
   /**
-   * Creates a database
+   * Returns the SQL statement to get the list of charsets.
    *
-   * @param string $database
-   * @param string $enc
-   * @param string $collation
-   * @return bool
+   * @return string
    */
-  private function createMysqlDatabase(string $database, string $enc = 'utf8', string $collation = 'utf8_general_ci'): bool
+  public function getCharsets(): string
   {
-    if (Str::checkName($database, $enc, $collation)) {
-      return (bool)$this->rawQuery("CREATE DATABASE IF NOT EXISTS `$database` DEFAULT CHARACTER SET $enc COLLATE $collation;");
-    }
-
-    return false;
+    return "SELECT DISTINCT " . $this->escape("CHARACTER_SET_NAME"). " AS " . $this->escape("charset") . PHP_EOL .
+      "FROM " . $this->escape("INFORMATION_SCHEMA.character_sets") . ";";
   }
 
 
   /**
-   * Creates a database
+   * Returns the SQL statement to get the list of collations.
    *
-   * @param string $database
-   * @return bool
+   * @return string
    */
-  public function createDatabase(string $database): bool
+  public function getCollations(): string
   {
-    return $this->createMysqlDatabase($database);
+    return "SELECT DISTINCT " . $this->escape("COLLATION_NAME"). " AS " . $this->escape("collation") . PHP_EOL .
+      "FROM " . $this->escape("INFORMATION_SCHEMA.collations") . ";";
   }
 
 
   /**
-   * Drops the given database
+   * Returns the SQL statement to create a database.
    *
    * @param string $database
-   * @return bool
-   * @throws Exception
+   * @param string|null $enc
+   * @param string|null $collation
+   * @return string
    */
-  public function dropDatabase(string $database): bool
+  public function getCreateDatabase(string $database, ?string $enc = null, ?string $collation = null): string
   {
-    if ($this->check()) {
-      if (!Str::checkName($database)) {
-        throw new Exception(X::_("Wrong database name") . " $database");
-      }
-
-      try {
-        $this->rawQuery("DROP DATABASE `$database`");
-      } catch (Exception $e) {
-        return false;
-      }
+    $enc = $enc ?: self::$defaultCharset;
+    $collation = $collation ?: self::$defaultCollation;
+    if ($st = parent::getCreateDatabase($database, $enc, $collation)) {
+      return substr($st, 0, -1)." DEFAULT CHARACTER SET '$enc' COLLATE '$collation';";
     }
 
-    return $this->check();
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to get the charset of a database.
+   *
+   * @param string $database
+   * @return string
+   */
+  public function getCharsetDatabase(string $database): string
+  {
+    if (Str::checkName($database)) {
+      return <<<SQL
+        SELECT default_character_set_name AS charset
+        FROM information_schema.schemata
+        WHERE schema_name = "$database";
+      SQL;
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to get the collation of a database.
+   *
+   * @param string $database
+   * @return string
+   */
+  public function getCollationDatabase(string $database): string
+  {
+    if (Str::checkName($database)) {
+      return <<<SQL
+        SELECT default_collation_name AS collation
+        FROM information_schema.schemata
+        WHERE schema_name = "$database";
+      SQL;
+    }
+
+    return '';
   }
 
 
@@ -474,7 +454,7 @@ MYSQL
       }
     }
 
-    if ($cur !== null) {
+    if (!empty($cur)) {
       $this->change($cur);
     }
 
@@ -515,6 +495,25 @@ MYSQL
 
 
   /**
+   * Returns true if the given table exists
+   *
+   * @param string $table
+   * @param string $database. or currently selected if none
+   * @return boolean
+   */
+  public function tableExists(string $table, string $database = ''): bool
+  {
+    $q = "SHOW tables ";
+    if (!empty($database)) {
+      $q .= "FROM " . $this->escape($database) . " ";
+    }
+
+    $q .= "LIKE \"$table\"";
+    return (bool)$this->getRow($q);
+  }
+
+
+  /**
    * Gets the status of a table
    *
    * @param string $table
@@ -549,61 +548,6 @@ MYSQL
     return $this->getOne("SELECT replace(uuid(),'-','')");
   }
 
-
-  /**
-   * @param $table_name
-   * @param array $columns
-   * @param array|null $keys
-   * @param bool $with_constraints
-   * @param string $charset
-   * @param string $engine
-   * @return string
-   */
-  public function createTable($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'utf8', string $engine = 'InnoDB')
-  {
-    $lines = [];
-    $sql = '';
-    foreach ($columns as $n => $c) {
-      $name = $c['name'] ?? $n;
-      if (isset($c['type']) && Str::checkName($name)) {
-        $st = $this->colSimpleName($name, true) . ' ' . $c['type'];
-        if (!empty($c['maxlength'])) {
-          $st .= '(' . $c['maxlength'] . ')';
-        } elseif (!empty($c['values']) && \is_array($c['values'])) {
-          $st .= '(';
-          foreach ($c['values'] as $i => $v) {
-            $st .= "'" . Str::escapeSquotes($v) . "'";
-            if ($i < count($c['values']) - 1) {
-              $st .= ',';
-            }
-          }
-
-          $st .= ')';
-        }
-
-        if ((strpos($c['type'], 'int') !== false) && empty($c['signed'])) {
-          $st .= ' UNSIGNED';
-        }
-
-        if (empty($c['null'])) {
-          $st .= ' NOT NULL';
-        }
-
-        if (array_key_exists('default', $c)) {
-          $st .= ' DEFAULT ' . ($c['default'] === 'NULL' ? 'NULL' : "'" . Str::escapeSquotes($c['default']) . "'");
-        }
-
-        $lines[] = $st;
-      }
-    }
-
-    if (count($lines)) {
-      $sql = 'CREATE TABLE ' . $this->tableSimpleName($table_name, true) . ' (' . PHP_EOL . implode(',' . PHP_EOL, $lines) .
-        PHP_EOL . ') ENGINE=' . $engine . ' DEFAULT CHARSET=' . $charset . ';';
-    }
-
-    return $sql;
-  }
 
   /**
    * Actions to do once the PDO object has been created
@@ -800,6 +744,8 @@ MYSQL;
             'signed' => strpos($row['COLUMN_TYPE'], ' unsigned') === false ? 1 : 0,
             'virtual' => $row['EXTRA'] === 'VIRTUAL GENERATED',
             'generation' => $row['GENERATION_EXPRESSION'],
+            'charset' => $row['CHARACTER_SET_NAME'] ?? null,
+            'collation' => $row['COLLATION_NAME'] ?? null,
           ];
           if (($row['COLUMN_DEFAULT'] !== null) || ($row['IS_NULLABLE'] === 'YES')) {
             $r[$f]['default']           = \is_null($row['COLUMN_DEFAULT']) ? 'NULL' : $row['COLUMN_DEFAULT'];
@@ -971,67 +917,187 @@ MYSQL
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
    * @throws Exception
    */
-  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
+  public function getCreateTable(string $table, ?array $cfg = null): string
   {
-    if (!$model) {
-      $model = $this->modelize($table);
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
     }
 
-    if (!$charset) {
-      if (!empty($model['charset'])) {
-        $charset = $model['charset'];
-        if (!empty($model['collation'])) {
-          $collate = $model['collation'];
+    if ($st = parent::getCreateTable($table, $cfg)) {
+      if (empty($charset)) {
+        if (!empty($cfg['charset'])) {
+          $charset = $cfg['charset'];
+          if (!empty($cfg['collation'])) {
+            $collate = $cfg['collation'];
+          }
         }
-      } else {
-        $charset = self::$defaultCharset;
-        $collate = self::$defaultCollation;
-      }
-    }
-
-    $st = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
-    $done = false;
-    foreach ($model['fields'] as $name => $col) {
-      if (!$done) {
-        $done = true;
-      } else {
-        $st .= ',' . PHP_EOL;
+        else {
+          $charset = self::$defaultCharset;
+          $collate = self::$defaultCollation;
+        }
       }
 
-      $st .= $this->getColumnDefinitionStatement($name, $col);
+      $st = substr($st, 0, -1)." ENGINE=".
+        (!empty($cfg['engine']) ? Str::encodeFilename($cfg['engine']) : static::$defaultEngine).
+        " DEFAULT CHARSET=".Str::encodeFilename($charset).
+        ($collate ? " COLLATE=" . Str::encodeFilename($collate) : '').";";
+      return $st;
     }
 
-    $st .= PHP_EOL . ") ENGINE=InnoDB DEFAULT CHARSET=" . Str::encodeFilename($charset) . ($collate ? " COLLATE=" . Str::encodeFilename($collate) : '') . ";";
-    return $st;
+    return '';
   }
 
   /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   * @throws Exception
+   * Returns the SQL statement to analyze a table.
+   *
+   * @param string $table The name of the table to analyze.
+   * @return string The SQL statement to analyze the table, or an empty string if the table name is invalid.
    */
-  public function getCreateKeys(string $table, array|null $model = null): string
+  public function getAnalyzeTable(string $table): string
   {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
+    if (Str::checkName($table)) {
+      return "ANALYZE TABLE " . $this->tableSimpleName($table, true) . ";";
     }
 
-    if ($model && !empty($model['keys'])) {
-      $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
-      $last = count($model['keys']) - 1;
+    return '';
+  }
 
+
+  /**
+   * Returns the SQL statement to get the charset of a table.
+   *
+   * @param string $table
+   * @return string
+   */
+  public function getCharsetTable(string $table): string
+  {
+    if (Str::checkName($table)) {
+      return <<<SQL
+        SELECT CCSA.`character_set_name` AS charset
+        FROM information_schema.`TABLES` T,
+            information_schema.`COLLATION_CHARACTER_SET_APPLICABILITY` CCSA
+        WHERE CCSA.`collation_name` = T.`table_collation`
+          AND T.`TABLE_SCHEMA` = DATABASE()
+          AND T.`TABLE_NAME` = "$table";
+      SQL;
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to get the collation of a table.
+   *
+   * @param string $table
+   * @return string
+   */
+  public function getCollationTable(string $table): string
+  {
+    if (Str::checkName($table)) {
+      return <<<SQL
+        SELECT `TABLE_COLLATION` as collation
+        FROM `information_schema`.`TABLES`
+        WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = "$table";
+      SQL;
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to create a column.
+   * @param string $table The name of the table.
+   * @param string $column The name of the column to create.
+   * @param array $columnCfg The configuration for the column.
+   * @return string The SQL statement to create the column, or an empty string if the parameters are invalid.
+   */
+  public function getCreateColumn(string $table, string $column, array $columnCfg): string
+  {
+    if ($st = parent::getCreateColumn($table, $column, $columnCfg)) {
+      if (!empty($columnCfg['after'])
+        && is_string($columnCfg['after'])
+      ) {
+        $st = substr($st, 0, -1)." AFTER " . $this->escape($columnCfg['after']);
+      }
+
+      return $st;
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to create the constraints.
+   * @param string $table
+   * @param array|null $cfg
+   * @return string
+   */
+  public function getCreateConstraints(string $table, ?array $cfg = null): string
+  {
+    $st = '';
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
+    }
+
+    if ($cfg && !empty($cfg['keys'])) {
+      $keys = array_values(array_filter(
+        $cfg['keys'],
+        fn($a) => !empty($a['columns'])
+          && !empty($a['constraint'])
+          && !empty($a['ref_table'])
+          && !empty($a['ref_column'])
+      ));
+      if ($last = count($keys)) {
+        $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+        $i   = 0;
+        foreach ($keys as $k) {
+          $i++;
+          $cols = implode(', ', array_map(fn($col) => $this->escape($col), $k['columns']));
+          $refCols = is_array($k['ref_column']) ?
+            implode(', ', array_map(fn($col) => $this->escape($col), $k['ref_column'])) :
+            $this->escape($k['ref_column']);
+          $st .= '  ADD CONSTRAINT ' . $this->escape($k['constraint']) .
+            ' FOREIGN KEY (' . $cols . ') ' .
+            'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
+            (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
+            (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
+            ($i === $last ? ';' : ',' . PHP_EOL);
+        }
+      }
+    }
+
+    return $st;
+  }
+
+
+  /**
+   * @param string $table
+   * @param array|null $cfg
+   * @return string
+   */
+  public function getCreateKeys(string $table, ?array $cfg = null): string
+  {
+    $st = '';
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
+    }
+
+    if ($cfg && !empty($cfg['keys'])) {
+      $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
+      $last = count($cfg['keys']) - 1;
       $i = 0;
-      foreach ($model['keys'] as $name => $key) {
+      foreach ($cfg['keys'] as $name => $key) {
         $st .= '  ADD ';
         if (!empty($key['unique'])
-          && isset($model['fields'][$key['columns'][0]])
-          && ($model['fields'][$key['columns'][0]]['key'] === 'PRI')
+          && isset($cfg['fields'][$key['columns'][0]])
+          && ($cfg['fields'][$key['columns'][0]]['key'] === 'PRI')
         ) {
           $st .= 'PRIMARY KEY';
         } elseif (!empty($key['unique'])) {
@@ -1040,13 +1106,13 @@ MYSQL
           $st .= 'KEY ' . $this->escape($name);
         }
 
-        $st .= ' (' . implode(
-            ',', array_map(
-              function ($a) {
-                return $this->escape($a);
-              }, $key['columns']
-            )
-          ) . ')';
+        $st .= ' ('.implode(
+          ',',
+          array_map(
+            fn($a) => $this->escape($a),
+            $key['columns']
+          )
+        ).')';
         $st .= $i === $last ? ';' : ',' . PHP_EOL;
         $i++;
       }
@@ -1055,73 +1121,6 @@ MYSQL
     return $st;
   }
 
-  /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   * @throws Exception
-   */
-  public function getCreate(string $table, array|null $model = null): string
-  {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
-    }
-
-    if ($st = $this->getCreateTable($table, $model)) {
-
-      if (empty($model['keys'])) {
-        return $st;
-      }
-
-      $lines = X::split($st, PHP_EOL);
-      $end = array_pop($lines);
-      $st = X::join($lines, PHP_EOL);
-
-      foreach ($model['keys'] as $name => $key) {
-        $st .= ',' . PHP_EOL . '  ';
-        if (
-          !empty($key['unique']) &&
-          (count($key['columns']) === 1) &&
-          isset($model['fields'][$key['columns'][0]]) &&
-          isset($model['fields'][$key['columns'][0]]['key']) &&
-          $model['fields'][$key['columns'][0]]['key'] === 'PRI'
-        ) {
-          $st .= 'PRIMARY KEY';
-        } elseif (!empty($key['unique'])) {
-          $st .= 'UNIQUE KEY ' . $this->escape($name);
-        } else {
-          $st .= 'KEY ' . $this->escape($name);
-        }
-
-        $st .= ' (' . implode(
-            ',', array_map(
-              function ($a) {
-                return $this->escape($a);
-              }, $key['columns']
-            )
-          ) . ')';
-      }
-
-      // For avoiding constraint names conflicts
-      $keybase = strtolower(Str::genpwd(8, 4));
-      $i = 1;
-      foreach ($model['keys'] as $name => $key) {
-        if (!empty($key['ref_table']) && !empty($key['ref_column'])) {
-          $st .= ',' . PHP_EOL . '  ' .
-            'CONSTRAINT ' . $this->escape($keybase . $i) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
-            'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
-            (!empty($key['delete']) ? ' ON DELETE ' . $key['delete'] : '') .
-            (!empty($key['update']) ? ' ON UPDATE ' . $key['update'] : '');
-          $i++;
-        }
-      }
-
-      $st .= PHP_EOL . $end;
-    }
-
-    return $st;
-  }
 
   /**
    * Return a string for alter table sql statement.
@@ -1453,20 +1452,22 @@ MYSQL
    *
    * @param string $table
    * @param string $column
-   * @param array $col
+   * @param array $columnCfg
    * @return bool
-   * @throws Exception
    */
-  public function createColumn(string $table, string $column, array $col): bool
+  public function createColumn(string $table, string $column, array $columnCfg): bool
   {
-    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      $column_definition = $this->getColumnDefinitionStatement($column, $col);
-
-      if (!empty($col['after']) && is_string($col['after'])) {
-        $column_definition .= " AFTER " . $this->escape($col['after']);
+    if (($table = $this->tableFullName($table, true))
+      && Str::checkName($column)
+      && ($columnDefinition = $this->getColumnDefinitionStatement($column, $columnCfg))
+    ) {
+      if (!empty($columnCfg['after'])
+        && is_string($columnCfg['after'])
+      ) {
+        $columnDefinition .= " AFTER " . $this->escape($columnCfg['after']);
       }
 
-      return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
+      return (bool)$this->rawQuery("ALTER TABLE $table ADD $columnDefinition");
     }
 
     return false;
@@ -1476,88 +1477,92 @@ MYSQL
    * Returns a statement for column definition.
    *
    * @param string $name
-   * @param array $col
-   * @param bool $include_col_name
+   * @param array $cfg
+   * @param bool $includeColumnName
    * @return string
    * @throws Exception
    */
-  protected function getColumnDefinitionStatement(string $name, array $col, bool $include_col_name = true): string
+  protected function getColumnDefinitionStatement(string $name, array $cfg, bool $includeColumnName = true): string
   {
     $st = '';
-
-    if ($include_col_name) {
+    if ($includeColumnName) {
       $st .= '  ' . $this->escape($name) . ' ';
     }
 
-    if (empty($col['type'])) {
+    if (empty($cfg['type'])) {
       throw new Exception(X::_('Column type is not provided'));
     }
 
-    if (!in_array($col['type'], self::$types)) {
-      if (isset(self::$interoperability[$col['type']])) {
-        $st .= self::$interoperability[$col['type']];
+    if (!in_array($cfg['type'], self::$types)) {
+      if (isset(self::$interoperability[$cfg['type']])) {
+        $st .= self::$interoperability[$cfg['type']];
       }
       else {
-        throw new Exception(X::_("Impossible to recognize the column type")." $col[type]");
+        throw new Exception(X::_("Impossible to recognize the column type")." $cfg[type]");
       }
     }
     else {
-      $st .= $col['type'];
+      $st .= $cfg['type'];
     }
 
-    if (($col['type'] === 'enum') || ($col['type'] === 'set')) {
-      if (empty($col['extra'])) {
-        throw new Exception(X::_("Extra field is required for")." {$col['type']}");
+    if (($cfg['type'] === 'enum') || ($cfg['type'] === 'set')) {
+      if (empty($cfg['extra'])) {
+        throw new Exception(X::_("Extra field is required for")." {$cfg['type']}");
       }
 
-      $st .= ' (' . $col['extra'] . ')';
+      $st .= ' (' . $cfg['extra'] . ')';
     }
-    elseif (!empty($col['maxlength'])) {
-      $st .= '(' . $col['maxlength'];
-      if (!empty($col['decimals'])) {
-        $st .= ',' . $col['decimals'];
+    elseif (!empty($cfg['maxlength'])) {
+      $st .= '(' . $cfg['maxlength'];
+      if (!empty($cfg['decimals'])) {
+        $st .= ',' . $cfg['decimals'];
       }
 
       $st .= ')';
     }
 
-    if (in_array($col['type'], self::$numeric_types)
-      && empty($col['signed'])
+    if (in_array($cfg['type'], self::$numeric_types)
+      && empty($cfg['signed'])
     ) {
       $st .= ' UNSIGNED';
     }
-    elseif (!empty($col['charset'])) {
-      $st .= ' CHARACTER SET ' . Str::encodeFilename($col['charset']);
-      if (!empty($col['collation'])) {
-        $st .= ' COLLATE ' . Str::encodeFilename($col['collation']);
+    elseif (!empty($cfg['charset'])) {
+      $st .= ' CHARACTER SET ' . Str::encodeFilename($cfg['charset']);
+      if (!empty($cfg['collation'])) {
+        $st .= ' COLLATE ' . Str::encodeFilename($cfg['collation']);
       }
     }
 
-    if (empty($col['null'])) {
+    if (empty($cfg['null'])) {
       $st .= ' NOT NULL';
     }
 
-    if (!empty($col['virtual'])) {
-      $st .= ' GENERATED ALWAYS AS (' . $col['generation'] . ') VIRTUAL';
+    if (!empty($cfg['virtual'])) {
+      $st .= ' GENERATED ALWAYS AS (' . $cfg['generation'] . ') VIRTUAL';
     }
-    elseif (array_key_exists('default', $col)) {
-      if (!empty($col['defaultExpression'])) {
+    elseif (array_key_exists('default', $cfg)) {
+      if (!empty($cfg['defaultExpression'])) {
         $st .= ' DEFAULT ';
-        if ($col['default'] === null) {
-          $st .= ' NULL';
+        if (is_null($cfg['default'])
+          || (strtoupper((string)$cfg['default']) === 'NULL')
+        ) {
+          $st .= 'NULL';
         }
         else {
-          $st .= (string)$col['default'];
+          $st .= (string)$cfg['default'];
         }
       }
       else {
-        $def = (string)$col['default'];
-        if (!empty($col['default'])) {
-          $st .= " DEFAULT '" . Str::escapeQuotes(trim((string)$col['default'], "'")) . "'";
+        if (is_null($cfg['default'])
+          || (strtoupper((string)$cfg['default']) === 'NULL')
+        ) {
+          $st .= ' DEFAULT NULL';
+        }
+        else if (isset($cfg['default'])) {
+          $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default'], "'"))."'");
         }
       }
     }
-
 
     return $st;
   }

@@ -230,7 +230,7 @@ interface Engines
    * @param string $database
    * @return bool
    */
-  public function createDatabase(string $database): bool;
+  public function createDatabase(string $database, ?string $enc = null, ?string $collation = null): bool;
 
 
   /**
@@ -240,6 +240,22 @@ interface Engines
    * @return bool
    */
   public function dropDatabase(string $database): bool;
+
+  /**
+   * Creates a table
+   *
+   * @param string $table
+   * @param array|null $cfg
+   * @param bool $createKeys
+   * @param bool $createConstraints
+   * @return bool
+   */
+  public function createTable(
+    string $table,
+    ?array $cfg = null,
+    bool $createKeys = true,
+    bool $createConstraints = true
+  ): bool;
 
   /**
    * Drops a table

@@ -272,7 +272,13 @@ trait Manip
    * @param array|null $todo
    * @return iterable|null
    */
-  public function import(array $options, null|array|string|int $id_parent = null, $no_alias = false, ?array &$todo = null): Generator
+  public function import( 
+    array $options,
+    null|array|string|int $id_parent = null,
+    $no_alias = false,
+    ?array &$todo = null,
+    bool $returnId = false
+  ): ?iterable
   {
     if (is_array($id_parent)) {
       $id_parent = $this->fromCode(...$id_parent);
@@ -286,6 +292,7 @@ trait Manip
     }
 
     if (!empty($options) && $this->check() && $this->exists($id_parent)) {
+      $withParent = [];
       $c       =& $this->fields;
       $is_root = false;
       if ($todo === null) {
@@ -303,10 +310,12 @@ trait Manip
       if (X::isAssoc($options)) {
         $options = [$options];
       }
-      $realParent = $id_parent ?: $this->default;
 
+      $this->deleteCache();
+      $realParent = $id_parent ?: $this->default;
       $currentOptions = $this->fullOptions($realParent);
       foreach ($options as $o) {
+        $this->deleteCache();
         $after = [];
         $items = [];
         /** @todo Temp solution */
@@ -320,6 +329,11 @@ trait Manip
           }
         }
 
+        if (!empty($o[$c['id_parent']]) && is_array($o[$c['id_parent']])) {
+          $withParent[] = $o;
+          continue;
+        }
+
         $o[$c['id_parent']] = $realParent;
         if (isset($o['items'])) {
           $items = $o['items'] ?: null;
@@ -328,32 +342,60 @@ trait Manip
 
 
         $hasNoText = empty($o[$c['text']]);
+
         if (isset($o[$c['id_alias']])) {
-          $after['id_alias'] = $o[$c['id_alias']];
-          if ($hasNoText) {
-            $o[$c['text']] = 'waiting for alias';
+          if ($tmp = $this->fromCode(...$o[$c['id_alias']])) {
+            $o[$c['id_alias']] = $tmp;
           }
-          unset($o[$c['id_alias']]);
+          else {
+            $after['id_alias'] = $o[$c['id_alias']];
+            // Add doesn't accept element with neither alias nor text
+            if ($hasNoText) {
+              $o[$c['text']] = 'waiting for alias';
+              $after[$c['text']] = null;
+            }
+
+            unset($o[$c['id_alias']]);
+          }
         }
 
         if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_root_alias'])) {
-          $after['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];
-          unset($o[$c['cfg']]['id_root_alias']);
+          if ($tmp = $this->fromCode(...$o[$c['cfg']]['id_root_alias'])) {
+            $o[$c['cfg']]['id_root_alias'] = $tmp;
+            $o[$c['cfg']]['relations'] = 'alias';
+          }
+          else {
+            $after['id_root_alias'] = $o[$c['cfg']]['id_root_alias'];
+            unset($o[$c['cfg']]['id_root_alias']);
+          }
         }
 
-        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['template'])) {
-          $after['template'] = $o[$c['cfg']]['template'];
-          unset($o[$c['cfg']]['template']);
+        if (isset($o[$c['cfg']]) && !empty($o[$c['cfg']]['id_template'])) {
+          if ($tmp = $this->fromCode(...$o[$c['cfg']]['id_template'])) {
+            $o[$c['cfg']]['id_template'] = $tmp;
+            $o[$c['cfg']]['relations'] = 'template';
+            $after['id_template'] = $o[$c['cfg']]['id_template'];
+          }
+          else {
+            $after['id_template'] = $o[$c['cfg']]['id_template'];
+            unset($o[$c['cfg']]['id_template']);
+          }
         }
 
         $search = $o;
-        unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']]);
-        if ($row = X::getRow($currentOptions, $search['code'] ? [$c['code'] => $search['code']] : $search)) {
+        unset($search[$c['id']], $search[$c['cfg']], $search[$c['num']], $search[$c['alias']]);
+        $code = $o[$c['code']] ?? (isset($o['alias']) ? $o['alias']['code'] : null);
+
+        if ($code) {
+          $fn = fn($co) => ($co[$c['code']] === $code) || (isset($co['alias']) && ($co['alias']['code'] === $code));
+        }
+
+        if ($row = X::getRow($currentOptions, $code ? $fn : $search)) {
           $o = X::mergeArrays($row, $o);
         }
 
         if ($id = $this->add($o, true)) {
-          yield 1;
+          yield $returnId ? $id : 1;
           if (!empty($after)) {
             $todo[$id] = $after;
           }
@@ -374,10 +416,10 @@ trait Manip
         foreach ($todo as $id => $td) {
           if (!empty($td['id_alias'])) {
             $id_alias = is_array($td['id_alias']) ? $this->fromCode(...$td['id_alias']) : $id['id_alias'];
-            if ($id_alias) {
+            if (Str::isUid($id_alias)) {
               try {
                 $this->setAlias($id, $id_alias);
-                if ($hasNoText) {
+                if (array_key_exists($c['text'], $td) && !$td[$c['text']]) {
                   $this->setText($id, null);
                 }
               }
@@ -396,17 +438,46 @@ trait Manip
             }
           }
 
-          if (!empty($td['id_root_alias'])
-              && ($id_root_alias = $this->fromCode(...$td['id_root_alias']))
-          ) {
-            $this->setcfg($id, ['id_root_alias' => $id_root_alias], true);
+          if (!empty($td['id_root_alias'])) {
+            if ($id_root_alias = $this->fromCode(...$td['id_root_alias'])) {
+              $this->setCfg($id, ['id_root_alias' => $id_root_alias, 'allow_children' => 1, 'relations' => 'alias'], true);
+            }
+            else {
+              X::ddump($td['id_root_alias'], $this->getDefault(), $this->option('appui'));
+              throw new Exception(
+                X::_(
+                  "Error while importing: impossible to set the root alias %s",
+                  json_encode($td, JSON_PRETTY_PRINT)
+                )
+              );
+            }
           }
 
-          if (!empty($td['template'])
-              && ($id_template = $this->fromCode(...$td['template']))
-          ) {
-            $this->setcfg($id, ['template' => $id_template], true);
+          if (!empty($td['id_template'])) {
+            if ($id_template = is_array($td['id_template']) ? $this->fromCode(...$td['id_template']) : $td['id_template']) {
+              $this->setCfg($id, ['id_template' => $id_template, 'allow_children' => 1, 'relations' => 'template']);
+              $this->applySubTemplates($id);
+            }
+            else {
+              throw new Exception(
+                X::_(
+                  "Error while importing: impossible to set the template %s",
+                  json_encode($td, JSON_PRETTY_PRINT)
+                )
+              );
+            }
           }
+        }
+      }
+
+      $this->deleteCache();
+      foreach ($withParent as $o) {
+        if (!empty($o['items']) &&  ($idParent = $this->fromCode(...$o[$c['id_parent']]))) {
+          $this->import(
+            $o['items'],
+            $idParent,
+            $no_alias
+          );
         }
       }
 
@@ -425,17 +496,21 @@ trait Manip
    * @param int|string  $target The destination option's ID
    * @param boolean     $deep   If set to true, children will also be duplicated
    * @param boolean     $force  If set to true and option exists it will be merged
+   * @param boolean     $returnId If set to true, the ID of the duplicated option will be returned
    * @return int|null The number of affected rows or null if option not found
    */
-  public function duplicate($id, $target, $deep = false, $force = false, $return_num = false)
+  public function duplicate($id, $target, $deep = false, $force = false, $returnId = false)
   {
     $res    = null;
     $target = $this->fromCode($target);
     if (Str::isUid($target)) {
       if ($opt = $this->export($id, $deep ? 'sfull' : 'simple')) {
-        foreach ($this->import($opt, $target) as $num) {
-          $res += $num;
+        foreach ($this->import($opt, $target, false, null, $returnId) as $num) {
+          if (!$returnId || empty($id)) {
+            $res += $num;
+          }
         }
+
         $this->deleteCache($target);
       }
     }

@@ -2090,8 +2090,22 @@ class X
       case "isnotempty":
         return $v1 !== '';
       case '==':
-        return $v1 == $v2;
       default:
+        if (is_array($v1) && is_array($v2)) {
+          $k1 = array_keys($v1);
+          $k2 = array_keys($v2);
+          sort($k1);
+          sort($k2);
+          if ($k1 != $k2) {
+            return false;
+          }
+          $s1 = [];
+          array_map(fn($a) => $s1[] = $v1[$a], $k1);
+          $s2 = [];
+          array_map(fn($a) => $s2[] = $v2[$a], $k2);
+          return json_encode([$k1, $s1]) === json_encode([$k2, $s2]);
+        }
+
         return $v1 == $v2;
     }
   }

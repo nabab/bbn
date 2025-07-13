@@ -10,6 +10,7 @@ use PDOException;
 use bbn\Str;
 use bbn\X;
 use bbn\File\Dir;
+use bbn\Appui\Option;
 
 /**
  * Database Class
@@ -25,21 +26,8 @@ use bbn\File\Dir;
 class Sqlite extends Sql
 {
 
-  private $sqlite_keys_enabled = false;
-
-  /**
-   * @var array
-   */
-  protected array $cfg;
-
-  /**
-   * The host of this connection
-   * @var string $host
-   */
-  protected $host;
-
-  /** @var string The connection code as it would be stored in option */
-  protected $connection_code;
+  /** @var string The quote character */
+  public $qte = '"';
 
   /** @var array Allowed operators */
   public static $operators = ['!=','=','<>','<','<=','>','>=','like','clike','slike','not','is','is not', 'in','between', 'not like'];
@@ -98,8 +86,9 @@ class Sqlite extends Sql
     'SUM',
   ];
 
-  /** @var string The quote character */
-  public $qte = '"';
+  protected static $defaultCharset = 'UTF-8';
+
+  private $sqlite_keys_enabled = false;
 
   /**
    * Constructor
@@ -112,27 +101,7 @@ class Sqlite extends Sql
       throw new Exception('The SQLite driver for PDO is not installed...');
     }
 
-    $cfg = $this->getConnection($cfg);
-
-    try {
-      $this->cacheInit();
-      $this->current  = $cfg['db'];
-      $this->host     = $cfg['host'];
-      $this->connection_code = $cfg['host'];
-
-      $this->pdo = new PDO(...$cfg['args']);
-      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-      $this->cfg = $cfg;
-      $this->setHash($cfg['args']);
-
-    } catch (PDOException $e) {
-      $err = X::_("Impossible to create the connection").
-        " {$cfg['engine']}/Connection ". $this->getEngine()." to {$this->host} "
-        .X::_("with the following error").$e->getMessage();
-      throw new Exception($err);
-    }
+    parent::__construct($cfg);
   }
 
   /**
@@ -175,14 +144,15 @@ class Sqlite extends Sql
       }
     }
 
-    if (!isset($cfg['host'])) {
+    if (!isset($cfg['host'])
+      || !is_file($cfg['host'].$cfg['db'])
+    ) {
       throw new Exception('Db file could not be located');
     }
 
-    if (!is_file($cfg['host'].$cfg['db'])) {
-      X::ddump("jjjj");
-    }
     $cfg['args'] = ['sqlite:'.$cfg['host'].$cfg['db']];
+    $cfg['originalDb'] = $cfg['db'];
+    $cfg['originalHost'] = $cfg['host'];
     $cfg['db']   = 'main';
 
     return $cfg;
@@ -230,6 +200,19 @@ class Sqlite extends Sql
     }
 
       return false;
+  }
+
+
+  /**
+   * Returns true if the given table exists
+   *
+   * @param string $table
+   * @param string $database. or currently selected if none
+   * @return boolean
+   */
+  public function tableExists(string $table, string $database = ''): bool
+  {
+    return (bool)$this->getRow("SELECT name FROM sqlite_master WHERE type='table' AND name='$table'");
   }
 
 
@@ -321,6 +304,7 @@ class Sqlite extends Sql
    */
   public function getDatabases(): ?array
   {
+    return null;
     if (!$this->check()) {
       return null;
     }
@@ -639,65 +623,109 @@ class Sqlite extends Sql
 
 
   /**
-   * @param string $table
-   * @param array|null $model
+   * Returns the SQL statement to get the charset of a database.
+   *
+   * @param string $database
    * @return string
-   * @throws Exception
    */
-  public function getCreateTable(string $table, array|null $model = null, $charset = null, $collate = null): string
+  public function getCharsetDatabase(string $database): string
   {
-    if (!$model) {
-      $model = $this->modelize($table);
-    }
+    return "PRAGMA encoding";
+  }
 
-    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
-    $done = false;
-    foreach ($model['fields'] as $name => $col) {
-      if (!$done) {
-        $done = true;
-      }
-      else {
-        $st .= ',' . PHP_EOL;
-      }
-
-      $st .= $this->getColumnDefinitionStatement($name, $col);
-    }
-
-    if (isset($model['keys']['PRIMARY'])) {
-      $st .= ','.PHP_EOL.'  PRIMARY KEY ('.X::join(
-        array_map(
-          function ($a) {
-            return $this->escape($a);
-          },
-          $model['keys']['PRIMARY']['columns']
-        ),
-        ', '
-      ).')';
-    }
-
-    if ($c = $this->getCreateConstraints($table, $model)) {
-      $st .= PHP_EOL. $c;
-    }
-    $st .= PHP_EOL . ')';
-    return $st;
+  /**
+   * Returns the SQL statement to analyze the current database.
+   *
+   * @return string
+   */
+  public function getAnalyzeDatabase(): string
+  {
+    return "ANALYZE;";
   }
 
 
   /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
    * @throws Exception
    */
-  public function getCreateKeys(string $table, ?array $model = null): string
+  public function getCreateTable(string $table, ?array $cfg = null): string
   {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
     }
 
-    if ($model && !empty($model['keys'])) {
-      foreach ($model['keys'] as $name => $key) {
+    $st   = 'CREATE TABLE ' . $this->escape($table) . ' (' . PHP_EOL;
+    $numFields = count($cfg['fields']);
+    $i = 0;
+    foreach ($cfg['fields'] as $name => $col) {
+      $i++;
+      $st .= $this->getColumnDefinitionStatement($name, $col);
+      if ($i < $numFields) {
+        $st .= ',' . PHP_EOL;
+      }
+    }
+
+    if (isset($cfg['keys']['PRIMARY'])) {
+      $st .= ',' . PHP_EOL . '  PRIMARY KEY (' . X::join(
+        array_map(
+          function ($a) {
+            return $this->escape($a);
+          },
+          $cfg['keys']['PRIMARY']['columns']
+        ),
+        ', '
+      ) . ')';
+    }
+
+    if ($c = $this->getCreateConstraintsOnly($table, $cfg)) {
+      $st .= ',' . PHP_EOL . $c;
+    }
+
+    $st .= PHP_EOL . '); PRAGMA encoding=' . $this->qte . (empty($cfg['charset']) ? static::$defaultCharset : $cfg['charset']) . $this->qte . ';';
+    return $st;
+  }
+
+
+  /**
+   * Returns the SQL statement to get the charset of a table.
+   *
+   * @param string $table
+   * @return string
+   */
+  public function getCharsetTable(string $table): string
+  {
+    if (Str::checkName($table)) {
+      return $this->getCharsetDatabase($this->getCurrent());
+    }
+
+    return '';
+  }
+
+
+  /**
+   * @param string $table
+   * @param array|null $cfg
+   * @return string
+   * @throws Exception
+   */
+  public function getCreateKeys(string $table, ?array $cfg = null): string
+  {
+    $st = '';
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
+    }
+
+    if ($cfg
+      && !empty($cfg['keys'])
+      && ($keys = array_filter(
+        $cfg['keys'],
+        fn($k) => !empty($k['columns']) && empty($k['ref_table']) && empty($k['ref_column'])
+      ))
+    ) {
+      ;
+      foreach ($keys as $name => $key) {
         if ($name === 'PRIMARY') {
           continue;
         }
@@ -711,9 +739,7 @@ class Sqlite extends Sql
 
         $st .= ' ('.X::join(
           array_map(
-            function ($a) {
-              return $this->escape($a);
-            },
+            fn($a) => $this->escape($a),
             $key['columns']
           ),
           ', '
@@ -727,21 +753,55 @@ class Sqlite extends Sql
 
 
   /**
-   * @param null|string $table The table for which to create the statement
+   * Return SQL string for table creation.
+   *
+   * @param string $table
+   * @param array|null $cfg
+   * @param bool $createKeys
+   * @param bool $createConstraints
    * @return string
    */
-  public function getCreate(string $table, array|null $model = null): string
+  public function getCreateTableRaw(
+    string $table,
+    ?array $cfg = null,
+    bool $createKeys = true,
+    bool $createConstraints = true
+  ): string
   {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
+    if (empty($cfg)) {
+      $cfg = $this->modelize($table);
     }
 
-    if ($st = $this->getCreateTable($table, $model)) {
-      $st .= ';'.PHP_EOL . $this->getCreateKeys($table, $model);
+    if (!$createKeys || !$createConstraints) {
+      foreach ($cfg['keys'] as $k => $v) {
+        if (!$createKeys
+          && !empty($v['columns'])
+          && empty($v['ref_table'])
+          && empty($v['ref_column'])
+        ) {
+          unset($cfg['keys'][$k]);
+        }
+
+        if (!$createConstraints
+          && !empty($v['columns'])
+          && !empty($v['constraint'])
+          && !empty($v['ref_table'])
+          && !empty($v['ref_column'])
+        ) {
+          unset($cfg['keys'][$k]);
+        }
+      }
     }
 
-    return $st;
+    if ($sql = $this->getCreateTable($table, $cfg)) {
+      if ($createKeys) {
+        $sql .= PHP_EOL.$this->getCreateKeys($table, $cfg);
+      }
+
+      return $sql;
+    }
+
+    return '';
   }
 
 
@@ -960,25 +1020,40 @@ class Sqlite extends Sql
 
 
   /**
+   * Returns the SQL statement to get the list of charsets.
+   *
+   * @return string
+   */
+  public function getCharsets(): string
+  {
+    return "SELECT " . $this->escape("column1") . " AS ". $this->escape("charset") . PHP_EOL .
+      "FROM (VALUES('UTF-8'), ('UTF-16'), ('UTF-16le'), ('UTF-16be'))";
+  }
+
+
+  /**
+   * Returns the SQL statement to get the list of collations.
+   *
+   * @return string
+   */
+  public function getCollations(): string
+  {
+    return "SELECT DISTINCT " . $this->escape("name"). " AS " . $this->escape("collation") . PHP_EOL .
+      "FROM " . $this->escape("pragma_collation_list") . ";";
+  }
+
+
+  /**
    * Creates a database
    *
    * @param string $database
+   * @param string|null $enc
+   * @param string|null $collation
    * @return bool
    */
-  public function createDatabase(string $database): bool
+  public function createDatabase(string $database, ?string $enc = null, ?string $collation = null): bool
   {
-    if (Str::checkFilename($database)) {
-      if (empty(strpos($database, '.sqlite'))) {
-        $database = $database.'.sqlite';
-      }
-
-      if (empty(file_exists($this->host.$database))) {
-        fopen($this->host.$database, 'w');
-        return file_exists($this->host.$database);
-      }
-    }
-
-    return false;
+    return static::createDatabaseOnHost($database, $this->host);
   }
 
 
@@ -990,18 +1065,51 @@ class Sqlite extends Sql
    */
   public function dropDatabase(string $database): bool
   {
-    if (Str::checkFilename($database)) {
-      if (empty(strpos($database, '.sqlite'))) {
-        $database = $database.'.sqlite';
+    if ($database = self::normalizeFilename($database)) {
+      if ($this->host.'/'.$database === $this->cfg['originalHost'].'/'.$this->cfg['originalDb']) {
+        throw new \Exception(X::_('Cannot drop the currently open database!'));
       }
 
-      if (file_exists($this->host.$database)) {
-        unlink($this->host.$database);
-        return !file_exists($this->host.$database);
-      }
+      return static::dropDatabaseOnHost($database, $this->host);
     }
 
     return false;
+  }
+
+
+  /**
+   * Renames the given database
+   *
+   * @param string $oldDatabase
+   * @param string $newDatabase
+   * @return bool
+   */
+  public function renameDatabase(string $oldDatabase, string $newDatabase): bool
+  {
+    if (($oldDatabase = self::normalizeFilename($oldDatabase))
+      && ($newDatabase = self::normalizeFilename($newDatabase))
+    ) {
+      if ($this->host.'/'.$oldDatabase === $this->cfg['originalHost'].'/'.$this->cfg['originalDb']) {
+        throw new \Exception(X::_('Cannot drop the currently open database!'));
+      }
+
+      return static::renameDatabaseOnHost($oldDatabase, $newDatabase, $this->host);
+    }
+
+    return false;
+  }
+
+
+  /**
+   * Duplicates the given database
+   *
+   * @param string $oldDatabase
+   * @param string $newDatabase
+   * @return bool
+   */
+  public function duplicateDatabase(string $oldDatabase, string $newDatabase): bool
+  {
+    return static::duplicateDatabaseOnHost($oldDatabase, $newDatabase, $this->host);
   }
 
 
@@ -1069,9 +1177,11 @@ class Sqlite extends Sql
 
   public function dbSize(string $database = '', string $type = ''): int
   {
-    if (empty(strpos($database, '.sqlite'))) {
-      $database = $database.'.sqlite';
-    }
+    if (!str_ends_with($database, '.sqlite')
+        && !str_ends_with($database, '.db')
+      ) {
+        $database .= '.sqlite';
+      }
 
    return @filesize($this->host . $database) ?: 0;
   }
@@ -1079,7 +1189,10 @@ class Sqlite extends Sql
 
   public function tableSize(string $table, string $type = ''): int
   {
-    return 0;
+    return $this->getOne(
+      'SELECT SUM(pgsize) FROM dbstat WHERE name = ?',
+      $table
+    ) ?: 0;
   }
 
 
@@ -1118,108 +1231,37 @@ class Sqlite extends Sql
 
 
   /**
-   * @param $table_name
-   * @param array $columns
-   * @param array|null $keys
-   * @param bool $with_constraints
-   * @param string $charset
-   * @return string
-   */
-  public function createTable($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
-  {
-    $lines = [];
-    $sql   = '';
-    foreach ($columns as $n => $c){
-      $name = $c['name'] ?? $n;
-      if (isset($c['type']) && Str::checkName($name)) {
-        $st = $this->colSimpleName($name, true).' '.$c['type'];
-        if (!empty($c['maxlength'])) {
-          $st .= '('.$c['maxlength'].')';
-        }
-        elseif (!empty($c['values']) && \is_array($c['values'])) {
-          $st .= '(';
-          foreach ($c['values'] as $i => $v){
-            $st .= "'".Str::escapeSquotes($v)."'";
-            if ($i < count($c['values']) - 1) {
-              $st .= ',';
-            }
-          }
-
-          $st .= ')';
-        }
-
-        if ((strpos($c['type'], 'int') !== false) && empty($c['signed'])) {
-          $st .= ' UNSIGNED';
-        }
-
-        if (empty($c['null'])) {
-          $st .= ' NOT NULL';
-        }
-
-        if (isset($c['default'])) {
-          $st .= ' DEFAULT '.($c['default'] === 'NULL' ? 'NULL' : "'".Str::escapeSquotes($c['default'])."'");
-        }
-
-        $lines[] = $st;
-      }
-    }
-
-    if (count($lines)) {
-      $sql = 'CREATE TABLE '.$this->tableSimpleName($table_name, false).' ('.PHP_EOL.implode(','.PHP_EOL, $lines).
-        PHP_EOL.'); PRAGMA encoding='.$this->qte.$charset.$this->qte.';';
-    }
-
-    return $sql;
-  }
-
-
-  public function createTableSqlite($table_name, array $columns, array|null $keys = null, bool $with_constraints = false, string $charset = 'UTF-8')
-  {
-    $str = $this->createTable($table_name, $columns, $keys, $with_constraints, $charset);
-    if ($str !== '') {
-      return (bool)$this->rawQuery($str);
-    }
-
-    return false;
-  }
-
-
-  /**
    * @param string $table
-   * @param array|null $model
+   * @param array|null $cfg
    * @return string
-   * @throws Exception
-   * TODO-testing: ALTER TABLE ADD CONSTRAINT is not supported:
-   * https://www.sqlite.org/omitted.html
    */
-  public function getCreateConstraints(string $table, array|null $model = null): string
+  public function getCreateConstraintsOnly(string $table, ?array $cfg = null): string
   {
     $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
     }
 
-    if ($model && !empty($model['keys'])) {
-      $keys = array_filter(
-        $model['keys'],
+    if ($cfg && !empty($cfg['keys'])) {
+      $keys = array_values(array_filter(
+        $cfg['keys'],
         fn($a) => !empty($a['columns'])
           && !empty($a['constraint'])
           && !empty($a['ref_table'])
           && !empty($a['ref_column'])
-      );
-      if ($last = count($keys)) {
-        $i = 0;
-        foreach ($keys as $k) {
-          $i++;
+      ));
+      if (!empty($keys)) {
+        foreach ($keys as $i =>$k) {
           $cols = implode(', ', array_map(fn($col) => $this->escape($col), $k['columns']));
           $refCols = is_array($k['ref_column']) ?
             implode(', ', array_map(fn($col) => $this->escape($col), $k['ref_column'])) :
             $this->escape($k['ref_column']);
-          $st .= '  CONSTRAINT ' . $this->escape($k['constraint']) . ' FOREIGN KEY (' . $cols . ') ' .
+          $st .= '  CONSTRAINT ' . $this->escape($k['constraint']) .
+            ' FOREIGN KEY (' . $cols . ') ' .
             'REFERENCES ' . $this->escape($k['ref_table']) . '(' . $refCols . ') ' .
             (!empty($k['delete']) ? ' ON DELETE ' . $k['delete'] : '') .
             (!empty($k['update']) ? ' ON UPDATE ' . $k['update'] : '') .
-            ($i === $last ? '' : ',' . PHP_EOL);
+            (isset($keys[$i + 1]) ? ',' . PHP_EOL : '');
         }
       }
     }
@@ -1230,19 +1272,66 @@ class Sqlite extends Sql
 
   /**
    * @param string $table
-   * @param array|null $model
-   * @return bool
-   * @throws Exception
+   * @param array|null $cfg
+   * @return string
    */
-  public function createConstraintsSqlite(string $table, array|null $model = null): bool
+  public function getCreateConstraints(string $table, ?array $cfg = null): string
   {
-    $str = $this->getCreateConstraints($table,  $model);
-    if ($str !== '') {
-      return (bool)$this->rawQuery($str);
+    $st = '';
+    if (!$cfg) {
+      $cfg = $this->modelize($table);
     }
 
-    return false;
+    if ($cfg && !empty($cfg['keys'])) {
+      $keys = array_values(
+        array_filter(
+          $cfg['keys'],
+          fn($a) => !empty($a['columns'])
+            && !empty($a['constraint'])
+            && !empty($a['ref_table'])
+            && !empty($a['ref_column'])
+        )
+      );
+      if (!empty($keys)) {
+        $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
+        $st .= $this->getCreateTable($tmpTable, $cfg);
+        $st .= $this->getCreateKeys($tmpTable, $cfg);
+        $st .= 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';'.PHP_EOL;
+        $st .= 'DROP TABLE '.$this->escape($table).';'.PHP_EOL;
+        $st .= 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';'.PHP_EOL;
+      }
+    }
+
+    return $st;
   }
+
+
+  /**
+   * Returns a string for dropping a constraint.
+   *
+   * @param string $table
+   * @param string $constraint
+   * @return string
+   */
+  public function getDropConstraint(string $table, string $constraint): string
+  {
+    $st = '';
+    if ($cfg = $this->modelize($table)) {
+      $cfg['keys'] = array_filter(
+        $cfg['keys'],
+        fn($a) => empty($a['constraint'])
+          && (strtolower($a['constraint']) !== strtolower($constraint))
+      );
+      $tmpTable = Str::encodeFilename('_bbntmp_'.$table);
+      $st = $this->getCreateTable($tmpTable, $cfg);
+      $st .= 'INSERT INTO '.$this->escape($tmpTable).' SELECT * FROM '.$this->escape($table).';'.PHP_EOL;
+      $st .= 'DROP TABLE '.$this->escape($table).';'.PHP_EOL;
+      $st .= 'ALTER TABLE '.$this->escape($tmpTable).' RENAME TO '.$this->escape($table).';'.PHP_EOL;
+    }
+
+    return $st;
+  }
+
 
   /**
    * Return primary keys of a table as a numeric array.
@@ -1261,85 +1350,192 @@ class Sqlite extends Sql
   }
 
 
-  /**
-   * @param string $table
-   * @param string $column
-   * @param array $col
-   * @return bool
-   * @throws Exception
-   */
-  public function createColumn(string $table, string $column, array $col): bool
-  {
-    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      $column_definition = $this->getColumnDefinitionStatement($column, $col);
-
-      return (bool)$this->rawQuery("ALTER TABLE $table ADD $column_definition");
-    }
-
-    return false;
-  }
-
-  /**
-   * Returns a statement for column definition.
-   *
-   * @param string $name
-   * @param array $col
-   * @return string
-   * @throws Exception
-   */
-  protected function getColumnDefinitionStatement(string $name, array $col): string
-  {
-    $st = '  ' . $this->escape($name) . ' ';
-
-    if (!empty($col['type'])) {
-      if (!in_array(strtolower($col['type']), self::$types)) {
-        if (isset(self::$interoperability[strtolower($col['type'])])) {
-          $st .= self::$interoperability[strtolower($col['type'])];
-        }
-        // No error: no type is fine
-      }
-      else {
-        $st .= $col['type'];
-      }
-    }
-
-    if (!empty($col['maxlength'])) {
-      $st .= '('.$col['maxlength'].')';
-    }
-
-    if (empty($col['null'])) {
-      $st .= ' NOT NULL';
-    }
-
-    if (array_key_exists('default', $col)) {
-      if (!is_null($col['default'])
-        && ($col['default'] !== 'NULL')
-      ) {
-        $st .= " DEFAULT " . Str::escapeQuotes(trim((string)$col['default']));
-      }
-    }
-
-    return $st;
-  }
-
   public function getCfg(): array
   {
     return $this->cfg;
   }
+
 
   public function getHost(): ?string
   {
     return $this->host;
   }
 
+
   public function getConnectionCode()
   {
     return $this->connection_code;
   }
 
+
   public function __toString()
   {
     return 'sqlite';
   }
+
+
+  public static function getHostDatabases(string $host): array
+  {
+    $databases = [];
+    if (is_dir($host)) {
+      $fs = Dir::getFiles($host, false, false, ['sqlite', 'db']);
+      foreach ($fs as $f) {
+        if (is_file($f)) {
+          $databases[] = X::pathinfo($f, PATHINFO_FILENAME);
+        }
+      }
+    }
+
+    sort($databases);
+    return $databases;
+  }
+
+
+  public static function createDatabaseOnHost(string $database, string $host): bool
+  {
+    if (($database = self::normalizeFilename($database))
+      && ($path = self::getHostPath($host))
+      && !file_exists($path.$database)
+    ) {
+      file_put_contents($path.$database, '');
+      return file_exists($path.$database);
+    }
+
+    return false;
+  }
+
+
+  public static function dropDatabaseOnHost(string $database, string $host): bool
+  {
+    if (($database = self::normalizeFilename($database))
+      && ($path = self::getHostPath($host))
+      && file_exists($path.$database)
+    ) {
+      return unlink($path.$database);
+    }
+
+    return false;
+  }
+
+
+  public static function renameDatabaseOnHost(string $oldDatabase, string $newDatabase, string $host): bool
+  {
+    if (($oldDatabase = self::normalizeFilename($oldDatabase))
+      && ($newDatabase = self::normalizeFilename($newDatabase))
+      && ($oldDatabase !== $newDatabase)
+      && ($path = self::getHostPath($host))
+      && file_exists($path.$oldDatabase)
+    ) {
+      return rename($path.$oldDatabase, $path.$newDatabase);
+    }
+
+    return false;
+  }
+
+
+  public static function duplicateDatabaseOnHost(string $oldDatabase, string $newDatabase, string $host): bool
+  {
+    if (($oldDatabase = self::normalizeFilename($oldDatabase))
+      && ($newDatabase = self::normalizeFilename($newDatabase))
+      && ($oldDatabase !== $newDatabase)
+      && ($path = self::getHostPath($host))
+      && file_exists($path.$oldDatabase)
+    ) {
+      return copy($path.$oldDatabase, $path.$newDatabase);
+    }
+
+    return false;
+  }
+
+
+  public static function normalizeFilename($filename): ?string
+  {
+    if (Str::checkFilename($filename)) {
+      if (!str_ends_with($filename, '.sqlite')
+        && !str_ends_with($filename, '.db')
+      ) {
+        $filename .= '.sqlite';
+      }
+
+      return $filename;
+    }
+
+    return null;
+  }
+
+  private static function getHostPath(string $host): string
+  {
+    $path = $host;
+    if (Str::isUid($host)) {
+      $opt = Option::getInstance();
+      if ($code = $opt->code($host)) {
+        $path = $code;
+      }
+      else {
+        throw new Exception(X::_("Host '%s' not found", $host));
+      }
+    }
+
+    $pbits = X::split($path, '/');
+    foreach ($pbits as &$bit) {
+      if (str_starts_with($bit, 'BBN_') && defined($bit)) {
+        $bit = constant($bit);
+        if (str_ends_with($bit, '/')) {
+          $bit = rtrim($bit, '/');
+        }
+      }
+    }
+
+    return X::join($pbits, '/').'/';
+  }
+
+
+  /**
+   * Returns a statement for column definition.
+   *
+   * @param string $name
+   * @param array $cfg
+   * @param bool $includeColumnName
+   * @return string
+   * @throws Exception
+   */
+  protected function getColumnDefinitionStatement(string $name, array $cfg, bool $includeColumnName = true): string
+  {
+    $st = '';
+    if ($includeColumnName) {
+      $st .= '  ' . $this->escape($name) . ' ';
+    }
+
+    if (!empty($cfg['type'])) {
+      if (!in_array(strtolower($cfg['type']), self::$types)) {
+        if (isset(self::$interoperability[strtolower($cfg['type'])])) {
+          $st .= self::$interoperability[strtolower($cfg['type'])];
+        }
+        // No error: no type is fine
+      }
+      else {
+        $st .= $cfg['type'];
+      }
+    }
+
+    if (!empty($cfg['maxlength'])) {
+      $st .= '('.$cfg['maxlength'].')';
+    }
+
+    if (empty($cfg['null'])) {
+      $st .= ' NOT NULL';
+    }
+
+    if (array_key_exists('default', $cfg)) {
+      if (!is_null($cfg['default'])
+        && ($cfg['default'] !== 'NULL')
+      ) {
+        $st .= " DEFAULT " . (is_numeric($cfg['default']) ? $cfg['default'] : "'".Str::escapeQuotes(trim((string)$cfg['default']))."'");
+      }
+    }
+
+    return $st;
+  }
+
 
 }

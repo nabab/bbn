@@ -5391,7 +5391,7 @@ class OptionTest extends TestCase
   }
 
   /** @test */
-  public function getParentCfg_method_returns_a_formatted_content_of_the_config_column_as_array_from_the_given_option_parent()
+  public function getApplicableCfg_method_returns_a_formatted_content_of_the_config_column_as_array_from_the_given_option_parent()
   {
     $this->mockOptionClass();
 
@@ -5415,12 +5415,12 @@ class OptionTest extends TestCase
 
     $this->assertSame(
       $expected,
-      $this->option->getParentCfg('list')
+      $this->option->getApplicableCfg('list')
     );
   }
 
   /** @test */
-  public function getParentCfg_method_returns_null_when_fails_to_retrieve_parent_id()
+  public function getApplicableCfg_method_returns_null_when_fails_to_retrieve_parent_id()
   {
     $this->mockOptionClass();
 
@@ -5435,12 +5435,12 @@ class OptionTest extends TestCase
       ->andReturnNull();
 
     $this->assertNull(
-      $this->option->getParentCfg('list')
+      $this->option->getApplicableCfg('list')
     );
   }
 
   /** @test */
-  public function getParentCfg_method_returns_null_when_the_given_code_does_not_exist()
+  public function getApplicableCfg_method_returns_null_when_the_given_code_does_not_exist()
   {
     $this->mockOptionClass();
 
@@ -5450,7 +5450,7 @@ class OptionTest extends TestCase
       ->andReturnNull();
 
     $this->assertNull(
-      $this->option->getParentCfg('list')
+      $this->option->getApplicableCfg('list')
     );
   }
 

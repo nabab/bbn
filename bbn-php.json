@@ -6445,9 +6445,9 @@
                                 "type": "method",
                                 "class": "\\bbn\\Appui\\Option\\Cfg",
                                 "lastmod": 1733800062,
-                                "text": "getParentCfg",
+                                "text": "getApplicableCfg",
                                 "desc": "",
-                                "value": "getParentCfg"
+                                "value": "getApplicableCfg"
                             },
                             {
                                 "type": "method",
@@ -22823,9 +22823,9 @@
                         "type": "method",
                         "class": "\\bbn\\Appui\\Option",
                         "lastmod": 1733800076,
-                        "text": "getParentCfg",
+                        "text": "getApplicableCfg",
                         "desc": "",
-                        "value": "getParentCfg"
+                        "value": "getApplicableCfg"
                     },
                     {
                         "type": "method",
@@ -65391,9 +65391,9 @@
                         "type": "method",
                         "class": "\\bbn\\User\\Permissions",
                         "lastmod": 1734658427,
-                        "text": "getParentCfg",
+                        "text": "getApplicableCfg",
                         "desc": "",
-                        "value": "getParentCfg"
+                        "value": "getApplicableCfg"
                     },
                     {
                         "type": "method",

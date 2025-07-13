@@ -5712,8 +5712,8 @@
             },
             "comments": "  \/**\n   * Returns the raw content of the cfg column for the given option.\n   *\n   * @param mixed ...$codes Any option(s) accepted by fromCode()\n   * @return string|null The raw cfg value or null if the option cannot be found\n   *\/"
         },
-        "getParentCfg": {
-            "name": "getParentCfg",
+        "getApplicableCfg": {
+            "name": "getApplicableCfg",
             "summary": "Returns a formatted content of the cfg column as an array from the option's parent.",
             "description": "",
             "description_parts": [],
@@ -5722,7 +5722,7 @@
             "static": false,
             "visibility": "public",
             "final": false,
-            "code": "  public function getParentCfg(...$codes): ?array\n  {\n    \/\/ Get the ID of the option from its code.\n    $id = $this->fromCode($codes);\n\n    \/\/ Check if the ID is valid and retrieve the parent's config.\n    if ($id && ($id_parent = $this->getIdParent($id))) {\n      return $this->getCfg($id_parent);\n    }\n\n    return null;\n  }",
+            "code": "  public function getApplicableCfg(...$codes): ?array\n  {\n    \/\/ Get the ID of the option from its code.\n    $id = $this->fromCode($codes);\n\n    \/\/ Check if the ID is valid and retrieve the parent's config.\n    if ($id && ($id_parent = $this->getIdParent($id))) {\n      return $this->getCfg($id_parent);\n    }\n\n    return null;\n  }",
             "parent": false,
             "trait": "bbn\\Appui\\Option\\Cfg",
             "startLine": 157,
@@ -5735,7 +5735,7 @@
             "returnsReference": false,
             "numberOfParameters": 1,
             "numberOfRequiredParameters": 0,
-            "shortName": "getParentCfg",
+            "shortName": "getApplicableCfg",
             "returns": [
                 null,
                 "array"

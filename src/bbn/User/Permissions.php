@@ -529,7 +529,7 @@ class Permissions extends Basic
    * @param string|null $id_option The option's UID
    * @return array|null
    */
-  public function getParentCfg(string $id_option): ?array
+  public function getApplicableCfg(string $id_option): ?array
   {
     foreach ($this->opt->parents($id_option) as $i => $p) {
       $cfg = $this->opt->getCfg($p);

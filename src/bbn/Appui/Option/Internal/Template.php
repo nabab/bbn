@@ -302,6 +302,44 @@ trait Template
     return null;
   }
 
+  public function applySubTemplates($id, $target = null): int 
+  {
+    $num = 0;
+    if (!$target) {
+      $target = $id;
+    }
+
+    if (($cfg = $this->getCfg($id)) && ($id_tpl = $cfg['id_template'])) {
+      if (($id_tpl === $this->getSubpluginTemplateId()) && (count($this->parents($id)) <= 3)) {
+        $id_tpl = $this->getPluginTemplateId();
+      }
+      $items = $this->nativeOptions($target);
+      if (!empty($items)) {
+        foreach ($items as $it) {
+          $scfg = $this->getCfg($it['id']);
+          if (empty($scfg['container'])) {
+            if ($it['id_alias'] !== $id_tpl) {
+              if ($this->setAlias($it['id'], $id_tpl)) {
+                $this->deleteCache($it['id']);
+                $num++;
+              }
+              else {
+                throw new Exception(X::_("Impossible to set the alias for the option")." ".$it['id']);
+              }
+            }
+
+            $this->applyTemplate($it['id']);
+          }
+          else {
+            $this->applySubTemplates($id, $it['id']);
+          }
+        }
+      }
+    }
+
+    return $num;
+  }
+
 
   /**
    * @param string $id
@@ -316,6 +354,10 @@ trait Template
 
     if (!($idAlias = $this->alias($id))) {
       throw new Exception(X::_("Impossible to apply a template, the option must be aliased"));
+    }
+
+    if (($idAlias === $this->getSubpluginTemplateId()) && (count($this->parents($id)) === 3)) {
+      $idAlias = $this->getPluginTemplateId();
     }
 
     $tot = 0;
@@ -357,20 +399,22 @@ trait Template
       throw new Exception("The template cannot apply to itself");
     }
 
-    $opt = $this->nativeOption($idSubtemplate);
+    $subtpl = $this->rawOption($idSubtemplate);
+    $f =& $this->class_cfg['arch']['options'];
+    $cfg = $subtpl[$f['cfg']] ? json_decode($subtpl[$f['cfg']], true) : [];
     $foptions = $this->rawOptions($target);
     $update = true;
     if (!($o = X::getRow($foptions, ['id_alias' => $idSubtemplate]))) {
-      if ($o = X::getRow($foptions, ['code' => $opt['code']])) {
+      if ($o = X::getRow($foptions, ['code' => $subtpl[$f['code']]])) {
         if ($o['id'] === $idSubtemplate) {
           X::log([
             $idSubtemplate,
             $target,
             $this->option($target),
-            $opt,
+            $subtpl,
             $foptions,
             $this->items($target),
-            $this->db->rselectAll('bbn_options', [], ['id_parent' => $target])
+            $this->db->rselectAll('bbn_options', [], [$f['id_parent'] => $target])
           ], 'optionsFail');
         }
         if ($this->setAlias($o['id'], $idSubtemplate)) {
@@ -381,7 +425,7 @@ trait Template
         'id_parent' => $target,
         'id_alias' => $idSubtemplate
       ])) {
-        $o = $this->nativeOption($id);
+        $o = $this->rawOption($id);
         $tot++;
         $update = false;
       }
@@ -389,9 +433,9 @@ trait Template
         throw new Exception(X::_("Impossible to add the option"));
       }
     }
+
     if ($update && !empty($o)) {
       $upd = [];
-      $f =& $this->class_cfg['arch']['options'];
       if (!empty($o[$f['code']])) {
         $upd[$f['code']] = null;
       }
@@ -412,11 +456,18 @@ trait Template
       }
     }
 
-    foreach ($this->items($idSubtemplate) as $tid) {
-      $tot += $this->applyChildTemplate($tid, $o['id']);
+    $this->deleteCache();
+    
+    if (!empty($cfg['id_template'])) {
+      $this->applySubTemplates($o['id']);
+    }
+    else {
+      foreach ($this->items($idSubtemplate) as $tid) {
+        $tot += $this->applyChildTemplate($tid, $o['id']);
+      }
     }
 
-
+    $this->deleteCache();
     return $tot;
   }
 

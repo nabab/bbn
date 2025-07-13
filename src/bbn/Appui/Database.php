@@ -12,6 +12,8 @@ use bbn;
 use bbn\Str;
 use bbn\X;
 use bbn\Db;
+use bbn\Appui\Passwords;
+use ValueError;
 
 class Database extends bbn\Models\Cls\Cache
 {
@@ -51,8 +53,38 @@ class Database extends bbn\Models\Cls\Cache
    */
   protected $connections = [
     'mysql' => [],
-    'postgre' => [],
+    'pgsql' => [],
     'sqlite' => []
+  ];
+
+
+  public static $dbProps = [
+    'id' => null,
+    'name' => null,
+    'text' => null,
+    'engine' => null,
+    'id_engine' => null,
+    'id_host' => null,
+    'num_tables' => 0,
+    'num_connections' => 0,
+    'num_procedures' => 0,
+    'num_functions' => 0,
+    'pcolumns' => [],
+  ];
+
+
+  public static $tableProps = [
+    'id' => null,
+    'name' => null,
+    'text' => null,
+    'engine' => null,
+    'id_engine' => null,
+    'id_host' => null,
+    'database' => null,
+    'id_database' => null,
+    'num_columns' => 0,
+    'num_keys' => 0,
+    'num_constraints' => 0
   ];
 
 
@@ -108,6 +140,7 @@ class Database extends bbn\Models\Cls\Cache
       if (!isset($this->connections[$parent['code']][$cfg['code'] . $db])) {
         switch ($parent['code']) {
           case 'mysql':
+          case 'pgsql':
             if (strpos($cfg['code'], '@')) {
               $bits = bbn\X::split($cfg['code'], '@');
               if (count($bits) === 2) {
@@ -115,17 +148,19 @@ class Database extends bbn\Models\Cls\Cache
                   throw new \Exception(X::_("No password for %s", $cfg['code']));
                 }
                 $db_cfg = [
-                  'engines' => 'mysql',
-                  'user' => $bits[0],
+                  'engine' => $parent['code'],
                   'host' => $bits[1],
+                  'port' => !empty($cfg['port']) ? $cfg['port'] : null,
                   'db' => $db,
+                  'user' => $bits[0],
                   'pass' => $password
                 ];
               }
               else {
                 $db_cfg = [
-                  'engines' => 'mysql',
+                  'engine' => $parent['code'],
                   'host' => $cfg['code'],
+                  'port' => !empty($cfg['port']) ? $cfg['port'] : null,
                   'db' => $db
                 ];
               }
@@ -139,19 +174,24 @@ class Database extends bbn\Models\Cls\Cache
             }
             break;
 
-          case 'postgre':
-            if (empty($db) || empty($cfg['path'])) {
-              throw new \Exception(X::_('db or path empty'));
-            }
-            break;
-
           case 'sqlite':
+            $pbits = X::split($cfg['code'], '/');
+            foreach ($pbits as &$bit) {
+              if (str_starts_with($bit, 'BBN_') && defined($bit)) {
+                $bit = constant($bit);
+                if (str_ends_with($bit, '/')) {
+                  $bit = rtrim($bit, '/');
+                }
+              }
+            }
+
+            $cfg['path'] = X::join($pbits, '/');
             if (empty($db) || empty($cfg['path']) || !file_exists($cfg['path'].'/'.$db)) {
               throw new \Exception(X::_('db or path empty'));
             }
-            
+
             $db_cfg = [
-              'engines' => 'sqlite',
+              'engine' => 'sqlite',
               'db' => $cfg['path'].'/'.$db
             ];
             try {
@@ -177,6 +217,94 @@ class Database extends bbn\Models\Cls\Cache
   }
 
 
+  public function engineId(string $engine): ?string
+  {
+    return self::getOptionId($engine, 'engines');
+  }
+
+
+  public function engineCode(string $engineId): ?string
+  {
+    if (bbn\Str::isUid($engineId)) {
+      return $this->o->code($engineId) ?: null;
+    }
+
+    return null;
+  }
+
+
+  public function engineIdFromHost(string $hostId): ?string
+  {
+    if (($idEngineTemplate = $this->o->getTemplateId('engine'))
+      && bbn\Str::isUid($hostId)
+      && ($idParent = $this->o->getIdParent($hostId))
+      && ($idEngines = self::getOptionId('engines'))
+    ) {
+      while (!empty($idParent) && ($idParent !== $idEngines)) {
+        $idParent = $this->o->getIdParent($idParent);
+        if (!($o = $this->o->option($idParent))) {
+          return null;
+        }
+
+        if ($o['id_alias'] === $idEngineTemplate) {
+          return $o['id'];
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  public function enginePcolumns(string $engineId): array
+  {
+    if (!Str::isUid($engineId)) {
+      $engineId = $this->engineId($engineId);
+    }
+
+    if (!empty($engineId)
+      && ($idPcolumns = $this->o->fromCode('pcolumns', $engineId))
+    ) {
+      return array_map(function($item) {
+        unset($item['id_parent'], $item['id_alias'], $item['num'], $item['num_children']);
+        return $item;
+      }, $this->o->fullOptions($idPcolumns));
+    }
+
+    return [];
+  }
+
+
+  public function engineDataTypes(string $engineCode): array
+  {
+    return bbn\Db\Languages\Sql::$types;
+    /* if (Str::isUid($engineCode)) {
+      $engineCode = $this->engineCode($engineCode);
+    }
+
+    if (!empty($engineCode)) {
+      $c = "bbn\\Db\\Languages\\". ucfirst($engineCode);
+      if (class_exists($c)) {
+        return $c::$types;
+      }
+    }
+
+    return []; */
+  }
+
+
+  public function engines(): array
+  {
+    if (($engines = self::getOptionId('engines'))
+      && ($codes = $this->o->getCodes($engines))
+    ) {
+      return array_values($codes);
+    }
+
+    return [];
+  }
+
+
   /**
    * Returns the ID of a connection.
    *
@@ -185,12 +313,28 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function hostId(string|null $host, string $engine = 'mysql'): ?string
   {
+    if (bbn\Str::isUid($host)) {
+      return $host;
+    }
+
     if (empty($host)) {
       $host = $this->db->getConnectionCode();
     }
 
-    $r = self::getOptionId($host, $engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines');
+    $r = self::getOptionId($host, 'connections', $engine, 'engines');
     return $r ?: null;
+  }
+
+
+  /**
+   * Returns the code of a connection.
+   *
+   * @param string $hostId The connection ID
+   * @return null|string
+   */
+  public function hostCode(string $hostId): ?string
+  {
+    return $this->o->code($hostId) ?: null;
   }
 
 
@@ -201,7 +345,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function countHosts(string $engine = 'mysql'): ?int
   {
-    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines'))
+    if (($id_parent = self::getOptionId('connections', $engine, 'engines'))
         && ($num = $this->o->count($id_parent))
     ) {
       return $num;
@@ -218,7 +362,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function hosts(string $engine = 'mysql'): array
   {
-    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines'))
+    if (($id_parent = self::getOptionId('connections', $engine, 'engines'))
         && ($co = array_values($this->o->codeOptions($id_parent)))
     ) {
       return $co;
@@ -235,7 +379,7 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function fullHosts(string $engine = 'mysql'): ?array
   {
-    if (($id_parent = self::getOptionId($engine === 'sqlite' ? 'paths' : 'connections', $engine, 'engines'))
+    if (($id_parent = self::getOptionId('connections', $engine, 'engines'))
         && ($opt = $this->o->fullOptions($id_parent))
     ) {
       return $opt;
@@ -305,27 +449,20 @@ class Database extends bbn\Models\Cls\Cache
     }
 
     if ($host) {
-      $o   = &$this->o;
       $arr = array_map(
-        function ($a) use ($o) {
-          return $o->parent($a['id_parent']);
-        },
+        fn($a) => $this->o->parent($a['id_parent']),
         $this->o->getAliases($host)
       );
     }
-
     if (!empty($arr)) {
-      $res = array_map(
-        function ($a) {
-          return [
-            'id' => $a['id'],
-            'text' => $a['text'],
-            'name' => $a['code']
-          ];
-        },
+      return array_map(
+        fn($a) => [
+          'id' => $a['id'],
+          'text' => $a['text'],
+          'name' => $a['code']
+        ],
         $arr
       );
-      return $res;
     }
 
     return [];
@@ -340,44 +477,91 @@ class Database extends bbn\Models\Cls\Cache
    */
   public function fullDbs(string $host = '', string $engine = 'mysql'): array
   {
-    $o =& $this->o;
+    if (!bbn\Str::isUid($engine)) {
+      $engineId = $this->engineId($engine);
+    }
+    else {
+      $engineId = $engine;
+      $engine = $this->engineCode($engineId);
+    }
+
     if ($dbs = $this->dbs($host, $engine)) {
-      $res = array_map(
-        function ($a) use ($o, $engine) {
-          $r = [
-            'id' => $a['id'],
-            'text' => $a['text'],
-            'name' => $a['name'],
-            'num_tables' => 0,
-            'num_connections' => 0,
-            'num_procedures' => 0,
-            'num_functions' => 0
-          ];
-          //die(var_dump( $o->fromCode('tables', $a['id'])));
-          if ($id_tables = $o->fromCode('tables', $a['id'])) {
-            $r['num_tables'] = $o->count($id_tables);
-          }
+      $hostId = $this->hostId($host, $engine);
+      foreach ($dbs as &$db) {
+        $db = $this->fullDb($db, $hostId, $engineId);
+      }
 
-          if ($id_connections = $o->fromCode($engine === 'sqlite' ? 'paths' : 'connections', $a['id'])) {
-            $r['num_connection'] = $o->count($id_connections);
-          }
-
-          if ($id_procedures = $o->fromCode('procedures', $a['id'])) {
-            $r['num_procedures'] = $o->count($id_procedures);
-          }
-
-          if ($id_functions = $o->fromCode('functions', $a['id'])) {
-            $r['num_functions'] = $o->count($id_functions);
-          }
-
-          return $r;
-        },
-        $dbs
-      );
-      return $res ?: [];
+      return $dbs;
     }
 
     return [];
+  }
+
+
+  public function fullDb(string|array $db, ?string $host = null, ?string $engine = null): ?array
+  {
+
+    if (empty($engine)) {
+      $engine = $this->db->getEngine();
+    }
+
+    if (bbn\Str::isUid($engine)) {
+      $engineId = $engine;
+      $engine = $this->engineCode($engineId);
+    }
+    else {
+      $engineId = $this->engineId($engine);
+    }
+
+    if (empty($host)) {
+      $host = $this->db->getConnectionCode();
+    }
+
+    $hostId = $this->hostId($host, $engine);
+    if (is_array($db)) {
+      $dbData = $db;
+    }
+    else {
+      if (!Str::isUid($db)) {
+        $db = $this->dbId($db, $hostId, $engine);
+      }
+
+      $dbData = $this->o->option($db);
+    }
+
+    if (empty($dbData)) {
+      $dbData = static::$dbProps;
+    }
+
+    if (!empty($dbData)) {
+      $r =  X::mergeArrays(static::$dbProps, [
+        'id' => $dbData['id'],
+        'text' => $dbData['text'],
+        'name' => $dbData['code'] ?? $dbData['name'],
+        'engine' => $engine,
+        'id_engine' => $engineId,
+        'id_host' => $hostId
+      ]);
+      if ($idTables = $this->o->fromCode('tables', $r['id'])) {
+        $r['num_tables'] = $this->o->count($idTables);
+      }
+
+      if ($idConnections = $this->o->fromCode('connections', $r['id'])) {
+        $r['num_connections'] = $this->o->count($idConnections);
+      }
+
+      if ($idProcedures = $this->o->fromCode('procedures', $r['id'])) {
+        $r['num_procedures'] = $this->o->count($idProcedures);
+      }
+
+      if ($idFunctions = $this->o->fromCode('functions', $r['id'])) {
+        $r['num_functions'] = $this->o->count($idFunctions);
+      }
+
+      return $r;
+    }
+
+    return null;
   }
 
 
@@ -489,46 +673,90 @@ class Database extends bbn\Models\Cls\Cache
    * @param string $host The connection's code
    * @return array|null
    */
-  public function fullTables(string $db = '', string $host = '', string $engine = 'mysql'): ?array
+  public function fullTables(string $db = '', string $host = '', string $engine = 'mysql'): array
   {
-    if (!bbn\Str::isUid($db)) {
-      if (Str::isUid($host)) {
-        $db = $this->dbId($db, $host);
-      }
-      else {
-        $db = $this->dbId($db, $host, $engine);
-      }
+    if (!bbn\Str::isUid($engine)) {
+      $engineId = $this->engineId($engine);
+    }
+    else {
+      $engineId = $engine;
+      $engine = $this->engineCode($engineId);
     }
 
-    if (bbn\Str::isUid($db) && ($id_parent = $this->o->fromCode('tables', $db))) {
-      $o =& $this->o;
-      if ($fo = $this->o->fullOptions($id_parent)) {
-        $res = array_map(
-          function ($a) use ($o) {
-            $r = array_merge(
-              $a,
-              [
-                'name' => $a['code'],
-                'num_columns' => 0,
-                'num_keys' => 0
-              ]
-            );
-            if ($id_columns = $o->fromCode('columns', $a['id'])) {
-              $r['num_columns'] = $o->count($id_columns);
-            }
-
-            if ($id_keys = $o->fromCode('keys', $a['id'])) {
-              $r['num_keys'] = $o->count($id_keys);
-            }
-
-            return $r;
-          },
-          $fo
-        );
-        return $res ?: [];
+    $hostId = $this->hostId($host, $engine);
+    if ($tables = $this->tables($db, $host, $engine)) {
+      foreach ($tables as &$table) {
+        $table = $this->fullTable($table, $db, $hostId, $engineId);
       }
+
+      return $tables;
     }
 
+    return [];
+  }
+
+
+  public function fullTable(
+    string|array $table,
+    ?string $db = null,
+    ?string $host = null,
+    ?string $engine = null
+  ): ?array
+  {
+    if (empty($engine)) {
+      $engine = $this->db->getEngine();
+    }
+
+    if (bbn\Str::isUid($engine)) {
+      $engineId = $engine;
+      $engine = $this->engineCode($engineId);
+    }
+    else {
+      $engineId = $this->engineId($engine);
+    }
+
+    if (empty($host)) {
+      $host = $this->db->getConnectionCode();
+    }
+
+    $hostId = $this->hostId($host, $engine);
+    if (empty($db)) {
+      $db = $this->db->getCurrent();
+    }
+
+    $dbId = $this->dbId($db, $hostId, $engine);
+    if (is_array($table)) {
+      $tableData = $table;
+    }
+    else if ($tableId = Str::isUid($table) ? $table : $this->tableId($table, $dbId, $hostId, $engine)) {
+      $tableData = $this->o->option($tableId);
+    }
+
+    if (empty($tableData)) {
+      $tableData = static::$tableProps;
+    }
+
+    if (!empty($tableData)) {
+      $r =  X::mergeArrays(static::$tableProps, [
+        'id' => $tableData['id'],
+        'text' => $tableData['text'] ?? (!Str::isUid($table) ? $table : null),
+        'name' => $tableData['code'] ?? $tableData['name'] ?? (!Str::isUid($table) ? $table : null),
+        'engine' => $engine,
+        'id_engine' => $engineId,
+        'id_host' => $hostId,
+        'database' => $db,
+        'id_database' => $dbId
+      ]);
+      if ($idColumns = $this->o->fromCode('columns', $r['id'])) {
+        $r['num_columns'] = $this->o->count($idColumns);
+      }
+
+      if ($idKeys = $this->o->fromCode('keys', $r['id'])) {
+        $r['num_keys'] = $this->o->count($idKeys);
+      }
+
+      return $r;
+    }
     return null;
   }
 
@@ -1054,117 +1282,58 @@ class Database extends bbn\Models\Cls\Cache
   public function importDb(string $db, string $host = '', $full = false): ?string
   {
     $id_db = null;
+    if (!bbn\Str::isUid($host)) {
+      throw new \Exception(_("Invalid host ID"));
+    }
+    else if (!$this->o->exists($host)) {
+      throw new \Exception(X::_("Impossible to find the host with ID \"%s\"", $host));
+    }
+
+    if (!($engineId = $this->engineIdFromHost($host))) {
+      throw new \Exception(X::_("Impossible to find the engine ID for the host \"%s\"", $host));
+    }
+
+    if (!($engine = $this->engineCode($engineId))) {
+      throw new \Exception(X::_("Impossible to find the engine code for the host \"%s\"", $host));
+    }
+
+    if (!($idTemplate = $this->o->getTemplateId('database'))) {
+      throw new \Exception(X::_("Impossible to find the template \"%s\"", 'database'));
+    }
+
     if (Str::isUid($host)
-        && ($engine = $this->o->parent($this->o->getIdParent($host)))
-        && ($id_dbs = $this->o->fromCode('dbs', $engine['id']))
+      && ($id_dbs = $this->o->fromCode('dbs', $engineId))
     ) {
       if (!($id_db = $this->o->fromCode($db, $id_dbs))) {
-        if ($id_db = $this->o->add(
-          [
-            'id_parent' => $id_dbs,
-            'text' => $db,
-            'code' => $db,
-          ]
-        )
-        ) {
-          $this->o->setCfg($id_db, ['allow_children' => 1, 'show_code' => 1]);
-        }
+        $id_db = $this->addDatabase($db, $host);
+      }
+      else if (($this->o->getIdAlias($id_db) !== $idTemplate)
+        && $this->o->setAlias($id_db, $idTemplate)
+      ) {
+        $this->o->applyTemplate($id_db);
       }
 
       if ($id_db) {
-        if (!($id_procedures = $this->o->fromCode('procedures', $id_db))
-            && ($id_procedures = $this->o->add(
-              [
-                'id_parent' => $id_db,
-                'text' => X::_('Procedures'),
-                'code' => 'procedures',
-              ]
-            ))
+        if (($id_connections = $this->o->fromCode('connections', $id_db))
+          && $this->o->fromCode('procedures', $id_db)
+          && $this->o->fromCode('functions', $id_db)
+          && $this->o->fromCode('tables', $id_db)
         ) {
-          $this->o->setCfg(
-            $id_procedures,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'allow_children' => 1
-            ]
-          );
-        }
-
-        if (!($id_connections = $this->o->fromCode('connections', $id_db))
-            && ($id_connections = $this->o->add(
-              [
-                'id_parent' => $id_db,
-                'text' => X::_('Connections'),
-                'code' => 'connections',
-              ]
-            ))
-        ) {
-          $this->o->setCfg(
-            $id_connections,
-            [
-              'relations' => 'alias',
-              'notext' => 1,
-              'id_root_alias' => self::getOptionId('connections', $id_db),
-              'root_alias' => 'Connections'
-            ]
-          );
-        }
-
-        if (!($id_functions = $this->o->fromCode('functions', $id_db))
-            && ($id_functions = $this->o->add(
-              [
-                'id_parent' => $id_db,
-                'text' => X::_('Function'),
-                'code' => 'functions',
-              ]
-            ))
-        ) {
-          $this->o->setCfg(
-            $id_functions,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'allow_children' => 1
-            ]
-          );
-        }
-
-        if (!($id_tables = $this->o->fromCode('tables', $id_db))
-            && ($id_tables = $this->o->add(
-              [
-                'id_parent' => $id_db,
-                'text' => X::_('Tables'),
-                'code' => 'tables',
-              ]
-            ))
-        ) {
-          $this->o->setCfg(
-            $id_tables,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'allow_children' => 1
-            ]
-          );
-        }
-
-        if ($id_connections && $id_functions && $id_procedures && $id_tables) {
-          if (!$this->db->count(
-            'bbn_options', [
-              'id_parent' => $id_connections,
-              'id_alias' => $host
-            ]
-          )) {
+          $optCfg = $this->o->getClassCfg();
+          $optFields = $optCfg['arch']['options'];
+          if (!$this->db->count($optCfg['table'], [
+            $optFields['id_parent'] => $id_connections,
+            $optFields['id_alias'] => $host
+          ])) {
             $this->o->add([
-              'id_parent' => $id_connections,
-              'id_alias' => $host
+              $optFields['id_parent'] => $id_connections,
+              $optFields['id_alias'] => $host
             ]);
           }
           if ($full) {
             if (!empty($host)) {
               try {
-                $conn = $this->connection($host, $engine['code'], $db);
+                $conn = $this->connection($host, $engine, $db);
               }
               catch (\Exception $e) {
                 throw new \Exception(X::_("Impossible to connect"));
@@ -1229,68 +1398,46 @@ class Database extends bbn\Models\Cls\Cache
       $host_id = bbn\Str::isUid($host) ? $host : $this->hostId($host);
     }
 
-    if ($host_id && ($id_tables = $this->o->fromCode('tables', $id_db))) {
-      $engine = $this->o->parent($this->o->getIdParent($host_id));
-      if (!($id_table = $this->o->fromCode($table, $id_tables))
-          && ($id_table = $this->o->add(
-            [
-              'id_parent' => $id_tables,
-              'text' => $table,
-              'code' => $table,
-            ]
-          ))
-      ) {
-        $this->o->setCfg($id_table, ['allow_children' => 1]);
-        if ($id_columns = $this->o->add(
-          [
-            'id_parent' => $id_table,
-            'text' => X::_("Columns"),
-            'code' => 'columns'
-          ]
-        )
-        ) {
-          $this->o->setCfg(
-            $id_columns,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'sortable' => 1
-            ]
-          );
-        }
+    if (!bbn\Str::isUid($host_id)) {
+      throw new \Exception(_("Invalid host ID"));
+    }
+    else if (!$this->o->exists($host_id)) {
+      throw new \Exception(X::_("Impossible to find the host with ID \"%s\"", $host_id));
+    }
 
-        if ($id_keys = $this->o->add(
-          [
-            'id_parent' => $id_table,
-            'text' => X::_("Keys"),
-            'code' => 'keys',
-          ]
-        )
+    if (!($engineId = $this->engineIdFromHost($host_id))) {
+      throw new \Exception(X::_("Impossible to find the engine ID for the host \"%s\"", $host_id));
+    }
+
+    if (!($engine = $this->engineCode($engineId))) {
+      throw new \Exception(X::_("Impossible to find the engine code for the host \"%s\"", $host_id));
+    }
+
+    if (!($idTemplate = $this->o->getTemplateId('table'))) {
+      throw new \Exception(X::_("Impossible to find the template \"%s\"", 'table'));
+    }
+
+    if (!empty($host_id)
+      && ($id_tables = $this->o->fromCode('tables', $id_db))
+    ) {
+      if (!($id_table = $this->o->fromCode($table, $id_tables))) {
+        $id_table = $this->addTable($table, $id_db, $host_id);
+      }
+      else {
+        if (($this->o->getIdAlias($id_table) !== $idTemplate)
+          && $this->o->setAlias($id_table, $idTemplate)
         ) {
-          $this->o->setCfg(
-            $id_keys,
-            [
-              'show_code' => 1,
-              'show_value' => 1,
-              'relations' => 'alias',
-              'allow_children' => 1
-            ]
-          );
+          $this->o->applyTemplate($id_table);
         }
       }
-      else{
-        $id_columns = $this->o->fromCode('columns', $id_table);
-        $id_keys    = $this->o->fromCode('keys', $id_table);
-      }
 
-      $db = $this->o->code($id_db);
       if ($id_table
-          && $id_columns
-          && $id_keys
-          && $db
-          && ($conn = $this->connection($host_id, $engine['code'], $db))
-          && ($m = $conn->modelize($db.'.'.$table))
-          && !empty($m['fields'])
+        && ($id_columns = $this->o->fromCode('columns', $id_table))
+        && ($id_keys = $this->o->fromCode('keys', $id_table))
+        && ($db = $this->o->code($id_db))
+        && ($conn = $this->connection($host_id, $engine, $db))
+        && ($m = $conn->modelize($db.'.'.$table))
+        && !empty($m['fields'])
       ) {
         $num_cols     = 0;
         $num_cols_rem = 0;
@@ -1614,6 +1761,243 @@ class Database extends bbn\Models\Cls\Cache
       }
 
       return $res;
+    }
+
+    return null;
+  }
+
+
+  public function addDatabase(string $name, string $hostId): ?string
+  {
+    if (!bbn\Str::isUid($hostId)) {
+      throw new \Exception(_("Invalid host ID"));
+    }
+    else if (!$this->o->exists($hostId)) {
+      throw new \Exception(X::_("Impossible to find the host with ID \"%s\"", $hostId));
+    }
+
+    if (!($idTemplate = $this->o->getTemplateId('database'))) {
+      throw new \Exception(X::_("Impossible to find the template \"%s\"", 'database'));
+    }
+
+    if (!($engineId = $this->engineIdFromHost($hostId))) {
+      throw new \Exception(X::_("Impossible to find the engine ID for the host \"%s\"", $hostId));
+    }
+
+    if ($idDbs = $this->o->fromCode('dbs', $engineId)) {
+      if ($this->o->fromCode($name, $idDbs)) {
+        throw new \Exception(X::_("The database \"%s\" already exists in the options", $name));
+      }
+
+      $optCfg = $this->o->getClassCfg();
+      $optFields = $optCfg['arch']['options'];
+      if ($idDb = $this->o->add([
+        $optFields['id_parent'] => $idDbs,
+        $optFields['id_alias'] => $idTemplate,
+        $optFields['text'] => $name,
+        $optFields['code'] => $name
+      ])) {
+        $this->o->applyTemplate($idDb);
+        if ($idConnections = $this->o->fromCode('connections', $idDb)) {
+          if (!$this->db->count($optCfg['table'], [
+              $optFields['id_parent'] => $idConnections,
+              $optFields['id_alias'] => $hostId
+            ])
+            && ($idConn = $this->o->add([
+              $optFields['id_parent'] => $idConnections,
+              $optFields['id_alias'] => $hostId,
+            ]))
+            && ($pass = new Passwords($this->db))
+            && ($p = $pass->get($hostId))
+          ) {
+            $pass->store($p, $idConn);
+          }
+
+          return $idDb;
+        }
+      }
+    }
+
+    return null;
+  }
+
+
+  public function removeDatabase(string $id): int
+  {
+    if (!bbn\Str::isUid($id)) {
+      throw new \Exception(_("Invalid database ID"));
+    }
+    else if (!$this->o->exists($id)) {
+      throw new \Exception(X::_("Impossible to find the database with ID \"%s\"", $id));
+    }
+
+    return $this->o->removeFull($id);
+  }
+
+
+  public function renameDatabase(string $id, string $name): bool
+  {
+    if (!bbn\Str::isUid($id)) {
+      throw new \Exception(_("Invalid database ID"));
+    }
+    else if (!$this->o->exists($id)) {
+      throw new \Exception(X::_("Impossible to find the database with ID \"%s\"", $id));
+    }
+
+    if (empty($name)) {
+      throw new \Exception(_("The database name cannot be empty"));
+    }
+
+    return $this->o->setText($id, $name) && $this->o->setCode($id, $name);
+  }
+
+
+  public function duplicateDatabase(string $id, string $name): bool
+  {
+    if (!bbn\Str::isUid($id)) {
+      throw new \Exception(_("Invalid database ID"));
+    }
+    else if (!$this->o->exists($id)) {
+      throw new \Exception(X::_("Impossible to find the database with ID \"%s\"", $id));
+    }
+
+    if (empty($name)) {
+      throw new \Exception(_("The database name cannot be empty"));
+    }
+
+    if (($idParent = $this->o->getIdParent($id))
+      && ($idNew = $this->o->duplicate($id, $idParent, true, false, true))
+    ) {
+      return $this->o->setText($idNew, $name) && $this->o->setCode($idNew, $name);
+    }
+
+    return false;
+  }
+
+
+  public function addTable(string $name, string $dbId, string $hostId): ?string
+  {
+    if (!bbn\Str::isUid($hostId)) {
+      throw new \Exception(_("Invalid host ID"));
+    }
+    else if (!$this->o->exists($hostId)) {
+      throw new \Exception(X::_("Impossible to find the host with ID \"%s\"", $hostId));
+    }
+
+    if (!($idTemplate = $this->o->getTemplateId('table'))) {
+      throw new \Exception(X::_("Impossible to find the template \"%s\"", 'table'));
+    }
+
+    if ($idTables = $this->o->fromCode('tables', $dbId)) {
+      if ($this->o->fromCode($name, $idTables)) {
+        throw new \Exception(X::_("The table \"%s\" already exists in the options", $name));
+      }
+
+      $optCfg = $this->o->getClassCfg();
+      $optFields = $optCfg['arch']['options'];
+      if ($idTable = $this->o->add([
+        $optFields['id_parent'] => $idTables,
+        $optFields['id_alias'] => $idTemplate,
+        $optFields['text'] => $name,
+        $optFields['code'] => $name
+      ])) {
+        $this->o->applyTemplate($idTable);
+        return $idTable;
+      }
+    }
+
+    return null;
+  }
+
+
+  public function infoDb(string $dbName, string $hostId, string $engine): ?array
+  {
+    if (!Str::isUid($hostId)) {
+      $hostId = $this->hostId($hostId, $engine);
+    }
+
+    if (!empty($hostId)
+      && ($engine = Str::isUid($engine) ? $this->engineCode($engine) : $engine)
+      && ($engineId = $this->engineId($engine))
+    ) {
+      $dbId = $this->dbId($dbName, $hostId, $engine);
+      try {
+        $conn = $this->connection($hostId, $engine, $dbName);
+      }
+      catch (\Exception $e) {}
+
+      $r = X::mergeArrays(
+        !empty($dbId) ? ($this->fullDb($dbId, $hostId, $engineId) ?: []) : static::$dbProps,
+        [
+          'id' => $dbId,
+          'name' => $dbName,
+          'text' => $dbName,
+          'engine' => $engine,
+          'id_engine' => $engineId,
+          'host' => $this->hostCode($hostId),
+          'id_host' => $hostId,
+          'is_real' => !empty($conn),
+          'is_virtual' => !empty($dbId),
+          'num_real_tables' => $conn ? count($conn->getTables($dbName)) : 0,
+          'num_real_procedures' => 0,
+          'num_real_functions' => 0,
+          'size' => $conn ? $conn->dbSize($dbName) : 0,
+          'charset' => $conn ? $conn->getDatabaseCharset($dbName) : '',
+          'collation' => $conn ? $conn->getDatabaseCollation($dbName) : '',
+          'last_check' => date('Y-m-d H:i:s')
+        ]
+      );
+
+      return $r;
+    }
+
+    return null;
+  }
+
+
+  public function infoTable(string $tableName, string $dbName, string $hostId, string $engine): ?array
+  {
+    if (!Str::isUid($hostId)) {
+      $hostId = $this->hostId($hostId, $engine);
+    }
+
+    if (!empty($hostId)
+      && ($engine = Str::isUid($engine) ? $this->engineCode($engine) : $engine)
+      && ($engineId = $this->engineId($engine))
+    ) {
+      $dbId = $this->dbId($dbName, $hostId, $engine);
+      $tableId = $this->tableId($tableName, $dbId ?: $dbName, $hostId, $engine);
+      $isReal = false;
+      try {
+        if ($conn = $this->connection($hostId, $engine, $dbName)) {
+          $isReal = $conn->tableExists($tableName);
+        }
+      }
+      catch (\Exception $e) {}
+
+      $r = X::mergeArrays(
+        !empty($tableId) ? ($this->fullTable($tableId, $dbId ?: $dbName, $hostId, $engineId) ?: []) : static::$tableProps,
+        [
+          'id' => $tableId,
+          'name' => $tableName,
+          'text' => $tableName,
+          'engine' => $engine,
+          'id_engine' => $engineId,
+          'host' => $this->hostCode($hostId),
+          'id_host' => $hostId,
+          'database' => $dbName,
+          'id_database' => $dbId,
+          'is_real' => $isReal,
+          'is_virtual' => !empty($tableId),
+          'num_real_columns' => $isReal ? count($conn->getColumns($tableName)) : 0,
+          'num_real_keys' => $isReal ? count($conn->getKeys($tableName)) : 0,
+          'size' => $isReal ? $conn->tableSize($tableName) : 0,
+          'charset' => $isReal ? $conn->getTableCharset($tableName) : '',
+          'collation' => $isReal ? $conn->getTableCollation($tableName) : '',
+          'last_check' => date('Y-m-d H:i:s')
+        ]
+      );
+      return $r;
     }
 
     return null;

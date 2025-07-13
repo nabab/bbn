@@ -27,14 +27,19 @@ trait Code
 
       // If the first argument is a valid UID, check if it's an existing option ID or proceed with further checks.
       if (Str::isUid($codes[0])) {
-        if ($num === 1) {
-          return $codes[0];
+        if ($num > 1) {
+          // Perform an extra check to ensure the provided ID corresponds to its parent.
+          $parentFromCodes = $this->_fromCode(\array_slice($codes, 1), $real, $depth + 1);
+          $parentId = $this->getIdParent($codes[0]);
+          if ($parentId !== $parentFromCodes) {
+            $parentId = $this->getIdParent($parentId);
+            if ($parentId !== $parentFromCodes) {
+              return null;
+            }
+          }
         }
 
-        // Perform an extra check to ensure the provided ID corresponds to its parent.
-        if ($this->getIdParent($codes[0]) === $this->_fromCode(\array_slice($codes, 1), $real, $depth + 1)) {
-          //return $codes[0];
-        }
+        return $codes[0];
       }
 
       // Check if the first argument is a valid alphanumeric code.

@@ -16,19 +16,18 @@ use bbn\Db\Query;
 use bbn\Db\SqlEngines;
 use bbn\Db\SqlFormatters;
 use PHPSQLParser\PHPSQLParser;
+use bbn\Db\Languages\Models\Sql\Commands;
+use bbn\Db\Languages\Models\Sql\Formatters;
 
 abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 {
   use HasError;
   use Cache;
+  use Commands;
+  use Formatters;
 
   /** @var string The quote character */
   public $qte = '`';
-
-  /**
-   * @var mixed $cache
-   */
-  protected $cache = [];
 
   /** @var array Allowed operators */
   public static $operators = ['!=', '=', '<>', '<', '<=', '>', '>=', 'like', 'clike', 'slike', 'not', 'is', 'is not', 'in', 'between', 'not like'];
@@ -103,6 +102,46 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     'VAR_SAMP',
     'VARIANCE',
   ];
+
+  /**
+   * @var array
+   */
+  protected array $cfg;
+
+  /** @var string The connection code as it would be stored in option */
+  protected $connection_code;
+
+  /**
+   * The host of this connection
+   * @var string $host
+   */
+  protected $host;
+
+  /**
+   * The username of this connection
+   * @var string|null $username
+   */
+  protected $username;
+
+  protected static $defaultCharset;
+
+  protected static $defaultCollation;
+
+  protected static $defaultEngine;
+
+  /** @var array The 'kinds' of writing statement */
+  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'RENAME'];
+
+  /** @var array The 'kinds' of reading statement */
+  protected static $read_kinds = ['SELECT', 'SHOW'];
+
+  /** @var array The 'kinds' of structure alteration statement */
+  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE', 'RENAME'];
+
+  /**
+   * @var mixed $cache
+   */
+  protected $cache = [];
 
   /**
    * @var integer $cache_renewal
@@ -215,15 +254,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     ]
   ];
 
-  /** @var array The 'kinds' of writing statement */
-  protected static $write_kinds = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE', 'RENAME'];
-
-  /** @var array The 'kinds' of reading statement */
-  protected static $read_kinds = ['SELECT', 'SHOW'];
-
-  /** @var array The 'kinds' of structure alteration statement */
-  protected static $structure_kinds = ['DROP', 'ALTER', 'CREATE', 'RENAME'];
-
   /**
    * @var array $last_cfg
    */
@@ -264,6 +294,54 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     }
 
     return false;
+  }
+
+
+  /**
+   * Constructor
+   *
+   * @param array $cfg
+   * @throws Exception
+   */
+  public function __construct(array $cfg)
+  {
+    if (!\extension_loaded('pdo_mysql')) {
+      throw new Exception(X::_("The MySQL driver for PDO is not installed..."));
+    }
+
+    $cfg = $this->getConnection($cfg);
+
+    try {
+      $this->cacheInit();
+      $this->current = $cfg['db'] ?? null;
+      $this->host = $cfg['host'] ?? null;
+      $this->username = $cfg['user'] ?? null;
+      $this->connection_code = $cfg['code_host'];
+
+      $this->pdo = new PDO(...$cfg['args']);
+      $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+      $this->pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+      $this->pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
+      $this->cfg = $cfg;
+      $this->setHash($cfg['args']);
+
+      if (!empty($cfg['cache_length'])) {
+        $this->cache_renewal = (int)$cfg['cache_length'];
+      }
+
+      if (isset($cfg['on_error'])) {
+        $this->on_error = $cfg['on_error'];
+      }
+
+      unset($cfg['pass']);
+    }
+    catch (PDOException $e) {
+      $err = X::_("Impossible to create the connection") .
+        " $cfg[engine] ".X::_("to")." {$this->host} "
+        . X::_("with the following error") . " " . $e->getMessage();
+        X::log($cfg);
+      throw new Exception($err);
+    }
   }
 
 
@@ -587,6 +665,12 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
     if ($done) {
       if (!$r || !count($r)) {
+        if (($this->getEngine() === 'sqlite')
+          && str_starts_with($statement, 'PRAGMA')
+        ) {
+          return null;
+        }
+
         $this->log('Impossible to parse the query '.$statement);
         return null;
       }
@@ -1652,101 +1736,6 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
     return ($this->getEngine() === 'sqlite' ? 'OR ' : '') . 'IGNORE ';
   }
 
-  /**
-   * @param string $table
-   * @param array|null $model
-   * @return string
-   * @throws Exception
-   */
-  public function getCreateConstraints(string $table, array|null $model = null): string
-  {
-    $st = '';
-    if (!$model) {
-      $model = $this->modelize($table);
-    }
-
-    if ($model && !empty($model['keys'])) {
-      $constraints = array_filter(
-        $model['keys'], function ($a) {
-        return !empty($a['ref_table']) && isset($a['columns']) && (count($a['columns']) === 1)
-          && !empty($a['constraint']) && !empty($a['ref_column']);
-      }
-      );
-      if ($last = count($constraints)) {
-        $st .= 'ALTER TABLE ' . $this->escape($table) . PHP_EOL;
-        $i   = 0;
-        foreach ($constraints as $name => $key) {
-          $i++;
-          $st .= '  ADD ' .
-            'CONSTRAINT ' . $this->escape($key['constraint']) . ' FOREIGN KEY (' . $this->escape($key['columns'][0]) . ') ' .
-            'REFERENCES ' . $this->escape($key['ref_table']) . ' (' . $this->escape($key['ref_column']) . ')' .
-            (!empty($key['delete']) ? ' ON DELETE ' . $key['delete'] : '') .
-            (!empty($key['update']) ? ' ON UPDATE ' . $key['update'] : '') .
-            ($i === $last ? ';' : ',' . PHP_EOL);
-        }
-      }
-    }
-
-    return $st;
-  }
-
-
-  /**
-   * Returns true if the given table exists
-   *
-   * @param string $table
-   * @param string $database. or currently selected if none
-   * @return boolean
-   */
-  public function tableExists(string $table, string $database = ''): bool
-  {
-    $q = "SHOW tables ";
-    if ($database) {
-      $q .= "FROM " . $this->escape($database) . " ";
-    }
-
-    return (bool)$this->getOne($q . "LIKE ?", $table);
-  }
-
-
-  /**
-   * Drops a table
-   *
-   * @param string $table
-   * @param string $database. or currently selected if none
-   * @return boolean
-   */
-  public function dropTable(string $table, string $database = ''): bool
-  {
-    $tfn = $this->tableFullName(($database ? $database . '.' : '') . $table, true);
-    if (!$tfn) {
-      throw new Exception(X::_("Invalid table name to drop"));
-    }
-
-    if (!$this->tableExists($table, $database)) {
-      throw new Exception(X::_("The table %s does not exist", $table));
-    }
-
-    $this->query("DROP table $tfn");
-    return !$this->tableExists($table, $database);
-
-  }
-
-
-
-  /**
-   * @param string $table
-   * @param string $column
-   * @return bool
-   */
-  public function dropColumn(string $table, string $column): bool
-  {
-    if (($table = $this->tableFullName($table, true)) && Str::checkName($column)) {
-      return (bool)$this->rawQuery("ALTER TABLE $table DROP COLUMN $column");
-    }
-
-    return false;
-  }
 
   /**
    * @param array $where
@@ -2029,6 +2018,8 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
 
       return $refs;
     }
+
+    return null;
   }
 
   /**
@@ -2120,7 +2111,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
           $params['write']     = !\in_array($params['kind'], self::$read_kinds, true);
           $params['structure'] = \in_array($params['kind'], self::$structure_kinds, true);
         }
-        elseif (($this->getEngine() === 'sqlite') && (strpos($statement, 'PRAGMA') === 0)) {
+        elseif (($this->getEngine() === 'sqlite') && str_starts_with($statement, 'PRAGMA')) {
           $params['kind'] = 'PRAGMA';
         }
         else {
@@ -3756,6 +3747,7 @@ abstract class Sql implements SqlEngines, Engines, EnginesApi, SqlFormatters
       $args = $args[0];
     }
 
+    array_unshift($args, $this->getCurrent());
     $st = '';
     foreach ($args as $a){
       $st .= is_array($a) ? serialize($a) : '--'.$a.'--';
