@@ -50,7 +50,7 @@ trait Optional
       if (!$path) {
         $tmp = explode('\\', __CLASS__);
         $cls = strtolower(end($tmp));
-        $path = ['options', $cls, 'appui'];
+        $path = [$cls, 'appui', 'plugins'];
       }
 
       self::$option_root_id = $opt->fromCode(...$path);

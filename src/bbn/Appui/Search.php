@@ -128,13 +128,15 @@ class Search extends Basic
     $this->cacheInit();
     self::optionalInit();
     $this->timer      = new Timer();
+
     if (empty($models)
       && ($def = $this->getOption('default'))
       && !empty($def['id_alias'])
     ) {
       $models = \array_map(fn($m) => $m['alias'] ?? [], $this->getOptions($def['id_alias']) ?: []);
     }
-    else if (empty($models)) {
+
+    if (empty($models)) {
       try {
         $ctrl->getCustomModelGroup('', 'appui-search');
       }
@@ -161,6 +163,7 @@ class Search extends Basic
         }
       }
     }
+
     if (!empty($models)) {
       foreach ($models as $m) {
         if ($this->perm->has($this->perm->optionToPermission($m['id']), 'options')
@@ -202,6 +205,7 @@ class Search extends Basic
 
     $result = [];
 
+    //X::log(self::$functions, 'searchCfg');
     if (!empty(self::$functions)) {
       foreach (self::$functions as $plugin => $items) {
         if (!is_array($items)) {
@@ -453,6 +457,8 @@ class Search extends Basic
 
     //X::ddump($config_array, "DDDD", $this->getExecutedCfg($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
+    //X::log([$search_value, $step, $num_cfg, $id_search]);
+    //X::log($config_array, 'search');
     if (!$start && !$step) {
       array_walk($config_array, function (&$a) {
         $a['cfg']['start'] = 0;
@@ -689,7 +695,7 @@ class Search extends Basic
           );
           $cfg          = $item['cfg'];
           $cfg['start'] = 0;
-          X::log($processed_cfg['filters'], 'searchArray');
+          //X::log($processed_cfg['filters'], 'searchArray');
           $cfg['where'] = [
             'logic' => 'AND',
             'conditions' => [
@@ -715,7 +721,7 @@ class Search extends Basic
             ]
           ];
 
-          X::log($cfg, 'searchArray');
+          //X::log($cfg, 'searchArray');
           if ($add_to_top = $this->db->rselect($cfg)) {
             $add_to_top['component'] = $cp;
             $add_to_top['hash'] = $hash;
