@@ -130,6 +130,17 @@ trait Options
   }
 
 
+  public function count(...$codes): int
+  {
+    $num = 0;
+    if ($tmp = $this->items(...$codes)) {
+      $num = count($tmp);
+    }
+
+    return $num;
+  }
+
+
   /**
    * Returns an array of the children's IDs of the given option sorted by order or text
    *

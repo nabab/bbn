@@ -108,6 +108,7 @@ trait Code
       $c = &$this->class_cfg;
       $f = &$this->fields;
       $rightValue = null;
+      $done = false;
 
       /** @var int|false $tmp */
       if ($tmp = $this->db->selectOne(
@@ -118,6 +119,7 @@ trait Code
           [$f['code'], '=', $true_code]
         ]
       )) {
+        $done = true;
         $rightValue = $tmp;
       }
       // If still no match is found, attempt to follow an alias with a matching code.
@@ -185,8 +187,22 @@ trait Code
         }
       }
 
+      if (!$rightValue && !$real && !$this->count($id_parent) && ($parent = $this->option($id_parent)) && $parent['id_alias'] && empty($parent['code']) && ($tmp = $this->db->selectOne(
+        $c['table'],
+        $f['id'],
+        [
+          [$f['id_parent'], '=', $parent['id_alias']],
+          [$f['code'], '=', $true_code]
+        ]
+      ))) {
+        $rightValue = $tmp;
+      }
+
+
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {
+        //X::hdump([$depth, $this->nativeOption($rightValue), $this->fullOptions($rightValue)]);
+
         if (!$real && ($opt = $this->nativeOption($rightValue)) && !empty($opt['id_alias'])) {
           if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
             if (!\count($codes) || !in_array(end($codes), ['options', 'plugins', 'permissions', 'templates'])) {
