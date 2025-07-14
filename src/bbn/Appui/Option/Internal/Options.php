@@ -97,50 +97,16 @@ trait Options
    * @param mixed $code Any option(s) accepted by {@link fromCode()}
    * @return array|null An indexed array of id/text options or false if option not found
    */
-  public function options($code = null): ?array
+  public function options(...$codes): ?array
   {
-    if (Str::isUid($id = $this->fromCode(\func_get_args()))) {
+    if ($id = $this->fromCode(...$codes)) {
       $locale = $this->getTranslatingLocale($id);
       if ($r = $this->getCache($id, __FUNCTION__, $locale)) {
         return $r;
       }
 
-
       $cf  =& $this->fields;
-      $cfg = $this->getCfg($id) ?: [];
-      $order = empty($cfg['sortable']) ? [
-          $this->fields['text'] => 'ASC',
-          $this->fields['code'] => 'ASC',
-          $this->fields['id'] => 'ASC',
-        ] : [
-          $this->fields['num'] => 'ASC',
-          $this->fields['text'] => 'ASC',
-          $this->fields['code'] => 'ASC',
-          $this->fields['id'] => 'ASC',
-        ];
-      $opts = $this->db->rselectAll([
-        'tables' => [$this->class_cfg['table']],
-        'fields' => [
-          $this->db->cfn($cf['id'], $this->class_cfg['table']),
-          $this->db->cfn($cf['text'], $this->class_cfg['table']),
-          $this->db->cfn($cf['id_alias'], $this->class_cfg['table'])
-        ],
-        'join' => [
-          [
-            'table' => $this->class_cfg['table'],
-            'alias' => 'alias',
-            'type'  => 'LEFT',
-            'on'    => [
-              [
-                'field' => $this->db->cfn($cf['id_alias'], $this->class_cfg['table']),
-                'exp'   => 'alias.'.$cf['id']
-              ]
-            ]
-          ]
-        ],
-        'where' => [$this->db->cfn($cf['id_parent'], $this->class_cfg['table']) => $id],
-        'order' => $order
-      ]);
+      $opts = $this->fullOptions($id) ?: [];
       $res = [];
       foreach ($opts as $o) {
         if (\is_null($o[$cf['text']]) && !empty($o[$cf['id_alias']])) {
