@@ -32,9 +32,11 @@ trait Code
           $parentFromCodes = $this->_fromCode(\array_slice($codes, 1), $real, $depth + 1);
           $parentId = $this->getIdParent($codes[0]);
           if ($parentId !== $parentFromCodes) {
-            $parentId = $this->getIdParent($parentId);
-            if ($parentId !== $parentFromCodes) {
-              return null;
+            if ($parentFromCodes !== $this->getIdAlias($parentId)) {
+              $parentId = $this->getIdParent($parentId);
+              if ($parentId !== $parentFromCodes) {
+                return null;
+              }
             }
           }
         }
