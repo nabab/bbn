@@ -121,7 +121,7 @@ trait Options
         $res[$o[$cf['id']]] = $o[$cf['text']];
       }
 
-      \asort($res);
+      //\asort($res);
       $this->setCache($id, __FUNCTION__, $res, $locale);
       return $res;
     }
