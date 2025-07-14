@@ -453,11 +453,25 @@ class Search extends Basic
       'data' => []
     ];
     $id_search = $this->getSearchId($search_value);
+    if (!$step) {
+      if ($id_search) {
+        $this->updateSearch($search_value);
+        if ($previousResults = $this->retrieveUserResults($id_search, $config_array)) {
+          $results['data'] = $previousResults;
+        }
+      }
+      else {
+        $id_search = $this->saveSearch($search_value);
+      }
+    }
+
     $results['id'] = $id_search;
+    if (!empty($results['data'])) {
+      return $results;
+    }
 
     //X::ddump($config_array, "DDDD", $this->getExecutedCfg($search_value), $search_value, $this->search_cfg);
     $num_cfg = count($config_array);
-    //X::log([$search_value, $step, $num_cfg, $id_search]);
     //X::log($config_array, 'search');
     if (!$start && !$step) {
       array_walk($config_array, function (&$a) {
@@ -772,6 +786,7 @@ class Search extends Basic
     }
 
     $col = $this->class_cfg['arch']['search_results']['id_search'];
+    $hashCol = $this->class_cfg['arch']['search_results']['data_hash'];
     $table = $this->class_cfg['tables']['search_results'];
     $filter = [$col => $id_search];
     if (!empty($signature)) {
@@ -784,9 +799,9 @@ class Search extends Basic
         $filter[$col] = $o;
         if ($tmp = $this->db->rselectAll($this->class_cfg['tables']['search_results'], [], $filter)) {
           foreach ($tmp as $t) {
-            //if (!X::getRow($res, ['hash' => $t['hash']])) {
+            if (!X::getRow($res, [$hashCol => $t[$hashCol]])) {
               $res[] = $t;
-            //}
+            }
           }
         }
       }

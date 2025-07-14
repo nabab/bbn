@@ -290,7 +290,11 @@ class Manager
   protected function readCondition(): ?array
   {
     clearstatcache();
-    return $this->fs->decodeContents($this->filePath, 'json', true);
+    if ($this->fs->isFile($this->filePath)) {
+      return $this->fs->decodeContents($this->filePath, 'json', true);
+    }
+
+    return null;
   }
 
   /**
