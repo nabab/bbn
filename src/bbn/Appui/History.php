@@ -1543,7 +1543,9 @@ MYSQL;
               foreach ($s['refs'] as $ref) {
                 if (!empty($ref['constraint']) && $db->count($ref['table'], [$ref['col'] => $primary_where])) {
                   if ($ref['delete'] === 'RESTRICT') {
-                    throw new Exception(X::_("Impossible to delete the record from %s because it is referenced in the table %s", $table, $ref['table']));
+                    if ($ref['table'] !== self::$db->tsn(self::$table)) {
+                      throw new Exception(X::_("Impossible to delete the record from %s because it is referenced in the table %s", $table, $ref['table']));
+                    }
                   }
                   elseif ($ref['delete'] === 'SET NULL') {
                     self::$db->update($ref['table'], [$ref['col'] => null], [$ref['col'] => $primary_where]);

@@ -1442,10 +1442,22 @@ class Database extends bbn\Models\Cls\Cache
         $num_cols     = 0;
         $num_cols_rem = 0;
         $fields       = [];
-        $ocols        = array_flip($this->o->options($id_columns));
+        $ocols = $this->o->codeIds($id_columns);
+        if (!is_array($ocols)) {
+          X::ddump(
+            $ocols,
+            $this->o->option($id_columns),
+            $this->o->option($id_keys),
+            $db
+          );
+        }
         foreach ($m['fields'] as $col => $cfg) {
           if ($opt_col = $this->o->option($col, $id_columns)) {
-            $num_cols += (int)$this->o->set($opt_col['id'], bbn\X::mergeArrays($opt_col, $cfg));
+            $num_cols += (int)$this->o->set($opt_col['id'], bbn\X::mergeArrays($opt_col, $cfg, [
+              'text' => $opt_col['text'] === $opt_col['code'] ? $col : $opt_col['text'],
+              'code' => $col,
+              'num' => $cfg['position']
+            ]));
           }
           elseif ($id = $this->o->add(
             bbn\X::mergeArrays(
@@ -1848,7 +1860,9 @@ class Database extends bbn\Models\Cls\Cache
       throw new \Exception(_("The database name cannot be empty"));
     }
 
-    return $this->o->setText($id, $name) && $this->o->setCode($id, $name);
+    $r1 = $this->o->setText($id, $name);
+    $r2 = $this->o->setCode($id, $name);
+    return $r1 && $r2;
   }
 
 
@@ -1868,7 +1882,9 @@ class Database extends bbn\Models\Cls\Cache
     if (($idParent = $this->o->getIdParent($id))
       && ($idNew = $this->o->duplicate($id, $idParent, true, false, true))
     ) {
-      return $this->o->setText($idNew, $name) && $this->o->setCode($idNew, $name);
+      $r1 = $this->o->setText($idNew, $name);
+      $r2 = $this->o->setCode($idNew, $name);
+      return $r1 && $r2;
     }
 
     return false;

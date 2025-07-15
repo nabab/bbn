@@ -417,13 +417,15 @@ trait Template
             $this->db->rselectAll('bbn_options', [], [$f['id_parent'] => $target])
           ], 'optionsFail');
         }
+        
         if ($this->setAlias($o['id'], $idSubtemplate)) {
           $tot++;
         }
       }
       elseif ($id = $this->add([
-        'id_parent' => $target,
-        'id_alias' => $idSubtemplate
+        $f['id_parent'] => $target,
+        $f['code']      => $subtpl[$f['code']],
+        $f['id_alias']  => $idSubtemplate
       ])) {
         $o = $this->rawOption($id);
         $tot++;
@@ -436,8 +438,8 @@ trait Template
 
     if ($update && !empty($o)) {
       $upd = [];
-      if (!empty($o[$f['code']])) {
-        $upd[$f['code']] = null;
+      if ($o[$f['code']] !== $subtpl[$f['code']]) {
+        $upd[$f['code']] = $subtpl[$f['code']];
       }
       if (!empty($o[$f['text']])) {
         $upd[$f['text']] = null;

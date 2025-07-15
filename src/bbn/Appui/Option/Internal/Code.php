@@ -110,7 +110,6 @@ trait Code
       $c = &$this->class_cfg;
       $f = &$this->fields;
       $rightValue = null;
-      $done = false;
 
       /** @var int|false $tmp */
       if ($tmp = $this->db->selectOne(
@@ -124,82 +123,6 @@ trait Code
         $done = true;
         $rightValue = $tmp;
       }
-      // If still no match is found, attempt to follow an alias with a matching code.
-      elseif (!$real && ($tmp = $this->db->selectOne([
-        'table' => $c['table'],
-        'fields' => [$c['table'] . '.' . $f['id']],
-        'join' => [[
-          'table' => $c['table'],
-          'alias' => 'o1',
-          'on' => [
-            [
-              'field' => 'o1.' . $f['id'],
-              'exp' => $c['table'] . '.' . $f['id_alias']
-            ]
-          ]
-        ]],
-        'where' => [
-          [$c['table'] . '.' . $f['id_parent'], '=', $id_parent],
-          ['o1.' . $f['code'], 'LIKE', $true_code]
-        ]
-      ]))) {
-        $rightValue = $tmp;
-      }
-      // If no direct match is found, attempt to find a magic code option that bypasses the normal matching logic.
-      elseif (!$real && $this->getMagicTemplateId()) {
-        if ($tmp2 = $this->db->selectOne(
-            $c['table'],
-            $f['id'],
-            [
-              $f['id_parent'] => $id_parent,
-              $f['id_alias'] => [$this->getOptionsTemplateId(), $this->getSubOptionsTemplateId()]
-            ]
-          )
-        ) {
-          if  ($tmp = $this->db->selectOne(
-            $c['table'],
-            $f['id'],
-            [
-              [$f['id_parent'], '=', $tmp2],
-              [$f['code'], '=', $true_code]
-            ]
-          )) {
-            $rightValue = $tmp;
-          }
-          elseif ($tmp = $this->db->selectOne([
-            'table' => $c['table'],
-            'fields' => [$c['table'] . '.' . $f['id_alias']],
-            'join' => [[
-              'table' => $c['table'],
-              'alias' => 'o1',
-              'on' => [
-                [
-                  'field' => 'o1.' . $f['id'],
-                  'exp' => $c['table'] . '.' . $f['id_alias']
-                ]
-              ]
-            ]],
-            'where' => [
-              $c['table'] . '.' . $f['id_parent'] => $tmp2,
-              'o1.' . $f['code'] => $true_code
-            ]
-          ])) {
-            $rightValue = $tmp;
-          }
-        }
-      }
-
-      if (!$rightValue && !$real && !$this->count($id_parent) && ($parent = $this->option($id_parent)) && $parent['id_alias'] && empty($parent['code']) && ($tmp = $this->db->selectOne(
-        $c['table'],
-        $f['id'],
-        [
-          [$f['id_parent'], '=', $parent['id_alias']],
-          [$f['code'], '=', $true_code]
-        ]
-      ))) {
-        $rightValue = $tmp;
-      }
-
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {

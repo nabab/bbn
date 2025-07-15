@@ -102,6 +102,7 @@ trait Write
                 $c['text'] => $it[$c['text']],
                 $c['id_alias'] => $it[$c['id_alias']],
                 $c['value'] => $it[$c['value']],
+                $c['code'] => $it[$c['code']],
                 $c['num'] => $it[$c['num']] ?? null,
                 $c['cfg'] => $it[$c['cfg']] ?? null
               ],
@@ -155,7 +156,7 @@ trait Write
           $this->applyTemplate($id);
         }
 
-        if ($items && Str::isUid($id)) {
+        if ($id && $items && Str::isUid($id)) {
           foreach ($items as $item){
             $item[$c['id_parent']] = $id;
             $res              += (int)$this->add($item, $force, $return_num, $with_id);
@@ -944,8 +945,10 @@ trait Write
       }
     }
     elseif (!$this->exists($it[$c['id_alias']])) {
-      X::log(['The alias does not exist', $it]);
-      throw new Exception(X::_("Impossible to find the alias %s", $it[$c['id_alias']]));
+      $o = $this->option($id_parent);
+      X::log(['The alias does not exist', $it, $this->option($o['id_parent']), $o]);
+      //throw new Exception(X::_("Impossible to find the alias %s", $it[$c['id_alias']]));
+      unset($it[$c['id_alias']]);
     }
 
     if (array_key_exists($c['id'], $it) && empty($it[$c['id']])) {
