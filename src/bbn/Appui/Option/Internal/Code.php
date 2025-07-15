@@ -151,6 +151,16 @@ trait Code
                   ]
                 );
               }
+              else {
+                $rightValue = $this->db->selectOne(
+                  $c['table'],
+                  $f['id'],
+                  [
+                    $f['id_parent'] => $alias['id'],
+                    $f['code'] => $true_code
+                  ]
+                );
+              }
             }
             else {
               $rightValue = $this->db->selectOne(
