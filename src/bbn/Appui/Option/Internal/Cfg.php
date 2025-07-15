@@ -245,7 +245,7 @@ trait Cfg
       }
 
       // Check for permissions and store them in the config array.
-      $perm = $itemCfg['permissions'] === 'single' ? true : ($cfg['permissions'] ?? false);
+      $perm = isset($itemCfg['permissions']) && ($itemCfg['permissions'] === 'single') ? true : ($cfg['permissions'] ?? false);
       // Look for parent options with inheritance.
       $parents = array_reverse($this->parents($id_parent));
       $last    = end($parents);
