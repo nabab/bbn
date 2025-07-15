@@ -327,12 +327,16 @@ class Identity extends DbCls
     if ($info = $this->getInfo($id)) {
       foreach ($this->class_cfg['uauth_modes'] as $mode) {
         if (($info[$mode] ?? '') !== ($fn[$mode] ?? '')) {
-          if (!empty($info[$mode])) {
-            $ok += (int)$this->dbUauthRemove($id, $info[$mode], $mode);
+          if (!empty($info[$mode])
+            && $this->dbUauthRemove($id, $info[$mode], $mode)
+          ) {
+            $ok++;
           }
 
-          if (!empty($fn[$mode])) {
-            $ok += (int)$this->dbUauthAdd($id, $fn[$mode], $mode);
+          if (!empty($fn[$mode])
+            && $this->dbUauthAdd($id, $fn[$mode], $mode)
+          ) {
+            $ok++;
           }
         }
       }
@@ -344,7 +348,7 @@ class Identity extends DbCls
 
     }
 
-    return $ok;
+    return (int)$ok;
   }
 
   public function getTableRelations(string|null $table = null): array
