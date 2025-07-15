@@ -139,14 +139,29 @@ trait Code
             }
           }
           elseif (!$opt['text']) {
-            $rightValue = $this->db->selectOne(
-              $c['table'],
-              $f['id'],
-              [
-                $f['id_parent'] => $opt['id_alias'],
-                $f['code'] => $true_code
-              ]
-            );
+            $alias = $this->nativeOption($opt['id_alias']);
+            if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()], true)) {
+              if (!in_array($true_code, ['options', 'plugins', 'permissions', 'templates']) && ($id_option = $this->fromRealCode('options', $alias['id']))) {
+                $rightValue = $this->db->selectOne(
+                  $c['table'],
+                  $f['id'],
+                  [
+                    $f['id_parent'] => $id_option,
+                    $f['code'] => $true_code
+                  ]
+                );
+              }
+            }
+            else {
+              $rightValue = $this->db->selectOne(
+                $c['table'],
+                $f['id'],
+                [
+                  $f['id_parent'] => $opt['id_alias'],
+                  $f['code'] => $true_code
+                ]
+              );
+            }
           }
         }
       }
