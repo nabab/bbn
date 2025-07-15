@@ -54,13 +54,12 @@ trait Code
       $lastCode = end($codes);
       // Ensure that the last argument is a valid UID; otherwise, append the default value.
       if (!$depth) {
-        if ($lastCode === 'appui') {
-          $codes[] = 'plugins';
-          $lastCode = 'plugins';
-          $num++;
-        }
-
         if (!Str::isUid($lastCode)) {
+          if ($lastCode === 'appui') {
+            $codes[] = 'plugins';
+            $lastCode = 'plugins';
+            $num++;
+          }
           if ($lastCode === false) {
             array_pop($codes);
             $codes[] = $this->getRoot();
@@ -79,7 +78,9 @@ trait Code
             $codes[] = $this->getDefault();
             $num++;
           }
+
         }
+
       }
 
       //X::log($codes, 'codes');
@@ -116,35 +117,42 @@ trait Code
         $c['table'],
         $f['id'],
         [
-          [$f['id_parent'], '=', $id_parent],
-          [$f['code'], '=', $true_code]
+          $f['id_parent'] =>  $id_parent,
+          $f['code'] => $true_code
         ]
       )) {
-        $done = true;
         $rightValue = $tmp;
+      }
+      elseif (!$real) {
+        $opt = $this->nativeOption($id_parent);
+        if ($opt['id_alias']) {
+          if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()], true)) {
+            if (!in_array($true_code, ['options', 'plugins', 'permissions', 'templates']) && ($id_option = $this->fromRealCode('options', $id_parent))) {
+              $rightValue = $this->db->selectOne(
+                $c['table'],
+                $f['id'],
+                [
+                  $f['id_parent'] => $id_option,
+                  $f['code'] => $true_code
+                ]
+              );
+            }
+          }
+          elseif (!$opt['text']) {
+            $rightValue = $this->db->selectOne(
+              $c['table'],
+              $f['id'],
+              [
+                $f['id_parent'] => $opt['id_alias'],
+                $f['code'] => $true_code
+              ]
+            );
+          }
+        }
       }
 
       // If a match is found, return the cached result or proceed recursively with the remaining arguments.
       if ($rightValue) {
-        //X::hdump([$depth, $this->nativeOption($rightValue), $this->fullOptions($rightValue)]);
-
-        if (!$real && ($opt = $this->nativeOption($rightValue)) && !empty($opt['id_alias'])) {
-          if (in_array($opt['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
-            if (!\count($codes) || !in_array(end($codes), ['options', 'plugins', 'permissions', 'templates'])) {
-              $codes[] = 'options';
-            }
-          }
-          elseif (empty($opt['text'])) {
-            $alias = $this->nativeOption($opt['id_alias']);
-            if ($alias['id_alias'] && in_array($alias['id_alias'], [$this->getPluginTemplateId(), $this->getSubpluginTemplateId()])) {
-              $rightValue = $opt['id_alias'];
-              if (!\count($codes) || !in_array(end($codes), ['options', 'plugins', 'permissions', 'templates'])) {
-                $codes[] = 'options';
-              }
-            }
-          }
-        }
-
         if (\count($codes)) {
           $codes[] = $rightValue;
           return $this->_fromCode($codes, $real, $depth + 1);

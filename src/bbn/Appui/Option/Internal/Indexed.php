@@ -205,7 +205,7 @@ trait Indexed
 
         foreach ($additionalFields as $f) {
           if (!array_key_exists($f, $res[$i])) {
-            $res[$i][$f] = $o[$f] ? $o[$f] : ($o['alias'][$f] ?? null);
+            $res[$i][$f] = empty($o[$f]) ? ($o['alias'][$f] ?? null) : $o[$f];
           }
         }
         
