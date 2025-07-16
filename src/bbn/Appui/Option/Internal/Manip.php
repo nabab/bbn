@@ -346,12 +346,17 @@ trait Manip
         if (isset($o[$c['id_alias']])) {
           if ($tmp = $this->fromCode(...$o[$c['id_alias']])) {
             $o[$c['id_alias']] = $tmp;
+            if (empty($o[$c['code']])) {
+              $o[$c['code']] = $this->code($tmp);
+            }
           }
           else {
             $after['id_alias'] = $o[$c['id_alias']];
+            if (empty($o[$c['code']])) {
+              $o[$c['code']] = $this->code($tmp);
+            }
             // Add doesn't accept element with neither alias nor text
             if ($hasNoText) {
-              $o[$c['text']] = 'waiting for alias';
               $after[$c['text']] = null;
             }
 
@@ -387,10 +392,10 @@ trait Manip
         $code = $o[$c['code']] ?? (isset($o['alias']) ? $o['alias']['code'] : null);
 
         if ($code) {
-          $fn = fn($co) => ($co[$c['code']] === $code) || (isset($co['alias']) && ($co['alias']['code'] === $code));
+          $search = [$c['code'] => $code];
         }
 
-        if ($row = X::getRow($currentOptions, $code ? $fn : $search)) {
+        if ($row = X::getRow($currentOptions, $search)) {
           $o = X::mergeArrays($row, $o);
         }
 
@@ -443,7 +448,6 @@ trait Manip
               $this->setCfg($id, ['id_root_alias' => $id_root_alias, 'allow_children' => 1, 'relations' => 'alias'], true);
             }
             else {
-              X::ddump($td['id_root_alias'], $this->getDefault(), $this->option('appui'));
               throw new Exception(
                 X::_(
                   "Error while importing: impossible to set the root alias %s",

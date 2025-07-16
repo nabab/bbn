@@ -65,6 +65,10 @@ trait Cfg
 
     // Iterate through the parents to find one with inheritance.
     foreach ($parents as $i => $p) {
+      if ($i < 2) {
+        // Skip the first two parents as they are not relevant for inheritance.
+        continue;
+      }
       // Retrieve the config of the parent option.
       $parent_cfg = $this->db->selectOne($c['table'], $f['cfg'], [$f['id'] => $p]);
 
@@ -72,7 +76,7 @@ trait Cfg
       $parent_cfg = Str::isJson($parent_cfg) ? json_decode($parent_cfg, true) : [];
 
       // Check for inheritance in the parent's config or scfg.
-      if (!empty($parent_cfg['scfg']) && ($i === $last)) {
+      if (!empty($parent_cfg['scfg']) && ($p === $last)) {
         // Merge the current config with the parent's scfg and set inherit_from and frozen.
         $cfg                 = array_merge((array)$cfg, $parent_cfg['scfg']);
         $cfg['inherit_from'] = $p;
@@ -84,7 +88,7 @@ trait Cfg
       if (!empty($parent_cfg['inheritance']) || !empty($parent_cfg['scfg']['inheritance'])) {
         // Check if the parent is a direct parent and its inheritance value is 'children' or 'cascade'.
         if (
-          (($i === $last)
+          (($p === $last)
             && (
               (($parent_cfg['inheritance'] ?? null) === 'children')
               || (!empty($parent_cfg['scfg']) && (($parent_cfg['scfg']['inheritance'] ?? null) === 'children'))
