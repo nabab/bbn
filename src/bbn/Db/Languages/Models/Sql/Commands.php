@@ -293,6 +293,39 @@ trait Commands {
 
 
   /**
+   * Duplicates the given table
+   *
+   * @param string $source
+   * @param string $target
+   * @param bool $withData
+   * @return bool
+   * @throws Exception
+   */
+  public function duplicateTable(string $source, string $target, bool $withData): bool
+  {
+    if ($this->check()) {
+      if (!Str::checkName($source) || !Str::checkName($target)) {
+        throw new Exception(X::_("Wrong table name '%s' or '%s'", $source, $target));
+      }
+
+      if ($sql = $this->getDuplicateTable($source, $target, $withData)) {
+        try {
+          $this->disableKeys();
+          $res = (bool)$this->emulatePreparesAndQuery($sql);
+          $this->enableKeys();
+          return $res;
+        }
+        catch (Exception $e) {
+          return false;
+        }
+      }
+    }
+
+    return $this->check();
+  }
+
+
+  /**
    * Analyzes the given table.
    *
    * @param string $table

@@ -52,8 +52,12 @@ trait Formatters {
     if (Str::checkName($source) && Str::checkName($target)) {
       $sql = $this->getCreateDatabase($target).PHP_EOL;
       if ($tables = $this->getTables($source)) {
+        foreach ($tables as $table) {
+          $sql .= $this->getDuplicateTable("$source.$table", "$target.$table", false).PHP_EOL;
+        }
+
         foreach ($tables as $i => $table) {
-          $sql .= "CREATE TABLE IF NOT EXISTS ".$this->escape("$target.$table")." AS SELECT * FROM ".$this->escape("$source.$table").";".(!empty($tables[$i+1]) ? PHP_EOL : '');
+          $sql .= ($i ? PHP_EOL : '') . "INSERT INTO " . $this->escape("$target.$table") . " SELECT * FROM " . $this->escape("$source.$table") . ";";
         }
       }
 
@@ -178,6 +182,34 @@ trait Formatters {
     ) {
       $table = $this->tableFullName((!empty($database) ? "$database." : '').$this->tableSimpleName($table), true);
       return "DROP TABLE IF EXISTS $table;";
+    }
+
+    return '';
+  }
+
+
+  /**
+   * Returns the SQL statement to duplicate a table.
+   * This method generates a CREATE TABLE statement for the target table based on the source table.
+   * @param string $source The name of the source table.
+   * @param string $target The name of the target table.
+   * @param bool $withData Whether to include data in the duplication.
+   * @return string The SQL statement to duplicate the table, or an empty string if the parameters are invalid.
+   */
+  public function getDuplicateTable(string $source, string $target, bool $withData = true): string
+  {
+    if (Str::checkName($source) && Str::checkName($target)) {
+      $sql = $this->getCreateTable($source);
+      $sql = str_replace(
+        'CREATE TABLE '.$this->escape($source),
+        'CREATE TABLE ' . $this->escape($target),
+        $sql
+      );
+      if ($withData) {
+        $sql .= PHP_EOL . "INSERT INTO " . $this->escape($target) . " SELECT * FROM " . $this->escape($source) . ";";
+      }
+die(var_dump($sql));
+      return $sql;
     }
 
     return '';

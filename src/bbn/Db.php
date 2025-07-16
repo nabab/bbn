@@ -3410,6 +3410,21 @@ class Db implements Db\Actions
 
 
   /**
+   * Duplicates a table
+   *
+   * @param string $source The source table name
+   * @param string $target The target table name
+   * @param bool $withData If true, the data will be copied too
+   * @return bool True if it succeeded
+   */
+  public function duplicateTable(string $source, string $target, bool $withData = true): bool
+  {
+    $this->ensureLanguageMethodExists(__FUNCTION__);
+    return $this->language->duplicateTable($source, $target, $withData);
+  }
+
+
+  /**
    * Returns the charset of the given table
    *
    * @param string $table

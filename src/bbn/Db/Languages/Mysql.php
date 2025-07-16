@@ -951,6 +951,7 @@ MYSQL
     return '';
   }
 
+
   /**
    * Returns the SQL statement to analyze a table.
    *
