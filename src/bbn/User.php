@@ -1223,7 +1223,7 @@ use bbn\Models\Tts\DbUauth;
   {
     $this->error = null;
     if ($this->check() && $id) {
-      $this->_authenticate($id)->_user_info()->_init_dir(true)->saveSession();
+      $this->_authenticate($id)->_user_info(true)->_init_dir(true)->saveSession();
     }
 
     return $this;
@@ -1531,7 +1531,7 @@ use bbn\Models\Tts\DbUauth;
    *
    * @return self
    */
-  private function _user_info(): self
+  private function _user_info(bool $force = false): self
   {
     if ($this->getId()) {
       // Removing the encryption key to prevent it being saved in the session
@@ -1539,7 +1539,7 @@ use bbn\Models\Tts\DbUauth;
         unset($this->fields['enckey']);
       }
 
-      if (!empty($this->getSession('cfg'))) {
+      if (!empty($this->getSession('cfg') && !$force)) {
         $this->cfg      = $this->getSession('cfg');
         $this->id_group = $this->getSession('id_group');
       } elseif ($d = $this->db->rselect(
