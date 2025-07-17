@@ -21,9 +21,7 @@ use bbn\Appui\Url;
 use bbn\Appui\Option;
 use bbn\File\System;
 use bbn\File\Dir;
-use bbn\User\Preferences;
 use bbn\Api\Git;
-use bbn\Util\Timer;
 use function yaml_parse;
 use function json_decode;
 
@@ -518,7 +516,6 @@ class Project extends DbCls
    */
   public function getProjectInfo(bool $force = false)
   {
-    $timing = new Timer();
     if ($this->id) {
       if (!$force && $this->projectInfo) {
         return $this->projectInfo;
@@ -529,18 +526,10 @@ class Project extends DbCls
         //return $this->projectInfo;
       }
 
-      $timing->start('path');
       $path = $this->getPaths(true);
-      $timing->stop('path');
-      $timing->start('langs');
       $langs = $this->getLangsIds();
-      $timing->stop('langs');
-      $timing->start('lang');
       $lang = $this->getLang();
-      $timing->stop('lang');
-      $timing->start('db');
       $db = $this->getDbs();
-      $timing->stop('db');
       $info = [
         'id' => $this->id,
         'code' => $this->getCode(),
@@ -550,7 +539,6 @@ class Project extends DbCls
         'lang' => $lang,
         'db' => $db,
       ];
-      X::log($timing->results(), 'getProjectInfo');
 
       if (!empty($info['db']['items'])) {
         $conn = '';
@@ -1078,11 +1066,7 @@ class Project extends DbCls
   public function getPaths(bool $withPath = false, bool $force = false): array
   {
     if ($force || !$this->pathInfo) {
-      $timing = new Timer();
-      $timing->start('getPathsFullTree');
       $tree = $this->getFullTree();
-      $timing->stop('getPathsFullTree');
-      X::log($timing->results(), 'getProjectInfo');
       $roots = $tree['path']['items'] ?: [];
       $res = [];
       foreach($roots as $root) {
