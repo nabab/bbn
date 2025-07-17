@@ -127,16 +127,24 @@ trait Tree
     if (Str::isUid($id = $this->fromCode(\func_get_args()))
         && ($res = $this->option($id))
     ) {
-      if ($opts = $this->items($id)) {
-        $res['items'] = [];
-        foreach ($opts as $o){
-          if ($t = $this->fullTree($o)) {
-            $res['items'][] = $t;
-          }
+      $res['items'] = $this->_fullTree($id);
+      return $res;
+    }
+
+    return null;
+  }
+
+  private function _fullTree(string $id): ?array
+  {
+    if (Str::isUid($id)) {
+      if ($opts = $this->fullOptions($id)) {
+        foreach ($opts as &$o){
+          $o['items'] = $this->_fullTree($o['id']);
         }
+        unset($o);
       }
 
-      return $res;
+      return $opts;
     }
 
     return null;
